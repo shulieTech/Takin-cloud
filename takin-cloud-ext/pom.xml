@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>takin-cloud</artifactId>
+        <groupId>io.shulie.takin</groupId>
+        <version>takin-cloud-2.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>takin-cloud-ext</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.shulie.takin.plugin.framework</groupId>
+            <artifactId>takin-plugin-framework-spring</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.shulie.takin</groupId>
+            <artifactId>takin-common-beans</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+</project>

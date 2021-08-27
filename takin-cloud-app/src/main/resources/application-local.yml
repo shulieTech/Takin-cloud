@@ -1,0 +1,22 @@
+resource:
+  mysql:
+    host: 192.168.1.151
+    port: 3306
+  redis:
+    host: 192.168.1.151
+    port: 6379
+  influxdb:
+    host: 192.168.1.151
+    port: 8086
+
+# zk
+takin:
+  pradar:
+    zk:
+      server: 192.168.1.229:2181,192.168.1.215:2181
+
+
+# mybatis plus
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

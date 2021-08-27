@@ -1,0 +1,34 @@
+package io.shulie.takin.cloud.common.page;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @Auther: vernon
+ * @Date: 2020/1/8 17:22
+ * @Description:
+ */
+public class PageUtils {
+    public static <T> List<T> getPage(Boolean needPage, Integer current, Integer pageSize, List<T> filteredSources) {
+        if (filteredSources == null || filteredSources.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<T> pagedTargets = new ArrayList<>();
+        if (needPage) {
+            Integer page = current;
+            if (page < 0) {
+                page = 0;
+            }
+            Integer offset = page * pageSize;
+            if (offset <= filteredSources.size() - 1) {
+                for (int index = offset, count = 0; index < filteredSources.size() && count < pageSize;
+                     index++, count++) {
+                    pagedTargets.add(filteredSources.get(index));
+                }
+            }
+        } else {
+            pagedTargets.addAll(filteredSources);
+        }
+        return pagedTargets;
+    }
+}

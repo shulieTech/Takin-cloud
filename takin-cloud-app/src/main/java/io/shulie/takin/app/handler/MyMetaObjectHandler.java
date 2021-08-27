@@ -1,0 +1,37 @@
+package io.shulie.takin.app.handler;
+
+import java.util.Objects;
+
+import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
+import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.reflection.MetaObject;
+import org.springframework.stereotype.Component;
+
+/**
+ * @Author: fanxx
+ * @Date: 2020/11/4 11:02 上午
+ * @Description:
+ */
+@Slf4j
+@Component
+public class MyMetaObjectHandler implements MetaObjectHandler {
+
+    @Override
+    public void insertFill(MetaObject metaObject) {
+        CloudUserCommonRequestExt userCommonExt = new CloudUserCommonRequestExt();
+        CloudPluginUtils.fillUserData(userCommonExt);
+        if (Objects.nonNull(userCommonExt.getCustomerId())) {
+            this.strictInsertFill(metaObject, "customerId", Long.class, userCommonExt.getCustomerId());
+        }
+        if(Objects.nonNull(userCommonExt.getUserId())){
+            this.strictInsertFill(metaObject, "userId", Long.class, userCommonExt.getUserId());
+        }
+    }
+
+    @Override
+    public void updateFill(MetaObject metaObject) {
+
+    }
+}

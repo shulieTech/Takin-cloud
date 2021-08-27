@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.shulie.takin.cloud.data.mapper.mysql.EnginePluginSupportedMapper">
+
+    <delete id="deleteSupportedVersionsByPluginId" parameterType="java.lang.Long">
+        delete from t_engine_plugin_supported_versions where plugin_id = #{pluginId, jdbcType=BIGINT}
+    </delete>
+
+</mapper>

@@ -1,0 +1,102 @@
+# 端口, 路径
+server:
+  port: 10010
+  servlet:
+    context-path: /takin-cloud
+  # tomcat 文件上传大小
+  tomcat:
+    max-http-post-size: -1
+
+
+
+spring:
+  datasource:
+    url: "jdbc:mysql://${resource.mysql.host:127.0.0.1}:${resource.mysql.port:3306}/trodb_cloud?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowMultiQueries=true&serverTimezone=Asia/Shanghai"
+    username: root
+    password: shulie@2020
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    initialSize: 1
+    minIdle: 3
+    maxActive: 20
+    # 配置获取连接等待超时的时间
+    maxWait: 60000
+    # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+    timeBetweenEvictionRunsMillis: 60000
+    # 配置一个连接在池中最小生存的时间，单位是毫秒
+    minEvictableIdleTimeMillis: 30000
+    validationQuery: select 'x'
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    # 打开PSCache，并且指定每个连接上PSCache的大小
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+    # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+    filters: stat,wall,slf4j
+    # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+
+  redis:
+    host: ${resource.redis.host:127.0.0.1}
+    port: ${resource.redis.port:6379}
+    password: pamirs@2020
+    timeout: 10000
+    jedis:
+      pool:
+        # 连接池中的最大空闲连接
+        max-idle: 8
+        # 连接池中的最小空闲连接
+        min-idle: 10
+        # 连接池最大连接数（使用负值表示没有限制）
+        max-active: 100
+        # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-wait: -1
+  # 环境选择
+  profiles:
+    active: local
+  # Spring Security default user name and password
+  security:
+    user:
+      name: actuator
+      password: actuator
+      roles: ACTUATOR_ADMIN
+  # flyway 数据库版本升级控制
+  flyway:
+    enabled: true
+    clean-on-validation-error: false
+    clean-disabled: true
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    table: "t_migration_history"
+    baseline-on-migrate: true
+    baseline-version: 1
+    validate-on-migrate: false
+  aop:
+    auto: true
+    proxy-target-class: true
+
+  influxdb:
+    url:  http://${resource.influxdb.host:127.0.0.1}:${resource.influxdb.port:8086}
+    user: pradar
+    password: pamirs@db2020
+    database: jmeter
+
+# mybatis plus
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations:
+    - "classpath*:com/pamirs/takin/entity/mapper/**/*.xml"
+    - "classpath*:mappers/*.xml"
+takin:
+  pradar:
+    zk:
+      server: 192.168.1.204:2181,192.168.1.204:2181,192.168.1.204:2181
+
+
+#单元测试使用
+#pressure.engine.install.dir: /Users/shulie/pressure-engine/pressure-engine.tar.gz
+#pressure.engine.task.dir: /Users/shulie/pressure-engine
+#takin.plugin.pluginPath: /Users/shulie/plugins

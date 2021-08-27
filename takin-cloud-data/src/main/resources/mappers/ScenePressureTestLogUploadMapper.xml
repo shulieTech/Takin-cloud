@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.shulie.takin.cloud.data.mapper.mysql.SceneJmeterlogUploadMapper">
+  <resultMap id="BaseResultMap" type="io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity">
+    <!--@mbg.generated-->
+    <!--@Table t_scene_jmeterlog_upload-->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="scene_id" jdbcType="BIGINT" property="sceneId" />
+    <result column="report_id" jdbcType="BIGINT" property="reportId" />
+    <result column="customer_id" jdbcType="BIGINT" property="customerId" />
+    <result column="task_status" jdbcType="INTEGER" property="taskStatus" />
+    <result column="upload_status" jdbcType="INTEGER" property="uploadStatus" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="upload_count" jdbcType="INTEGER" property="uploadCount" />
+    <result column="file_name" jdbcType="VARCHAR" property="fileName" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, scene_id, report_id, customer_id, task_status, upload_status, create_time, modify_time, 
+    upload_count, file_name
+  </sql>
+  <update id="updateBatch" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update t_scene_jmeterlog_upload
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="scene_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.sceneId,jdbcType=BIGINT}
+        </foreach>
+      </trim>
+      <trim prefix="report_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.reportId,jdbcType=BIGINT}
+        </foreach>
+      </trim>
+      <trim prefix="customer_id = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.customerId,jdbcType=BIGINT}
+        </foreach>
+      </trim>
+      <trim prefix="task_status = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.taskStatus,jdbcType=INTEGER}
+        </foreach>
+      </trim>
+      <trim prefix="upload_status = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.uploadStatus,jdbcType=INTEGER}
+        </foreach>
+      </trim>
+      <trim prefix="create_time = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.createTime,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="modify_time = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.modifyTime,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="upload_count = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.uploadCount,jdbcType=INTEGER}
+        </foreach>
+      </trim>
+      <trim prefix="file_name = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.fileName,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=BIGINT}
+    </foreach>
+  </update>
+</mapper>

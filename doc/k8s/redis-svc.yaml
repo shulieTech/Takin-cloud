@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    app: tro-redis
+spec:
+  selector:
+    app: tro-redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+      nodePort: 30003
+  type: NodePort

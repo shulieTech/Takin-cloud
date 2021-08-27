@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tro-redis
+  labels:
+    app: tro-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tro-redis
+  template:
+    metadata:
+      name: tro-redis
+      labels:
+        app: tro-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:5.0.9
+          imagePullPolicy: IfNotPresent
+          command:
+            - "redis-server"
+          args:
+            - "/opt/conf/redis.conf"
+          volumeMounts:
+            - mountPath: /opt/data/redis
+              name: redis-data
+            - mountPath: /opt/conf
+              name: redis-config
+          ports:
+            - containerPort: 6379
+              name: redis
+              protocol: TCP
+      restartPolicy: Always
+      volumes:
+        - name: redis-data
+          nfs:
+            path: /opt/nfs
+            server: 10.0.1.4
+        - name: redis-config
+          configMap:
+            name: redis-conf
