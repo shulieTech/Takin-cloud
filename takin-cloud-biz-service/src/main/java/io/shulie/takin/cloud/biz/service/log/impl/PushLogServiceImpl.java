@@ -1,14 +1,13 @@
 package io.shulie.takin.cloud.biz.service.log.impl;
 
 
-import com.pamirs.pradar.Pradar;
-import com.pamirs.pradar.PradarCoreUtils;
 import com.pamirs.pradar.log.parser.DataType;
 import com.pamirs.pradar.log.parser.packet.Request;
 import com.pamirs.pradar.remoting.RemotingClient;
 import com.pamirs.pradar.remoting.protocol.*;
 import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
 import io.shulie.takin.cloud.biz.service.log.PushLogService;
+import io.shulie.takin.cloud.biz.utils.PradarCoreUtils;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -64,7 +63,7 @@ public class PushLogServiceImpl implements PushLogService {
             request.setBody(data);
             request.setVersion(version);
             request.setHostIp(PradarCoreUtils.getLocalAddress());
-            request.setCharset(Pradar.DEFAULT_CHARSET.name());
+            request.setCharset(PradarCoreUtils.DEFAULT_CHARSET.name());
             ProtocolFactory factory = selector.select(command.getProtocolCode());
             factory.encode(request, command);
             RemotingCommand responseCommand = remotingClient.invokeSync(serverAndPort, command, 1000 * 5);
