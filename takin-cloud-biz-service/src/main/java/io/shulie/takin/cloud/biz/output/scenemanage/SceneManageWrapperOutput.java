@@ -13,14 +13,14 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @ClassName SceneManageWrapperOutput
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午5:55
+ * @author qianshui
+ * @date 2020/4/17 下午5:55
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "场景详情出参")
 public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implements Serializable {
 
@@ -94,7 +94,7 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
 
     private Long scriptId;
 
-    private Long businessFlowId ;
+    private Long businessFlowId;
 
     private Integer scheduleInterval;
 
@@ -112,13 +112,13 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
 
     private boolean continueRead;
 
-
     /**
      * 压测类型，默认为0，默认不展示到页面
      */
     private Integer type;
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class SceneBusinessActivityRefOutput extends SceneBusinessActivityRefBean {
 
         private static final long serialVersionUID = -6384484202725660595L;
@@ -132,7 +132,7 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
         @ApiModelProperty(value = "应用IDS")
         private String applicationIds;
 
-        private Long scriptId ;
+        private Long scriptId;
 
         private String businessFlowId;
         /**
@@ -206,13 +206,13 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
     }
 
     @Data
-    public static class EnginePluginRefOutput implements Serializable{
+    public static class EnginePluginRefOutput implements Serializable {
         @ApiModelProperty(value = "插件ID")
         private Long id;
         @ApiModelProperty(value = "插件版本")
         private String version;
 
-        public static EnginePluginRefOutput create(Long id,String version){
+        public static EnginePluginRefOutput create(Long id, String version) {
             EnginePluginRefOutput output = new EnginePluginRefOutput();
             output.setId(id);
             output.setVersion(version);

@@ -10,28 +10,30 @@ import io.shulie.takin.common.beans.response.ResponseResult;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.web.diff.api.statistics
  * @date 2020/11/30 9:53 下午
  */
 public interface CloudPressureStatisticsApi {
     /**
      * 统计场景分类，脚本类型，返回饼状图数据
-     * @param input
-     * @return
+     *
+     * @param input -
+     * @return -
      */
     ResponseResult<PressurePieTotalResp> getPressurePieTotal(PressureTotalReq input);
 
     /**
      * 统计报告通过/未通过
-     * @param input
-     * @return
+     *
+     * @param input -
+     * @return -
      */
     ResponseResult<ReportTotalResp> getReportTotal(PressureTotalReq input);
 
     /**
      * 压测场景次数统计 && 压测脚本次数统计
-     * @param input
-     * @return
+     *
+     * @param input -
+     * @return -
      */
     ResponseResult<List<PressureListTotalResp>> getPressureListTotal(PressureTotalReq input);
 }

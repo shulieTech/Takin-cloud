@@ -5,8 +5,8 @@ import java.util.Date;
 import lombok.Data;
 
 /**
- * @Author 莫问
- * @Date 2020-04-18
+ * @author 莫问
+ * @date 2020-04-18
  */
 @Data
 public class WarnBO {

@@ -5,7 +5,6 @@ import lombok.Data;
 /**
  * @author 何仲奇
  * TODO 新增一张表，用于记录启动记录
- * @Package com.pamirs.takin.entity.domain.vo.scenemanage
  * @date 2020/9/24 9:57 上午
  */
 @Data

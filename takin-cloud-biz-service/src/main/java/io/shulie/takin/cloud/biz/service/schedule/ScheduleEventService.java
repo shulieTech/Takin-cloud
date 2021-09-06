@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author 莫问
- * @Date 2020-05-12
+ * @author 莫问
+ * @date 2020-05-12
  */
 @Component
 public class ScheduleEventService {
@@ -26,7 +26,7 @@ public class ScheduleEventService {
     /**
      * 调度初始化
      *
-     * @param request
+     * @param request -
      */
     public void initSchedule(ScheduleRunRequest request) {
         Event event = new Event();
@@ -38,7 +38,7 @@ public class ScheduleEventService {
     /**
      * 运行调度
      *
-     * @param event
+     * @param event -
      */
     @IntrestFor(event = ScheduleEventConstant.RUN_SCHEDULE_EVENT)
     public void runSchedule(Event event) {
@@ -48,7 +48,7 @@ public class ScheduleEventService {
     /**
      * 启动调度
      *
-     * @param event
+     * @param event -
      */
     @IntrestFor(event = ScheduleEventConstant.START_SCHEDULE_EVENT)
     public void startSchedule(Event event) {
@@ -60,7 +60,7 @@ public class ScheduleEventService {
     /**
      * 停止调度
      *
-     * @param event
+     * @param event -
      */
     @IntrestFor(event = ScheduleEventConstant.STOP_SCHEDULE_EVENT)
     public void stopSchedule(Event event) {

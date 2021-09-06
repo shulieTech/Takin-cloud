@@ -7,14 +7,15 @@ import java.util.Date;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @Author: mubai
- * @Date: 2020-11-02 17:05
- * @Description:
+ * @author mubai
+ * @date 2020-11-02 17:05
  */
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ReportResp extends CloudUserCommonRequestExt implements Serializable {
 
     private static final long serialVersionUID = -8968593229706753112L;
@@ -24,7 +25,6 @@ public class ReportResp extends CloudUserCommonRequestExt implements Serializabl
 
     @ApiModelProperty(value = "消耗流量")
     private BigDecimal amount;
-
 
     @ApiModelProperty(value = "场景ID")
     private Long sceneId;
@@ -53,6 +53,5 @@ public class ReportResp extends CloudUserCommonRequestExt implements Serializabl
     private String errorMsg;
 
     private Long scriptId;
-
 
 }

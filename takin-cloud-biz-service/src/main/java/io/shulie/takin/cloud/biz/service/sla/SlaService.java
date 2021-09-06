@@ -3,10 +3,8 @@ package io.shulie.takin.cloud.biz.service.sla;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 
 /**
- * @ClassName SlaService
- * @Description
- * @Author qianshui
- * @Date 2020/4/20 下午4:47
+ * @author qianshui
+ * @date 2020/4/20 下午4:47
  */
 public interface SlaService {
 

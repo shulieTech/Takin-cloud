@@ -9,9 +9,8 @@ import org.springframework.stereotype.Service;
 import io.shulie.takin.cloud.biz.service.scene.SceneScriptRefService;
 
 /**
- * @Author: mubai
- * @Date: 2020-05-12 20:23
- * @Description:
+ * @author mubai
+ * @date 2020-05-12 20:23
  */
 
 @Service

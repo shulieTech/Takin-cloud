@@ -15,10 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @ClassName NoAuthController
- * @Description
- * @Author qianshui
- * @Date 2020/8/30 下午2:08
+ * @author qianshui
+ * @date 2020/8/30 下午2:08
  */
 @RestController
 @RequestMapping("/api/noauth")
@@ -35,13 +33,13 @@ public class NoAuthController {
      * update t_scene_manage set `status`=0 where id=？;
      * update t_report set `status`=2 where scene_id=？;
      *
-     * @param paramMap
-     * @return
+     * @param paramMap 参数
+     * @return -
      */
     @PutMapping("/resume/scenetask")
-    public ResponseResult resumeSceneTask(@RequestBody Map<String, Object> paramMap) {
+    public ResponseResult<String> resumeSceneTask(@RequestBody Map<String, Object> paramMap) {
         if (paramMap == null || paramMap.get("sceneId") == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.TASK_RUNNING_PARAM_VERIFY_ERROR,"sceneId cannot be null");
+            throw new TakinCloudException(TakinCloudExceptionEnum.TASK_RUNNING_PARAM_VERIFY_ERROR, "sceneId cannot be null");
         }
         Long sceneId = Long.parseLong(String.valueOf(paramMap.get("sceneId")));
         TReportMapper.resumeStatus(sceneId);

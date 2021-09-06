@@ -15,10 +15,8 @@ import org.springframework.stereotype.Service;
 import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
 
 /**
- * @ClassName ReportEventServiceImpl
- * @Description
- * @Author qianshui
- * @Date 2020/7/20 下午4:23
+ * @author qianshui
+ * @date 2020/7/20 下午4:23
  */
 @Service
 @Slf4j
@@ -51,9 +49,7 @@ public class ReportEventServiceImpl implements ReportEventService {
         }));
         int size = dataList.size();
         Map<String, String> resultMap = Maps.newLinkedHashMap();
-        indexs.forEach(index -> {
-            resultMap.put(index + PERCENTAGE, dataList.get(calcIndex(size, index)).getAvgRt() + MS);
-        });
+        indexs.forEach(index -> resultMap.put(index + PERCENTAGE, dataList.get(calcIndex(size, index)).getAvgRt() + MS));
         return resultMap;
     }
 

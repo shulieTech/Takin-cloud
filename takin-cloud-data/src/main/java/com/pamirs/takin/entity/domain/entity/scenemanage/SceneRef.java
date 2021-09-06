@@ -5,10 +5,8 @@ import java.io.Serializable;
 import lombok.Data;
 
 /**
- * @ClassName SceneRef
- * @Description
- * @Author qianshui
- * @Date 2020/4/18 下午3:39
+ * @author qianshui
+ * @date 2020/4/18 下午3:39
  */
 @Data
 public class SceneRef implements Serializable {

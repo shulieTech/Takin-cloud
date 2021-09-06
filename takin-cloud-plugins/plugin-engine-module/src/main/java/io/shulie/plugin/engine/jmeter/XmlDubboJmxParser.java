@@ -16,10 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * dubbo 脚本解析器
+ *
  * @author HengYu
- * @className XmlDubboJmxParser
  * @date 2021/4/12 4:02 下午
- * @description dubbo 脚本解析器
  */
 public class XmlDubboJmxParser extends JmxParser {
 

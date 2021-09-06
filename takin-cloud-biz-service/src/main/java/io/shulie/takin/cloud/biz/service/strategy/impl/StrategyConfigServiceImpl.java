@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.biz.service.strategy.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -28,14 +29,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+
 import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * @ClassName StrategyConfigServiceImpl
- * @Description
- * @Author qianshui
- * @Date 2020/5/9 下午3:17
+ * @author qianshui
+ * @date 2020/5/9 下午3:17
  */
 @Slf4j
 @Service
@@ -94,7 +94,6 @@ public class StrategyConfigServiceImpl implements StrategyConfigService {
 
     }
 
-
     @Override
     public StrategyConfigDTO getDefaultStrategyConfig() {
         PageInfo<StrategyConfigDTO> strategyConfig = queryPageList(new StrategyConfigQueryVO());
@@ -147,7 +146,7 @@ public class StrategyConfigServiceImpl implements StrategyConfigService {
             dto.setDeploymentMethod(DeploymentMethodEnum.getByType(object.getInteger("deploymentMethod")));
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：解析配置失败 --> Parse Config Failure = {}，异常信息: {}",
-                    TakinCloudExceptionEnum.SCHEDULE_START_ERROR,config,e);
+                TakinCloudExceptionEnum.SCHEDULE_START_ERROR, config, e);
         }
     }
 }

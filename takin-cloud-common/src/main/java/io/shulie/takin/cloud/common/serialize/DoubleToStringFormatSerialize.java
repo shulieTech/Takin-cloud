@@ -36,7 +36,7 @@ public class DoubleToStringFormatSerialize extends JsonSerializer<Double> {
      * 使用java正则表达式去掉多余的.与0
      *
      * @param s 字符串
-     * @return
+     * @return -
      * @author shulie
      * @2018年5月21日
      * @version v1.0

@@ -11,9 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author: fanxx
- * @Date: 2021/8/2 3:02 下午
- * @Description:
+ * @author fanxx
+ * @date 2021/8/2 3:02 下午
  */
 @Component
 @Slf4j
@@ -27,7 +26,6 @@ public class EnginePluginUtils {
     @Autowired
     private PluginManager pluginManager;
 
-
     public EngineExtApi getEngineExtApi() {
         List<EngineExtApi> extensions = pluginManager.getExtensions(EngineExtApi.class);
         for (EngineExtApi engineExtApi : extensions) {
@@ -38,7 +36,7 @@ public class EnginePluginUtils {
         return null;
     }
 
-    public EngineCallExtApi getEngineCallExtApi(){
+    public EngineCallExtApi getEngineCallExtApi() {
         List<EngineCallExtApi> extensions = pluginManager.getExtensions(EngineCallExtApi.class);
         for (EngineCallExtApi engineCallExtApi : extensions) {
             if (engineCallExtType.equals(engineCallExtApi.getType())) {

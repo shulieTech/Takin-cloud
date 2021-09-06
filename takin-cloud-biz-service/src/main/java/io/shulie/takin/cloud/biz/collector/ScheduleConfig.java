@@ -5,18 +5,16 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import java.util.concurrent.Executor;
 
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.context.annotation.Configuration;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-
 /**
- * @Author <a href="tangyuhan@shulie.io">yuhan.tang</a>
- * @package: io.shulie.takin.collector.conf
- * @Date 2020-04-27 12:06
+ * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
+ * @date 2020-04-27 12:06
  */
 @Configuration
 public class ScheduleConfig {
@@ -31,7 +29,6 @@ public class ScheduleConfig {
         taskScheduler.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         return taskScheduler;
     }
-
 
     @Bean(name = "checkStartedPodPool")
     public Executor asyncServiceExecutor() {
@@ -54,7 +51,7 @@ public class ScheduleConfig {
     }
 
     @Bean(name = "updateStatusPool")
-    public Executor updateSceneRunningStatusExecutor(){
+    public Executor updateSceneRunningStatusExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         // 设置核心线程数
         executor.setCorePoolSize(3);

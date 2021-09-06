@@ -3,22 +3,22 @@ package io.shulie.takin.cloud.open.req.scenemanage;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 
-import io.shulie.takin.cloud.common.bean.TimeBean;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
+import io.shulie.takin.cloud.common.bean.TimeBean;
+import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.cloud.open.bean.scenemanage
- * @description:
  * @date 2020/10/22 7:49 下午
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "场景保存入参")
 public class SceneManageWrapperReq extends CloudUserCommonRequestExt implements Serializable {
 
@@ -77,7 +77,5 @@ public class SceneManageWrapperReq extends CloudUserCommonRequestExt implements 
     private String features;
 
     private Long scriptId;
-
-
 
 }

@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author shulie
  * @version v1.0
- * @Date: Create in 2018/7/16 10:18
+ * @date Create in 2018/7/16 10:18
  */
 public class GsonUtil {
 
@@ -97,8 +97,8 @@ public class GsonUtil {
     /**
      * 说明: 将对象转化为字符串(泛型实现)
      *
-     * @param
-     * @return
+     * @param t 泛型对象
+     * @return -
      * @author shulie
      * @date 2018/7/16 10:40
      */

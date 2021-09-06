@@ -67,7 +67,7 @@ public interface TDictionaryDataMapper {
      * 查询数据字典列表
      *
      * @param paramMap
-     * @return
+     * @return -
      */
     List<TDictionaryVo> queryDictionaryList(Map<String, Object> paramMap);
 
@@ -75,7 +75,7 @@ public interface TDictionaryDataMapper {
      * 查询数据字典详情
      *
      * @param tDictionaryId
-     * @return
+     * @return -
      */
     TDictionaryVo queryDictionaryDetail(@Param("tDictionaryId") String tDictionaryId);
 

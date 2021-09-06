@@ -2,15 +2,12 @@ package io.shulie.takin.cloud.data.result.scenemanage;
 
 import java.util.Date;
 
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 
 /**
- * @author by: hezhongqi
- * @Package io.shulie.takin.cloud.data.result.scenemanage
- * @ClassName: SceneManageResult
- * @Description: TODO
- * @Date: 2021/8/3 16:11
+ * @author hezhongqi
+ * @date 2021/8/3 16:11
  */
 @Data
 public class SceneManageResult {
@@ -72,7 +69,6 @@ public class SceneManageResult {
      * 扩展字段
      */
     private String features;
-
 
     /**
      * 创建人

@@ -10,10 +10,8 @@ import io.shulie.takin.ext.content.enginecall.StrategyOutputExt;
 import org.apache.ibatis.annotations.Param;
 
 /**
- * @ClassName StrategyConfigService
- * @Description
- * @Author qianshui
- * @Date 2020/5/9 下午3:16
+ * @author qianshui
+ * @date 2020/5/9 下午3:16
  */
 public interface StrategyConfigService {
 
@@ -30,15 +28,16 @@ public interface StrategyConfigService {
     /**
      * 根据最大并发获得策略结果
      *
-     * @param expectThroughput
-     * @return
+     * @param expectThroughput -
+     * @param tpsNum           -
+     * @return -
      */
     StrategyOutputExt getStrategy(Integer expectThroughput, Integer tpsNum);
 
     /**
      * 获取默认策略
      *
-     * @return
+     * @return -
      */
     StrategyConfigDTO getDefaultStrategyConfig();
 }

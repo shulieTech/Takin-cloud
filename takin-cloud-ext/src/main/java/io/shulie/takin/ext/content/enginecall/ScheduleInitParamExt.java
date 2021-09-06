@@ -3,8 +3,8 @@ package io.shulie.takin.ext.content.enginecall;
 import lombok.Data;
 
 /**
- * @Author 莫问
- * @Date 2020-08-10
+ * @author 莫问
+ * @date 2020-08-10
  */
 @Data
 public class ScheduleInitParamExt {

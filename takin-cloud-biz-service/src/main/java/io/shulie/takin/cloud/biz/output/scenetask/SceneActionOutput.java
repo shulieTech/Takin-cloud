@@ -5,10 +5,8 @@ import java.util.List;
 import lombok.Data;
 
 /**
- * @ClassName SceneActionOutput
- * @Description
- * @Author qianshui
- * @Date 2020/11/13 上午10:58
+ * @author qianshui
+ * @date 2020/11/13 上午10:58
  */
 @Data
 public class SceneActionOutput {

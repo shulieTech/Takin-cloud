@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author 何仲奇
- * @package io.shulie.takin.cloud.controller.jmeter
  * @date 2020/9/23 2:42 下午
  */
 @RestController
@@ -25,7 +24,7 @@ public class EngineCallbackController {
 
     @PostMapping()
     @ApiOperation(value = "引擎回调状态")
-    public ResponseResult taskResultNotify(@RequestBody EngineNotifyParam notify) {
+    public ResponseResult<?> taskResultNotify(@RequestBody EngineNotifyParam notify) {
         return engineCallbackService.notifyEngineState(notify);
     }
 }

@@ -25,7 +25,7 @@ public interface ReportService {
      * 报告列表
      *
      * @param param
-     * @return
+     * @return -
      */
     PageInfo<CloudReportDTO> listReport(ReportQueryParam param);
 
@@ -33,7 +33,7 @@ public interface ReportService {
      * 报告详情
      *
      * @param reportId
-     * @return
+     * @return -
      */
     ReportDetailOutput getReportByReportId(Long reportId);
 
@@ -41,7 +41,7 @@ public interface ReportService {
      * 报告链路趋势
      *
      * @param reportTrendQuery
-     * @return
+     * @return -
      */
     ReportTrendDTO queryReportTrend(ReportTrendQueryParam reportTrendQuery);
 
@@ -49,7 +49,7 @@ public interface ReportService {
      * 实况报表
      *
      * @param sceneId
-     * @return
+     * @return -
      */
     ReportDetailOutput tempReportDetail(Long sceneId);
 
@@ -59,7 +59,7 @@ public interface ReportService {
      * 实况链路趋势
      *
      * @param reportTrendQuery
-     * @return
+     * @return -
      */
     ReportTrendDTO queryTempReportTrend(ReportTrendQueryParam reportTrendQuery);
 
@@ -67,19 +67,19 @@ public interface ReportService {
      * 警告列表
      *
      * @param param
-     * @return
+     * @return -
      */
     PageInfo<WarnDetailOutput> listWarn(WarnQueryParam param);
 
     /**
      * @param reportId
-     * @return
+     * @return -
      */
     List<BusinessActivityDTO> queryReportActivityByReportId(Long reportId);
 
     /**
      * @param sceneId
-     * @return
+     * @return -
      */
     List<BusinessActivityDTO> queryReportActivityBySceneId(Long sceneId);
 
@@ -89,14 +89,14 @@ public interface ReportService {
      * 获取报告的业务活动数量和压测通过数量
      *
      * @param reportId
-     * @return
+     * @return -
      */
     Map<String, Object> getReportCount(Long reportId);
 
     /**
      * 查询正在生成的报告
      *
-     * @return
+     * @return -
      */
     Long queryRunningReport();
 
@@ -106,7 +106,7 @@ public interface ReportService {
      * 锁定报告
      *
      * @param reportId
-     * @return
+     * @return -
      */
     Boolean lockReport(Long reportId);
 
@@ -114,7 +114,7 @@ public interface ReportService {
      * 解锁报告
      *
      * @param reportId
-     * @return
+     * @return -
      */
     Boolean unLockReport(Long reportId);
 
@@ -122,7 +122,7 @@ public interface ReportService {
      * 客户端调，报告完成
      *
      * @param reportId
-     * @return
+     * @return -
      */
     Boolean finishReport(Long reportId);
 
@@ -130,7 +130,7 @@ public interface ReportService {
      * 强制关闭报告
      *
      * @param reportId
-     * @return
+     * @return -
      */
     void forceFinishReport(Long reportId);
 
@@ -140,7 +140,7 @@ public interface ReportService {
      * @param reportId
      * @param sceneId
      * @param customerId
-     * @return
+     * @return -
      */
     List<Metrices> metrices(Long reportId, Long sceneId, Long customerId);
 
@@ -177,7 +177,7 @@ public interface ReportService {
     /**
      * 获取报告
      * @param id
-     * @return
+     * @return -
      */
     ReportOutput selectById(Long id);
 }

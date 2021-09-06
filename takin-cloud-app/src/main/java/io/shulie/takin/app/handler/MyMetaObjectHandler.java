@@ -10,9 +10,8 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author: fanxx
- * @Date: 2020/11/4 11:02 上午
- * @Description:
+ * @author fanxx
+ * @date 2020/11/4 11:02 上午
  */
 @Slf4j
 @Component
@@ -25,7 +24,7 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         if (Objects.nonNull(userCommonExt.getCustomerId())) {
             this.strictInsertFill(metaObject, "customerId", Long.class, userCommonExt.getCustomerId());
         }
-        if(Objects.nonNull(userCommonExt.getUserId())){
+        if (Objects.nonNull(userCommonExt.getUserId())) {
             this.strictInsertFill(metaObject, "userId", Long.class, userCommonExt.getUserId());
         }
     }

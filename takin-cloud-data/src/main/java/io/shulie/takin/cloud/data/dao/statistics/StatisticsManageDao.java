@@ -11,27 +11,28 @@ import org.apache.ibatis.annotations.Select;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.cloud.data.dao.scenemanage
  * @date 2020/10/26 4:40 下午
  */
 @Mapper
 public interface StatisticsManageDao {
     /**
      * 统计场景分类，返回饼状图数据
-     * @param startTime
-     * @param endTime
-     * @return
+     *
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return -
      */
     @Select("<script>select status,count(1) as count from t_scene_manage where create_time &gt;= #{startTime} and create_time &lt;= #{endTime} "
-            + "and is_deleted =0  GROUP BY STATUS</script>")
+        + "and is_deleted =0  GROUP BY STATUS</script>")
     List<PressurePieTotalResult> getPressureScenePieTotal(@Param("startTime") String startTime,
         @Param("endTime") String endTime);
 
     /**
      * 统计报告通过/未通过
-     * @param startTime
-     * @param endTime
-     * @return
+     *
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return -
      */
     @Select("<script>SELECT sum(CASE conclusion WHEN 1 THEN 1 ELSE 0 END) as success,\n"
         + "sum(CASE conclusion WHEN 0 THEN 1 ELSE 0 END) as fail,count(1) as count\n"
@@ -42,9 +43,10 @@ public interface StatisticsManageDao {
 
     /**
      * 压测场景次数统计  标签数据需要从web获取
-     * @param startTime
-     * @param endTime
-     * @return
+     *
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return -
      */
     @Select("<script>SELECT a.id,a.scene_name as name,a.create_time as gmtCreate,a.user_id as createName,\n"
         + "sum(CASE b.conclusion WHEN 1 THEN 1 ELSE 0 END) as success,\n"
@@ -58,10 +60,11 @@ public interface StatisticsManageDao {
 
     /**
      * 压测脚本次数统计
-     * @param startTime
-     * @param endTime
-     * @param scriptIds
-     * @return
+     *
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @param scriptIds 脚本主键
+     * @return -
      */
     @Select("<script>" +
         "SELECT script_id as id,\n"

@@ -6,10 +6,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
- * @ClassName StrategyConfigDTO
- * @Description
- * @Author qianshui
- * @Date 2020/5/9 下午2:06
+ * @author qianshui
+ * @date 2020/5/9 下午2:06
  */
 @Data
 public class StrategyConfigExt implements Serializable {

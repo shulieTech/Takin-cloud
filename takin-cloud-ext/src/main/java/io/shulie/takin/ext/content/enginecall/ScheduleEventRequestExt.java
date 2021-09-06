@@ -6,8 +6,8 @@ import java.util.Map;
 import lombok.Data;
 
 /**
- * @Author 莫问
- * @Date 2020-05-14
+ * @author 莫问
+ * @date 2020-05-14
  */
 @Data
 public class ScheduleEventRequestExt implements Serializable {

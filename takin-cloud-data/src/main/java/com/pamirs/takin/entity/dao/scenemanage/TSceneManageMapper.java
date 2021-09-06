@@ -26,7 +26,7 @@ public interface TSceneManageMapper {
 
     /**
      * 查询所有场景信息
-     * @return
+     * @return -
      */
     List<SceneManage> selectAllSceneManageList();
 

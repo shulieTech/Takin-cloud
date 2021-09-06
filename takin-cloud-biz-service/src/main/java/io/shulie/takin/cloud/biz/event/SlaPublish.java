@@ -10,9 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author: qianshui
- * @Date: 2020/4/17 下午8:28
- * @Description:
+ * @author qianshui
+ * @date 2020/4/17 下午8:28
  */
 @Component
 @Slf4j
@@ -29,7 +28,7 @@ public class SlaPublish {
             eventCenterTemplate.doEvents(event);
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：压测任务停止异常 --> 【SLA】发起stop动作异常: {},入参:{}",
-                    TakinCloudExceptionEnum.TASK_RUNNING_SAL_METRICS_DATA_ERROR,e,scheduleStopRequest.toString());
+                TakinCloudExceptionEnum.TASK_RUNNING_SAL_METRICS_DATA_ERROR, e, scheduleStopRequest.toString());
         }
     }
 }

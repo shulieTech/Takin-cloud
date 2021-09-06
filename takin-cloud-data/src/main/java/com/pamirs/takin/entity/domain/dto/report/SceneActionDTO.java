@@ -6,8 +6,8 @@ import java.util.List;
 import lombok.Data;
 
 /**
- * @Author 莫问
- * @Date 2020-04-21
+ * @author 莫问
+ * @date 2020-04-21
  */
 @Data
 public class SceneActionDTO implements Serializable {

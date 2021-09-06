@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @Author 莫问
- * @Date 2020-05-12
+ * @author 莫问
+ * @date 2020-05-12
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements Serializable {
 
     /**
@@ -116,8 +118,8 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
     /**
      * 添加引擎插件路径
      *
-     * @param enginePluginsFilePath
-     * @return
+     * @param enginePluginsFilePath 引擎插件路径
+     * @return -
      * @author lipeng
      */
     public List<String> addEnginePluginsFilePath(String enginePluginsFilePath) {
@@ -161,13 +163,12 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
         /**
          * 文件分片信息,key-排序，引擎会用到；value-需要读取的分区数据
          */
-        Map<Integer,List<StartEndPosition>> startEndPositions;
-
+        Map<Integer, List<StartEndPosition>> startEndPositions;
 
     }
 
     @Data
-    public static class StartEndPosition implements Serializable{
+    public static class StartEndPosition implements Serializable {
 
         /**
          * 分区

@@ -23,7 +23,6 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * @author 何仲奇
- * @Package io.shulie.takin.cloud.client.api
  * @date 2020/10/20 3:42 下午
  */
 @Validated
@@ -40,79 +39,75 @@ public interface CloudSceneApi {
     /**
      * 保存
      *
-     * @param sceneManageWrapperReq
-     * @return
+     * @param sceneManageWrapperReq -
+     * @return -
      */
     ResponseResult<Long> saveScene(SceneManageWrapperReq sceneManageWrapperReq);
 
     /**
      * 更新
      *
-     * @param sceneManageWrapperReq
-     * @return
+     * @param sceneManageWrapperReq -
+     * @return -
      */
     ResponseResult<String> updateScene(SceneManageWrapperReq sceneManageWrapperReq);
 
     /**
      * 删除
      *
-     * @param sceneManageDeleteReq
-     * @return
+     * @param sceneManageDeleteReq -
+     * @return -
      */
     ResponseResult<String> deleteScene(SceneManageDeleteReq sceneManageDeleteReq);
 
     /**
      * 获取场景明细 供编辑使用
      *
-     * @param sceneManageIdVO
-     * @return
+     * @param sceneManageIdVO -
+     * @return -
      */
     ResponseResult<SceneManageWrapperResp> getSceneDetail(SceneManageIdReq sceneManageIdVO);
 
     /**
      * 不分页查询所有场景带脚本信息
      *
-     * @param request
-     * @return
+     * @param request -
+     * @return -
      */
     ResponseResult<List<SceneManageListResp>> getSceneManageList(CloudUserCommonRequestExt request);
 
     /**
      * 获取压测场景列表
      *
-     * @param sceneManageQueryReq
-     * @return
+     * @param sceneManageQueryReq -
+     * @return -
      */
     ResponseResult<List<SceneManageListResp>> getSceneList(SceneManageQueryReq sceneManageQueryReq);
-
 
     /**
      * 流量计算
      *
-     * @param sceneManageWrapperReq
-     * @return
+     * @param sceneManageWrapperReq -
+     * @return -
      */
     ResponseResult<BigDecimal> calcFlow(SceneManageWrapperReq sceneManageWrapperReq);
 
     /**
      * 获取机器数量范围
      *
-     * @param sceneIpNumReq
-     * @return
+     * @param sceneIpNumReq -
+     * @return -
      */
     ResponseResult<StrategyResp> getIpNum(SceneIpNumReq sceneIpNumReq);
 
     /**
      * 校验并更新脚本
      *
-     * @param scriptCheckAndUpdateReq
+     * @param scriptCheckAndUpdateReq -
      * @return 返回解析失败信息，如果为空，表示解析成功
      */
     ResponseResult<ScriptCheckResp> checkAndUpdateScript(ScriptCheckAndUpdateReq scriptCheckAndUpdateReq);
 
-
-
-
-    ResponseResult<List<SceneManageWrapperResp>> queryByIds (SceneManageQueryByIdsReq req) ;
+    ResponseResult<List<SceneManageWrapperResp>> queryByIds(SceneManageQueryByIdsReq req);
 
 }

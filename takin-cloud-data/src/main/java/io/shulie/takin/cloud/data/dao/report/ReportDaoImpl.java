@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.cloud.data.dao.report
  * @date 2020/12/17 3:31 下午
  */
 @Service
@@ -63,7 +62,7 @@ public class ReportDaoImpl implements ReportDao {
      *
      * @param sceneId
      *
-     * @return
+     * @return -
      */
     @Override
     public ReportResult getRecentlyReport(Long sceneId) {

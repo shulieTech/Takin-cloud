@@ -11,38 +11,39 @@ import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.cloud.data.dao.scenemanage
  * @date 2020/10/26 4:40 下午
  */
 public interface SceneManageDAO extends IService<SceneManageEntity> {
 
     /**
      * 新增场景
-     * @param createParam
+     *
+     * @param createParam -
      */
     Long insert(SceneManageCreateOrUpdateParam createParam);
 
     /**
      * 更新场景
-     * @param updateParam
+     *
+     * @param updateParam -
      */
     void update(SceneManageCreateOrUpdateParam updateParam);
 
     /**
      * 获取场景
-     * @param id
-     * @return
+     *
+     * @param id -
+     * @return -
      */
     SceneManageResult getSceneById(Long id);
 
     /**
      * 根据条件分页查询
-     * @param queryBean
-     * @return
+     *
+     * @param queryBean -
+     * @return -
      */
     List<SceneManageResult> getPageList(SceneManageQueryBean queryBean);
-
-
 
     /**
      * 根据名称查询压测场景
@@ -62,17 +63,18 @@ public interface SceneManageDAO extends IService<SceneManageEntity> {
 
     /**
      * 查询场景
-     * @param sceneId
-     * @return
+     *
+     * @param sceneId -
+     * @return -
      */
     SceneManageListResult querySceneManageById(Long sceneId);
 
     /**
      * 查询单个场景所有信息
-     * @param sceneId
-     * @return
+     *
+     * @param sceneId -
+     * @return -
      */
     SceneManageEntity queueSceneById(Long sceneId);
-
 
 }

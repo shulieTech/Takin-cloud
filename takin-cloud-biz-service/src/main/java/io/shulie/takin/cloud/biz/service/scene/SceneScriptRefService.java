@@ -4,9 +4,8 @@ import com.pamirs.takin.entity.domain.entity.scenemanage.SceneScriptRef;
 import com.pamirs.takin.entity.domain.query.SceneScriptRefQueryParam;
 
 /**
- * @Author: mubai
- * @Date: 2020-05-12 20:22
- * @Description:
+ * @author mubai
+ * @date 2020-05-12 20:22
  */
 public interface SceneScriptRefService {
 

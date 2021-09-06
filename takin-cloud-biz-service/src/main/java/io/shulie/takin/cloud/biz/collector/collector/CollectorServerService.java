@@ -11,9 +11,8 @@ import org.springframework.stereotype.Service;
 /**
  * 计算压测引擎上报的服务器状态。用于弹性伸缩
  *
- * @Author <a href="tangyuhan@shulie.io">yuhan.tang</a>
- * @package: io.shulie.takin.cloud.poll.poll
- * @Date 2020-05-11 14:26
+ * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
+ * @date 2020-05-11 14:26
  */
 @Slf4j
 @Service
@@ -21,7 +20,7 @@ public class CollectorServerService {
 
     public void collector(ServerStatusInfo serverStatusInfo) {
         int cpu = collectorCpu(serverStatusInfo.getCpu());
-        int memery = collectorMemery(serverStatusInfo.getMemery());
+        int memory = collectorMemory(serverStatusInfo.getMemery());
         int io = collectorIo(serverStatusInfo.getIo());
         int disk = collectorDisk(serverStatusInfo.getDiskUsages());
         int loader = collectorLoader(serverStatusInfo.getLoadInfo());
@@ -33,8 +32,8 @@ public class CollectorServerService {
      * 0  正常
      * 1  扩容
      *
-     * @param cpu
-     * @return
+     * @param cpu -
+     * @return -
      */
     public int collectorCpu(float cpu) {
         return 0;
@@ -46,10 +45,10 @@ public class CollectorServerService {
      * 0  正常
      * 1  扩容
      *
-     * @param memery
-     * @return
+     * @param memory -
+     * @return -
      */
-    public int collectorMemery(long memery) {
+    public int collectorMemory(long memory) {
         return 0;
     }
 
@@ -59,8 +58,8 @@ public class CollectorServerService {
      * 0  正常
      * 1  扩容
      *
-     * @param io
-     * @return
+     * @param io -
+     * @return -
      */
     public int collectorIo(String io) {
         return 0;
@@ -72,8 +71,8 @@ public class CollectorServerService {
      * 0  正常
      * 1  扩容
      *
-     * @param loadInfo
-     * @return
+     * @param loadInfo -
+     * @return -
      */
     public int collectorLoader(LoadInfo loadInfo) {
         return 0;
@@ -85,8 +84,8 @@ public class CollectorServerService {
      * 0  正常
      * 1  扩容
      *
-     * @param diskUsages
-     * @return
+     * @param diskUsages -
+     * @return -
      */
     public int collectorDisk(List<DiskUsage> diskUsages) {
         return 0;

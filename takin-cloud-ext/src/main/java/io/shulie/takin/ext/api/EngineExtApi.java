@@ -33,7 +33,7 @@ public interface EngineExtApi extends ExtensionPoint, Typed {
     /**
      * 解析脚本文件
      * @param uploadPath
-     * @return
+     * @return -
      */
     ScriptParseExt parseScriptFile(String uploadPath);
 }

@@ -35,7 +35,7 @@ public class SpringContextUtil {
      * 说明：新增方法，返回实例对象
      *
      * @param paramClass
-     * @return
+     * @return -
      * @throws Exception
      * @author shulie
      * @time：2017年5月26日 下午1:49:47
@@ -89,7 +89,7 @@ public class SpringContextUtil {
      * 如果给定的bean名字在bean定义中有别名，则返回这些别名
      *
      * @param name
-     * @return
+     * @return -
      * @throws NoSuchBeanDefinitionException
      */
     public static String[] getAliases(String name) throws NoSuchBeanDefinitionException {

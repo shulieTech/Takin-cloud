@@ -8,10 +8,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @ClassName SceneActionResponse
- * @Description
- * @Author qianshui
- * @Date 2020/11/13 上午11:03
+ * @author qianshui
+ * @date 2020/11/13 上午11:03
  */
 @Data
 @ApiModel("状态检查返回值")

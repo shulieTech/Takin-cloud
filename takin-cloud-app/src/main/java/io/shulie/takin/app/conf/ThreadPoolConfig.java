@@ -10,17 +10,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
-* @Package io.shulie.takin.cloud.app.conf
-* @author 无涯
-* @description:
-* @date 2021/6/7 3:17 下午
-*/
+ * @author 无涯
+ * @date 2021/6/7 3:17 下午
+ */
 @Configuration
 public class ThreadPoolConfig {
 
     /**
      * 采用丢弃队列中最老的任务
-     * @return
+     *
+     * @return -
      */
     @Bean(name = "stopThreadPool")
     public ThreadPoolExecutor stopTaskExecutor() {

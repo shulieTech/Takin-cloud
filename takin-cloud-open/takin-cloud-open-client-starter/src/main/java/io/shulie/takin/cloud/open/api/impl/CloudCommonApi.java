@@ -3,31 +3,30 @@ package io.shulie.takin.cloud.open.api.impl;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 import io.shulie.takin.cloud.common.utils.AppBusinessUtil;
 import io.shulie.takin.cloud.open.constant.CloudApiConstant;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 /**
- * @ClassName CloudCommonApi
- * @Description
- * @Author qianshui
- * @Date 2020/11/16 下午4:21
+ * @author qianshui
+ * @date 2020/11/16 下午4:21
  */
 @Component
 public class CloudCommonApi {
     /**
      * 转化 header
-     * @param ext
-     * @return
+     *
+     * @param ext -
+     * @return -
      */
     protected Map<String, String> getHeaders(CloudUserCommonRequestExt ext) {
         Map<String, String> map = Maps.newHashMap();
         map.put(CloudApiConstant.LICENSE_REQUIRED, "true");
         map.put(CloudApiConstant.LICENSE_KEY, this.getDevLicense(ext.getLicense()));
-        if(StringUtils.isNotBlank(ext.getFilterSql())) {
-            map.put(CloudApiConstant.FILTER_SQL,ext.getFilterSql());
+        if (StringUtils.isNotBlank(ext.getFilterSql())) {
+            map.put(CloudApiConstant.FILTER_SQL, ext.getFilterSql());
         }
         map.put(CloudApiConstant.USER_ID, String.valueOf(ext.getUserId()));
         return map;

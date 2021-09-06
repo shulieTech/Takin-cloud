@@ -16,7 +16,7 @@ public interface SceneManageEntityConverter {
     /**
      * 单对象转换
      * @param sceneManageEntity
-     * @return
+     * @return -
      */
     SceneManageListResult ofSceneManageEntity(SceneManageEntity sceneManageEntity);
 }

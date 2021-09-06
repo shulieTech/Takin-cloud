@@ -1,10 +1,8 @@
 package io.shulie.takin.cloud.common.constants;
 
 /**
- * @ClassName PtConfigConstant
- * @Description
- * @Author qianshui
- * @Date 2020/4/18 上午11:49
+ * @author qianshui
+ * @date 2020/4/18 上午11:49
  */
 public class SceneManageConstant {
 
@@ -45,7 +43,7 @@ public class SceneManageConstant {
     public static final String IS_ORDERED_SPLIT = "isOrderSplit";
 
     // ---- 业务活动目标
-    public static final String TPS= "TPS";
+    public static final String TPS = "TPS";
 
     public static final String RT = "RT";
 
@@ -54,7 +52,7 @@ public class SceneManageConstant {
     public static final String SA = "SA";
 
     // ---- SLA配置
-    public static final String COMPARE_TYPE= "compareType";
+    public static final String COMPARE_TYPE = "compareType";
 
     public static final String COMPARE_VALUE = "compareValue";
 
@@ -67,11 +65,11 @@ public class SceneManageConstant {
     public static final String EVENT_DESTORY = "destory";
 
     //features ,扩展字段
-    public static final String FEATURES_CONFIG_TYPE = "configType" ;
+    public static final String FEATURES_CONFIG_TYPE = "configType";
 
-    public static final String FEATURES_SCRIPT_ID = "scriptId" ;
+    public static final String FEATURES_SCRIPT_ID = "scriptId";
 
-    public static final String FEATURES_BUSINESS_FLOW_ID ="businessFlowId";
+    public static final String FEATURES_BUSINESS_FLOW_ID = "businessFlowId";
 
     public static final String FEATURES_SCHEDULE_INTERVAL = "scheduleInterval";
 
@@ -88,7 +86,7 @@ public class SceneManageConstant {
     /**
      * 压测任务状态 job不存在：none 运行中：running 运行失败：failed
      */
-    public static String SCENETASK_JOB_STATUS_NONE="none";
-    public static String SCENETASK_JOB_STATUS_RUNNING="running";
-    public static String SCENETASK_JOB_STATUS_FAILED="failed";
+    public static String SCENETASK_JOB_STATUS_NONE = "none";
+    public static String SCENETASK_JOB_STATUS_RUNNING = "running";
+    public static String SCENETASK_JOB_STATUS_FAILED = "failed";
 }

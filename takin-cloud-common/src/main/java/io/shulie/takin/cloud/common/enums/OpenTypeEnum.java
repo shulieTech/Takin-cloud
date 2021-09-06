@@ -1,9 +1,8 @@
 package io.shulie.takin.cloud.common.enums;
 
 /**
- * @Author: fanxx
- * @Date: 2020/5/13 下午3:03
- * @Description:
+ * @author fanxx
+ * @date 2020/5/13 下午3:03
  */
 public enum OpenTypeEnum {
     /**

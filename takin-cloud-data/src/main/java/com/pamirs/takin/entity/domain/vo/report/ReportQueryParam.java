@@ -6,13 +6,15 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @Author 莫问
- * @Date 2020-04-17
+ * @author 莫问
+ * @date 2020-04-17
  */
 @Data
 @ApiModel
+@EqualsAndHashCode(callSuper = true)
 public class ReportQueryParam extends CloudUserCommonRequestExt implements Serializable {
 
     /**

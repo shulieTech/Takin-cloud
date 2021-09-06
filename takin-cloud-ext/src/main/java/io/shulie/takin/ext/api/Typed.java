@@ -7,7 +7,7 @@ public interface Typed {
 
     /**
      * 根据type区分需要使用的插件
-     * @return
+     * @return -
      */
     String getType();
 }

@@ -2,14 +2,16 @@ package io.shulie.takin.cloud.open.req.report;
 
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @ClassName WarnCreateReq
- * @Description 创建告警
- * @Author qianshui
- * @Date 2020/11/18 上午11:41
+ * 创建告警
+ *
+ * @author qianshui
+ * @date 2020/11/18 上午11:41
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class WarnCreateReq extends CloudUserCommonRequestExt {
     private static final long serialVersionUID = 4235614311515898729L;
 

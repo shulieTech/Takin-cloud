@@ -1,4 +1,4 @@
-package io.shulie.takin.schedule.taskmanage.Impl;
+package io.shulie.tro.schedule.taskmanage.Impl;
 
 import io.shulie.takin.app.Application;
 import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
@@ -12,10 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * @ClassName InsertFillTest
- * @Description
- * @Author qianshui
- * @Date 2020/10/27 下午5:32
+ * @author qianshui
+ * @date 2020/10/27 下午5:32
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class})

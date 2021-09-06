@@ -13,10 +13,8 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
 /**
- * @ClassName ParseXmlUtil
- * @Description
- * @Author qianshui
- * @Date 2020/7/24 上午11:50
+ * @author qianshui
+ * @date 2020/7/24 上午11:50
  */
 @Slf4j
 public class ParseXmlUtil {
@@ -67,7 +65,7 @@ public class ParseXmlUtil {
             }
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：Parse Jmeter Script Error --> 异常信息: {}",
-                    TakinCloudExceptionEnum.XML_PARSE_ERROR,e);
+                TakinCloudExceptionEnum.XML_PARSE_ERROR, e);
         }
         return dataMap;
     }
@@ -132,8 +130,6 @@ public class ParseXmlUtil {
                 "</HeaderManager>";
 
         Map<String, String> map = parseHeaderXml(xml);
-        map.forEach((key, value) -> {
-            System.out.println("name:" + key + "; value:" + value);
-        });
+        map.forEach((key, value) -> System.out.println("name:" + key + "; value:" + value));
     }
 }

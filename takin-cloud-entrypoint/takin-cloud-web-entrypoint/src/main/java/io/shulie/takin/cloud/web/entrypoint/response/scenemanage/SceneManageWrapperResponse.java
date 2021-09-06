@@ -13,14 +13,14 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @ClassName SceneManageWrapperResponse
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午5:55
+ * @author qianshui
+ * @date 2020/4/17 下午5:55
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "场景详情出参")
 public class SceneManageWrapperResponse extends CloudUserCommonRequestExt implements Serializable {
 
@@ -88,19 +88,18 @@ public class SceneManageWrapperResponse extends CloudUserCommonRequestExt implem
 
     private transient String lastPtTime;
 
-
     private String features;
 
     private Integer configType;
 
     private Long scriptId;
 
-    private String businessFlowId ;
+    private String businessFlowId;
 
     private Integer scheduleInterval;
 
-
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class SceneBusinessActivityRefResponse extends SceneBusinessActivityRefBean {
 
         private static final long serialVersionUID = -6384484202725660595L;
@@ -116,11 +115,12 @@ public class SceneManageWrapperResponse extends CloudUserCommonRequestExt implem
 
         private Long scriptId;
 
-        private String businessFlowId ;
+        private String businessFlowId;
 
-        private Integer configType ;
+        private Integer configType;
 
     }
+
     @Data
     public static class SceneScriptRefResponse implements Serializable {
 
@@ -156,8 +156,8 @@ public class SceneManageWrapperResponse extends CloudUserCommonRequestExt implem
         @ApiModelProperty(value = "Topic")
         private String topic;
 
-
     }
+
     @Data
     public static class SceneSlaRefResponse implements Serializable {
 

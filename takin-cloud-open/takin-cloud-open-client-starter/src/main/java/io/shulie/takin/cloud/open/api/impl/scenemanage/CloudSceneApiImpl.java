@@ -33,7 +33,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author 何仲奇
- * @Package io.shulie.takin.cloud.client.api.impl
  * @date 2020/10/21 3:03 下午
  */
 @Component
@@ -41,7 +40,6 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
 
     @Autowired
     private TroCloudClientProperties troCloudClientProperties;
-
 
     @ApiPointCut(name = "cloudScene", errorCode = TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_FILE_ERROR)
     @Override
@@ -54,12 +52,12 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     public ResponseResult<Long> saveScene(SceneManageWrapperReq req) {
         TakinResponseEntity<ResponseResult<Long>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_URL,
-                getHeaders(req), new TypeReference<ResponseResult<Long>>() {},req);
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(req), new TypeReference<ResponseResult<Long>>() {}, req);
+        if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
     @Override
@@ -67,48 +65,48 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
 
         TakinResponseEntity<ResponseResult<String>> takinResponseEntity =
             HttpHelper.doPut(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_URL,
-                getHeaders(req), new TypeReference<ResponseResult<String>>() {},req);
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(req), new TypeReference<ResponseResult<String>>() {}, req);
+        if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
     @Override
     public ResponseResult<String> deleteScene(SceneManageDeleteReq req) {
         TakinResponseEntity<ResponseResult<String>> takinResponseEntity =
             HttpHelper.doDelete(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_URL,
-                getHeaders(req), new TypeReference<ResponseResult<String>>() {},req);
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(req), new TypeReference<ResponseResult<String>>() {}, req);
+        if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
     @Override
     public ResponseResult<SceneManageWrapperResp> getSceneDetail(SceneManageIdReq req) {
         TakinResponseEntity<ResponseResult<SceneManageWrapperResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_DETAIL_URL,
-                getHeaders(req),req,new TypeReference<ResponseResult<SceneManageWrapperResp>>() {});
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(req), req, new TypeReference<ResponseResult<SceneManageWrapperResp>>() {});
+        if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
     @Override
     public ResponseResult<List<SceneManageListResp>> getSceneManageList(CloudUserCommonRequestExt req) {
         TakinResponseEntity<ResponseResult<List<SceneManageListResp>>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_All_LIST_URL,
-                getHeaders(req),req,new TypeReference<ResponseResult<List<SceneManageListResp>>>() {});
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(req), req, new TypeReference<ResponseResult<List<SceneManageListResp>>>() {});
+        if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
     @Override
@@ -116,12 +114,12 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
         TakinResponseEntity<ResponseResult<List<SceneManageListResp>>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_LIST_URL,
                 //过滤
-                getHeaders(req),req,new TypeReference<ResponseResult<List<SceneManageListResp>>>() {});
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(req), req, new TypeReference<ResponseResult<List<SceneManageListResp>>>() {});
+        if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
 
     }
 
@@ -129,53 +127,52 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     public ResponseResult<BigDecimal> calcFlow(SceneManageWrapperReq req) {
         TakinResponseEntity<ResponseResult<BigDecimal>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_FLOWCALC_URL,
-                getHeaders(req),new TypeReference<ResponseResult<BigDecimal>>() {},req);
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(req), new TypeReference<ResponseResult<BigDecimal>>() {}, req);
+        if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
-
 
     @Override
     public ResponseResult<StrategyResp> getIpNum(SceneIpNumReq req) {
         TakinResponseEntity<ResponseResult<StrategyResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_IPNUM_URL,
-                getHeaders(req),req,new TypeReference<ResponseResult<StrategyResp>>() {});
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(req), req, new TypeReference<ResponseResult<StrategyResp>>() {});
+        if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
     @Override
     public ResponseResult<ScriptCheckResp> checkAndUpdateScript(ScriptCheckAndUpdateReq req) {
         TakinResponseEntity<ResponseResult<ScriptCheckResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_CHECK_AND_UPDATE_URL,
-                getHeaders(req),req,new TypeReference<ResponseResult<ScriptCheckResp>>() {});
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(req), req, new TypeReference<ResponseResult<ScriptCheckResp>>() {});
+        if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
     @Override
     public ResponseResult<List<SceneManageWrapperResp>> queryByIds(SceneManageQueryByIdsReq req) {
 
-        String url = troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_BY_SCENE_IDS ;
+        String url = troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_BY_SCENE_IDS;
         List<Long> sceneIds = req.getSceneIds();
         String join = StringUtils.join(sceneIds, ",");
         url = url + "?sceneIds=" + join;
         TakinResponseEntity<ResponseResult<List<SceneManageWrapperResp>>> takinResponseEntity =
-            HttpHelper.doGet(url, getHeaders(req),new TypeReference<ResponseResult<List<SceneManageWrapperResp>>>() {});
-        if(takinResponseEntity.getSuccess()) {
+            HttpHelper.doGet(url, getHeaders(req), new TypeReference<ResponseResult<List<SceneManageWrapperResp>>>() {});
+        if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
 }

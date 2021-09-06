@@ -8,14 +8,14 @@ import io.shulie.takin.cloud.common.bean.TimeBean;
 import io.shulie.takin.cloud.common.enums.machine.EnumResult;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @ClassName SceneDetailResult
- * @Description
- * @Author qianshui
- * @Date 2020/5/18 下午8:26
+ * @author qianshui
+ * @date 2020/5/18 下午8:26
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class SceneDetailResp extends CloudUserCommonRequestExt implements Serializable {
 
     private static final long serialVersionUID = 1453217777875591954L;
@@ -68,6 +68,7 @@ public class SceneDetailResp extends CloudUserCommonRequestExt implements Serial
         private EnumResult isSplit;
 
     }
+
     @Data
     public static class SlaDetailResp implements Serializable {
 

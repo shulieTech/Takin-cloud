@@ -5,14 +5,14 @@ import java.util.Date;
 
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
-* @Package io.shulie.takin.cloud.biz.output.report
-* @author 无涯
-* @description:
-* @date 2021/6/7 4:37 下午
-*/
+ * @author 无涯
+ * @date 2021/6/7 4:37 下午
+ */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ReportOutput extends CloudUserCommonRequestExt {
     private Long id;
 
@@ -100,7 +100,6 @@ public class ReportOutput extends CloudUserCommonRequestExt {
      * 目标TPS
      */
     private Integer tps;
-
 
     /**
      * 扩展字段，JSON数据格式

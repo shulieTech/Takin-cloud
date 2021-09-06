@@ -4,13 +4,13 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
- * @Author: mubai
- * @Date: 2020-10-29 15:01
- * @Description:
+ * @author mubai
+ * @date 2020-10-29 15:01
  */
 
 @Data

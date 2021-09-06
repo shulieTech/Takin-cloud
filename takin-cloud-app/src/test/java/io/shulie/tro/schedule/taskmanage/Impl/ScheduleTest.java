@@ -1,4 +1,4 @@
-package io.shulie.takin.schedule.taskmanage.Impl;
+package io.shulie.tro.schedule.taskmanage.Impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,8 +17,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import io.shulie.takin.cloud.biz.service.schedule.ScheduleService;
 
 /**
- * @Author 莫问
- * @Date 2020-05-12
+ * @author 莫问
+ * @date 2020-05-12
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class})
@@ -30,7 +30,7 @@ public class ScheduleTest {
     @Test
     public void testScchedule() {
         ScheduleRunRequest runRequest = new ScheduleRunRequest();
-        Long scheduleId = Long.parseLong(RandomUtils.nextInt() + "");
+        long scheduleId = Integer.valueOf(RandomUtils.nextInt()).longValue();
         runRequest.setScheduleId(scheduleId);
         ScheduleStartRequestExt scheduleStartRequest = new ScheduleStartRequestExt();
         scheduleStartRequest.setContinuedTime(100L);

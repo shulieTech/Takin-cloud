@@ -1,15 +1,16 @@
 package io.shulie.takin.eventcenter.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
 /**
- * @Author: fanxx
- * @Date: 2020/4/17 下午3:05
- * @Description:
+ * @author fanxx
+ * @date 2020/4/17 下午3:05
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class TaskBean extends TaskConfig {
     /**
      * 进程号

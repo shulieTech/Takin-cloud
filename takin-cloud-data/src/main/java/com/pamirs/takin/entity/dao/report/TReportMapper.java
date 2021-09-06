@@ -31,7 +31,7 @@ public interface TReportMapper {
      * 报表列表
      *
      * @param param
-     * @return
+     * @return -
      */
     @DataApartInterceptAnnotation
     List<Report> listReport(@Param("param") ReportQueryParam param);
@@ -40,7 +40,7 @@ public interface TReportMapper {
      * 获取已经生成报告的场景ID
      *
      * @param sceneIds
-     * @return
+     * @return -
      */
     List<Report> listReportSceneIds(@Param("sceneIds") List<Long> sceneIds);
 
@@ -48,7 +48,7 @@ public interface TReportMapper {
      * 根据场景ID获取压测中的报告ID
      *
      * @param sceneId
-     * @return
+     * @return -
      */
     Report getReportBySceneId(Long sceneId);
 
@@ -56,7 +56,7 @@ public interface TReportMapper {
      * 根据场景ID获取（临时）压测中的报告ID
      *
      * @param sceneId
-     * @return
+     * @return -
      */
     Report getTempReportBySceneId(Long sceneId);
 
@@ -67,7 +67,7 @@ public interface TReportMapper {
      *
      * @param id
      * @param startTime
-     * @return
+     * @return -
      */
     int updateStartTime(@Param("id") Long id, @Param("startTime") Date startTime);
 

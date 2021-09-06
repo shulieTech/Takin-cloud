@@ -16,7 +16,7 @@ public interface TReportBusinessActivityDetailMapper {
 
     /**
      * @param reportId
-     * @return
+     * @return -
      */
     List<ReportBusinessActivityDetail> queryReportBusinessActivityDetailByReportId(@Param("reportId") Long reportId);
 

@@ -30,8 +30,7 @@ import org.springframework.web.servlet.config.annotation.*;
  * 项目配置类
  *
  * @author shulie
- * @description
- * @create 2018/9/15 9:56
+ * @date 2018/9/15 9:56
  */
 @EnableWebMvc
 @Configuration
@@ -43,10 +42,8 @@ public class WebConfig implements WebMvcConfigurer, EnvironmentAware {
      * 配置拦截器
      *
      * @param registry 拦截器注册器
-     * @return void
-     * @description
      * @author shulie
-     * @create 2018/9/15 9:55
+     * @date 2018/9/15 9:55
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -81,9 +78,8 @@ public class WebConfig implements WebMvcConfigurer, EnvironmentAware {
     /**
      * 配置路径匹配
      *
-     * @description
      * @author shulie
-     * @create 2018/9/15 9:56
+     * @date 2018/9/15 9:56
      */
     @Override
     public void configurePathMatch(PathMatchConfigurer pathMatchConfigurer) {
@@ -93,11 +89,9 @@ public class WebConfig implements WebMvcConfigurer, EnvironmentAware {
     /**
      * 配置mediaType
      *
-     * @param configurer
-     * @return void
-     * @description
+     * @param configurer 配置项
      * @author shulie
-     * @create 2018/9/15 9:57
+     * @date 2018/9/15 9:57
      */
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
@@ -124,11 +118,9 @@ public class WebConfig implements WebMvcConfigurer, EnvironmentAware {
     /**
      * 配置静态资源拦截器
      *
-     * @param registry
-     * @return void
-     * @description
+     * @param registry 注册器
      * @author shulie
-     * @create 2018/9/15 9:57
+     * @date 2018/9/15 9:57
      */
     //此方法用来专门注册一个Handler，来处理静态资源的，例如：图片，js，css等
     //当请求http://{domain}/resource/1.png时，会把/WEB-INF/resources/1.png返回
@@ -145,11 +137,9 @@ public class WebConfig implements WebMvcConfigurer, EnvironmentAware {
     /**
      * 配置视图转发
      *
-     * @param registry
-     * @return void
-     * @description
+     * @param registry 注册器
      * @author shulie
-     * @create 2018/9/15 9:58
+     * @date 2018/9/15 9:58
      */
     //这是访问${domain}/login时，会直接返回index页面
     @Override
@@ -160,11 +150,9 @@ public class WebConfig implements WebMvcConfigurer, EnvironmentAware {
     /**
      * 配置视图解析器
      *
-     * @param viewResolverRegistry
-     * @return void
-     * @description
+     * @param viewResolverRegistry -
      * @author shulie
-     * @create 2018/9/15 9:59
+     * @date 2018/9/15 9:59
      */
     @Override
     public void configureViewResolvers(ViewResolverRegistry viewResolverRegistry) {
@@ -174,11 +162,9 @@ public class WebConfig implements WebMvcConfigurer, EnvironmentAware {
     /**
      * 配置参数解析器
      *
-     * @param list
-     * @return void
-     * @description
+     * @param list -
      * @author shulie
-     * @create 2018/9/15 9:59
+     * @date 2018/9/15 9:59
      */
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> list) {
@@ -188,11 +174,9 @@ public class WebConfig implements WebMvcConfigurer, EnvironmentAware {
     /**
      * 配置返回值处理器
      *
-     * @param list
-     * @return void
-     * @description
+     * @param list -
      * @author shulie
-     * @create 2018/9/15 9:59
+     * @date 2018/9/15 9:59
      */
     @Override
     public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> list) {
@@ -202,11 +186,9 @@ public class WebConfig implements WebMvcConfigurer, EnvironmentAware {
     /**
      * 配置httpMessage转发器
      *
-     * @param list
-     * @return void
-     * @description
+     * @param list -
      * @author shulie
-     * @create 2018/9/15 10:00
+     * @date 2018/9/15 10:00
      */
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> list) {
@@ -214,7 +196,7 @@ public class WebConfig implements WebMvcConfigurer, EnvironmentAware {
     }
 
     @Bean
-    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter(){
+    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
         // 通过该方法对mapper对象进行设置，所有序列化的对象都将按改规则进行系列化
         // Include.Include.ALWAYS 默认
         // Include.NON_DEFAULT 属性为默认值不序列化

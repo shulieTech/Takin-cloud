@@ -6,8 +6,8 @@ import java.math.RoundingMode;
 import lombok.Data;
 
 /**
- * @Author 莫问
- * @Date 2020-04-21
+ * @author 莫问
+ * @date 2020-04-21
  */
 @Data
 public class StatReportDTO {
@@ -71,7 +71,7 @@ public class StatReportDTO {
      * 获取SA
      * sa总数/总请求*100
      *
-     * @return
+     * @return -
      */
     public BigDecimal getSa() {
         if (saCount == null) {
@@ -87,7 +87,7 @@ public class StatReportDTO {
      * 成功率
      * (总次数-失败次数)/总次数*100
      *
-     * @return
+     * @return -
      */
     public BigDecimal getSuccessRate() {
         if (getTotalRequest() == null) {

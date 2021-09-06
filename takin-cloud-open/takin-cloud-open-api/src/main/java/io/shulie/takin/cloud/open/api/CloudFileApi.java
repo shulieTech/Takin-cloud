@@ -18,7 +18,7 @@ public interface CloudFileApi {
     /**
      * 获取文件内容
      * @param fileContentParamReq
-     * @return
+     * @return -
      */
     ResponseResult<Map<String, Object>> getFileContent(FileContentParamReq fileContentParamReq);
 
@@ -26,7 +26,7 @@ public interface CloudFileApi {
      * 删除文件
      *
      * @param fileDeleteParamReq
-     * @return
+     * @return -
      */
     ResponseResult<Boolean> deleteFile(FileDeleteParamReq fileDeleteParamReq);
 
@@ -34,7 +34,7 @@ public interface CloudFileApi {
      * 复制文件到指定目录
      *
      * @param fileCopyParamReq
-     * @return
+     * @return -
      */
     ResponseResult<Boolean> copyFile(FileCopyParamReq fileCopyParamReq);
 
@@ -42,14 +42,14 @@ public interface CloudFileApi {
      * 将指定文件打包到指定目录
      *
      * @param fileZipParamReq
-     * @return
+     * @return -
      */
     ResponseResult<Boolean> zipFile(FileZipParamReq fileZipParamReq);
 
     /**
      * 将字符串转为指定文件
      * @param fileCreateByStringParamReq
-     * @return
+     * @return -
      */
     ResponseResult<Boolean>  createFileByPathAndString(FileCreateByStringParamReq fileCreateByStringParamReq);
 }

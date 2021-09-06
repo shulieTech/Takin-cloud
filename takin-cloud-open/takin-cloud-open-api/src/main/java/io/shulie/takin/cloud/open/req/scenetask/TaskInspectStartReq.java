@@ -12,13 +12,14 @@ import io.shulie.takin.cloud.open.req.scenemanage.SceneScriptRefOpen;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @Author: fanxx
- * @Date: 2021/4/8 6:02 下午
- * @Description:
+ * @author fanxx
+ * @date 2021/4/8 6:02 下午
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class TaskInspectStartReq extends CloudUserCommonRequestExt implements Serializable {
     private static final long serialVersionUID = -9162208161836587615L;
 

@@ -17,7 +17,6 @@ package io.shulie.plugin.enginecall.contents;
 
 /**
  * @author 无涯
- * @Package io.shulie.tro.cloud.common.constants
  * @date 2021/5/10 5:50 下午
  */
 public interface EnginePackVersionConstants {

@@ -4,7 +4,6 @@ import lombok.Data;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.cloud.data.param.report
  * @date 2020/12/17 3:34 下午
  */
 @Data

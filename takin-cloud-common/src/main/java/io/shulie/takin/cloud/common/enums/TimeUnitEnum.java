@@ -1,10 +1,8 @@
 package io.shulie.takin.cloud.common.enums;
 
 /**
- * @ClassName TimeUnitEnum
- * @Description
- * @Author qianshui
- * @Date 2020/5/11 下午7:58
+ * @author qianshui
+ * @date 2020/5/11 下午7:58
  */
 public enum TimeUnitEnum {
 

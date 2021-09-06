@@ -9,9 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Author: mubai
- * @Date: 2020-10-29 15:20
- * @Description:
+ * @author mubai
+ * @date 2020-10-29 15:20
  */
 public class SceneBusinessActivityRefInputConvert {
 
@@ -26,9 +25,7 @@ public class SceneBusinessActivityRefInputConvert {
         if (CollectionUtils.isEmpty(list)) {
             return outs;
         }
-        list.stream().forEach(open -> {
-            outs.add(of(open));
-        });
+        list.forEach(open -> outs.add(of(open)));
         return outs;
     }
 }

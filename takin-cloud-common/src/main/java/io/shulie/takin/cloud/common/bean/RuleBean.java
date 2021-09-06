@@ -7,10 +7,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @ClassName RuleBean
- * @Description
- * @Author qianshui
- * @Date 2020/4/18 上午10:58
+ * @author qianshui
+ * @date 2020/4/18 上午10:58
  */
 @Data
 public class RuleBean implements Serializable {
@@ -29,7 +27,9 @@ public class RuleBean implements Serializable {
     @ApiModelProperty(value = "连续触发次数")
     private Integer times;
 
-    public void RuleBean(Integer indexInfo, Integer condition, BigDecimal during, Integer times) {
+    public RuleBean() {}
+
+    public RuleBean(Integer indexInfo, Integer condition, BigDecimal during, Integer times) {
         this.setIndexInfo(indexInfo);
         this.setCondition(condition);
         this.setDuring(during);

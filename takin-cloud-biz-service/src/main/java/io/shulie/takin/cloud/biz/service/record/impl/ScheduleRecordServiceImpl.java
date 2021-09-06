@@ -19,10 +19,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 /**
- * @ClassName ScheduleRecordServiceImpl
- * @Description
- * @Author qianshui
- * @Date 2020/5/9 下午2:16
+ * @author qianshui
+ * @date 2020/5/9 下午2:16
  */
 @Slf4j
 @Service
@@ -33,7 +31,7 @@ public class ScheduleRecordServiceImpl implements ScheduleRecordService {
 
     @Override
     public PageInfo<ScheduleRecordDTO> queryPageList(ScheduleRecordQueryVO queryVO) {
-        Page page = PageHelper.startPage(queryVO.getCurrentPage() + 1, queryVO.getPageSize());
+        Page<ScheduleRecord> page = PageHelper.startPage(queryVO.getCurrentPage() + 1, queryVO.getPageSize());
 
         List<ScheduleRecord> queryList = TScheduleRecordMapper.getPageList(queryVO);
         if (CollectionUtils.isEmpty(queryList)) {
@@ -52,7 +50,7 @@ public class ScheduleRecordServiceImpl implements ScheduleRecordService {
             resultList.add(dto);
         });
 
-        PageInfo pageInfo = new PageInfo<>(resultList);
+        PageInfo<ScheduleRecordDTO> pageInfo = new PageInfo<>(resultList);
         pageInfo.setTotal(page.getTotal());
         return pageInfo;
     }

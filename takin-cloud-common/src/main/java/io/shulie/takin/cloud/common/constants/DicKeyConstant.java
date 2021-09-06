@@ -1,10 +1,8 @@
 package io.shulie.takin.cloud.common.constants;
 
 /**
- * @ClassName DicKeyConstant
- * @Description
- * @Author qianshui
- * @Date 2020/5/19 上午10:53
+ * @author qianshui
+ * @date 2020/5/19 上午10:53
  */
 public class DicKeyConstant {
 
