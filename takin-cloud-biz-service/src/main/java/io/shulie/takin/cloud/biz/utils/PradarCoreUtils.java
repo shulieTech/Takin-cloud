@@ -1,8 +1,6 @@
 package io.shulie.takin.cloud.biz.utils;
 
-import com.pamirs.pradar.AppNameUtils;
 
-import com.pamirs.pradar.InvokeContext;
 import org.apache.commons.lang.StringUtils;
 
 import java.net.InetAddress;
@@ -27,9 +25,6 @@ public class PradarCoreUtils {
     public PradarCoreUtils() {
     }
 
-    private static String getAppName() {
-        return AppNameUtils.appName();
-    }
 
     public static String makeLogSafe(String value) {
         value = StringUtils.replace(value, "\r\n", "\t");
@@ -187,7 +182,7 @@ public class PradarCoreUtils {
     static final Charset getDefaultOutputCharset() {
         String charsetName = getSystemProperty("pradar.charset");
         Charset cs;
-        if (com.pamirs.pradar.PradarCoreUtils.isNotBlank(charsetName)) {
+        if (PradarCoreUtils.isNotBlank(charsetName)) {
             charsetName = charsetName.trim();
 
             try {
@@ -300,7 +295,4 @@ public class PradarCoreUtils {
         return LOCAL_HOST_NAME;
     }
 
-    public static boolean isClusterTestEnabled(InvokeContext ctx) {
-        return ctx != null && "1".equals(ctx.getUserData("t"));
-    }
 }
