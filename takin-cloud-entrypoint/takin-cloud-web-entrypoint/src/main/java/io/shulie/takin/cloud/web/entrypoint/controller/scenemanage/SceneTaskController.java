@@ -24,8 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * @Author 莫问
- * @Date 2020-04-27
+ * @author 莫问
+ * @date 2020-04-27
  */
 @RestController
 @RequestMapping(APIUrls.TRO_API_URL + "scene/task/")
@@ -43,7 +43,7 @@ public class SceneTaskController {
 
     @PostMapping("/start")
     @ApiOperation(value = "开始场景测试")
-    public ResponseResult start(@RequestBody SceneTaskStartRequest request) {
+    public ResponseResult<?> start(@RequestBody SceneTaskStartRequest request) {
 
         SceneTaskStartInput input = new SceneTaskStartInput();
         BeanUtils.copyProperties(request, input);
@@ -52,7 +52,7 @@ public class SceneTaskController {
 
     @PostMapping("/stop")
     @ApiOperation(value = "结束场景测试")
-    public ResponseResult stop(@RequestBody SceneManageIdRequest request) {
+    public ResponseResult<?> stop(@RequestBody SceneManageIdRequest request) {
         sceneTaskService.stop(request.getId());
         return ResponseResult.success();
     }
@@ -75,7 +75,7 @@ public class SceneTaskController {
 
     @GetMapping("/initCallback")
     @ApiOperation(value = "调度初始化回调函数")
-    public ResponseResult initCallback(ScheduleInitParamExt param) {
+    public ResponseResult<?> initCallback(ScheduleInitParamExt param) {
         // 初始化调度
         scheduleService.initScheduleCallback(param);
         return ResponseResult.success();
@@ -83,7 +83,7 @@ public class SceneTaskController {
 
     @GetMapping("/script/fileSplit")
     @ApiOperation(value = "拆分大文件")
-    public ResponseResult splitBigFile(ScriptFileSplitVO fileSplitVO) {
+    public ResponseResult<?> splitBigFile(ScriptFileSplitVO fileSplitVO) {
         fileSliceService.asyncSliceFile(new FileSliceRequest() {{
             setSceneId(fileSplitVO.getSceneId());
             setFileName(fileSplitVO.getFileName());
@@ -96,10 +96,11 @@ public class SceneTaskController {
         }});
         return ResponseResult.success();
     }
+
     @PostMapping("/script/preSplit")
     @ApiModelProperty(value = "文件预拆分结果")
-    public ResponseResult preSplitFile(@RequestBody FileSplitResultVO resultVO){
-        fileSliceService.preSlice(new SceneBigFileSliceParam(){{
+    public ResponseResult<?> preSplitFile(@RequestBody FileSplitResultVO resultVO) {
+        fileSliceService.preSlice(new SceneBigFileSliceParam() {{
             setFileName(resultVO.getFileName());
             setSliceCount(resultVO.getSliceCount());
             setSceneId(resultVO.getSceneId());

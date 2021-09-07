@@ -6,36 +6,36 @@ import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.ext.content.enginecall.ScheduleStopRequestExt;
 
 /**
- * @Author 莫问
- * @Date 2020-05-12
+ * @author 莫问
+ * @date 2020-05-12
  */
 public interface ScheduleService {
 
     /**
      * 启动调度
      *
-     * @param request
+     * @param request 请求参数
      */
     void startSchedule(ScheduleStartRequestExt request);
 
     /**
      * 停止调度
      *
-     * @param request
+     * @param request 请求参数
      */
     void stopSchedule(ScheduleStopRequestExt request);
 
     /**
      * 调度运行
      *
-     * @param request
+     * @param request 请求参数
      */
     void runSchedule(ScheduleRunRequest request);
 
     /**
      * 初始化回调
      *
-     * @param param
+     * @param param 请求参数
      */
     void initScheduleCallback(ScheduleInitParamExt param);
 }

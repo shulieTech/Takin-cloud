@@ -20,7 +20,7 @@ public interface EnginePluginMapper extends BaseMapper<EnginePluginEntity> {
      *
      * @param pluginTypes 插件类型
      *
-     * @return
+     * @return -
      */
     List<EnginePluginSimpleInfoResult> selectAvailablePluginsByType(List<String> pluginTypes);
 
@@ -28,7 +28,7 @@ public interface EnginePluginMapper extends BaseMapper<EnginePluginEntity> {
      * 根据插件id获取插件支持的版本信息
      *
      * @param pluginId
-     * @return
+     * @return -
      */
     List<Map> selectEnginePluginSupportedVersions(Long pluginId);
 

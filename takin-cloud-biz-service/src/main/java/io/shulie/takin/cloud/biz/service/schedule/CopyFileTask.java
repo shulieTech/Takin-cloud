@@ -6,9 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 
 /**
- * @Author: mubai
- * @Date: 2020-10-29 17:15
- * @Description:
+ * @author mubai
+ * @date 2020-10-29 17:15
  */
 @Slf4j
 public class CopyFileTask implements Runnable {
@@ -20,7 +19,6 @@ public class CopyFileTask implements Runnable {
         this.dest = dest;
     }
 
-
     @Override
     public void run() {
 
@@ -29,7 +27,7 @@ public class CopyFileTask implements Runnable {
             Runtime.getRuntime().exec(cmd);
         } catch (IOException e) {
             log.error("异常代码【{}】,异常内容：文件复制失败 --> 异常信息: {}",
-                    TakinCloudExceptionEnum.FILE_COPY_ERROR,e);
+                TakinCloudExceptionEnum.FILE_COPY_ERROR, e);
         }
     }
 }

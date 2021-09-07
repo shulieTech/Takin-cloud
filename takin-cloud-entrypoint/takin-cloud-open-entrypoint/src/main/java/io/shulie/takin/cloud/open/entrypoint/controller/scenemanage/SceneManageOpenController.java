@@ -69,17 +69,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
 /**
- * @ClassName SceneManageController
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午2:31
+ * @author qianshui
+ * @date 2020/4/17 下午2:31
  */
+@Slf4j
 @RestController
 @RequestMapping(APIUrls.TRO_OPEN_API_URL + "scenemanage")
 @Api(tags = "压测场景管理")
-@Slf4j
 public class SceneManageOpenController {
 
     @Autowired
@@ -93,7 +90,6 @@ public class SceneManageOpenController {
 
     @Autowired
     private EnginePluginUtils pluginUtils;
-
 
     @ApiOperation(value = "|_ 更改脚本对应的压测场景的文件")
     @PutMapping("/updateFile")
@@ -122,7 +118,7 @@ public class SceneManageOpenController {
         input.setStopCondition(SceneSlaRefInputConverter.ofList(wrapperReq.getStopCondition()));
         input.setWarningCondition(SceneSlaRefInputConverter.ofList(wrapperReq.getWarningCondition()));
         input.setBusinessActivityConfig(
-                SceneBusinessActivityRefInputConvert.ofLists(wrapperReq.getBusinessActivityConfig()));
+            SceneBusinessActivityRefInputConvert.ofLists(wrapperReq.getBusinessActivityConfig()));
         input.setUploadFile(SceneScriptRefInputConvert.ofList(wrapperReq.getUploadFile()));
 
     }
@@ -171,26 +167,24 @@ public class SceneManageOpenController {
         HashMap<String, Object> map = JSON.parseObject(features, HashMap.class);
         Integer configType = -1;
         if (map.containsKey(SceneManageConstant.FEATURES_CONFIG_TYPE)) {
-            configType = (Integer) map.get(SceneManageConstant.FEATURES_CONFIG_TYPE);
+            configType = (Integer)map.get(SceneManageConstant.FEATURES_CONFIG_TYPE);
             resp.setConfigType(configType);
         }
         if (map.containsKey(SceneManageConstant.FEATURES_SCRIPT_ID)) {
-            Long scriptId = (Long) map.get(SceneManageConstant.FEATURES_SCRIPT_ID);
+            Long scriptId = (Long)map.get(SceneManageConstant.FEATURES_SCRIPT_ID);
             // todo 逻辑查看
-            if (configType != -1 && configType == 1) {
+            if (configType == 1) {
                 //业务活动
                 List<SceneManageWrapperResp.SceneBusinessActivityRefResp> businessActivityConfig = resp.getBusinessActivityConfig();
-                businessActivityConfig.stream().forEach(data -> {
-                    data.setScriptId(scriptId);
-                });
+                businessActivityConfig.forEach(data -> data.setScriptId(scriptId));
             } else {
                 resp.setScriptId(scriptId);
             }
         }
         Object businessFlowId = map.get(SceneManageConstant.FEATURES_BUSINESS_FLOW_ID);
-        resp.setBusinessFlowId(businessFlowId == null ? null : (String) businessFlowId);
+        resp.setBusinessFlowId(businessFlowId == null ? null : (String)businessFlowId);
         if (map.containsKey(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL)) {
-            Integer schedualInterval = (Integer) map.get(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL);
+            Integer schedualInterval = (Integer)map.get(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL);
             resp.setScheduleInterval(schedualInterval);
         }
     }
@@ -211,17 +205,17 @@ public class SceneManageOpenController {
     @GetMapping("/list")
     @ApiOperation(value = "压测场景列表")
     public ResponseResult<List<SceneManageListResp>> getList(
-            @ApiParam(name = "current", value = "页码", required = true) Integer current,
-            @ApiParam(name = "pageSize", value = "页大小", required = true) Integer pageSize,
-            @ApiParam(name = "sceneId", value = "压测场景ID") Long sceneId,
-            @ApiParam(name = "sceneName", value = "压测场景名称") String sceneName,
-            @ApiParam(name = "status", value = "压测状态") Integer status,
-            @ApiParam(name = "sceneIds", value = "场景ids，逗号分割") String sceneIds,
-            @ApiParam(name = "lastPtStartTime", value = "压测结束时间") String lastPtStartTime,
-            @ApiParam(name = "lastPtEndTime", value = "压测结束时间") String lastPtEndTime
+        @ApiParam(name = "current", value = "页码", required = true) Integer current,
+        @ApiParam(name = "pageSize", value = "页大小", required = true) Integer pageSize,
+        @ApiParam(name = "sceneId", value = "压测场景ID") Long sceneId,
+        @ApiParam(name = "sceneName", value = "压测场景名称") String sceneName,
+        @ApiParam(name = "status", value = "压测状态") Integer status,
+        @ApiParam(name = "sceneIds", value = "场景ids，逗号分割") String sceneIds,
+        @ApiParam(name = "lastPtStartTime", value = "压测结束时间") String lastPtStartTime,
+        @ApiParam(name = "lastPtEndTime", value = "压测结束时间") String lastPtEndTime
     ) {
 
-        /**
+        /*
          * 1、封装参数
          * 2、调用查询服务
          * 3、返回指定格式
@@ -245,14 +239,13 @@ public class SceneManageOpenController {
         PageInfo<SceneManageListOutput> pageInfo = sceneManageService.queryPageList(queryVO);
         // 转换
         List<SceneManageListResp> list = pageInfo.getList().stream()
-                .map(output -> {
-                    SceneManageListResp resp = new SceneManageListResp();
-                    BeanUtils.copyProperties(output, resp);
-                    return resp;
-                }).collect(Collectors.toList());
+            .map(output -> {
+                SceneManageListResp resp = new SceneManageListResp();
+                BeanUtils.copyProperties(output, resp);
+                return resp;
+            }).collect(Collectors.toList());
         return ResponseResult.success(list, pageInfo.getTotal());
     }
-
 
     @GetMapping("/listSceneManage")
     @ApiOperation(value = "不分页查询所有场景带脚本信息")
@@ -261,11 +254,11 @@ public class SceneManageOpenController {
         List<SceneManageListOutput> sceneManageListOutputs = sceneManageService.querySceneManageList();
         // 转换
         List<SceneManageListResp> list = sceneManageListOutputs.stream()
-                .map(output -> {
-                    SceneManageListResp resp = new SceneManageListResp();
-                    BeanUtils.copyProperties(output, resp);
-                    return resp;
-                }).collect(Collectors.toList());
+            .map(output -> {
+                SceneManageListResp resp = new SceneManageListResp();
+                BeanUtils.copyProperties(output, resp);
+                return resp;
+            }).collect(Collectors.toList());
         return ResponseResult.success(list);
     }
 
@@ -279,13 +272,13 @@ public class SceneManageOpenController {
     }
 
     /**
-     * 并发数量
+     * 获取机器数量范围
      *
-     * @param concurrenceNum
-     * @return
+     * @param concurrenceNum 并发数量
+     * @return -
      */
     @GetMapping("/ipnum")
-    @ApiOperation(value = "获取机器数量范围")
+    @ApiOperation(value = "")
     public ResponseResult<StrategyResp> getIpNum(Integer concurrenceNum, Integer tpsNum) {
         StrategyOutputExt output = strategyConfigService.getStrategy(concurrenceNum, tpsNum);
         StrategyResp resp = new StrategyResp();
@@ -293,21 +286,19 @@ public class SceneManageOpenController {
         return ResponseResult.success(resp);
     }
 
-
     @GetMapping("/checkAndUpdate/script")
     @ApiOperation(value = "解析脚本")
     public ResponseResult<ScriptCheckResp> checkAndUpdate(ScriptCheckAndUpdateReq req) {
         ScriptVerityRespExt scriptVerityRespExt = sceneManageService.checkAndUpdate(req.getRequest(), req.getUploadPath(),
-                req.isAbsolutePath(), req.isUpdate());
+            req.isAbsolutePath(), req.isUpdate());
         return ResponseResult.success(SceneTaskOpenConverter.INSTANCE.ofScriptVerityRespExt(scriptVerityRespExt));
     }
-
 
     private void wrapperSceneManage(SceneManageWrapperOutput sceneManage) {
         if (sceneManage == null || CollectionUtils.isEmpty(sceneManage.getBusinessActivityConfig())) {
             return;
         }
-        sceneManage.getBusinessActivityConfig().stream().forEach(data -> {
+        sceneManage.getBusinessActivityConfig().forEach(data -> {
             if (StringUtils.isBlank(data.getBindRef())) {
                 data.setBindRef("-1");
             }
@@ -328,7 +319,7 @@ public class SceneManageOpenController {
         detailDTO.setUpdateTime(wrapperResp.getUpdateTime());
         detailDTO.setLastPtTime(wrapperResp.getLastPtTime());
         detailDTO.setStatus(
-                dictionaryCache.getObjectByParam(DicKeyConstant.SCENE_MANAGE_STATUS, wrapperResp.getStatus()));
+            dictionaryCache.getObjectByParam(DicKeyConstant.SCENE_MANAGE_STATUS, wrapperResp.getStatus()));
         //业务活动
         if (CollectionUtils.isNotEmpty(wrapperResp.getBusinessActivityConfig())) {
             List<BusinessActivityDetailResp> activity = Lists.newArrayList();
@@ -348,7 +339,7 @@ public class SceneManageOpenController {
         detailDTO.setConcurrenceNum(wrapperResp.getConcurrenceNum());
         detailDTO.setIpNum(wrapperResp.getIpNum());
         detailDTO.setPressureMode(
-                dictionaryCache.getObjectByParam(DicKeyConstant.PT_MODEL, wrapperResp.getPressureMode()));
+            dictionaryCache.getObjectByParam(DicKeyConstant.PT_MODEL, wrapperResp.getPressureMode()));
         detailDTO.setPressureTestTime(wrapperResp.getPressureTestTime());
         detailDTO.setIncreasingTime(wrapperResp.getIncreasingTime());
         detailDTO.setStep(wrapperResp.getStep());
@@ -375,7 +366,7 @@ public class SceneManageOpenController {
                 SceneDetailResp.SlaDetailResp stop = new SceneDetailResp.SlaDetailResp();
                 stop.setRuleName(data.getRuleName());
                 stop.setBusinessActivity(
-                        convertIdsToNames(data.getBusinessActivity(), detailDTO.getBusinessActivityConfig()));
+                    convertIdsToNames(data.getBusinessActivity(), detailDTO.getBusinessActivityConfig()));
                 stop.setRule(buildRule(data));
                 stop.setStatus(dictionaryCache.getObjectByParam(DicKeyConstant.LIVE_STATUS, data.getStatus()));
                 sla.add(stop);
@@ -389,7 +380,7 @@ public class SceneManageOpenController {
                 SceneDetailResp.SlaDetailResp stop = new SceneDetailResp.SlaDetailResp();
                 stop.setRuleName(data.getRuleName());
                 stop.setBusinessActivity(
-                        convertIdsToNames(data.getBusinessActivity(), detailDTO.getBusinessActivityConfig()));
+                    convertIdsToNames(data.getBusinessActivity(), detailDTO.getBusinessActivityConfig()));
                 stop.setRule(buildRule(data));
                 stop.setStatus(dictionaryCache.getObjectByParam(DicKeyConstant.LIVE_STATUS, data.getStatus()));
                 sla.add(stop);
@@ -420,7 +411,7 @@ public class SceneManageOpenController {
             return null;
         }
         Map<String, String> detailMap = ListHelper.transferToMap(detailList,
-                data -> String.valueOf(data.getBusinessActivityId()), BusinessActivityDetailResp::getBusinessActivityName);
+            data -> String.valueOf(data.getBusinessActivityId()), BusinessActivityDetailResp::getBusinessActivityName);
 
         StringBuffer sb = new StringBuffer();
         for (String id : ids) {

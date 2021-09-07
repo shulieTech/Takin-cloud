@@ -3,15 +3,16 @@ package io.shulie.takin.cloud.data.result.report;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.cloud.data.result.report
  * @date 2020/12/17 3:31 下午
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ReportResult extends CloudUserCommonRequestExt {
     private Long id;
 
@@ -85,9 +86,6 @@ public class ReportResult extends CloudUserCommonRequestExt {
      */
     private BigDecimal sa;
 
-
-
-
     /**
      * 施压类型,0:并发,1:tps,2:自定义;不填默认为0
      */
@@ -102,7 +100,6 @@ public class ReportResult extends CloudUserCommonRequestExt {
      * 目标TPS
      */
     private Integer tps;
-
 
     /**
      * 扩展字段，JSON数据格式

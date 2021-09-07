@@ -11,10 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * @ClassName SlaListener
- * @Description
- * @Author qianshui
- * @Date 2020/4/20 下午8:19
+ * @author qianshui
+ * @date 2020/4/20 下午8:19
  */
 @Component
 @Slf4j
@@ -26,7 +24,7 @@ public class SlaListener {
     /**
      * 任务启动，缓存值
      *
-     * @param event
+     * @param event -
      */
     @IntrestFor(event = "started")
     public void doStartSLAEvent(Event event) {
@@ -39,7 +37,7 @@ public class SlaListener {
     /**
      * 任务停止，清除缓存
      *
-     * @param event
+     * @param event -
      */
     @IntrestFor(event = "finished")
     public void doStopSLAEvent(Event event) {

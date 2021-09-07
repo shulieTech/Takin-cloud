@@ -8,10 +8,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @ClassName StrategyConfigDTO
- * @Description
- * @Author qianshui
- * @Date 2020/5/9 下午2:06
+ * @author qianshui
+ * @date 2020/5/9 下午2:06
  */
 @Data
 @ApiModel(description = "分配策略列表")

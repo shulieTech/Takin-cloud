@@ -5,10 +5,10 @@ import java.io.Serializable;
 import lombok.Data;
 
 /**
- * @ClassName ApplicationDTO
- * @Description 应用对象
- * @Author qianshui
- * @Date 2020/7/22 下午3:14
+ * 应用对象
+ *
+ * @author qianshui
+ * @date 2020/7/22 下午3:14
  */
 @Data
 public class Metrices implements Serializable {

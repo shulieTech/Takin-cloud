@@ -1,8 +1,8 @@
 package io.shulie.takin.cloud.common.constants;
 
 /**
- * @Author 莫问
- * @Date 2020-05-14
+ * @author 莫问
+ * @date 2020-05-14
  */
 public class ScheduleEventConstant {
 

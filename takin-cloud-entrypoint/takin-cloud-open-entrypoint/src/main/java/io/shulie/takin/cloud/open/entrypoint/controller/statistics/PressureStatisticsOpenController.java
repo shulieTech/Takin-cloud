@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.web.app.controller.statistic
  * @date 2020/11/30 7:07 下午
  */
 @RestController
@@ -37,7 +36,7 @@ public class PressureStatisticsOpenController {
     /**
      * 统计场景分类，返回饼状图数据
 
-     * @return
+     * @return -
      */
     @GetMapping("/getPressurePieTotal")
     @ApiOperation("统计压测场景分类")
@@ -52,7 +51,7 @@ public class PressureStatisticsOpenController {
     /**
      * 统计报告通过/未通过
 
-     * @return
+     * @return -
      */
     @GetMapping("/getReportTotal")
     @ApiOperation("统计报告通过以及未通过")
@@ -67,7 +66,7 @@ public class PressureStatisticsOpenController {
     /**
      * 压测场景次数统计 && 压测脚本次数统计
 
-     * @return
+     * @return -
      */
     @PostMapping("/getPressureListTotal")
     @ApiOperation("统计压测场景次数以及压测脚本次数")

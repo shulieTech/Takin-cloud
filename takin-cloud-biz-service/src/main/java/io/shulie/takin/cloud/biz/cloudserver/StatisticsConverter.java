@@ -9,7 +9,6 @@ import org.mapstruct.factory.Mappers;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.cloud.biz.cloudserver
  * @date 2020/12/1 6:57 下午
  */
 @Mapper
@@ -18,8 +17,9 @@ public interface StatisticsConverter {
 
     /**
      * 转换
-     * @param results
-     * @return
+     *
+     * @param results -
+     * @return -
      */
-    List<PressureListTotalOutput> ofResult (List<PressureListTotalResult> results);
+    List<PressureListTotalOutput> ofResult(List<PressureListTotalResult> results);
 }

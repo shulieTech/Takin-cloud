@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * @author 何仲奇
- * @Package io.shulie.takin.scenemanage.poll.impl
  * @date 2020/9/23 2:59 下午
  */
 @Service
@@ -40,22 +39,22 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
     private ReportService reportService;
 
     @Override
-    public ResponseResult notifyEngineState(EngineNotifyParam notify) {
+    public ResponseResult<?> notifyEngineState(EngineNotifyParam notify) {
         String engineName = ScheduleConstants.getEngineName(notify.getSceneId(), notify.getResultId(), notify.getCustomerId());
         String scheduleName = ScheduleConstants.getScheduleName(notify.getSceneId(), notify.getResultId(),
             notify.getCustomerId());
         EngineStatusEnum engineStatusEnum = EngineStatusEnum.getEngineStatusEnum(notify.getStatus());
-        if (engineStatusEnum == null){
-            log.warn("没有找到引擎回传状态所对应的枚举，回传状态为:{}",notify.getStatus());
+        if (engineStatusEnum == null) {
+            log.warn("没有找到引擎回传状态所对应的枚举，回传状态为:{}", notify.getStatus());
             return ResponseResult.success();
         }
         switch (engineStatusEnum) {
             case START_FAILED:
                 log.info("本次压测{}-{}-{},压力引擎 启动失败：{},返回参数：{}", notify.getSceneId(), notify.getResultId(),
-                    notify.getCustomerId(), notify.getMsg(),JsonHelper.bean2Json(notify));
+                    notify.getCustomerId(), notify.getMsg(), JsonHelper.bean2Json(notify));
                 // 记录压测引擎 压力引擎 相关错误  这里给出具体哪个 压力节点 调用压力引擎 失败 todo 之后可以指定到具体的压力节点
                 String tempFailSign = ScheduleConstants.TEMP_FAIL_SIGN + engineName;
-                Long startFailCount = redisClientUtils.increment(tempFailSign,1);
+                Long startFailCount = redisClientUtils.increment(tempFailSign, 1);
                 // 记录失败原因，成功则不记录报告中 报告直接完成
                 reportService.updateReportFeatures(notify.getResultId(), ReportConstans.FINISH_STATUS, ReportConstans.PRESSURE_MSG, notify.getMsg());
 
@@ -69,7 +68,7 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
                         notify.getCustomerId()).success(false).errorMsg("").build());
                 }
                 //修改缓存压测启动状态为失败
-                setTryRunTaskInfo(notify.getSceneId(),notify.getResultId(),notify.getCustomerId(),notify.getMsg());
+                setTryRunTaskInfo(notify.getSceneId(), notify.getResultId(), notify.getCustomerId(), notify.getMsg());
                 break;
             case INTERRUPT:
                 //获取中断状态
@@ -78,9 +77,9 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
             case INTERRUPT_SUCCESSED:
                 // 中断成功
                 log.info("本次压测{}-{}-{} 中断成功", notify.getSceneId(), notify.getResultId(), notify.getCustomerId());
-                Long interruptSuccessCount = redisClientUtils.increment(ScheduleConstants.INTERRUPT_POD_NUM + engineName,1);
-                if(interruptFinish(engineName,interruptSuccessCount)) {
-                    redisClientUtils.del(ScheduleConstants.INTERRUPT_POD_NUM + scheduleName,ScheduleConstants.INTERRUPT_POD + scheduleName);
+                Long interruptSuccessCount = redisClientUtils.increment(ScheduleConstants.INTERRUPT_POD_NUM + engineName, 1);
+                if (interruptFinish(engineName, interruptSuccessCount)) {
+                    redisClientUtils.del(ScheduleConstants.INTERRUPT_POD_NUM + scheduleName, ScheduleConstants.INTERRUPT_POD + scheduleName);
                 }
                 break;
             case INTERRUPT_FAILED:
@@ -92,23 +91,23 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
         return ResponseResult.success();
     }
 
-    private boolean interruptFinish(String engineName,Long interruptSuccessCount) {
+    private boolean interruptFinish(String engineName, Long interruptSuccessCount) {
+        boolean redisNotHasKey = !redisClientUtils.hasKey(engineName);
+        Long redisValue = Long.valueOf(redisClientUtils.getString(engineName));
         // 解决pod 没有发送事件问题
-        if(!redisClientUtils.hasKey(engineName) || interruptSuccessCount.equals(Long.valueOf(redisClientUtils.getString(engineName)))) {
-            return true;
-        }
-        return false;
+        return redisNotHasKey
+            || interruptSuccessCount.equals(redisValue);
     }
 
-    private void setTryRunTaskInfo(Long sceneId,Long reportId,Long customerId,String errorMsg){
+    private void setTryRunTaskInfo(Long sceneId, Long reportId, Long customerId, String errorMsg) {
         log.info("压测启动失败--sceneId:【{}】,reportId:【{}】,customerId:【{}】,errorMsg:【{}】"
-            ,sceneId,reportId,customerId,errorMsg);
+            , sceneId, reportId, customerId, errorMsg);
         String tryRunTaskKey = String
             .format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneId, reportId);
         redisClientUtils.hmset(tryRunTaskKey,
             SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY, SceneRunTaskStatusEnum.FAILED.getText());
         redisClientUtils.hmset(tryRunTaskKey,
-            SceneTaskRedisConstants.SCENE_RUN_TASK_ERROR,errorMsg);
+            SceneTaskRedisConstants.SCENE_RUN_TASK_ERROR, errorMsg);
         //试跑失败，停掉pod
         sceneTaskService.stop(sceneId);
     }

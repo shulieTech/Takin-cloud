@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.cloud.data.dao.scenemanage
  * @date 2020/10/26 4:40 下午
  */
 @Component

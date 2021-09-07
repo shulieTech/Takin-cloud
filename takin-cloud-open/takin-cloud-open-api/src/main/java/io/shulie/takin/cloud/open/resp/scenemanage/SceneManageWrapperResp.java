@@ -13,14 +13,14 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @ClassName SceneManageWrapperDTO
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午5:55
+ * @author qianshui
+ * @date 2020/4/17 下午5:55
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "场景详情出参")
 public class SceneManageWrapperResp extends CloudUserCommonRequestExt implements Serializable {
 
@@ -96,19 +96,20 @@ public class SceneManageWrapperResp extends CloudUserCommonRequestExt implements
 
     private String BusinessFlowId;
 
-    @ApiModelProperty(name = "executeTime",value = "定时执行时间")
-    private String executeTime ;
+    @ApiModelProperty(name = "executeTime", value = "定时执行时间")
+    private String executeTime;
 
-    @ApiModelProperty(name = "tag",value = "场景标签")
-    private List<String> tag ;
+    @ApiModelProperty(name = "tag", value = "场景标签")
+    private List<String> tag;
 
-    @ApiModelProperty(name = "isScheduler",value = "是否为定时启动场景")
-    private Boolean isScheduler ;
+    @ApiModelProperty(name = "isScheduler", value = "是否为定时启动场景")
+    private Boolean isScheduler;
 
     @ApiModelProperty(name = "scheduleInterval", value = "漏数时间间隔")
     private Integer scheduleInterval;
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class SceneBusinessActivityRefResp extends SceneBusinessActivityRefBean {
 
         private static final long serialVersionUID = -6384484202725660595L;

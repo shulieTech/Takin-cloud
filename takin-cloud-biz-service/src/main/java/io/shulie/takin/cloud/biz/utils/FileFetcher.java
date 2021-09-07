@@ -200,7 +200,7 @@ public class FileFetcher {
      * 定位换行符的位置，返回偏移量
      *
      * @param buffer
-     * @return
+     * @return -
      */
     private int enterOffset(ByteBuffer buffer) {
         buffer.flip();

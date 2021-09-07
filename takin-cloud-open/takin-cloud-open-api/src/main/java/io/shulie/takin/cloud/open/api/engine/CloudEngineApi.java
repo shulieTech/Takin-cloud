@@ -21,7 +21,7 @@ public interface CloudEngineApi {
      * 根据插件类型获取插件列表
      *
      * @param request
-     * @return
+     * @return -
      */
     ResponseResult<Map<String, List<EnginePluginSimpleInfoResp>>> listEnginePlugins(EnginePluginFetchWrapperReq request);
 
@@ -29,7 +29,7 @@ public interface CloudEngineApi {
      * 根据插件ID获取插件详情
      *
      * @param request
-     * @return
+     * @return -
      */
     ResponseResult<EnginePluginDetailResp> getEnginePluginDetails(EnginePluginDetailsWrapperReq request);
 }

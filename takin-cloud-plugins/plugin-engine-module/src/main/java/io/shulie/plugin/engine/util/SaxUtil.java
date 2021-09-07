@@ -26,17 +26,22 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
 /**
- * @ClassName SaxUtil
- * @Description 1、获取jmx文件内容
- * * 2、获取http接口数量
- * * 3、循环获取http的name和url
- * * 4、获取该http对应的header信息
- * *      通过字符串截取先获得整个<headerManager></headerManager>
- * *      非启用状态的header不纳入计算范围
- * *      再获取header里面的method(顺丰的请求url会放到这里），和User-Agent信息
- * * 5、替换url
- * @Author qianshui
- * @Date 2020/4/22 上午4:09
+ * <ol>
+ *     <li>获取jmx文件内容</li>
+ *     <li>获取http接口数量</li>
+ *     <li>循环获取http的name和url</li>
+ *     <li>获取该http对应的header信息
+ *     <p>
+ * 通过字符串截取先获得整个<headerManager></headerManager>
+ * 非启用状态的header不纳入计算范围
+ * 再获取header里面的method(顺丰的请求url会放到这里），和User-Agent信息
+ * </p>
+ * </li>
+ *     <li>替换url</li>
+ * </ol>
+ *
+ * @author qianshui
+ * @date 2020/4/22 上午4:09
  */
 @Slf4j
 public class SaxUtil {
@@ -47,24 +52,22 @@ public class SaxUtil {
         try {
             File file = new File(path);
             String content = FileManagerHelper.readFileToString(file, "utf-8");
-            /**
-             * 读取文件内容
-             */
+            // 读取文件内容
             Document document = saxReader.read(file);
-            //去除所有禁用节点和对应的所有子节点
+            // 去除所有禁用节点和对应的所有子节点
             cleanAllDisableElement(document);
             List<ScriptUrlExt> scriptUrls = getScriptUrlFromJmx(scriptParseExt, content, document);
             scriptParseExt.setRequestUrl(scriptUrls);
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：Parse Jmeter Script Error --> 异常信息: {}",
-                    TakinCloudExceptionEnum.XML_PARSE_ERROR,e);
+                TakinCloudExceptionEnum.XML_PARSE_ERROR, e);
         }
         return scriptParseExt;
     }
 
     private static List<ScriptUrlExt> getXmlJdbcContent(Document document, String content, ScriptParseExt scriptParseExt) {
         XmlJdbcJmxParser parser = new XmlJdbcJmxParser();
-        return parser.getEntryContent(document,content,scriptParseExt);
+        return parser.getEntryContent(document, content, scriptParseExt);
     }
 
     private static List<ScriptUrlExt> getXmlKafkaContent(Document document, String content, ScriptParseExt scriptParseExt) {
@@ -90,7 +93,7 @@ public class SaxUtil {
             FileManagerHelper.createFileByPathAndString(path, xmlContent);
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：Parse Jmeter Script Error --> 异常信息: {}",
-                    TakinCloudExceptionEnum.XML_PARSE_ERROR,e);
+                TakinCloudExceptionEnum.XML_PARSE_ERROR, e);
         }
     }
 
@@ -114,9 +117,7 @@ public class SaxUtil {
             scriptUrls.addAll(jdbcContents);
         }
         log.info("jmx parser start ==================");
-        scriptUrls.stream().forEach((scriptUrlVO)->{
-            log.info(JSON.toJSONString(scriptUrlVO));
-        });
+        scriptUrls.forEach((scriptUrlVO) -> log.info(JSON.toJSONString(scriptUrlVO)));
         log.info("jmx parser end ==================");
         return scriptUrls;
     }
@@ -185,8 +186,8 @@ public class SaxUtil {
         if (CollectionUtils.isEmpty(elements)) {
             return;
         }
-        for (Iterator it = elements.iterator(); it.hasNext(); ) {
-            Element element = (Element)it.next();
+        for (Object o : elements) {
+            Element element = (Element)o;
             if (element.getName().equals(elementName)) {
                 result.add(element);
             }
@@ -194,8 +195,6 @@ public class SaxUtil {
             selectElement(elementName, childElements, result);
         }
     }
-
-
 
     public static void main(String[] args) throws InterruptedException {
         String path = "/Users/shulie/Documents/test.jmx";
@@ -234,9 +233,7 @@ public class SaxUtil {
                 }
             }
 
-            /**
-             * 读取文件内容
-             */
+            // 读取文件内容
             Document document = saxReader.read(file);
             //去除所有禁用节点和对应的所有子节点
             cleanAllDisableElement(document);
@@ -252,7 +249,7 @@ public class SaxUtil {
             FileManagerHelper.createFileByPathAndString(path, xmlContent);
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：Parse Jmeter Script Error --> 异常信息: {}",
-                    TakinCloudExceptionEnum.XML_PARSE_ERROR,e);
+                TakinCloudExceptionEnum.XML_PARSE_ERROR, e);
         }
     }
 

@@ -6,9 +6,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Author: fanxx
- * @Date: 2021/5/12 8:26 下午
- * @Description:
+ * @author fanxx
+ * @date 2021/5/12 8:26 下午
  */
 @Data
 public class InspectBusinessActivitySummaryBean {

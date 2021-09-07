@@ -1,4 +1,4 @@
-package io.shulie.takin.schedule.taskmanage.Impl;
+package io.shulie.tro.schedule.taskmanage.Impl;
 
 import java.util.Calendar;
 
@@ -7,7 +7,6 @@ import org.junit.Test;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.schedule.taskmanage.Impl
  * @date 2020/10/28 9:40 上午
  */
 public class CollectorUtilTest {
@@ -18,12 +17,4 @@ public class CollectorUtilTest {
         System.out.println(calendar.getTimeInMillis());
     }
 
-    @Test
-    public void compare() {
-        long min = 1626666689886L;
-        Long max = 1626666693788L;
-        if(max.longValue() > min) {
-            System.out.println("aa");
-        }
-    }
 }

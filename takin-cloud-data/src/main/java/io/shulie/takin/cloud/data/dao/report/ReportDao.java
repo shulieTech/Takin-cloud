@@ -9,75 +9,75 @@ import io.shulie.takin.cloud.data.result.report.ReportResult;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.cloud.data.dao.report
  * @date 2020/12/17 3:30 下午
  */
 public interface ReportDao {
     /**
      * 获取列表
-     * @param param
-     * @return
+     *
+     * @param param -
+     * @return -
      */
     List<ReportResult> getList(ReportDataQueryParam param);
 
     /**
      * 获取报告
-     * @param id
-     * @return
+     *
+     * @param id 报告主键
+     * @return -
      */
     ReportResult selectById(Long id);
 
     /**
      * 获取当前场景最新一条报告
      *
-     * @param sceneId
-     *
-     * @return
+     * @param sceneId 场景主键
+     * @return -
      */
     ReportResult getRecentlyReport(Long sceneId);
 
     /**
      * 更新通过是否通过
-     * @param param
+     *
+     * @param param 入参
      */
     void updateReportConclusion(ReportUpdateConclusionParam param);
 
     /**
      * 更新报告
-     * @param param
+     *
+     * @param param 参数
      */
     void updateReport(ReportUpdateParam param);
 
     /**
      * 完成报告
-     * @param reportId
      *
+     * @param reportId 报告主键
      */
     void finishReport(Long reportId);
 
     /**
      * 锁报告
-     * @param resultId
-     * @param lock
+     *
+     * @param resultId -
+     * @param lock     -
      */
     void updateReportLock(Long resultId, Integer lock);
-
-
 
     /**
      * 根据场景ID获取（临时）压测中的报告ID
      *
-     * @param sceneId
-     * @return
+     * @param sceneId 场景主键
+     * @return -
      */
     ReportResult getTempReportBySceneId(Long sceneId);
-
 
     /**
      * 根据场景ID获取压测中的报告ID
      *
-     * @param sceneId
-     * @return
+     * @param sceneId 场景主键
+     * @return -
      */
     ReportResult getReportBySceneId(Long sceneId);
 }

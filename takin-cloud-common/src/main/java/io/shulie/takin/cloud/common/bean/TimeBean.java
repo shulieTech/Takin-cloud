@@ -5,10 +5,8 @@ import java.io.Serializable;
 import lombok.Data;
 
 /**
- * @ClassName TimeBean
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午9:51
+ * @author qianshui
+ * @date 2020/4/17 下午9:51
  */
 @Data
 public class TimeBean implements Serializable {
@@ -19,7 +17,7 @@ public class TimeBean implements Serializable {
 
     private String unit;
 
-    public TimeBean(){
+    public TimeBean() {
 
     }
 

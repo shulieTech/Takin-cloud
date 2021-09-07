@@ -7,9 +7,8 @@ import java.util.concurrent.TimeUnit;
 import lombok.Data;
 
 /**
- * @Author: fanxx
- * @Date: 2020/4/20 下午4:14
- * @Description:
+ * @author fanxx
+ * @date 2020/4/20 下午4:14
  */
 @Data
 public class TaskConfig {

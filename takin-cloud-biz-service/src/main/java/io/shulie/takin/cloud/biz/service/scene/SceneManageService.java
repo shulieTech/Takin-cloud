@@ -15,19 +15,17 @@ import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
 import io.shulie.takin.ext.content.script.ScriptVerityRespExt;
 
-
 /**
- * @ClassName SceneManage
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午3:31
+ * @author qianshui
+ * @date 2020/4/17 下午3:31
  */
 public interface SceneManageService {
 
     /**
      * 新增场景
-     * @param wrapperVO
-     * @return
+     *
+     * @param wrapperVO 包装参数
+     * @return -
      */
     Long addSceneManage(SceneManageWrapperInput wrapperVO);
 
@@ -44,8 +42,8 @@ public interface SceneManageService {
     /**
      * 根据场景ID获取业务活动配置
      *
-     * @param sceneId
-     * @return
+     * @param sceneId 场景主键
+     * @return -
      */
     List<SceneBusinessActivityRefOutput> getBusinessActivityBySceneId(Long sceneId);
 
@@ -53,29 +51,30 @@ public interface SceneManageService {
 
     /**
      * 获取压测场景目标路径,当前以/结尾
-     * @param sceneId
-     * @return
+     *
+     * @param sceneId 场景主键
+     * @return -
      */
-    String getDestPath (Long sceneId);
+    String getDestPath(Long sceneId);
 
     /**
      * 严格更新 压测场景生命周期
      *
-     * @param statusVO
+     * @param statusVO 状态参数
      */
     Boolean updateSceneLifeCycle(UpdateStatusBean statusVO);
 
     /**
      * 记录场景启动过程  比如job 是否创建成功，压力节点 是否创建成功，
      *
-     * @param recordVO
+     * @param recordVO 记录参数
      */
     void reportRecord(SceneManageStartRecordVO recordVO);
 
     /**
      * 不分页查询所有场景信息，带脚本信息
      *
-     * @return
+     * @return -
      */
     List<SceneManageListOutput> querySceneManageList();
 
@@ -88,9 +87,7 @@ public interface SceneManageService {
 
     List<SceneManageWrapperOutput> getByIds(List<Long> sceneIds);
 
-
     void saveUnUploadLogInfo();
 
-
-    ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath,boolean isAbsolutePath,boolean update);
+    ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update);
 }

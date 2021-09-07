@@ -9,10 +9,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @ClassName SceneBusinessActivityRefInput
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午5:13
+ * @author qianshui
+ * @date 2020/4/17 下午5:13
  */
 @Data
 public class SceneBusinessActivityRefInput implements Serializable {

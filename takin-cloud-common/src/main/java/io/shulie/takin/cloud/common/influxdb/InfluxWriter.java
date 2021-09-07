@@ -23,9 +23,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author <a href="tangyuhan@shulie.io">yuhan.tang</a>
- * @package: com.pamirs.takin.common.influxdb
- * @Date 2020-04-20 14:25
+ * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
+ * @date 2020-04-20 14:25
  */
 @Component
 public class InfluxWriter {
@@ -84,7 +83,7 @@ public class InfluxWriter {
      * @param tags        标签
      * @param fields      字段
      * @param time        时间
-     * @return
+     * @return -
      */
     public boolean insert(String measurement, Map<String, String> tags, Map<String, Object> fields, long time) {
         Point.Builder builder = Point.measurement(measurement);
@@ -97,7 +96,7 @@ public class InfluxWriter {
             influxDB.write(database, "", builder.build());
         } catch (Exception ex) {
             logger.error("异常代码【{}】,异常内容：influxdb写数据异常 --> 异常信息: {}",
-                    TakinCloudExceptionEnum.TASK_RUNNING_RECEIVE_PT_DATA_ERROR,ex);
+                TakinCloudExceptionEnum.TASK_RUNNING_RECEIVE_PT_DATA_ERROR, ex);
             return false;
         }
         return true;
@@ -106,7 +105,7 @@ public class InfluxWriter {
     /**
      * 查询数据
      *
-     * @return
+     * @return -
      */
     public List<QueryResult.Result> select(String command) {
         QueryResult queryResult = influxDB.query(new Query(command, database));
@@ -116,7 +115,7 @@ public class InfluxWriter {
     /**
      * 创建数据库
      *
-     * @param dbName
+     * @param dbName 数据库名称
      */
     public void createDB(String dbName) {
         influxDB.setDatabase(dbName);
@@ -125,10 +124,10 @@ public class InfluxWriter {
     /**
      * 封装查询结果
      *
-     * @param command
-     * @param clazz
-     * @param <T>
-     * @return
+     * @param command 命令
+     * @param clazz   结果集合的泛型类
+     * @param <T>     泛型
+     * @return -
      */
     public <T> List<T> query(String command, Class<T> clazz) {
         List<QueryResult.Result> results = select(command);
@@ -145,13 +144,13 @@ public class InfluxWriter {
                 Map<String, String> tags = serie.getTags();
 
                 // 封装查询结果
-                for (int i = 0; i < values.size(); ++i) {
+                for (List<Object> value : values) {
                     JSONObject jsonData = new JSONObject();
                     if (tags != null && tags.keySet().size() > 0) {
-                        tags.forEach((k, v) -> jsonData.put(k, v));
+                        jsonData.putAll(tags);
                     }
                     for (int j = 0; j < colums.size(); ++j) {
-                        jsonData.put(colums.get(j), values.get(i).get(j));
+                        jsonData.put(colums.get(j), value.get(j));
                     }
                     resultArr.add(jsonData);
                 }

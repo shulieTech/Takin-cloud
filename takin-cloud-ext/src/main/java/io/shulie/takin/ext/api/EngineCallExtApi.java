@@ -30,14 +30,14 @@ public interface EngineCallExtApi extends ExtensionPoint,Typed {
 
     /**
      * 获取所有正在运行的任务名称
-     * @return
+     * @return -
      */
     List<String> getAllRunningJobName();
 
     /**
      * 获取当前任务状态
      * @param jobName
-     * @return
+     * @return -
      */
     String getJobStatus(String jobName);
 
@@ -45,7 +45,7 @@ public interface EngineCallExtApi extends ExtensionPoint,Typed {
     /**
      * 获取建议的机器节点数量范围
      * @param strategyConfigExt
-     * @return
+     * @return -
      */
     StrategyOutputExt getPressureNodeNumRange(StrategyConfigExt strategyConfigExt);
 }

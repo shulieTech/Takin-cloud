@@ -7,14 +7,12 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * @Author: mubai
- * @Date: 2020-10-29 12:00
- * @Description:
+ * @author mubai
+ * @date 2020-10-29 12:00
  */
 
 @Data
 public class SceneSlaRefOpen implements Serializable {
-
 
     private static final long serialVersionUID = -1911877711253414893L;
 

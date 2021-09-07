@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.data.result.scenemanage;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
@@ -12,14 +13,14 @@ import io.shulie.takin.cloud.common.enums.machine.EnumResult;
 import io.shulie.takin.cloud.common.bean.TimeBean;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @ClassName SceneDetailResult
- * @Description
- * @Author qianshui
- * @Date 2020/5/18 下午8:26
+ * @author qianshui
+ * @date 2020/5/18 下午8:26
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class SceneDetailResult extends CloudUserCommonRequestExt implements Serializable {
 
     private static final long serialVersionUID = 1453217777875591954L;
@@ -58,10 +59,10 @@ public class SceneDetailResult extends CloudUserCommonRequestExt implements Seri
 
     public static void main(String[] args) {
         SceneDetailResult dto = new SceneDetailResult();
-        dto.setBusinessActivityConfig(Arrays.asList(new BusinessActivityDetailResult()));
-        dto.setUploadFile(Arrays.asList(new ScriptDetailResult()));
-        dto.setStopCondition(Arrays.asList(new SlaDetailResult()));
-        dto.setWarningCondition(Arrays.asList(new SlaDetailResult()));
+        dto.setBusinessActivityConfig(Collections.singletonList(new BusinessActivityDetailResult()));
+        dto.setUploadFile(Collections.singletonList(new ScriptDetailResult()));
+        dto.setStopCondition(Collections.singletonList(new SlaDetailResult()));
+        dto.setWarningCondition(Collections.singletonList(new SlaDetailResult()));
         System.out.println(JSON.toJSONString(dto, SerializerFeature.WriteMapNullValue));
     }
 }

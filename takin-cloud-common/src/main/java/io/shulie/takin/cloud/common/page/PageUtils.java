@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Auther: vernon
- * @Date: 2020/1/8 17:22
- * @Description:
+ * @author vernon
+ * @date 2020/1/8 17:22
  */
 public class PageUtils {
     public static <T> List<T> getPage(Boolean needPage, Integer current, Integer pageSize, List<T> filteredSources) {
@@ -19,7 +18,7 @@ public class PageUtils {
             if (page < 0) {
                 page = 0;
             }
-            Integer offset = page * pageSize;
+            int offset = page * pageSize;
             if (offset <= filteredSources.size() - 1) {
                 for (int index = offset, count = 0; index < filteredSources.size() && count < pageSize;
                      index++, count++) {

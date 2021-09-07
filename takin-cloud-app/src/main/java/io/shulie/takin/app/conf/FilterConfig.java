@@ -8,16 +8,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @Auther: vernon
- * @Date: 2019/12/2 15:34
- * @Description:添加put请求过滤器
+ * 添加put请求过滤器
+ *
+ * @author vernon
+ * @date 2019/12/2 15:34
  */
 @Configuration
 public class FilterConfig {
 
     @Bean
-    public FilterRegistrationBean pufFilter() {
-        FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<Filter>();
+    public FilterRegistrationBean<Filter> pufFilter() {
+        FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
         registration.addUrlPatterns("/*");
         registration.setFilter(new org.springframework.web.filter.HttpPutFormContentFilter());
         registration.setName("httpPutFormContentFilter");

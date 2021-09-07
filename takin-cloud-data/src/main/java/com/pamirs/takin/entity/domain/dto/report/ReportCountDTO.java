@@ -7,10 +7,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @ClassName ReportCountDTO
- * @Description 压测报告；统计返回
- * @Author qianshui
- * @Date 2020/7/22 下午2:19
+ * 压测报告；统计返回
+ *
+ * @author qianshui
+ * @date 2020/7/22 下午2:19
  */
 @ApiModel
 @Data

@@ -3,15 +3,16 @@ package io.shulie.takin.cloud.data.param.report;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.cloud.data.param.report
  * @date 2021/2/3 10:49 上午
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ReportUpdateParam extends CloudUserCommonRequestExt {
     private Long id;
 

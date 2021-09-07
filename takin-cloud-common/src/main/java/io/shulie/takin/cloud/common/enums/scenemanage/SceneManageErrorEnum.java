@@ -2,7 +2,6 @@ package io.shulie.takin.cloud.common.enums.scenemanage;
 
 /**
  * @author 何仲奇
- * @Package com.pamirs.takin.common.enums
  * @date 2020/9/25 12:56 下午
  */
 public enum SceneManageErrorEnum {

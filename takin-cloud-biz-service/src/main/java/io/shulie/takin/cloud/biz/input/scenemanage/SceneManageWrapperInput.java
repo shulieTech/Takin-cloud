@@ -11,14 +11,14 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @ClassName SceneManageWrapperInput
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午5:55
+ * @author qianshui
+ * @date 2020/4/17 下午5:55
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "场景保存入参")
 public class SceneManageWrapperInput extends CloudUserCommonRequestExt implements Serializable {
 
@@ -80,69 +80,68 @@ public class SceneManageWrapperInput extends CloudUserCommonRequestExt implement
     @ApiModelProperty(name = "warningCondition", value = "SLA警告配置")
     private List<SceneSlaRefInput> warningCondition;
 
-    private String features ;
+    private String features;
 
-    private Long scriptId ;
-
+    private Long scriptId;
 
     private Long fixTimer;
 
     private Integer loopsNum;
 
     private Integer concurrencyNum;
-//
-//    @Data
-//    public static class SceneScriptRefInput implements Serializable {
-//
-//        private static final long serialVersionUID = -2991318843153108331L;
-//
-//        @ApiModelProperty(value = "ID")
-//        private Long id;
-//
-//        @ApiModelProperty(value = "上传ID")
-//        private String uploadId;
-//
-//        @ApiModelProperty(value = "文件名称")
-//        private String fileName;
-//
-//        @ApiModelProperty(value = "上传时间")
-//        private String uploadTime;
-//
-//        @ApiModelProperty(value = "上传路径")
-//        private String uploadPath;
-//
-//        @ApiModelProperty(value = "是否删除")
-//        private Integer isDeleted;
-//
-//        @ApiModelProperty(value = "上传数据量")
-//        private Long uploadedData;
-//
-//        @ApiModelProperty(value = "是否拆分")
-//        private Integer isSplit;
-//
-//        @ApiModelProperty(value = "Topic")
-//        private String topic;
-//
-//        @ApiModelProperty(value = "文件类型")
-//        private Integer fileType;
-//    }
-//
-//    @Data
-//    public static class SceneSlaRefInput implements Serializable {
-//
-//        private static final long serialVersionUID = 4747478435828708203L;
-//
-//        @ApiModelProperty(value = "规则名称")
-//        private String ruleName;
-//
-//        @ApiModelProperty(value = "适用对象")
-//        private String[] businessActivity;
-//
-//        @ApiModelProperty(value = "规则")
-//        private RuleBean rule;
-//
-//        @ApiModelProperty(value = "状态")
-//        private Integer status = 0;
-//    }
+    //
+    //    @Data
+    //    public static class SceneScriptRefInput implements Serializable {
+    //
+    //        private static final long serialVersionUID = -2991318843153108331L;
+    //
+    //        @ApiModelProperty(value = "ID")
+    //        private Long id;
+    //
+    //        @ApiModelProperty(value = "上传ID")
+    //        private String uploadId;
+    //
+    //        @ApiModelProperty(value = "文件名称")
+    //        private String fileName;
+    //
+    //        @ApiModelProperty(value = "上传时间")
+    //        private String uploadTime;
+    //
+    //        @ApiModelProperty(value = "上传路径")
+    //        private String uploadPath;
+    //
+    //        @ApiModelProperty(value = "是否删除")
+    //        private Integer isDeleted;
+    //
+    //        @ApiModelProperty(value = "上传数据量")
+    //        private Long uploadedData;
+    //
+    //        @ApiModelProperty(value = "是否拆分")
+    //        private Integer isSplit;
+    //
+    //        @ApiModelProperty(value = "Topic")
+    //        private String topic;
+    //
+    //        @ApiModelProperty(value = "文件类型")
+    //        private Integer fileType;
+    //    }
+    //
+    //    @Data
+    //    public static class SceneSlaRefInput implements Serializable {
+    //
+    //        private static final long serialVersionUID = 4747478435828708203L;
+    //
+    //        @ApiModelProperty(value = "规则名称")
+    //        private String ruleName;
+    //
+    //        @ApiModelProperty(value = "适用对象")
+    //        private String[] businessActivity;
+    //
+    //        @ApiModelProperty(value = "规则")
+    //        private RuleBean rule;
+    //
+    //        @ApiModelProperty(value = "状态")
+    //        private Integer status = 0;
+    //    }
 
 }

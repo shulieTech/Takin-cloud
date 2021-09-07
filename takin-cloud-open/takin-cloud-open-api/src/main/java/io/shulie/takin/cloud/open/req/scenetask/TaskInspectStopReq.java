@@ -7,13 +7,14 @@ import javax.validation.constraints.NotNull;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @Author: fanxx
- * @Date: 2021/4/14 4:36 下午
- * @Description:
+ * @author fanxx
+ * @date 2021/4/14 4:36 下午
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class TaskInspectStopReq extends CloudUserCommonRequestExt implements Serializable {
     private static final long serialVersionUID = -9162208161836587615L;
 

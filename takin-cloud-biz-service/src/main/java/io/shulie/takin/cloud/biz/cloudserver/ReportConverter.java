@@ -20,8 +20,8 @@ import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 /**
- * @Author 莫问
- * @Date 2020-04-17
+ * @author 莫问
+ * @date 2020-04-17
  */
 
 @Mapper(imports = {DateUtil.class})
@@ -32,8 +32,8 @@ public interface ReportConverter {
     /**
      * Report Converter ReportDetail
      *
-     * @param report
-     * @return
+     * @param report -
+     * @return -
      */
     @Mapping(target = "startTime", expression = "java(DateUtil.getDate(report.getStartTime(),\"yyyy-MM-dd HH:mm:ss\"))")
     ReportDetailOutput ofReportDetail(ReportResult report);
@@ -41,8 +41,8 @@ public interface ReportConverter {
     /**
      * Report Converter ReportDTO
      *
-     * @param report
-     * @return
+     * @param report -
+     * @return -
      */
     List<CloudReportDTO> ofReport(List<Report> report);
 
@@ -57,26 +57,26 @@ public interface ReportConverter {
     /**
      * WarnBO Converter WarnBean
      *
-     * @param warn
-     * @return
+     * @param warn -
+     * @return -
      */
     List<WarnBean> ofWarn(List<WarnBO> warn);
 
     @Mappings(
-            value = {
-                    @Mapping(target = "reportId", source = "ptId"),
-                    @Mapping(target = "content", source = "warnContent"),
-                    @Mapping(target = "warnTime",
-                            expression = "java(DateUtil.getDate(warnDetail.getWarnTime(),\"yyyy-MM-dd HH:mm:ss\"))")
-            }
+        value = {
+            @Mapping(target = "reportId", source = "ptId"),
+            @Mapping(target = "content", source = "warnContent"),
+            @Mapping(target = "warnTime",
+                expression = "java(DateUtil.getDate(warnDetail.getWarnTime(),\"yyyy-MM-dd HH:mm:ss\"))")
+        }
     )
     WarnDetailOutput ofWarn(WarnDetail warnDetail);
 
     /**
      * WarnDetail Converter WarnDetailResult
      *
-     * @param warnDetail
-     * @return
+     * @param warnDetail -
+     * @return -
      */
     List<WarnDetailOutput> ofWarnDetail(List<WarnDetail> warnDetail);
 
@@ -97,8 +97,8 @@ public interface ReportConverter {
     /**
      * ReportBusinessActivityDetail Converter BusinessActivityDTO
      *
-     * @param data
-     * @return
+     * @param data -
+     * @return -
      */
     List<BusinessActivityDTO> ofBusinessActivity(List<ReportBusinessActivityDetail> data);
 }

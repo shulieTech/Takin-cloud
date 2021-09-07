@@ -4,7 +4,6 @@ import lombok.Data;
 
 /**
  * @author 何仲奇
- * @Package com.pamirs.takin.entity.domain.vo.report
  * @date 2020/9/30 5:59 下午
  */
 @Data

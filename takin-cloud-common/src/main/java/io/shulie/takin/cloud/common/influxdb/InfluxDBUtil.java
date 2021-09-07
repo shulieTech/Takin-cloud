@@ -1,10 +1,8 @@
 package io.shulie.takin.cloud.common.influxdb;
 
 /**
- * @ClassName InfluxDBUtil
- * @Description
- * @Author qianshui
- * @Date 2020/7/20 下午4:34
+ * @author qianshui
+ * @date 2020/7/20 下午4:34
  */
 public class InfluxDBUtil {
 

@@ -8,10 +8,8 @@ import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 
 /**
- * @ClassName SlaUtil
- * @Description
- * @Author qianshui
- * @Date 2020/5/19 下午4:03
+ * @author qianshui
+ * @date 2020/5/19 下午4:03
  */
 public class SlaUtil {
 

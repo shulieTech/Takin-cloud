@@ -20,7 +20,7 @@ public interface TWarnDetailMapper {
      * 警告汇总
      *
      * @param reportId
-     * @return
+     * @return -
      */
     List<WarnBO> summaryWarnByReportId(Long reportId);
 
@@ -28,7 +28,7 @@ public interface TWarnDetailMapper {
      * 警告列表
      *
      * @param param
-     * @return
+     * @return -
      */
     List<WarnDetail> listWarn(WarnQueryParam param);
 
@@ -36,7 +36,7 @@ public interface TWarnDetailMapper {
      * 统计报告总警告次数
      *
      * @param reportId
-     * @return
+     * @return -
      */
     Long countReportTotalWarn(Long reportId);
 

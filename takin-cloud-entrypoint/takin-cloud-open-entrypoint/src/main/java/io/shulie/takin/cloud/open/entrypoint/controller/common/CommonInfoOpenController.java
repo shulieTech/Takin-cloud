@@ -30,7 +30,7 @@ public class CommonInfoOpenController {
     /**
      * 获取cloud配置信息接口
      *
-     * @return
+     * @return -
      */
     @ApiOperation(value = "获取cloud配置信息接口")
     @GetMapping("/getCloudConfigurationInfos")

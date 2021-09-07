@@ -5,8 +5,8 @@ import java.io.Serializable;
 import lombok.Data;
 
 /**
- * @Author 莫问
- * @Date 2020-04-21
+ * @author 莫问
+ * @date 2020-04-21
  */
 @Data
 public class SceneActionParam implements Serializable {

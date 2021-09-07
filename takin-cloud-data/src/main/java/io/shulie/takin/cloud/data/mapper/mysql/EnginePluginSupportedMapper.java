@@ -15,7 +15,7 @@ public interface EnginePluginSupportedMapper extends BaseMapper<EnginePluginSupp
      * 根据插件id删除支持的版本信息
      *
      * @param pluginId 插件id
-     * @return
+     * @return -
      */
     int deleteSupportedVersionsByPluginId(Long pluginId);
 

@@ -26,10 +26,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
- * @ClassName AsyncServiceImpl
- * @Description
- * @Author qianshui
- * @Date 2020/10/30 下午7:13
+ * @author qianshui
+ * @date 2020/10/30 下午7:13
  */
 @Service
 @Slf4j
@@ -40,7 +38,7 @@ public class AsyncServiceImpl implements AsyncService {
 
     @Autowired
     private EventCenterTemplate eventCenterTemplate;
-    
+
     @Autowired
     private SceneManageService sceneManageService;
 
@@ -62,7 +60,7 @@ public class AsyncServiceImpl implements AsyncService {
     @Override
     public void checkStartedTask(ScheduleStartRequestExt startRequest) {
         log.info("启动后台检查压测任务状态线程.....");
-        Integer currentTime = 0;
+        int currentTime = 0;
         boolean checkPass = false;
 
         String pressureNodeTotalName = ScheduleConstants.getPressureNodeTotalKey(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getCustomerId());
@@ -71,7 +69,7 @@ public class AsyncServiceImpl implements AsyncService {
             String pressureNodeTotal = redisClientUtils.getString(pressureNodeTotalName);
             String pressureNodeNum = redisClientUtils.getString(pressureNodeName);
             log.info("任务id={}, 计划启动【{}】个节点，当前启动【{}】个节点.....", startRequest.getTaskId(), pressureNodeTotal, pressureNodeNum);
-            if(pressureNodeTotal != null && pressureNodeNum != null) {
+            if (pressureNodeTotal != null && pressureNodeNum != null) {
                 try {
                     if (Integer.parseInt(pressureNodeNum) == Integer.parseInt(pressureNodeTotal)) {
                         checkPass = true;
@@ -80,27 +78,27 @@ public class AsyncServiceImpl implements AsyncService {
                     }
                 } catch (Exception e) {
                     log.error("异常代码【{}】,异常内容：任务启动异常 --> 从Redis里获取节点数量数据格式异常: {}",
-                            TakinCloudExceptionEnum.TASK_START_ERROR_CHECK_POD,e);
+                        TakinCloudExceptionEnum.TASK_START_ERROR_CHECK_POD, e);
                 }
             }
             try {
                 Thread.sleep(CHECK_INTERVAL_TIME * 1000);
             } catch (InterruptedException e) {
-                log.warn("进程暂停异常",e);
+                log.warn("进程暂停异常", e);
             }
             currentTime += CHECK_INTERVAL_TIME;
         }
         //压力节点 没有在设定时间内启动完毕，停止压测
-        if(!checkPass) {
-            log.info("调度任务{}-{}-{},压力节点 没有在设定时间{}s内启动，停止压测,",startRequest.getSceneId(), startRequest.getTaskId(),
-                startRequest.getCustomerId(),CHECK_INTERVAL_TIME);
+        if (!checkPass) {
+            log.info("调度任务{}-{}-{},压力节点 没有在设定时间{}s内启动，停止压测,", startRequest.getSceneId(), startRequest.getTaskId(),
+                startRequest.getCustomerId(), CHECK_INTERVAL_TIME);
             // 记录停止原因
             // 补充停止原因
             //设置缓存，用以检查压测场景启动状态 lxr 20210623
             String k8sPodKey = String.format(SceneTaskRedisConstants.PRESSURE_NODE_ERROR_KEY + "%s_%s", startRequest.getSceneId(), startRequest.getTaskId());
             redisClientUtils.hmset(k8sPodKey, SceneTaskRedisConstants.PRESSURE_NODE_START_ERROR,
                 String.format("节点没有在设定时间【%s】s内启动，计划启动节点个数【%s】,实际启动节点个数【%s】,"
-                    + "，导致压测停止", pressureNodeStartExpireTime, redisClientUtils.getString(pressureNodeTotalName),redisClientUtils.getString(pressureNodeName)));
+                    + "，导致压测停止", pressureNodeStartExpireTime, redisClientUtils.getString(pressureNodeTotalName), redisClientUtils.getString(pressureNodeName)));
             callStop(startRequest);
         }
     }
@@ -108,24 +106,24 @@ public class AsyncServiceImpl implements AsyncService {
     @Async("updateStatusPool")
     @Override
     public void updateSceneRunningStatus(Long sceneId, Long reportId) {
-        while (true){
+        while (true) {
             boolean reportFinished = isReportFinished(reportId);
-            if (reportFinished){
+            if (reportFinished) {
                 String statusKey = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneId,
                     reportId);
                 boolean updateResult = redisClientUtils.hmset(statusKey, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY,
                     SceneRunTaskStatusEnum.ENDED.getText());
-                if (updateResult){
-                    log.info("更新场景运行状态缓存成功，报告已完成。场景ID:{},报告ID:{}",sceneId,reportId);
-                }else {
-                    log.error("更新场景运行状态缓存失败，报告已完成。场景ID:{},报告ID:{}",sceneId,reportId);
+                if (updateResult) {
+                    log.info("更新场景运行状态缓存成功，报告已完成。场景ID:{},报告ID:{}", sceneId, reportId);
+                } else {
+                    log.error("更新场景运行状态缓存失败，报告已完成。场景ID:{},报告ID:{}", sceneId, reportId);
                 }
                 break;
             }
             try {
                 TimeUnit.SECONDS.sleep(CHECK_INTERVAL_TIME);
             } catch (InterruptedException e) {
-                log.error("更新场景运行状态缓存失败！异常信息:{}",e.getMessage());
+                log.error("更新场景运行状态缓存失败！异常信息:{}", e.getMessage());
             }
         }
     }

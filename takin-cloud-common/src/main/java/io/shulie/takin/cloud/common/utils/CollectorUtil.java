@@ -7,33 +7,32 @@ import io.shulie.takin.cloud.common.constants.Constants;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * @Author <a href="tangyuhan@shulie.io">yuhan.tang</a>
- * @package: io.shulie.takin.collector.util
- * @Date 2020-04-20 20:38
+ * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
+ * @date 2020-04-20 20:38
  */
 public class CollectorUtil {
 
     /**
      * 组装时间戳 +  podNum
-     * @param timestamp
-     * @param podNum
-     * @return
+     *
+     * @param timestamp 时间戳
+     * @param podNum    pod数量
+     * @return -
      */
-    public static String getTimestampPodNum(Long timestamp,String podNum) {
-       return timestamp + (StringUtils.isNotBlank(podNum) ? podNum : Constants.NULL_SIGN);
+    public static String getTimestampPodNum(Long timestamp, String podNum) {
+        return timestamp + (StringUtils.isNotBlank(podNum) ? podNum : Constants.NULL_SIGN);
     }
 
     /**
      * 组装时间戳 +  podNum
-     * @param timestamp
-     * @param podNum
-     * @return
+     *
+     * @param timestamp 时间戳
+     * @param podNum    pod数量
+     * @return -
      */
-    public static String coverTimestampPodNum(Long timestamp,String podNum) {
+    public static String coverTimestampPodNum(Long timestamp, String podNum) {
         return timestamp + (StringUtils.isNotBlank(podNum) ? podNum : Constants.NULL_SIGN);
     }
-
-
 
     /**
      * 时间窗口格式化
@@ -42,8 +41,8 @@ public class CollectorUtil {
      * >5 - <=10 取值 秒：10
      * >55 - <=60 取值 秒：0   分钟：+1
      *
-     * @param timestamp
-     * @return
+     * @param timestamp 时间戳
+     * @return -
      */
     public static Calendar getTimeWindow(long timestamp) {
         int nowSecond = 0;
@@ -69,8 +68,8 @@ public class CollectorUtil {
     /**
      * 获取延迟10S的写入窗口格式化时间。
      *
-     * @param timestamp
-     * @return
+     * @param timestamp 时间戳
+     * @return -
      */
     public static long getPushWindowTime(long timestamp) {
         Calendar instance = getTimeWindow(timestamp);
@@ -81,8 +80,8 @@ public class CollectorUtil {
     /**
      * 获取5S后的写入窗口格式化时间。
      *
-     * @param timestamp
-     * @return
+     * @param timestamp 时间戳
+     * @return -
      */
     public static long addWindowTime(long timestamp) {
         Calendar instance = Calendar.getInstance();
@@ -94,8 +93,8 @@ public class CollectorUtil {
     /**
      * 获取结束时间的写入窗口格式化时间。
      *
-     * @param timestamp
-     * @return
+     * @param timestamp 时间戳
+     * @return -
      */
     public static long getEndWindowTime(long timestamp) {
         Calendar instance = getTimeWindow(timestamp);

@@ -5,13 +5,14 @@ import java.io.Serializable;
 import io.shulie.takin.common.beans.page.PagingDevice;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @Author: fanxx
- * @Date: 2020/5/15 下午9:00
- * @Description:
+ * @author fanxx
+ * @date 2020/5/15 下午9:00
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class PressureMachineQueryParam extends PagingDevice implements Serializable {
     private static final long serialVersionUID = 4896574213234382011L;
 

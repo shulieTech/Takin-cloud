@@ -8,10 +8,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @ClassName RiskApplicationCountDTO
- * @Description 风险机器 应用 数量 汇总
- * @Author qianshui
- * @Date 2020/7/22 下午2:42
+ * 风险机器 应用 数量 汇总
+ *
+ * @author qianshui
+ * @date 2020/7/22 下午2:42
  */
 @ApiModel
 @Data

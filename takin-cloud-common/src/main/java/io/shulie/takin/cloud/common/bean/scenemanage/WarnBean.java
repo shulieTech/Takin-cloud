@@ -6,11 +6,9 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
-* @Package io.shulie.takin.cloud.common.bean.scenemanage
-* @author 无涯
-* @description:
-* @date 2021/2/3 11:46 上午
-*/
+ * @author 无涯
+ * @date 2021/2/3 11:46 上午
+ */
 @Data
 public class WarnBean implements Serializable {
 

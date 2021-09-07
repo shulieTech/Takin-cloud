@@ -9,27 +9,27 @@ public interface EngineConfigService {
 
     /**
      * 获取引擎日志配置
-     * @return
+     * @return -
      */
     EngineLogPtlConfigOutput getEnginePtlConfig();
 
     /**
      * 获取日志采样率
-     * @return
+     * @return -
      */
     String getLogSimpling();
 
     /**
      * 获取日志推送服务
      * @param failServer
-     * @return
+     * @return -
      */
     String getLogPushServer(String failServer);
 
     /**
      * 获取需要挂载本地磁盘的场景ID
      *
-     * @return
+     * @return -
      */
     String[] getLocalMountSceneIds();
 

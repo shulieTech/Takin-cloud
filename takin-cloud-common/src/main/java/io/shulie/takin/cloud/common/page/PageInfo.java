@@ -14,14 +14,13 @@ import io.shulie.takin.cloud.common.constants.PageHelperConstants;
 import org.apache.commons.collections4.MapUtils;
 
 /**
- * 说明: 分页助手
+ * 说明: 分页助手<br>对Page<E>结果进行包装
+ * <p>
+ * <a href="http://git.oschina.net/free/Mybatis_PageHelper">项目地址</a>
+ * </p>
  *
  * @author shulie
- * @version v1.0
- * 项目地址 : http://git.oschina.net/free/Mybatis_PageHelper
- * @ClassName: PageInfo
- * @Description: 对Page<E>结果进行包装
- * @2018年4月13日
+ * @date 2018年4月13日
  */
 @SuppressWarnings("all")
 public class PageInfo<T> implements Serializable {
@@ -101,12 +100,12 @@ public class PageInfo<T> implements Serializable {
     }
 
     /**
+     * 从参数集合中获取页码
+     *
      * @param params
      * @return int
-     * @Title: getPageNum
-     * @Description: 从参数集合中获取页码
-     * @Author: Gavin
-     * @Create Date: 2017年11月23日下午2:32:34
+     * @author Gavin
+     * @date 2017年11月23日下午2:32:34
      */
     public static int getPageNum(Map<String, Object> params) {
         int pageNum = MapUtils.getIntValue(params, PageHelperConstants.PAGENUM, 1);
@@ -117,12 +116,12 @@ public class PageInfo<T> implements Serializable {
     }
 
     /**
+     * 从参数集合中获取每页条数
+     *
      * @param params
      * @return int
-     * @Title: getPageSize
-     * @Description: 从参数集合中获取每页条数
-     * @Author: Gavin
-     * @Create Date: 2017年11月23日下午2:32:51
+     * @author Gavin
+     * @date 2017年11月23日下午2:32:51
      */
     public static int getPageSize(Map<String, Object> params) {
         int pageSize = MapUtils.getIntValue(params, PageHelperConstants.PAGESIZE, 10);

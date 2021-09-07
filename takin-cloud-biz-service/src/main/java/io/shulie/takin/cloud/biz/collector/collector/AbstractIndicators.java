@@ -18,11 +18,9 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.types.Expiration;
 import io.shulie.takin.cloud.common.constants.CollectorConstants;
 
-
 /**
- * @Author <a href="tangyuhan@shulie.io">yuhan.tang</a>
- * @package: io.shulie.takin.cloud.poll.poll
- * @Date 2020-04-20 21:08
+ * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
+ * @date 2020-04-20 21:08
  */
 @Slf4j
 public abstract class AbstractIndicators {
@@ -62,7 +60,7 @@ public abstract class AbstractIndicators {
     private Expiration expiration = Expiration.seconds((int)CollectorConstants.REDIS_KEY_TIMEOUT);
 
     /**
-     * 压测场景强行关闭预留时间 
+     * 压测场景强行关闭预留时间
      */
     @Value("${scene.pressure.forceCloseTime: 20}")
     private Integer forceCloseTime;
@@ -71,9 +69,9 @@ public abstract class AbstractIndicators {
      * 获取Metrics key
      * 示例：COLLECTOR:TASK:102121:213124512312
      *
-     * @param sceneId
-     * @param reportId
-     * @return
+     * @param sceneId  场景主键
+     * @param reportId 报告主键
+     * @return -
      */
     protected String getPressureTaskKey(Long sceneId, Long reportId, Long customerId) {
         // 兼容原始redis key
@@ -88,11 +86,8 @@ public abstract class AbstractIndicators {
         return (boolean)redisTemplate.execute((RedisCallback<Boolean>)connection -> {
             Boolean bl = connection.set(getLockPrefix(key).getBytes(), value.getBytes(), expiration,
                 RedisStringCommands.SetOption.SET_IF_ABSENT);
-            if (null != bl && bl) {
-                //connection.expire(key.getBytes(), EXPIREMSECS * 1000);
-                return true;
-            }
-            return false;
+            //connection.expire(key.getBytes(), EXPIREMSECS * 1000);
+            return null != bl && bl;
         });
     }
 
@@ -108,9 +103,9 @@ public abstract class AbstractIndicators {
      * 获取Metrics key
      * 示例：COLLECTOR:TASK:102121:213124512312:1587375600000:登录接口
      *
-     * @param taskKey
-     * @param time
-     * @return
+     * @param taskKey 任务key
+     * @param time    时间
+     * @return -
      */
     protected String getWindowKey(String taskKey, String transaction, long time) {
         return String.format("%s:%s:%s", taskKey, time, transaction);
@@ -124,15 +119,15 @@ public abstract class AbstractIndicators {
         return String.format("%s_%s_%s", sceneId, reportId, customerId);
     }
 
-    public static String getRedisTpsLimitKey(Long sceneId,Long reportId,Long customerId){
+    public static String getRedisTpsLimitKey(Long sceneId, Long reportId, Long customerId) {
         return String.format("__REDIS_TPS_LIMIT_KEY_%s_%s_%s__", sceneId, reportId, customerId);
     }
 
-    public static String getRedisTpsAllLimitKey(Long sceneId,Long reportId,Long customerId){
+    public static String getRedisTpsAllLimitKey(Long sceneId, Long reportId, Long customerId) {
         return String.format("__REDIS_TPS_ALL_LIMIT_KEY_%s_%s_%s__", sceneId, reportId, customerId);
     }
 
-    public static String getRedisTpsPodNumKey(Long sceneId,Long reportId,Long customerId){
+    public static String getRedisTpsPodNumKey(Long sceneId, Long reportId, Long customerId) {
         return String.format("__REDIS_TPS_POD_NUM_KEY_%s_%s_%s__", sceneId, reportId, customerId);
     }
 
@@ -140,8 +135,8 @@ public abstract class AbstractIndicators {
      * 获取Metrics 指标key
      * 示例：COLLECTOR:TASK:102121:213124512312:1587375600000:rt
      *
-     * @param indicatorsName
-     * @return
+     * @param indicatorsName 指标名称
+     * @return -
      */
     protected String getIndicatorsKey(String windowKey, String indicatorsName) {
         return String.format("%s:%s", windowKey, indicatorsName);
@@ -162,8 +157,8 @@ public abstract class AbstractIndicators {
     /**
      * time 不进行转换
      *
-     * @param taskKey
-     * @return
+     * @param taskKey 任务key
+     * @return -
      */
     protected String last(String taskKey) {
         return getIndicatorsKey(String.format("%s:%s", taskKey, "last"), "last");
@@ -171,11 +166,12 @@ public abstract class AbstractIndicators {
 
     /**
      * 强行自动标识
-     * @param taskKey
-     * @return
+     *
+     * @param taskKey 任务key
+     * @return -
      */
     protected String forceCloseTime(String taskKey) {
-        return getIndicatorsKey(String.format("%s:%s", taskKey,"forceClose"),"force");
+        return getIndicatorsKey(String.format("%s:%s", taskKey, "forceClose"), "force");
     }
 
     protected String countKey(String taskKey, String transaction, long timeWindow) {
@@ -198,16 +194,16 @@ public abstract class AbstractIndicators {
         return getIndicatorsKey(getWindowKey(taskKey, transaction, timeWindow), "minRt");
     }
 
-    protected void doubleSaveRedisMap(String key, String timestampPodNum,Double value) {
+    protected void doubleSaveRedisMap(String key, String timestampPodNum, Double value) {
         // 归纳
-        redisTemplate.opsForHash().put(key,timestampPodNum,value);
+        redisTemplate.opsForHash().put(key, timestampPodNum, value);
         //redisTemplate.opsForValue().increment(key, value);
         setTTL(key);
     }
 
-    protected void longSaveRedisMap(String key, String timestampPodNum,Long value) {
+    protected void longSaveRedisMap(String key, String timestampPodNum, Long value) {
         // 归纳
-        redisTemplate.opsForHash().put(key,timestampPodNum,value);
+        redisTemplate.opsForHash().put(key, timestampPodNum, value);
         //redisTemplate.opsForValue().increment(key, value);
         setTTL(key);
     }
@@ -218,18 +214,19 @@ public abstract class AbstractIndicators {
 
     /**
      * 强行自动关闭时间
-     * @param key
-     * @param startTime
+     *
+     * @param key          key
+     * @param startTime    开始时间
      * @param pressureTime 秒
      */
-    protected void setForceCloseTime(String key, Long startTime,Long pressureTime) {
-        if(forceCloseTime > 30 ) {
+    protected void setForceCloseTime(String key, Long startTime, Long pressureTime) {
+        if (forceCloseTime > 30) {
             // 大于30 强制改成30
             forceCloseTime = 30;
         }
-        Long forceTime = startTime + pressureTime * 1000 + forceCloseTime*1000;
+        Long forceTime = startTime + pressureTime * 1000 + forceCloseTime * 1000;
         redisTemplate.opsForValue().set(key, forceTime);
-        log.info("redis key:{} 超时时间:{} ",key,forceTime);
+        log.info("redis key:{} 超时时间:{} ", key, forceTime);
     }
 
     protected void longCumulative(String key, Long value) {
@@ -237,16 +234,16 @@ public abstract class AbstractIndicators {
         setTTL(key);
     }
 
-    protected void intSaveRedisMap(String key,String timestampPodNum,Integer value) {
+    protected void intSaveRedisMap(String key, String timestampPodNum, Integer value) {
         // 归纳 数据
-        redisTemplate.opsForHash().put(key,timestampPodNum,value);
+        redisTemplate.opsForHash().put(key, timestampPodNum, value);
         // 计算 数据
         //redisTemplate.opsForValue().increment(key, value);
         setTTL(key);
     }
 
-    protected void setError(String key,String timestampPodNum, String value) {
-        redisTemplate.opsForHash().put(key,timestampPodNum,value);
+    protected void setError(String key, String timestampPodNum, String value) {
+        redisTemplate.opsForHash().put(key, timestampPodNum, value);
         //redisTemplate.opsForValue().set(key, value);
         setTTL(key);
     }
@@ -265,7 +262,7 @@ public abstract class AbstractIndicators {
     protected void setMin(String key, Long value) {
         if (redisTemplate.hasKey(key)) {
             long temp = getEventTimeStrap(key);
-            if (value.longValue() < temp) {
+            if (value < temp) {
                 redisTemplate.opsForValue().set(key, value);
             }
         } else {
@@ -288,8 +285,8 @@ public abstract class AbstractIndicators {
 
     protected Integer getIntValue(String key) {
         // 数据进行集合
-        if(redisTemplate.hasKey(key) && redisTemplate.opsForHash().size(key) > 0 ) {
-            Map<String,Integer> map =  redisTemplate.opsForHash().entries(key);
+        if (redisTemplate.hasKey(key) && redisTemplate.opsForHash().size(key) > 0) {
+            Map<String, Integer> map = redisTemplate.opsForHash().entries(key);
             // 数据聚合
             return map.values().stream().reduce(Integer::sum).orElse(0);
         }
@@ -303,8 +300,9 @@ public abstract class AbstractIndicators {
 
     /**
      * 获取时间搓，取time 求min max
-     * @param key
-     * @return
+     *
+     * @param key key
+     * @return -
      */
     protected Long getEventTimeStrap(String key) {
         Object object = redisTemplate.opsForValue().get(key);
@@ -315,11 +313,11 @@ public abstract class AbstractIndicators {
     }
 
     protected Long getLongValueFromMap(String key) {
-        if(redisTemplate.hasKey(key) && redisTemplate.opsForHash().size(key) > 0 ) {
-            Map<String,Object> map =  redisTemplate.opsForHash().entries(key);
+        if (redisTemplate.hasKey(key) && redisTemplate.opsForHash().size(key) > 0) {
+            Map<String, Object> map = redisTemplate.opsForHash().entries(key);
             // 数据聚合
             return map.values().stream().map(String::valueOf)
-                    .map(Long::valueOf).reduce(Long::sum).orElse(0L);
+                .map(Long::valueOf).reduce(Long::sum).orElse(0L);
         }
         return null;
     }
@@ -334,15 +332,15 @@ public abstract class AbstractIndicators {
 
     @PostConstruct
     public void init() {
-        minRedisScript = new DefaultRedisScript<Void>();
+        minRedisScript = new DefaultRedisScript<>();
         minRedisScript.setResultType(Void.class);
         minRedisScript.setScriptText(minScript);
 
-        maxRedisScript = new DefaultRedisScript<Void>();
+        maxRedisScript = new DefaultRedisScript<>();
         maxRedisScript.setResultType(Void.class);
         maxRedisScript.setScriptText(maxScript);
 
-        unlockRedisScript = new DefaultRedisScript<Void>();
+        unlockRedisScript = new DefaultRedisScript<>();
         unlockRedisScript.setResultType(Void.class);
         unlockRedisScript.setScriptText(unlockScript);
 

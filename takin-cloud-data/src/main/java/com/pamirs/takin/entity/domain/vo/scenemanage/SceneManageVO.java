@@ -7,10 +7,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @ClassName SceneManageVO
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午4:43
+ * @author qianshui
+ * @date 2020/4/17 下午4:43
  */
 @Data
 @ApiModel(value = "SceneManageVO", description = "场景基本信息")

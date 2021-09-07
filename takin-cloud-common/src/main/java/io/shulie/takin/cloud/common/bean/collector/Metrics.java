@@ -5,9 +5,8 @@ import lombok.Data;
 /**
  * Influxdb 对象
  *
- * @Author <a href="tangyuhan@shulie.io">yuhan.tang</a>
- * @package: io.shulie.takin.entity
- * @Date 2020-04-20 15:20
+ * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
+ * @date 2020-04-20 15:20
  */
 @Data
 public class Metrics {

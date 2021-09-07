@@ -1,8 +1,8 @@
 package io.shulie.takin.cloud.common.constants;
 
 /**
- * @Author 莫问
- * @Date 2020-05-21
+ * @author 莫问
+ * @date 2020-05-21
  */
 
 public class ScheduleConstants {
@@ -109,7 +109,7 @@ public class ScheduleConstants {
     /**
      * 调度名称
      *
-     * @return
+     * @return -
      */
     public static String getScheduleName(Long sceneId, Long taskId, Long customerId) {
         // 兼容原始redis key
@@ -122,7 +122,7 @@ public class ScheduleConstants {
     /**
      * ConfigMap名称
      *
-     * @return
+     * @return -
      */
     public static String getConfigMapName(Long sceneId, Long taskId, Long customerId) {
         // 兼容原始redis key
@@ -135,7 +135,7 @@ public class ScheduleConstants {
     /**
      * 获取url
      *
-     * @return
+     * @return -
      */
     public static String getConsoleUrl(Long sceneId, Long taskId, Long customerId) {
         // 兼容原始redis key
@@ -149,7 +149,7 @@ public class ScheduleConstants {
     /**
      * 压力节点 引擎名
      *
-     * @return
+     * @return -
      */
     public static String getEngineName(Long sceneId, Long reportId, Long customerId) {
         // 兼容原始redis key
@@ -162,7 +162,7 @@ public class ScheduleConstants {
     /**
      * 压力节点名总数名称
      *
-     * @return
+     * @return -
      */
     public static String getPressureNodeTotalKey(Long sceneId, Long reportId, Long customerId) {
         // 兼容原始redis key
@@ -175,7 +175,7 @@ public class ScheduleConstants {
     /**
      * 压力节点 名
      *
-     * @return
+     * @return -
      */
     public static String getPressureNodeName(Long sceneId, Long reportId, Long customerId) {
         // 兼容原始redis key

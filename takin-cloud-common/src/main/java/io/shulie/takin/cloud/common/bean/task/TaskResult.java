@@ -6,9 +6,8 @@ import io.shulie.takin.cloud.common.enums.scenemanage.TaskStatusEnum;
 import lombok.Data;
 
 /**
- * @Author: fanxx
- * @Date: 2020/4/20 下午2:41
- * @Description:
+ * @author fanxx
+ * @date 2020/4/20 下午2:41
  */
 @Data
 public class TaskResult {

@@ -39,7 +39,7 @@ public class EnginePluginDetailOutput implements Serializable {
      * @param enginePlugin
      * @param supportedVersions
      * @param uploadFiles
-     * @return
+     * @return -
      */
     public static EnginePluginDetailOutput create(EnginePluginEntity enginePlugin, List<String> supportedVersions, List<EnginePluginFileOutput> uploadFiles) {
         EnginePluginDetailOutput instance = new EnginePluginDetailOutput();

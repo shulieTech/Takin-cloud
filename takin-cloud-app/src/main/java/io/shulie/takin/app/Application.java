@@ -19,8 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * @author shulie
- * @package: com.pamirs
- * @Date 2019-07-23 18:30
+ * @date 2019-07-23 18:30
  */
 @EnableAsync
 @EnableScheduling

@@ -23,52 +23,52 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.cloud.open.api.impl.report
  * @date 2020/12/17 1:29 下午
  */
 @Component
 public class CloudReportApiImpl extends CloudCommonApi implements CloudReportApi {
     @Autowired
     private TroCloudClientProperties troCloudClientProperties;
+
     @Override
     public ResponseResult<List<ReportResp>> listReport(ReportQueryReq req) {
         return null;
     }
+
     @Override
     public ResponseResult<String> addWarn(WarnCreateReq req) {
         TakinResponseEntity<ResponseResult<String>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_WARN_URL,
-                getHeaders(req), new TypeReference<ResponseResult<String>>() {},req);
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(req), new TypeReference<ResponseResult<String>>() {}, req);
+        if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
-
 
     @Override
     public ResponseResult<String> updateReportConclusion(UpdateReportConclusionReq req) {
         TakinResponseEntity<ResponseResult<String>> takinResponseEntity =
-            HttpHelper.doPut(troCloudClientProperties.getUrl()+ CloudApiConstant.REPORT_UPDATE_STATE_URL,
-                getHeaders(req), new TypeReference<ResponseResult<String>>() {},req);
-        if(takinResponseEntity.getSuccess()) {
+            HttpHelper.doPut(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_UPDATE_STATE_URL,
+                getHeaders(req), new TypeReference<ResponseResult<String>>() {}, req);
+        if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
     @Override
     public ResponseResult<ReportDetailResp> getReportByReportId(ReportDetailByIdReq req) {
         TakinResponseEntity<ResponseResult<ReportDetailResp>> takinResponseEntity =
-            HttpHelper.doGet(troCloudClientProperties.getUrl()+ CloudApiConstant.REPORT_DETAIL_GET_URL,
-                getHeaders(req),req,new TypeReference<ResponseResult<ReportDetailResp>>() {});
-        if(takinResponseEntity.getSuccess()) {
+            HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_DETAIL_GET_URL,
+                getHeaders(req), req, new TypeReference<ResponseResult<ReportDetailResp>>() {});
+        if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
     @Override
@@ -82,6 +82,5 @@ public class CloudReportApiImpl extends CloudCommonApi implements CloudReportApi
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
             takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
-
 
 }

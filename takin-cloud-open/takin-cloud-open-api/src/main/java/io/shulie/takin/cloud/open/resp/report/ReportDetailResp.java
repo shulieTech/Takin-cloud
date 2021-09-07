@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import lombok.EqualsAndHashCode;
 import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
@@ -16,11 +17,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
-* @Package io.shulie.takin.cloud.open.req.report
 * @author 无涯
-* @description:
 * @date 2021/2/3 11:46 上午
 */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class ReportDetailResp extends CloudUserCommonRequestExt implements Serializable {
 

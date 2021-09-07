@@ -7,12 +7,14 @@ import java.util.Date;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @Author 莫问
- * @Date 2020-04-17
+ * @author 莫问
+ * @date 2020-04-17
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class CloudReportDTO extends CloudUserCommonRequestExt implements Serializable {
 
     private static final long serialVersionUID = 4235565595934721788L;
@@ -48,7 +50,5 @@ public class CloudReportDTO extends CloudUserCommonRequestExt implements Seriali
 
     @ApiModelProperty(value = "压测不通过的原因")
     private String errorMsg;
-
-
 
 }

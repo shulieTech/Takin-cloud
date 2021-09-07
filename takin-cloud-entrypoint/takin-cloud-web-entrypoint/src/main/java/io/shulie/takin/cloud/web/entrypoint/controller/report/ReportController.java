@@ -41,9 +41,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * @Author 莫问
- * @Description
- * @Date 2020-04-17
+ * @author 莫问
+ * @date 2020-04-17
  */
 @RestController
 @RequestMapping(APIUrls.TRO_API_URL)
@@ -69,8 +68,9 @@ public class ReportController {
 
     /**
      * 迁移到open-opi
-     * @param reportId
-     * @return
+     *
+     * @param reportId 报告主键
+     * @return -
      */
     @Deprecated
     @GetMapping(value = "report/getReportByReportId")
@@ -79,7 +79,7 @@ public class ReportController {
     public ResponseResult<ReportDetailOutput> getReportByReportId(Long reportId) {
         ReportDetailOutput detail = reportService.getReportByReportId(reportId);
         if (detail == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR,"报告不存在");
+            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在");
         }
         return ResponseResult.success(detail);
     }
@@ -87,8 +87,8 @@ public class ReportController {
     /**
      * 缓存报告链路数据
      *
-     * @param reportTrendQuery
-     * @return
+     * @param reportTrendQuery 请求数据
+     * @return -
      */
     @GetMapping("report/queryReportTrend")
     @ApiOperation("报告链路趋势")
@@ -119,7 +119,7 @@ public class ReportController {
     public ResponseResult<ReportDetailOutput> tempReportDetail(Long sceneId) {
         ReportDetailOutput detail = reportService.tempReportDetail(sceneId);
         if (detail == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR,"实况报表不存在");
+            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "实况报表不存在");
         }
         return ResponseResult.success(detail);
     }

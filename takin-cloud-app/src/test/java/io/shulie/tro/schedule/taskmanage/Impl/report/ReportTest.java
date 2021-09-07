@@ -1,4 +1,4 @@
-package io.shulie.takin.schedule.taskmanage.Impl.report;
+package io.shulie.tro.schedule.taskmanage.Impl.report;
 
 import java.util.List;
 
@@ -22,11 +22,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * @Author: mubai
- * @Date: 2020-11-09 17:27
- * @Description:
+ * @author mubai
+ * @date 2020-11-09 17:27
  */
-
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -72,15 +70,14 @@ public class ReportTest {
         System.out.println(reportByReportId);
     }
 
-//    @Test
-//    public void insert() {
-//        Report report = new Report();
-//        report.setSceneId(11L);
-//        report.setSceneName("ss");
-//        report.setStartTime(new Date());
-//
-//        tReportMapper.insertSelective(report);
-//    }
-
+    //    @Test
+    //    public void insert() {
+    //        Report report = new Report();
+    //        report.setSceneId(11L);
+    //        report.setSceneName("ss");
+    //        report.setStartTime(new Date());
+    //
+    //        tReportMapper.insertSelective(report);
+    //    }
 
 }

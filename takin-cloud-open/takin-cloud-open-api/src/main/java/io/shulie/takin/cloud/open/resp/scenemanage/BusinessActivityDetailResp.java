@@ -6,10 +6,8 @@ import java.math.BigDecimal;
 import lombok.Data;
 
 /**
- * @ClassName BusinessActivityDetailResult
- * @Description
- * @Author qianshui
- * @Date 2020/5/18 下午8:36
+ * @author qianshui
+ * @date 2020/5/18 下午8:36
  */
 @Data
 public class BusinessActivityDetailResp implements Serializable {

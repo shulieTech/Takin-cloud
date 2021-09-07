@@ -19,11 +19,8 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * 基于JDK 1.8 日期API
  *
- * @Author: xingchen
- * @ClassName: DateUtils
- * @Package: cn.net.yto.bnet.screen.util
- * @Date: 2019/03/10下午2:21
- * @Description:
+ * @author xingchen
+ * @date 2019/03/10下午2:21
  */
 public class DateUtil {
     public static String YYYYMMDDHHMMSS = "yyyy-MM-dd HH:mm:ss";
@@ -33,15 +30,14 @@ public class DateUtil {
 
     public static String formatTime(long timestamp) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(YYYYMMDDHHMMSS);
-        String format = dateFormat.format(timestamp);
-        return format;
+        return dateFormat.format(timestamp);
     }
 
     /**
      * 将日期转为字符串 yyyy-mm-dd HH:mm:ss
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static String getYYYYMMDDHHMMSS(Date date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYYMMDDHHMMSS);
@@ -52,8 +48,8 @@ public class DateUtil {
     /**
      * 将日期转为字符串 yyyy-mm-dd HH:mm:ss
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static String getDate(Date date, String pattern) {
         if (date == null) {
@@ -67,8 +63,8 @@ public class DateUtil {
     /**
      * 将字符串转为日期
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static Date getDate(String date) {
         if (StringUtils.isBlank(date)) {
@@ -82,8 +78,8 @@ public class DateUtil {
     /**
      * 将字符串转为日期
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static Date getMSDate(String date) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(YYYYMMDDHHMMSSMS);
@@ -94,8 +90,8 @@ public class DateUtil {
     /**
      * 将字符串转为日期
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static Date getDate(String date, String pattern) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(pattern);
@@ -106,8 +102,8 @@ public class DateUtil {
     /**
      * LocalDateTime 和DateTime 互转
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static LocalDateTime dateToDateTime(Date date) {
         Instant instant = date.toInstant();
@@ -115,65 +111,60 @@ public class DateUtil {
     }
 
     public static Date dateTimeToDate(LocalDateTime localDateTime) {
-        Date date = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-        return date;
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 
     /**
      * date 转LocalDate
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static LocalDate dateToLocalDate(Date date) {
         Instant instant = date.toInstant();
-        LocalDate localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate();
-        return localDate;
+        return instant.atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
     /**
      * date 转LocalDate
      *
-     * @param localDate
-     * @return
+     * @param localDate -
+     * @return -
      */
     public static Date localToDate(LocalDate localDate) {
-        Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        return date;
+        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     /**
      * date 转DateTime
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static LocalTime dateToLocalTime(Date date) {
         Instant instant = date.toInstant();
-        LocalTime localTime = instant.atZone(ZoneId.systemDefault()).toLocalTime();
-        return localTime;
+        return instant.atZone(ZoneId.systemDefault()).toLocalTime();
     }
 
     /**
      * date 转LocalTime
      *
-     * @param localTime
-     * @return
+     * @param localTime -
+     * @return -
      */
     public static Date localToDate(LocalTime localTime) {
         LocalDate localDate = LocalDate.now();
         LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
         ZoneId zone = ZoneId.systemDefault();
         Instant instant = localDateTime.atZone(zone).toInstant();
-        Date date = Date.from(instant);
-        return date;
+        return Date.from(instant);
     }
 
     /**
      * 将日期转为字符串 yyyy-mm-dd
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static String getYYYYMMDD(Date date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYYMMDD);
@@ -184,8 +175,8 @@ public class DateUtil {
     /**
      * 将日期转为字符串 yyyy-mm-dd
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static String getYYYYMM(Date date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYYMM);
@@ -196,8 +187,8 @@ public class DateUtil {
     /**
      * 获取当前时间之后的某一天的最小时间
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static Date afterXDateTimeMIN(Date date, int after) {
         LocalDateTime localDateTime = dateToDateTime(date);
@@ -209,8 +200,8 @@ public class DateUtil {
     /**
      * 获取当前时间之后的某一天的最大时间
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static Date afterXDateTimeMAX(Date date, int after) {
         LocalDateTime localDateTime = dateToDateTime(date);
@@ -222,8 +213,8 @@ public class DateUtil {
     /**
      * 获取当前时间之前的某一天的最小时间
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static Date beforeXDateTimeMIN(Date date, int before) {
         LocalDateTime localDateTime = dateToDateTime(date);
@@ -235,9 +226,9 @@ public class DateUtil {
     /**
      * 获取某天的几点
      *
-     * @param date
-     * @param time
-     * @return
+     * @param date -
+     * @param time -
+     * @return -
      */
     public static Date getTimeByDay(Date date, int time) {
         LocalDateTime localDateTime = dateToDateTime(date);
@@ -249,8 +240,8 @@ public class DateUtil {
     /**
      * 获取当前时间之前的某一天的最大时间
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static Date beforeXDateTimeMAX(Date date, int before) {
         LocalDateTime localDateTime = dateToDateTime(date);
@@ -262,7 +253,7 @@ public class DateUtil {
     /**
      * 获取本月的第一天 00:00:00
      *
-     * @return
+     * @return -
      */
     public static Date currentFirstDayOfMonth() {
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -273,7 +264,7 @@ public class DateUtil {
     /**
      * 获取前几个月的1号0点 00:00:00
      *
-     * @return
+     * @return -
      */
     public static Date preXDayOfMonthMIN(int month) {
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -285,7 +276,7 @@ public class DateUtil {
     /**
      * 获取前几个月的1号0点 00:00:00
      *
-     * @return
+     * @return -
      */
     public static Date preXDayOfMonthMIN(Date date, int month) {
         LocalDateTime localDateTime = dateToDateTime(date);
@@ -297,7 +288,7 @@ public class DateUtil {
     /**
      * 获取前几个月的最后一天23：59：59
      *
-     * @return
+     * @return -
      */
     public static Date preXDayOfMonthMAX(int month) {
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -309,7 +300,7 @@ public class DateUtil {
     /**
      * 获取某个时间几个月的最后一天23：59：59
      *
-     * @return
+     * @return -
      */
     public static Date preXDayOfMonthMAX(Date date, int month) {
         LocalDateTime localDateTime = dateToDateTime(date);
@@ -321,9 +312,9 @@ public class DateUtil {
     /**
      * 两个日期相差多少个月
      *
-     * @param date1
-     * @param date2
-     * @return
+     * @param date1 -
+     * @param date2 -
+     * @return -
      */
     public static Long getUntilMonth(Date date1, Date date2) {
         LocalDate localDate1 = dateToLocalDate(date1);
@@ -334,28 +325,28 @@ public class DateUtil {
     /**
      * 两个日期相差多少小时
      *
-     * @param date1
-     * @param date2
-     * @return
+     * @param date1 -
+     * @param date2 -
+     * @return -
      */
     public static Long getUntilHours(Date date1, Date date2) {
         LocalDateTime localDate1 = dateToDateTime(date1);
         LocalDateTime localDate2 = dateToDateTime(date2);
-        Long senonds = Duration.between(localDate1, localDate2).get(ChronoUnit.SECONDS);
-        return senonds / 3600;
+        long seconds = Duration.between(localDate1, localDate2).get(ChronoUnit.SECONDS);
+        return seconds / 3600;
     }
 
     /**
      * 两个日期相差多少小时 double 约等于
      *
-     * @param date1
-     * @param date2
-     * @return
+     * @param date1 -
+     * @param date2 -
+     * @return -
      */
     public static double getUntilHoursByDouble(Date date1, Date date2) {
         LocalDateTime localDate1 = dateToDateTime(date1);
         LocalDateTime localDate2 = dateToDateTime(date2);
-        Long seconds = Duration.between(localDate1, localDate2).get(ChronoUnit.SECONDS);
+        long seconds = Duration.between(localDate1, localDate2).get(ChronoUnit.SECONDS);
         BigDecimal secondss = BigDecimal.valueOf(seconds);
         BigDecimal hours = secondss.divide(BigDecimal.valueOf(3600), 2, BigDecimal.ROUND_HALF_UP);
         return hours.doubleValue();
@@ -364,9 +355,9 @@ public class DateUtil {
     /**
      * 两个日期相差多少秒
      *
-     * @param date1
-     * @param date2
-     * @return
+     * @param date1 -
+     * @param date2 -
+     * @return -
      */
     public static Long getUntilSecond(Date date1, Date date2) {
         LocalDateTime localDate1 = dateToDateTime(date1);
@@ -377,9 +368,9 @@ public class DateUtil {
     /**
      * 获取当前时间后几分钟的时间
      *
-     * @param date
-     * @param minute
-     * @return
+     * @param date   -
+     * @param minute -
+     * @return -
      */
     public static Date afterXMinuteDate(Date date, long minute) {
         LocalDateTime localDate = dateToDateTime(date);
@@ -390,9 +381,9 @@ public class DateUtil {
     /**
      * 获取当前时间后几分钟的时间
      *
-     * @param date
-     * @param minute
-     * @return
+     * @param date   -
+     * @param minute -
+     * @return -
      */
     public static Date preXMinuteDate(Date date, long minute) {
         LocalDateTime localDate = dateToDateTime(date);
@@ -400,19 +391,11 @@ public class DateUtil {
         return dateTimeToDate(afterTime);
     }
 
-    public static void main(String args[]) {
-        //LocalDateTime localDateTime = LocalDateTime.now();
-
-        //System.out.println(localDateTime.getDayOfMonth());
-        //System.out.println(getYYYYMMDDHHMMSS(DateUtils.preXDayOfMonthMAX(new Date(), 1)));
-        System.out.println(DateUtil.getYYYYMMDDHHMMSS(preXMinuteDate(new Date(), 11)));
-    }
-
     /**
      * 当前时间23：59：59
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static Date currentMax(Date date) {
         LocalDateTime localDateTime = dateToDateTime(date);
@@ -423,8 +406,8 @@ public class DateUtil {
     /**
      * 当前时间23：59：59
      *
-     * @param date
-     * @return
+     * @param date -
+     * @return -
      */
     public static Date currentMin(Date date) {
         LocalDateTime localDateTime = dateToDateTime(date);
@@ -444,7 +427,7 @@ public class DateUtil {
      * 获取昨天同期时间戳
      *
      * @param time 格式化时间
-     * @return
+     * @return -
      */
     public static long getYesterday(long time) {
         Calendar calendar = Calendar.getInstance();
@@ -499,19 +482,20 @@ public class DateUtil {
 
     /**
      * 压测时长：
-     *  无启动时间，返回null
-     *  无停止时间，返回null
-     *  停止时间-启动时间
-     * @param startTime
-     * @param endTime
-     * @return
+     * 无启动时间，返回null
+     * 无停止时间，返回null
+     * 停止时间-启动时间
+     *
+     * @param startTime -
+     * @param endTime   -
+     * @return -
      */
-    public static String formatTestTime(Date startTime, Date endTime){
-        if(startTime == null || endTime == null) {
+    public static String formatTestTime(Date startTime, Date endTime) {
+        if (startTime == null || endTime == null) {
             return null;
         }
-        LocalDateTime start = startTime.toInstant().atZone( ZoneId.systemDefault()).toLocalDateTime();
-        LocalDateTime end = endTime.toInstant().atZone( ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime start = startTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime end = endTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         long seconds = Duration.between(start, end).getSeconds();
         long hour = seconds / 3600;
         long minutes = seconds / 60;

@@ -3,8 +3,8 @@ package com.pamirs.takin.entity.domain.dto.strategy;
 import lombok.Data;
 
 /**
- * @Author 莫问
- * @Date 2020-05-15
+ * @author 莫问
+ * @date 2020-05-15
  */
 @Data
 public class StrategyResultDTO {

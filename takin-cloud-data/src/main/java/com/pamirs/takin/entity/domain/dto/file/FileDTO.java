@@ -7,10 +7,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @ClassName FileVO
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午9:03
+ * @author qianshui
+ * @date 2020/4/17 下午9:03
  */
 @Data
 @ApiModel(description = "上传结果")

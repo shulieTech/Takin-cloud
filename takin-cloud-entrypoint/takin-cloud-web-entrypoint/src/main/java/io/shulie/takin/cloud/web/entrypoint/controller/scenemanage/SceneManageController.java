@@ -72,10 +72,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * @ClassName SceneManageController
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午2:31
+ * @author qianshui
+ * @date 2020/4/17 下午2:31
  */
 @RestController
 @RequestMapping(APIUrls.TRO_API_URL + "scenemanage")
@@ -136,8 +134,7 @@ public class SceneManageController {
 
         SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(id, options);
         assembleFeatures(sceneManage);
-        ResponseResult<SceneManageWrapperResponse> resp = wrapperSceneManage(sceneManage);
-        return resp;
+        return wrapperSceneManage(sceneManage);
     }
 
     public void assembleFeatures(SceneManageWrapperOutput resp) {
@@ -153,7 +150,7 @@ public class SceneManageController {
         }
         if (map.containsKey(SceneManageConstant.FEATURES_SCRIPT_ID)) {
             Long scriptId = Long.valueOf(map.get(SceneManageConstant.FEATURES_SCRIPT_ID).toString());
-            if (configType != -1 && configType == 1) {
+            if (configType == 1) {
                 //业务活动
                 List<SceneManageWrapperOutput.SceneBusinessActivityRefOutput> businessActivityConfig = resp
                     .getBusinessActivityConfig();
@@ -202,8 +199,7 @@ public class SceneManageController {
         @ApiParam(name = "lastPtStartTime", value = "压测结束时间") String lastPtStartTime,
         @ApiParam(name = "lastPtEndTime", value = "压测结束时间") String lastPtEndTime
     ) {
-
-        /**
+        /*
          * 1、封装参数
          * 2、调用查询服务
          * 3、返回指定格式
@@ -245,10 +241,10 @@ public class SceneManageController {
     }
 
     /**
-     * 并发数量
+     * 获取机器数量范围
      *
-     * @param concurrenceNum
-     * @return
+     * @param concurrenceNum 并发数量
+     * @return -
      */
     @GetMapping("/ipnum")
     @ApiOperation(value = "获取机器数量范围")
@@ -258,7 +254,6 @@ public class SceneManageController {
         BeanUtils.copyProperties(output, strategyResponse);
         return ResponseResult.success(strategyResponse);
     }
-
 
     private ResponseResult<SceneManageWrapperResponse> wrapperSceneManage(SceneManageWrapperOutput sceneManage) {
 
@@ -271,10 +266,10 @@ public class SceneManageController {
         response.setUploadFile(SceneScriptRefRespConvertor.INSTANCE.ofList(sceneManage.getUploadFile()));
         response.setScheduleInterval(sceneManage.getScheduleInterval());
 
-        if (sceneManage == null || CollectionUtils.isEmpty(response.getBusinessActivityConfig())) {
+        if (CollectionUtils.isEmpty(response.getBusinessActivityConfig())) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "场景不存在或者没有业务活动配置");
         }
-        sceneManage.getBusinessActivityConfig().stream().forEach(data -> {
+        sceneManage.getBusinessActivityConfig().forEach(data -> {
             if (StringUtils.isBlank(data.getBindRef())) {
                 data.setBindRef("-1");
             }

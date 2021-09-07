@@ -5,10 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @ClassName AchieveModel
- * @Description
- * @Author qianshui
- * @Date 2020/4/20 下午5:33
+ * @author qianshui
+ * @date 2020/4/20 下午5:33
  */
 @Data
 @NoArgsConstructor

@@ -63,7 +63,7 @@ public class BigFileServiceImpl implements BigFileService {
     private FileSliceService fileSliceService;
 
     @Override
-    public ResponseResult upload(Part dto) {
+    public ResponseResult<?> upload(Part dto) {
         if (dto == null){
             throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR,"param can not to be null !");
         }
@@ -109,7 +109,7 @@ public class BigFileServiceImpl implements BigFileService {
     }
 
     @Override
-    public ResponseResult compact(Part part) {
+    public ResponseResult<Map<String, Object>> compact(Part part) {
 
         log.info("{}:开始文件打包行为", part.getOriginalName());
         if (part == null || part.getOriginalName() == null || part.getSceneId() == null) {
@@ -208,7 +208,7 @@ public class BigFileServiceImpl implements BigFileService {
      * @param part        传输对象
      * @param errors     error对象
      * @param parentPath 上传父目录
-     * @return
+     * @return -
      */
     private ResponseResult<Map<String, Object>> validatorFile(Part part, List<Part> errors,
         String parentPath) {

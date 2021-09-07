@@ -16,7 +16,7 @@ public interface SceneManageReqConvertor {
     /**
      * 入参转换
      * @param wrapperRequest
-     * @return
+     * @return -
      */
     SceneManageWrapperInput ofSceneManageWrapperInput(SceneManageWrapperRequest wrapperRequest);
 }

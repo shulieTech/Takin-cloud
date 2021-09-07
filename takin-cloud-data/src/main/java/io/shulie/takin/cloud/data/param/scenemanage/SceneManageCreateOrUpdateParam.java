@@ -6,10 +6,7 @@ import lombok.Data;
 
 /**
  * @author by: hezhongqi
- * @Package io.shulie.takin.cloud.data.param.scenemanage
- * @ClassName: SceneManageCreateParam
- * @Description: TODO
- * @Date: 2021/8/3 15:06
+ * @date 2021/8/3 15:06
  */
 @Data
 public class SceneManageCreateOrUpdateParam {

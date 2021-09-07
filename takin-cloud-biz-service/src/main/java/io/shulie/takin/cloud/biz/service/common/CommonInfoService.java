@@ -13,7 +13,7 @@ public interface CommonInfoService {
     /**
      * 获取公共配置信息
      *
-     * @return
+     * @return -
      */
     CommonInfosOutput getCommonConfigurationInfos();
 }

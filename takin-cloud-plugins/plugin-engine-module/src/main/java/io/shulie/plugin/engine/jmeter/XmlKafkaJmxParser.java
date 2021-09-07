@@ -13,15 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author HengYu
- * @className XmlKafkaJmxParser
- * @date 2021/4/12 4:02 下午
- * @description kafka 脚本解析器
+ * kafka 脚本解析器
  *
+ * @author HengYu
+ * @date 2021/4/12 4:02 下午
  */
 public class XmlKafkaJmxParser extends JmxParser {
 
-    private  Logger log = LoggerFactory.getLogger(XmlKafkaJmxParser.class);
+    private Logger log = LoggerFactory.getLogger(XmlKafkaJmxParser.class);
 
     @Override
     public List<ScriptUrlExt> getEntryContent(Document document, String content, ScriptParseExt scriptParseExt) {

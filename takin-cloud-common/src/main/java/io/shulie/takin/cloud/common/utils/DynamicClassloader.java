@@ -5,8 +5,7 @@ import java.net.URLClassLoader;
 
 /**
  * @author shulie
- * @package: com.pamirs.takin.common.util
- * @Date 2019-06-26 15:32
+ * @date 2019-06-26 15:32
  */
 public class DynamicClassloader extends URLClassLoader {
 

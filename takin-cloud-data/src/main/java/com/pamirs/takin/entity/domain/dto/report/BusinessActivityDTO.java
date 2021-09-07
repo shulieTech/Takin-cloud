@@ -1,12 +1,12 @@
 package com.pamirs.takin.entity.domain.dto.report;
 
+import lombok.Data;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
 
 /**
- * @Author 莫问
- * @Date 2020-04-20
+ * @author 莫问
+ * @date 2020-04-20
  */
 @ApiModel
 @Data

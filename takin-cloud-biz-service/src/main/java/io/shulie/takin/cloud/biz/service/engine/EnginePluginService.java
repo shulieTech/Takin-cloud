@@ -21,7 +21,7 @@ public interface EnginePluginService {
      *
      * @param pluginTypes 插件类型
      *
-     * @return
+     * @return -
      */
     Map<String, List<EnginePluginSimpleInfoOutput>> findEngineAvailablePluginsByType(List<String> pluginTypes);
 
@@ -29,7 +29,7 @@ public interface EnginePluginService {
      * 根据插件ID获取插件详情信息
      *
      * @param pluginId
-     * @return
+     * @return -
      */
     ResponseResult<EnginePluginDetailOutput> findEnginePluginDetails(Long pluginId);
 
@@ -37,7 +37,7 @@ public interface EnginePluginService {
      * 保存引擎插件
      *
      * @param input
-     * @return
+     * @return -
      */
     void saveEnginePlugin(EnginePluginWrapperInput input);
 
@@ -46,7 +46,7 @@ public interface EnginePluginService {
      *
      * @param pluginId
      * @param status
-     * @return
+     * @return -
      */
     void changeEnginePluginStatus(Long pluginId, Integer status);
 

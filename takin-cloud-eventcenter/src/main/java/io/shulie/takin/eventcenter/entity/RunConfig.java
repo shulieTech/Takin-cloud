@@ -3,9 +3,8 @@ package io.shulie.takin.eventcenter.entity;
 import lombok.Data;
 
 /**
- * @Author: fanxx
- * @Date: 2020/4/20 上午10:20
- * @Description:
+ * @author fanxx
+ * @date 2020/4/20 上午10:20
  */
 @Data
 public class RunConfig {

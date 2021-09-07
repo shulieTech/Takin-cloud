@@ -2,6 +2,7 @@
 
 package io.shulie.takin.cloud.biz.service.sla.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.google.common.collect.Maps;
 import com.pamirs.takin.entity.dao.scenemanage.TWarnDetailMapper;
 import com.pamirs.takin.entity.domain.entity.scenemanage.WarnDetail;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneSlaRefResult;
 import io.shulie.takin.ext.content.enginecall.ScheduleStopRequestExt;
 import io.shulie.takin.cloud.biz.event.SlaPublish;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
@@ -41,10 +43,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * @ClassName SlaServiceImpl
- * @Description
- * @Author qianshui
- * @Date 2020/4/20 下午4:48
+ * @author qianshui
+ * @date 2020/4/20 下午4:48
  */
 @Service
 @Slf4j
@@ -78,12 +78,12 @@ public class SlaServiceImpl implements SlaService {
             dto = getSceneManageWrapperDTO(sceneId);
             if (dto == null) {
                 log.error("异常代码【{}】,异常内容：构建sla异常 --> 未找到压测场景， SendMetricsEvent={}",
-                        TakinCloudExceptionEnum.TASK_START_BUILD_SAL,JSON.toJSONString(metricsEvnet));
+                    TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvnet));
                 return false;
             }
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：构建sla异常 -->  查找到压测场景异常， SendMetricsEvent={}，异常信息:{}",
-                    TakinCloudExceptionEnum.TASK_START_BUILD_SAL,JSON.toJSONString(metricsEvnet),e);
+                TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvnet), e);
             return false;
         }
         SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivity = dto.getBusinessActivityConfig().stream().filter(
@@ -91,13 +91,13 @@ public class SlaServiceImpl implements SlaService {
 
         if (businessActivity == null) {
             log.error("异常代码【{}】,异常内容：构建sla异常 --> 未找到业务活动， SendMetricsEvent={}",
-                    TakinCloudExceptionEnum.TASK_START_BUILD_SAL,JSON.toJSONString(metricsEvnet));
+                TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvnet));
             return false;
         }
 
         Long businessActivityId = businessActivity.getBusinessActivityId();
 
-        doDestory(dto.getId(), metricsEvnet, filterSlaList(businessActivityId, dto.getStopCondition()),businessActivity);
+        doDestory(dto.getId(), metricsEvnet, filterSlaList(businessActivityId, dto.getStopCondition()), businessActivity);
 
         doWarn(businessActivity, metricsEvnet, filterSlaList(businessActivityId, dto.getWarningCondition()));
 
@@ -112,9 +112,9 @@ public class SlaServiceImpl implements SlaService {
         }
         SceneManageWrapperResult dto = JSON.parseObject(scene, SceneManageWrapperResult.class);
 
-        dto.getStopCondition().stream().map(data -> data.getId()).forEach(
+        dto.getStopCondition().stream().map(SceneSlaRefResult::getId).forEach(
             id -> redisClientUtils.hmdelete(SLA_DESTORY_KEY, String.valueOf(id)));
-        dto.getWarningCondition().stream().map(data -> data.getId()).forEach(
+        dto.getWarningCondition().stream().map(SceneSlaRefResult::getId).forEach(
             id -> redisClientUtils.hmdelete(SLA_WARN_KEY, String.valueOf(id)));
         redisClientUtils.hmdelete(SLA_SCENE_KEY, String.valueOf(sceneId));
         redisClientUtils.delete(PREFIX_TASK + sceneId);
@@ -132,7 +132,7 @@ public class SlaServiceImpl implements SlaService {
         }
         slaList.forEach(dto -> {
             SceneSlaRefInput input = new SceneSlaRefInput();
-            BeanUtils.copyProperties(dto,input);
+            BeanUtils.copyProperties(dto, input);
             Map<String, Object> conditionMap = SlaUtil.matchCondition(input, metricsEvent);
             if (!(Boolean)conditionMap.get("result")) {
                 redisClientUtils.hmdelete(SLA_DESTORY_KEY, String.valueOf(dto.getId()));
@@ -187,13 +187,13 @@ public class SlaServiceImpl implements SlaService {
     }
 
     private void doWarn(SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivityDTO,
-                        SendMetricsEvent metricsEvent, List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
+        SendMetricsEvent metricsEvent, List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
         if (CollectionUtils.isEmpty(slaList)) {
             return;
         }
         slaList.forEach(dto -> {
             SceneSlaRefInput input = new SceneSlaRefInput();
-            BeanUtils.copyProperties(dto,input);
+            BeanUtils.copyProperties(dto, input);
             Map<String, Object> conditionMap = SlaUtil.matchCondition(input, metricsEvent);
             if (!(Boolean)conditionMap.get("result")) {
                 redisClientUtils.hmdelete(SLA_WARN_KEY, String.valueOf(dto.getId()));
@@ -261,7 +261,7 @@ public class SlaServiceImpl implements SlaService {
 
     private List<SceneManageWrapperOutput.SceneSlaRefOutput> filterSlaList(Long businessActivityId, List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
         if (CollectionUtils.isEmpty(slaList)) {
-            return Collections.EMPTY_LIST;
+            return new ArrayList<>(0);
         }
         return slaList.stream().filter(data -> checkContain(data.getBusinessActivity(), businessActivityId))
             .collect(Collectors.toList());
@@ -284,7 +284,6 @@ public class SlaServiceImpl implements SlaService {
         if (object != null) {
             return JSON.parseObject(object, SceneManageWrapperOutput.class);
         }
-        ;
         SceneManageQueryOpitons options = new SceneManageQueryOpitons();
         options.setIncludeBusinessActivity(true);
         options.setIncludeSLA(true);

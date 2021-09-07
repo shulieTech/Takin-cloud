@@ -6,9 +6,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 /**
- * @Author: mubai
- * @Date: 2020-10-30 11:32
- * @Description:
+ * @author mubai
+ * @date 2020-10-30 11:32
  */
 
 @Mapper

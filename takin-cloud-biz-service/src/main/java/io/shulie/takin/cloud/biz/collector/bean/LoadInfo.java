@@ -4,9 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * @Author <a href="tangyuhan@shulie.io">yuhan.tang</a>
- * @package: io.shulie.takin.cloud.collector.bean
- * @Date 2020-05-11 14:30
+ * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
+ * @date 2020-05-11 14:30
  */
 @Getter
 @Setter

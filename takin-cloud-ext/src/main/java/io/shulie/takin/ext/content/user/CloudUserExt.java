@@ -8,10 +8,7 @@ import lombok.Data;
 
 /**
  * @author by: hezhongqi
- * @Package io.shulie.takin.ext.content.user
- * @ClassName: UserExt
- * @Description: TODO
- * @Date: 2021/8/4 11:25
+ * @date 2021/8/4 11:25
  */
 @Data
 public class CloudUserExt {
@@ -47,6 +44,5 @@ public class CloudUserExt {
 
     @ApiModelProperty(value = "版本")
     private String version;
-
 
 }
