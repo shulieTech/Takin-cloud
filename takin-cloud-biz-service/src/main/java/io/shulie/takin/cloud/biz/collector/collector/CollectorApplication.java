@@ -48,7 +48,7 @@ public class CollectorApplication {
     public ResponseEntity<String> receive(@RequestParam("sceneId") Long sceneId,
         @RequestParam("reportId") Long reportId,
         @RequestParam(value = "customerId", required = false) Long customerId,
-        @RequestBody List<Map<String, String>> metrics,
+        @RequestBody List<Map> metrics,
         HttpServletRequest request) {
         try {
             if (sceneId == null || reportId == null) {
