@@ -7,14 +7,14 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @ClassName SceneManageListResult
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午2:45
+ * @author qianshui
+ * @date 2020/4/17 下午2:45
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "列表查询出参")
 public class SceneManageListOutput extends CloudUserCommonRequestExt implements Serializable {
 

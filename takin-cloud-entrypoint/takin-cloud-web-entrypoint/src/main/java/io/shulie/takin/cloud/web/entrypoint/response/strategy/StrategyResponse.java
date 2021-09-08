@@ -3,8 +3,8 @@ package io.shulie.takin.cloud.web.entrypoint.response.strategy;
 import lombok.Data;
 
 /**
- * @Author 莫问
- * @Date 2020-05-15
+ * @author 莫问
+ * @date 2020-05-15
  */
 @Data
 public class StrategyResponse {

@@ -13,23 +13,23 @@ import com.fasterxml.jackson.databind.SerializerProvider;
  *
  * @author shulie
  * @version v1.0
- * @Date: Create in 2018/8/23 17:36
+ * @date Create in 2018/8/23 17:36
  */
 public class DateToLongFormatSerialize extends JsonSerializer<Date> {
 
     /**
      * 继承父类的serialize方法
-     * @author shulie
-     * @2018年5月21日
+     *
      * @param date 日期
-     * @param gen JsonGenerator gen
-     * @version v1.0
+     * @param gen  JsonGenerator gen
+     * @author shulie
+     * @date 2018年5月21日
      */
     @Override
-    public void serialize(Date date, JsonGenerator gen, SerializerProvider provider) throws IOException, JsonProcessingException {
-        if(date == null){
+    public void serialize(Date date, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        if (date == null) {
             gen.writeString("");
-        }else{
+        } else {
             gen.writeString(String.valueOf(date.getTime()));
         }
     }

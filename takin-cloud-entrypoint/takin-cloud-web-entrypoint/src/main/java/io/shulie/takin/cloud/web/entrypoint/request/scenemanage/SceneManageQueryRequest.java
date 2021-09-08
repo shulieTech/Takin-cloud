@@ -4,14 +4,16 @@ import java.io.Serializable;
 
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @ClassName SceneManageQueryRequest
- * @Description 场景列表查询
- * @Author qianshui
- * @Date 2020/4/17 下午2:18
+ * 场景列表查询
+ *
+ * @author qianshui
+ * @date 2020/4/17 下午2:18
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class SceneManageQueryRequest extends CloudUserCommonRequestExt implements Serializable {
 
     private Long sceneId;

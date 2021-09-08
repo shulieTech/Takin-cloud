@@ -1,4 +1,4 @@
-package io.shulie.takin.schedule.taskmanage.Impl;
+package io.shulie.tro.schedule.taskmanage.Impl;
 
 import com.github.pagehelper.PageInfo;
 import io.shulie.takin.app.Application;
@@ -13,9 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * @Author: mubai
- * @Date: 2020-12-03 20:05
- * @Description:
+ * @author mubai
+ * @date 2020-12-03 20:05
  */
 
 @RunWith(SpringRunner.class)
@@ -27,11 +26,10 @@ public class SceneManageServiceTest {
     private SceneManageService sceneManageService;
 
     @Test
-    public void testQuery(){
+    public void testQuery() {
         SceneManageQueryInput queryInput = new SceneManageQueryInput();
-       // List<Long> list = Arrays.asList(113l, 114l, 115l, 116l, 117l, 118l);
-       // queryInput.setSceneIds(list);
-
+        // List<Long> list = Arrays.asList(113l, 114l, 115l, 116l, 117l, 118l);
+        // queryInput.setSceneIds(list);
 
         queryInput.setLastPtStartTime("2020-12-03 09:11:00");
         queryInput.setLastPtEndTime("2020-12-03 20:08:00");

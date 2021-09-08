@@ -6,10 +6,8 @@ import io.shulie.takin.cloud.common.enums.machine.EnumResult;
 import lombok.Data;
 
 /**
- * @ClassName SlaDetailResult
- * @Description
- * @Author qianshui
- * @Date 2020/5/18 下午11:44
+ * @author qianshui
+ * @date 2020/5/18 下午11:44
  */
 @Data
 public class SlaDetailResult implements Serializable {

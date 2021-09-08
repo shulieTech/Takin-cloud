@@ -6,10 +6,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @ClassName SceneScriptRefResult
- * @Description
- * @Author qianshui
- * @Date 2020/4/18 上午11:07
+ * @author qianshui
+ * @date 2020/4/18 上午11:07
  */
 @Data
 public class SceneScriptRefResult implements Serializable {

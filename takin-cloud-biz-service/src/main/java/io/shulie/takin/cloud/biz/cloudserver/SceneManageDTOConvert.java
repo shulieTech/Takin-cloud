@@ -24,10 +24,8 @@ import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 /**
- * @ClassName SceneManageConvert
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午4:26
+ * @author qianshui
+ * @date 2020/4/17 下午4:26
  */
 @Mapper
 public interface SceneManageDTOConvert {

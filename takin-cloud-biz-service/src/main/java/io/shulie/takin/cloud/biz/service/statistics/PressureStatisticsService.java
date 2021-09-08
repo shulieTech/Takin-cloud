@@ -10,28 +10,27 @@ import io.shulie.takin.cloud.biz.output.statistics.ReportTotalOutput;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.web.app.service.statistics
  * @date 2020/11/30 9:35 下午
  */
 public interface PressureStatisticsService {
     /**
      * 统计场景分类，脚本类型，返回饼状图数据
      *
-     * @return
+     * @return -
      */
     PressurePieTotalOutput getPressurePieTotal(PressureTotalInput input);
 
     /**
      * 统计报告通过/未通过
      *
-     * @return
+     * @return -
      */
     ReportTotalOutput getReportTotal(PressureTotalInput input);
 
     /**
      * 压测场景次数统计 && 压测脚本次数统计
      *
-     * @return
+     * @return -
      */
     List<PressureListTotalOutput> getPressureListTotal(PressureTotalInput input);
 

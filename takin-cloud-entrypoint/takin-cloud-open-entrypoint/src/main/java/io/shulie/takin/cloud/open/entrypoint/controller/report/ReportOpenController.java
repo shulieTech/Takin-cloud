@@ -27,9 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @Author 莫问
- * @Description
- * @Date 2020-04-17
+ * @author 莫问
+ * @date 2020-04-17
  */
 @RestController
 @RequestMapping(APIUrls.TRO_OPEN_API_URL)
@@ -38,7 +37,6 @@ public class ReportOpenController {
 
     @Autowired
     private ReportService reportService;
-
 
     @PostMapping("/report/warn")
     @ApiOperation("创建告警")
@@ -56,11 +54,10 @@ public class ReportOpenController {
     @ApiOperation("更新报告-漏数检查使用")
     public ResponseResult<String> updateReportConclusion(@RequestBody UpdateReportConclusionReq req) {
         UpdateReportConclusionInput input = new UpdateReportConclusionInput();
-        BeanUtils.copyProperties(req,input);
+        BeanUtils.copyProperties(req, input);
         reportService.updateReportConclusion(input);
         return ResponseResult.success("更新成功");
     }
-
 
     @GetMapping(value = "report/getReportByReportId")
     @ApiOperation("报告详情")
@@ -68,10 +65,10 @@ public class ReportOpenController {
     public ResponseResult<ReportDetailResp> getReportByReportId(Long reportId) {
         ReportDetailOutput detailOutput = reportService.getReportByReportId(reportId);
         if (detailOutput == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR,"报告不存在");
+            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在");
         }
         ReportDetailResp resp = new ReportDetailResp();
-        BeanUtils.copyProperties(detailOutput,resp);
+        BeanUtils.copyProperties(detailOutput, resp);
         return ResponseResult.success(resp);
     }
 
@@ -84,10 +81,10 @@ public class ReportOpenController {
     public ResponseResult<ReportDetailResp> tempReportDetail(Long sceneId) {
         ReportDetailOutput detailOutput = reportService.tempReportDetail(sceneId);
         if (detailOutput == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR,"报告不存在");
+            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在");
         }
         ReportDetailResp resp = new ReportDetailResp();
-        BeanUtils.copyProperties(detailOutput,resp);
+        BeanUtils.copyProperties(detailOutput, resp);
         return ResponseResult.success(resp);
     }
 

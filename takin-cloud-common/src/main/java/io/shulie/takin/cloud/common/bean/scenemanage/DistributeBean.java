@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.cloud.common.bean.scenemanage
  * @date 2021/2/3 3:37 下午
  */
 @Data

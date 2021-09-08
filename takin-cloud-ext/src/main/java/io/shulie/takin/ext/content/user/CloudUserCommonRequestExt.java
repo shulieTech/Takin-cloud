@@ -6,6 +6,7 @@ import java.util.List;
 import io.shulie.takin.common.beans.page.PagingDevice;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 放在这里的原因，PagingDevice需要支持
@@ -13,10 +14,10 @@ import lombok.Data;
  * @author hezhongqi
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class CloudUserCommonRequestExt extends PagingDevice implements Serializable {
 
     private static final long serialVersionUID = -1529428936481160409L;
-
 
     /**
      * 用户字段 源字段 为 uid
@@ -35,7 +36,7 @@ public class CloudUserCommonRequestExt extends PagingDevice implements Serializa
     private List<Long> customerIds;
 
     /**
-     *license  转化成 customerId
+     * license  转化成 customerId
      */
     private transient String license;
 
@@ -43,8 +44,6 @@ public class CloudUserCommonRequestExt extends PagingDevice implements Serializa
      * 查询过滤sql
      */
     private transient String filterSql;
-
-
 
     /**
      * 对应字段 name
@@ -63,11 +62,10 @@ public class CloudUserCommonRequestExt extends PagingDevice implements Serializa
     /**
      * 报告模块用
      */
-    @ApiModelProperty(name = "userIdStr",value = "负责人ids")
+    @ApiModelProperty(name = "userIdStr", value = "负责人ids")
     private String userIdStr;
     private List<Long> userIds;
 
-
-    private Long deptId ;
+    private Long deptId;
 
 }

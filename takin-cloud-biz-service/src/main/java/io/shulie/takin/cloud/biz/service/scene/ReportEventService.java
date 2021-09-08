@@ -3,10 +3,8 @@ package io.shulie.takin.cloud.biz.service.scene;
 import java.util.Map;
 
 /**
- * @ClassName ReportEventService
- * @Description
- * @Author qianshui
- * @Date 2020/7/20 下午3:40
+ * @author qianshui
+ * @date 2020/7/20 下午3:40
  */
 public interface ReportEventService {
 

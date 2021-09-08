@@ -5,7 +5,6 @@ import lombok.Getter;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.cloud.common.enums.deployment
  * @date 2021/4/25 1:58 下午
  */
 @AllArgsConstructor

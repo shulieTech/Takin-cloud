@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.biz.collector;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,9 +53,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author <a href="tangyuhan@shulie.io">yuhan.tang</a>
- * @package: io.shulie.takin.cloud.poll.poll
- * @Date 2020-04-20 22:13
+ * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
+ * @date 2020-04-20 22:13
  */
 @Slf4j
 @Component
@@ -70,7 +70,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     private RedisClientUtils redisClientUtils;
 
     @Autowired
-    private TSceneManageMapper TSceneManageMapper;
+    private TSceneManageMapper tSceneManageMapper;
 
     @Value("${scheduling.enabled:true}")
     private Boolean schedulingEnabled;
@@ -87,8 +87,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
      */
     // todo 本地缓存，之后都需要改成redis 解决redis锁问题，以及redis 缓存延迟问题
 
-    private static Map<String, Long> timeWindowMap = Maps.newConcurrentMap();
-
+    private static final Map<String, Long> TIME_WINDOW_MAP = Maps.newConcurrentMap();
 
     public void sendMetrics(Metrics metrics) {
         Event event = new Event();
@@ -101,29 +100,27 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     public void doStartScheduleTaskEvent(Event event) {
         log.info("PushWindowDataScheduled，从调度中心收到压测任务启动成功事件");
         Object object = event.getExt();
-        TaskResult taskBean = (TaskResult) object;
+        TaskResult taskBean = (TaskResult)object;
         String taskKey = getTaskKey(taskBean.getSceneId(), taskBean.getTaskId(), taskBean.getCustomerId());
-        /**
-         * 压测时长 + 预热时长 + 五分钟 7天
-         */
+        // 压测时长 + 预热时长 + 五分钟 7天
         long taskTimeout = 7L * 24 * 60 * 60;
         Map<String, Object> extMap = taskBean.getExtendMap();
         List<String> refList = Lists.newArrayList();
         if (MapUtils.isNotEmpty(extMap)) {
-            refList.addAll((List) extMap.get("businessActivityBindRef"));
+            refList.addAll((List)extMap.get("businessActivityBindRef"));
         }
         ArrayList<String> transation = new ArrayList<>(refList);
         transation.add("all");
         String redisKey = String.format(CollectorConstants.REDIS_PRESSURE_TASK_KEY, taskKey);
         redisTemplate.opsForValue().set(redisKey, transation, taskTimeout, TimeUnit.SECONDS);
         log.info("PushWindowDataScheduled Create Redis Key = {}, expireDuration={}min, refList={} Success....",
-                redisKey, taskTimeout, refList);
+            redisKey, taskTimeout, refList);
     }
 
     // todo 没有用到
     @IntrestFor(event = "stop")
     public void doStopTaskEvent(Event event) {
-        TaskConfig taskConfig = (TaskConfig) event.getExt();
+        TaskConfig taskConfig = (TaskConfig)event.getExt();
         delTask(taskConfig.getSceneId(), taskConfig.getTaskId(), taskConfig.getCustomerId());
     }
 
@@ -134,11 +131,11 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     public void doDeleteTaskEvent(Event event) {
         try {
             log.info("通知PushWindowDataScheduled模块，从调度中心收到压测任务结束事件");
-            TaskResult taskResult = (TaskResult) event.getExt();
+            TaskResult taskResult = (TaskResult)event.getExt();
             delTask(taskResult.getSceneId(), taskResult.getTaskId(), taskResult.getCustomerId());
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：压测数据汇总处理异常 --> 【PushWindowDataScheduled】处理finished事件异常: {},入参:{}",
-                    TakinCloudExceptionEnum.TASK_RUNNING_DEAL_PT_DATA_ERROR, e, event.toString());
+                TakinCloudExceptionEnum.TASK_RUNNING_DEAL_PT_DATA_ERROR, e, event.toString());
         }
     }
 
@@ -157,24 +154,24 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     /**
      * 计算读取的时间窗口
      *
-     * @return
+     * @return -
      */
     private Long refreshTimeWindow(String engineName) {
         long timeWindow = 0L;
         String tempTimestamp = ScheduleConstants.TEMP_TIMESTAMP_SIGN + engineName;
         // 插入成功 进行计数
-        if (timeWindowMap.containsKey(tempTimestamp)) {
+        if (TIME_WINDOW_MAP.containsKey(tempTimestamp)) {
             // 获取下一个5s,并更新redis
-            timeWindow = CollectorUtil.addWindowTime(timeWindowMap.get(tempTimestamp));
-            timeWindowMap.put(tempTimestamp, timeWindow);
+            timeWindow = CollectorUtil.addWindowTime(TIME_WINDOW_MAP.get(tempTimestamp));
+            TIME_WINDOW_MAP.put(tempTimestamp, timeWindow);
             return timeWindow;
         }
         String startTimeKey = engineName + ScheduleConstants.FIRST_SIGN;
         if (redisTemplate.hasKey(startTimeKey)) {
             // 延迟5s 获取数据
             timeWindow = CollectorUtil.getPushWindowTime(
-                    CollectorUtil.getTimeWindow((Long) redisTemplate.opsForValue().get(startTimeKey)).getTimeInMillis());
-            timeWindowMap.put(tempTimestamp, timeWindow);
+                CollectorUtil.getTimeWindow((Long)redisTemplate.opsForValue().get(startTimeKey)).getTimeInMillis());
+            TIME_WINDOW_MAP.put(tempTimestamp, timeWindow);
         }
 
         return timeWindow;
@@ -226,7 +223,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                             unlock(sceneReportKey, "collectorSchedulerPool");
                             continue;
                         }
-                        List<String> transactions = (List<String>) redisTemplate.opsForValue().get(sceneReportKey);
+                        List<String> transactions = (List<String>)redisTemplate.opsForValue().get(sceneReportKey);
                         if (null == transactions || transactions.size() == 0) {
                             unlock(sceneReportKey, "collectorSchedulerPool");
                             continue;
@@ -240,7 +237,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                         if (ScheduleConstants.LAST_SIGN.equals(last)) {
                             // 只需触发一次即可
                             String endTimeKey = engineName + ScheduleConstants.LAST_SIGN;
-                            long endTime = CollectorUtil.getEndWindowTime((Long) redisTemplate.opsForValue().get(endTimeKey));
+                            long endTime = CollectorUtil.getEndWindowTime((Long)redisTemplate.opsForValue().get(endTimeKey));
                             log.info("触发手动收尾操作，当前时间窗口：{},结束时间窗口：{},", timeWindow, endTime);
                             // 比较 endTime timeWindow
                             // 如果结束时间 小于等于当前时间，数据不用补充，
@@ -261,7 +258,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                             redisTemplate.delete(last(taskKey));
                             // 删除 timeWindowMap 的key
                             String tempTimestamp = ScheduleConstants.TEMP_TIMESTAMP_SIGN + engineName;
-                            timeWindowMap.remove(tempTimestamp);
+                            TIME_WINDOW_MAP.remove(tempTimestamp);
                         }
                         // 超时自动检修，强行触发关闭
                         forceClose(taskKey, timeWindow, sceneId, reportId, customerId);
@@ -269,41 +266,41 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                     }
                 } catch (Exception e) {
                     log.error("异常代码【{}】,异常内容：压测数据汇总处理异常 --> 【collector】Real-time data analysis for anomalies hashkey:{}, 异常信息:{}",
-                            TakinCloudExceptionEnum.TASK_RUNNING_DEAL_PT_DATA_ERROR, sceneReportKey, e);
+                        TakinCloudExceptionEnum.TASK_RUNNING_DEAL_PT_DATA_ERROR, sceneReportKey, e);
                 } finally {
                     unlock(sceneReportKey, "collectorSchedulerPool");
                 }
             }
         } catch (Throwable e) {
             log.error("异常代码【{}】,异常内容：压测数据汇总处理异常 --> 【collector】pushData处理异常, 异常信息:{}",
-                    TakinCloudExceptionEnum.TASK_RUNNING_DEAL_PT_DATA_ERROR, e);
+                TakinCloudExceptionEnum.TASK_RUNNING_DEAL_PT_DATA_ERROR, e);
         }
     }
 
     /**
      * 超时自动检修，强行触发关闭
      *
-     * @param taskKey
-     * @param timeWindow
+     * @param taskKey    任务key
+     * @param timeWindow 数据窗口
      */
     private void forceClose(String taskKey, Long timeWindow, Long sceneId, Long reportId, Long customerId) {
-        Long forceTime = (Long) Optional.ofNullable(redisTemplate.opsForValue().get(forceCloseTime(taskKey))).orElse(0L);
+        Long forceTime = (Long)Optional.ofNullable(redisTemplate.opsForValue().get(forceCloseTime(taskKey))).orElse(0L);
         if (forceTime > 0 && timeWindow >= forceTime) {
             log.info("本次压测{}-{}-{}:触发超时自动检修，强行触发关闭，超时延迟时间-{}，触发时间-{}",
-                    sceneId, reportId, customerId, forceTime, timeWindow);
+                sceneId, reportId, customerId, forceTime, timeWindow);
 
             log.info("场景[{}]压测任务已完成,将要开始更新报告{}", sceneId, reportId);
             // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
-            SceneManage sceneManage = TSceneManageMapper.selectByPrimaryKey(sceneId);
+            SceneManage sceneManage = tSceneManageMapper.selectByPrimaryKey(sceneId);
             //如果是强制停止 不需要更新
             log.info("finish scene {}, state :{}", sceneId, Optional.ofNullable(sceneManage)
-                    .map(SceneManage::getType)
-                    .map(SceneManageStatusEnum::getSceneManageStatusEnum)
-                    .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
+                .map(SceneManage::getType)
+                .map(SceneManageStatusEnum::getSceneManageStatusEnum)
+                .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
             if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {
                 sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
-                        .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP).updateEnum(SceneManageStatusEnum.STOP)
-                        .build());
+                    .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP).updateEnum(SceneManageStatusEnum.STOP)
+                    .build());
             }
             // 清除 SLA配置 清除PushWindowDataScheduled 删除pod job configMap  生成报告
             Event event = new Event();
@@ -314,19 +311,19 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             // 删除 timeWindowMap 的key
             String engineName = ScheduleConstants.getEngineName(sceneId, reportId, customerId);
             String tempTimestamp = ScheduleConstants.TEMP_TIMESTAMP_SIGN + engineName;
-            timeWindowMap.remove(tempTimestamp);
+            TIME_WINDOW_MAP.remove(tempTimestamp);
         }
     }
 
     private void writeInfluxDB(List<String> transactions, String taskKey, long timeWindow, Long sceneId, Long reportId,
-                               Long customerId) {
+        Long customerId) {
         long start = System.currentTimeMillis();
         for (String transaction : transactions) {
             Integer count = getIntValue(countKey(taskKey, transaction, timeWindow));
             if (null == count || count < 1) {
                 log.warn(
-                        "【collector metric】【null == count || count < 1】 write influxDB time : {},{}-{}-{}-{}, ", timeWindow,
-                        sceneId, reportId, customerId, transaction);
+                    "【collector metric】【null == count || count < 1】 write influxDB time : {},{}-{}-{}-{}, ", timeWindow,
+                    sceneId, reportId, customerId, transaction);
                 continue;
             }
             Integer failCount = getIntValue(failCountKey(taskKey, transaction, timeWindow));
@@ -344,36 +341,36 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             Map<String, String> tags = new HashMap<>();
             tags.put("transaction", transaction);
             Map<String, Object> fields = getInfluxdbFieldMap(count, failCount,
-                    saCount, sumRt, maxRt, minRt, avgTps, avgRt, saRate, successRate, activeThreads);
+                saCount, sumRt, maxRt, minRt, avgTps, avgRt, saRate, successRate, activeThreads);
 
             influxWriter.insert(InfluxDBUtil.getMeasurement(sceneId, reportId, customerId), tags,
-                    fields, timeWindow);
+                fields, timeWindow);
             try {
                 SendMetricsEvent metrics = getSendMetricsEvent(sceneId, reportId, customerId, timeWindow,
-                        transaction, count, failCount, maxRt, minRt, avgTps, avgRt,
-                        saRate, successRate);
+                    transaction, count, failCount, maxRt, minRt, avgTps, avgRt,
+                    saRate, successRate);
                 //未finish，发事件
                 String existKey = String.format(CollectorConstants.REDIS_PRESSURE_TASK_KEY,
-                        getTaskKey(sceneId, reportId, customerId));
+                    getTaskKey(sceneId, reportId, customerId));
                 if (redisTemplate.hasKey(existKey)) {
                     sendMetrics(metrics);
                 }
             } catch (Exception e) {
                 log.error("异常代码【{}】,异常内容：压测数据汇总处理异常 --> 【collector metric】【error】 write influxDB time : {}" +
-                                " sceneId : {}, reportId : {},customerId : {}, 异常信息:{}",
-                        TakinCloudExceptionEnum.TASK_RUNNING_DEAL_PT_DATA_ERROR, timeWindow, sceneId, reportId, customerId, e);
+                        " sceneId : {}, reportId : {},customerId : {}, 异常信息:{}",
+                    TakinCloudExceptionEnum.TASK_RUNNING_DEAL_PT_DATA_ERROR, timeWindow, sceneId, reportId, customerId, e);
             }
             long end = System.currentTimeMillis();
             log.info(
-                    "【collector metric】【success】 write influxDB time : {},write time：{} sceneId : {}, reportId : {},"
-                            + "customerId : {}",
-                    timeWindow, (end - start), sceneId, reportId, customerId);
+                "【collector metric】【success】 write influxDB time : {},write time：{} sceneId : {}, reportId : {},"
+                    + "customerId : {}",
+                timeWindow, (end - start), sceneId, reportId, customerId);
 
         }
     }
 
     private Map<String, Object> getInfluxdbFieldMap(Integer count, Integer failCount, Integer saCount, Long sumRt,
-                                                    Double maxRt, Double minRt, Double avgTps, Double avgRt, Double saRate, Double successRate, Integer activeThreads) {
+        Double maxRt, Double minRt, Double avgTps, Double avgRt, Double saRate, Double successRate, Integer activeThreads) {
         Map<String, Object> fields = new HashMap<>();
         fields.put("count", count);
         fields.put("fail_count", failCount);
@@ -392,8 +389,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     }
 
     private SendMetricsEvent getSendMetricsEvent(Long sceneId, Long reportId, Long customerId, long timeWindow, String transaction,
-                                                 Integer count, Integer failCount, Double maxRt, Double minRt, Double avgTps, Double avgRt, Double saRate,
-                                                 Double successRate) {
+        Integer count, Integer failCount, Double maxRt, Double minRt, Double avgTps, Double avgRt, Double saRate,
+        Double successRate) {
         SendMetricsEvent metrics = new SendMetricsEvent();
         metrics.setTransaction(transaction);
         metrics.setCount(count);
@@ -414,7 +411,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     private void scan(String pattern, Consumer<byte[]> consumer) {
         this.redisTemplate.execute((RedisConnection connection) -> {
             try (Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions().count(Long.MAX_VALUE).match(pattern)
-                    .build())) {
+                .build())) {
                 cursor.forEachRemaining(consumer);
                 return null;
             } catch (IOException e) {
@@ -427,7 +424,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
      * 获取符合条件的key
      *
      * @param pattern 表达式
-     * @return
+     * @return -
      */
     public Set<String> keys(String pattern) {
         Set<String> keys = new HashSet<>();
@@ -442,47 +439,47 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     /**
      * 平均TPS计算
      *
-     * @return
+     * @return -
      */
     private Double getAvgTps(Integer count) {
         BigDecimal countDecimal = BigDecimal.valueOf(count);
-        return countDecimal.divide(BigDecimal.valueOf(CollectorConstants.SEND_TIME), 2, BigDecimal.ROUND_HALF_UP)
-                .doubleValue();
+        return countDecimal.divide(BigDecimal.valueOf(CollectorConstants.SEND_TIME), 2, RoundingMode.HALF_UP)
+            .doubleValue();
     }
 
     /**
      * 平均RT 计算
      *
-     * @return
+     * @return -
      */
     private Double getAvgRt(Integer count, Long sumRt) {
         BigDecimal countDecimal = BigDecimal.valueOf(count);
         BigDecimal rtDecimal = BigDecimal.valueOf(sumRt);
-        return rtDecimal.divide(countDecimal, 2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return rtDecimal.divide(countDecimal, 2, RoundingMode.HALF_UP).doubleValue();
     }
 
     /**
      * 事物成功率
      *
-     * @return
+     * @return -
      */
     private Double getSaRate(Integer count, Integer saCount) {
         BigDecimal countDecimal = BigDecimal.valueOf(count);
         BigDecimal saCountDecimal = BigDecimal.valueOf(saCount);
-        return saCountDecimal.divide(countDecimal, 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100))
-                .doubleValue();
+        return saCountDecimal.divide(countDecimal, 2, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100))
+            .doubleValue();
     }
 
     /**
      * 请求成功率
      *
-     * @return
+     * @return -
      */
     private Double getSuccessRate(Integer count, Integer failCount) {
         BigDecimal countDecimal = BigDecimal.valueOf(count);
         BigDecimal failCountDecimal = BigDecimal.valueOf(failCount);
         return countDecimal.subtract(failCountDecimal).multiply(BigDecimal.valueOf(100)).divide(countDecimal, 2,
-                BigDecimal.ROUND_HALF_UP).doubleValue();
+            RoundingMode.HALF_UP).doubleValue();
     }
 
 }

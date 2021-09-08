@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -46,10 +47,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * @ClassName FileController
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午5:50
+ * @author qianshui
+ * @date 2020/4/17 下午5:50
  */
 @RestController
 @RequestMapping("/api/file")
@@ -92,7 +91,7 @@ public class FileController {
                 dto.setFileType(mf.getOriginalFilename().endsWith("jmx") ? 0 : 1);
             } catch (IOException e) {
                 log.error("异常代码【{}】,异常内容：文件处理异常 --> 异常信息: {}",
-                        TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,e);
+                    TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR, e);
                 dto.setUploadResult(false);
                 dto.setErrorMsg(e.getMessage());
             }
@@ -125,11 +124,11 @@ public class FileController {
                 response.setContentType("application/octet-stream");
                 String saveName = StringUtils.substring(fileName, StringUtils.indexOf(fileName, "/") + "/".length());
                 response.setHeader("Content-Disposition",
-                    "attachment;filename=" + new String(saveName.getBytes("UTF-8"), "iso-8859-1"));
+                    "attachment;filename=" + new String(saveName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1));
             }
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：文件命令执行异常 --> 脚本文件下载异常，异常信息: {}",
-                    TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,e);
+                TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR, e);
         }
     }
 
@@ -138,7 +137,7 @@ public class FileController {
     public void downloadFileByPath(@RequestParam("filePath") String filePath, HttpServletResponse response) {
         try {
             //反编码
-            filePath =  URLDecoder.decode(filePath,"utf-8");
+            filePath = URLDecoder.decode(filePath, "utf-8");
             boolean permit = fileStrategy.filePathValidate(filePath);
 
             if (!permit) {
@@ -150,13 +149,13 @@ public class FileController {
                 ServletOutputStream outputStream = response.getOutputStream();
                 Files.copy(Paths.get(filePath), outputStream);
                 response.setContentType("application/octet-stream");
-                String saveName = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.length());
+                String saveName = filePath.substring(filePath.lastIndexOf("/") + 1);
                 response.setHeader("Content-Disposition",
-                    "attachment;filename=" + new String(saveName.getBytes("UTF-8"), "iso-8859-1"));
+                    "attachment;filename=" + new String(saveName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1));
             }
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：文件命令执行异常 --> 脚本文件下载异常，异常信息: {}",
-                    TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,e);
+                TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR, e);
         }
     }
 
@@ -173,7 +172,7 @@ public class FileController {
             FileManagerHelper.copyFiles(fileCopyParamDTO.getSourcePaths(), fileCopyParamDTO.getTargetPath());
         } catch (IOException e) {
             log.error("异常代码【{}】,异常内容：文件复制异常 --> 异常信息: {}",
-                    TakinCloudExceptionEnum.FILE_COPY_ERROR,e);
+                TakinCloudExceptionEnum.FILE_COPY_ERROR, e);
             return Boolean.FALSE;
         }
         return Boolean.TRUE;
@@ -187,7 +186,7 @@ public class FileController {
                 , fileZipParamDTO.getZipFileName(), fileZipParamDTO.getIsCovered());
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：文件打包失败 --> 异常信息: {}",
-                    TakinCloudExceptionEnum.FILE_ZIP_ERROR,e);
+                TakinCloudExceptionEnum.FILE_ZIP_ERROR, e);
             return Boolean.FALSE;
         }
         return Boolean.TRUE;
@@ -216,17 +215,17 @@ public class FileController {
             dto.setTopic(topic);
         } catch (FileNotFoundException e) {
             log.error("异常代码【{}】,异常内容：找不到对应的文件 --> 异常信息: {}",
-                    TakinCloudExceptionEnum.FILE_NOT_FOUND_ERROR,e);
+                TakinCloudExceptionEnum.FILE_NOT_FOUND_ERROR, e);
         } catch (IOException e) {
             log.error("异常代码【{}】,异常内容：文件处理异常 --> 异常信息: {}",
-                    TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,e);
+                TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR, e);
         } finally {
             if (br != null) {
                 try {
                     br.close();
                 } catch (IOException e) {
                     log.error("异常代码【{}】,异常内容：文件流关闭异常 --> 异常信息: {}",
-                            TakinCloudExceptionEnum.FILE_CLOSE_ERROR,e);
+                        TakinCloudExceptionEnum.FILE_CLOSE_ERROR, e);
                 }
             }
         }

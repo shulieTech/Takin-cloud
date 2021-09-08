@@ -15,7 +15,7 @@ public interface ScheduleConvertor {
     /**
      * 参数转换
      * @param config
-     * @return
+     * @return -
      */
     StrategyConfigExt ofStrategyConfig(StrategyConfigDTO config);
 }

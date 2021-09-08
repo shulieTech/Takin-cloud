@@ -3,12 +3,12 @@
 package io.shulie.takin.cloud.common.constants;
 
 /**
- * @Author 莫问
- * @Date 2020-04-24
+ * 报表状态
+ *
+ * @author 莫问
+ * @date 2020-04-24
  */
 public class ReportConstans {
-
-    /*********报表状态**/
 
     /**
      * 就绪状态
@@ -30,7 +30,7 @@ public class ReportConstans {
      **/
     public static final int LOCK_STATUS = 9;
 
-    /**压测失败**/
+    //压测失败
     //public static final int FAIL_STATUS = 3;
 
     /**
@@ -38,15 +38,13 @@ public class ReportConstans {
      */
     public static final String PRESSURE_MSG = "pressure_msg";
 
-    /*********报表结论**/
-
     /**
-     * 通过
+     * 报表结论:通过
      **/
     public static final int PASS = 1;
 
     /**
-     * 不通过
+     * 报表结论:不通过
      **/
     public static final int FAIL = 0;
 

@@ -8,9 +8,8 @@ import org.mapstruct.factory.Mappers;
 import java.util.List;
 
 /**
- * @Author: mubai
- * @Date: 2020-10-30 12:56
- * @Description:
+ * @author mubai
+ * @date 2020-10-30 12:56
  */
 
 @Mapper

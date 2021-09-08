@@ -12,14 +12,14 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @ClassName SceneManageWrapperRequest
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午5:55
+ * @author qianshui
+ * @date 2020/4/17 下午5:55
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "场景保存入参")
 public class SceneManageWrapperRequest extends CloudUserCommonRequestExt {
 

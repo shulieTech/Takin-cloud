@@ -1,9 +1,8 @@
 package io.shulie.takin.cloud.biz.input.scenemanage;
 
 /**
- * @Author: fanxx
- * @Date: 2021/4/12 4:48 下午
- * @Description:
+ * @author fanxx
+ * @date 2021/4/12 4:48 下午
  */
 public class SceneInspectInput {
     /**

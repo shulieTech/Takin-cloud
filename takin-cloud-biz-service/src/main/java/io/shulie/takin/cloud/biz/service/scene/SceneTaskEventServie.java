@@ -29,8 +29,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author 莫问
- * @Date 2020-04-22
+ * @author 莫问
+ * @date 2020-04-22
  */
 @Component
 @Slf4j
@@ -74,8 +74,8 @@ public class SceneTaskEventServie {
     /**
      * 场景任务启动事件
      *
-     * @param scene
-     * @param reportId
+     * @param scene    场景
+     * @param reportId 报告主键
      */
     public void callStartEvent(SceneManageWrapperOutput scene, Long reportId) {
         ScheduleStartRequestExt scheduleStartRequest = new ScheduleStartRequestExt();
@@ -116,9 +116,9 @@ public class SceneTaskEventServie {
         //add end
 
         //一个插件可能会有多个版本，需要根据版本号来获取相应的文件路径 modified by xr.l 20210712
-        if (CollectionUtils.isNotEmpty(scene.getEnginePlugins())){
+        if (CollectionUtils.isNotEmpty(scene.getEnginePlugins())) {
             scheduleStartRequest.setEnginePluginsFilePath(enginePluginFilesService.findPluginFilesPathByPluginIdAndVersion(scene.getEnginePlugins()));
-        }else {
+        } else {
             scheduleStartRequest.setEnginePluginsFilePath(
                 Lists.newArrayList());
         }
@@ -138,7 +138,7 @@ public class SceneTaskEventServie {
         scheduleStartRequest.setInspect(scene.isInspect());
         scheduleStartRequest.setTryRun(scene.isTryRun());
 
-        List dataFileList = new ArrayList();
+        List<ScheduleStartRequestExt.DataFile> dataFileList = new ArrayList<ScheduleStartRequestExt.DataFile>();
         scene.getUploadFile().forEach(file -> {
             if (file.getFileType() == 0) {
                 scheduleStartRequest.setScriptPath(file.getUploadPath());
@@ -165,10 +165,10 @@ public class SceneTaskEventServie {
     /**
      * 停止场景压测任务
      *
-     * @param reportResult
+     * @param reportResult 报告结果
      */
     public void callStopEvent(ReportResult reportResult) {
-        ScheduleStopRequestExt scheduleStopRequest  = new ScheduleStopRequestExt();
+        ScheduleStopRequestExt scheduleStopRequest = new ScheduleStopRequestExt();
         scheduleStopRequest.setSceneId(reportResult.getSceneId());
         scheduleStopRequest.setTaskId(reportResult.getId());
         scheduleStopRequest.setCustomerId(reportResult.getCustomerId());
@@ -182,7 +182,7 @@ public class SceneTaskEventServie {
     /**
      * 启动结果
      *
-     * @param param
+     * @param param 参数
      */
     public String callStartResultEvent(SceneTaskNotifyParam param) {
         String index = "";
@@ -196,13 +196,11 @@ public class SceneTaskEventServie {
             result.setMsg(param.getMsg());
 
             boolean isNotify = true;
-            if (param.getStatus().equals("started")) {
+            if ("started".equals(param.getStatus())) {
                 // 压力节点 启动成功
                 result.setStatus(TaskStatusEnum.STARTED);
                 event.setEventName("started");
-                /**
-                 * 扩展配置
-                 */
+                // 扩展配置
                 Map<String, Object> extendMap = Maps.newHashMap();
                 SceneManageQueryOpitons options = new SceneManageQueryOpitons();
                 options.setIncludeBusinessActivity(true);
@@ -210,15 +208,16 @@ public class SceneTaskEventServie {
                 if (dto != null && CollectionUtils.isNotEmpty(dto.getBusinessActivityConfig())) {
                     extendMap.put("businessActivityCount", dto.getBusinessActivityConfig().size());
                     extendMap.put("businessActivityBindRef", dto.getBusinessActivityConfig().stream()
-                        .filter(data -> StringUtils.isNoneBlank(data.getBindRef()))
-                        .map(SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getBindRef).map(String::trim).distinct().collect(Collectors.toList()));
+                        .map(SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getBindRef)
+                        .filter(StringUtils::isNoneBlank)
+                        .map(String::trim).distinct().collect(Collectors.toList()));
                 }
                 result.setExtendMap(extendMap);
                 String key = ScheduleConstants.getFileSplitQueue(param.getSceneId(), param.getTaskId(),
                     param.getCustomerId());
                 index = stringRedisTemplate.opsForList().leftPop(key);
 
-            } else if (param.getStatus().equals("failed")) {
+            } else if ("failed".equals(param.getStatus())) {
                 result.setStatus(TaskStatusEnum.FAILED);
                 event.setEventName("failed");
             } else {
@@ -231,7 +230,7 @@ public class SceneTaskEventServie {
                 log.info("成功处理压力引擎节点通知事件: {}", param);
             }
             log.info("pressureNode {}-{}-{}: Accept the start result ,pressureNode number :{}",
-                param.getSceneId(),param.getTaskId(),param.getCustomerId(),index);
+                param.getSceneId(), param.getTaskId(), param.getCustomerId(), index);
         }
         return index;
     }

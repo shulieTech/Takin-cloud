@@ -45,8 +45,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 /**
- * @Author 莫问
- * @Date 2020-08-07
+ * @author 莫问
+ * @date 2020-08-07
  */
 
 @Service
@@ -186,16 +186,12 @@ public class FileSplitService {
                                 String key = String.format(SceneStartCheckConstants.SCENE_KEY, startRequest.getSceneId(),
                                     dataFile.getName());
                                 Map<Object, Object> positionMap =  redisTemplate.opsForHash().entries(key);
-                                if (null != positionMap) {
-                                    SceneFileReadPosition position = JSONUtil.toBean(
-                                        positionMap.get(String.format(SceneStartCheckConstants.FILE_POD_FIELD_KEY,dataFile.getName(), i + 1)).toString(),
-                                        SceneFileReadPosition.class);
-                                    if (position.getReadPosition() >= list.get(i).getStart()
-                                        && position.getReadPosition() <= list.get(i).getEnd()) {
-                                        pair.setStart(position.getReadPosition());
-                                    } else {
-                                        pair.setStart(list.get(i).getStart());
-                                    }
+                                SceneFileReadPosition position = JSONUtil.toBean(
+                                    positionMap.get(String.format(SceneStartCheckConstants.FILE_POD_FIELD_KEY,dataFile.getName(), i + 1)).toString(),
+                                    SceneFileReadPosition.class);
+                                if (position.getReadPosition() >= list.get(i).getStart()
+                                    && position.getReadPosition() <= list.get(i).getEnd()) {
+                                    pair.setStart(position.getReadPosition());
                                 } else {
                                     pair.setStart(list.get(i).getStart());
                                 }

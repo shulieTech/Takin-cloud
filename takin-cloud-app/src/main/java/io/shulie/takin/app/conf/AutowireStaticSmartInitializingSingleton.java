@@ -8,10 +8,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author by: hezhongqi
- * @Package io.shulie.takin.app.conf
- * @ClassName: AutowireStaticSmartInitializingSingleton
- * @Description: TODO
- * @Date: 2021/8/16 11:54
+ * @date 2021/8/16 11:54
  */
 @Component
 public class AutowireStaticSmartInitializingSingleton implements SmartInitializingSingleton {

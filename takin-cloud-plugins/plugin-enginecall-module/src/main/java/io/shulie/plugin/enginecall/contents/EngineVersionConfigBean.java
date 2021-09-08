@@ -19,7 +19,6 @@ import lombok.Data;
 
 /**
  * @author 无涯
- * @Package io.shulie.tro.cloud.common.enums.engine
  * @date 2021/5/10 5:22 下午
  */
 @Data

@@ -19,9 +19,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author HengYu
- * @className XmlHttpJmxParser
  * @date 2021/4/12 4:02 下午
- * @description
  */
 public class XmlHttpJmxParser extends JmxParser {
 
@@ -91,7 +89,7 @@ public class XmlHttpJmxParser extends JmxParser {
         if (CollectionUtils.isNotEmpty(voList)) {
             StringBuffer sb = new StringBuffer();
             voList.forEach(data -> sb.append(data.getName()).append(" ").append(data.getPath()).append("\n"));
-            log.info("Parse Jmeter Script Result: " + sb.toString());
+            log.info("Parse Jmeter Script Result: " + sb);
         } else {
             log.info("Parse Jmeter Script Empty");
         }
@@ -101,13 +99,13 @@ public class XmlHttpJmxParser extends JmxParser {
     /**
      * 获取第httpIndex对应的headerManager
      *
-     * @param
-     * @return
+     * @param -
+     * @return -
      */
     private static String getHeaderXml(String xml, int httpIndex) {
         int times = 0;
         String tempXml = xml;
-        int p1 = -1;
+        int p1;
         while (times <= httpIndex) {
             p1 = tempXml.indexOf("<HTTPSamplerProxy");
             if (p1 == -1) {

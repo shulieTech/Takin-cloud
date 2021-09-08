@@ -6,9 +6,8 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * @Author: mubai
- * @Date: 2020-10-29 16:11
- * @Description:
+ * @author mubai
+ * @date 2020-10-29 16:11
  */
 
 @Data
@@ -49,10 +48,10 @@ public class SceneScriptRefInput implements Serializable {
     @ApiModelProperty(value = "文件类型")
     private Integer fileType;
 
-    private String fileExtend ;
+    private String fileExtend;
 
     //脚本id
     private Long scriptId;
     //文件大小
-    private String fileSize ;
+    private String fileSize;
 }

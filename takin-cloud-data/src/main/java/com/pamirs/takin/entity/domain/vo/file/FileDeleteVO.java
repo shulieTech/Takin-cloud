@@ -7,10 +7,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @ClassName FileDeleteVO
- * @Description
- * @Author qianshui
- * @Date 2020/4/20 上午11:19
+ * @author qianshui
+ * @date 2020/4/20 上午11:19
  */
 @Data
 @ApiModel(description = "文件删除入参")

@@ -6,21 +6,20 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * @Author: mubai
- * @Date: 2021-01-11 20:49
- * @Description:
+ * @author mubai
+ * @date 2021-01-11 20:49
  */
 public class ResponseHeaderUtils {
 
     //原本调用方式，需要将token放入header中
     public static final String PAGE_TOTAL_HEADER = "x-total-count";
 
-    public static void setTotalCount(Long totalCount){
-        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+    public static void setTotalCount(Long totalCount) {
+        HttpServletResponse response = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getResponse();
         response.setHeader("Access-Control-Expose-Headers", PAGE_TOTAL_HEADER);
-        if (totalCount !=null){
+        if (totalCount != null) {
             response.setHeader(PAGE_TOTAL_HEADER, totalCount + "");
-        }else {
+        } else {
             response.setHeader(PAGE_TOTAL_HEADER, 0 + "");
         }
 

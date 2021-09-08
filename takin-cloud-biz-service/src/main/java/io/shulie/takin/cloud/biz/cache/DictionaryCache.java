@@ -18,9 +18,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 /**
- * @Auther: vernon
- * @Date: 2019/12/2 16:51
- * @Description: 常量字典枚举类
+ * 常量字典枚举类
+ *
+ * @author vernon
+ * @date 2019/12/2 16:51
  */
 @Component
 @Slf4j
@@ -51,17 +52,17 @@ public class DictionaryCache {
         }
         //分组
         Map<String, List<TDictionaryVo>> groupMap = voList.stream().collect(
-            Collectors.groupingBy(data -> data.getTypeAlias()));
+            Collectors.groupingBy(TDictionaryVo::getTypeAlias));
         //组合数据
         groupMap.forEach((key, value) -> {
             List<EnumResult> resultList = Lists.newArrayList();
-            value.stream().forEach(data -> {
+            value.forEach(data -> {
                 EnumResult result = new EnumResult();
                 try {
                     result.setNum(Integer.parseInt(data.getValueOrder()));
                 } catch (Exception e) {
                     log.error("异常代码【{}】,异常内容：parse dictionaryData error --> 字典数据转int值异常: {}",
-                            TakinCloudExceptionEnum.DICTIONARY_DATA_PARSE_ERROR,e);
+                        TakinCloudExceptionEnum.DICTIONARY_DATA_PARSE_ERROR, e);
                 }
                 result.setLabel(data.getValueName());
                 result.setValue(data.getValueCode());

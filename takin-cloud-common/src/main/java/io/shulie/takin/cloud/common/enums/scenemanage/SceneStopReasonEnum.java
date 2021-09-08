@@ -6,16 +6,15 @@ import lombok.Getter;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.cloud.common.enums.scenemanage
  * @date 2021/6/24 10:44 上午
  */
 @AllArgsConstructor
 @Getter
 public enum SceneStopReasonEnum {
     // 名称-对象触发了熔断机制。
-    SLA("SLA触发熔断机制","[%s]-[%s]触发了熔断机制"),
-    PRESSURE_NODE("压力节点异常","%s"),
-    ENGINE("压测引擎异常","%s");
+    SLA("SLA触发熔断机制", "[%s]-[%s]触发了熔断机制"),
+    PRESSURE_NODE("压力节点异常", "%s"),
+    ENGINE("压测引擎异常", "%s");
     private String type;
     /**
      * 格式定义
@@ -24,29 +23,32 @@ public enum SceneStopReasonEnum {
 
     /**
      * 转sla格式
-     * @param slaBean
-     * @return
+     *
+     * @param slaBean -
+     * @return -
      */
-    public static String toSlaDesc(SlaBean slaBean){
-        return String.format(SLA.description,slaBean.getRuleName(),slaBean.getBusinessActivity());
+    public static String toSlaDesc(SlaBean slaBean) {
+        return String.format(SLA.description, slaBean.getRuleName(), slaBean.getBusinessActivity());
     }
 
     /**
      * 转压测引擎格式
-     * @param error
-     * @return
+     *
+     * @param error -
+     * @return -
      */
-    public static String toEngineDesc(String error){
-        return String.format(ENGINE.description,error);
+    public static String toEngineDesc(String error) {
+        return String.format(ENGINE.description, error);
     }
 
     /**
      * 普通转换
-     * @param error
-     * @return
+     *
+     * @param error -
+     * @return -
      */
-    public static String toDesc(String error){
-        return String.format("%s",error);
+    public static String toDesc(String error) {
+        return String.format("%s", error);
     }
 
 }

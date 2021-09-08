@@ -3,15 +3,15 @@ package com.pamirs.takin.entity.domain.dto.report;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+import lombok.Data;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
 
 /**
- * @ClassName BottleneckInterfaceDTO
- * @Description 瓶颈接口DTO
- * @Author qianshui
- * @Date 2020/7/22 下午2:31
+ * 瓶颈接口DTO
+ *
+ * @author qianshui
+ * @date 2020/7/22 下午2:31
  */
 @ApiModel
 @Data

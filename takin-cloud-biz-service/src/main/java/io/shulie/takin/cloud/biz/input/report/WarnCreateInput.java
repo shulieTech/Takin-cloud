@@ -3,10 +3,8 @@ package io.shulie.takin.cloud.biz.input.report;
 import lombok.Data;
 
 /**
- * @ClassName WarnCreateInput
- * @Description
- * @Author qianshui
- * @Date 2020/11/18 上午11:49
+ * @author qianshui
+ * @date 2020/11/18 上午11:49
  */
 @Data
 public class WarnCreateInput {

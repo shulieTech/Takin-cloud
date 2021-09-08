@@ -95,7 +95,7 @@ public class IPUtils {
     /**
      * 说明：判断是否为windows操作系统
      *
-     * @return
+     * @return -
      * @author shulie
      * @time：2017年10月5日 下午2:46:05
      */
@@ -106,7 +106,7 @@ public class IPUtils {
     /**
      * 说明：获取linux服务器的ip地址
      *
-     * @return
+     * @return -
      * @throws UnknownHostException
      * @throws SocketException
      * @author shulie

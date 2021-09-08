@@ -4,13 +4,14 @@ import java.io.Serializable;
 
 import io.shulie.takin.common.beans.page.PagingDevice;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @Author: fanxx
- * @Date: 2020/5/13 上午10:58
- * @Description:
+ * @author fanxx
+ * @date 2020/5/13 上午10:58
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class MachineTaskQueryParam extends PagingDevice implements Serializable {
     private static final long serialVersionUID = -5236680598754497031L;
     private Integer taskType;

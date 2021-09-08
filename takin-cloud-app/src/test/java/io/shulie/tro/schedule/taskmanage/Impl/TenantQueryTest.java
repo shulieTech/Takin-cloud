@@ -1,4 +1,4 @@
-package io.shulie.takin.schedule.taskmanage.Impl;
+package io.shulie.tro.schedule.taskmanage.Impl;
 
 import java.util.List;
 import java.util.Map;
@@ -17,10 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * @ClassName TenantQueryTest
- * @Description
- * @Author qianshui
- * @Date 2020/10/27 下午8:36
+ * @author qianshui
+ * @date 2020/10/27 下午8:36
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class})

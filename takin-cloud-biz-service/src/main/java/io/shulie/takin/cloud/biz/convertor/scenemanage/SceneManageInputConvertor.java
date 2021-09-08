@@ -17,7 +17,7 @@ public interface SceneManageInputConvertor {
     /**
      * 入参转换
      * @param businessActivityConfig
-     * @return
+     * @return -
      */
     List<SceneBusinessActivityRefInput> ofListSceneBusinessActivityRefInput(List<SceneBusinessActivityRefInput> businessActivityConfig);
 }

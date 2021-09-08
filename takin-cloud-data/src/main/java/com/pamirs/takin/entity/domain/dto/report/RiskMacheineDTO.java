@@ -7,10 +7,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @ClassName RiskMacheineDTO
- * @Description 风险机器列表
- * @Author qianshui
- * @Date 2020/7/22 下午2:57
+ * 风险机器列表
+ *
+ * @author qianshui
+ * @date 2020/7/22 下午2:57
  */
 @ApiModel
 @Data

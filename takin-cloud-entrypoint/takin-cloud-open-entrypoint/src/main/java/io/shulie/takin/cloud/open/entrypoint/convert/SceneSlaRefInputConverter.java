@@ -7,29 +7,23 @@ import org.springframework.beans.BeanUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
- * @Author: mubai
- * @Date: 2020-10-29 10:56
- * @Description:
+ * @author mubai
+ * @date 2020-10-29 10:56
  */
 
 public class SceneSlaRefInputConverter {
 
-
     public static SceneSlaRefInput of(SceneSlaRefOpen sceneSlaRef) {
         SceneSlaRefInput out = new SceneSlaRefInput();
-        BeanUtils.copyProperties(sceneSlaRef,out);
+        BeanUtils.copyProperties(sceneSlaRef, out);
         return out;
     }
 
     public static List<SceneSlaRefInput> ofList(List<SceneSlaRefOpen> sceneSlaRefs) {
         List<SceneSlaRefInput> result = new ArrayList<>();
-        sceneSlaRefs.stream().forEach(sceneSlaRef -> {
-            result.add(of(sceneSlaRef));
-        });
+        sceneSlaRefs.forEach(sceneSlaRef -> result.add(of(sceneSlaRef)));
         return result;
     }
-
 
 }

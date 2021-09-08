@@ -1,10 +1,10 @@
 package io.shulie.takin.cloud.common.constants;
 
 /**
- * @ClassName LoginConstant
- * @Description 登录常量
- * @Author qianshui
- * @Date 2020/8/6 上午11:05
+ * 登录常量
+ *
+ * @author qianshui
+ * @date 2020/8/6 上午11:05
  */
 public class LoginConstant {
 

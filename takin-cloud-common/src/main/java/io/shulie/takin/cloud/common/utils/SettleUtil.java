@@ -4,10 +4,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * @ClassName SettleUtil
- * @Description
- * @Author qianshui
- * @Date 2020/5/9 下午5:18
+ * @author qianshui
+ * @date 2020/5/9 下午5:18
  */
 public class SettleUtil {
 

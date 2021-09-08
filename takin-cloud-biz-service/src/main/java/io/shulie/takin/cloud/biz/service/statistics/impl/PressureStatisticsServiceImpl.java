@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * @author 无涯
- * @Package io.shulie.takin.web.app.service.statistics
  * @date 2020/11/30 9:36 下午
  */
 @Service

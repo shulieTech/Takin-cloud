@@ -5,14 +5,16 @@ import java.util.List;
 
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @ClassName SceneManageQueryBean
- * @Description 场景列表查询
- * @Author qianshui
- * @Date 2020/4/17 下午2:18
+ * 场景列表查询
+ *
+ * @author qianshui
+ * @date 2020/4/17 下午2:18
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class SceneManageQueryBean extends CloudUserCommonRequestExt implements Serializable {
 
     private Long sceneId;
@@ -29,9 +31,9 @@ public class SceneManageQueryBean extends CloudUserCommonRequestExt implements S
     /**
      * 场景ids
      */
-    private List<Long> sceneIds ;
+    private List<Long> sceneIds;
 
-    private String lastPtStartTime ;
+    private String lastPtStartTime;
 
-    private String lastPtEndTime ;
+    private String lastPtEndTime;
 }

@@ -28,7 +28,7 @@ public class CommonInfoApiImpl extends CloudCommonApi implements CommonInfoApi {
     /**
      * 获取cloud配置信息
      *
-     * @return
+     * @return -
      */
     @Override
     public ResponseResult<CommonInfosResp> getCloudConfigurationInfos(CloudCommonInfoWrapperReq request) {

@@ -8,9 +8,8 @@ import org.mapstruct.factory.Mappers;
 import java.util.List;
 
 /**
- * @Author: mubai
- * @Date: 2020-10-30 12:54
- * @Description:
+ * @author mubai
+ * @date 2020-10-30 12:54
  */
 
 @Mapper
@@ -21,6 +20,5 @@ public interface SceneScriptRefRespConvertor {
     SceneManageWrapperResponse.SceneScriptRefResponse of(SceneManageWrapperOutput.SceneScriptRefOutput output);
 
     List<SceneManageWrapperResponse.SceneScriptRefResponse> ofList(List<SceneManageWrapperOutput.SceneScriptRefOutput> output);
-
 
 }

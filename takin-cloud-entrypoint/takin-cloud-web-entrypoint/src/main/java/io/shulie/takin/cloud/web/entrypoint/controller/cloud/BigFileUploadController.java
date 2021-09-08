@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,11 +31,9 @@ import io.shulie.takin.cloud.biz.service.cloudServer.BigFileService;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * @Author: mubai
- * @Date: 2020-05-12 14:47
- * @Description:
+ * @author mubai
+ * @date 2020-05-12 14:47
  */
-
 @RestController
 @RequestMapping("/api/bigfile/")
 public class BigFileUploadController {
@@ -70,16 +69,16 @@ public class BigFileUploadController {
     }
 
     @PostMapping("upload")
-    public ResponseResult upload(HttpServletRequest request, String param, @RequestBody List<MultipartFile> file) {
+    public ResponseResult<?> upload(HttpServletRequest request, String param, @RequestBody List<MultipartFile> file) {
 
         Part uploadVO = JSON.parseObject(param, Part.class);
 
         if (uploadVO.getUserAppKey() == null || uploadVO.getSceneId() == null || uploadVO.getFileName() == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR,"license | sceneId | fileName can not be null");
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "license | sceneId | fileName can not be null");
         }
 
         if (file.size() == 0) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR,"upload file can not be null");
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "upload file can not be null");
         }
 
         try {
@@ -88,7 +87,7 @@ public class BigFileUploadController {
             uploadVO.setByteData(bytes);
             return bigFileService.upload(uploadVO);
         } catch (IOException e) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_ERROR,"文件上传失败!",e);
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_ERROR, "文件上传失败!", e);
         }
 
     }
@@ -115,10 +114,10 @@ public class BigFileUploadController {
     }
 
     @PostMapping("compact")
-    public ResponseResult compact(HttpServletRequest request, @RequestBody Part param) {
+    public ResponseResult<Map<String, Object>> compact(HttpServletRequest request, @RequestBody Part param) {
         //BigFileUploadVO param = JSON.parseObject(json,BigFileUploadVO.class);
         if (param.getUserAppKey() == null || param.getSceneId() == null || param.getOriginalName() == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR,"license | sceneId | fileName can not be null");
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "license | sceneId | fileName can not be null");
 
         }
         return bigFileService.compact(param);

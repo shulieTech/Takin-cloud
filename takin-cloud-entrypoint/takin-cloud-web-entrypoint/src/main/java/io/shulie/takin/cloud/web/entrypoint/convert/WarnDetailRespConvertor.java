@@ -8,16 +8,15 @@ import org.mapstruct.factory.Mappers;
 import java.util.List;
 
 /**
- * @Author: mubai
- * @Date: 2020-11-09 18:50
- * @Description:
+ * @author mubai
+ * @date 2020-11-09 18:50
  */
 
 @Mapper
 public interface WarnDetailRespConvertor {
     WarnDetailRespConvertor INSTANCE = Mappers.getMapper(WarnDetailRespConvertor.class);
 
-    WarnDetailResponse of(WarnDetailOutput output) ;
+    WarnDetailResponse of(WarnDetailOutput output);
 
     List<WarnDetailResponse> ofList(List<WarnDetailOutput> warnDetailOutputs);
 }

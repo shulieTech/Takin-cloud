@@ -8,8 +8,7 @@ import java.util.Map;
 
 /**
  * @author shulie
- * @package: com.shulie.fastdevops.system.util
- * @Date 2019-04-02 20:44 生成唯一短ID
+ * @date 2019-04-02 20:44 生成唯一短ID
  */
 public class Generate {
 
@@ -32,7 +31,7 @@ public class Generate {
 
     public static String generateId36Scale() {
         Calendar calendar = Calendar.getInstance();
-        StringBuilder stringBuilder = new StringBuilder("").
+        StringBuilder stringBuilder = new StringBuilder().
             append(calendar.get(Calendar.YEAR)).
             append(calendar.get(Calendar.MONTH) + 1).
             append(calendar.get(Calendar.DAY_OF_MONTH)).
@@ -68,14 +67,5 @@ public class Generate {
             num = num.add(bigDecimal.toBigInteger());
         }
         return num;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(Generate.generateId36Scale("up"));
-        //        BigInteger up = Generate.scaleConver("up", 36);
-        //        System.out.println(up);
-        //        String s = Generate.scaleToString(up, 36);
-        //        System.out.println(s);
-        //        System.out.println(Generate.scaleConver("up", 36));
     }
 }

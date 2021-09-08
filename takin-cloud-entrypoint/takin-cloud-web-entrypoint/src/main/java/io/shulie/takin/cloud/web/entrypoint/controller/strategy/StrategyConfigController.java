@@ -26,10 +26,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @ClassName StrategyConfigController
- * @Description
- * @Author qianshui
- * @Date 2020/5/9 下午3:27
+ * @author qianshui
+ * @date 2020/5/9 下午3:27
  */
 @RestController
 @RequestMapping("/api/strategyconfig")
@@ -41,13 +39,13 @@ public class StrategyConfigController {
 
     @PostMapping
     @ApiOperation(value = "新增分配策略")
-    public ResponseResult add(@RequestBody @Valid StrategyConfigAddVO addVO) {
+    public ResponseResult<?> add(@RequestBody @Valid StrategyConfigAddVO addVO) {
         return ResponseResult.success(strategyConfigService.add(addVO));
     }
 
     @PutMapping
     @ApiOperation(value = "修改分配策略")
-    public ResponseResult update(@RequestBody @Valid StrategyConfigUpdateVO updateVO) {
+    public ResponseResult<?> update(@RequestBody @Valid StrategyConfigUpdateVO updateVO) {
         return ResponseResult.success(strategyConfigService.update(updateVO));
     }
 
@@ -59,7 +57,7 @@ public class StrategyConfigController {
 
     @DeleteMapping
     @ApiOperation(value = "删除分配策略")
-    public ResponseResult delete(@RequestBody @Valid SceneManageDeleteRequest deleteVO) {
+    public ResponseResult<?> delete(@RequestBody @Valid SceneManageDeleteRequest deleteVO) {
         strategyConfigService.delete(deleteVO.getId());
         return ResponseResult.success();
     }
@@ -69,7 +67,7 @@ public class StrategyConfigController {
     public ResponseResult<List<StrategyConfigDTO>> getList(@ApiParam(name = "current", value = "页码") Integer current,
         @ApiParam(name = "pageSize", value = "页大小") Integer pageSize) {
 
-        /**
+        /*
          * 1、封装参数
          * 2、调用查询服务
          * 3、返回指定格式

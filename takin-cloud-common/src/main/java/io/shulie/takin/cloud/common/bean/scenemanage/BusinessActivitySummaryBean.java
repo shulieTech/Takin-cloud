@@ -1,15 +1,15 @@
 package io.shulie.takin.cloud.common.bean.scenemanage;
 
+import java.util.List;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
- * @Author 莫问
- * @Date 2020-04-17
+ * @author 莫问
+ * @date 2020-04-17
  */
 @Data
 public class BusinessActivitySummaryBean implements Serializable {

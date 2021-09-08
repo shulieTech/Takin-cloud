@@ -1,9 +1,8 @@
 package io.shulie.takin.cloud.common.enums.machine;
 
 /**
- * @Author: fanxx
- * @Date: 2020/5/13 下午5:25
- * @Description:
+ * @author fanxx
+ * @date 2020/5/13 下午5:25
  */
 public enum MachineTaskStatusEnum {
     /**

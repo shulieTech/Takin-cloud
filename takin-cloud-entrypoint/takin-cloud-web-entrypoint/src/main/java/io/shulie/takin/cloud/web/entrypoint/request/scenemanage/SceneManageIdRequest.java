@@ -8,10 +8,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @ClassName SceneManageIdRequest
- * @Description
- * @Author qianshui
- * @Date 2020/4/21 下午5:01
+ * @author qianshui
+ * @date 2020/4/21 下午5:01
  */
 @Data
 public class SceneManageIdRequest implements Serializable {

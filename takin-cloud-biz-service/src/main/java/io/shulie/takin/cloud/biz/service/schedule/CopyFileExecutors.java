@@ -4,15 +4,14 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * @Author: mubai
- * @Date: 2020-10-29 17:21
- * @Description:
+ * @author mubai
+ * @date 2020-10-29 17:21
  */
-
 @Component
 public class CopyFileExecutors implements DisposableBean {
 
@@ -24,7 +23,7 @@ public class CopyFileExecutors implements DisposableBean {
     }
 
     @Override
-    public void destroy() throws Exception {
+    public void destroy() {
         poll.shutdown();
     }
 }

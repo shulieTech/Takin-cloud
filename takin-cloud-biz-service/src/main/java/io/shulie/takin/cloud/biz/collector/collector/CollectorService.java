@@ -11,7 +11,6 @@ import javax.annotation.Resource;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.dao.scenemanage.TSceneManageMapper;
 import com.pamirs.takin.entity.domain.entity.report.Report;
 import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.async.AsyncService;
@@ -39,9 +38,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * @Author <a href="tangyuhan@shulie.io">yuhan.tang</a>
- * @package: io.shulie.takin.cloud.poll.poll
- * @Date 2020-04-20 14:38
+ * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
+ * @date 2020-04-20 14:38
  */
 @Slf4j
 @Service
@@ -70,9 +68,9 @@ public class CollectorService extends AbstractIndicators {
     private boolean cloudPushPtlLog;
 
     private final static ExecutorService THREAD_POOL = new ThreadPoolExecutor(5, 200,
-            300L, TimeUnit.SECONDS,
-            new NoLengthBlockingQueue<>(), new ThreadFactoryBuilder()
-            .setNameFormat("ptl-log-push-%d").build(), new ThreadPoolExecutor.AbortPolicy());
+        300L, TimeUnit.SECONDS,
+        new NoLengthBlockingQueue<>(), new ThreadFactoryBuilder()
+        .setNameFormat("ptl-log-push-%d").build(), new ThreadPoolExecutor.AbortPolicy());
 
     /**
      * 记录时间
@@ -86,37 +84,35 @@ public class CollectorService extends AbstractIndicators {
                 if (validate(timeWindow, sceneId, reportId, customerId, metrics)) {
                     // 写入redis
                     log.info("{}-{}-{} write redis , timestamp-{},timeWindow-{}", sceneId, reportId, customerId,
-                            metric.getTimestamp(), timeWindow);
+                        metric.getTimestamp(), timeWindow);
                     String transaction = metric.getTransaction();
                     intSaveRedisMap(countKey(taskKey, transaction, timeWindow),
-                            CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), metric.getCount());
+                        CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), metric.getCount());
                     intSaveRedisMap(failCountKey(taskKey, transaction, timeWindow),
-                            CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), metric.getFailCount());
+                        CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), metric.getFailCount());
                     intSaveRedisMap(saCountKey(taskKey, transaction, timeWindow),
-                            CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), metric.getSaCount());
+                        CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), metric.getSaCount());
                     intSaveRedisMap(activeThreadsKey(taskKey, transaction, timeWindow),
-                            CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), metric.getActiveThreads());
+                        CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), metric.getActiveThreads());
 
                     // 错误信息
                     setError(errorKey(taskKey, transaction, timeWindow),
-                            CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), GsonUtil.gsonToString(metric.getErrorInfos()));
+                        CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), GsonUtil.gsonToString(metric.getErrorInfos()));
 
-                    /**
-                     * all指标额外计算，累加所有业务活动的saCount all 为空
-                     */
+                    // all指标额外计算，累加所有业务活动的saCount all 为空
                     intSaveRedisMap(saCountKey(taskKey, "all", timeWindow),
-                            // 计算所有业务活动的saCount 用特殊标识 _transaction
-                            CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()) + "_" + transaction,
-                            metric.getSaCount());
+                        // 计算所有业务活动的saCount 用特殊标识 _transaction
+                        CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()) + "_" + transaction,
+                        metric.getSaCount());
 
                     longSaveRedisMap(rtKey(taskKey, transaction, timeWindow),
-                            CollectorUtil.getTimestampPodNum(metric.getTimestamp(),metric.getPodNum()), metric.getSumRt());
+                        CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), metric.getSumRt());
                     mostValue(maxRtKey(taskKey, transaction, timeWindow), metric.getMaxRt(), 0);
                     mostValue(minRtKey(taskKey, transaction, timeWindow), metric.getMinRt(), 1);
                 }
             } catch (Exception e) {
                 log.error("异常代码【{}】,异常内容：接收压测引擎回传数据错误 --> 接收数据统计或存储错误: {}",
-                        TakinCloudExceptionEnum.TASK_RUNNING_RECEIVE_PT_DATA_ERROR, e);
+                    TakinCloudExceptionEnum.TASK_RUNNING_RECEIVE_PT_DATA_ERROR, e);
             }
         }
     }
@@ -128,8 +124,8 @@ public class CollectorService extends AbstractIndicators {
         for (EventMetrics metric : metrics) {
             try {
                 // 解决多pod
-                Boolean isFirst = METRICS_EVENTS_STARTED.equals(metric.getEventName()) ? true : false;
-                Boolean isLast = METRICS_EVENTS_ENDED.equals(metric.getEventName()) ? true : false;
+                boolean isFirst = METRICS_EVENTS_STARTED.equals(metric.getEventName());
+                boolean isLast = METRICS_EVENTS_ENDED.equals(metric.getEventName());
                 if (isFirst) {
                     // 超时自动检修，强行触发关闭
                     if (!redisClientUtils.hasKey(forceCloseTime(taskKey))) {
@@ -147,9 +143,9 @@ public class CollectorService extends AbstractIndicators {
                     //events.compute(engineName, (k, v) -> v == null ? 1 : v + 1);
                     if (count != null && count == 1) {
                         sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
-                                .checkEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING)
-                                .updateEnum(SceneManageStatusEnum.ENGINE_RUNNING)
-                                .build());
+                            .checkEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING)
+                            .updateEnum(SceneManageStatusEnum.ENGINE_RUNNING)
+                            .build());
                     }
                     String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_JTL_FILE_NAME_SYSTEM_PROP_KEY);
                     cacheTryRunTaskStatus(sceneId, reportId, customerId, SceneRunTaskStatusEnum.STARTED, fileName);
@@ -157,7 +153,7 @@ public class CollectorService extends AbstractIndicators {
                     if (cloudPushPtlLog) {
                         log.info("开始异步上传ptl日志，场景ID：{},报告ID:{}", sceneId, reportId);
                         THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, customerId, logUploadDAO, redisClientUtils,
-                                pushLogService, sceneManageDAO, ptlDir, fileName) {
+                            pushLogService, sceneManageDAO, ptlDir, fileName) {
                         });
                     }
                 }
@@ -189,32 +185,32 @@ public class CollectorService extends AbstractIndicators {
                 }
             } catch (Exception e) {
                 log.error("异常代码【{}】,异常内容：接收压测引擎回传事件数据异常 --> 【Collector-metrics-Error】接收处理事件数据，异常信息: {}",
-                        TakinCloudExceptionEnum.TASK_RUNNING_RECEIVE_PT_DATA_ERROR, e);
+                    TakinCloudExceptionEnum.TASK_RUNNING_RECEIVE_PT_DATA_ERROR, e);
             }
         }
     }
 
     private void cacheTryRunTaskStatus(Long sceneId, Long reportId, Long customerId, SceneRunTaskStatusEnum status,
-                                       String fileName) {
+        String fileName) {
         String tryRunTaskKey = String
-                .format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneId, reportId);
+            .format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneId, reportId);
         //任务状态记录到redis
         redisTemplate.opsForHash().put(tryRunTaskKey, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY, status.getText());
         Report report = tReportMapper.selectByPrimaryKey(reportId);
         if (Objects.nonNull(report) && report.getPressureType() != PressureTypeEnums.FLOW_DEBUG.getCode()
-                && report.getPressureType() != PressureTypeEnums.INSPECTION_MODE.getCode()
-                && status.getCode() == SceneRunTaskStatusEnum.STARTED.getCode()
-                && StringUtils.isNotBlank(fileName)) {
+            && report.getPressureType() != PressureTypeEnums.INSPECTION_MODE.getCode()
+            && status.getCode() == SceneRunTaskStatusEnum.STARTED.getCode()
+            && StringUtils.isNotBlank(fileName)) {
             int reportStatus = report.getStatus();
             if (reportStatus == ReportConstans.INIT_STATUS || reportStatus == ReportConstans.RUN_STATUS
-                    || reportStatus == ReportConstans.FINISH_STATUS) {
+                || reportStatus == ReportConstans.FINISH_STATUS) {
                 //判断当前report是否已经在上传，超时时间10分钟
                 Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent(
-                        String.format(SceneTaskRedisConstants.UPLOAD_TASK_STATUS + "_%s_%s", sceneId, reportId), reportId,
-                        SceneTaskRedisConstants.DEFAULT_EXPIRE_TIME,
-                        TimeUnit.MINUTES);
+                    String.format(SceneTaskRedisConstants.UPLOAD_TASK_STATUS + "_%s_%s", sceneId, reportId), reportId,
+                    SceneTaskRedisConstants.DEFAULT_EXPIRE_TIME,
+                    TimeUnit.MINUTES);
 
-                if (ifAbsent) {
+                if (ifAbsent != null && ifAbsent) {
                     asyncService.updateSceneRunningStatus(sceneId, reportId);
                 }
             }
@@ -225,17 +221,15 @@ public class CollectorService extends AbstractIndicators {
         log.info("场景[{}]压测任务已完成,将要开始更新报告{}", sceneId, reportId);
         // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
         sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
-                .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
-                .updateEnum(SceneManageStatusEnum.STOP)
-                .build());
+            .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
+            .updateEnum(SceneManageStatusEnum.STOP)
+            .build());
     }
 
     private boolean isLastSign(Long lastSignCount, String engineName) {
-        if (StringUtils.isNotEmpty(redisClientUtils.getString(engineName))
-                && lastSignCount.equals(Long.valueOf(redisClientUtils.getString(engineName)))) {
-            return true;
-        }
-        return false;
+        boolean redisValueNotIsNull = StringUtils.isNotBlank(redisClientUtils.getString(engineName));
+        Long redisValue = Long.valueOf(redisClientUtils.getString(engineName));
+        return redisValueNotIsNull && lastSignCount.equals(redisValue);
     }
 
     /**
@@ -244,16 +238,16 @@ public class CollectorService extends AbstractIndicators {
     public void statisticalIp(Long sceneId, Long reportId, Long customerId, long time, String ip) {
 
         String windosTimeKey = String.format("%s:%s", getPressureTaskKey(sceneId, reportId, customerId),
-                "windosTime");
+            "windosTime");
         String timeInMillis = String.valueOf(CollectorUtil.getTimeWindow(time).getTimeInMillis());
-        List<String> ips = null;
+        List<String> ips;
         if (redisTemplate.getExpire(windosTimeKey) == -2) {
             ips = new ArrayList<>();
             ips.add(ip);
             redisTemplate.opsForHash().put(windosTimeKey, timeInMillis, ips);
             redisTemplate.expire(windosTimeKey, 60 * 60 * 2, TimeUnit.SECONDS);
         } else {
-            ips = (List<String>) redisTemplate.opsForHash().get(windosTimeKey, timeInMillis);
+            ips = (List<String>)redisTemplate.opsForHash().get(windosTimeKey, timeInMillis);
             if (null == ips) {
                 ips = new ArrayList<>();
             }
@@ -266,12 +260,12 @@ public class CollectorService extends AbstractIndicators {
     /**
      * 校验数据是否丢弃
      *
-     * @return
+     * @return -
      */
     private boolean validate(long time, Long sceneId, Long reportId, Long customerId, List<ResponseMetrics> metrics) {
         if ((System.currentTimeMillis() - time) > CollectorConstants.overdueTime) {
             log.info("{}-{}-{}数据丢失,超时时间{}，数据原文：{}", sceneId, reportId, customerId,
-                    System.currentTimeMillis() - time, JsonHelper.bean2Json(metrics));
+                System.currentTimeMillis() - time, JsonHelper.bean2Json(metrics));
             return false;
         }
         return true;

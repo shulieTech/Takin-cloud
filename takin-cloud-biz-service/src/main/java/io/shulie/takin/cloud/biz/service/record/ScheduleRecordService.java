@@ -5,10 +5,8 @@ import com.pamirs.takin.entity.domain.dto.schedule.ScheduleRecordDTO;
 import com.pamirs.takin.entity.domain.vo.schedule.ScheduleRecordQueryVO;
 
 /**
- * @ClassName ScheduleRecordService
- * @Description
- * @Author qianshui
- * @Date 2020/5/9 下午2:10
+ * @author qianshui
+ * @date 2020/5/9 下午2:10
  */
 public interface ScheduleRecordService {
 

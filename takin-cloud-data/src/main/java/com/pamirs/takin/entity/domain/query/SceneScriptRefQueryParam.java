@@ -5,9 +5,8 @@ import java.io.Serializable;
 import lombok.Data;
 
 /**
- * @Author: mubai
- * @Date: 2020-05-12 17:28
- * @Description:
+ * @author mubai
+ * @date 2020-05-12 17:28
  */
 
 @Data

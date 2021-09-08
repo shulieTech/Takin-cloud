@@ -2,7 +2,6 @@ package io.shulie.takin.cloud.common.enums.engine;
 
 /**
  * @author 何仲奇
- * @Package com.pamirs.takin.entity.domain.vo.jmeter
  * @date 2020/9/23 3:01 下午
  */
 public enum EngineStatusEnum {

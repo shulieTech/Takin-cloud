@@ -22,8 +22,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 /**
- * @Author: 慕白
- * @Date: 2019-04-17 9:24
+ * @author 慕白
+ * @date 2019-04-17 9:24
  * redis 工具类
  */
 @Component
@@ -47,7 +47,7 @@ public class RedisClientUtils {
 
     @PostConstruct
     public void init() {
-        unlockRedisScript = new DefaultRedisScript<Void>();
+        unlockRedisScript = new DefaultRedisScript<>();
         unlockRedisScript.setResultType(Void.class);
         unlockRedisScript.setScriptText(unlockScript);
     }
@@ -87,10 +87,7 @@ public class RedisClientUtils {
         return (boolean)redisTemplate.execute((RedisCallback<Boolean>)connection -> {
             Boolean bl = connection.set(getLockPrefix(key).getBytes(), value.getBytes(), expiration,
                 RedisStringCommands.SetOption.SET_IF_ABSENT);
-            if (null != bl && bl) {
-                return true;
-            }
-            return false;
+            return null != bl && bl;
         });
     }
 
@@ -110,9 +107,9 @@ public class RedisClientUtils {
     /**
      * 获取并自增l个，key不过期
      *
-     * @param key
-     * @param l
-     * @return
+     * @param key -
+     * @param l   -
+     * @return -
      */
     public Long incrementAndNotExpire(final String key, final long l) {
         return stringRedisTemplate.opsForValue().increment(key, l);
@@ -123,7 +120,7 @@ public class RedisClientUtils {
      *
      * @param key  键
      * @param time 时间(秒)
-     * @return
+     * @return -
      */
     public boolean expire(String key, long time) {
         try {
@@ -133,7 +130,7 @@ public class RedisClientUtils {
             return true;
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：redis命令执行失败 --> expire方法执行异常，异常信息: {}",
-                    TakinCloudExceptionEnum.REDIS_CMD_EXECUTE_ERROR,e);
+                TakinCloudExceptionEnum.REDIS_CMD_EXECUTE_ERROR, e);
             return false;
         }
     }
@@ -161,7 +158,7 @@ public class RedisClientUtils {
             return true;
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：redis命令执行失败 --> set方法执行异常，异常信息: {}",
-                    TakinCloudExceptionEnum.REDIS_CMD_EXECUTE_ERROR,e);
+                TakinCloudExceptionEnum.REDIS_CMD_EXECUTE_ERROR, e);
             return false;
         }
 
@@ -185,7 +182,7 @@ public class RedisClientUtils {
             return true;
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：redis命令执行失败 --> set with time方法执行异常，异常信息: {}",
-                    TakinCloudExceptionEnum.REDIS_CMD_EXECUTE_ERROR,e);
+                TakinCloudExceptionEnum.REDIS_CMD_EXECUTE_ERROR, e);
             return false;
         }
     }
@@ -203,7 +200,7 @@ public class RedisClientUtils {
             return true;
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：redis命令执行失败 --> hmset 方法执行异常，异常信息: {}",
-                    TakinCloudExceptionEnum.REDIS_CMD_EXECUTE_ERROR,e);
+                TakinCloudExceptionEnum.REDIS_CMD_EXECUTE_ERROR, e);
             return false;
         }
     }
@@ -214,7 +211,7 @@ public class RedisClientUtils {
             return true;
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：redis命令执行失败 --> hmset with time方法执行异常，异常信息: {}",
-                    TakinCloudExceptionEnum.REDIS_CMD_EXECUTE_ERROR,e);
+                TakinCloudExceptionEnum.REDIS_CMD_EXECUTE_ERROR, e);
             return false;
         }
     }
@@ -236,7 +233,7 @@ public class RedisClientUtils {
             return true;
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：redis命令执行失败 --> hmset map with time方法执行异常，异常信息: {}",
-                    TakinCloudExceptionEnum.REDIS_CMD_EXECUTE_ERROR,e);
+                TakinCloudExceptionEnum.REDIS_CMD_EXECUTE_ERROR, e);
             return false;
         }
     }
@@ -268,7 +265,7 @@ public class RedisClientUtils {
             return redisTemplate.hasKey(key);
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：redis命令执行失败 --> hasKey方法执行异常，异常信息: {}",
-                    TakinCloudExceptionEnum.REDIS_CMD_EXECUTE_ERROR,e);
+                TakinCloudExceptionEnum.REDIS_CMD_EXECUTE_ERROR, e);
             return false;
         }
     }
@@ -303,7 +300,7 @@ public class RedisClientUtils {
      * @param key
      * @param value
      * @param score
-     * @return
+     * @return -
      */
     public Boolean zAdd(String key, String value, double score) {
         return redisTemplate.opsForZSet().add(key, value, score);
@@ -312,7 +309,7 @@ public class RedisClientUtils {
     /**
      * @param key
      * @param values
-     * @return
+     * @return -
      */
     public Long zAdd(String key, Set<ZSetOperations.TypedTuple<String>> values) {
         return redisTemplate.opsForZSet().add(key, values);
@@ -321,7 +318,7 @@ public class RedisClientUtils {
     /**
      * @param key
      * @param values
-     * @return
+     * @return -
      */
     public Long zRemove(String key, Object... values) {
         return redisTemplate.opsForZSet().remove(key, values);
@@ -333,7 +330,7 @@ public class RedisClientUtils {
      * @param key
      * @param value
      * @param delta
-     * @return
+     * @return -
      */
     public Double zIncrementScore(String key, String value, double delta) {
         return redisTemplate.opsForZSet().incrementScore(key, value, delta);
@@ -345,7 +342,7 @@ public class RedisClientUtils {
     //     * @param key
     //     * @param start 开始位置
     //     * @param end   结束位置, -1查询所有
-    //     * @return
+    //     * @return -
     //     */
     //    public Set<String> zRange(String key, long start, long end) {
     //        return redisTemplate.opsForZSet().range(key, start, end);
@@ -357,7 +354,7 @@ public class RedisClientUtils {
     //     * @param key
     //     * @param start
     //     * @param end
-    //     * @return
+    //     * @return -
     //     */
     //    public Set<ZSetOperations.TypedTuple<String>> zRangeWithScores(String key, long start,
     //                                                                   long end) {
@@ -370,7 +367,7 @@ public class RedisClientUtils {
      * @param key
      * @param start
      * @param end   ["num1","num2","num3"]
-     * @return
+     * @return -
      */
     public Set<String> zReverseRange(String key, long start, long end) {
         return redisTemplate.opsForZSet().reverseRange(key, start, end);
@@ -382,7 +379,7 @@ public class RedisClientUtils {
      * @param key
      * @param start
      * @param end   [{"score":100,"value":"num1"},{"score":99,"value":"num2"},{"score":98,"value":"num3"}]
-     * @return
+     * @return -
      */
     public Set<ZSetOperations.TypedTuple<String>> zReverseRangeWithScores(String key,
         long start, long end) {
@@ -392,6 +389,7 @@ public class RedisClientUtils {
 
     /**
      * list 右边插入
+     *
      * @param key
      * @param value
      */

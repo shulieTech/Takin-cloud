@@ -33,7 +33,7 @@ public class CloudEngineApiImpl extends CloudCommonApi implements CloudEngineApi
      * 根据插件类型获取插件列表
      *
      * @param request
-     * @return
+     * @return -
      */
     @Override
     public ResponseResult<Map<String, List<EnginePluginSimpleInfoResp>>> listEnginePlugins(
@@ -47,7 +47,7 @@ public class CloudEngineApiImpl extends CloudCommonApi implements CloudEngineApi
      * 根据插件ID获取插件详情
      *
      * @param request
-     * @return
+     * @return -
      */
     @Override
     public ResponseResult<EnginePluginDetailResp> getEnginePluginDetails(EnginePluginDetailsWrapperReq request) {

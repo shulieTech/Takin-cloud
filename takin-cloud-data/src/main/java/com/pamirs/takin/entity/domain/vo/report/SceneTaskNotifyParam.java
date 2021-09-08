@@ -3,8 +3,8 @@ package com.pamirs.takin.entity.domain.vo.report;
 import lombok.Data;
 
 /**
- * @Author 莫问
- * @Date 2020-04-23
+ * @author 莫问
+ * @date 2020-04-23
  */
 @Data
 public class SceneTaskNotifyParam {

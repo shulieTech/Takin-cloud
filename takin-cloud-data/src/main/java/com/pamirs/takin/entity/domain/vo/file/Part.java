@@ -6,11 +6,9 @@ import java.util.List;
 import lombok.Data;
 
 /**
- * @Author: hengyu
- * @Date: 2020-05-12 14:43
- * @Description:
+ * @author hengyu
+ * @date 2020-05-12 14:43
  */
-
 @Data
 public class Part implements Serializable {
     private static final long serialVersionUID = 3132972991439604004L;

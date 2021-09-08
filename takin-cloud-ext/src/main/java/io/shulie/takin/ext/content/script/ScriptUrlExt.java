@@ -5,10 +5,8 @@ import java.io.Serializable;
 import lombok.Data;
 
 /**
- * @ClassName ScriptUrlVO
- * @Description
- * @Author qianshui
- * @Date 2020/4/22 上午4:14
+ * @author qianshui
+ * @date 2020/4/22 上午4:14
  */
 @Data
 public class ScriptUrlExt implements Serializable {

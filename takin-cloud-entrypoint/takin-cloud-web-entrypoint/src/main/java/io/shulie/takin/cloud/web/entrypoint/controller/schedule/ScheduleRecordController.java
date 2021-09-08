@@ -21,10 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @ClassName ScheduleRecordController
- * @Description
- * @Author qianshui
- * @Date 2020/5/9 下午2:05
+ * @author qianshui
+ * @date 2020/5/9 下午2:05
  */
 @RestController
 @RequestMapping("/api/schedulerecord")
@@ -44,13 +42,13 @@ public class ScheduleRecordController {
         @ApiParam(name = "pageSize", value = "页大小", required = true) Integer pageSize,
         @ApiParam(name = "sceneId", value = "压测场景ID", required = true) Long sceneId) {
 
-        /**
+        /*
          * 1、封装参数
          * 2、调用查询服务
          * 3、返回指定格式
          */
         if (sceneId == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCHEDULE_RECORD_GET_ERROR,"缺少压测场景ID");
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCHEDULE_RECORD_GET_ERROR, "缺少压测场景ID");
         }
         ScheduleRecordQueryVO queryVO = new ScheduleRecordQueryVO();
         queryVO.setCurrentPage(current);

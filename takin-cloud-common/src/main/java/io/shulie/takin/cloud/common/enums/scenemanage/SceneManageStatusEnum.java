@@ -5,13 +5,13 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 /**
- * @ClassName SceneManageStatusEnum
- * @Description
- * @Author qianshui
- * @Date 2020/4/27 上午11:20
+ * @author qianshui
+ * @date 2020/4/27 上午11:20
  */
 public enum SceneManageStatusEnum {
-
+    /**
+     * 待启动
+     */
     WAIT(0, "待启动"),
     JOB_CREATEING(3, "job创建中"),
     PRESSURE_NODE_RUNNING(4, "压力节点工作中"),
@@ -22,14 +22,14 @@ public enum SceneManageStatusEnum {
     //特殊情况
     FILESPLIT_RUNNING(7, "文件拆分中"),
     FILESPLIT_END(8, "文件拆分完成"),
-    FAILED(9,"压测失败"),
+    FAILED(9, "压测失败"),
     // 强制停止两个都停止
-    FORCE_STOP(10,"强制停止")
-    ;
+    FORCE_STOP(10, "强制停止");
 
     /**
      * 待启动
-     * @return
+     *
+     * @return -
      */
     public static SceneManageStatusEnum[] getAll() {
         return SceneManageStatusEnum.values();
@@ -37,7 +37,8 @@ public enum SceneManageStatusEnum {
 
     /**
      * 待启动
-     * @return
+     *
+     * @return -
      */
     public static List<SceneManageStatusEnum> getFree() {
         List<SceneManageStatusEnum> free = Lists.newArrayList();
@@ -49,7 +50,8 @@ public enum SceneManageStatusEnum {
 
     /**
      * 启动中
-     * @return
+     *
+     * @return -
      */
     public static List<SceneManageStatusEnum> getStarting() {
         List<SceneManageStatusEnum> starting = Lists.newArrayList();
@@ -63,14 +65,15 @@ public enum SceneManageStatusEnum {
 
     /**
      * 压测中
-     * @return
+     *
+     * @return -
      */
     public static List<SceneManageStatusEnum> getWorking() {
-       List<SceneManageStatusEnum> working = Lists.newArrayList();
-       working.add(ENGINE_RUNNING);
-       working.add(PTING);
-       working.add(STOP);
-       return working;
+        List<SceneManageStatusEnum> working = Lists.newArrayList();
+        working.add(ENGINE_RUNNING);
+        working.add(PTING);
+        working.add(STOP);
+        return working;
     }
 
     private Integer value;
@@ -91,50 +94,44 @@ public enum SceneManageStatusEnum {
     }
 
     public static SceneManageStatusEnum getSceneManageStatusEnum(Integer status) {
-        for(SceneManageStatusEnum statusEnum:values()) {
-            if(status.equals(statusEnum.getValue())) {
+        for (SceneManageStatusEnum statusEnum : values()) {
+            if (status.equals(statusEnum.getValue())) {
                 return statusEnum;
             }
         }
         return null;
     }
 
-    public static Integer getAdaptStatus (Integer status) {
+    public static Integer getAdaptStatus(Integer status) {
         SceneManageStatusEnum statusEnum = getSceneManageStatusEnum(status);
-        if(SceneManageStatusEnum.getFree().contains(statusEnum)) {
+        if (SceneManageStatusEnum.getFree().contains(statusEnum)) {
             return WAIT.getValue();
         }
-        if(SceneManageStatusEnum.getStarting().contains(statusEnum)) {
+        if (SceneManageStatusEnum.getStarting().contains(statusEnum)) {
             return STARTING.getValue();
         }
 
-        if(SceneManageStatusEnum.getWorking().contains(statusEnum)) {
+        if (SceneManageStatusEnum.getWorking().contains(statusEnum)) {
             return PTING.getValue();
         }
 
         return statusEnum.getValue();
     }
-    public static Boolean ifStop (Integer status) {
+
+    public static Boolean ifStop(Integer status) {
         SceneManageStatusEnum statusEnum = getSceneManageStatusEnum(status);
-        if(SceneManageStatusEnum.getFree().contains(statusEnum) || SceneManageStatusEnum.getStarting().contains(statusEnum)) {
-            return true;
-        }
-        return false;
+        return SceneManageStatusEnum.getFree().contains(statusEnum)
+            || SceneManageStatusEnum.getStarting().contains(statusEnum);
     }
 
     public static Boolean ifFinished(Integer status) {
         SceneManageStatusEnum statusEnum = getSceneManageStatusEnum(status);
-        if (SceneManageStatusEnum.getFree().contains(statusEnum) || SceneManageStatusEnum.STOP == statusEnum) {
-            return true;
-        }
-        return false;
+        return SceneManageStatusEnum.getFree().contains(statusEnum)
+            || SceneManageStatusEnum.STOP == statusEnum;
     }
 
     public static Boolean ifFree(Integer status) {
         SceneManageStatusEnum statusEnum = getSceneManageStatusEnum(status);
-        if (SceneManageStatusEnum.getFree().contains(statusEnum)) {
-            return true;
-        }
-        return false;
+        return SceneManageStatusEnum.getFree().contains(statusEnum);
     }
 }

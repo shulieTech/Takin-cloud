@@ -3,9 +3,8 @@ package io.shulie.takin.cloud.common.enums.machine;
 import lombok.Data;
 
 /**
- * @Auther: vernon
- * @Date: 2019/12/23 21:52
- * @Description:
+ * @author vernon
+ * @date 2019/12/23 21:52
  */
 @Data
 public class EnumResult {

@@ -12,18 +12,14 @@ import io.shulie.takin.plugin.framework.core.PluginManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * @author by: hezhongqi
- * @Package io.shulie.takin.ext.util
- * @ClassName: CustomUtil
- * @Description:
- * @Date: 2021/8/4 14:42
+ * @author hezhongqi
+ * @date 2021/8/4 14:42
  */
 public class CloudPluginUtils {
 
-
-
     private static CloudUserExtApi userApi;
     static PluginManager pluginManager;
+
     @Autowired
     public void setPluginManager(PluginManager pluginManager) {
         CloudPluginUtils.pluginManager = pluginManager;
@@ -42,25 +38,27 @@ public class CloudPluginUtils {
         return Boolean.FALSE;
     }
 
+
     /**
      * 返回用户id
-     * @return
+     *
+     * @return -
      */
     public static CloudUserExt getUser() {
-        if(userApi != null) {
+        if (userApi != null) {
             return userApi.getUser();
         }
-       return null;
+        return null;
     }
-
 
     /**
      * 目前用户id = 租户id
-     * @return
+     *
+     * @return -
      */
     public static Long getCustomerId() {
-        if(userApi != null) {
-            if(getUser() != null) {
+        if (userApi != null) {
+            if (getUser() != null) {
                 return getUser().getCustomerId();
             }
         }
@@ -70,21 +68,22 @@ public class CloudPluginUtils {
 
     /**
      * 返回过滤sql
-     * @return
+     *
+     * @return -
      */
     public static String getFilterSql() {
-        if(userApi != null) {
-            if(userApi.getRequestExt() != null) {
+        if (userApi != null) {
+            if (userApi.getRequestExt() != null) {
                 return userApi.getRequestExt().getFilterSql();
             }
         }
         return "";
     }
 
-
     /**
      * 公共补充 查询 用户数据
-     * @param userCommonExt
+     *
+     * @param userCommonExt -
      */
     public static void fillUserData(CloudUserCommonRequestExt userCommonExt) {
         if (Objects.nonNull(userApi)) {
@@ -104,8 +103,9 @@ public class CloudPluginUtils {
 
     /**
      * 报告补充 查询 报告用户数据
-     * @param reportExt
-     * @param targetExt
+     *
+     * @param reportExt -
+     * @param targetExt -
      */
     public static void fillReportData(CloudUserCommonRequestExt reportExt, CloudUserCommonRequestExt targetExt) {
         if (Objects.nonNull(userApi)) {
@@ -115,8 +115,9 @@ public class CloudPluginUtils {
 
     /**
      * 获取用户信息
-     * @param customerIds
-     * @return
+     *
+     * @param customerIds -
+     * @return -
      */
     public static Map<Long, String> getUserNameMap(List<Long> customerIds) {
         if (Objects.nonNull(userApi)) {
@@ -131,7 +132,7 @@ public class CloudPluginUtils {
         }
     }
 
-    public static void fillCustomerName(CloudUserCommonRequestExt requestExt, Map<Long, String> userMap ) {
+    public static void fillCustomerName(CloudUserCommonRequestExt requestExt, Map<Long, String> userMap) {
         if (!userMap.isEmpty() && Objects.nonNull(requestExt.getUserId()) && Objects.nonNull(userMap.get(requestExt.getUserId()))) {
             requestExt.setCustomerName(userMap.get(requestExt.getUserId()));
         }

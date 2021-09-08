@@ -32,6 +32,7 @@ import com.pamirs.takin.entity.dao.scenemanage.TSceneBusinessActivityRefMapper;
 import com.pamirs.takin.entity.dao.scenemanage.TSceneManageMapper;
 import com.pamirs.takin.entity.dao.scenemanage.TSceneScriptRefMapper;
 import com.pamirs.takin.entity.dao.scenemanage.TSceneSlaRefMapper;
+import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.entity.scenemanage.SceneBusinessActivityRef;
 import com.pamirs.takin.entity.domain.entity.scenemanage.SceneManage;
 import com.pamirs.takin.entity.domain.entity.scenemanage.SceneRef;
@@ -99,10 +100,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @ClassName SceneManageImpl
- * @Description
- * @Author qianshui
- * @Date 2020/4/17 下午3:32
+ * @author qianshui
+ * @date 2020/4/17 下午3:32
  */
 @Service
 @Slf4j
@@ -152,7 +151,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long addSceneManage(SceneManageWrapperInput wrapperRequest) {
-        /**
+        /*
          * 0、校验业务活动和脚本文件是否匹配
          *    1、是否有脚本脚本文件
          *    2、Jmeter脚本文件是否唯一
@@ -168,14 +167,14 @@ public class SceneManageServiceImpl implements SceneManageService {
             isScriptManage = json.get(SceneManageConstant.FEATURES_SCRIPT_ID) != null;
         }
         Map<String, Object> maps = buildSceneManageRef(wrapperRequest);
-        List<SceneBusinessActivityRef> businessActivityRefs = (List<SceneBusinessActivityRef>) maps.get(SCENE_BUSINESS_ACTIVITY);
-        List<SceneScriptRef> sceneScriptRefList = (List<SceneScriptRef>) maps.get(SCENE_SCRIPT);
-        List<SceneSlaRef> sceneSlaRefs = (List<SceneSlaRef>) maps.get(SCENE_SLA);
+        List<SceneBusinessActivityRef> businessActivityRefs = (List<SceneBusinessActivityRef>)maps.get(SCENE_BUSINESS_ACTIVITY);
+        List<SceneScriptRef> sceneScriptRefList = (List<SceneScriptRef>)maps.get(SCENE_SCRIPT);
+        List<SceneSlaRef> sceneSlaRefs = (List<SceneSlaRef>)maps.get(SCENE_SLA);
         if (isScriptManage) {
             matchScriptBusinessActivity(businessActivityRefs, sceneScriptRefList);
         }
-        Long sceneId = saveToDB((SceneManageCreateOrUpdateParam) maps.get(SCENE_MANAGE),
-                businessActivityRefs, sceneScriptRefList, sceneSlaRefs, isScriptManage);
+        Long sceneId = saveToDB((SceneManageCreateOrUpdateParam)maps.get(SCENE_MANAGE),
+            businessActivityRefs, sceneScriptRefList, sceneSlaRefs, isScriptManage);
 
         //使用了脚本，需要转移文件
         if (isScriptManage) {
@@ -183,8 +182,8 @@ public class SceneManageServiceImpl implements SceneManageService {
             if (CollectionUtils.isNotEmpty(uploadFileList)) {
                 //数据文件、脚本文件
                 List<SceneScriptRefInput> normalFileList
-                        = uploadFileList.stream().filter(sceneScriptRefInput -> sceneScriptRefInput.getFileType().equals(0) || sceneScriptRefInput.getFileType().equals(1)).collect(
-                        Collectors.toList());
+                    = uploadFileList.stream().filter(sceneScriptRefInput -> sceneScriptRefInput.getFileType().equals(0) || sceneScriptRefInput.getFileType().equals(1)).collect(
+                    Collectors.toList());
                 String destPath = getDestPath(sceneId);
                 for (SceneScriptRefInput file : normalFileList) {
                     String sourcePath = file.getUploadPath();
@@ -192,8 +191,8 @@ public class SceneManageServiceImpl implements SceneManageService {
                 }
                 //附件
                 List<SceneScriptRefInput> attachmentFileList
-                        = uploadFileList.stream().filter(sceneScriptRefInput -> sceneScriptRefInput.getFileType().equals(2)).collect(
-                        Collectors.toList());
+                    = uploadFileList.stream().filter(sceneScriptRefInput -> sceneScriptRefInput.getFileType().equals(2)).collect(
+                    Collectors.toList());
                 if (CollectionUtils.isNotEmpty(attachmentFileList)) {
                     String attachmentPath = destPath + SceneManageConstant.FILE_SPLIT + "attachments";
                     for (SceneScriptRefInput file : attachmentFileList) {
@@ -217,14 +216,16 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (!file.isDirectory()) {
             file.delete();
         } else if (file.isDirectory()) {
-            String[] filelist = file.list();
-            for (int i = 0; i < filelist.length; i++) {
-                File delfile = new File(dest + "/" + filelist[i]);
-                if (!delfile.isDirectory()) {
-                    delfile.delete();
-                    log.info(delfile.getAbsolutePath() + "删除文件成功");
-                } else if (delfile.isDirectory()) {
-                    delDirFile(dest + "/" + filelist[i]);
+            String[] fileList = file.list();
+            if (fileList != null) {
+                for (String s : fileList) {
+                    File delfile = new File(dest + "/" + s);
+                    if (!delfile.isDirectory()) {
+                        delfile.delete();
+                        log.info(delfile.getAbsolutePath() + "删除文件成功");
+                    } else if (delfile.isDirectory()) {
+                        delDirFile(dest + "/" + s);
+                    }
                 }
             }
             log.info(file.getAbsolutePath() + "删除成功");
@@ -246,7 +247,7 @@ public class SceneManageServiceImpl implements SceneManageService {
                 FileManagerHelper.copyFiles(Collections.singletonList(source), dest);
             } catch (Exception e) {
                 log.error("异常代码【{}】,异常内容：压测场景处理文件异常 --> 文件复制失败: {}",
-                        TakinCloudExceptionEnum.SCENE_MANAGE_FILE_COPY_ERROR, e);
+                    TakinCloudExceptionEnum.SCENE_MANAGE_FILE_COPY_ERROR, e);
             }
         }).start();
     }
@@ -264,21 +265,19 @@ public class SceneManageServiceImpl implements SceneManageService {
             EngineExtApi engineExtApi = enginePluginUtils.getEngineExtApi();
             ScriptParseExt scriptParseExt = engineExtApi.parseScriptFile(sceneScriptRef.getUploadPath());
             if (scriptParseExt == null || CollectionUtils.isEmpty(scriptParseExt.getRequestUrl())
-                    || CollectionUtils.isEmpty(businessActivityList)) {
+                || CollectionUtils.isEmpty(businessActivityList)) {
                 return;
             }
-            businessActivityList.forEach(businessActivity -> {
-                scriptParseExt.getRequestUrl().forEach(scriptUrlExt -> {
-                    if (UrlUtil.checkEqual(businessActivity.getBindRef(), scriptUrlExt.getPath())) {
-                        businessActivity.setBindRef(scriptUrlExt.getName());
-                    }
-                });
-            });
+            businessActivityList.forEach(businessActivity -> scriptParseExt.getRequestUrl().forEach(scriptUrlExt -> {
+                if (UrlUtil.checkEqual(businessActivity.getBindRef(), scriptUrlExt.getPath())) {
+                    businessActivity.setBindRef(scriptUrlExt.getName());
+                }
+            }));
         }
     }
 
     private Long saveToDB(SceneManageCreateOrUpdateParam createParam, List<SceneBusinessActivityRef> businessActivityList,
-                          List<SceneScriptRef> scriptList, List<SceneSlaRef> slaList, boolean isScriptManage) {
+        List<SceneScriptRef> scriptList, List<SceneSlaRef> slaList, boolean isScriptManage) {
         //负责人默认创建人
         Long sceneId = sceneManageDAO.insert(createParam);
         if (sceneId == null) {
@@ -317,7 +316,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     @Override
     public PageInfo<SceneManageListOutput> queryPageList(SceneManageQueryInput queryVO) {
 
-        Page page = PageHelper.startPage(queryVO.getCurrentPage() + 1, queryVO.getPageSize());
+        Page<SceneManageListOutput> page = PageHelper.startPage(queryVO.getCurrentPage() + 1, queryVO.getPageSize());
         SceneManageQueryBean sceneManageQueryBean = new SceneManageQueryBean();
         BeanUtils.copyProperties(queryVO, sceneManageQueryBean);
         //默认查询普通类型场景，场景类型目前不透出去
@@ -343,22 +342,20 @@ public class SceneManageServiceImpl implements SceneManageService {
             dto.setThreadNum(threadNum.get(dto.getId()));
         }
         List<Long> sceneIds = TReportMapper.listReportSceneIds(
-                resultList.stream().map(data -> data.getId()).collect(Collectors.toList()))
-                .stream().map(data -> data.getSceneId()).distinct().collect(Collectors.toList());
+                resultList.stream().map(SceneManageListOutput::getId).collect(Collectors.toList()))
+            .stream().map(Report::getSceneId).distinct().collect(Collectors.toList());
         resultList.forEach(data -> data.setHasReport(sceneIds.contains(data.getId())));
 
         List<Long> customerIds = resultList.stream().map(SceneManageListOutput::getCustomerId).distinct()
             .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(customerIds)) {
             Map<Long, String> userMap = CloudPluginUtils.getUserNameMap(customerIds);
-            resultList.forEach(data -> CloudPluginUtils.fillCustomerName(data,userMap));
+            resultList.forEach(data -> CloudPluginUtils.fillCustomerName(data, userMap));
         }
         // 状态适配
-        resultList.forEach(data -> {
-            data.setStatus(SceneManageStatusEnum.getAdaptStatus(data.getStatus()));
-        });
+        resultList.forEach(data -> data.setStatus(SceneManageStatusEnum.getAdaptStatus(data.getStatus())));
 
-        PageInfo pageInfo = new PageInfo<>(resultList);
+        PageInfo<SceneManageListOutput> pageInfo = new PageInfo<>(resultList);
         pageInfo.setTotal(page.getTotal());
         return pageInfo;
     }
@@ -396,17 +393,17 @@ public class SceneManageServiceImpl implements SceneManageService {
             JSONObject json = JSON.parseObject(oldScene.getFeatures());
             JSONObject newFeatures = JSON.parseObject(wrapperRequest.getFeatures());
             if (newFeatures != null && json != null && json.get(SceneManageConstant.FEATURES_SCRIPT_ID) != null && newFeatures.get(SceneManageConstant.FEATURES_SCRIPT_ID) != null
-                    && json.getLongValue(SceneManageConstant.FEATURES_SCRIPT_ID) != newFeatures.getLongValue(SceneManageConstant.FEATURES_SCRIPT_ID)) {
+                && json.getLongValue(SceneManageConstant.FEATURES_SCRIPT_ID) != newFeatures.getLongValue(SceneManageConstant.FEATURES_SCRIPT_ID)) {
                 fileNeedChange = true;
             }
         }
 
         Map<String, Object> maps = buildSceneManageRef(wrapperRequest);
-        SceneManageCreateOrUpdateParam manageCreateOrUpdateParam = (SceneManageCreateOrUpdateParam) maps.get(SCENE_MANAGE);
-        List<SceneBusinessActivityRef> businessActivityRefs = (List<SceneBusinessActivityRef>) maps.get(SCENE_BUSINESS_ACTIVITY);
-        List<SceneScriptRef> sceneScriptRefList = (List<SceneScriptRef>) maps.get(SCENE_SCRIPT);
-        List<SceneSlaRef> sceneSlaRefs = (List<SceneSlaRef>) maps.get(SCENE_SLA);
-        if (isScriptManage){
+        SceneManageCreateOrUpdateParam manageCreateOrUpdateParam = (SceneManageCreateOrUpdateParam)maps.get(SCENE_MANAGE);
+        List<SceneBusinessActivityRef> businessActivityRefs = (List<SceneBusinessActivityRef>)maps.get(SCENE_BUSINESS_ACTIVITY);
+        List<SceneScriptRef> sceneScriptRefList = (List<SceneScriptRef>)maps.get(SCENE_SCRIPT);
+        List<SceneSlaRef> sceneSlaRefs = (List<SceneSlaRef>)maps.get(SCENE_SLA);
+        if (isScriptManage) {
             matchScriptBusinessActivity(businessActivityRefs, sceneScriptRefList);
         }
         updateToDB(manageCreateOrUpdateParam, businessActivityRefs, sceneScriptRefList, sceneSlaRefs, isScriptManage);
@@ -418,7 +415,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     }
 
     private void updateToDB(SceneManageCreateOrUpdateParam updateParam, List<SceneBusinessActivityRef> businessActivityList,
-                            List<SceneScriptRef> scriptList, List<SceneSlaRef> slaList, boolean isScriptManage) {
+        List<SceneScriptRef> scriptList, List<SceneSlaRef> slaList, boolean isScriptManage) {
         sceneManageDAO.update(updateParam);
         Long sceneId = updateParam.getId();
         fillSceneId(businessActivityList, sceneId);
@@ -448,21 +445,21 @@ public class SceneManageServiceImpl implements SceneManageService {
     /**
      * 4.5.0之前，未使用脚本管理处理方式
      *
-     * @param scriptList
-     * @param sceneId
+     * @param scriptList -
+     * @param sceneId    -
      */
     private void dealScriptRefFile(List<SceneScriptRef> scriptList, Long sceneId) {
         if (CollectionUtils.isNotEmpty(scriptList)) {
             List<Long> ids = scriptList.stream().filter(data -> data.getId() != null && 1 == data.getIsDeleted()).map(
-                    data -> data.getId()).collect(Collectors.toList());
+                SceneScriptRef::getId).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(ids)) {
                 TSceneScriptRefMapper.deleteByIds(ids);
                 //删除大文件对应的缓存
                 delCache(ids);
                 //删除脚本/数据文件
                 List<String> files = scriptList.stream().filter(
-                        data -> data.getId() != null && 1 == data.getIsDeleted()).map(data -> data.getUploadPath()).collect(
-                        Collectors.toList());
+                    data -> data.getId() != null && 1 == data.getIsDeleted()).map(SceneScriptRef::getUploadPath).collect(
+                    Collectors.toList());
                 deleteUploadFile(files);
             }
 
@@ -488,7 +485,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         //删除场景脚本关联关系，重新关联
         TSceneScriptRefMapper.deleteBySceneId(sceneId);
         List<Long> ids = scriptList.stream().filter(data -> data.getId() != null && 1 == data.getIsDeleted())
-                .map(SceneScriptRef::getId).collect(Collectors.toList());
+            .map(SceneScriptRef::getId).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(ids)) {
             TSceneScriptRefMapper.deleteByIds(ids);
             //删除大文件对应的缓存
@@ -521,7 +518,7 @@ public class SceneManageServiceImpl implements SceneManageService {
                     }
                 } catch (Exception e) {
                     log.error("异常代码【{}】,异常内容：大文件上传异常 --> 大文件删除对应的缓存异常: {}",
-                            TakinCloudExceptionEnum.BIGFILE_UPLOAD_ERROR, e);
+                        TakinCloudExceptionEnum.BIGFILE_UPLOAD_ERROR, e);
                 }
             }
         }
@@ -535,34 +532,34 @@ public class SceneManageServiceImpl implements SceneManageService {
     @Override
     public Boolean updateSceneLifeCycle(UpdateStatusBean statusVO) {
         String checkStatus = Arrays.stream(statusVO.getCheckEnum()).map(SceneManageStatusEnum::getDesc).collect(
-                Collectors.joining(","));
+            Collectors.joining(","));
         String updateStatus = statusVO.getUpdateEnum().getDesc();
 
         SceneManageResult sceneManageResult = sceneManageDAO.getSceneById(statusVO.getSceneId());
         if (sceneManageResult == null) {
             log.error("异常代码【{}】,异常内容：更新生命周期失败 --> 找不到对应的场景: {}",
-                    TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId());
+                TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId());
             toFailureState(statusVO.getSceneId(), statusVO.getResultId(),
-                    SceneManageErrorEnum.SCENEMANAGE_UPDATE_LIFECYCLE_NOT_FIND_SCENE.getErrorMessage());
+                SceneManageErrorEnum.SCENEMANAGE_UPDATE_LIFECYCLE_NOT_FIND_SCENE.getErrorMessage());
             return false;
         }
 
         SceneManageStatusEnum statusEnum = SceneManageStatusEnum.getSceneManageStatusEnum(sceneManageResult.getStatus());
         if (statusEnum == null) {
             log.error("异常代码【{}】,异常内容：更新生命周期失败 --> 未知状态: 场景id{}，状态{}",
-                    TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId(), sceneManageResult.getStatus());
+                TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId(), sceneManageResult.getStatus());
             toFailureState(statusVO.getSceneId(), statusVO.getResultId(),
-                    SceneManageErrorEnum.SCENEMANAGE_UPDATE_LIFECYCLE_UNKNOWN_STATE.getErrorMessage());
+                SceneManageErrorEnum.SCENEMANAGE_UPDATE_LIFECYCLE_UNKNOWN_STATE.getErrorMessage());
             return false;
         }
         String statusMsg = statusEnum.getDesc();
 
         if (!Arrays.asList(statusVO.getCheckEnum()).contains(statusEnum)) {
             log.error("异常代码【{}】,异常内容：更新生命周期失败 --> check状态错误,本次压测 {}-{}-{} 状态更新失败，更新生命周期：{} -> {},check:{}",
-                    TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId(), statusVO.getResultId(),
-                    statusVO.getCustomerId(), statusMsg, updateStatus, checkStatus);
+                TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId(), statusVO.getResultId(),
+                statusVO.getCustomerId(), statusMsg, updateStatus, checkStatus);
             toFailureState(statusVO.getSceneId(), statusVO.getResultId(),
-                    SceneManageErrorEnum.SCENEMANAGE_UPDATE_LIFECYCLE_CHECK_FAILED.getErrorMessage());
+                SceneManageErrorEnum.SCENEMANAGE_UPDATE_LIFECYCLE_CHECK_FAILED.getErrorMessage());
             return false;
         }
 
@@ -576,17 +573,17 @@ public class SceneManageServiceImpl implements SceneManageService {
             // 压测引擎启动状态是 更新下 再次更新报告开始时间
             if (statusVO.getUpdateEnum().equals(SceneManageStatusEnum.ENGINE_RUNNING)) {
                 String engineName = ScheduleConstants.getEngineName(statusVO.getSceneId(), statusVO.getResultId(),
-                        statusVO.getCustomerId());
+                    statusVO.getCustomerId());
                 String startTime = engineName + ScheduleConstants.FIRST_SIGN;
                 TReportMapper.updateStartTime(statusVO.getResultId(), new Date(Long.parseLong(
-                        Optional.ofNullable(redisClientUtils.getString(startTime))
-                                .orElse(String.valueOf(System.currentTimeMillis())))));
+                    Optional.ofNullable(redisClientUtils.getString(startTime))
+                        .orElse(String.valueOf(System.currentTimeMillis())))));
             }
 
             ReportResult recentlyReport = reportDao.getRecentlyReport(statusVO.getSceneId());
-            if(!statusVO.getResultId().equals(recentlyReport.getId())) {
+            if (!statusVO.getResultId().equals(recentlyReport.getId())) {
                 log.error("更新压测生命周期，所更新的报告不是压测场景的最新报告,场景id:{},更新的报告id:{},当前最新的报告id:{}",
-                        statusVO.getSceneId(), statusVO.getResultId(),recentlyReport.getId());
+                    statusVO.getSceneId(), statusVO.getResultId(), recentlyReport.getId());
                 return false;
             }
 
@@ -594,11 +591,11 @@ public class SceneManageServiceImpl implements SceneManageService {
             //        report.setStartTime(new Date());
             sceneManageDAO.update(updateParam);
             log.info("本次压测{}-{}-{} 状态更新成功，更新生命周期：{} -> {},check:{}", statusVO.getSceneId(), statusVO.getResultId(),
-                    statusVO.getCustomerId(), statusMsg, updateStatus, checkStatus);
+                statusVO.getCustomerId(), statusMsg, updateStatus, checkStatus);
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：更新生命周期失败 --> 本次压测{}-{}-{} 状态更新失败，更新生命周期：{} -> {},check:{},异常信息:{}",
-                    TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId(), statusVO.getResultId(),
-                    statusVO.getCustomerId(), statusMsg, updateStatus, checkStatus, e);
+                TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId(), statusVO.getResultId(),
+                statusVO.getCustomerId(), statusMsg, updateStatus, checkStatus, e);
             toFailureState(statusVO.getSceneId(), statusVO.getResultId(), "状态更新失败" + e.getLocalizedMessage());
             return false;
 
@@ -612,11 +609,11 @@ public class SceneManageServiceImpl implements SceneManageService {
     private void toFailureState(Long sceneId, Long reportId, String errorMsg) {
         // 记录失败原因，成功则不记录报告中 报告直接完成
         reportService.updateReportFeatures(reportId, ReportConstans.FINISH_STATUS, ReportConstans.PRESSURE_MSG,
-                errorMsg);
+            errorMsg);
         ReportResult recentlyReport = reportDao.getRecentlyReport(sceneId);
-        if(!reportId.equals(recentlyReport.getId())) {
+        if (!reportId.equals(recentlyReport.getId())) {
             log.error("更新压测生命周期，所更新的报告不是压测场景的最新报告,场景id:{},更新的报告id:{},当前最新的报告id:{}",
-                    sceneId, reportId,recentlyReport.getId());
+                sceneId, reportId, recentlyReport.getId());
             return;
         }
         // 状态 更新 失败状态
@@ -634,9 +631,9 @@ public class SceneManageServiceImpl implements SceneManageService {
     public void reportRecord(SceneManageStartRecordVO recordVO) {
         if (!existSceneManage(recordVO.getSceneId())) {
             log.error("异常代码【{}】,异常内容：获取场景信息失败 --> 找不到对应的场景: {}",
-                    TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, recordVO.getSceneId());
+                TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, recordVO.getSceneId());
             toFailureState(recordVO.getSceneId(), recordVO.getResultId(),
-                    String.format("场景%s不存在", recordVO.getSceneId()));
+                String.format("场景%s不存在", recordVO.getSceneId()));
         }
         if (!recordVO.getSuccess()) {
             // 目前只记录失败
@@ -705,7 +702,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         List<SceneManage> byIds = TSceneManageMapper.getByIds(sceneIds);
         List<SceneManageWrapperOutput> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(byIds)) {
-            byIds.stream().forEach(sceneManage -> {
+            byIds.forEach(sceneManage -> {
                 SceneManageWrapperOutput output = new SceneManageWrapperOutput();
                 output.setPressureTestSceneName(sceneManage.getSceneName());
                 output.setId(sceneManage.getId());
@@ -767,8 +764,8 @@ public class SceneManageServiceImpl implements SceneManageService {
 
         // 数据文件、脚本文件
         List<SceneScriptRefInput> normalFileList = inputList.stream()
-                .filter(input -> FileTypeBusinessUtil.isScriptOrData(input.getFileType()))
-                .collect(Collectors.toList());
+            .filter(input -> FileTypeBusinessUtil.isScriptOrData(input.getFileType()))
+            .collect(Collectors.toList());
 
         if (CollectionUtils.isNotEmpty(normalFileList)) {
             for (SceneScriptRefInput file : normalFileList) {
@@ -778,8 +775,8 @@ public class SceneManageServiceImpl implements SceneManageService {
 
         // 附件
         List<SceneScriptRefInput> attachmentFileList = inputList.stream()
-                .filter(input -> FileTypeBusinessUtil.isAttachment(input.getFileType()))
-                .collect(Collectors.toList());
+            .filter(input -> FileTypeBusinessUtil.isAttachment(input.getFileType()))
+            .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(attachmentFileList)) {
             String attachmentPath = destPath + SceneManageConstant.FILE_SPLIT + "attachments";
             for (SceneScriptRefInput file : attachmentFileList) {
@@ -796,11 +793,11 @@ public class SceneManageServiceImpl implements SceneManageService {
      */
     private List<SceneScriptRefInput> uploadFiles2InputList(List<UploadFileDTO> uploadFiles) {
         return uploadFiles.stream().map(uploadFile -> {
-            SceneScriptRefInput input = new SceneScriptRefInput();
-            BeanUtils.copyProperties(uploadFile, input);
-            return input;
-        })
-                .collect(Collectors.toList());
+                SceneScriptRefInput input = new SceneScriptRefInput();
+                BeanUtils.copyProperties(uploadFile, input);
+                return input;
+            })
+            .collect(Collectors.toList());
     }
 
     private Boolean existSceneManage(Long sceneId) {
@@ -823,13 +820,13 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (Boolean.TRUE.equals(options.getIncludeBusinessActivity())) {
             List<SceneBusinessActivityRef> businessActivityList = TSceneBusinessActivityRefMapper.selectBySceneId(id);
             List<SceneBusinessActivityRefOutput> dtoList = SceneManageDTOConvert.INSTANCE.ofBusinessActivityList(
-                    businessActivityList);
+                businessActivityList);
             wrapperDTO.setBusinessActivityConfig(dtoList);
         }
 
         if (Boolean.TRUE.equals(options.getIncludeScript())) {
             List<SceneScriptRef> scriptList = TSceneScriptRefMapper.selectBySceneIdAndScriptType(id,
-                    wrapperDTO.getScriptType());
+                wrapperDTO.getScriptType());
             List<SceneScriptRefOutput> dtoList = SceneManageDTOConvert.INSTANCE.ofScriptList(scriptList);
             wrapperDTO.setUploadFile(dtoList);
         }
@@ -838,11 +835,11 @@ public class SceneManageServiceImpl implements SceneManageService {
             List<SceneSlaRef> slaList = TSceneSlaRefMapper.selectBySceneId(id);
             List<SceneSlaRefOutput> dtoList = SceneManageDTOConvert.INSTANCE.ofSlaList(slaList);
             wrapperDTO.setStopCondition(
-                    dtoList.stream().filter(data -> SceneManageConstant.EVENT_DESTORY.equals(data.getEvent()))
-                            .collect(Collectors.toList()));
+                dtoList.stream().filter(data -> SceneManageConstant.EVENT_DESTORY.equals(data.getEvent()))
+                    .collect(Collectors.toList()));
             wrapperDTO.setWarningCondition(
-                    dtoList.stream().filter(data -> SceneManageConstant.EVENT_WARN.equals(data.getEvent()))
-                            .collect(Collectors.toList()));
+                dtoList.stream().filter(data -> SceneManageConstant.EVENT_WARN.equals(data.getEvent()))
+                    .collect(Collectors.toList()));
         }
 
         wrapperDTO.setTotalTestTime(wrapperDTO.getPressureTestSecond());
@@ -857,7 +854,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     @Override
     public ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update) {
-        String path = "";
+        String path;
         if (!isAbsolutePath) {
             path = scriptPath + SceneManageConstant.FILE_SPLIT + uploadPath;
         } else {
@@ -914,7 +911,6 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     }
 
-
     private void fillBase(SceneManageWrapperOutput wrapperOutput, SceneManageResult sceneManageResult) {
         wrapperOutput.setId(sceneManageResult.getId());
         wrapperOutput.setScriptType(sceneManageResult.getScriptType());
@@ -939,15 +935,15 @@ public class SceneManageServiceImpl implements SceneManageService {
             wrapperOutput.setPressureType(pressureType == null ? 0 : pressureType);
             //压测时长
             wrapperOutput.setPressureTestTime(new TimeBean(jsonObject.getLong(SceneManageConstant.PT_DURATION),
-                    jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
+                jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
             wrapperOutput.setPressureTestSecond(convertTime(jsonObject.getLong(SceneManageConstant.PT_DURATION),
-                    jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
+                jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
             wrapperOutput.setPressureMode(jsonObject.getInteger(SceneManageConstant.PT_MODE));
             //阶梯时长
             wrapperOutput.setIncreasingTime(new TimeBean(jsonObject.getLong(SceneManageConstant.STEP_DURATION),
-                    jsonObject.getString(SceneManageConstant.STEP_DURATION_UNIT)));
+                jsonObject.getString(SceneManageConstant.STEP_DURATION_UNIT)));
             wrapperOutput.setIncreasingSecond(convertTime(jsonObject.getLong(SceneManageConstant.STEP_DURATION),
-                    jsonObject.getString(SceneManageConstant.STEP_DURATION_UNIT)));
+                jsonObject.getString(SceneManageConstant.STEP_DURATION_UNIT)));
             wrapperOutput.setStep(jsonObject.getInteger(SceneManageConstant.STEP));
             //预计消耗流量
             BigDecimal flow = jsonObject.getBigDecimal(SceneManageConstant.ESTIMATE_FLOW);
@@ -960,13 +956,13 @@ public class SceneManageServiceImpl implements SceneManageService {
     /**
      * 秒转化为时、分、秒
      *
-     * @return
+     * @return -
      */
     private Long convertTime(Long time, String unit) {
         if (time == null) {
             return 0L;
         }
-        Long t = 0L;
+        long t;
         if (TimeUnitEnum.DAY.getValue().equals(unit)) {
             t = time * 24 * 60 * 60;
         } else if (TimeUnitEnum.HOUR.getValue().equals(unit)) {
@@ -1007,9 +1003,9 @@ public class SceneManageServiceImpl implements SceneManageService {
         map.put(SceneManageConstant.PT_DURATION_UNIT, wrapperVO.getPressureTestTime().getUnit());
         map.put(SceneManageConstant.PT_MODE, wrapperVO.getPressureMode());
         map.put(SceneManageConstant.STEP_DURATION,
-                wrapperVO.getIncreasingTime() != null ? wrapperVO.getIncreasingTime().getTime() : null);
+            wrapperVO.getIncreasingTime() != null ? wrapperVO.getIncreasingTime().getTime() : null);
         map.put(SceneManageConstant.STEP_DURATION_UNIT,
-                wrapperVO.getIncreasingTime() != null ? wrapperVO.getIncreasingTime().getUnit() : null);
+            wrapperVO.getIncreasingTime() != null ? wrapperVO.getIncreasingTime().getUnit() : null);
         map.put(SceneManageConstant.STEP, wrapperVO.getStep());
         BigDecimal value = new BigDecimal(0);
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
@@ -1077,8 +1073,8 @@ public class SceneManageServiceImpl implements SceneManageService {
     private List<SceneSlaRef> buildSceneSlaRef(List<SceneSlaRefInput> voList, String event) {
         List<SceneSlaRef> slaList = Lists.newArrayList();
         voList = voList.stream().filter(
-                data -> data.getBusinessActivity() != null && data.getBusinessActivity().length > 0).collect(
-                Collectors.toList());
+            data -> data.getBusinessActivity() != null && data.getBusinessActivity().length > 0).collect(
+            Collectors.toList());
         if (CollectionUtils.isEmpty(voList)) {
             return slaList;
         }
@@ -1115,7 +1111,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (CollectionUtils.isEmpty(refList)) {
             return;
         }
-        refList.stream().forEach(data -> data.setSceneId(sceneId));
+        refList.forEach(data -> data.setSceneId(sceneId));
     }
 
     private void moveTempFile(List<SceneScriptRef> scriptList, Long sceneId) {
@@ -1126,17 +1122,17 @@ public class SceneManageServiceImpl implements SceneManageService {
         }
         scriptList.stream().filter(data -> data.getUploadId() != null).forEach(data -> {
             String tempPath = scriptTempPath
-                    + SceneManageConstant.FILE_SPLIT
-                    + data.getUploadId()
-                    + SceneManageConstant.FILE_SPLIT
-                    + data.getFileName();
+                + SceneManageConstant.FILE_SPLIT
+                + data.getUploadId()
+                + SceneManageConstant.FILE_SPLIT
+                + data.getFileName();
             File file = new File(tempPath);
             data.setFileSize(LinuxUtil.getPrintSize(file.length()));
             data.setUploadPath(sceneId + SceneManageConstant.FILE_SPLIT + data.getFileName());
             LinuxUtil.executeLinuxCmd("mv " + tempPath + " " + dirPath);
             LinuxUtil.executeLinuxCmd("rm -rf " + scriptTempPath
-                    + SceneManageConstant.FILE_SPLIT
-                    + data.getUploadId());
+                + SceneManageConstant.FILE_SPLIT
+                + data.getUploadId());
         });
     }
 
@@ -1144,10 +1140,10 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (CollectionUtils.isEmpty(files)) {
             return;
         }
-        files.stream().forEach(file ->
-                LinuxUtil.executeLinuxCmd("rm -rf " + scriptPath
-                        + SceneManageConstant.FILE_SPLIT
-                        + file)
+        files.forEach(file ->
+            LinuxUtil.executeLinuxCmd("rm -rf " + scriptPath
+                + SceneManageConstant.FILE_SPLIT
+                + file)
         );
     }
 }

@@ -13,9 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * @Author: mubai
- * @Date: 2020-05-14 17:59
- * @Description:
+ * @author mubai
+ * @date 2020-05-14 17:59
  */
 
 @Service
@@ -30,16 +29,16 @@ public class FileWriteService {
     /**
      * 获取字节起始位置
      *
-     * @param fileSceneUniqueKey
-     * @param requirePos
-     * @return
+     * @param fileSceneUniqueKey -
+     * @param requirePos         -
+     * @return -
      */
     public synchronized Long calculateStartPos(String fileSceneUniqueKey, long requirePos) {
         //每次获取新位置
         Object dbPos = redisClientUtils.getObject(fileSceneUniqueKey);
-        Long startPos = 0L;
+        long startPos = 0L;
         if (dbPos != null) {
-            startPos = Long.valueOf(dbPos.toString());
+            startPos = Long.parseLong(dbPos.toString());
         }
         return startPos;
 
@@ -53,13 +52,13 @@ public class FileWriteService {
         builder.append(sceneId);
         builder.append("-");
         builder.append(filename);
-        /**
+        /*
          * 起始位置不为空则将数据写入指定的pos，否则是多线程、多客户端上传，计算出新的起始位置
          */
         if (startPos == null) {
             startPos = calculateStartPos(builder.toString(), bytes.length);
         }
-        /**
+        /*
          * 抢占字节数组占用的位置
          */
         redisClientUtils.incrementAndNotExpire(builder.toString(), bytes.length);
@@ -93,10 +92,10 @@ public class FileWriteService {
     /**
      * 创建特定大小的空文件
      *
-     * @param filepath
-     * @param sizeInBytes
-     * @return
-     * @throws IOException
+     * @param filepath    -
+     * @param sizeInBytes -
+     * @return -
+     * @throws IOException -
      */
     private File createFile(String filepath, final Long sizeInBytes) throws IOException {
 
@@ -113,11 +112,7 @@ public class FileWriteService {
 
     public boolean exitFile(String path) {
         File file = new File(path);
-        if (file.exists()) {
-            return true;
-        } else {
-            return false;
-        }
+        return file.exists();
     }
 
 }

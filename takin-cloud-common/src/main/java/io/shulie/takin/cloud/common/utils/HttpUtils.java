@@ -13,9 +13,8 @@ import io.shulie.takin.common.beans.response.ResponseResult;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @Author: mubai
- * @Date: 2020-05-26 10:35
- * @Description:
+ * @author mubai
+ * @date 2020-05-26 10:35
  */
 @Slf4j
 public class HttpUtils {
@@ -32,7 +31,7 @@ public class HttpUtils {
             writer.flush();
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：HTTP方法执行异常 --> 异常信息: {}",
-                    TakinCloudExceptionEnum.HTTP_CMD_EXECUTE_ERROR,e);
+                TakinCloudExceptionEnum.HTTP_CMD_EXECUTE_ERROR, e);
         } finally {
             if (inputStream != null) {
                 inputStream.close();

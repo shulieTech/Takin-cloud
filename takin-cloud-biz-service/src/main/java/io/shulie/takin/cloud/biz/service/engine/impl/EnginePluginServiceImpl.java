@@ -53,7 +53,7 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
      *
      * @param pluginTypes 插件类型
      *
-     * @return
+     * @return -
      */
     @Override
     public Map<String, List<EnginePluginSimpleInfoOutput>> findEngineAvailablePluginsByType(List<String> pluginTypes) {
@@ -71,7 +71,7 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
      * 根据插件ID获取插件详情
      *
      * @param pluginId
-     * @return
+     * @return -
      */
     @Override
     public ResponseResult<EnginePluginDetailOutput> findEnginePluginDetails(Long pluginId) {
@@ -92,7 +92,7 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
      * 保存引擎插件
      *
      * @param input
-     * @return
+     * @return -
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -134,7 +134,7 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
     /**
      * @param pluginId
      * @param status
-     * @return
+     * @return -
      */
     @Override
     @Transactional(rollbackFor = Exception.class)

@@ -3,12 +3,14 @@ package com.pamirs.takin.entity.domain.vo.sla;
 import io.shulie.takin.common.beans.page.PagingDevice;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @Author 莫问
- * @Date 2020-04-18
+ * @author 莫问
+ * @date 2020-04-18
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class WarnQueryParam extends PagingDevice {
 
     @ApiModelProperty(value = "报告ID")
