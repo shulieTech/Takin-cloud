@@ -5,7 +5,7 @@
     <!--@mbg.generated-->
     <!--@Table t_report-->
     <id column="id" jdbcType="BIGINT" property="id" />
-    <result column="custom_id" jdbcType="BIGINT" property="customId" />
+    <result column="customer_id" jdbcType="BIGINT" property="customerId" />
     <result column="amount" jdbcType="DECIMAL" property="amount" />
     <result column="scene_id" jdbcType="BIGINT" property="sceneId" />
     <result column="scene_name" jdbcType="VARCHAR" property="sceneName" />
@@ -27,7 +27,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, custom_id, amount, scene_id, scene_name, start_time, end_time, `status`, conclusion, 
+    id, customer_id, amount, scene_id, scene_name, start_time, end_time, `status`, conclusion,
     total_request, avg_tps, avg_rt, concurrent, success_rate, sa, operate_id, features, 
     is_deleted, gmt_create, gmt_update
   </sql>
