@@ -5,7 +5,7 @@
     <!--@mbg.generated-->
     <!--@Table t_scene_manage-->
     <id column="id" jdbcType="BIGINT" property="id" />
-    <result column="custom_id" jdbcType="BIGINT" property="customId" />
+    <result column="customer_id" jdbcType="BIGINT" property="customerId" />
     <result column="scene_name" jdbcType="VARCHAR" property="sceneName" />
     <result column="status" jdbcType="TINYINT" property="status" />
     <result column="last_pt_time" jdbcType="TIMESTAMP" property="lastPtTime" />
@@ -19,7 +19,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, custom_id, scene_name, `status`, last_pt_time, pt_config, script_type, is_deleted, 
+    id, customer_id, scene_name, `status`, last_pt_time, pt_config, script_type, is_deleted,
     create_time, create_name, update_time, update_name
   </sql>
 </mapper>

@@ -40,8 +40,8 @@ public class DataApartInterceptor implements Interceptor {
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        if( !CloudPluginUtils.checkUserData() ||
-            (CloudPluginUtils.getUser() != null &&  CloudPluginUtils.getUser().getLoginChannel() == 0)) {
+        if(!CloudPluginUtils.checkUserData() || CloudPluginUtils.getUser() == null
+            ||  CloudPluginUtils.getUser().getLoginChannel() == 0) {
             return invocation.proceed();
         }
         StatementHandler statementHandler = (StatementHandler)invocation.getTarget();
@@ -49,7 +49,16 @@ public class DataApartInterceptor implements Interceptor {
             SystemMetaObject.DEFAULT_OBJECT_WRAPPER_FACTORY, new DefaultReflectorFactory());
         //先拦截到RoutingStatementHandler，里面有个StatementHandler类型的delegate变量，其实现类是BaseStatementHandler
         // ，然后就到BaseStatementHandler的成员变量mappedStatement
-        MappedStatement mappedStatement = (MappedStatement)metaObject.getValue("delegate.mappedStatement");
+        MappedStatement mappedStatement = null;
+        try {
+            // 与MybatisPlusInterceptor 拦截器 冲突
+            mappedStatement = (MappedStatement)metaObject.getValue("delegate.mappedStatement");
+        } catch (Exception e) {
+            return invocation.proceed();
+        }
+        if(mappedStatement == null) {
+            return invocation.proceed();
+        }
         //sql语句类型 select、delete、insert、update
         String sqlCommandType = mappedStatement.getSqlCommandType().toString();
         if (!"select".equals(sqlCommandType.toLowerCase())) {
@@ -127,7 +136,7 @@ public class DataApartInterceptor implements Interceptor {
         }
         if (pos > 0) {
             sb.append(sql.substring(0, pos));
-            sb.append(" where custom_id = " + userId);
+            sb.append(" where customer_id = " + userId);
             if(StringUtils.isNoneBlank(filterSql)) {
                 sb.append(" and " + filterSql);
             }
@@ -137,7 +146,7 @@ public class DataApartInterceptor implements Interceptor {
             int index = lowerIndexOf(sql, tables[tableIndex]);
             sb.append(sql.substring(0, index));
             sb.append(tables[tableIndex]);
-            sb.append(" where custom_id = " + userId);
+            sb.append(" where customer_id = " + userId);
             if(StringUtils.isNoneBlank(filterSql)) {
                 sb.append(" and " + filterSql);
             }
