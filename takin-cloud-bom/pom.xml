@@ -10,7 +10,6 @@
 
     <properties>
         <takin.cloud.version>takin-cloud-2.0.1</takin.cloud.version>
-        <takin-plugin-framework-spring.version>1.0.1</takin-plugin-framework-spring.version>
     </properties>
 
     <dependencyManagement>
@@ -19,11 +18,6 @@
                 <groupId>io.shulie.takin</groupId>
                 <artifactId>takin-cloud-ext</artifactId>
                 <version>${takin.cloud.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.shulie.takin.plugin.framework</groupId>
-                <artifactId>takin-plugin-framework-spring</artifactId>
-                <version>${takin-plugin-framework-spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.shulie.takin</groupId>

@@ -29,6 +29,19 @@ public class CloudPluginUtils {
         CloudPluginUtils.pluginManager = pluginManager;
         userApi = pluginManager.getExtension(CloudUserExtApi.class);
     }
+
+    /**
+     * 是否带用户模块
+     *
+     * @return true/false
+     */
+    public static Boolean checkUserData() {
+        if (userApi != null) {
+            return Boolean.TRUE;
+        }
+        return Boolean.FALSE;
+    }
+
     /**
      * 返回用户id
      * @return
