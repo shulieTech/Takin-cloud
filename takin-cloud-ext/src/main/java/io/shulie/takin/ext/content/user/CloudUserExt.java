@@ -45,4 +45,13 @@ public class CloudUserExt {
     @ApiModelProperty(value = "版本")
     private String version;
 
+    /**
+     * 登录渠道
+     * 0-console 前端页面
+     * 1-web 客户端license
+     */
+    @ApiModelProperty(value = "登录渠道")
+    private Integer loginChannel;
+
+
 }
