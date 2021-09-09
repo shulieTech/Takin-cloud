@@ -17,6 +17,9 @@ import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.cloud.common.utils.IPUtils;
 import io.shulie.takin.cloud.common.utils.UrlUtil;
 import io.shulie.takin.utils.json.JsonHelper;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping("/api/collector")
+@Api(tags = "接受压测引擎参数")
 public class CollectorApplication {
 
     @Autowired
@@ -44,11 +48,12 @@ public class CollectorApplication {
     @Value("${script.pre.match:true}")
     private boolean scriptPreMatch;
 
+    @ApiOperation("接收事件和压测数据")
     @RequestMapping("/receive")
-    public ResponseEntity<String> receive(@RequestParam("sceneId") Long sceneId,
-        @RequestParam("reportId") Long reportId,
-        @RequestParam(value = "customerId", required = false) Long customerId,
-        @RequestBody List<Map> metrics,
+    public ResponseEntity<String> receive(@ApiParam("场景id") @RequestParam("sceneId") Long sceneId,
+                                          @ApiParam("报告id") @RequestParam("reportId") Long reportId,
+                                          @ApiParam("租户id") @RequestParam(value = "customerId", required = false) Long customerId,
+                                          @ApiParam("事件或数据参数") @RequestBody List<Map> metrics,
         HttpServletRequest request) {
         try {
             if (sceneId == null || reportId == null) {

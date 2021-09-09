@@ -43,6 +43,8 @@
         <mybatis.plus.version>3.4.0</mybatis.plus.version>
         <freemarker.version>2.3.30</freemarker.version>
         <mybatis.version>3.5.5</mybatis.version>
+        <spring.swagger.version>2.9.2</spring.swagger.version>
+        <swagger.ui.version>1.9.6</swagger.ui.version>
         <swagger.version>1.5.22</swagger.version>
 
         <flyway.version>5.2.4</flyway.version>
@@ -191,6 +193,21 @@
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-annotations</artifactId>
                 <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${spring.swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>swagger-bootstrap-ui</artifactId>
+                <version>${swagger.ui.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-spring-boot-starter</artifactId>
+                <version>2.0.1</version>
             </dependency>
             <dependency>
                 <groupId>org.influxdb</groupId>

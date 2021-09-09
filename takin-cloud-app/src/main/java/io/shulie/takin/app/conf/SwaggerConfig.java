@@ -2,9 +2,12 @@ package io.shulie.takin.app.conf;
 
 import java.time.LocalDate;
 
+import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import io.swagger.annotations.Api;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -18,6 +21,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @Configuration
 @EnableSwagger2
+@EnableKnife4j
+@Import(BeanValidatorPluginsConfiguration.class)
 public class SwaggerConfig {
 
     /**
@@ -32,77 +37,6 @@ public class SwaggerConfig {
             .select()
             .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
             .paths(PathSelectors.any())
-            .build()
-            .directModelSubstitute(LocalDate.class, String.class)
-            .useDefaultResponseMessages(false)
-            .apiInfo(apiInfo())
-            ;
-    }
-
-    @Bean
-    public Docket api1() {
-        return new Docket(DocumentationType.SWAGGER_2)
-            .groupName("接入简化")
-            .select()
-            .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
-            .paths(PathSelectors.regex("/api/shadow.*"))
-            .build()
-            .directModelSubstitute(LocalDate.class, String.class)
-            .useDefaultResponseMessages(false)
-            .apiInfo(apiInfo())
-            ;
-    }
-
-    @Bean
-    public Docket api2() {
-        return new Docket(DocumentationType.SWAGGER_2)
-            .groupName("POC")
-            .select()
-            .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
-            .paths(PathSelectors.regex("/api/poc.*"))
-            .build()
-            .directModelSubstitute(LocalDate.class, String.class)
-            .useDefaultResponseMessages(false)
-            .apiInfo(apiInfo())
-            ;
-    }
-
-    @Bean
-    public Docket apiV4() {
-        return new Docket(DocumentationType.SWAGGER_2)
-            .groupName("压测平台-V4")
-            .select()
-            .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
-            .paths(PathSelectors.regex("/api/(report|scenemanage|file|link/white/list/wlist|scene/task).*"))
-            .build()
-            .directModelSubstitute(LocalDate.class, String.class)
-            .useDefaultResponseMessages(false)
-            .apiInfo(apiInfo())
-            ;
-    }
-
-    @Bean
-    public Docket apiV41() {
-        return new Docket(DocumentationType.SWAGGER_2)
-            .groupName("压测平台-V4.1")
-            .select()
-            .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
-            .paths(PathSelectors.regex(
-                "/api/(scenemanage/list|user/list|schedulerecord|strategyconfig|settle|base/config|cloud|machine).*"))
-            .build()
-            .directModelSubstitute(LocalDate.class, String.class)
-            .useDefaultResponseMessages(false)
-            .apiInfo(apiInfo())
-            ;
-    }
-
-    @Bean
-    public Docket apiV42() {
-        return new Docket(DocumentationType.SWAGGER_2)
-            .groupName("4.2.2-压测报告升级")
-            .select()
-            .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
-            .paths(PathSelectors.regex("/api/(report).*"))
             .build()
             .directModelSubstitute(LocalDate.class, String.class)
             .useDefaultResponseMessages(false)
