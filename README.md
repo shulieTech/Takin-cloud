@@ -21,3 +21,6 @@
 - 1. 修改application-local.yml内容（必改）
 - 2. application.yml中mysql/redis/influx等的用户名和密码（没变可以不改）
 - 3. script.temp.path 和 script.path 默认在/data下面；（如果需要修改可以改；script.temp.path需要和takin-web中配置保持一致）
+
+5.swagger文档地址
+http://localhost:10010/takin-cloud/doc.html
