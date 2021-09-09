@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import com.pamirs.takin.entity.domain.dto.strategy.StrategyConfigDTO;
 import com.pamirs.takin.entity.domain.dto.strategy.StrategyConfigDetailDTO;
 import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigAddVO;
 import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigQueryVO;
@@ -12,6 +11,7 @@ import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigUpdateVO;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 import io.shulie.takin.cloud.web.entrypoint.request.scenemanage.SceneManageDeleteRequest;
 import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.ext.content.enginecall.StrategyConfigExt;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -64,8 +64,8 @@ public class StrategyConfigController {
 
     @GetMapping("/list")
     @ApiOperation(value = "分配策略列表")
-    public ResponseResult<List<StrategyConfigDTO>> getList(@ApiParam(name = "current", value = "页码") Integer current,
-        @ApiParam(name = "pageSize", value = "页大小") Integer pageSize) {
+    public ResponseResult<List<StrategyConfigExt>> getList(@ApiParam(name = "current", value = "页码") Integer current,
+                                                           @ApiParam(name = "pageSize", value = "页大小") Integer pageSize) {
 
         /*
          * 1、封装参数

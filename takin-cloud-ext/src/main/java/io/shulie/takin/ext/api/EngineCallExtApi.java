@@ -48,4 +48,11 @@ public interface EngineCallExtApi extends ExtensionPoint,Typed {
      * @return -
      */
     StrategyOutputExt getPressureNodeNumRange(StrategyConfigExt strategyConfigExt);
+
+    /**
+     * 获取默认的调度策略
+     * @return
+     */
+    StrategyConfigExt getDefaultStrategyConfig();
+
 }

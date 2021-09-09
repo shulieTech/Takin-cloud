@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 
 import com.google.common.collect.Lists;
 import com.pamirs.takin.entity.dao.schedule.TScheduleRecordMapper;
-import com.pamirs.takin.entity.domain.dto.strategy.StrategyConfigDTO;
 import com.pamirs.takin.entity.domain.entity.schedule.ScheduleRecord;
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
 import io.shulie.takin.cloud.biz.convertor.ScheduleConvertor;
@@ -28,10 +27,7 @@ import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
 import io.shulie.takin.ext.api.EngineCallExtApi;
-import io.shulie.takin.ext.content.enginecall.ScheduleInitParamExt;
-import io.shulie.takin.ext.content.enginecall.ScheduleRunRequest;
-import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
-import io.shulie.takin.ext.content.enginecall.ScheduleStopRequestExt;
+import io.shulie.takin.ext.content.enginecall.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +96,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             return;
         }
         //获取策略
-        StrategyConfigDTO config = strategyConfigService.getDefaultStrategyConfig();
+        StrategyConfigExt config = strategyConfigService.getDefaultStrategyConfig();
         if (config == null) {
             log.error("异常代码【{}】,异常内容：启动调度失败 --> 调度策略未配置",
                 TakinCloudExceptionEnum.SCHEDULE_START_ERROR);

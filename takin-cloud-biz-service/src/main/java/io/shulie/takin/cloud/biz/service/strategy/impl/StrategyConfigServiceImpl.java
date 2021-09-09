@@ -8,7 +8,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.pamirs.takin.entity.dao.strategy.TStrategyConfigMapper;
-import com.pamirs.takin.entity.domain.dto.strategy.StrategyConfigDTO;
 import com.pamirs.takin.entity.domain.dto.strategy.StrategyConfigDetailDTO;
 import com.pamirs.takin.entity.domain.entity.strategy.StrategyConfig;
 import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigAddVO;
@@ -25,7 +24,6 @@ import io.shulie.takin.ext.content.enginecall.StrategyOutputExt;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -95,25 +93,22 @@ public class StrategyConfigServiceImpl implements StrategyConfigService {
     }
 
     @Override
-    public StrategyConfigDTO getDefaultStrategyConfig() {
-        PageInfo<StrategyConfigDTO> strategyConfig = queryPageList(new StrategyConfigQueryVO());
-        if (strategyConfig != null && strategyConfig.getSize() > 0) {
-            return strategyConfig.getList().get(0);
-        }
-        return null;
+    public StrategyConfigExt getDefaultStrategyConfig() {
+        EngineCallExtApi engineCallExtApi = pluginUtils.getEngineCallExtApi();
+        return engineCallExtApi.getDefaultStrategyConfig();
     }
 
     @Override
-    public PageInfo<StrategyConfigDTO> queryPageList(StrategyConfigQueryVO queryVO) {
+    public PageInfo<StrategyConfigExt> queryPageList(StrategyConfigQueryVO queryVO) {
         Page page = PageHelper.startPage(queryVO.getCurrentPage() + 1, queryVO.getPageSize());
 
         List<StrategyConfig> queryList = tStrategyConfigMapper.getPageList(queryVO);
         if (CollectionUtils.isEmpty(queryList)) {
             return new PageInfo<>(Lists.newArrayList());
         }
-        List<StrategyConfigDTO> resultList = Lists.newArrayList();
+        List<StrategyConfigExt> resultList = Lists.newArrayList();
         queryList.forEach(data -> {
-            StrategyConfigDTO dto = new StrategyConfigDTO();
+            StrategyConfigExt dto = new StrategyConfigExt();
             dto.setId(data.getId());
             dto.setStrategyName(data.getStrategyName());
             parseConfig(dto, data.getStrategyConfig());
@@ -126,7 +121,7 @@ public class StrategyConfigServiceImpl implements StrategyConfigService {
         return pageInfo;
     }
 
-    private void parseConfig(StrategyConfigDTO dto, String config) {
+    private void parseConfig(StrategyConfigExt dto, String config) {
         try {
             JSONObject object = JSON.parseObject(config);
             dto.setThreadNum(object.getInteger("threadNum"));

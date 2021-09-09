@@ -124,6 +124,19 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         return strategyOutputExt;
     }
 
+    @Override
+    public StrategyConfigExt getDefaultStrategyConfig() {
+        StrategyConfigExt strategyConfigExt = new StrategyConfigExt();
+        strategyConfigExt.setStrategyName("开源默认策略");
+        strategyConfigExt.setThreadNum(1000);
+        strategyConfigExt.setTpsNum(2000);
+        strategyConfigExt.setLimitCpuNum(new BigDecimal(2));
+        strategyConfigExt.setLimitMemorySize(new BigDecimal(3076));
+        strategyConfigExt.setCpuNum(new BigDecimal(2));
+        strategyConfigExt.setMemorySize(new BigDecimal(3076));
+        return strategyConfigExt;
+    }
+
     /**
      * 创建引擎配置文件
      */
