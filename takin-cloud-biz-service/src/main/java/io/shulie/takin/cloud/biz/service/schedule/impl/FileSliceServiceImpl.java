@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.annotation.Resource;
+
 import com.alibaba.fastjson.JSONObject;
 
 import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
-import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
@@ -19,15 +20,16 @@ import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.utils.FileSliceByLine;
 import io.shulie.takin.cloud.common.utils.FileSliceByLine.FileSliceInfo;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum;
+import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.Builder;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneBigFileSliceDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -38,15 +40,12 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class FileSliceServiceImpl implements FileSliceService {
-
-    @Autowired
+    @Resource
     SceneBigFileSliceDAO fileSliceDAO;
-
     @Value("${script.path}")
     private String nfsDir;
-
-    @Autowired
-    private TSceneManageMapper sceneManageMapper;
+    @Resource
+    SceneManageDAO sceneManageDao;
 
     private static final String DEFAULT_PATH_SEPARATOR = "/";
 
@@ -286,7 +285,7 @@ public class FileSliceServiceImpl implements FileSliceService {
         //podNum
         if (request.getSplit()) {
             if (request.getOrderSplit() == null || !request.getOrderSplit()) {
-                SceneManage sceneManage = sceneManageMapper.selectByPrimaryKey(request.getSceneId());
+                SceneManageResult sceneManage = sceneManageDao.getSceneById(request.getSceneId());
                 if (Objects.isNull(sceneManage)) {
                     throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR,
                         "未查询到ID为{" + request.getSceneId() + "}的场景!");

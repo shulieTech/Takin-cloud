@@ -17,8 +17,6 @@ public interface TSceneManageMapper {
 
     Long insertSelective(SceneManage record);
 
-    SceneManage selectByPrimaryKey(Long id);
-
     int updateByPrimaryKeySelective(SceneManage record);
 
     int updateStatus(UpdateStatusBean record);

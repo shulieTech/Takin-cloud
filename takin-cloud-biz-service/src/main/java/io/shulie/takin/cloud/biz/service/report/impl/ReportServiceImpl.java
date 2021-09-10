@@ -20,7 +20,6 @@ import javax.annotation.Resource;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import io.shulie.takin.cloud.common.utils.TestTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.influxdb.impl.TimeUtil;
 import cn.hutool.core.util.StrUtil;
@@ -43,6 +42,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.shulie.takin.cloud.common.bean.sla.SlaBean;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import org.apache.commons.collections4.CollectionUtils;
+import io.shulie.takin.cloud.common.utils.TestTimeUtil;
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
 import io.shulie.takin.ext.content.asset.AssetInvoiceExt;
@@ -71,6 +71,7 @@ import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import org.springframework.transaction.annotation.Transactional;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
 import com.pamirs.takin.entity.domain.vo.report.ReportQueryParam;
 import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
@@ -83,14 +84,14 @@ import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventServie;
 import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.DistributeBean;
 import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
-import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
-import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
+import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
 import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import com.pamirs.takin.entity.domain.dto.report.StatInspectReportDTO;
 import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
@@ -118,6 +119,8 @@ public class ReportServiceImpl implements ReportService {
     TReportMapper tReportMapper;
     @Resource
     PluginManager pluginManager;
+    @Resource
+    SceneManageDAO sceneManageDao;
     @Resource
     RedisClientUtils redisClientUtils;
     @Resource
@@ -571,10 +574,10 @@ public class ReportServiceImpl implements ReportService {
 
         // 两个地方关闭压测引擎，版本不同，关闭方式不同
         //更新场景 压测引擎停止 ---> 待启动
-        SceneManage sceneManage = tSceneManageMapper.selectByPrimaryKey(reportResult.getSceneId());
+        SceneManageResult sceneManage = sceneManageDao.getSceneById(reportResult.getSceneId());
         //如果是强制停止 不需要更新
         log.info("finish scene {}, state :{}", reportResult.getSceneId(), Optional.ofNullable(sceneManage)
-            .map(SceneManage::getStatus)
+            .map(SceneManageResult::getStatus)
             .map(SceneManageStatusEnum::getSceneManageStatusEnum)
             .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
         if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {

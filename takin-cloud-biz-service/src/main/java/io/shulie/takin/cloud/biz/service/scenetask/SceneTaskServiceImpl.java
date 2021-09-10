@@ -86,6 +86,7 @@ import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
 import io.shulie.takin.ext.api.AssetExtApi;
 import io.shulie.takin.ext.api.EngineCallExtApi;
@@ -113,6 +114,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     @Resource
     private TSceneManageMapper tSceneManageMapper;
+    ;
 
     @Autowired
     private SceneManageService sceneManageService;
@@ -266,7 +268,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     @Override
     public void stop(Long sceneId) {
-        SceneManage sceneManage = tSceneManageMapper.selectByPrimaryKey(sceneId);
+        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (sceneManage == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "压测场景不存在");
         }
@@ -283,7 +285,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     @Override
     public SceneActionOutput checkSceneTaskStatus(Long sceneId, Long reportId) {
         SceneActionOutput scene = new SceneActionOutput();
-        SceneManage sceneManage = tSceneManageMapper.selectByPrimaryKey(sceneId);
+        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (sceneManage != null) {
             // 监测启动状态
             scene.setData(SceneManageStatusEnum.getAdaptStatus(sceneManage.getStatus()).longValue());
@@ -503,7 +505,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     public SceneInspectTaskStopOutput stopInspectTask(Long sceneId) {
         SceneInspectTaskStopOutput output = new SceneInspectTaskStopOutput();
         output.setSceneId(sceneId);
-        SceneManage sceneManage = tSceneManageMapper.selectByPrimaryKey(sceneId);
+        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (!Objects.isNull(sceneManage)) {
             SceneManageStatusEnum statusEnum = SceneManageStatusEnum.getSceneManageStatusEnum(sceneManage.getStatus());
             if (!SceneManageStatusEnum.getWorking().contains(statusEnum) && !SceneManageStatusEnum.getFree().contains(
@@ -618,7 +620,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     @Override
     public SceneJobStateOutput checkSceneJobStatus(Long sceneId) {
         SceneJobStateOutput state = new SceneJobStateOutput();
-        SceneManage sceneManage = tSceneManageMapper.selectByPrimaryKey(sceneId);
+        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (Objects.isNull(sceneManage)) {
             state.setState(SceneManageConstant.SCENETASK_JOB_STATUS_NONE);
             state.setMsg("未查询到相应的压测场景");

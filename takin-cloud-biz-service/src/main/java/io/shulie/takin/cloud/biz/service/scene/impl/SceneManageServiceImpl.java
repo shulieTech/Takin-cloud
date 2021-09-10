@@ -800,7 +800,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     }
 
     private Boolean existSceneManage(Long sceneId) {
-        return tSceneManageMapper.selectByPrimaryKey(sceneId) != null;
+        return sceneManageDAO.getSceneById(sceneId) != null;
     }
 
     @Override

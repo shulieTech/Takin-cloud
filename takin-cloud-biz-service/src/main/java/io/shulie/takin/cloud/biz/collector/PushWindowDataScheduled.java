@@ -14,10 +14,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import javax.annotation.Resource;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
-import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import io.shulie.takin.cloud.biz.collector.collector.AbstractIndicators;
 import io.shulie.takin.cloud.common.bean.collector.Metrics;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
@@ -30,12 +30,12 @@ import io.shulie.takin.cloud.common.influxdb.InfluxDBUtil;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CollectorUtil;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.eventcenter.EventCenterTemplate;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
@@ -60,26 +60,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class PushWindowDataScheduled extends AbstractIndicators {
 
-    @Autowired
+    @Resource
+    private ReportDao reportDao;
+    @Resource
     private InfluxWriter influxWriter;
-
-    @Autowired
+    @Resource
+    private SceneManageDAO sceneManageDAO;
+    @Resource
     private EventCenterTemplate eventCenterTemplate;
-
-    @Autowired
-    private RedisClientUtils redisClientUtils;
-
-    @Autowired
-    private TSceneManageMapper tSceneManageMapper;
 
     @Value("${scheduling.enabled:true}")
     private Boolean schedulingEnabled;
-
-    @Autowired
-    private SceneManageDAO sceneManageDAO;
-
-    @Autowired
-    private ReportDao reportDao;
 
     // todo 之后改成分布式，需要注意，redis 读写锁问题
     /**
@@ -291,10 +282,10 @@ public class PushWindowDataScheduled extends AbstractIndicators {
 
             log.info("场景[{}]压测任务已完成,将要开始更新报告{}", sceneId, reportId);
             // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
-            SceneManage sceneManage = tSceneManageMapper.selectByPrimaryKey(sceneId);
+            SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
             //如果是强制停止 不需要更新
             log.info("finish scene {}, state :{}", sceneId, Optional.ofNullable(sceneManage)
-                .map(SceneManage::getType)
+                .map(SceneManageResult::getType)
                 .map(SceneManageStatusEnum::getSceneManageStatusEnum)
                 .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
             if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {
