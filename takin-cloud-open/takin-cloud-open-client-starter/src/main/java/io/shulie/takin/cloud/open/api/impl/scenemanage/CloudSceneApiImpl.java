@@ -150,8 +150,8 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     @Override
     public ResponseResult<ScriptCheckResp> checkAndUpdateScript(ScriptCheckAndUpdateReq req) {
         TakinResponseEntity<ResponseResult<ScriptCheckResp>> takinResponseEntity =
-            HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_CHECK_AND_UPDATE_URL,
-                getHeaders(req), req, new TypeReference<ResponseResult<ScriptCheckResp>>() {});
+            HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_CHECK_AND_UPDATE_URL,
+                getHeaders(req), new TypeReference<ResponseResult<ScriptCheckResp>>() {},req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
