@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.pamirs.takin.entity.dao.scenemanage.TSceneBusinessActivityRefMapper">
-    <resultMap id="BaseResultMap" type="com.pamirs.takin.entity.domain.entity.scenemanage.SceneBusinessActivityRef">
+<mapper namespace="com.pamirs.takin.entity.dao.scene.manage.TSceneBusinessActivityRefMapper">
+    <resultMap id="BaseResultMap" type="com.pamirs.takin.entity.domain.entity.scene.manage.SceneBusinessActivityRef">
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="scene_id" property="sceneId" jdbcType="BIGINT"/>
         <result column="business_activity_id" property="businessActivityId" jdbcType="BIGINT"/>
@@ -38,7 +38,7 @@
     </delete>
 
     <insert id="insertSelective"
-            parameterType="com.pamirs.takin.entity.domain.entity.scenemanage.SceneBusinessActivityRef"
+            parameterType="com.pamirs.takin.entity.domain.entity.scene.manage.SceneBusinessActivityRef"
             useGeneratedKeys="true" keyProperty="id">
         insert into t_scene_business_activity_ref
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -131,7 +131,7 @@
     </insert>
 
     <update id="updateByPrimaryKeySelective"
-            parameterType="com.pamirs.takin.entity.domain.entity.scenemanage.SceneBusinessActivityRef">
+            parameterType="com.pamirs.takin.entity.domain.entity.scene.manage.SceneBusinessActivityRef">
         update t_scene_business_activity_ref
         <set>
             <if test="sceneId != null">

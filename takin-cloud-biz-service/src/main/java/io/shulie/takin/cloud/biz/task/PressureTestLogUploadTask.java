@@ -1,12 +1,7 @@
 package io.shulie.takin.cloud.biz.task;
 
-import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.domain.entity.report.Report;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.log.PushLogService;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.utils.FileFetcher;
-import io.shulie.takin.cloud.common.constants.ReportConstans;
 import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
@@ -50,9 +45,9 @@ public class PressureTestLogUploadTask implements Runnable {
     private String fileName;
 
     public PressureTestLogUploadTask(Long sceneId, Long reportId, Long customerId,
-                                     SceneTaskPressureTestLogUploadDAO logUploadDAO, RedisClientUtils redisClientUtils,
-                                     PushLogService pushLogService, SceneManageDAO sceneManageDAO,
-                                     String logDir, String fileName) {
+        SceneTaskPressureTestLogUploadDAO logUploadDAO, RedisClientUtils redisClientUtils,
+        PushLogService pushLogService, SceneManageDAO sceneManageDAO,
+        String logDir, String fileName) {
         this.sceneId = sceneId;
         this.reportId = reportId;
         this.customerId = customerId;
@@ -66,7 +61,7 @@ public class PressureTestLogUploadTask implements Runnable {
 
     private static final String VERSION = "1.6";
 
-    private static final Long MAX_PUSH_SIZE = 1024 * 1024 * 1L;
+    private static final Long MAX_PUSH_SIZE = 1024L * 1024L;
 
     private void uploadPtlFile() {
         String filePath = String.format(logDir + "/ptl/%s/%s/%s", this.sceneId, this.reportId, fileName);
@@ -84,7 +79,7 @@ public class PressureTestLogUploadTask implements Runnable {
         File ptlFile = getFile(filePath);
         if (ptlFile == null) {
             log.error("异常代码【{}】,异常内容：上传压测明细日志失败 --> 上传压测明细日志--【{}】不存在或者不是文件",
-                    TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, filePath);
+                TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, filePath);
             return;
         }
         //去掉特殊字符
@@ -95,7 +90,7 @@ public class PressureTestLogUploadTask implements Runnable {
             fileFetcher = new FileFetcher(ptlFile);
         } catch (FileNotFoundException e) {
             log.error("异常代码【{}】,异常内容：上传压测明细日志失败 --> 获取fileFetcher出错,文件：【{}】,异常信息【{}】",
-                    TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, filePath, e);
+                TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, filePath, e);
             cleanCache(subFileName);
             return;
         }
@@ -121,7 +116,7 @@ public class PressureTestLogUploadTask implements Runnable {
                         if (position == 0) {
                             TimeUnit.SECONDS.sleep(3);
                             data = readFile(ptlFile, subFileName, position, ptlFile.getAbsolutePath(), fileFetcher,
-                                    lastSize);
+                                lastSize);
                             if (data != null && data.length > 0) {
                                 pushLogService.pushLogToAmdb(data, VERSION);
                             }
@@ -129,7 +124,7 @@ public class PressureTestLogUploadTask implements Runnable {
                         log.info("上传压测明细日志--文件【{}】上传完成，文件大小【{}】", this.fileName, position);
                         //删除缓存的key，记录文件上传大小
                         createUploadRecord(this.sceneId, this.reportId, this.customerId,
-                                ptlFile.getAbsolutePath(), position);
+                            ptlFile.getAbsolutePath(), position);
                         cleanCache(subFileName);
                         fileFetcher.close();
                         break;
@@ -141,7 +136,7 @@ public class PressureTestLogUploadTask implements Runnable {
             } catch (Throwable e) {
                 cleanCache(subFileName);
                 log.error("异常代码【{}】,异常内容：推送日志到amdb异常 --> 异常信息: {}",
-                        TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, e);
+                    TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, e);
                 return;
             }
         }
@@ -149,35 +144,35 @@ public class PressureTestLogUploadTask implements Runnable {
 
     private void cleanCache(String fileName) {
         String statusKey = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", this.sceneId,
-                this.reportId);
+            this.reportId);
         redisClientUtils.hmdelete(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
-                String.format("%s_%s_%s", this.sceneId,
-                        this.reportId, fileName));
+            String.format("%s_%s_%s", this.sceneId,
+                this.reportId, fileName));
         redisClientUtils.hmset(statusKey, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY,
-                SceneRunTaskStatusEnum.ENDED.getText());
+            SceneRunTaskStatusEnum.ENDED.getText());
     }
 
     /**
      * 记录上传的行数
      *
-     * @param fileName
-     * @param position
+     * @param fileName -
+     * @param position -
      */
     private void cacheFileUploadedPosition(String fileName, Long position) {
         this.redisClientUtils.hmset(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
-                String.format("%s_%s_%s", this.sceneId, this.reportId, fileName),
-                position);
+            String.format("%s_%s_%s", this.sceneId, this.reportId, fileName),
+            position);
     }
 
     /**
      * 获取上传的位置
      *
-     * @param fileName
+     * @param fileName -
      * @return -
      */
     private Long getPosition(String fileName) {
         Object position = this.redisClientUtils.hmget(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
-                String.format("%s_%s_%s", this.sceneId, this.reportId, fileName));
+            String.format("%s_%s_%s", this.sceneId, this.reportId, fileName));
         if (Objects.isNull(position)) {
             return 0L;
         } else {
@@ -194,7 +189,7 @@ public class PressureTestLogUploadTask implements Runnable {
 
     private boolean isSceneEnded(Long sceneId) {
         SceneManageResult manageResult = this.sceneManageDAO.getSceneById(sceneId);
-        if (Objects.isNull(manageResult) || Objects.isNull(manageResult.getStatus())){
+        if (Objects.isNull(manageResult) || Objects.isNull(manageResult.getStatus())) {
             return true;
         }
         return SceneManageStatusEnum.ifFinished(manageResult.getStatus());
@@ -203,14 +198,14 @@ public class PressureTestLogUploadTask implements Runnable {
     /**
      * 从指定定行数开始，读取文件的剩余内容
      *
-     * @param position
-     * @param filePath
+     * @param position -
+     * @param filePath -
      * @return -
-     * @throws IOException
+     * @throws IOException -
      */
     private byte[] readFile(File file, String subFileName, Long position, String filePath, FileFetcher fileFetcher,
-                            long pushSize)
-            throws IOException {
+        long pushSize)
+        throws IOException {
         if (!file.exists() || !file.isFile()) {
             log.warn("上传压测明细日志--读取文件【{}】失败：文件不存在或非文件", filePath);
             return null;
@@ -229,8 +224,8 @@ public class PressureTestLogUploadTask implements Runnable {
     /**
      * 创建上传记录
      *
-     * @param fileName
-     * @param fileSize
+     * @param fileName -
+     * @param fileSize -
      */
     private void createUploadRecord(Long sceneId, Long reportId, Long customerId, String fileName, Long fileSize) {
         log.info("上传压测明细日志--文件【{}】上传完成，创建上传记录", fileName);
@@ -249,7 +244,7 @@ public class PressureTestLogUploadTask implements Runnable {
             log.info("上传压测明细日志--创建上传记录成功:sceneID:【{}】,reportID:【{}】,fileName:【{}】", sceneId, reportId, fileName);
         } else {
             log.error("异常代码【{}】,异常内容：上传压测明细日志--创建上传记录失败:sceneID:【{}】,reportID:【{}】,fileName:【{}",
-                    TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, sceneId, reportId, fileName);
+                TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, sceneId, reportId, fileName);
         }
     }
 
@@ -265,11 +260,11 @@ public class PressureTestLogUploadTask implements Runnable {
     public void run() {
         long beginTime = System.currentTimeMillis();
         log.info("上传压测明细日志--任务启动：线程id-{},sceneId-{},reportId-{},开始时间：{}", Thread.currentThread().getId(),
-                this.sceneId, this.reportId, beginTime);
+            this.sceneId, this.reportId, beginTime);
         uploadPtlFile();
         long endTime = System.currentTimeMillis();
         log.info("上传压测明细日志--任务完成:线程id-{},sceneId-{},reportId-{},结束时间：{},耗时：{}", Thread.currentThread().getId(),
-                this.sceneId, this.reportId, endTime,
-                endTime - beginTime);
+            this.sceneId, this.reportId, endTime,
+            endTime - beginTime);
     }
 }

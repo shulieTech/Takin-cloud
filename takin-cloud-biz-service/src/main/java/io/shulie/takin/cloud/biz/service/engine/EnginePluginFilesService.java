@@ -2,7 +2,7 @@ package io.shulie.takin.cloud.biz.service.engine;
 
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginFileOutput;
 import io.shulie.takin.cloud.common.bean.file.FileManageInfo;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 
 import java.util.List;
 
@@ -17,14 +17,16 @@ public interface EnginePluginFilesService {
     /**
      * 根据插件id获取所有文件路径
      *
-     * @param pluginIds
+     * @param pluginIds 插件主键集合
+     * @return 路径集合
      */
     List<String> findPluginFilesPathByPluginIds(List<Long> pluginIds);
 
     /**
      * 根据插件id获取文件信息
      *
-     * @param pluginId
+     * @param pluginId 插件主键
+     * @return -
      */
     List<EnginePluginFileOutput> findPluginFilesInfoByPluginId(Long pluginId);
 
@@ -32,13 +34,14 @@ public interface EnginePluginFilesService {
      * 批量保存引擎插件文件信息
      *
      * @param pluginId 插件ID
-     * @param files 文件信息
+     * @param files    文件信息
      */
     void batchSaveEnginePluginFiles(List<FileManageInfo> files, Long pluginId);
 
     /**
      * 根据插件Id和插件版本号获取文件路径
-     * @param plugins
+     *
+     * @param plugins 插件主键集合
      * @return -
      */
     List<String> findPluginFilesPathByPluginIdAndVersion(List<SceneManageWrapperOutput.EnginePluginRefOutput> plugins);

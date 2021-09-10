@@ -13,28 +13,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Create by xuyh at 2020/4/18 16:00.
+ * @author xuyh
+ * @date 2020/4/18 16:00
  */
 public class FileUtils {
-    private static Logger logger = LoggerFactory.getLogger(FileUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
 
     public static File createFileDE(String filePathName) {
         File file = new File(filePathName);
         if (file.exists()) {
-            if (!file.delete()){
+            if (!file.delete()) {
                 return null;
             }
         }
-        if (!makeDir(file.getParentFile())){
+        if (!makeDir(file.getParentFile())) {
             return null;
         }
 
         try {
-            if (!file.createNewFile()){
+            if (!file.createNewFile()) {
                 return null;
             }
         } catch (Exception e) {
-            logger.warn(e.getMessage(), e);
+            LOGGER.warn(e.getMessage(), e);
         }
         return file;
     }
@@ -42,7 +43,7 @@ public class FileUtils {
     public static boolean makeDir(File dir) {
         if (!dir.exists()) {
             File parent = dir.getParentFile();
-            if (parent != null){
+            if (parent != null) {
                 makeDir(parent);
             }
             return dir.mkdir();
@@ -51,30 +52,24 @@ public class FileUtils {
     }
 
     public static List<File> getDirectoryFiles(String dir, String fileEndsWith) {
-        List<File> scriptFiles = new ArrayList<>();
         if (dir == null) {
             return null;
         }
         File fileDir = new File(dir);
         if (!fileDir.isDirectory()) {
-            logger.warn("Expected a dir, but not: '{}'", fileDir.getPath());
+            LOGGER.warn("Expected a dir, but not: '{}'", fileDir.getPath());
         }
         if (!fileDir.isAbsolute()) {
-            logger.warn("Expected a absolute path, bu not: '{}'", fileDir.getPath());
+            LOGGER.warn("Expected a absolute path, bu not: '{}'", fileDir.getPath());
         }
         File[] files = fileDir.listFiles(file -> {
-            if (fileEndsWith == null) {
-                return true;
-            } else {
-                return file.getName().endsWith(fileEndsWith);
-            }
+            // 没有匹配规则的话返回第一个
+            if (fileEndsWith == null) {return true;}
+            // 匹配文件名
+            else {return file.getName().endsWith(fileEndsWith);}
         });
-        if (files == null || files.length == 0) {
-            return null;
-        }
-
-        scriptFiles.addAll(Arrays.asList(files));
-        return scriptFiles;
+        if (files == null || files.length == 0) {return null;}
+        return new ArrayList<>(Arrays.asList(files));
     }
 
     public static boolean deleteDir(File dir) {
@@ -102,13 +97,13 @@ public class FileUtils {
             writer.write(content);
             writer.flush();
         } catch (Exception e) {
-            logger.warn(e.getMessage(), e);
+            LOGGER.warn(e.getMessage(), e);
         } finally {
             if (writer != null) {
                 try {
                     writer.close();
                 } catch (Exception e) {
-                    logger.warn(e.getMessage(), e);
+                    LOGGER.warn(e.getMessage(), e);
                 }
             }
         }
@@ -126,91 +121,84 @@ public class FileUtils {
                 stringBuilder.append(buffer, 0, length);
             }
         } catch (Exception e) {
-            logger.warn(e.getMessage(), e);
+            LOGGER.warn(e.getMessage(), e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (Exception e) {
-                    logger.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
-                            TakinCloudExceptionEnum.FILE_CLOSE_ERROR,e);
+                    LOGGER.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
+                        TakinCloudExceptionEnum.FILE_CLOSE_ERROR, e);
                 }
             }
         }
         return stringBuilder.toString();
     }
+
     /**
      * 构建目录
-     * @param outputDir
-     * @param subDir
+     *
+     * @param outputDir -
+     * @param subDir    -
      */
-    public static void createDirectory(String outputDir,String subDir) {
+    public static void createDirectory(String outputDir, String subDir) {
         File file = new File(outputDir);
         //子目录不为空
-        if (!(subDir == null || subDir.trim().equals(""))) {
+        if (!(subDir == null || "".equals(subDir.trim()))) {
             file = new File(outputDir + "/" + subDir);
         }
         if (!file.exists()) {
-            if (!file.getParentFile().exists()){
+            if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
             file.mkdirs();
         }
     }
 
-
-    public static void tarGzFileToFile(String sourcePath,String extractPath){
+    public static void tarGzFileToFile(String sourcePath, String extractPath) {
         TarInputStream tarIn = null;
-        try{
+        try {
             tarIn = new TarInputStream(new GZIPInputStream(
-                    new BufferedInputStream(new FileInputStream(sourcePath))),
-                    1024 * 2);
+                new BufferedInputStream(new FileInputStream(sourcePath))),
+                1024 * 2);
             //创建输出目录
-            createDirectory(extractPath,null);
+            createDirectory(extractPath, null);
 
-            TarEntry entry = null;
-            while( (entry = tarIn.getNextEntry()) != null ){
-                if(entry.isDirectory()){
+            TarEntry entry;
+            while ((entry = tarIn.getNextEntry()) != null) {
+                if (entry.isDirectory()) {
                     //是目录
                     entry.getName();
                     //创建空目录
-                    createDirectory(extractPath,entry.getName());
-                }else{
+                    createDirectory(extractPath, entry.getName());
+                } else {
                     //是文件
                     File tmpFile = new File(extractPath + "/" + entry.getName());
                     //创建输出目录
-                    createDirectory(tmpFile.getParent() + "/",null);
-                    OutputStream out = null;
-                    try{
-                        out = new FileOutputStream(tmpFile);
-                        int length = 0;
-
+                    createDirectory(tmpFile.getParent() + "/", null);
+                    try (OutputStream out = new FileOutputStream(tmpFile)) {
+                        int length;
                         byte[] b = new byte[2048];
-
-                        while((length = tarIn.read(b)) != -1){
+                        while ((length = tarIn.read(b)) != -1) {
                             out.write(b, 0, length);
                         }
-
-                    }catch(IOException ex){
+                    } catch (IOException ex) {
+                        LOGGER.error("tarGzFileToFile 异常", ex);
                         throw ex;
-                    }finally{
-                        if(out!=null){
-                            out.close();
-                        }
                     }
                 }
             }
-        }catch(IOException ex){
-            logger.error("异常代码【{}】,异常内容：tar包解压归档文件出现异常 --> 异常信息: {}",
-                    TakinCloudExceptionEnum.FILE_TAR_ERROR,ex);
-        } finally{
-            try{
-                if(tarIn != null){
+        } catch (IOException ex) {
+            LOGGER.error("异常代码【{}】,异常内容：tar包解压归档文件出现异常 --> 异常信息: {}",
+                TakinCloudExceptionEnum.FILE_TAR_ERROR, ex);
+        } finally {
+            try {
+                if (tarIn != null) {
                     tarIn.close();
                 }
-            }catch(IOException ex){
-                logger.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
-                        TakinCloudExceptionEnum.FILE_CLOSE_ERROR,ex);
+            } catch (IOException ex) {
+                LOGGER.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
+                    TakinCloudExceptionEnum.FILE_CLOSE_ERROR, ex);
             }
         }
     }
@@ -223,46 +211,38 @@ public class FileUtils {
      */
     public static boolean deleteDirectory(String dir) {
         // 如果dir不以文件分隔符结尾，自动添加文件分隔符
-        if (!dir.endsWith(File.separator)){
+        if (!dir.endsWith(File.separator)) {
             dir = dir + File.separator;
         }
         File dirFile = new File(dir);
         // 如果dir对应的文件不存在，或者不是一个目录，则退出
         if ((!dirFile.exists()) || (!dirFile.isDirectory())) {
-            logger.warn("删除目录失败：" + dir + "不存在！");
+            LOGGER.warn("删除目录失败：" + dir + "不存在！");
             return false;
         }
         boolean flag = true;
         // 删除文件夹中的所有文件包括子目录
         File[] files = dirFile.listFiles();
-        for (int i = 0; i < files.length; i++) {
+        for (File file : files) {
             // 删除子文件
-            if (files[i].isFile()) {
-                flag = deleteFile(files[i].getAbsolutePath());
-                if (!flag){
-                    break;
-                }
+            if (file.isFile()) {
+                flag = deleteFile(file.getAbsolutePath());
+                if (!flag) {break;}
             }
             // 删除子目录
-            else if (files[i].isDirectory()) {
-                flag = deleteDirectory(files[i].getAbsolutePath());
-                if (!flag){
-                    break;
-                }
-
+            else if (file.isDirectory()) {
+                flag = deleteDirectory(file.getAbsolutePath());
+                if (!flag) {break;}
             }
         }
-        if (!flag) {
-            logger.warn("删除目录失败！");
-            return false;
-        }
-        // 删除当前目录
-        if (dirFile.delete()) {
-            logger.warn("删除目录" + dir + "成功！");
+        // 删除目录成功
+        if (flag) {
+            // 删除当前目录
+            if (dirFile.delete()) {LOGGER.warn("删除目录[{}]成功！", dir);} else {return false;}
             return true;
-        } else {
-            return false;
         }
+        LOGGER.warn("删除目录失败！");
+        return false;
     }
 
     /**
@@ -276,14 +256,14 @@ public class FileUtils {
         // 如果文件路径所对应的文件存在，并且是一个文件，则直接删除
         if (file.exists() && file.isFile()) {
             if (file.delete()) {
-                logger.warn("删除单个文件" + fileName + "成功！");
+                LOGGER.warn("删除单个文件" + fileName + "成功！");
                 return true;
             } else {
-                logger.warn("删除单个文件" + fileName + "失败！");
+                LOGGER.warn("删除单个文件" + fileName + "失败！");
                 return false;
             }
         } else {
-            logger.warn("删除单个文件失败：" + fileName + "不存在！");
+            LOGGER.warn("删除单个文件失败：" + fileName + "不存在！");
             return false;
         }
     }

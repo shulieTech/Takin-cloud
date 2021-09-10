@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.biz.service.strategy.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.hutool.core.date.DateUtil;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -16,7 +17,6 @@ import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigUpdateVO;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 import io.shulie.takin.cloud.common.enums.deployment.DeploymentMethodEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.utils.DateUtil;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.ext.api.EngineCallExtApi;
 import io.shulie.takin.ext.content.enginecall.StrategyConfigExt;
@@ -100,8 +100,7 @@ public class StrategyConfigServiceImpl implements StrategyConfigService {
 
     @Override
     public PageInfo<StrategyConfigExt> queryPageList(StrategyConfigQueryVO queryVO) {
-        Page page = PageHelper.startPage(queryVO.getCurrentPage() + 1, queryVO.getPageSize());
-
+        Page<?> pageInfo = PageHelper.startPage(queryVO.getCurrentPage() + 1, queryVO.getPageSize());
         List<StrategyConfig> queryList = tStrategyConfigMapper.getPageList(queryVO);
         if (CollectionUtils.isEmpty(queryList)) {
             return new PageInfo<>(Lists.newArrayList());
@@ -112,13 +111,13 @@ public class StrategyConfigServiceImpl implements StrategyConfigService {
             dto.setId(data.getId());
             dto.setStrategyName(data.getStrategyName());
             parseConfig(dto, data.getStrategyConfig());
-            dto.setUpdateTime(DateUtil.getYYYYMMDDHHMMSS(data.getUpdateTime()));
+            dto.setUpdateTime(DateUtil.formatDateTime(data.getUpdateTime()));
             resultList.add(dto);
         });
 
-        PageInfo pageInfo = new PageInfo<>(resultList);
-        pageInfo.setTotal(page.getTotal());
-        return pageInfo;
+        return new PageInfo<StrategyConfigExt>(resultList) {{
+            setTotal(pageInfo.getTotal());
+        }};
     }
 
     private void parseConfig(StrategyConfigExt dto, String config) {

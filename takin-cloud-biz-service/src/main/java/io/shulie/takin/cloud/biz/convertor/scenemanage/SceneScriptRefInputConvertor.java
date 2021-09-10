@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.biz.convertor.scenemanage;
 
-import com.pamirs.takin.entity.domain.entity.scenemanage.SceneScriptRef;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneScriptRefInput;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

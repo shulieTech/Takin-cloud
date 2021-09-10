@@ -5,14 +5,14 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.dao.scenemanage.TSceneManageMapper;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.common.beans.response.ResponseResult;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import io.shulie.takin.common.beans.response.ResponseResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 
 /**
  * @author qianshui
@@ -21,12 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/noauth")
 public class NoAuthController {
-
     @Resource
-    private TSceneManageMapper TSceneManageMapper;
-
+    private TReportMapper tReportMapper;
     @Resource
-    private TReportMapper TReportMapper;
+    private TSceneManageMapper tSceneManageMapper;
 
     /**
      * 恢复压测中的场景状态
@@ -42,8 +40,8 @@ public class NoAuthController {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_RUNNING_PARAM_VERIFY_ERROR, "sceneId cannot be null");
         }
         Long sceneId = Long.parseLong(String.valueOf(paramMap.get("sceneId")));
-        TReportMapper.resumeStatus(sceneId);
-        TSceneManageMapper.resumeStatus(sceneId);
+        tReportMapper.resumeStatus(sceneId);
+        tSceneManageMapper.resumeStatus(sceneId);
         return ResponseResult.success("resume success");
     }
 }

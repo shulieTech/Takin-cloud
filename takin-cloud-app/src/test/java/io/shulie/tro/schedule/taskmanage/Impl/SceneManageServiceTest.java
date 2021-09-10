@@ -3,7 +3,7 @@ package io.shulie.tro.schedule.taskmanage.Impl;
 import com.github.pagehelper.PageInfo;
 import io.shulie.takin.app.Application;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageQueryInput;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageListOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;

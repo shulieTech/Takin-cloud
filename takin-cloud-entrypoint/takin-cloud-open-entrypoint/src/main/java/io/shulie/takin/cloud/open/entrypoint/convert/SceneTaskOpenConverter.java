@@ -1,9 +1,8 @@
 package io.shulie.takin.cloud.open.entrypoint.convert;
 
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneStartTrialRunOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneStartTrialRunOutput;
 import io.shulie.takin.cloud.open.resp.scenemanage.ScriptCheckResp;
-import io.shulie.takin.ext.content.script.ScriptParseExt;
 import io.shulie.takin.cloud.open.req.scenetask.SceneTryRunTaskStartReq;
 import io.shulie.takin.cloud.open.req.scenetask.TaskFlowDebugStartReq;
 import io.shulie.takin.cloud.open.resp.scenetask.SceneActionResp;
@@ -24,31 +23,34 @@ public interface SceneTaskOpenConverter {
 
     /**
      * 启动日志返回结果转换
-     * @param sceneStartTrialRunOutput
+     *
+     * @param sceneStartTrialRunOutput -
      * @return -
      */
     SceneActionResp ofSceneStartTrialRunOutput(SceneStartTrialRunOutput sceneStartTrialRunOutput);
 
     /**
      * 入参转换
-     * @param taskFlowDebugStartReq
+     *
+     * @param taskFlowDebugStartReq -
      * @return -
      */
     SceneManageWrapperInput ofTaskDebugDataStartReq(TaskFlowDebugStartReq taskFlowDebugStartReq);
 
     /**
      * 入参转换
-     * @param taskInspectStartReq
+     *
+     * @param taskInspectStartReq -
      * @return -
      */
     SceneManageWrapperInput ofTaskInspectStartReq(TaskInspectStartReq taskInspectStartReq);
 
     /**
      * 入惨转换
-     * @param sceneTryRunTaskStartReq
+     *
+     * @param sceneTryRunTaskStartReq -
      * @return -
      */
     SceneManageWrapperInput ofSceneTryRunTaskReq(SceneTryRunTaskStartReq sceneTryRunTaskStartReq);
-
 
 }
