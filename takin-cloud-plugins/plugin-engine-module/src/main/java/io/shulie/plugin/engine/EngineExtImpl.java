@@ -28,7 +28,7 @@ public class EngineExtImpl implements EngineExtApi {
         scriptVerityRespExt.setErrorMsg(errorMsgList);
 
         if (CollectionUtils.isEmpty(scriptVerityExt.getRequest())){
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCRIPT_VERITY_ERROR,"脚本校验业务活动id不能为空");
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCRIPT_VERITY_ERROR,"脚本校验业务活动不能为空");
         }
 
         ScriptParseExt scriptParseExt = SaxUtil.parseJmx(scriptVerityExt.getScriptPath());
