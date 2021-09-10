@@ -3,42 +3,42 @@ package io.shulie.takin.cloud.web.entrypoint.controller.report;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSON;
 
+import io.swagger.annotations.Api;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
-import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
-import com.pamirs.takin.entity.domain.dto.report.Metrices;
-import com.pamirs.takin.entity.domain.dto.report.ReportTrendDTO;
-import com.pamirs.takin.entity.domain.vo.report.ReportIdParam;
-import com.pamirs.takin.entity.domain.vo.report.ReportQueryParam;
-import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
-import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
-import io.shulie.takin.cloud.biz.output.scenemanage.WarnDetailOutput;
-import io.shulie.takin.cloud.biz.service.report.ReportService;
-import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
-import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
-import io.shulie.takin.cloud.common.constants.APIUrls;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.web.entrypoint.convert.WarnDetailRespConvertor;
-import io.shulie.takin.cloud.web.entrypoint.response.scenemanage.WarnDetailResponse;
-import io.shulie.takin.common.beans.response.ResponseResult;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.annotations.ApiImplicitParam;
+import io.shulie.takin.cloud.common.constants.APIUrls;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import com.pamirs.takin.entity.domain.dto.report.Metrices;
 import org.springframework.web.bind.annotation.RequestBody;
+import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
+import com.pamirs.takin.entity.domain.vo.report.ReportIdParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
+import com.pamirs.takin.entity.domain.dto.report.ReportTrendDTO;
+import com.pamirs.takin.entity.domain.vo.report.ReportQueryParam;
+import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import org.springframework.web.context.request.RequestContextHolder;
+import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
+import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import io.shulie.takin.cloud.web.entrypoint.convert.WarnDetailRespConvertor;
+import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
+import io.shulie.takin.cloud.web.entrypoint.response.scenemanage.WarnDetailResponse;
 
 /**
  * @author 莫问
@@ -48,14 +48,15 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @RequestMapping(APIUrls.TRO_API_URL)
 @Api(tags = "场景报告模块", value = "场景报告")
 public class ReportController {
-
-    //原本调用方式，需要将token放入header中
+    /**
+     * 原本调用方式，需要将token放入header中
+     */
     public static final String PAGE_TOTAL_HEADER = "x-total-count";
 
-    @Autowired
+    @Resource
     private ReportService reportService;
 
-    @Autowired
+    @Resource
     private RedisClientUtils redisClientUtils;
 
     @GetMapping("report/listReport")
@@ -202,8 +203,8 @@ public class ReportController {
 
     @GetMapping("/report/metrices")
     @ApiOperation("当前压测的所有数据")
-    public ResponseResult<List<Metrices>> metrices(Long reportId, Long sceneId, Long customerId) {
-        return ResponseResult.success(reportService.metrices(reportId, sceneId, customerId));
+    public ResponseResult<List<Metrices>> metrics(Long reportId, Long sceneId, Long customerId) {
+        return ResponseResult.success(reportService.metric(reportId, sceneId, customerId));
     }
 
     /**

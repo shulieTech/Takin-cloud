@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.pamirs.takin.entity.dao.scenemanage.TSceneSlaRefMapper">
-    <resultMap id="BaseResultMap" type="com.pamirs.takin.entity.domain.entity.scenemanage.SceneSlaRef">
+<mapper namespace="com.pamirs.takin.entity.dao.scene.manage.TSceneSlaRefMapper">
+    <resultMap id="BaseResultMap" type="com.pamirs.takin.entity.domain.entity.scene.manage.SceneSlaRef">
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="scene_id" property="sceneId" jdbcType="BIGINT"/>
         <result column="sla_name" property="slaName" jdbcType="VARCHAR"/>
@@ -37,7 +37,7 @@
         where scene_id = #{sceneId,jdbcType=BIGINT}
     </delete>
 
-    <insert id="insertSelective" parameterType="com.pamirs.takin.entity.domain.entity.scenemanage.SceneSlaRef"
+    <insert id="insertSelective" parameterType="com.pamirs.takin.entity.domain.entity.scene.manage.SceneSlaRef"
             useGeneratedKeys="true" keyProperty="id">
         insert into t_scene_sla_ref
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -130,7 +130,7 @@
     </insert>
 
     <update id="updateByPrimaryKeySelective"
-            parameterType="com.pamirs.takin.entity.domain.entity.scenemanage.SceneSlaRef">
+            parameterType="com.pamirs.takin.entity.domain.entity.scene.manage.SceneSlaRef">
         update t_scene_sla_ref
         <set>
             <if test="sceneId != null">

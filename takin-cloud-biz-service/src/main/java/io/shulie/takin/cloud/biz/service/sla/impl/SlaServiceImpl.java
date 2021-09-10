@@ -2,45 +2,43 @@
 
 package io.shulie.takin.cloud.biz.service.sla.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.google.common.collect.Maps;
-import com.pamirs.takin.entity.dao.scenemanage.TWarnDetailMapper;
-import com.pamirs.takin.entity.domain.entity.scenemanage.WarnDetail;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneSlaRefResult;
-import io.shulie.takin.ext.content.enginecall.ScheduleStopRequestExt;
-import io.shulie.takin.cloud.biz.event.SlaPublish;
-import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.biz.service.report.ReportService;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.biz.service.sla.SlaService;
-import io.shulie.takin.cloud.biz.utils.SlaUtil;
-import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
-import io.shulie.takin.cloud.common.bean.sla.AchieveModel;
-import io.shulie.takin.cloud.common.bean.sla.SlaBean;
-import io.shulie.takin.cloud.common.constants.Constants;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.common.utils.DateUtil;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageWrapperResult;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+import cn.hutool.core.date.DateUtil;
+import com.google.common.collect.Maps;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import io.shulie.takin.cloud.biz.utils.SlaUtil;
+import io.shulie.takin.cloud.biz.event.SlaPublish;
+import io.shulie.takin.cloud.common.bean.sla.SlaBean;
+import org.apache.commons.collections4.CollectionUtils;
+import io.shulie.takin.cloud.biz.service.sla.SlaService;
+import io.shulie.takin.cloud.common.constants.Constants;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import io.shulie.takin.cloud.common.bean.sla.AchieveModel;
+import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
+import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
+import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
+import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
+import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
+import io.shulie.takin.ext.content.enginecall.ScheduleStopRequestExt;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneSlaRefResult;
+import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageWrapperResult;
 
 /**
  * @author qianshui
@@ -51,55 +49,55 @@ import org.springframework.stereotype.Service;
 public class SlaServiceImpl implements SlaService {
 
     public static final String SLA_SCENE_KEY = "TRO:SLA:SCENE:KEY";
-    public static final String SLA_DESTORY_KEY = "TRO:SLA:DESTORY:KEY";
+    public static final String SLA_DESTROY_KEY = "TRO:SLA:DESTROY:KEY";
     public static final String SLA_WARN_KEY = "TRO:SLA:WARN:KEY";
     public static final Long EXPIRE_TIME = 24 * 3600L;
     public static final String PREFIX_TASK = "TRO:SLA:TASK:";
-    @Autowired
+    @Resource
     private SlaPublish slaPublish;
-    @Autowired
-    private SceneManageService sceneManageService;
+    @Resource
+    private ReportService reportService;
+    @Resource
+    private RedisClientUtils redisClientUtils;
     @Resource
     private TWarnDetailMapper TWarnDetailMapper;
-    @Autowired
-    private RedisClientUtils redisClientUtils;
-    @Autowired
-    private ReportService reportService;
+    @Resource
+    private SceneManageService sceneManageService;
 
     @Override
-    public Boolean buildWarn(SendMetricsEvent metricsEvnet) {
-        if (StringUtils.isBlank(metricsEvnet.getTransaction())
-            || "all".equalsIgnoreCase(metricsEvnet.getTransaction())) {
+    public Boolean buildWarn(SendMetricsEvent metricsEvent) {
+        if (StringUtils.isBlank(metricsEvent.getTransaction())
+            || "all".equalsIgnoreCase(metricsEvent.getTransaction())) {
             return true;
         }
-        Long sceneId = metricsEvnet.getSceneId();
+        Long sceneId = metricsEvent.getSceneId();
         SceneManageWrapperOutput dto;
         try {
             dto = getSceneManageWrapperDTO(sceneId);
             if (dto == null) {
                 log.error("异常代码【{}】,异常内容：构建sla异常 --> 未找到压测场景， SendMetricsEvent={}",
-                    TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvnet));
+                    TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvent));
                 return false;
             }
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：构建sla异常 -->  查找到压测场景异常， SendMetricsEvent={}，异常信息:{}",
-                TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvnet), e);
+                TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvent), e);
             return false;
         }
         SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivity = dto.getBusinessActivityConfig().stream().filter(
-            data -> metricsEvnet.getTransaction().equals(data.getBindRef())).findFirst().orElse(null);
+            data -> metricsEvent.getTransaction().equals(data.getBindRef())).findFirst().orElse(null);
 
         if (businessActivity == null) {
             log.error("异常代码【{}】,异常内容：构建sla异常 --> 未找到业务活动， SendMetricsEvent={}",
-                TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvnet));
+                TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvent));
             return false;
         }
 
         Long businessActivityId = businessActivity.getBusinessActivityId();
 
-        doDestory(dto.getId(), metricsEvnet, filterSlaList(businessActivityId, dto.getStopCondition()), businessActivity);
+        doDestroy(dto.getId(), metricsEvent, filterSlaList(businessActivityId, dto.getStopCondition()), businessActivity);
 
-        doWarn(businessActivity, metricsEvnet, filterSlaList(businessActivityId, dto.getWarningCondition()));
+        doWarn(businessActivity, metricsEvent, filterSlaList(businessActivityId, dto.getWarningCondition()));
 
         return true;
     }
@@ -113,7 +111,7 @@ public class SlaServiceImpl implements SlaService {
         SceneManageWrapperResult dto = JSON.parseObject(scene, SceneManageWrapperResult.class);
 
         dto.getStopCondition().stream().map(SceneSlaRefResult::getId).forEach(
-            id -> redisClientUtils.hmdelete(SLA_DESTORY_KEY, String.valueOf(id)));
+            id -> redisClientUtils.hmdelete(SLA_DESTROY_KEY, String.valueOf(id)));
         dto.getWarningCondition().stream().map(SceneSlaRefResult::getId).forEach(
             id -> redisClientUtils.hmdelete(SLA_WARN_KEY, String.valueOf(id)));
         redisClientUtils.hmdelete(SLA_SCENE_KEY, String.valueOf(sceneId));
@@ -126,7 +124,7 @@ public class SlaServiceImpl implements SlaService {
         redisClientUtils.setString(PREFIX_TASK + sceneId, "on", 7, TimeUnit.DAYS);
     }
 
-    private void doDestory(Long sceneId, SendMetricsEvent metricsEvent, List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList, SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivityDTO) {
+    private void doDestroy(Long sceneId, SendMetricsEvent metricsEvent, List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList, SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivityDTO) {
         if (CollectionUtils.isEmpty(slaList)) {
             return;
         }
@@ -135,16 +133,16 @@ public class SlaServiceImpl implements SlaService {
             BeanUtils.copyProperties(dto, input);
             Map<String, Object> conditionMap = SlaUtil.matchCondition(input, metricsEvent);
             if (!(Boolean)conditionMap.get("result")) {
-                redisClientUtils.hmdelete(SLA_DESTORY_KEY, String.valueOf(dto.getId()));
+                redisClientUtils.hmdelete(SLA_DESTROY_KEY, String.valueOf(dto.getId()));
                 return;
             }
-            String object = (String)redisClientUtils.hmget(SLA_DESTORY_KEY, String.valueOf(dto.getId()));
+            String object = (String)redisClientUtils.hmget(SLA_DESTROY_KEY, String.valueOf(dto.getId()));
             AchieveModel model = (object != null ? JSON.parseObject(object, AchieveModel.class) : null);
             if (!matchContinue(model, metricsEvent.getTimestamp())) {
                 Map<String, Object> dataMap = Maps.newHashMap();
                 dataMap.put(String.valueOf(dto.getId()),
                     JSON.toJSONString(new AchieveModel(1, metricsEvent.getTimestamp())));
-                redisClientUtils.hmset(SLA_DESTORY_KEY, dataMap, EXPIRE_TIME);
+                redisClientUtils.hmset(SLA_DESTROY_KEY, dataMap, EXPIRE_TIME);
                 return;
             }
             model.setTimes(model.getTimes() + 1);
@@ -181,7 +179,7 @@ public class SlaServiceImpl implements SlaService {
                     log.warn("【SLA】发送压测任务终止事件失败:{}", e.getMessage(), e);
                 }
             } else {
-                redisClientUtils.hmset(SLA_DESTORY_KEY, String.valueOf(dto.getId()), JSON.toJSONString(model));
+                redisClientUtils.hmset(SLA_DESTROY_KEY, String.valueOf(dto.getId()), JSON.toJSONString(model));
             }
         });
     }
@@ -227,11 +225,9 @@ public class SlaServiceImpl implements SlaService {
         if (model == null) {
             return false;
         }
-        log.info("【sla】校验是否连续，上次触发时间={}, 当前时间={}，相差={}", model.getLastAchieveTime(), timestamp,
+        log.info("【sla】校验是否连续，上次触发时间={}, 当前时间={}，相差={}",
+            model.getLastAchieveTime(), timestamp,
             (timestamp - model.getLastAchieveTime()));
-        //        if(timestamp - model.getLastAchieveTime() <= 6000) {
-        //            return true;
-        //        }
         return true;
     }
 
@@ -245,7 +241,7 @@ public class SlaServiceImpl implements SlaService {
         warnDetail.setSlaName(salDTO.getRuleName());
         warnDetail.setBusinessActivityId(businessActivityDTO.getBusinessActivityId());
         warnDetail.setBusinessActivityName(businessActivityDTO.getBusinessActivityName());
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(conditionMap.get("type"));
         sb.append(conditionMap.get("compare"));
         sb.append(salDTO.getRule().getDuring());
@@ -254,7 +250,7 @@ public class SlaServiceImpl implements SlaService {
         sb.append(salDTO.getRule().getTimes());
         sb.append("次");
         warnDetail.setWarnContent(sb.toString());
-        warnDetail.setWarnTime(DateUtil.getDate(DateUtil.formatTime(metricsEvent.getTimestamp())));
+        warnDetail.setWarnTime(DateUtil.date(metricsEvent.getTimestamp()));
         warnDetail.setRealValue((Double)conditionMap.get("real"));
         return warnDetail;
     }

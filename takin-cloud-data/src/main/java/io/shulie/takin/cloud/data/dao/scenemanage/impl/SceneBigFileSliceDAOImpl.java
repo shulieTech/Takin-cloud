@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
+
 import com.alibaba.fastjson.JSONObject;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.pamirs.takin.entity.dao.scenemanage.TSceneScriptRefMapper;
-import com.pamirs.takin.entity.domain.entity.scenemanage.SceneScriptRef;
+import com.pamirs.takin.entity.dao.scene.manage.TSceneScriptRefMapper;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import io.shulie.takin.cloud.common.enums.FileSliceStatusEnum;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneBigFileSliceDAO;
 import io.shulie.takin.cloud.data.mapper.mysql.SceneBigFileSliceMapper;
@@ -30,13 +32,13 @@ import org.springframework.stereotype.Component;
 public class SceneBigFileSliceDAOImpl extends ServiceImpl<SceneBigFileSliceMapper, SceneBigFileSliceEntity>
     implements SceneBigFileSliceDAO, MPUtil<SceneBigFileSliceEntity> {
 
-    @Autowired
+    @Resource
     SceneScriptRefMapper sceneScriptRefMapper;
 
-    @Autowired
+    @Resource
     TSceneScriptRefMapper tSceneScriptRefMapper;
 
-    @Autowired
+    @Resource
     SceneBigFileSliceMapper sceneBigFileSliceMapper;
 
     private static final String SUFFIX = ".csv";
@@ -106,7 +108,7 @@ public class SceneBigFileSliceDAOImpl extends ServiceImpl<SceneBigFileSliceMappe
             String fileExtend = entity.getFileExtend();
             JSONObject jsonObject = JSONObject.parseObject(fileExtend);
             if (jsonObject.containsKey("isOrderSplit")) {
-                return jsonObject.getString("isOrderSplit").equals("1");
+                return "1".equals(jsonObject.getString("isOrderSplit"));
             }
             return false;
         }

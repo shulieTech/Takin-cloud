@@ -1,50 +1,50 @@
 package io.shulie.takin.cloud.web.entrypoint.controller.file;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.nio.charset.StandardCharsets;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.common.collect.Lists;
-import com.pamirs.takin.entity.domain.dto.file.FileDTO;
-import com.pamirs.takin.entity.domain.vo.file.FileDeleteVO;
-import io.shulie.takin.cloud.common.constants.SceneManageConstant;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.utils.DateUtil;
-import io.shulie.takin.cloud.common.utils.LinuxUtil;
-import io.shulie.takin.cloud.web.entrypoint.controller.strategy.LocalFileStrategy;
-import io.shulie.takin.cloud.web.entrypoint.request.filemanage.FileCopyParamRequest;
-import io.shulie.takin.cloud.web.entrypoint.request.filemanage.FileCreateByStringParamRequest;
-import io.shulie.takin.cloud.web.entrypoint.request.filemanage.FileDeleteParamRequest;
-import io.shulie.takin.cloud.web.entrypoint.request.filemanage.FileZipParamRequest;
-import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.utils.file.FileManagerHelper;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import io.swagger.annotations.Api;
+import cn.hutool.core.date.DateUtil;
+import com.google.common.collect.Lists;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
+import io.shulie.takin.cloud.common.utils.LinuxUtil;
+import io.shulie.takin.utils.file.FileManagerHelper;
+import org.springframework.web.multipart.MultipartFile;
+import com.pamirs.takin.entity.domain.dto.file.FileDTO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
+import com.pamirs.takin.entity.domain.vo.file.FileDeleteVO;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import io.shulie.takin.common.beans.response.ResponseResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestMapping;
+import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.web.entrypoint.controller.strategy.LocalFileStrategy;
+import io.shulie.takin.cloud.web.entrypoint.request.filemanage.FileZipParamRequest;
+import io.shulie.takin.cloud.web.entrypoint.request.filemanage.FileCopyParamRequest;
+import io.shulie.takin.cloud.web.entrypoint.request.filemanage.FileDeleteParamRequest;
+import io.shulie.takin.cloud.web.entrypoint.request.filemanage.FileCreateByStringParamRequest;
 
 /**
  * @author qianshui
@@ -62,12 +62,12 @@ public class FileController {
     @Value("${script.path}")
     private String scriptPath;
 
-    @Autowired
+    @Resource
     private LocalFileStrategy fileStrategy;
 
     @PostMapping("/upload")
     @ApiOperation(value = "文件上传")
-    public ResponseResult upload(List<MultipartFile> file) {
+    public ResponseResult<List<FileDTO>> upload(List<MultipartFile> file) {
         List<FileDTO> dtoList = Lists.newArrayList();
         for (MultipartFile mf : file) {
             String uploadId = UUID.randomUUID().toString();
@@ -80,7 +80,7 @@ public class FileController {
             FileDTO dto = new FileDTO();
             try {
                 dto.setUploadId(uploadId);
-                dto.setUploadTime(DateUtil.getYYYYMMDDHHMMSS(new Date()));
+                dto.setUploadTime(DateUtil.formatDateTime(new Date()));
                 dto.setFileName(mf.getOriginalFilename());
                 dto.setIsDeleted(0);
                 dto.setIsSplit(0);
@@ -102,7 +102,7 @@ public class FileController {
 
     @DeleteMapping
     @ApiOperation(value = "临时文件删除")
-    public ResponseResult delete(@RequestBody FileDeleteVO vo) {
+    public ResponseResult<?> delete(@RequestBody FileDeleteVO vo) {
         if (vo.getUploadId() != null) {
             String targetDir = tempPath + SceneManageConstant.FILE_SPLIT + vo.getUploadId();
             LinuxUtil.executeLinuxCmd("rm -rf " + targetDir);

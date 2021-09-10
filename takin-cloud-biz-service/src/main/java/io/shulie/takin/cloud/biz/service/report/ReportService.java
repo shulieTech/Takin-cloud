@@ -4,27 +4,30 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.pagehelper.PageInfo;
-import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
+import io.shulie.takin.cloud.biz.output.report.ReportOutput;
+import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
+import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
 import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
 import com.pamirs.takin.entity.domain.dto.report.ReportTrendDTO;
 import com.pamirs.takin.entity.domain.vo.report.ReportQueryParam;
-import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
-import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
-import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
-import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
-import io.shulie.takin.cloud.biz.output.report.ReportOutput;
-import io.shulie.takin.cloud.biz.output.scenemanage.WarnDetailOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
+import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
+import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
+import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
+import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
-import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
 
+/**
+ * @author 数列科技
+ */
 public interface ReportService {
 
     /**
      * 报告列表
      *
-     * @param param
+     * @param param -
      * @return -
      */
     PageInfo<CloudReportDTO> listReport(ReportQueryParam param);
@@ -32,7 +35,7 @@ public interface ReportService {
     /**
      * 报告详情
      *
-     * @param reportId
+     * @param reportId 报告主键
      * @return -
      */
     ReportDetailOutput getReportByReportId(Long reportId);
@@ -40,7 +43,7 @@ public interface ReportService {
     /**
      * 报告链路趋势
      *
-     * @param reportTrendQuery
+     * @param reportTrendQuery -
      * @return -
      */
     ReportTrendDTO queryReportTrend(ReportTrendQueryParam reportTrendQuery);
@@ -48,17 +51,15 @@ public interface ReportService {
     /**
      * 实况报表
      *
-     * @param sceneId
+     * @param sceneId 场景主键
      * @return -
      */
     ReportDetailOutput tempReportDetail(Long sceneId);
 
-
-
     /**
      * 实况链路趋势
      *
-     * @param reportTrendQuery
+     * @param reportTrendQuery -
      * @return -
      */
     ReportTrendDTO queryTempReportTrend(ReportTrendQueryParam reportTrendQuery);
@@ -66,29 +67,39 @@ public interface ReportService {
     /**
      * 警告列表
      *
-     * @param param
+     * @param param -
      * @return -
      */
     PageInfo<WarnDetailOutput> listWarn(WarnQueryParam param);
 
     /**
-     * @param reportId
+     * 查询报告中的业务活动
+     *
+     * @param reportId 报告主键
      * @return -
      */
     List<BusinessActivityDTO> queryReportActivityByReportId(Long reportId);
 
     /**
-     * @param sceneId
+     * 查询报告中的业务活动
+     *
+     * @param sceneId 场景主键
      * @return -
      */
     List<BusinessActivityDTO> queryReportActivityBySceneId(Long sceneId);
 
+    /**
+     * 获取业务活动摘要列表
+     *
+     * @param reportId 报告主键
+     * @return -
+     */
     List<BusinessActivitySummaryBean> getBusinessActivitySummaryList(Long reportId);
 
     /**
      * 获取报告的业务活动数量和压测通过数量
      *
-     * @param reportId
+     * @param reportId 报告主键
      * @return -
      */
     Map<String, Object> getReportCount(Long reportId);
@@ -100,12 +111,17 @@ public interface ReportService {
      */
     Long queryRunningReport();
 
+    /**
+     * 获取运行中的报告列表
+     *
+     * @return -
+     */
     List<Long> queryListRunningReport();
 
     /**
      * 锁定报告
      *
-     * @param reportId
+     * @param reportId 报告主键
      * @return -
      */
     Boolean lockReport(Long reportId);
@@ -113,7 +129,7 @@ public interface ReportService {
     /**
      * 解锁报告
      *
-     * @param reportId
+     * @param reportId 报告主键
      * @return -
      */
     Boolean unLockReport(Long reportId);
@@ -121,7 +137,7 @@ public interface ReportService {
     /**
      * 客户端调，报告完成
      *
-     * @param reportId
+     * @param reportId 报告主键
      * @return -
      */
     Boolean finishReport(Long reportId);
@@ -129,54 +145,55 @@ public interface ReportService {
     /**
      * 强制关闭报告
      *
-     * @param reportId
-     * @return -
+     * @param reportId 报告主键
      */
     void forceFinishReport(Long reportId);
 
     /**
      * 新增 customerId
      *
-     * @param reportId
-     * @param sceneId
-     * @param customerId
+     * @param reportId   报告主键
+     * @param sceneId    场景主键
+     * @param customerId 租户主键
      * @return -
      */
-    List<Metrices> metrices(Long reportId, Long sceneId, Long customerId);
+    List<Metrices> metric(Long reportId, Long sceneId, Long customerId);
 
     /**
      * 更新扩展字段
      *
-     * @param reportId
-     * @param status
-     * @param errKey
-     * @param errMsg
+     * @param reportId 报告主键
+     * @param status   状态
+     * @param errKey   错误key
+     * @param errMsg   错误message
      */
     void updateReportFeatures(Long reportId, Integer status, String errKey, String errMsg);
 
-
     /**
      * 创建告警
-     * @param input
+     *
+     * @param input -
      */
     void addWarn(WarnCreateInput input);
 
-
     /**
      * 更新报告是否通过
-     * @param input
+     *
+     * @param input -
      */
     void updateReportConclusion(UpdateReportConclusionInput input);
 
     /**
      * 更新sla数据
-     * @param input
+     *
+     * @param input -
      */
     void updateReportSlaData(UpdateReportSlaDataInput input);
 
     /**
      * 获取报告
-     * @param id
+     *
+     * @param id 报告主键
      * @return -
      */
     ReportOutput selectById(Long id);

@@ -7,7 +7,7 @@ import com.pamirs.takin.entity.dao.schedule.TScheduleRecordMapper;
 import com.pamirs.takin.entity.domain.entity.schedule.ScheduleRecord;
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
 import io.shulie.takin.cloud.biz.convertor.ScheduleConvertor;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.async.AsyncService;
 import io.shulie.takin.cloud.biz.service.record.ScheduleRecordEnginePluginService;
 import io.shulie.takin.cloud.biz.service.report.ReportService;

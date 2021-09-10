@@ -1,9 +1,9 @@
-package com.pamirs.takin.entity.dao.scenemanage;
+package com.pamirs.takin.entity.dao.scene.manage;
 
 import java.util.List;
 
 import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
-import com.pamirs.takin.entity.domain.entity.scenemanage.WarnDetail;
+import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
 import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
 
 public interface TWarnDetailMapper {
@@ -19,7 +19,7 @@ public interface TWarnDetailMapper {
     /**
      * 警告汇总
      *
-     * @param reportId
+     * @param reportId 报告主键
      * @return -
      */
     List<WarnBO> summaryWarnByReportId(Long reportId);
@@ -27,7 +27,7 @@ public interface TWarnDetailMapper {
     /**
      * 警告列表
      *
-     * @param param
+     * @param param -
      * @return -
      */
     List<WarnDetail> listWarn(WarnQueryParam param);
@@ -35,7 +35,7 @@ public interface TWarnDetailMapper {
     /**
      * 统计报告总警告次数
      *
-     * @param reportId
+     * @param reportId 报告主键
      * @return -
      */
     Long countReportTotalWarn(Long reportId);

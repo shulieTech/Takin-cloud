@@ -7,12 +7,12 @@ import java.util.List;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import com.pamirs.takin.entity.domain.entity.scenemanage.SceneBusinessActivityRef;
-import com.pamirs.takin.entity.domain.entity.scenemanage.SceneManage;
-import com.pamirs.takin.entity.domain.entity.scenemanage.SceneScriptRef;
-import com.pamirs.takin.entity.domain.entity.scenemanage.SceneSlaRef;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageListOutput;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageWrapperOutput;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneBusinessActivityRef;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneSlaRef;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.common.bean.RuleBean;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import org.apache.commons.lang3.StringUtils;

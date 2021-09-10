@@ -16,8 +16,8 @@ import java.util.function.Consumer;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.pamirs.takin.entity.dao.scenemanage.TSceneManageMapper;
-import com.pamirs.takin.entity.domain.entity.scenemanage.SceneManage;
+import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import io.shulie.takin.cloud.biz.collector.collector.AbstractIndicators;
 import io.shulie.takin.cloud.common.bean.collector.Metrics;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
@@ -107,7 +107,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         Map<String, Object> extMap = taskBean.getExtendMap();
         List<String> refList = Lists.newArrayList();
         if (MapUtils.isNotEmpty(extMap)) {
-            refList.addAll((List)extMap.get("businessActivityBindRef"));
+            refList.addAll((List<String>)extMap.get("businessActivityBindRef"));
         }
         ArrayList<String> transation = new ArrayList<>(refList);
         transation.add("all");

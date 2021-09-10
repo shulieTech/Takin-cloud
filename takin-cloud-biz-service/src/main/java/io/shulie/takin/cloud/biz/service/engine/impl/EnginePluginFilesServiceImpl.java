@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginFileOutput;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginFilesService;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.common.bean.file.FileManageInfo;
 import io.shulie.takin.cloud.common.constants.FileManageConstants;
 import io.shulie.takin.cloud.data.mapper.mysql.EnginePluginFilesMapper;
@@ -55,7 +55,7 @@ public class EnginePluginFilesServiceImpl extends ServiceImpl<EnginePluginFilesM
     /**
      * 根据插件id获取文件路径
      *
-     * @param pluginIds
+     * @param pluginIds 插件主键集合
      */
     @Override
     public List<String> findPluginFilesPathByPluginIds(List<Long> pluginIds) {
@@ -74,7 +74,7 @@ public class EnginePluginFilesServiceImpl extends ServiceImpl<EnginePluginFilesM
     /**
      * 根据插件id获取文件信息
      *
-     * @param pluginId
+     * @param pluginId 插件主键
      */
     @Override
     public List<EnginePluginFileOutput> findPluginFilesInfoByPluginId(Long pluginId) {
@@ -126,7 +126,7 @@ public class EnginePluginFilesServiceImpl extends ServiceImpl<EnginePluginFilesM
                 Long fileId = file.getFileId();
                 if (fileId != null && fileId != 0) {
                     //已存在但要移除的
-                    if (FileManageConstants.FILE_STATUS_DELETED == isDeleted) {
+                    if (FileManageConstants.FILE_STATUS_DELETED.equals(isDeleted)) {
                         removeIds.add(file.getFileId());
                     }
                 }
@@ -201,7 +201,7 @@ public class EnginePluginFilesServiceImpl extends ServiceImpl<EnginePluginFilesM
             if (versionEntities.size() == 1) {
                 EnginePluginFilesRef enginePluginFilesRef = enginePluginFilesMapper.selectById(
                     versionEntities.get(0).getFileRefId());
-                if (Objects.nonNull(enginePluginFilesRef)){
+                if (Objects.nonNull(enginePluginFilesRef)) {
                     return enginePluginFilesRef.getFilePath();
                 }
             }

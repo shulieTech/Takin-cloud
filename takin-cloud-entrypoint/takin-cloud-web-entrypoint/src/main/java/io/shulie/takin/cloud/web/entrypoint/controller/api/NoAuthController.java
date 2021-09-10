@@ -5,7 +5,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.dao.scenemanage.TSceneManageMapper;
+import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.common.beans.response.ResponseResult;

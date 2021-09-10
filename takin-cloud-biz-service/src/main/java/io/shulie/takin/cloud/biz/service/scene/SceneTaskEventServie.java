@@ -10,7 +10,7 @@ import com.google.common.collect.Maps;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.ext.content.enginecall.ScheduleStopRequestExt;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginFilesService;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
@@ -138,7 +138,7 @@ public class SceneTaskEventServie {
         scheduleStartRequest.setInspect(scene.isInspect());
         scheduleStartRequest.setTryRun(scene.isTryRun());
 
-        List<ScheduleStartRequestExt.DataFile> dataFileList = new ArrayList<ScheduleStartRequestExt.DataFile>();
+        List<ScheduleStartRequestExt.DataFile> dataFileList = new ArrayList<>();
         scene.getUploadFile().forEach(file -> {
             if (file.getFileType() == 0) {
                 scheduleStartRequest.setScriptPath(file.getUploadPath());

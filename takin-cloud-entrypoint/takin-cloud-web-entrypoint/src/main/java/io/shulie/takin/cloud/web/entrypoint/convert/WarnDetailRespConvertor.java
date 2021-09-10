@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.web.entrypoint.convert;
 
-import io.shulie.takin.cloud.biz.output.scenemanage.WarnDetailOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
 import io.shulie.takin.cloud.web.entrypoint.response.scenemanage.WarnDetailResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

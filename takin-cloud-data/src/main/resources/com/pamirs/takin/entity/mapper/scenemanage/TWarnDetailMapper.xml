@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.pamirs.takin.entity.dao.scenemanage.TWarnDetailMapper">
-    <resultMap id="BaseResultMap" type="com.pamirs.takin.entity.domain.entity.scenemanage.WarnDetail">
+<mapper namespace="com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper">
+    <resultMap id="BaseResultMap" type="com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail">
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="pt_id" property="ptId" jdbcType="BIGINT"/>
         <result column="sla_id" property="slaId" jdbcType="BIGINT"/>
@@ -39,7 +39,7 @@
         from t_warn_detail
         where id = #{id,jdbcType=BIGINT}
     </delete>
-    <insert id="insertSelective" parameterType="com.pamirs.takin.entity.domain.entity.scenemanage.WarnDetail">
+    <insert id="insertSelective" parameterType="com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail">
         insert into t_warn_detail
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -106,7 +106,7 @@
             </if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="com.pamirs.takin.entity.domain.entity.scenemanage.WarnDetail">
+    <update id="updateByPrimaryKeySelective" parameterType="com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail">
         update t_warn_detail
         <set>
             <if test="ptId != null">

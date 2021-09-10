@@ -1,30 +1,34 @@
 package io.shulie.plugin.enginecall.service.impl;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.shulie.plugin.enginecall.service.EngineCallService;
-import io.shulie.takin.cloud.common.constants.NoLengthBlockingQueue;
-import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
-import io.shulie.takin.cloud.common.constants.SceneManageConstant;
-import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.common.utils.FileUtils;
-import io.shulie.takin.utils.json.JsonHelper;
-import io.shulie.takin.utils.linux.LinuxHelper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.List;
+import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadPoolExecutor;
+
+import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import io.shulie.takin.utils.json.JsonHelper;
+import org.springframework.stereotype.Service;
+import io.shulie.takin.utils.linux.LinuxHelper;
+import io.shulie.takin.cloud.common.utils.FileUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.plugin.enginecall.service.EngineCallService;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.takin.cloud.common.constants.NoLengthBlockingQueue;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 
 /**
  * @author zhaoyong
@@ -33,13 +37,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public class LocalThreadServiceImpl implements EngineCallService {
 
-    @Autowired
+    @Resource
     private RedisClientUtils redisClientUtils;
 
     private final static ExecutorService THREAD_POOL = new ThreadPoolExecutor(1, 6,
-            50L, TimeUnit.MILLISECONDS,
-            new NoLengthBlockingQueue<Runnable>(), new ThreadFactoryBuilder()
-            .setNameFormat("local-thread-task-%d").build(), new ThreadPoolExecutor.AbortPolicy());
+        50L, TimeUnit.MILLISECONDS,
+        new NoLengthBlockingQueue<>(), new ThreadFactoryBuilder()
+        .setNameFormat("local-thread-task-%d").build(), new ThreadPoolExecutor.AbortPolicy());
 
     private final ConcurrentHashMap<String, Process> shellProcess = new ConcurrentHashMap<>();
 
@@ -53,7 +57,6 @@ public class LocalThreadServiceImpl implements EngineCallService {
      */
     @Value("${pressure.engine.task.dir:./engine}")
     private String taskDir;
-
 
     @Override
     public String createJob(Long sceneId, Long taskId, Long customerId) {
@@ -86,26 +89,24 @@ public class LocalThreadServiceImpl implements EngineCallService {
             sb.append(" -f y ");
             log.info("执行压测包，执行命令如下:{}", sb);
             int state = LinuxHelper.runShell(sb.toString(), null,
-                    new LinuxHelper.Callback() {
-                        @Override
-                        public void before(Process process) {
-                            log.info("threadPoolExecutor 开始启动压测引擎");
-                        }
-
-                        @Override
-                        public void after(Process process) {
-                            shellProcess.put(jobName, process);
-                        }
-
-                        @Override
-                        public void exception(Process process, Exception e) {
-                            log.error("异常代码【{}】,异常内容：压测引擎启动异常 --> " +
-                                    "，异常信息: {}", TakinCloudExceptionEnum.SCHEDULE_START_ERROR, e);
-                        }
-                    },
-                    message -> {
-                        log.info("执行返回结果:{}", message);
+                new LinuxHelper.Callback() {
+                    @Override
+                    public void before(Process process) {
+                        log.info("threadPoolExecutor 开始启动压测引擎");
                     }
+
+                    @Override
+                    public void after(Process process) {
+                        shellProcess.put(jobName, process);
+                    }
+
+                    @Override
+                    public void exception(Process process, Exception e) {
+                        log.error("异常代码【{}】,异常内容：压测引擎启动异常 --> " +
+                            "，异常信息: {}", TakinCloudExceptionEnum.SCHEDULE_START_ERROR, e);
+                    }
+                },
+                message -> log.info("执行返回结果:{}", message)
             );
             log.info("jmeter启动" + state);
         });
@@ -120,7 +121,7 @@ public class LocalThreadServiceImpl implements EngineCallService {
 
     @Override
     public void createConfigMap(Map<String, Object> configMap, String engineRedisKey) {
-        String fileName = (String) configMap.get("name");
+        String fileName = (String)configMap.get("name");
         FileUtils.writeTextFile(JsonHelper.obj2StringPretty(configMap.get("engine.conf")), taskDir + "/" + fileName);
         redisClientUtils.hmset(engineRedisKey, PressureInstanceRedisKey.SecondRedisKey.CONFIG_NAME, fileName);
     }
@@ -168,8 +169,7 @@ public class LocalThreadServiceImpl implements EngineCallService {
     }
 
     private String getEnginePackDir() {
-        String enginePackDir = new File(installDir).getParent() + "/pressure-engine";
-        return enginePackDir;
+        return new File(installDir).getParent() + "/pressure-engine";
     }
 
 }

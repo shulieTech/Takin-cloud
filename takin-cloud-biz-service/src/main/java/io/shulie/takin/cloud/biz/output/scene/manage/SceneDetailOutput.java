@@ -1,8 +1,7 @@
-package io.shulie.takin.cloud.biz.output.scenemanage;
+package io.shulie.takin.cloud.biz.output.scene.manage;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

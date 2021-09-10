@@ -12,7 +12,7 @@ import javax.annotation.Resource;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.entity.report.Report;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.async.AsyncService;
 import io.shulie.takin.cloud.biz.service.log.PushLogService;
 import io.shulie.takin.cloud.biz.task.PressureTestLogUploadTask;

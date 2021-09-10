@@ -1,7 +1,7 @@
-package com.pamirs.takin.entity.domain.entity.scenemanage;
+package com.pamirs.takin.entity.domain.entity.scene.manage;
 
-import java.io.Serializable;
 import java.util.Date;
+import java.io.Serializable;
 
 import lombok.Data;
 

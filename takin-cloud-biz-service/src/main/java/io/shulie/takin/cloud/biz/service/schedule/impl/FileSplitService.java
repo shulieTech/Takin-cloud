@@ -14,7 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
-import com.pamirs.takin.entity.domain.entity.scenemanage.SceneFileReadPosition;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
 import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
