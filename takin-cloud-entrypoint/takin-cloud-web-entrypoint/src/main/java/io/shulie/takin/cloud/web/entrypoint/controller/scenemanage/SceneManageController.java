@@ -24,8 +24,8 @@ import io.shulie.takin.cloud.biz.cache.DictionaryCache;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageQueryInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageListOutput;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 import io.shulie.takin.cloud.biz.utils.SlaUtil;
@@ -367,7 +367,7 @@ public class SceneManageController {
         SceneSlaRefInput input = new SceneSlaRefInput();
         BeanUtils.copyProperties(slaRefDTO, input);
         Map<String, Object> dataMap = SlaUtil.matchCondition(input, new SendMetricsEvent());
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(dataMap.get("type"));
         sb.append(dataMap.get("compare"));
         sb.append(slaRefDTO.getRule().getDuring());
@@ -386,7 +386,7 @@ public class SceneManageController {
             data -> String.valueOf(data.getBusinessActivityId()),
             BusinessActivityDetailResponse::getBusinessActivityName);
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (String id : ids) {
             if ("-1".equals(id)) {
                 sb.append("所有");

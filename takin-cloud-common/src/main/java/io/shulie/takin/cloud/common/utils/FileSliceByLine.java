@@ -1,36 +1,37 @@
 package io.shulie.takin.cloud.common.utils;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.TreeMap;
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 
 import com.alibaba.fastjson.JSONObject;
 
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 
 /**
+ * 大文件分片
+ *
  * @author moriarty
- * @description 大文件分片
  */
 public class FileSliceByLine {
     private static final Logger logger = LoggerFactory.getLogger(FileSliceByLine.class);
 
-    private String filePath;
-    private String separator;
+    private final String filePath;
+    private final String separator;
     private Long prePosition;
-    private Map<String, Integer> partitionMap;
     private Integer nextPartitionNum;
-    private Map<Integer, FileSliceInfo> fileSliceInfoMap;
-    private Integer orderColumnNum;
+    private final Map<String, Integer> partitionMap;
+    private final Map<Integer, FileSliceInfo> fileSliceInfoMap;
+    private final Integer orderColumnNum;
 
     private FileSliceByLine(String filePath, String separator, Integer columnNum) {
         this.filePath = filePath;
@@ -75,7 +76,7 @@ public class FileSliceByLine {
                     nextPartitionNum++;
                 }
             }
-            Map<Integer, FileSliceInfo> resultMap = new HashMap<>();
+            Map<Integer, FileSliceInfo> resultMap = new HashMap<>(fileSliceInfoMap.size());
             FileSliceInfo sliceInfo;
             for (Map.Entry<Integer, FileSliceInfo> entry : fileSliceInfoMap.entrySet()) {
                 sliceInfo = new FileSliceInfo() {{
@@ -87,7 +88,7 @@ public class FileSliceByLine {
             }
             return resultMap;
         } catch (Exception e) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR,e.getMessage(),e);
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR, e.getMessage(), e);
         } finally {
             try {
                 if (reader != null) {
@@ -95,21 +96,21 @@ public class FileSliceByLine {
                 }
             } catch (IOException ex) {
                 logger.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
-                        TakinCloudExceptionEnum.FILE_CLOSE_ERROR,ex);
+                    TakinCloudExceptionEnum.FILE_CLOSE_ERROR, ex);
             }
         }
     }
 
     public static class Builder {
-        private String filePath;
         private String separator;
         private Integer columnNum;
+        private final String filePath;
 
         public Builder(String filepath) {
             this.filePath = filepath;
             File file = new File(this.filePath);
             if (!file.exists()) {
-                throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR,"文件不存在！filepath:[" + filepath + "]");
+                throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR, "文件不存在！filepath:[" + filepath + "]");
             }
         }
 
@@ -145,13 +146,5 @@ public class FileSliceByLine {
         System.out.println(System.currentTimeMillis() - start);
         String s = JSONObject.toJSONString(stringFileSliceInfoMap);
         System.out.println(s);
-
-        //for (Map.Entry<String, FileSliceInfo> entry : stringFileSliceInfoMap.entrySet()) {
-        //    System.out.printf("topic:%s,start:%s,end:%s\n", entry.getKey(), entry.getValue().getStartPosition(),
-        //        entry.getValue().getEndPosition());
-        //}
-        //FileSliceInfo sliceInfo = stringFileSliceInfoMap.get("2");
-        //FileConsumer consumer = new FileConsumer(filePath,1024*1024,sliceInfo,"utf-8");
-        //consumer.consumer();
     }
 }

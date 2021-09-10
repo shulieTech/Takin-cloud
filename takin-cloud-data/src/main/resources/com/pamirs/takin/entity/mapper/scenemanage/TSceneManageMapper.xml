@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.pamirs.takin.entity.dao.scenemanage.TSceneManageMapper">
-    <resultMap id="BaseResultMap" type="com.pamirs.takin.entity.domain.entity.scenemanage.SceneManage">
+<mapper namespace="com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper">
+    <resultMap id="BaseResultMap" type="com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage">
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="customer_id" property="customerId" jdbcType="BIGINT"/>
         <result column="deptId" property="deptId" jdbcType="BIGINT"/>
@@ -29,7 +29,7 @@
         from t_scene_manage
         where id = #{id,jdbcType=BIGINT}
     </select>
-    <select id="selectAllSceneManageList" resultMap="BaseResultMap" >
+    <select id="selectAllSceneManageList" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from t_scene_manage
@@ -41,7 +41,7 @@
         set is_deleted = 1
         where id = #{id,jdbcType=BIGINT}
     </delete>
-    <insert id="insertSelective" parameterType="com.pamirs.takin.entity.domain.entity.scenemanage.SceneManage"
+    <insert id="insertSelective" parameterType="com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage"
             useGeneratedKeys="true" keyProperty="id">
         insert into t_scene_manage
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -140,7 +140,7 @@
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective"
-            parameterType="com.pamirs.takin.entity.domain.entity.scenemanage.SceneManage">
+            parameterType="com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage">
         update t_scene_manage
         <set>
             <if test="customerId != null">

@@ -5,9 +5,9 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.dao.scenemanage.TWarnDetailMapper;
+import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
 import com.pamirs.takin.entity.domain.entity.report.Report;
-import com.pamirs.takin.entity.domain.entity.scenemanage.WarnDetail;
+import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
 import io.shulie.takin.app.Application;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.biz.service.report.ReportService;

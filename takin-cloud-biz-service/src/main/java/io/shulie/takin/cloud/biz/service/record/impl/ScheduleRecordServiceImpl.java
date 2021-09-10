@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import cn.hutool.core.date.DateUtil;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -13,7 +14,6 @@ import com.pamirs.takin.entity.domain.dto.schedule.ScheduleRecordDTO;
 import com.pamirs.takin.entity.domain.entity.schedule.ScheduleRecord;
 import com.pamirs.takin.entity.domain.vo.schedule.ScheduleRecordQueryVO;
 import io.shulie.takin.cloud.biz.service.record.ScheduleRecordService;
-import io.shulie.takin.cloud.common.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -46,7 +46,7 @@ public class ScheduleRecordServiceImpl implements ScheduleRecordService {
             dto.setStatusInt(data.getStatus());
             dto.setMemorySize(data.getMemorySize());
             dto.setCpuCoreNum(data.getCpuCoreNum());
-            dto.setCreateTime(DateUtil.getYYYYMMDDHHMMSS(data.getCreateTime()));
+            dto.setCreateTime(DateUtil.formatDateTime(data.getCreateTime()));
             resultList.add(dto);
         });
 

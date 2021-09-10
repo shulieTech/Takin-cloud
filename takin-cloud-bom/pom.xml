@@ -10,6 +10,7 @@
 
     <properties>
         <takin.cloud.version>takin-cloud-2.0.2</takin.cloud.version>
+        <takin.cloud.open.version>takin-cloud-open-2.0.2.1</takin.cloud.open.version>
     </properties>
 
     <dependencyManagement>
@@ -37,12 +38,12 @@
             <dependency>
                 <groupId>io.shulie.takin</groupId>
                 <artifactId>takin-cloud-open-api</artifactId>
-                <version>${takin.cloud.version}</version>
+                <version>${takin.cloud.open.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.shulie.takin</groupId>
                 <artifactId>takin-cloud-open-client-starter</artifactId>
-                <version>${takin.cloud.version}</version>
+                <version>${takin.cloud.open.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.shulie.takin</groupId>

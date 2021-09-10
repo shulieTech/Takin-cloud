@@ -1,11 +1,13 @@
-package com.pamirs.takin.entity.dao.scenemanage;
+package com.pamirs.takin.entity.dao.scene.manage;
 
 import java.util.List;
 
-import com.pamirs.takin.entity.domain.entity.scenemanage.SceneScriptRef;
-import com.pamirs.takin.entity.domain.query.SceneScriptRefQueryParam;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Mapper;
+import com.pamirs.takin.entity.domain.query.SceneScriptRefQueryParam;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 
+@Mapper
 public interface TSceneScriptRefMapper {
 
     int deleteByPrimaryKey(Long id);
@@ -25,6 +27,6 @@ public interface TSceneScriptRefMapper {
 
     SceneScriptRef selectByExample(SceneScriptRefQueryParam param);
 
-    void deleteBySceneId(@Param("id") Long id) ;
+    void deleteBySceneId(@Param("id") Long id);
 
 }

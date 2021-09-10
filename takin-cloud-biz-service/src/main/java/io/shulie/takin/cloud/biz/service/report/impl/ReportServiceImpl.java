@@ -1,19 +1,18 @@
 package io.shulie.takin.cloud.biz.service.report.impl;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
+import java.util.Date;
+import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Calendar;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -21,87 +20,89 @@ import javax.annotation.Resource;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+import lombok.extern.slf4j.Slf4j;
+import org.influxdb.impl.TimeUtil;
 import cn.hutool.core.util.StrUtil;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.github.pagehelper.PageHelper;
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.DateField;
 import com.github.pagehelper.PageInfo;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
-import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.dao.scenemanage.TSceneManageMapper;
-import com.pamirs.takin.entity.dao.scenemanage.TWarnDetailMapper;
-import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
-import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
-import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
-import com.pamirs.takin.entity.domain.dto.report.Metrices;
-import com.pamirs.takin.entity.domain.dto.report.ReportTrendDTO;
-import com.pamirs.takin.entity.domain.dto.report.StatInspectReportDTO;
-import com.pamirs.takin.entity.domain.dto.report.StatReportDTO;
-import com.pamirs.takin.entity.domain.entity.report.Report;
-import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
-import com.pamirs.takin.entity.domain.entity.scenemanage.SceneManage;
-import com.pamirs.takin.entity.domain.entity.scenemanage.WarnDetail;
-import com.pamirs.takin.entity.domain.vo.report.ReportQueryParam;
-import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
-import io.shulie.takin.cloud.biz.cloudserver.ReportConverter;
-import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
-import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
-import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
-import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
-import io.shulie.takin.cloud.biz.output.report.ReportOutput;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageWrapperOutput.SceneBusinessActivityRefOutput;
-import io.shulie.takin.cloud.biz.output.scenemanage.WarnDetailOutput;
-import io.shulie.takin.cloud.biz.service.report.ReportService;
-import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventServie;
-import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
-import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.DataBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.DistributeBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
-import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
+import com.google.common.collect.Lists;
+import com.github.pagehelper.PageHelper;
+import io.shulie.takin.eventcenter.Event;
+import io.shulie.takin.ext.api.AssetExtApi;
+import org.springframework.beans.BeanUtils;
+import org.apache.commons.lang3.StringUtils;
+import io.shulie.takin.utils.json.JsonHelper;
+import org.springframework.stereotype.Service;
+import org.apache.commons.collections4.MapUtils;
+import io.shulie.takin.cloud.common.utils.GsonUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.shulie.takin.cloud.common.bean.sla.SlaBean;
-import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
+import io.shulie.takin.cloud.data.dao.report.ReportDao;
+import org.apache.commons.collections4.CollectionUtils;
+import io.shulie.takin.cloud.common.utils.TestTimeUtil;
+import com.pamirs.takin.entity.dao.report.TReportMapper;
+import io.shulie.takin.eventcenter.annotation.IntrestFor;
+import io.shulie.takin.ext.content.asset.AssetInvoiceExt;
+import com.pamirs.takin.entity.domain.dto.report.Metrices;
+import org.springframework.beans.factory.annotation.Value;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
-import io.shulie.takin.cloud.common.constants.ReportConstans;
-import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
-import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.influxdb.InfluxDBUtil;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.cloud.common.utils.DateUtil;
-import io.shulie.takin.cloud.common.utils.GsonUtil;
-import io.shulie.takin.cloud.data.dao.report.ReportDao;
-import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
-import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
-import io.shulie.takin.eventcenter.Event;
-import io.shulie.takin.eventcenter.annotation.IntrestFor;
-import io.shulie.takin.ext.api.AssetExtApi;
-import io.shulie.takin.ext.content.asset.AssetInvoiceExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
-import io.shulie.takin.utils.json.JsonHelper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang.time.DateUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.influxdb.impl.TimeUtil;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import com.pamirs.takin.entity.domain.entity.report.Report;
+import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
+import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
+import io.shulie.takin.cloud.biz.output.report.ReportOutput;
+import io.shulie.takin.cloud.biz.cloudserver.ReportConverter;
+import io.shulie.takin.cloud.common.constants.ReportConstans;
+import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
+import io.shulie.takin.cloud.common.bean.scenemanage.DataBean;
+import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
+import com.pamirs.takin.entity.domain.dto.report.StatReportDTO;
+import com.pamirs.takin.entity.domain.dto.report.ReportTrendDTO;
+import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
+import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import org.springframework.transaction.annotation.Transactional;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
+import com.pamirs.takin.entity.domain.vo.report.ReportQueryParam;
+import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
+import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
+import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
+import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
+import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
+import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventServie;
+import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
+import io.shulie.takin.cloud.common.bean.scenemanage.DistributeBean;
+import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
+import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
+import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
+import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import com.pamirs.takin.entity.domain.dto.report.StatInspectReportDTO;
+import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
+import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
+import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
+import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
+import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
+import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
+import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneBusinessActivityRefOutput;
 
 /**
  * @author 莫问
@@ -110,28 +111,33 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 public class ReportServiceImpl implements ReportService {
-
-    public static final String COMPARE = "<=";
-
-    @Autowired
-    private ReportDao reportDao;
     @Resource
-    private TReportMapper tReportMapper;
+    ReportDao reportDao;
     @Resource
-    private TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
+    InfluxWriter influxWriter;
     @Resource
-    private TWarnDetailMapper tWarnDetailMapper;
+    TReportMapper tReportMapper;
+    @Resource
+    PluginManager pluginManager;
+    @Resource
+    SceneManageDAO sceneManageDao;
+    @Resource
+    RedisClientUtils redisClientUtils;
+    @Resource
+    SceneTaskService sceneTaskService;
+    @Resource
+    TWarnDetailMapper tWarnDetailMapper;
+    @Resource
+    ReportEventService reportEventService;
+    @Resource
+    SceneManageService sceneManageService;
+    @Resource
+    TSceneManageMapper tSceneManageMapper;
+    @Resource
+    SceneTaskEventServie sceneTaskEventServie;
+    @Resource
+    TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
 
-    @Autowired
-    private SceneManageService sceneManageService;
-    @Autowired
-    private ReportEventService reportEventService;
-    @Autowired
-    private InfluxWriter influxWriter;
-    @Autowired
-    private RedisClientUtils redisClientUtils;
-    @Autowired
-    private SceneTaskEventServie sceneTaskEventServie;
     @Value("${report.aggregation.interval}")
     private String reportAggregationInterval;
     /**
@@ -140,12 +146,7 @@ public class ReportServiceImpl implements ReportService {
     @Value("${scene.pressure.forceCloseTime: 20}")
     private Integer forceCloseTime;
 
-    @Resource
-    private PluginManager pluginManager;
-    @Autowired
-    private SceneTaskService sceneTaskService;
-    @Autowired
-    private TSceneManageMapper tSceneManageMapper;
+    public static final String COMPARE = "<=";
 
     @Override
     public PageInfo<CloudReportDTO> listReport(ReportQueryParam param) {
@@ -214,7 +215,7 @@ public class ReportServiceImpl implements ReportService {
             detail.setConclusionRemark(
                 JSON.parseObject(report.getFeatures()).getString(ReportConstans.FEATURES_ERROR_MSG));
         }
-        detail.setTestTotalTime(DateUtil.formatTestTime(report.getStartTime(), report.getEndTime()));
+        detail.setTestTotalTime(TestTimeUtil.format(report.getStartTime(), report.getEndTime()));
         detail.setBusinessActivity(getBusinessActivitySummaryList(reportId));
         //任务没有完成，提示用户正在生成中
         if (report.getStatus() != ReportConstans.FINISH_STATUS) {
@@ -282,7 +283,7 @@ public class ReportServiceImpl implements ReportService {
         CloudPluginUtils.fillReportData(reportResult, reportDetail);
 
         List<SceneBusinessActivityRefOutput> refList = wrapper.getBusinessActivityConfig();
-        List list = Lists.newArrayList();
+        List<BusinessActivitySummaryBean> list = Lists.newArrayList();
         refList.forEach(businessActivityRef -> {
             StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(), businessActivityRef.getBindRef());
             BusinessActivitySummaryBean businessActivity = new BusinessActivitySummaryBean();
@@ -444,7 +445,7 @@ public class ReportServiceImpl implements ReportService {
         List<ReportBusinessActivityDetail> reportBusinessActivityDetailList = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportId);
         if (CollectionUtils.isEmpty(reportBusinessActivityDetailList)) {
-            return Collections.EMPTY_LIST;
+            return new ArrayList<>(0);
         }
         reportBusinessActivityDetailList.forEach(reportBusinessActivityDetail -> {
             BusinessActivitySummaryBean businessActivity = new BusinessActivitySummaryBean();
@@ -529,7 +530,8 @@ public class ReportServiceImpl implements ReportService {
     private boolean checkReportError(ReportResult reportResult) {
         // 锁定报告前提也是要有结束时间
         if (reportResult == null) {
-            log.error("not find reportId= {}", reportResult.getId());
+            log.error("io.shulie.takin.cloud.biz.service.report.impl.ReportServiceImpl#checkReportError"
+                + "reportResult 是 null");
             return true;
         }
         if (reportResult.getEndTime() == null) {
@@ -572,10 +574,10 @@ public class ReportServiceImpl implements ReportService {
 
         // 两个地方关闭压测引擎，版本不同，关闭方式不同
         //更新场景 压测引擎停止 ---> 待启动
-        SceneManage sceneManage = tSceneManageMapper.selectByPrimaryKey(reportResult.getSceneId());
+        SceneManageResult sceneManage = sceneManageDao.getSceneById(reportResult.getSceneId());
         //如果是强制停止 不需要更新
         log.info("finish scene {}, state :{}", reportResult.getSceneId(), Optional.ofNullable(sceneManage)
-            .map(SceneManage::getStatus)
+            .map(SceneManageResult::getStatus)
             .map(SceneManageStatusEnum::getSceneManageStatusEnum)
             .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
         if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {
@@ -608,7 +610,7 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private StatReportDTO statTempReport(Long sceneId, Long reportId, Long customerId, String transaction) {
-        StringBuffer influxDbSql = new StringBuffer();
+        StringBuilder influxDbSql = new StringBuilder();
         influxDbSql.append("select");
         influxDbSql.append(
             " count as totalRequest, fail_count as failRequest, avg_tps as tps , avg_rt as avgRt, sa_count as saCount,"
@@ -625,7 +627,7 @@ public class ReportServiceImpl implements ReportService {
      * 巡检报告取值
      */
     private StatInspectReportDTO statInspectReport(Long sceneId, Long reportId, Long customerId, String transaction, String startTime, String endTime) {
-        StringBuffer influxDbSql = new StringBuffer();
+        StringBuilder influxDbSql = new StringBuilder();
         influxDbSql.append("select");
         influxDbSql.append(
             " sum(count) as totalRequest,mean(avg_tps) as avgTps , sum(sum_rt)/sum(count) as avgRt , mean(success_rate) as avgSuccessRate");
@@ -671,7 +673,7 @@ public class ReportServiceImpl implements ReportService {
             }
         }
 
-        StringBuffer influxDbSql = new StringBuffer();
+        StringBuilder influxDbSql = new StringBuilder();
         influxDbSql.append("select");
         influxDbSql.append(
             " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps , sum(sum_rt)/sum(count) as "
@@ -730,7 +732,7 @@ public class ReportServiceImpl implements ReportService {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(date));
         calendar.set(Calendar.HOUR, calendar.get(Calendar.HOUR));
-        return DateUtil.getDate(calendar.getTime(), "HH:mm:ss");
+        return cn.hutool.core.date.DateUtil.formatTime(calendar.getTime());
     }
 
     /**
@@ -755,7 +757,7 @@ public class ReportServiceImpl implements ReportService {
      */
     public boolean checkSceneTaskIsTimeOut(ReportResult reportResult, SceneManageWrapperOutput scene) {
         long totalTestTime = scene.getTotalTestTime();
-        long runTime = DateUtil.getUntilSecond(reportResult.getStartTime(), new Date());
+        long runTime = DateUtil.between(reportResult.getStartTime(), new Date(), DateUnit.SECOND);
         if (runTime >= totalTestTime + forceCloseTime) {
             log.info("report = {}，runTime = {} , totalTestTime= {},Timeout check", reportResult.getId(), runTime, totalTestTime);
             return true;
@@ -769,20 +771,20 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     @Override
-    public List<Metrices> metrices(Long reportId, Long sceneId, Long customerId) {
-        List<Metrices> metricesList = Lists.newArrayList();
+    public List<Metrices> metric(Long reportId, Long sceneId, Long customerId) {
+        List<Metrices> metricList = Lists.newArrayList();
         if (StringUtils.isBlank(String.valueOf(reportId))) {
-            return metricesList;
+            return metricList;
         }
         try {
             String measurement = InfluxDBUtil.getMeasurement(sceneId, reportId, customerId);
-            metricesList = influxWriter.query(
+            metricList = influxWriter.query(
                 "select time,avg_tps as avgTps from " + measurement + " where transaction='all'", Metrices.class);
         } catch (Throwable e) {
-            log.error("异常代码【{}】,异常内容：获取压测中jemeter上报的数据异常 --> influxdb数据查询异常: {}",
+            log.error("异常代码【{}】,异常内容：获取压测中jmeter上报的数据异常 --> influxdb数据查询异常: {}",
                 TakinCloudExceptionEnum.REPORT_GET_ERROR, e);
         }
-        return metricesList;
+        return metricList;
     }
 
     private void getReportFeatures(ReportResult reportResult, String errKey, String errMsg) {
@@ -898,7 +900,8 @@ public class ReportServiceImpl implements ReportService {
             reportStatus.setPreStatus(ReportConstans.INIT_STATUS);
             reportStatus.setAfterStatus(ReportConstans.RUN_STATUS);
             int row = tReportMapper.updateReportStatus(reportStatus);
-            //modify by lipeng  添加TotalRequest不为null 保证报告是有数据的  20210707
+            // modify by 李鹏
+            // 添加TotalRequest不为null 保证报告是有数据的  20210707
             if (row != 1 && reportResult.getTotalRequest() != null) {
                 log.error("异常代码【{}】,异常内容：更新报告到生成中状态异常 --> 报告{}状态非0,状态为:{}",
                     TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId, reportResult.getStatus());
@@ -947,12 +950,13 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private StatReportDTO statReport(Long sceneId, Long reportId, Long customerId, String transaction) {
-        StringBuffer influxDbSql = new StringBuffer();
+        StringBuilder influxDbSql = new StringBuilder();
         influxDbSql.append("select");
         influxDbSql.append(
             " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps ,sum(sum_rt)/sum(count) as  "
                 + "avgRt, sum(sa_count) as saCount,  max(avg_tps) as maxTps, min(min_rt) as minRt, max(max_rt) as "
-                //add by lipeng 20210621 active_threads有可能出现0的情况，所以这里取平均后可能不为整数，加round取整
+                // add by 李鹏
+                // 20210621 active_threads有可能出现0的情况，所以这里取平均后可能不为整数，加round取整
                 + "maxRt, count(avg_rt) as recordCount ,round(mean(active_threads)) as avgConcurrenceNum");
         influxDbSql.append(" from ");
         influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, customerId));
@@ -1100,10 +1104,10 @@ public class ReportServiceImpl implements ReportService {
             new SceneManageQueryOpitons());
         Long totalTestTime = sceneManage.getTotalTestTime();
         Date curDate = new Date();
-        Long testRunTime = DateUtil.getUntilSecond(reportResult.getStartTime(), curDate);
+        long testRunTime = DateUtil.between(reportResult.getStartTime(), curDate, DateUnit.SECOND);
         if (testRunTime > totalTestTime) {
             //强制修改结束时间
-            curDate = DateUtils.addSeconds(reportResult.getStartTime(), totalTestTime.intValue());
+            curDate = DateUtil.offset(reportResult.getStartTime(), DateField.SECOND, totalTestTime.intValue());
         }
 
         //保存报表数据
@@ -1156,7 +1160,7 @@ public class ReportServiceImpl implements ReportService {
     public void addWarn(WarnCreateInput input) {
         WarnDetail warnDetail = new WarnDetail();
         BeanUtils.copyProperties(input, warnDetail);
-        warnDetail.setWarnTime(DateUtil.getDate(input.getWarnTime()));
+        warnDetail.setWarnTime(DateUtil.parseDateTime(input.getWarnTime()));
         warnDetail.setCreateTime(new Date());
         tWarnDetailMapper.insertSelective(warnDetail);
     }
@@ -1166,10 +1170,9 @@ public class ReportServiceImpl implements ReportService {
             return false;
         }
         JSONObject jsonObject = JSON.parseObject(reportResult.getFeatures());
-        if (jsonObject.containsKey(ReportConstans.SLA_ERROR_MSG) && StringUtils.isNotEmpty(jsonObject.getString(ReportConstans.SLA_ERROR_MSG))) {
-            return true;
-        }
-        return false;
+        // sla熔断数据
+        return jsonObject.containsKey(ReportConstans.SLA_ERROR_MSG)
+            && StringUtils.isNotEmpty(jsonObject.getString(ReportConstans.SLA_ERROR_MSG));
     }
 
 }

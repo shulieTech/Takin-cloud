@@ -1,7 +1,7 @@
 package io.shulie.takin.cloud.data.dao.scenemanage;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.pamirs.takin.entity.domain.entity.scenemanage.SceneScriptRef;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;

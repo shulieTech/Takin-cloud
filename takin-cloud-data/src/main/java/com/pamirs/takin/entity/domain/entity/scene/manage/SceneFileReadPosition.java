@@ -1,11 +1,11 @@
-package com.pamirs.takin.entity.domain.entity.scenemanage;
+package com.pamirs.takin.entity.domain.entity.scene.manage;
 
 import lombok.Data;
 
 @Data
 public class SceneFileReadPosition {
     /**
-     *   分片开始位置
+     * 分片开始位置
      */
     private Long startPosition;
 

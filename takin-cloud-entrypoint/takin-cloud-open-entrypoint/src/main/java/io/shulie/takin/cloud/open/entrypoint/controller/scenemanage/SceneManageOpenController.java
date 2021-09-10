@@ -18,8 +18,8 @@ import io.shulie.takin.cloud.biz.cache.DictionaryCache;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageQueryInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageListOutput;
-import io.shulie.takin.cloud.biz.output.scenemanage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 import io.shulie.takin.cloud.biz.utils.SlaUtil;
@@ -286,9 +286,9 @@ public class SceneManageOpenController {
         return ResponseResult.success(resp);
     }
 
-    @GetMapping("/checkAndUpdate/script")
+    @PostMapping("/checkAndUpdate/script")
     @ApiOperation(value = "解析脚本")
-    public ResponseResult<ScriptCheckResp> checkAndUpdate(ScriptCheckAndUpdateReq req) {
+    public ResponseResult<ScriptCheckResp> checkAndUpdate(@RequestBody ScriptCheckAndUpdateReq req) {
         ScriptVerityRespExt scriptVerityRespExt = sceneManageService.checkAndUpdate(req.getRequest(), req.getUploadPath(),
             req.isAbsolutePath(), req.isUpdate());
         return ResponseResult.success(SceneTaskOpenConverter.INSTANCE.ofScriptVerityRespExt(scriptVerityRespExt));
@@ -395,7 +395,7 @@ public class SceneManageOpenController {
         SceneSlaRefInput input = new SceneSlaRefInput();
         BeanUtils.copyProperties(slaRefDTO, input);
         Map<String, Object> dataMap = SlaUtil.matchCondition(input, new SendMetricsEvent());
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(dataMap.get("type"));
         sb.append(dataMap.get("compare"));
         sb.append(slaRefDTO.getRule().getDuring());

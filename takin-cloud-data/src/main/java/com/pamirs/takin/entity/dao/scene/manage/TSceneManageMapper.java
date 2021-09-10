@@ -1,21 +1,21 @@
-package com.pamirs.takin.entity.dao.scenemanage;
+package com.pamirs.takin.entity.dao.scene.manage;
 
 import java.util.List;
 
-import com.pamirs.takin.entity.domain.entity.scenemanage.SceneManage;
-import io.shulie.takin.cloud.common.annotation.DataApartInterceptAnnotation;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Mapper;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
+import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
+import io.shulie.takin.cloud.common.annotation.DataApartInterceptAnnotation;
 
+@Mapper
 @Deprecated
 public interface TSceneManageMapper {
 
     int deleteByPrimaryKey(Long id);
 
     Long insertSelective(SceneManage record);
-
-    SceneManage selectByPrimaryKey(Long id);
 
     int updateByPrimaryKeySelective(SceneManage record);
 
@@ -26,6 +26,7 @@ public interface TSceneManageMapper {
 
     /**
      * 查询所有场景信息
+     *
      * @return -
      */
     List<SceneManage> selectAllSceneManageList();
@@ -34,7 +35,6 @@ public interface TSceneManageMapper {
 
     int updateSceneUserById(@Param("id") Long id, @Param("userId") Long userId);
 
-    List<SceneManage> getByIds(@Param("ids") List<Long> ids) ;
-
+    List<SceneManage> getByIds(@Param("ids") List<Long> ids);
 
 }

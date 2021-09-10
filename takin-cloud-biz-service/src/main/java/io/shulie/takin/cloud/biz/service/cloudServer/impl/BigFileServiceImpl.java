@@ -12,10 +12,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 import javax.annotation.Resource;
+
 import cn.hutool.crypto.SecureUtil;
-import com.pamirs.takin.entity.dao.scenemanage.TSceneScriptRefMapper;
-import com.pamirs.takin.entity.domain.entity.scenemanage.SceneScriptRef;
+import com.pamirs.takin.entity.dao.scene.manage.TSceneScriptRefMapper;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import com.pamirs.takin.entity.domain.query.SceneScriptRefQueryParam;
 import com.pamirs.takin.entity.domain.vo.file.Part;
 import io.shulie.takin.cloud.biz.service.cloudServer.BigFileService;
@@ -32,9 +34,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 /**
- * @author: hengyu
- * @date: 2020-05-12 14:50
- * @description:
+ * @author hengyu
+ * @date 2020-05-12 14:50
  */
 @Slf4j
 @Service
@@ -64,13 +65,13 @@ public class BigFileServiceImpl implements BigFileService {
 
     @Override
     public ResponseResult<?> upload(Part dto) {
-        if (dto == null){
-            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR,"param can not to be null !");
+        if (dto == null) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "param can not to be null !");
         }
 
         //todo 进行鉴权
         if (dto.getFileName() == null || dto.getSceneId() == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR,"fileName or sceneId param validator fail!");
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "fileName or sceneId param validator fail!");
         }
         try {
             String parentPath = getParentPath(dto.getUuid());
@@ -83,11 +84,11 @@ public class BigFileServiceImpl implements BigFileService {
             IOUtils.write(dto.getByteData(), outputStream);
             outputStream.flush();
             dto.setStatus(true);
-            log.info("{}:文件上传成功.当前文件：{},文件绝对路径为：{}",dto.getOriginalName(),dto.getFileName(),file.getAbsolutePath());
+            log.info("{}:文件上传成功.当前文件：{},文件绝对路径为：{}", dto.getOriginalName(), dto.getFileName(), file.getAbsolutePath());
             return ResponseResult.success();
         } catch (Exception e) {
             dto.setStatus(false);
-            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_ERROR,"数据上传失败，当前文件"+dto.getOriginalName(),e);
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_ERROR, "数据上传失败，当前文件" + dto.getOriginalName(), e);
         } finally {
             dto.setByteData(null);
             redisTemplate.opsForHash().put(getKey(dto.getUuid()), dto.getFileName(), dto);
@@ -112,8 +113,8 @@ public class BigFileServiceImpl implements BigFileService {
     public ResponseResult<Map<String, Object>> compact(Part part) {
 
         log.info("{}:开始文件打包行为", part.getOriginalName());
-        if (part == null || part.getOriginalName() == null || part.getSceneId() == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR,"fileName or sceneId param validator fail!");
+        if (part.getOriginalName() == null || part.getSceneId() == null) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "fileName or sceneId param validator fail!");
         }
 
         List<Part> errors = new LinkedList<>();
@@ -137,7 +138,7 @@ public class BigFileServiceImpl implements BigFileService {
             destFile.getParentFile().mkdirs();
         }
 
-        long fileSize = 0;
+        long fileSize;
         try {
             FileOutputStream dest = new FileOutputStream(destFile, true);
             FileChannel dc = dest.getChannel();
@@ -159,10 +160,10 @@ public class BigFileServiceImpl implements BigFileService {
             if (dest != null) {
                 dest.close();
             }
-            log.info("{}:聚合文件成功路径为：{}", part.getOriginalName(),destFile.getAbsolutePath());
+            log.info("{}:聚合文件成功路径为：{}", part.getOriginalName(), destFile.getAbsolutePath());
             fileSize = destFile.length();
         } catch (Exception ex) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_ERROR,"服务端文件合并异常,文件名:"+part.getOriginalName(),ex);
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_ERROR, "服务端文件合并异常,文件名:" + part.getOriginalName(), ex);
 
         }
 
@@ -183,21 +184,22 @@ public class BigFileServiceImpl implements BigFileService {
 
     /**
      * 更新文件到场景目录
-     * @param part
-     * @param
-     * @param fileSize
+     *
+     * @param part     -
+     * @param destFile -
+     * @param fileSize -
      */
     private void updateFileData(Part part, File destFile, long fileSize) {
         SceneScriptRefQueryParam queryParam = new SceneScriptRefQueryParam();
         queryParam.setFileName(part.getOriginalName());
         queryParam.setSceneId(part.getSceneId());
 
-        String filePath = destFile.getParentFile().getName().concat("/")+destFile.getName();
+        String filePath = destFile.getParentFile().getName().concat("/") + destFile.getName();
         SceneScriptRef dbData = tSceneScriptRefMapper.selectByExample(queryParam);
         if (dbData != null) {
-            updateSceneScriptRef(part,dbData,filePath, fileSize);
+            updateSceneScriptRef(part, dbData, filePath, fileSize);
         } else {
-            addSceneScriptRef(part,filePath, fileSize);
+            addSceneScriptRef(part, filePath, fileSize);
         }
 
     }
@@ -205,7 +207,7 @@ public class BigFileServiceImpl implements BigFileService {
     /**
      * 校验文件块是否完整，现在使用算法是 MD5值进行验证
      *
-     * @param part        传输对象
+     * @param part       传输对象
      * @param errors     error对象
      * @param parentPath 上传父目录
      * @return -
@@ -233,10 +235,10 @@ public class BigFileServiceImpl implements BigFileService {
                 }
             }
         } catch (Exception e) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR,"validator file exception",e);
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "validator file exception", e);
         }
         if (errors.size() != 0) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR,part.getOriginalName()+"文件块损坏个数为"+errors.size());
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, part.getOriginalName() + "文件块损坏个数为" + errors.size());
         }
         return null;
     }
@@ -262,11 +264,11 @@ public class BigFileServiceImpl implements BigFileService {
         return parentPath.concat("/").concat(merge);
     }
 
-
     /**
      * 更新场景文件
-     * @param part
-     * @param dbData db数据
+     *
+     * @param part     -
+     * @param dbData   db数据
      * @param filePath 文件路径
      * @param fileSize 文件大小
      */
@@ -277,7 +279,7 @@ public class BigFileServiceImpl implements BigFileService {
         updateParam.setId(dbData.getId());
         updateParam.setFileSize(String.valueOf(fileSize));
         updateParam.setUploadPath(filePath);
-        setFileExt(part,updateParam);
+        setFileExt(part, updateParam);
         tSceneScriptRefMapper.updateByPrimaryKeySelective(updateParam);
         //新方案：顺丰使用多块磁盘，提供对外接口进行文件拆分 lxr 2021.06.21
         //fileSliceService.bigFileSlice(new BigFileSliceRequest(){{
@@ -288,22 +290,23 @@ public class BigFileServiceImpl implements BigFileService {
     }
 
     private void setFileExt(Part part, SceneScriptRef updateParam) {
-        Map<String,String> map = new HashMap<>(1);
-        if (part.getIsOrderSplit() != null){
-            map.put("isOrderSplit",String.valueOf(part.getIsOrderSplit()));
+        Map<String, String> map = new HashMap<>(1);
+        if (part.getIsOrderSplit() != null) {
+            map.put("isOrderSplit", String.valueOf(part.getIsOrderSplit()));
         }
-        if (part.getIsSplit() != null){
-            map.put("isSplit",String.valueOf(part.getIsSplit()));
+        if (part.getIsSplit() != null) {
+            map.put("isSplit", String.valueOf(part.getIsSplit()));
         }
-        if (part.getDataCount() != null){
-            map.put("dataCount",String.valueOf(part.getDataCount()));
+        if (part.getDataCount() != null) {
+            map.put("dataCount", String.valueOf(part.getDataCount()));
         }
         updateParam.setFileExtend(JsonHelper.bean2Json(map));
     }
 
     /**
      * 添加，同步添加
-     * @param part 文件对象
+     *
+     * @param part     文件对象
      * @param filePath 文件路径
      * @param fileSize 文件大小
      */
@@ -335,23 +338,23 @@ public class BigFileServiceImpl implements BigFileService {
     }
 
     @Override
-    public File getPradarUploadFile(){
+    public File getPradarUploadFile() {
         File docDir = new File(uploadClientPath);
         if (!docDir.exists()) {
             if (!docDir.mkdirs()) {
-                throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_UPLOAD_FILE_ERROR,"pradarUpload client dir create failed.");
+                throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_UPLOAD_FILE_ERROR, "pradarUpload client dir create failed.");
             }
         }
         File[] files = docDir.listFiles();
         if (files == null || files.length == 0) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_UPLOAD_FILE_ERROR,"pradarUpload client not found.");
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_UPLOAD_FILE_ERROR, "pradarUpload client not found.");
         }
         for (File file : files) {
             if (file.isFile()) {
                 return file;
             }
         }
-        throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_UPLOAD_FILE_ERROR,"pradarUpload client not found.");
+        throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_UPLOAD_FILE_ERROR, "pradarUpload client not found.");
     }
 
 }
