@@ -286,9 +286,9 @@ public class SceneManageOpenController {
         return ResponseResult.success(resp);
     }
 
-    @GetMapping("/checkAndUpdate/script")
+    @PostMapping("/checkAndUpdate/script")
     @ApiOperation(value = "解析脚本")
-    public ResponseResult<ScriptCheckResp> checkAndUpdate(ScriptCheckAndUpdateReq req) {
+    public ResponseResult<ScriptCheckResp> checkAndUpdate(@RequestBody ScriptCheckAndUpdateReq req) {
         ScriptVerityRespExt scriptVerityRespExt = sceneManageService.checkAndUpdate(req.getRequest(), req.getUploadPath(),
             req.isAbsolutePath(), req.isUpdate());
         return ResponseResult.success(SceneTaskOpenConverter.INSTANCE.ofScriptVerityRespExt(scriptVerityRespExt));
