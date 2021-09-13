@@ -51,4 +51,13 @@ public class AssetInvoiceExt extends CloudUserCommonRequestExt implements Serial
      * 阶梯层级
      */
     private Integer step;
+
+    /**
+     * 来源的详情ID
+     * 压测报告 -> 报告ID
+     * 业务活动流量验证 -> 业务活动ID
+     * 脚本调试 -> 脚本ID
+     * 巡检场景 ->
+     */
+    private Long resourceId;
 }
