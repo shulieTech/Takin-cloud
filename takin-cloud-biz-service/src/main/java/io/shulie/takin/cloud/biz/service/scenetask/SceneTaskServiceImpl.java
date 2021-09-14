@@ -167,6 +167,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     @Transactional
     public SceneActionOutput start(SceneTaskStartInput input) {
         CloudPluginUtils.fillUserData(input);
+        input.setAssetType(AssetTypeEnum.PRESS_REPORT.getCode());
+        input.setResourceId(input.getSceneId());
         return startTask(input, null);
     }
 
@@ -238,12 +240,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //冻结流量
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
-            Long resourceId = null;
-            Integer assetType = input.getAssetType();
-            if (AssetTypeEnum.ACTIVITY_CHECK.getCode().equals(assetType)) {
-                resourceId = input.getActivityId();
-            }
-            Long finalResourceId = resourceId;
+            //得到数据来源ID
+            Long resourceId = input.getResourceId();
             assetExtApi.lock(new AssetInvoiceExt() {{
                 setExpectThroughput(sceneData.getConcurrenceNum());
                 setIncreasingTime(sceneData.getIncreasingSecond());
@@ -254,7 +252,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 setPressureType(sceneData.getPressureType());
                 setCustomerId(sceneData.getCustomerId());
                 setStep(sceneData.getStep());
-                setResourceId(finalResourceId);
+                setResourceId(resourceId);
             }});
         }
 
@@ -395,7 +393,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         Long sceneManageId;
         CloudPluginUtils.fillUserData(input);
         //首先根据脚本实例id构建压测场景名称
-        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_FLOW_DEBUG + input.getCustomerId() + "_" + input.getScriptId();
+        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_FLOW_DEBUG + input.getCustomerId() + "_" + input.getScriptDeployId();
 
         //根据场景名称查询是否已经存在场景
         SceneManageListResult sceneManageResult = sceneManageDao.queryBySceneName(pressureTestSceneName);
@@ -437,7 +435,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //sceneTaskStartInput.setEnginePluginIds(enginePluginIds);
         sceneTaskStartInput.setEnginePlugins(enginePlugins);
         sceneTaskStartInput.setContinueRead(false);
-        sceneTaskStartInput.setContinueRead(false);
+        sceneTaskStartInput.setAssetType(AssetTypeEnum.ACTIVITY_CHECK.getCode());
+        sceneTaskStartInput.setResourceId(input.getBusinessActivityConfig().get(0).getBusinessActivityId());
         SceneActionOutput sceneActionDTO = startTask(sceneTaskStartInput, null);
         //返回报告id
         return sceneActionDTO.getData();
@@ -449,7 +448,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         SceneInspectTaskStartOutput startOutput = new SceneInspectTaskStartOutput();
         Long sceneManageId = null;
         //首先根据脚本实例id构建压测场景名称
-        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_INSPECT + input.getCustomerId() + "_" + input.getScriptId();
+        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_INSPECT + input.getCustomerId() + "_" + input.getScriptDeployId();
 
         //根据场景名称查询是否已经存在场景
         SceneManageListResult sceneManageResult = sceneManageDao.queryBySceneName(pressureTestSceneName);
@@ -540,7 +539,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         CloudPluginUtils.fillUserData(input);
         //首先根据脚本实例id构建压测场景名称
         String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_TRY_RUN + input.getCustomerId() + "_" + input
-                .getScriptId();
+                .getScriptDeployId();
         //根据场景名称查询是否已经存在场景
         SceneManageListResult sceneManageResult = sceneManageDao.queryBySceneName(pressureTestSceneName);
         SceneTryRunTaskStartOutput sceneTryRunTaskStartOutput = new SceneTryRunTaskStartOutput();
@@ -582,6 +581,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //TODO 根据次数，设置时间
         SceneTryRunInput tryRunInput = new SceneTryRunInput(input.getLoopsNum(), input.getConcurrencyNum());
         sceneTaskStartInput.setSceneTryRunInput(tryRunInput);
+        sceneTaskStartInput.setResourceId(input.getScriptId());
         SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput, null);
         sceneTryRunTaskStartOutput.setReportId(sceneActionOutput.getData());
 

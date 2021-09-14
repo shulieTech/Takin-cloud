@@ -42,12 +42,15 @@ public class SceneTryRunTaskStartReq extends CloudUserCommonRequestExt implement
     @ApiModelProperty(value = "扩展字段")
     private String features;
 
-    @ApiModelProperty(value = "脚本ID")
-    private Long scriptId;
-
     @ApiModelProperty(value = "试跑流量条数")
     private Integer loopsNum;
 
     @ApiModelProperty(value = "并发数")
     private Integer concurrencyNum;
+
+    @ApiModelProperty(value = "脚本版本号ID")
+    private Long scriptId;
+
+    @ApiModelProperty(value = "脚本版本号ID")
+    private Long scriptDeployId;
 }

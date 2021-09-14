@@ -30,8 +30,5 @@ public class SceneTaskStartInput extends CloudUserCommonRequestExt {
      */
     private Integer assetType;
 
-    /**
-     * 业务活动ID
-     */
-    private Long activityId;
+    private Long resourceId;
 }

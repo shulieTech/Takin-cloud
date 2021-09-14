@@ -1,7 +1,7 @@
 package io.shulie.takin.ext.content.enums;
 
 /**
- * 压测报告、业务活动流量验证、脚本调试、巡检场景
+ * 压测报告、业务活动流量验证、脚本调试、巡检场景(暂时不做)
  * @author caijianying
  */
 

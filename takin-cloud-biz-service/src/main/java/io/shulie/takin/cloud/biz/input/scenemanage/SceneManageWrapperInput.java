@@ -84,6 +84,8 @@ public class SceneManageWrapperInput extends CloudUserCommonRequestExt implement
 
     private Long scriptId;
 
+    private Long scriptDeployId;
+
     private Long fixTimer;
 
     private Integer loopsNum;
