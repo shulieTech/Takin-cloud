@@ -1,5 +1,8 @@
 package io.shulie.takin.cloud.open.api.impl.scenetask;
 
+import com.alibaba.fastjson.JSONObject;
+
+import cn.hutool.http.HttpUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.shulie.takin.cloud.open.api.impl.CloudCommonApi;
 import io.shulie.takin.cloud.open.api.scenetask.CloudTaskApi;
@@ -114,14 +117,17 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
 
     @Override
     public ResponseResult<SceneInspectTaskStartResp> startInspectTask(TaskInspectStartReq req) {
-        TakinResponseEntity<ResponseResult<SceneInspectTaskStartResp>> takinResponseEntity =
-            HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.START_INSPECT_TASK,
-                getHeaders(req), new TypeReference<ResponseResult<SceneInspectTaskStartResp>>() {}, req);
-        if (takinResponseEntity.getSuccess()) {
-            return takinResponseEntity.getBody();
+        try {
+            String url = troCloudClientProperties.getUrl() + CloudApiConstant.START_INSPECT_TASK;
+            String apiResultString = HttpUtil.createPost(url)
+                .headerMap(getHeaders(req), true)
+                .body(JSONObject.toJSONString(req))
+                .execute().body();
+            return JSONObject.parseObject(apiResultString,
+                new com.alibaba.fastjson.TypeReference<ResponseResult<SceneInspectTaskStartResp>>() {});
+        } catch (Exception ex) {
+            return ResponseResult.fail("500", "请查看cloud日志" + ex.getMessage());
         }
-        return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
     @Override
