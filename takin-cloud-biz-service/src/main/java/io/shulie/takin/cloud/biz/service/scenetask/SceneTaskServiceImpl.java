@@ -114,7 +114,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     @Resource
     private TSceneManageMapper tSceneManageMapper;
-    ;
 
     @Autowired
     private SceneManageService sceneManageService;
@@ -429,7 +428,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //sceneTaskStartInput.setEnginePluginIds(enginePluginIds);
         sceneTaskStartInput.setEnginePlugins(enginePlugins);
         sceneTaskStartInput.setContinueRead(false);
-        sceneTaskStartInput.setContinueRead(false);
         SceneActionOutput sceneActionDTO = startTask(sceneTaskStartInput, null);
         //返回报告id
         return sceneActionDTO.getData();
@@ -491,10 +489,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         Integer loopsNum = input.getLoopsNum();
         SceneInspectInput inspectInput = new SceneInspectInput().setFixedTimer(fixTimer).setLoopsNum(loopsNum);
         sceneTaskStartInput.setSceneInspectInput(inspectInput);
+        sceneTaskStartInput.setContinueRead(false);
         SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput, null);
         startOutput.setSceneId(sceneManageId);
         startOutput.setReportId(sceneActionOutput.getData());
-        sceneTaskStartInput.setContinueRead(false);
         //开始试跑就设置一个状态，后面区分试跑任务和正常压测
         String key = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneManageId, sceneActionOutput.getData());
         redisClientUtils.hmset(key, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY, SceneRunTaskStatusEnum.STARTING.getText());
