@@ -48,4 +48,6 @@ public class TaskFlowDebugStartReq extends CloudUserCommonRequestExt implements 
     private Long scriptId;
 
     private Long scriptDeployId;
+
+    private Long creatorId;
 }

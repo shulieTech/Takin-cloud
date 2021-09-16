@@ -31,17 +31,8 @@ import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
-import io.shulie.takin.cloud.biz.input.scenemanage.EnginePluginInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneInspectInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneStartTrialRunInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskQueryTpsInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput;
+import io.shulie.takin.cloud.biz.input.scenemanage.*;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput.FileInfo;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskUpdateTpsInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTryRunInput;
 import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStartOutput;
 import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStopOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
@@ -168,7 +159,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     public SceneActionOutput start(SceneTaskStartInput input) {
         CloudPluginUtils.fillUserData(input);
         input.setAssetType(AssetTypeEnum.PRESS_REPORT.getCode());
-        input.setResourceId(input.getSceneId());
+        input.setResourceId(null);
         return startTask(input, null);
     }
 
@@ -242,6 +233,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         if (assetExtApi != null) {
             //得到数据来源ID
             Long resourceId = input.getResourceId();
+            if (AssetTypeEnum.PRESS_REPORT.getCode().equals(input.getAssetType())) {
+                resourceId = report.getId();
+            }
+            Long finalResourceId = resourceId;
             assetExtApi.lock(new AssetInvoiceExt() {{
                 setExpectThroughput(sceneData.getConcurrenceNum());
                 setIncreasingTime(sceneData.getIncreasingSecond());
@@ -252,7 +247,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 setPressureType(sceneData.getPressureType());
                 setCustomerId(sceneData.getCustomerId());
                 setStep(sceneData.getStep());
-                setResourceId(resourceId);
+                setResourceId(finalResourceId);
+                setResourceName(input.getResourceName());
+                setResourceType(input.getAssetType());
+                setCreatorId(input.getCreatorId());
             }});
         }
 
@@ -432,11 +430,13 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         SceneTaskStartInput sceneTaskStartInput = new SceneTaskStartInput();
         sceneTaskStartInput.setSceneId(sceneManageId);
         sceneTaskStartInput.setUserId(input.getUserId());
-        //sceneTaskStartInput.setEnginePluginIds(enginePluginIds);
         sceneTaskStartInput.setEnginePlugins(enginePlugins);
         sceneTaskStartInput.setContinueRead(false);
+        SceneBusinessActivityRefInput activityRefInput = input.getBusinessActivityConfig().get(0);
         sceneTaskStartInput.setAssetType(AssetTypeEnum.ACTIVITY_CHECK.getCode());
-        sceneTaskStartInput.setResourceId(input.getBusinessActivityConfig().get(0).getBusinessActivityId());
+        sceneTaskStartInput.setResourceId(activityRefInput.getBusinessActivityId());
+        sceneTaskStartInput.setResourceName(activityRefInput.getBusinessActivityName());
+        sceneTaskStartInput.setCreatorId(input.getCreatorId());
         SceneActionOutput sceneActionDTO = startTask(sceneTaskStartInput, null);
         //返回报告id
         return sceneActionDTO.getData();
@@ -581,7 +581,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //TODO 根据次数，设置时间
         SceneTryRunInput tryRunInput = new SceneTryRunInput(input.getLoopsNum(), input.getConcurrencyNum());
         sceneTaskStartInput.setSceneTryRunInput(tryRunInput);
-        sceneTaskStartInput.setResourceId(input.getScriptId());
+        sceneTaskStartInput.setAssetType(AssetTypeEnum.SCRIPT_DEBUG.getCode());
+        sceneTaskStartInput.setResourceId(input.getScriptDeployId());
+        sceneTaskStartInput.setResourceName(input.getScriptName());
+        sceneTaskStartInput.setCreatorId(input.getCreatorId());
         SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput, null);
         sceneTryRunTaskStartOutput.setReportId(sceneActionOutput.getData());
 
