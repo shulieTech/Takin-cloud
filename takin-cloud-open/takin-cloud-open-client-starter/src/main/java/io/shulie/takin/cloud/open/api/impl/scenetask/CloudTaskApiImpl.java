@@ -132,14 +132,17 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
 
     @Override
     public ResponseResult<SceneInspectTaskStopResp> stopInspectTask(TaskInspectStopReq req) {
-        TakinResponseEntity<ResponseResult<SceneInspectTaskStopResp>> takinResponseEntity =
-            HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.STOP_INSPECT_TASK,
-                getHeaders(req), new TypeReference<ResponseResult<SceneInspectTaskStopResp>>() {}, req);
-        if (takinResponseEntity.getSuccess()) {
-            return takinResponseEntity.getBody();
+        try {
+            String url = troCloudClientProperties.getUrl() + CloudApiConstant.STOP_INSPECT_TASK;
+            String apiResultString = HttpUtil.createPost(url)
+                .headerMap(getHeaders(req), true)
+                .body(JSONObject.toJSONString(req))
+                .execute().body();
+            return JSONObject.parseObject(apiResultString,
+                new com.alibaba.fastjson.TypeReference<ResponseResult<SceneInspectTaskStopResp>>() {});
+        } catch (Exception ex) {
+            return ResponseResult.fail("500", "请查看cloud日志" + ex.getMessage());
         }
-        return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
     @Override
