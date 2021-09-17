@@ -82,6 +82,7 @@ import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
 import io.shulie.takin.ext.api.AssetExtApi;
 import io.shulie.takin.ext.api.EngineCallExtApi;
 import io.shulie.takin.ext.content.asset.AccountInfoExt;
+import io.shulie.takin.ext.content.asset.AssetBalanceExt;
 import io.shulie.takin.ext.content.asset.AssetInvoiceExt;
 import io.shulie.takin.ext.content.enums.AssetTypeEnum;
 import io.shulie.takin.plugin.framework.core.PluginManager;
@@ -916,6 +917,14 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             output.setHasUnread(false);
         }
         return output;
+    }
+
+    @Override
+    public void writeBalance(AssetBalanceExt balanceExt) {
+        AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
+        if (assetExtApi != null) {
+            assetExtApi.writeBalance(balanceExt);
+        }
     }
 
     private Boolean compareScript(long sceneId, String scriptId) {

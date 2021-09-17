@@ -53,7 +53,7 @@ public class CloudApiConstant {
     public static final String CHECK_TRY_RUN_TASK_STATUS = "/open-api/scene/task/checkTaskStatus";
     public static final String CHECK_SCENE_JOB_STATUS = "/open-api/scene/task/checkJobStatus";
     public static final String SCENE_START_PRE_CHECK = "/open-api/scene/task/preCheck";
-
+    public static final String SCENE_TASK_WRITE_BALANCE = "/open-api/scene/task/writeBalance";
     public static final String REPORT_WARN_URL = "/open-api/report/warn";
 
     /**
