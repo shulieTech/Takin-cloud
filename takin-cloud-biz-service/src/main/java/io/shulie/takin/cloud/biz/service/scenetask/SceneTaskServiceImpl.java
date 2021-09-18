@@ -165,7 +165,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     }
 
     private SceneActionOutput startTask(SceneTaskStartInput input, SceneStartTrialRunInput trialRunInput) {
-
+        log.warn("启动任务接收到入参：{}",JSON.toJSONString(input));
         SceneManageQueryOpitons options = new SceneManageQueryOpitons();
         options.setIncludeBusinessActivity(true);
         options.setIncludeScript(true);
@@ -921,6 +921,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     @Override
     public void writeBalance(AssetBalanceExt balanceExt) {
+        log.warn("回写流量接收到入参:{}",JSON.toJSONString(balanceExt));
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
             assetExtApi.writeBalance(balanceExt);
