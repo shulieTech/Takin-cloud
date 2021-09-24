@@ -43,7 +43,9 @@ public interface FileSliceService {
      */
     Boolean updateFileRefExtend(FileSliceRequest request);
 
-    void asyncSliceFile(FileSliceRequest request);
-
+    /**
+     * 文件预分片
+     * @param param
+     */
     void preSlice(SceneBigFileSliceParam param);
 }

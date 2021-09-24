@@ -16,6 +16,7 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.async.AsyncService;
 import io.shulie.takin.cloud.biz.service.log.PushLogService;
 import io.shulie.takin.cloud.biz.task.PressureTestLogUploadTask;
+import io.shulie.takin.cloud.biz.utils.DataUtils;
 import io.shulie.takin.cloud.common.bean.collector.EventMetrics;
 import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
@@ -81,38 +82,40 @@ public class CollectorService extends AbstractIndicators {
         for (ResponseMetrics metric : metrics) {
             try {
                 long timeWindow = CollectorUtil.getTimeWindow(metric.getTimestamp()).getTimeInMillis();
-                if (validate(timeWindow, sceneId, reportId, customerId, metrics)) {
+                if (validate(timeWindow,sceneId,reportId,customerId,metrics)) {
                     // 写入redis
-                    log.info("{}-{}-{} write redis , timestamp-{},timeWindow-{}", sceneId, reportId, customerId,
-                        metric.getTimestamp(), timeWindow);
+                    log.info("{}-{}-{} write redis , timestamp-{},timeWindow-{}",sceneId,reportId,customerId,
+                        metric.getTimestamp(),timeWindow);
                     String transaction = metric.getTransaction();
-                    intSaveRedisMap(countKey(taskKey, transaction, timeWindow),
-                        CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), metric.getCount());
-                    intSaveRedisMap(failCountKey(taskKey, transaction, timeWindow),
-                        CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), metric.getFailCount());
-                    intSaveRedisMap(saCountKey(taskKey, transaction, timeWindow),
-                        CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), metric.getSaCount());
-                    intSaveRedisMap(activeThreadsKey(taskKey, transaction, timeWindow),
-                        CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), metric.getActiveThreads());
+                    String timePod = CollectorUtil.getTimestampPodNum(metric.getTimestamp(),metric.getPodNum());
+                    intSaveRedisMap(countKey(taskKey, transaction, timeWindow), timePod, metric.getCount());
+                    intSaveRedisMap(failCountKey(taskKey, transaction, timeWindow), timePod, metric.getFailCount());
+                    intSaveRedisMap(saCountKey(taskKey, transaction, timeWindow), timePod, metric.getSaCount());
+                    intSaveRedisMap(activeThreadsKey(taskKey, transaction, timeWindow), timePod, metric.getActiveThreads());
 
                     // 错误信息
-                    setError(errorKey(taskKey, transaction, timeWindow),
-                        CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), GsonUtil.gsonToString(metric.getErrorInfos()));
+                    setError(errorKey(taskKey, transaction, timeWindow), timePod, GsonUtil.gsonToString(metric.getErrorInfos()));
+                    //1-100%每个百分点位sa数据
+                    saveRedisMap(percentDataKey(taskKey, transaction, timeWindow), timePod, metric.getPercentData());
 
-                    // all指标额外计算，累加所有业务活动的saCount all 为空
+                    /**
+                     * all指标额外计算，累加所有业务活动的saCount all 为空
+                     */
                     intSaveRedisMap(saCountKey(taskKey, "all", timeWindow),
                         // 计算所有业务活动的saCount 用特殊标识 _transaction
-                        CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()) + "_" + transaction,
+                        timePod + "_" + transaction ,
                         metric.getSaCount());
 
-                    longSaveRedisMap(rtKey(taskKey, transaction, timeWindow),
-                        CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum()), metric.getSumRt());
-                    mostValue(maxRtKey(taskKey, transaction, timeWindow), metric.getMaxRt(), 0);
+                    longSaveRedisMap(rtKey(taskKey, transaction, timeWindow), timePod, metric.getSumRt());
+
+                    //doubleSaveRedisMap(rtKey(taskKey, transaction, timeWindow),
+                    //    CollectorUtil.getTimestampPodNum(metric.getTimestamp(),metric.getPodNum()), metric.getRt() * metric.getCount());
+                    Double maxRt = DataUtils.getMaxRt(metric);
+                    mostValue(maxRtKey(taskKey, transaction, timeWindow), maxRt, 0);
                     mostValue(minRtKey(taskKey, transaction, timeWindow), metric.getMinRt(), 1);
                 }
             } catch (Exception e) {
-                log.error("异常代码【{}】,异常内容：接收压测引擎回传数据错误 --> 接收数据统计或存储错误: {}",
-                    TakinCloudExceptionEnum.TASK_RUNNING_RECEIVE_PT_DATA_ERROR, e);
+                log.error("write redis error :{}",e.getMessage());
             }
         }
     }

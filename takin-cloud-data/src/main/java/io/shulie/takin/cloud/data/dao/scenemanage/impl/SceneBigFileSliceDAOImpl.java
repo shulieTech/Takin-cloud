@@ -22,6 +22,8 @@ import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import io.shulie.takin.cloud.data.util.MPUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +33,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class SceneBigFileSliceDAOImpl extends ServiceImpl<SceneBigFileSliceMapper, SceneBigFileSliceEntity>
     implements SceneBigFileSliceDAO, MPUtil<SceneBigFileSliceEntity> {
+
+    private static Logger logger = LoggerFactory.getLogger(SceneBigFileSliceDAOImpl.class);
 
     @Resource
     SceneScriptRefMapper sceneScriptRefMapper;
@@ -92,7 +96,18 @@ public class SceneBigFileSliceDAOImpl extends ServiceImpl<SceneBigFileSliceMappe
                 SceneBigFileSliceEntity sliceEntity = sceneBigFileSliceMapper.selectOne(wrapper);
                 if (sliceEntity != null) {
                     if (entity.getFileName().equals(param.getFileName())) {
-                        return FileSliceStatusEnum.SLICED.getCode();
+                        long scriptRefUploadTime = entity.getUploadTime().getTime();
+                        if (Objects.isNull(sliceEntity.getFileUpdateTime())) {
+                            return FileSliceStatusEnum.FILE_CHANGED.getCode();
+                        }
+                        long sliceUploadTime = sliceEntity.getFileUpdateTime().getTime();
+                        if (sliceUploadTime == scriptRefUploadTime) {
+                            return FileSliceStatusEnum.SLICED.getCode();
+                        } else {
+                            logger.error("时间不匹配，slice time is [{}], scriptRef time is [{}]", sliceUploadTime,
+                                scriptRefUploadTime);
+                            return FileSliceStatusEnum.FILE_CHANGED.getCode();
+                        }
                     }
                     return FileSliceStatusEnum.FILE_CHANGED.getCode();
                 }

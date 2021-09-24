@@ -31,6 +31,7 @@ public class GsonUtil {
     public static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     public static final Gson GSON = new GsonBuilder()
+        .serializeSpecialFloatingPointValues()
         //            .generateNonExecutableJson()
         //            .registerTypeAdapter()
         //            .registerTypeAdapterFactory(new CglibProxyFactory())

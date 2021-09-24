@@ -121,7 +121,6 @@ public interface SceneTaskService {
      */
     SceneTryRunTaskStatusOutput checkTaskStatus(Long sceneId, Long reportId);
 
-    int saveUnUploadJmeterLogScene(Long sceneId, Long reportId, Long customerId, Integer taskStatus);
 
     /**
      * 检查巡检任务状态：压测引擎
@@ -131,5 +130,16 @@ public interface SceneTaskService {
      */
     SceneJobStateOutput checkSceneJobStatus(Long sceneId);
 
+    /**
+     * 开始压测前检查文件位点
+     * @param input
+     * @return
+     */
     SceneTaskStartCheckOutput sceneStartCsvPositionCheck(SceneTaskStartCheckInput input);
+
+    /**
+     * 清除位点缓存
+     * @param sceneId
+     */
+    void cleanCachedPosition(Long sceneId);
 }

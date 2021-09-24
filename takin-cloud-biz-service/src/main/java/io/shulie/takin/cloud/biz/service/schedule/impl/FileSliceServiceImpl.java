@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
+import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
 import io.shulie.takin.cloud.common.enums.FileSliceStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
@@ -30,6 +31,7 @@ import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -47,6 +49,9 @@ public class FileSliceServiceImpl implements FileSliceService {
     @Resource
     SceneManageDAO sceneManageDao;
 
+    @Autowired
+    SceneTaskService sceneTaskService;
+
     private static final String DEFAULT_PATH_SEPARATOR = "/";
 
     private static final String DEFAULT_FILE_COLUMN_SEPARATOR = ",";
@@ -54,49 +59,51 @@ public class FileSliceServiceImpl implements FileSliceService {
     @Override
     public boolean fileSlice(FileSliceRequest request) {
         //1.是否分片/是否已分片
-        if (request.getSplit()) {
-            Integer fileSliceStatusCode = this.isFileSliced(request);
-            FileSliceStatusEnum fileSliceStatus = FileSliceStatusEnum.getFileSliceStatusEnumByCode(
-                fileSliceStatusCode);
-            if (Objects.nonNull(request.getForceSplit()) && request.getForceSplit()) {
-                if (fileSliceStatus == FileSliceStatusEnum.SLICED) {
-                    fileSliceStatus = FileSliceStatusEnum.FILE_CHANGED;
-                }
-            }
-            //文件已拆分
+        Integer fileSliceStatusCode = this.isFileSliced(request);
+        FileSliceStatusEnum fileSliceStatus = FileSliceStatusEnum.getFileSliceStatusEnumByCode(
+            fileSliceStatusCode);
+        if (Objects.nonNull(request.getForceSplit()) && request.getForceSplit()) {
             if (fileSliceStatus == FileSliceStatusEnum.SLICED) {
-                log.info("【文件分片】--场景ID：【{}】，文件名：【{}】 文件已经分片完成.", request.getSceneId(), request.getFileName());
-                return true;
+                fileSliceStatus = FileSliceStatusEnum.FILE_CHANGED;
             }
-            //文件拆分中
-            if (fileSliceStatus == FileSliceStatusEnum.SLICING) {
-                throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR, "文件分片任务执行中，请勿重复发起" +
-                    ":场景ID【{" + request.getSceneId() + "}】,文件名【{" + request.getFileName() + "}】");
-            }
-            //根据请求，更新关联的scriptRef
-            updateFileRefExtend(request);
-            //填充request
-            fillRequest(request);
-
-            SceneBigFileSliceParam param = new SceneBigFileSliceParam() {{
-                setSceneId(request.getSceneId());
-                setFileRefId(request.getRefId());
-                setFileName(request.getFileName());
-                setStatus(FileSliceStatusEnum.SLICING.getCode());
-            }};
-            if (fileSliceStatus == FileSliceStatusEnum.FILE_CHANGED) {
-                fileSliceDAO.update(param);
-            } else if (fileSliceStatus == FileSliceStatusEnum.UNSLICED) {
-                fileSliceDAO.create(param);
-            }
-            if (request.getOrderSplit() != null && request.getOrderSplit()) {
-                sliceFileByOrder(request, param);
-            } else {
-                sliceFileWithoutOrder(request, param);
-            }
-            return fileSliceDAO.update(param) == 1;
         }
-        return false;
+        //文件已拆分
+        if (fileSliceStatus == FileSliceStatusEnum.SLICED) {
+            log.info("【文件分片】--场景ID：【{}】，文件名：【{}】 文件已经分片完成.", request.getSceneId(), request.getFileName());
+            return true;
+        }
+        //文件拆分中
+        if (fileSliceStatus == FileSliceStatusEnum.SLICING) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR, "文件分片任务执行中，请勿重复发起" +
+                ":场景ID【{" + request.getSceneId() + "}】,文件名【{" + request.getFileName() + "}】");
+        }
+        //根据请求，更新关联的scriptRef
+        updateFileRefExtend(request);
+        //填充request
+        fillRequest(request);
+
+        SceneBigFileSliceParam param = new SceneBigFileSliceParam() {{
+            setSceneId(request.getSceneId());
+            setFileRefId(request.getRefId());
+            setFileName(request.getFileName());
+            setStatus(FileSliceStatusEnum.SLICING.getCode());
+        }};
+
+        SceneScriptRefEntity entity = fileSliceDAO.selectRef(param);
+        if (Objects.nonNull(entity)){
+            param.setFileUploadTime(entity.getUploadTime());
+        }
+        if (fileSliceStatus == FileSliceStatusEnum.FILE_CHANGED) {
+            fileSliceDAO.update(param);
+        } else if (fileSliceStatus == FileSliceStatusEnum.UNSLICED) {
+            fileSliceDAO.create(param);
+        }
+        if (request.getOrderSplit() != null && request.getOrderSplit()) {
+            sliceFileByOrder(request, param);
+        } else {
+            sliceFileWithoutOrder(request, param);
+        }
+        return fileSliceDAO.update(param) == 1;
     }
 
     @Override
@@ -158,11 +165,6 @@ public class FileSliceServiceImpl implements FileSliceService {
         return true;
     }
 
-    @Async
-    @Override
-    public void asyncSliceFile(FileSliceRequest request) {
-        this.fileSlice(request);
-    }
 
     @Override
     public void preSlice(SceneBigFileSliceParam param) {
@@ -170,6 +172,7 @@ public class FileSliceServiceImpl implements FileSliceService {
         Date currentDate = new Date();
         SceneScriptRefEntity entity = fileSliceDAO.selectRef(param);
         if (Objects.isNull(entity)) {
+            Date finalCurrentDate = currentDate;
             SceneScriptRef sceneScriptRef = new SceneScriptRef() {{
                 setFileName(param.getFileName());
                 setSceneId(param.getSceneId());
@@ -178,7 +181,7 @@ public class FileSliceServiceImpl implements FileSliceService {
                 extJson.put("isSplit", param.getIsSplit());
                 extJson.put("isOrderSplit", param.getIsOrderSplit());
                 setFileExtend(extJson.toJSONString());
-                setUploadTime(currentDate);
+                setUploadTime(finalCurrentDate);
                 setFileType(1);
                 setScriptType(0);
                 setIsDeleted(0);
@@ -189,6 +192,7 @@ public class FileSliceServiceImpl implements FileSliceService {
             JSONObject extJson = JSONObject.parseObject(entity.getFileExtend());
             extJson.put("isSplit", param.getIsSplit());
             extJson.put("isOrderSplit", param.getIsOrderSplit());
+            currentDate = entity.getUploadTime();
             fileSliceDAO.updateRef(entity);
         }
         param.setFileRefId(entity.getId());
@@ -201,6 +205,8 @@ public class FileSliceServiceImpl implements FileSliceService {
         } else {
             fileSliceDAO.update(param);
         }
+        //清理位点缓存
+        sceneTaskService.cleanCachedPosition(param.getSceneId());
     }
 
     /**
