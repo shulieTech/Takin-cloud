@@ -95,6 +95,10 @@ public class SceneBigFileSliceDAOImpl extends ServiceImpl<SceneBigFileSliceMappe
                 wrapper.eq(SceneBigFileSliceEntity::getFileName, param.getFileName());
                 SceneBigFileSliceEntity sliceEntity = sceneBigFileSliceMapper.selectOne(wrapper);
                 if (sliceEntity != null) {
+                    if (Objects.isNull(sliceEntity.getSliceCount())
+                        || StringUtils.isBlank(sliceEntity.getSliceInfo())) {
+                        return FileSliceStatusEnum.FILE_CHANGED.getCode();
+                    }
                     if (entity.getFileName().equals(param.getFileName())) {
                         long scriptRefUploadTime = entity.getUploadTime().getTime();
                         if (Objects.isNull(sliceEntity.getFileUpdateTime())) {

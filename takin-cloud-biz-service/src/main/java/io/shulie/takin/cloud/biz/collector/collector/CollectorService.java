@@ -143,7 +143,6 @@ public class CollectorService extends AbstractIndicators {
                     // 压力节点 running -- > 压测引擎已启动
                     // 计数 压测引擎实际运行个数
                     Long count = redisClientUtils.increment(engineName, 1);
-                    //events.compute(engineName, (k, v) -> v == null ? 1 : v + 1);
                     if (count != null && count == 1) {
                         sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
                             .checkEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING)
@@ -173,7 +172,6 @@ public class CollectorService extends AbstractIndicators {
                     }
                     // 计数 回传标识数量
                     Long tempLastSignCount = redisClientUtils.increment(ScheduleConstants.TEMP_LAST_SIGN + engineName, 1);
-                    //events.compute(ScheduleConstants.TEMP_LAST_SIGN + engineName, (k, v) -> v == null ? 1 : v + 1);
                     // 是否是最后一个结束标识 回传个数 == 压测实际运行个数
                     if (isLastSign(tempLastSignCount, engineName)) {
                         // 标识结束标识
@@ -181,7 +179,6 @@ public class CollectorService extends AbstractIndicators {
                         setLast(last(taskKey), ScheduleConstants.LAST_SIGN);
                         // 删除临时标识
                         redisClientUtils.del(ScheduleConstants.TEMP_LAST_SIGN + engineName);
-                        //events.remove(ScheduleConstants.TEMP_LAST_SIGN + engineName);
                         // 压测停止
                         notifyEnd(sceneId, reportId, customerId);
                     }
@@ -214,6 +211,7 @@ public class CollectorService extends AbstractIndicators {
                     TimeUnit.MINUTES);
 
                 if (ifAbsent != null && ifAbsent) {
+                    //todo 增加参数判断，是从压测引擎上传还是从cloud上传，首先判断是否输出ptl文件，如果不输出文件，只能从引擎端上传
                     asyncService.updateSceneRunningStatus(sceneId, reportId);
                 }
             }

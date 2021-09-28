@@ -33,11 +33,12 @@ public class ReportEventServiceImpl implements ReportEventService {
     @Override
     public Map<String, String> queryAndCalcRtDistribute(String tableName, String bindRef) {
         StringBuffer sql = new StringBuffer();
-        sql.append("select avg_rt as avgRt from ");
-        sql.append(tableName);
-        sql.append(" where transaction='");
-        sql.append(bindRef);
-        sql.append("'");
+        sql.append("select sa_percent as percentData from ")
+            .append(tableName)
+            .append(" where transaction=")
+            .append("'")
+            .append(bindRef)
+            .append("'");
         Metrics metrics = influxWriter.querySingle(sql.toString(), Metrics.class);
         if (null == metrics) {
             return null;
