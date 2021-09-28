@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.biz.collector.collector;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -194,6 +196,16 @@ public abstract class AbstractIndicators {
         return getIndicatorsKey(getWindowKey(taskKey, transaction, timeWindow), "minRt");
     }
 
+    protected String percentDataKey(String taskKey, String transaction, long timeWindow) {
+        return getIndicatorsKey(getWindowKey(taskKey, transaction, timeWindow), "percents");
+    }
+
+    protected void saveRedisMap(String key, String timestampPodNum, Object value) {
+        // 归纳
+        redisTemplate.opsForHash().put(key, timestampPodNum, value);
+        setTTL(key);
+    }
+
     protected void doubleSaveRedisMap(String key, String timestampPodNum, Double value) {
         // 归纳
         redisTemplate.opsForHash().put(key, timestampPodNum, value);
@@ -291,11 +303,16 @@ public abstract class AbstractIndicators {
             return map.values().stream().reduce(Integer::sum).orElse(0);
         }
         return null;
-        //Object object = redisTemplate.opsForValue().get(key);
-        //if (null != object) {
-        //    return (int)object;
-        //}
+    }
 
+    protected List<String> getStringValue(String key) {
+        // 数据进行集合
+        if(redisTemplate.hasKey(key) && redisTemplate.opsForHash().size(key) > 0 ) {
+            Map<String,String> map =  redisTemplate.opsForHash().entries(key);
+            // 数据聚合
+            return new ArrayList<>(map.values());
+        }
+        return null;
     }
 
     /**
