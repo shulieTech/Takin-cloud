@@ -48,6 +48,7 @@ public class ResponseMetrics extends AbstractMetrics {
     private Integer activeThreads;
     private Map<String, String> tags = new HashMap<>();
     private Set<ErrorInfo> errorInfos;
+    private String percentData;
 
 
     public ResponseMetrics() {
@@ -63,5 +64,4 @@ public class ResponseMetrics extends AbstractMetrics {
         private String responseMessage;
         private String responseCode;
     }
-
 }

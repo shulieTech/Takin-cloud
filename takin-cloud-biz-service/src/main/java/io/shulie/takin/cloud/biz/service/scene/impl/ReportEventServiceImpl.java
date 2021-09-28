@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import io.shulie.takin.cloud.biz.output.statistics.RtDataOutput;
+import io.shulie.takin.cloud.biz.utils.DataUtils;
 import io.shulie.takin.cloud.common.bean.collector.Metrics;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import lombok.extern.slf4j.Slf4j;
@@ -31,25 +33,23 @@ public class ReportEventServiceImpl implements ReportEventService {
     @Override
     public Map<String, String> queryAndCalcRtDistribute(String tableName, String bindRef) {
         StringBuffer sql = new StringBuffer();
-        sql.append("select avg_rt as avgRt from ");
-        sql.append(tableName);
-        sql.append(" where transaction='");
-        sql.append(bindRef);
-        sql.append("'");
-        List<Metrics> dataList = influxWriter.query(sql.toString(), Metrics.class);
-        if (CollectionUtils.isEmpty(dataList)) {
+        sql.append("select sa_percent as percentData from ")
+            .append(tableName)
+            .append(" where transaction=")
+            .append("'")
+            .append(bindRef)
+            .append("'");
+        Metrics metrics = influxWriter.querySingle(sql.toString(), Metrics.class);
+        if (null == metrics) {
             return null;
         }
-        dataList.sort(((o1, o2) -> {
-            //modify by lipeng 20210711 添加等于的情况 否则jdk1.7+之后会出现错误 
-            //java.lang.IllegalArgumentException: Comparison method violates its general contract!
-            //详细参见 https://www.cnblogs.com/firstdream/p/7204067.html
-            return o1.getAvgRt().compareTo(o2.getAvgRt());
-            //modify end
-        }));
-        int size = dataList.size();
+        log.debug("报告生成，saPercent：{}",metrics.getPercentData());
+        Map<Integer, RtDataOutput> percentMap = DataUtils.parseToPercentMap(metrics.getPercentData());
+
         Map<String, String> resultMap = Maps.newLinkedHashMap();
-        indexs.forEach(index -> resultMap.put(index + PERCENTAGE, dataList.get(calcIndex(size, index)).getAvgRt() + MS));
+        indexs.forEach(percent -> {
+            resultMap.put(percent + PERCENTAGE, percentMap.get(percent).getTime() + MS);
+        });
         return resultMap;
     }
 

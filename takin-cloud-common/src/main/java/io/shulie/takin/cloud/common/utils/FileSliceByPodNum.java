@@ -41,7 +41,6 @@ public class FileSliceByPodNum {
 
     public ArrayList<StartEndPair> getStartEndPairs() {
         long everySize = this.fileLength / this.partSize;
-        everySize = everySize + 1;
         try {
             calculateStartEnd(0, everySize);
         } catch (IOException e) {
@@ -76,6 +75,12 @@ public class FileSliceByPodNum {
             }
             rAccessFile.seek(endPosition);
             tmp = (byte)rAccessFile.read();
+        }
+        //判断换行符是否为"\r\n"，即windows下的换行符CRLF，如果是，则将结束位置再+1
+        rAccessFile.seek(endPosition + 1);
+        tmp = (byte)rAccessFile.read();
+        if (tmp == '\r' || tmp == '\n') {
+            endPosition++;
         }
         pair.setEnd(endPosition);
         startEndPairs.add(pair);

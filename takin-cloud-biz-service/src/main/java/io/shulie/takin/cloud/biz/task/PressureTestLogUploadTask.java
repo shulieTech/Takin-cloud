@@ -187,6 +187,11 @@ public class PressureTestLogUploadTask implements Runnable {
         return 0;
     }
 
+    /**
+     * todo 这个方法需要修改，不能按照压测场景的状态来判断是否停止压测，最新的方案是按照job状态来判断。
+     * @param sceneId
+     * @return
+     */
     private boolean isSceneEnded(Long sceneId) {
         SceneManageResult manageResult = this.sceneManageDAO.getSceneById(sceneId);
         if (Objects.isNull(manageResult) || Objects.isNull(manageResult.getStatus())) {

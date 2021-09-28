@@ -81,22 +81,6 @@ public class SceneTaskController {
         return ResponseResult.success();
     }
 
-    @GetMapping("/script/fileSplit")
-    @ApiOperation(value = "拆分大文件")
-    public ResponseResult<?> splitBigFile(ScriptFileSplitVO fileSplitVO) {
-        fileSliceService.asyncSliceFile(new FileSliceRequest() {{
-            setSceneId(fileSplitVO.getSceneId());
-            setFileName(fileSplitVO.getFileName());
-            setSplit(true);
-            setPodNum(fileSplitVO.getPodNum());
-            setOrderSplit(fileSplitVO.getOrderSplit());
-            setOrderColumnNum(fileSplitVO.getOrderColumnNum());
-            setColumnSeparator(fileSplitVO.getColumnSeparator());
-            setForceSplit(fileSplitVO.getForceSplit());
-        }});
-        return ResponseResult.success();
-    }
-
     @PostMapping("/script/preSplit")
     @ApiModelProperty(value = "文件预拆分结果")
     public ResponseResult<?> preSplitFile(@RequestBody FileSplitResultVO resultVO) {
