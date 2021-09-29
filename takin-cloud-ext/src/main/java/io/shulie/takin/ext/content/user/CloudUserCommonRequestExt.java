@@ -28,17 +28,17 @@ public class CloudUserCommonRequestExt extends PagingDevice implements Serializa
     /**
      * 租户字段
      */
-    private Long customerId;
+    private Long tenantId;
+
+    /**
+     * 环境字段
+     */
+    private String envCode;
 
     /**
      * 租户ids
      */
-    private List<Long> customerIds;
-
-    /**
-     * license  转化成 customerId
-     */
-    private transient String license;
+    private List<Long> tenantIds;
 
     /**
      * 查询过滤sql
@@ -49,7 +49,7 @@ public class CloudUserCommonRequestExt extends PagingDevice implements Serializa
      * 对应字段 name
      */
     @ApiModelProperty(value = "客户名称")
-    private String customerName;
+    private String tenantName;
 
     /**
      * 操作用户ID

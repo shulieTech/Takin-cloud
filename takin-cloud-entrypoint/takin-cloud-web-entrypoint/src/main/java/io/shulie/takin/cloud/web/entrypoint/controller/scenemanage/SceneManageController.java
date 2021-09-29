@@ -207,8 +207,8 @@ public class SceneManageController {
         SceneManageQueryInput queryVO = new SceneManageQueryInput();
         queryVO.setCurrentPage(current);
         queryVO.setPageSize(pageSize);
-        queryVO.setCustomerName(customerName);
-        queryVO.setCustomerId(customerId);
+        queryVO.setTenantName(customerName);
+        queryVO.setTenantId(customerId);
         queryVO.setSceneId(sceneId);
         queryVO.setSceneName(sceneName);
         queryVO.setStatus(status);

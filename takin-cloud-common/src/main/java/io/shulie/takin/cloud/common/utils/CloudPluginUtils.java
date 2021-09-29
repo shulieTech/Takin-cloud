@@ -90,7 +90,7 @@ public class CloudPluginUtils {
             userApi.fillUserData(userCommonExt);
         } else {
             userCommonExt.setUserId(-1L);
-            userCommonExt.setCustomerId(-1L);
+            userCommonExt.setTenantId(-1L);
         }
     }
 
@@ -134,7 +134,7 @@ public class CloudPluginUtils {
 
     public static void fillCustomerName(CloudUserCommonRequestExt requestExt, Map<Long, String> userMap) {
         if (!userMap.isEmpty() && Objects.nonNull(requestExt.getUserId()) && Objects.nonNull(userMap.get(requestExt.getUserId()))) {
-            requestExt.setCustomerName(userMap.get(requestExt.getUserId()));
+            requestExt.setTenantName(userMap.get(requestExt.getUserId()));
         }
     }
 }

@@ -345,7 +345,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             .stream().map(Report::getSceneId).distinct().collect(Collectors.toList());
         resultList.forEach(data -> data.setHasReport(sceneIds.contains(data.getId())));
 
-        List<Long> customerIds = resultList.stream().map(SceneManageListOutput::getCustomerId).distinct()
+        List<Long> customerIds = resultList.stream().map(SceneManageListOutput::getTenantId).distinct()
             .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(customerIds)) {
             Map<Long, String> userMap = CloudPluginUtils.getUserNameMap(customerIds);
@@ -917,7 +917,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         wrapperOutput.setType(sceneManageResult.getType());
         // 状态适配
         wrapperOutput.setStatus(SceneManageStatusEnum.getAdaptStatus(sceneManageResult.getStatus()));
-        wrapperOutput.setCustomerId(sceneManageResult.getCustomerId());
+        wrapperOutput.setTenantId(sceneManageResult.getCustomerId());
         wrapperOutput.setUpdateTime(DateUtil.formatDateTime(sceneManageResult.getUpdateTime()));
         wrapperOutput.setLastPtTime(DateUtil.formatDateTime(sceneManageResult.getLastPtTime()));
         fillPtConfig(wrapperOutput, sceneManageResult);

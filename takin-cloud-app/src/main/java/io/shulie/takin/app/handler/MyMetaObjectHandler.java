@@ -21,8 +21,8 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
     public void insertFill(MetaObject metaObject) {
         CloudUserCommonRequestExt userCommonExt = new CloudUserCommonRequestExt();
         CloudPluginUtils.fillUserData(userCommonExt);
-        if (Objects.nonNull(userCommonExt.getCustomerId())) {
-            this.strictInsertFill(metaObject, "customerId", Long.class, userCommonExt.getCustomerId());
+        if (Objects.nonNull(userCommonExt.getTenantId())) {
+            this.strictInsertFill(metaObject, "customerId", Long.class, userCommonExt.getTenantId());
         }
         if (Objects.nonNull(userCommonExt.getUserId())) {
             this.strictInsertFill(metaObject, "userId", Long.class, userCommonExt.getUserId());

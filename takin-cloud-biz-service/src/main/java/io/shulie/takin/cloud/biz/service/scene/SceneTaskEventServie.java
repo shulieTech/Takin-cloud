@@ -83,7 +83,7 @@ public class SceneTaskEventServie {
         scheduleStartRequest.setSceneId(scene.getId());
         scheduleStartRequest.setTaskId(reportId);
         // 客户id
-        scheduleStartRequest.setCustomerId(scene.getCustomerId());
+        scheduleStartRequest.setCustomerId(scene.getTenantId());
         String pressureMode = scene.getPressureMode() == 1 ? "fixed"
             : scene.getPressureMode() == 2 ? "linear" : "stair";
         scheduleStartRequest.setPressureMode(pressureMode);
@@ -151,7 +151,7 @@ public class SceneTaskEventServie {
         ScheduleStopRequestExt scheduleStopRequest = new ScheduleStopRequestExt();
         scheduleStopRequest.setSceneId(reportResult.getSceneId());
         scheduleStopRequest.setTaskId(reportResult.getId());
-        scheduleStopRequest.setCustomerId(reportResult.getCustomerId());
+        scheduleStopRequest.setCustomerId(reportResult.getTenantId());
         Event event = new Event();
         event.setEventName(ScheduleEventConstant.STOP_SCHEDULE_EVENT);
         event.setExt(scheduleStopRequest);

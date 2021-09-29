@@ -179,7 +179,7 @@ public class ReportServiceImpl implements ReportService {
                 dto.setErrorMsg(errorMsgMap.get(dto.getId()));
             }
         }
-        List<Long> customerIds = list.stream().map(CloudReportDTO::getCustomerId)
+        List<Long> customerIds = list.stream().map(CloudReportDTO::getTenantId)
             .filter(Objects::nonNull).distinct().collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(customerIds)) {
             // 获取租户数据
@@ -259,7 +259,7 @@ public class ReportServiceImpl implements ReportService {
         ReportDetailOutput detailOutput = this.getReportByReportId(reportResult.getId());
         reportDetail.setSlaMsg(detailOutput.getSlaMsg());
 
-        StatReportDTO statReport = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
+        StatReportDTO statReport = statTempReport(sceneId, reportResult.getId(), reportResult.getTenantId(),
             ReportConstans.ALL_BUSINESS_ACTIVITY);
         if (statReport == null) {
             log.warn("实况报表:[{}]，暂无数据", reportResult.getId());
@@ -285,7 +285,7 @@ public class ReportServiceImpl implements ReportService {
         List<SceneBusinessActivityRefOutput> refList = wrapper.getBusinessActivityConfig();
         List<BusinessActivitySummaryBean> list = Lists.newArrayList();
         refList.forEach(businessActivityRef -> {
-            StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(), businessActivityRef.getBindRef());
+            StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getTenantId(), businessActivityRef.getBindRef());
             BusinessActivitySummaryBean businessActivity = new BusinessActivitySummaryBean();
             businessActivity.setBusinessActivityId(businessActivityRef.getBusinessActivityId());
             businessActivity.setBusinessActivityName(businessActivityRef.getBusinessActivityName());
@@ -582,7 +582,7 @@ public class ReportServiceImpl implements ReportService {
             .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
         if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {
             sceneManageService.updateSceneLifeCycle(
-                UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId()).checkEnum(
+                UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getTenantId()).checkEnum(
                     SceneManageStatusEnum.STOP).updateEnum(SceneManageStatusEnum.WAIT).build());
         }
 
@@ -599,7 +599,7 @@ public class ReportServiceImpl implements ReportService {
             reportDao.finishReport(reportId);
         }
 
-        sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId())
+        sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getTenantId())
             .checkEnum(SceneManageStatusEnum.getAll()).updateEnum(SceneManageStatusEnum.FORCE_STOP).build());
 
     }
@@ -679,7 +679,7 @@ public class ReportServiceImpl implements ReportService {
             " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps , sum(sum_rt)/sum(count) as "
                 + "avgRt, sum(sa_count) as saCount, count(avg_rt) as recordCount ,mean(active_threads) as avgConcurrenceNum ");
         influxDbSql.append(" from ");
-        influxDbSql.append(InfluxDBUtil.getMeasurement(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId()));
+        influxDbSql.append(InfluxDBUtil.getMeasurement(reportResult.getSceneId(), reportResult.getId(), reportResult.getTenantId()));
         influxDbSql.append(" where ");
         influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
 
@@ -893,7 +893,7 @@ public class ReportServiceImpl implements ReportService {
             return;
         }
         Boolean updateVersion = CloudPluginUtils.checkVersion(reportResult);
-        log.info("ReportId={}, customerId={}, CompareResult={}", reportId, reportResult.getCustomerId(), updateVersion);
+        log.info("ReportId={}, customerId={}, CompareResult={}", reportId, reportResult.getTenantId(), updateVersion);
         if (updateVersion) {
             UpdateStatusBean reportStatus = new UpdateStatusBean();
             reportStatus.setResultId(reportId);
@@ -934,7 +934,7 @@ public class ReportServiceImpl implements ReportService {
             tReportMapper.updateReportStatus(reportStatus);
             //更新场景 压测引擎停止压测---> 待启动  版本不一样，关闭不一样
             sceneManageService.updateSceneLifeCycle(
-                UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId()).checkEnum(
+                UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getTenantId()).checkEnum(
                     SceneManageStatusEnum.STOP).updateEnum(SceneManageStatusEnum.WAIT).build());
         }
 
@@ -1130,7 +1130,7 @@ public class ReportServiceImpl implements ReportService {
             setPressureType(sceneManage.getPressureType());
             setTaskId(reportResult.getId());
             setSceneId(reportResult.getSceneId());
-            setCustomerId(reportResult.getCustomerId());
+            setTenantId(reportResult.getTenantId());
             setStep(sceneManage.getStep());
             setAvgConcurrent(statReport.getAvgConcurrenceNum());
         }};

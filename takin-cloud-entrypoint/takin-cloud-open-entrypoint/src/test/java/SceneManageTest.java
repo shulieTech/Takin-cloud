@@ -19,7 +19,7 @@ public class SceneManageTest {
                 + "\"scriptType\":null,\"uploadFile\":null,\"stopCondition\":null,\"warningCondition\":null,"
                 + "\"currentPage\":0,\"offset\":0}\n";
         SceneManageWrapperReq wrapperReq1 = new SceneManageWrapperReq();
-        wrapperReq1.setCustomerId(1L);
+        wrapperReq1.setTenantId(1L);
         log.info(JsonHelper.bean2Json(wrapperReq1));
         SceneManageWrapperReq wrapperReq = JsonHelper.json2Bean(json, SceneManageWrapperReq.class);
         SceneManageWrapperInput input = new SceneManageWrapperInput();

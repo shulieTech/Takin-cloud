@@ -24,7 +24,7 @@ public class CloudCommonApi {
     protected Map<String, String> getHeaders(CloudUserCommonRequestExt ext) {
         Map<String, String> map = Maps.newHashMap();
         map.put(CloudApiConstant.LICENSE_REQUIRED, "true");
-        map.put(CloudApiConstant.LICENSE_KEY, this.getDevLicense(ext.getLicense()));
+        //map.put(CloudApiConstant.LICENSE_KEY, this.getDevLicense(ext.getLicense()));
         if (StringUtils.isNotBlank(ext.getFilterSql())) {
             map.put(CloudApiConstant.FILTER_SQL, ext.getFilterSql());
         }

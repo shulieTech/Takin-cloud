@@ -85,7 +85,6 @@ import io.shulie.takin.cloud.data.dao.sceneTask.SceneTaskPressureTestLogUploadDA
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
@@ -247,7 +246,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 setSceneId(input.getSceneId());
                 setTaskId(report.getId());
                 setPressureType(sceneData.getPressureType());
-                setCustomerId(sceneData.getCustomerId());
+                setTenantId(sceneData.getTenantId());
                 setStep(sceneData.getStep());
             }});
         }
@@ -257,7 +256,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         redisClientUtils.hmset(key, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY, SceneRunTaskStatusEnum.STARTING.getText());
         //缓存pod数量，上传jmeter日志时判断是否所有文件都上传完成
         redisClientUtils.hmset(ScheduleConstants.SCHEDULE_POD_NUM, String.valueOf(input.getSceneId()), sceneData.getIpNum());
-        String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(), report.getId(), input.getCustomerId());
+        String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(), report.getId(), input.getTenantId());
         List<String> activityRefs = sceneData.getBusinessActivityConfig().stream().map(SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getBindRef)
             .collect(Collectors.toList());
         redisClientUtils.hmset(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REFS
@@ -355,12 +354,12 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     public void updateSceneTaskTps(SceneTaskUpdateTpsInput input) {
         CloudPluginUtils.fillUserData(input);
         String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(), input.getReportId(),
-            input.getCustomerId());
+            input.getTenantId());
         Object totalIp = redisTemplate.opsForHash().get(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_POD_NUM);
         if (totalIp == null) {
             log.error("异常代码【{}】,异常内容：更新运行任务tps，获取不到pod总数 --> 异常信息:SceneId:{},ReportId:{}, CustomerId:{}",
                 TakinCloudExceptionEnum.TASK_START_ERROR_CHECK_POD, input.getSceneId(), input.getReportId(),
-                input.getCustomerId());
+                input.getTenantId());
             return;
         }
         BigDecimal podTpsNum = new BigDecimal(input.getTpsNum()).divide(new BigDecimal(totalIp.toString()), 0, RoundingMode.UP);
@@ -372,7 +371,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     public SceneTaskQueryTpsOutput queryAdjustTaskTps(SceneTaskQueryTpsInput input) {
         CloudPluginUtils.fillUserData(input);
         String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(), input.getReportId(),
-            input.getCustomerId());
+            input.getTenantId());
         Object object = redisTemplate.opsForHash().get(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_ALL_LIMIT);
 
         SceneTaskQueryTpsOutput sceneTaskQueryTpsOutput = new SceneTaskQueryTpsOutput();
@@ -389,7 +388,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         Long sceneManageId;
         CloudPluginUtils.fillUserData(input);
         //首先根据脚本实例id构建压测场景名称
-        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_FLOW_DEBUG + input.getCustomerId() + "_" + input.getScriptId();
+        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_FLOW_DEBUG + input.getTenantId() + "_" + input.getScriptId();
 
         //根据场景名称查询是否已经存在场景
         SceneManageListResult sceneManageResult = sceneManageDao.queryBySceneName(pressureTestSceneName);
@@ -443,7 +442,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         SceneInspectTaskStartOutput startOutput = new SceneInspectTaskStartOutput();
         Long sceneManageId = null;
         //首先根据脚本实例id构建压测场景名称
-        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_INSPECT + input.getCustomerId() + "_" + input.getScriptId();
+        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_INSPECT + input.getTenantId() + "_" + input.getScriptId();
 
         //根据场景名称查询是否已经存在场景
         SceneManageListResult sceneManageResult = sceneManageDao.queryBySceneName(pressureTestSceneName);
@@ -533,7 +532,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         Long sceneManageId;
         CloudPluginUtils.fillUserData(input);
         //首先根据脚本实例id构建压测场景名称
-        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_TRY_RUN + input.getCustomerId() + "_" + input
+        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_TRY_RUN + input.getTenantId() + "_" + input
             .getScriptId();
         //根据场景名称查询是否已经存在场景
         SceneManageListResult sceneManageResult = sceneManageDao.queryBySceneName(pressureTestSceneName);
@@ -654,14 +653,14 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     private void preCheckStart(SceneManageWrapperOutput sceneData) {
         // 流量判断
         {
-            if (sceneData.getCustomerId() == null) {
+            if (sceneData.getTenantId() == null) {
                 throw new TakinCloudException(TakinCloudExceptionEnum.TASK_START_VERIFY_ERROR, "场景没有绑定客户信息");
             }
             AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
             if (assetExtApi != null) {
                 List<AccountInfoExt> accountInfoList = assetExtApi.queryAccountInfoByUserIds(
                     new ArrayList<Long>(1) {{
-                        add(sceneData.getCustomerId());
+                        add(sceneData.getTenantId());
                     }});
                 if (accountInfoList != null && accountInfoList.size() >= 1) {
                     if (accountInfoList.get(0).getBalance().compareTo(sceneData.getEstimateFlow()) < 0) {
@@ -707,7 +706,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         report.setConcurrent(scene.getConcurrenceNum());
         report.setStatus(ReportConstans.INIT_STATUS);
         // 初始化
-        report.setCustomerId(scene.getCustomerId());
+        report.setCustomerId(scene.getTenantId());
         report.setOperateId(input.getUserId());
         report.setDeptId(input.getDeptId());
         // 解决开始时间 偏移10s
@@ -733,7 +732,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //标记场景
         // 待启动,压测失败，停止压测（压测工作已停止） 强制停止 ---> 启动中
         Boolean updateFlag = sceneManageService.updateSceneLifeCycle(
-            UpdateStatusBean.build(scene.getId(), report.getId(), scene.getCustomerId())
+            UpdateStatusBean.build(scene.getId(), report.getId(), scene.getTenantId())
                 .checkEnum(SceneManageStatusEnum.WAIT, SceneManageStatusEnum.FAILED, SceneManageStatusEnum.STOP, SceneManageStatusEnum.FORCE_STOP)
                 .updateEnum(SceneManageStatusEnum.STARTING).build());
         if (!updateFlag) {
