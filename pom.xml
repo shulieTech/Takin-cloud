@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.shulie.takin</groupId>
     <artifactId>takin-cloud</artifactId>
-    <version>takin-cloud-2.0.2</version>
+    <version>takin-cloud-2.0.2.2</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
