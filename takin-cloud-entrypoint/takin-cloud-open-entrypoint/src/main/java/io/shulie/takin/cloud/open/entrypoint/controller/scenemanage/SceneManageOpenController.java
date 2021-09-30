@@ -313,8 +313,6 @@ public class SceneManageOpenController {
         //基本信息
         detailDTO.setId(wrapperResp.getId());
         detailDTO.setSceneName(wrapperResp.getPressureTestSceneName());
-        // 补充插件信息
-        CloudPluginUtils.fillCustomerName(wrapperResp, detailDTO);
 
         detailDTO.setUpdateTime(wrapperResp.getUpdateTime());
         detailDTO.setLastPtTime(wrapperResp.getLastPtTime());

@@ -1,8 +1,8 @@
 package io.shulie.takin.cloud.open.req.scenemanage;
 
 import java.util.List;
-import java.io.Serializable;
 
+import io.shulie.takin.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
@@ -13,9 +13,7 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ScriptCheckAndUpdateReq extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = 33734315777916535L;
+public class ScriptCheckAndUpdateReq extends ContextExt {
 
     /**
      * 业务请求

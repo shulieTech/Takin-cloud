@@ -1,16 +1,18 @@
 package io.shulie.takin.cloud.open.req.scenetask;
 
-import java.io.Serializable;
 
+import io.shulie.takin.ext.content.trace.ContextExt;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author xr.l
  */
 @Data
-public class SceneTryRunTaskCheckReq extends CloudUserCommonRequestExt implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class SceneTryRunTaskCheckReq extends ContextExt {
 
     @ApiModelProperty(value = "场景Id")
     private Long sceneId;

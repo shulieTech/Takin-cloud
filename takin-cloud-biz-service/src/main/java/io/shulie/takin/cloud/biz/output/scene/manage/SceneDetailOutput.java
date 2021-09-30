@@ -1,6 +1,8 @@
 package io.shulie.takin.cloud.biz.output.scene.manage;
 
-import java.io.Serializable;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
@@ -13,9 +15,7 @@ import io.shulie.takin.cloud.data.result.scenemanage.ScriptDetailResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SlaDetailResult;
 import io.shulie.takin.cloud.common.enums.machine.EnumResult;
 import io.shulie.takin.cloud.common.bean.TimeBean;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import io.shulie.takin.ext.content.trace.ContextExt;
 
 /**
  * @author qianshui
@@ -23,9 +23,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SceneDetailOutput extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = 1453217777875591954L;
+public class SceneDetailOutput extends ContextExt {
 
     private Long id;
 

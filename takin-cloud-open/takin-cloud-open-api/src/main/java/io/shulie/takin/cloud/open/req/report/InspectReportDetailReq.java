@@ -1,7 +1,7 @@
 package io.shulie.takin.cloud.open.req.report;
 
-import java.io.Serializable;
 
+import io.shulie.takin.ext.content.trace.ContextExt;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -13,8 +13,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class InspectReportDetailReq extends CloudUserCommonRequestExt implements Serializable {
-    private static final long serialVersionUID = 8440924128595401088L;
+public class InspectReportDetailReq extends ContextExt {
 
     @ApiModelProperty(value = "场景ID")
     private Long sceneId;

@@ -1,14 +1,11 @@
 package com.pamirs.takin.entity.domain.entity.scene.manage;
 
 import java.util.Date;
-import java.io.Serializable;
 
 import lombok.Data;
 
 @Data
-public class WarnDetail implements Serializable {
-
-    private static final long serialVersionUID = -1912947106665624451L;
+public class WarnDetail {
 
     private Long id;
 

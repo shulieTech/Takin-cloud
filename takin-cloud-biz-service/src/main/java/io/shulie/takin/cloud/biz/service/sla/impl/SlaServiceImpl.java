@@ -153,7 +153,7 @@ public class SlaServiceImpl implements SlaService {
                     scheduleStopRequest.setTaskId(metricsEvent.getReportId());
                     scheduleStopRequest.setSceneId(sceneId);
                     // 增加顾客id
-                    scheduleStopRequest.setCustomerId(metricsEvent.getCustomerId());
+                    scheduleStopRequest.setTenantId(metricsEvent.getTenantId());
                     Map<String, Object> extendMap = Maps.newHashMap();
                     extendMap.put(Constants.SLA_DESTORY_EXTEND, "SLA发送压测任务终止事件");
                     scheduleStopRequest.setExtend(extendMap);

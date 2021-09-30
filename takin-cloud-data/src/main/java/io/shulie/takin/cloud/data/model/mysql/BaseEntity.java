@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.data.model.mysql;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -13,9 +12,7 @@ import lombok.Data;
  * @date 2021/6/1 10:49 上午
  */
 @Data
-public class BaseEntity implements Serializable {
-
-    private static final long serialVersionUID = 220459039796531099L;
+public class BaseEntity {
 
     @TableId(type = IdType.AUTO)
     private Long id;

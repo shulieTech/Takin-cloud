@@ -6,10 +6,10 @@ package io.shulie.takin.cloud.common.influxdb;
  */
 public class InfluxDBUtil {
 
-    public static String getMeasurement(Long sceneId, Long reportId, Long customerId) {
-        if (customerId == null || customerId < 0) {
+    public static String getMeasurement(Long sceneId, Long reportId, Long tenantId) {
+        if (tenantId == null || tenantId < 0) {
             return String.format("pressure_%s_%s", sceneId, reportId);
         }
-        return String.format("pressure_%s_%s_%s", sceneId, reportId, customerId);
+        return String.format("pressure_%s_%s_%s", sceneId, reportId, tenantId);
     }
 }

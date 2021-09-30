@@ -2,11 +2,11 @@
 
 package io.shulie.takin.cloud.open.resp.report;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import io.shulie.takin.ext.content.trace.ContextExt;
 import lombok.EqualsAndHashCode;
 import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
@@ -17,14 +17,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
-* @author 无涯
-* @date 2021/2/3 11:46 上午
-*/
-@EqualsAndHashCode(callSuper = true)
+ * @author 无涯
+ * @date 2021/2/3 11:46 上午
+ */
 @Data
-public class ReportDetailResp extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = 6093881590337487184L;
+@EqualsAndHashCode(callSuper = true)
+public class ReportDetailResp extends ContextExt {
 
     @ApiModelProperty(value = "报告状态：0/就绪状态，1/生成中, 2/完成生成")
     private Integer taskStatus;
@@ -40,7 +38,6 @@ public class ReportDetailResp extends CloudUserCommonRequestExt implements Seria
 
     @ApiModelProperty(value = "消耗流量")
     private BigDecimal amount;
-
 
     @ApiModelProperty(value = "场景名称")
     private Long sceneId;

@@ -63,8 +63,8 @@ public class AsyncServiceImpl implements AsyncService {
         int currentTime = 0;
         boolean checkPass = false;
 
-        String pressureNodeTotalName = ScheduleConstants.getPressureNodeTotalKey(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getCustomerId());
-        String pressureNodeName = ScheduleConstants.getPressureNodeName(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getCustomerId());
+        String pressureNodeTotalName = ScheduleConstants.getPressureNodeTotalKey(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getTenantId());
+        String pressureNodeName = ScheduleConstants.getPressureNodeName(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getTenantId());
         while (currentTime <= pressureNodeStartExpireTime) {
             String pressureNodeTotal = redisClientUtils.getString(pressureNodeTotalName);
             String pressureNodeNum = redisClientUtils.getString(pressureNodeName);
@@ -91,7 +91,7 @@ public class AsyncServiceImpl implements AsyncService {
         //压力节点 没有在设定时间内启动完毕，停止压测
         if (!checkPass) {
             log.info("调度任务{}-{}-{},压力节点 没有在设定时间{}s内启动，停止压测,", startRequest.getSceneId(), startRequest.getTaskId(),
-                startRequest.getCustomerId(), CHECK_INTERVAL_TIME);
+                startRequest.getTenantId(), CHECK_INTERVAL_TIME);
             // 记录停止原因
             // 补充停止原因
             //设置缓存，用以检查压测场景启动状态 lxr 20210623
@@ -137,11 +137,11 @@ public class AsyncServiceImpl implements AsyncService {
         // 汇报失败
         sceneManageService.reportRecord(SceneManageStartRecordVO.build(startRequest.getSceneId(),
             startRequest.getTaskId(),
-            startRequest.getCustomerId()).success(false).errorMsg("").build());
+            startRequest.getTenantId()).success(false).errorMsg("").build());
         // 清除 SLA配置 清除PushWindowDataScheduled 删除pod job configMap  生成报告拦截 状态拦截
         Event event = new Event();
         event.setEventName("finished");
-        event.setExt(new TaskResult(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getCustomerId()));
+        event.setExt(new TaskResult(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getTenantId()));
         eventCenterTemplate.doEvents(event);
     }
 }

@@ -1,12 +1,13 @@
 package io.shulie.takin.cloud.open.req.engine;
 
 import io.shulie.takin.cloud.common.bean.file.FileManageInfo;
+import io.shulie.takin.ext.content.trace.ContextExt;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -17,7 +18,8 @@ import java.util.List;
  */
 @Data
 @ApiModel("引擎插件保存入参")
-public class EnginePluginWrapperReq extends CloudUserCommonRequestExt implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class EnginePluginWrapperReq extends ContextExt {
 
     @ApiModelProperty(value = "插件ID", dataType = "long", notes = "选填，修改需要传此项")
     private Long pluginId;

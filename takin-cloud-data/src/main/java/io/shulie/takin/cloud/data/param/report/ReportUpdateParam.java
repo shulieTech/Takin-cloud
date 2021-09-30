@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.data.param.report;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import io.shulie.takin.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
@@ -13,7 +14,7 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ReportUpdateParam extends CloudUserCommonRequestExt {
+public class ReportUpdateParam extends ContextExt {
     private Long id;
 
     /**

@@ -4,66 +4,73 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+
 import com.google.common.collect.Maps;
-import io.shulie.takin.ext.api.CloudUserExtApi;
+import io.shulie.takin.ext.api.DataTraceExtApi;
+import io.shulie.takin.ext.content.trace.ContextExt;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
-import io.shulie.takin.ext.content.user.CloudUserExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author hezhongqi
+ * @author 张天赐
  * @date 2021/8/4 14:42
  */
+@Component
 public class CloudPluginUtils {
+    @Resource(type = PluginManager.class)
+    private PluginManager autoPluginManager;
 
-    private static CloudUserExtApi userApi;
-    static PluginManager pluginManager;
+    private static DataTraceExtApi userApi;
 
-    @Autowired
-    public void setPluginManager(PluginManager pluginManager) {
-        CloudPluginUtils.pluginManager = pluginManager;
-        userApi = pluginManager.getExtension(CloudUserExtApi.class);
+    @PostConstruct
+    public void init() {
+        userApi = autoPluginManager.getExtension(DataTraceExtApi.class);
     }
 
     /**
-     * 是否带用户模块
+     * 是否带数据溯源模块
      *
      * @return true/false
      */
     public static Boolean checkUserData() {
-        if (userApi != null) {
-            return Boolean.TRUE;
-        }
-        return Boolean.FALSE;
+        return userApi != null;
     }
-
 
     /**
      * 返回用户id
      *
      * @return -
      */
-    public static CloudUserExt getUser() {
-        if (userApi != null) {
-            return userApi.getUser();
-        }
-        return null;
+    public static ContextExt getContext() {
+        if (userApi != null) {return userApi.getContext();}
+        return new ContextExt() {{
+            setUserId(-1L);
+            setTenantId(-1L);
+            setEnvCode("");
+            setFilterSql("");
+        }};
     }
 
     /**
-     * 目前用户id = 租户id
+     * 用户主键
      *
      * @return -
      */
-    public static Long getCustomerId() {
-        if (userApi != null) {
-            if (getUser() != null) {
-                return getUser().getCustomerId();
-            }
-        }
-        // 默认给-1
-        return -1L;
+    public static Long getUserId() {
+        return getContext().getUserId();
+    }
+
+    /**
+     * 租户主键
+     *
+     * @return -
+     */
+    public static Long getTenantId() {
+        return getContext().getTenantId();
     }
 
     /**
@@ -72,69 +79,16 @@ public class CloudPluginUtils {
      * @return -
      */
     public static String getFilterSql() {
-        if (userApi != null) {
-            if (userApi.getRequestExt() != null) {
-                return userApi.getRequestExt().getFilterSql();
-            }
-        }
-        return "";
+        return getContext().getFilterSql();
     }
 
     /**
      * 公共补充 查询 用户数据
      *
-     * @param userCommonExt -
+     * @param ext -
      */
-    public static void fillUserData(CloudUserCommonRequestExt userCommonExt) {
-        if (Objects.nonNull(userApi)) {
-            userApi.fillUserData(userCommonExt);
-        } else {
-            userCommonExt.setUserId(-1L);
-            userCommonExt.setCustomerId(-1L);
-        }
-    }
-
-    public static Boolean checkVersion(CloudUserCommonRequestExt reportExt) {
-        if (Objects.nonNull(userApi)) {
-            return userApi.checkVersion(reportExt);
-        }
-        return true;
-    }
-
-    /**
-     * 报告补充 查询 报告用户数据
-     *
-     * @param reportExt -
-     * @param targetExt -
-     */
-    public static void fillReportData(CloudUserCommonRequestExt reportExt, CloudUserCommonRequestExt targetExt) {
-        if (Objects.nonNull(userApi)) {
-            userApi.fillReportData(reportExt, targetExt);
-        }
-    }
-
-    /**
-     * 获取用户信息
-     *
-     * @param customerIds -
-     * @return -
-     */
-    public static Map<Long, String> getUserNameMap(List<Long> customerIds) {
-        if (Objects.nonNull(userApi)) {
-            return userApi.getUserNameMap(customerIds);
-        }
-        return Maps.newHashMap();
-    }
-
-    public static void fillCustomerName(CloudUserCommonRequestExt sourceExt, CloudUserCommonRequestExt targetExt) {
-        if (Objects.nonNull(userApi)) {
-            userApi.fillCustomerName(sourceExt, targetExt);
-        }
-    }
-
-    public static void fillCustomerName(CloudUserCommonRequestExt requestExt, Map<Long, String> userMap) {
-        if (!userMap.isEmpty() && Objects.nonNull(requestExt.getUserId()) && Objects.nonNull(userMap.get(requestExt.getUserId()))) {
-            requestExt.setCustomerName(userMap.get(requestExt.getUserId()));
-        }
+    public static void fillUserData(ContextExt ext) {
+        ext.setUserId(getContext().getUserId());
+        ext.setTenantId(getContext().getTenantId());
     }
 }

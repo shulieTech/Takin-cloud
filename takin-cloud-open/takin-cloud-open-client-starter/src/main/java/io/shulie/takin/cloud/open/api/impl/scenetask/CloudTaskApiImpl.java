@@ -43,7 +43,7 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
     public ResponseResult<SceneActionResp> start(SceneTaskStartReq req) {
         TakinResponseEntity<ResponseResult<SceneActionResp>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_TASK_START,
-                getHeaders(req), new TypeReference<ResponseResult<SceneActionResp>>() {}, req);
+                getHeaders(), new TypeReference<ResponseResult<SceneActionResp>>() {}, req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -55,7 +55,7 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
     public ResponseResult<String> stopTask(SceneManageIdReq req) {
         TakinResponseEntity<ResponseResult<String>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_TASK_STOP,
-                getHeaders(req), new TypeReference<ResponseResult<String>>() {}, req);
+                getHeaders(), new TypeReference<ResponseResult<String>>() {}, req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -68,7 +68,7 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
     public ResponseResult<SceneActionResp> checkTask(SceneManageIdReq req) {
         TakinResponseEntity<ResponseResult<SceneActionResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_TASK_CHECK,
-                getHeaders(req), req, new TypeReference<ResponseResult<SceneActionResp>>() {});
+                getHeaders(), req, new TypeReference<ResponseResult<SceneActionResp>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -80,7 +80,7 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
     public ResponseResult<String> updateSceneTaskTps(SceneTaskUpdateTpsReq req) {
         TakinResponseEntity<ResponseResult<String>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_TASK_UPDATE_TPS,
-                getHeaders(req), new TypeReference<ResponseResult<String>>() {}, req);
+                getHeaders(), new TypeReference<ResponseResult<String>>() {}, req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -92,7 +92,7 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
     public ResponseResult<SceneTaskAdjustTpsResp> queryAdjustTaskTps(SceneTaskQueryTpsReq req) {
         TakinResponseEntity<ResponseResult<SceneTaskAdjustTpsResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_TASK_QUERY_ADJUST_TPS,
-                getHeaders(req), req, new TypeReference<ResponseResult<SceneTaskAdjustTpsResp>>() {});
+                getHeaders(), req, new TypeReference<ResponseResult<SceneTaskAdjustTpsResp>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -104,7 +104,7 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
     public ResponseResult<Long> startFlowDebugTask(TaskFlowDebugStartReq req) {
         TakinResponseEntity<ResponseResult<Long>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.START_FLOW_DEBUG_TASK,
-                getHeaders(req), new TypeReference<ResponseResult<Long>>() {}, req);
+                getHeaders(), new TypeReference<ResponseResult<Long>>() {}, req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -116,7 +116,7 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
     public ResponseResult<SceneInspectTaskStartResp> startInspectTask(TaskInspectStartReq req) {
         TakinResponseEntity<ResponseResult<SceneInspectTaskStartResp>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.START_INSPECT_TASK,
-                getHeaders(req), new TypeReference<ResponseResult<SceneInspectTaskStartResp>>() {}, req);
+                getHeaders(), new TypeReference<ResponseResult<SceneInspectTaskStartResp>>() {}, req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -128,7 +128,7 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
     public ResponseResult<SceneInspectTaskStopResp> stopInspectTask(TaskInspectStopReq req) {
         TakinResponseEntity<ResponseResult<SceneInspectTaskStopResp>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.STOP_INSPECT_TASK,
-                getHeaders(req), new TypeReference<ResponseResult<SceneInspectTaskStopResp>>() {}, req);
+                getHeaders(), new TypeReference<ResponseResult<SceneInspectTaskStopResp>>() {}, req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -140,7 +140,7 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
     public ResponseResult<SceneTryRunTaskStartResp> startTryRunTask(SceneTryRunTaskStartReq req) {
         TakinResponseEntity<ResponseResult<SceneTryRunTaskStartResp>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.START_TRY_RUN_TASK,
-                getHeaders(req), new TypeReference<ResponseResult<SceneTryRunTaskStartResp>>() {}, req);
+                getHeaders(), new TypeReference<ResponseResult<SceneTryRunTaskStartResp>>() {}, req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -152,7 +152,7 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
     public ResponseResult<SceneTryRunTaskStatusResp> checkTaskStatus(SceneTryRunTaskCheckReq req) {
         TakinResponseEntity<ResponseResult<SceneTryRunTaskStatusResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.CHECK_TRY_RUN_TASK_STATUS,
-                getHeaders(req), req, new TypeReference<ResponseResult<SceneTryRunTaskStatusResp>>() {});
+                getHeaders(), req, new TypeReference<ResponseResult<SceneTryRunTaskStatusResp>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -164,7 +164,7 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
     public ResponseResult<SceneJobStateResp> checkSceneJobSstatus(SceneManageIdReq req) {
         TakinResponseEntity<ResponseResult<SceneJobStateResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.CHECK_SCENE_JOB_STATUS,
-                getHeaders(req), req, new TypeReference<ResponseResult<SceneJobStateResp>>() {});
+                getHeaders(), req, new TypeReference<ResponseResult<SceneJobStateResp>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -176,7 +176,7 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
     public ResponseResult<SceneStartCheckResp> sceneStartPreCheck(SceneStartPreCheckReq req) {
         TakinResponseEntity<ResponseResult<SceneStartCheckResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_START_PRE_CHECK,
-                getHeaders(req), req, new TypeReference<ResponseResult<SceneStartCheckResp>>() {});
+                getHeaders(), req, new TypeReference<ResponseResult<SceneStartCheckResp>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }

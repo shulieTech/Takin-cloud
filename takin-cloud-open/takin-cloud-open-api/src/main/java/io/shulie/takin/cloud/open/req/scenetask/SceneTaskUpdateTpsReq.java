@@ -1,19 +1,20 @@
 package io.shulie.takin.cloud.open.req.scenetask;
 
-import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
+import io.shulie.takin.ext.content.trace.ContextExt;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author zhaoyong
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class SceneTaskUpdateTpsReq extends CloudUserCommonRequestExt implements Serializable {
-    private static final long serialVersionUID = -948341850155816814L;
+public class SceneTaskUpdateTpsReq extends ContextExt {
 
     @NotNull
     @ApiModelProperty(value = "sceneId")

@@ -1,6 +1,5 @@
 package com.pamirs.takin.entity.domain.dto.report;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 import io.swagger.annotations.ApiModel;
@@ -15,9 +14,7 @@ import lombok.Data;
  */
 @ApiModel
 @Data
-public class MachineDetailDTO implements Serializable {
-
-    private static final long serialVersionUID = 7813020434970519614L;
+public class MachineDetailDTO {
 
     @ApiModelProperty(value = "主机ip")
     private String machineIp;
@@ -41,9 +38,7 @@ public class MachineDetailDTO implements Serializable {
 
     @ApiModel
     @Data
-    public class MachineTPSTargetDTO implements Serializable {
-
-        private static final long serialVersionUID = -7728660288117937429L;
+    public class MachineTPSTargetDTO {
 
         private String[] tps;
 

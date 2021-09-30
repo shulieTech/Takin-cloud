@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.util.Date;
+
 import lombok.Data;
 
 /**
@@ -30,12 +32,6 @@ public class ScenePressureTestLogUploadEntity {
      */
     @TableField(value = "report_id")
     private Long reportId;
-
-    /**
-     * 用户ID
-     */
-    @TableField(value = "customer_id")
-    private Long customerId;
 
     /**
      * 压测任务状态：1-启动中；2-启动成功；3-压测失败；4-压测完成
@@ -72,4 +68,21 @@ public class ScenePressureTestLogUploadEntity {
      */
     @TableField(value = "file_name")
     private String fileName;
+
+    /**
+     * 用户主键
+     */
+    @TableField(value = "customer_id")
+    private Long userId;
+    /**
+     * 租户主键
+     */
+    @TableField(value = "tenant_id")
+    private Long tenantId;
+    /**
+     * 环境编码
+     */
+    @TableField(value = "env_code")
+    private String envCode;
+
 }

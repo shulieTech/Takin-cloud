@@ -1,7 +1,6 @@
 package io.shulie.takin.cloud.common.bean.scenemanage;
 
 import java.util.List;
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 import lombok.Data;
@@ -12,9 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @date 2020-04-17
  */
 @Data
-public class BusinessActivitySummaryBean implements Serializable {
-
-    private static final long serialVersionUID = 2170610535603454800L;
+public class BusinessActivitySummaryBean {
 
     @ApiModelProperty(value = "活动ID")
     private Long businessActivityId;

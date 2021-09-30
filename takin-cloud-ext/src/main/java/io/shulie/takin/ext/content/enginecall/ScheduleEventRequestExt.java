@@ -1,16 +1,18 @@
 package io.shulie.takin.ext.content.enginecall;
 
-import java.io.Serializable;
 import java.util.Map;
 
+import io.shulie.takin.ext.content.trace.ContextExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author 莫问
  * @date 2020-05-14
  */
 @Data
-public class ScheduleEventRequestExt implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class ScheduleEventRequestExt extends ContextExt {
 
     /**
      * 场景ID
@@ -21,11 +23,6 @@ public class ScheduleEventRequestExt implements Serializable {
      * 场景任务ID
      */
     private Long taskId;
-
-    /**
-     * 客户Id
-     */
-    private Long customerId;
 
     /**
      * 扩展参数

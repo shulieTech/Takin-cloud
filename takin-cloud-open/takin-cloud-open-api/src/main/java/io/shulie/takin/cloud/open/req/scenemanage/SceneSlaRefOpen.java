@@ -4,7 +4,6 @@ import io.shulie.takin.cloud.common.bean.RuleBean;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
 
 /**
  * @author mubai
@@ -12,9 +11,7 @@ import java.io.Serializable;
  */
 
 @Data
-public class SceneSlaRefOpen implements Serializable {
-
-    private static final long serialVersionUID = -1911877711253414893L;
+public class SceneSlaRefOpen {
 
     @ApiModelProperty(value = "规则名称")
     private String ruleName;

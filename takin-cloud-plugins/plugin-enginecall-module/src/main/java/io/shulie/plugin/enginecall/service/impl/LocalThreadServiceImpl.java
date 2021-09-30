@@ -59,9 +59,9 @@ public class LocalThreadServiceImpl implements EngineCallService {
     private String taskDir;
 
     @Override
-    public String createJob(Long sceneId, Long taskId, Long customerId) {
-        String jobName = ScheduleConstants.getScheduleName(sceneId, taskId, customerId);
-        String configMapName = ScheduleConstants.getConfigMapName(sceneId, taskId, customerId);
+    public String createJob(Long sceneId, Long taskId, Long tenantId) {
+        String jobName = ScheduleConstants.getScheduleName(sceneId, taskId, tenantId);
+        String configMapName = ScheduleConstants.getConfigMapName(sceneId, taskId, tenantId);
         if (!new File(installDir).exists()) {
             return "未找到引擎包";
         }

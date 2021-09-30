@@ -211,8 +211,8 @@ public class ReportController {
 
     @GetMapping("/report/metrices")
     @ApiOperation("当前压测的所有数据")
-    public ResponseResult<List<Metrices>> metrics(Long reportId, Long sceneId, Long customerId) {
-        return ResponseResult.success(reportService.metric(reportId, sceneId, customerId));
+    public ResponseResult<List<Metrices>> metrics(Long reportId, Long sceneId, Long tenantId) {
+        return ResponseResult.success(reportService.metric(reportId, sceneId, tenantId));
     }
 
     /**

@@ -5,7 +5,7 @@
         <!--@mbg.generated-->
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="scene_id" jdbcType="BIGINT" property="sceneId"/>
-        <result column="customer_id" property="customerId" jdbcType="BIGINT"/>
+        <result column="customer_id" property="tenantId" jdbcType="BIGINT"/>
         <result column="amount" jdbcType="DECIMAL" property="amount"/>
         <result column="scene_name" jdbcType="VARCHAR" property="sceneName"/>
         <result column="start_time" jdbcType="TIMESTAMP" property="startTime"/>
@@ -69,7 +69,7 @@
             <if test="sceneId != null">
                 scene_id,
             </if>
-            <if test="customerId != null">
+            <if test="tenantId != null">
                 customer_id,
             </if>
             <if test="deptId != null">
@@ -152,8 +152,8 @@
             <if test="sceneId != null">
                 #{sceneId,jdbcType=BIGINT},
             </if>
-            <if test="customerId != null">
-                #{customerId,jdbcType=BIGINT},
+            <if test="tenantId != null">
+                #{tenantId,jdbcType=BIGINT},
             </if>
             <if test="deptId != null">
                 #{deptId,jdbcType=BIGINT},

@@ -45,14 +45,14 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     @Override
     public Object updateSceneFileByScriptId(CloudUpdateSceneFileRequest request) {
         return HttpHelper.doPut(UrlBusinessUtil.getSceneMangeUpdateFileUrl(),
-            this.getHeaders(request), new TypeReference<ResponseResult<Object>>() {}, request);
+            getHeaders(), new TypeReference<ResponseResult<Object>>() {}, request);
     }
 
     @Override
     public ResponseResult<Long> saveScene(SceneManageWrapperReq req) {
         TakinResponseEntity<ResponseResult<Long>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_URL,
-                getHeaders(req), new TypeReference<ResponseResult<Long>>() {}, req);
+                getHeaders(), new TypeReference<ResponseResult<Long>>() {}, req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -65,7 +65,7 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
 
         TakinResponseEntity<ResponseResult<String>> takinResponseEntity =
             HttpHelper.doPut(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_URL,
-                getHeaders(req), new TypeReference<ResponseResult<String>>() {}, req);
+                getHeaders(), new TypeReference<ResponseResult<String>>() {}, req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -77,7 +77,7 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     public ResponseResult<String> deleteScene(SceneManageDeleteReq req) {
         TakinResponseEntity<ResponseResult<String>> takinResponseEntity =
             HttpHelper.doDelete(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_URL,
-                getHeaders(req), new TypeReference<ResponseResult<String>>() {}, req);
+                getHeaders(), new TypeReference<ResponseResult<String>>() {}, req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -89,7 +89,7 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     public ResponseResult<SceneManageWrapperResp> getSceneDetail(SceneManageIdReq req) {
         TakinResponseEntity<ResponseResult<SceneManageWrapperResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_DETAIL_URL,
-                getHeaders(req), req, new TypeReference<ResponseResult<SceneManageWrapperResp>>() {});
+                getHeaders(), req, new TypeReference<ResponseResult<SceneManageWrapperResp>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -101,7 +101,7 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     public ResponseResult<List<SceneManageListResp>> getSceneManageList(CloudUserCommonRequestExt req) {
         TakinResponseEntity<ResponseResult<List<SceneManageListResp>>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_All_LIST_URL,
-                getHeaders(req), req, new TypeReference<ResponseResult<List<SceneManageListResp>>>() {});
+                getHeaders(), req, new TypeReference<ResponseResult<List<SceneManageListResp>>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -114,7 +114,7 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
         TakinResponseEntity<ResponseResult<List<SceneManageListResp>>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_LIST_URL,
                 //过滤
-                getHeaders(req), req, new TypeReference<ResponseResult<List<SceneManageListResp>>>() {});
+                getHeaders(), req, new TypeReference<ResponseResult<List<SceneManageListResp>>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -127,7 +127,7 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     public ResponseResult<BigDecimal> calcFlow(SceneManageWrapperReq req) {
         TakinResponseEntity<ResponseResult<BigDecimal>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_FLOWCALC_URL,
-                getHeaders(req), new TypeReference<ResponseResult<BigDecimal>>() {}, req);
+                getHeaders(), new TypeReference<ResponseResult<BigDecimal>>() {}, req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -139,7 +139,7 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     public ResponseResult<StrategyResp> getIpNum(SceneIpNumReq req) {
         TakinResponseEntity<ResponseResult<StrategyResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_IPNUM_URL,
-                getHeaders(req), req, new TypeReference<ResponseResult<StrategyResp>>() {});
+                getHeaders(), req, new TypeReference<ResponseResult<StrategyResp>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -151,7 +151,7 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     public ResponseResult<ScriptCheckResp> checkAndUpdateScript(ScriptCheckAndUpdateReq req) {
         TakinResponseEntity<ResponseResult<ScriptCheckResp>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_CHECK_AND_UPDATE_URL,
-                getHeaders(req), new TypeReference<ResponseResult<ScriptCheckResp>>() {},req);
+                getHeaders(), new TypeReference<ResponseResult<ScriptCheckResp>>() {}, req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -167,7 +167,7 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
         String join = StringUtils.join(sceneIds, ",");
         url = url + "?sceneIds=" + join;
         TakinResponseEntity<ResponseResult<List<SceneManageWrapperResp>>> takinResponseEntity =
-            HttpHelper.doGet(url, getHeaders(req), new TypeReference<ResponseResult<List<SceneManageWrapperResp>>>() {});
+            HttpHelper.doGet(url, getHeaders(), new TypeReference<ResponseResult<List<SceneManageWrapperResp>>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }

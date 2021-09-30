@@ -22,10 +22,10 @@ import org.apache.ibatis.reflection.SystemMetaObject;
 import org.springframework.stereotype.Component;
 
 /**
- * @ClassName MySqlInterceptor
- * @Description mybatis 场景报告查询增加客户身份
- * @Author qianshui
- * @Date 2020/7/22 下午11:22
+ * mybatis 场景报告查询增加客户身份
+ *
+ * @author qianshui
+ * @date 2020/7/22 下午11:22
  */
 
 @Component
@@ -40,8 +40,7 @@ public class DataApartInterceptor implements Interceptor {
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        if(!CloudPluginUtils.checkUserData() || CloudPluginUtils.getUser() == null
-            ||  CloudPluginUtils.getUser().getLoginChannel() == 0) {
+        if (!CloudPluginUtils.checkUserData() || CloudPluginUtils.getContext() == null) {
             return invocation.proceed();
         }
         StatementHandler statementHandler = (StatementHandler)invocation.getTarget();
@@ -56,7 +55,7 @@ public class DataApartInterceptor implements Interceptor {
         } catch (Exception e) {
             return invocation.proceed();
         }
-        if(mappedStatement == null) {
+        if (mappedStatement == null) {
             return invocation.proceed();
         }
         //sql语句类型 select、delete、insert、update
@@ -115,7 +114,7 @@ public class DataApartInterceptor implements Interceptor {
      * @return
      */
     private String setSql(String sql, int tableIndex) {
-        return insertSql(tableIndex, sql, CloudPluginUtils.getCustomerId());
+        return insertSql(tableIndex, sql, CloudPluginUtils.getTenantId());
     }
 
     /**
@@ -130,14 +129,14 @@ public class DataApartInterceptor implements Interceptor {
         StringBuffer sb = new StringBuffer();
         int pos = lowerIndexOf(sql, " where ");
 
-        String filterSql =  CloudPluginUtils.getFilterSql();
-        if(StringUtils.isNoneBlank(filterSql)) {
+        String filterSql = CloudPluginUtils.getFilterSql();
+        if (StringUtils.isNoneBlank(filterSql)) {
             filterSql = "user_id in " + filterSql;
         }
         if (pos > 0) {
             sb.append(sql.substring(0, pos));
             sb.append(" where customer_id = " + userId);
-            if(StringUtils.isNoneBlank(filterSql)) {
+            if (StringUtils.isNoneBlank(filterSql)) {
                 sb.append(" and " + filterSql);
             }
             sb.append(" and ");
@@ -147,7 +146,7 @@ public class DataApartInterceptor implements Interceptor {
             sb.append(sql.substring(0, index));
             sb.append(tables[tableIndex]);
             sb.append(" where customer_id = " + userId);
-            if(StringUtils.isNoneBlank(filterSql)) {
+            if (StringUtils.isNoneBlank(filterSql)) {
                 sb.append(" and " + filterSql);
             }
             sb.append(sql.substring(index + tables[tableIndex].length()));

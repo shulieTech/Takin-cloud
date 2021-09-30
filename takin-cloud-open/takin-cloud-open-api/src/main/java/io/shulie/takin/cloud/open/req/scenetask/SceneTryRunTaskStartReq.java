@@ -1,25 +1,26 @@
 package io.shulie.takin.cloud.open.req.scenetask;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import io.shulie.takin.ext.content.trace.ContextExt;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.shulie.takin.cloud.open.req.engine.EnginePluginsRefOpen;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneBusinessActivityRefOpen;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneScriptRefOpen;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author xr.l
  * @date 2021-05-10
  */
 @Data
-public class SceneTryRunTaskStartReq extends CloudUserCommonRequestExt implements Serializable {
-    private static final long serialVersionUID = -9162208161836587615L;
+@EqualsAndHashCode(callSuper = true)
+public class SceneTryRunTaskStartReq extends ContextExt {
 
     @ApiModelProperty(value = "业务活动配置")
     @NotEmpty(message = "业务活动配置不能为空")

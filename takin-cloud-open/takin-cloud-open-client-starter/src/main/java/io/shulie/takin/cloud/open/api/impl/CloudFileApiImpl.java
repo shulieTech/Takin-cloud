@@ -31,12 +31,12 @@ public class CloudFileApiImpl extends CloudCommonApi implements CloudFileApi {
     public ResponseResult<Map<String, Object>> getFileContent(FileContentParamReq req) {
         TakinResponseEntity<ResponseResult<Map<String, Object>>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.FILE_CONTENT_BY_PATHS,
-                getHeaders(req), new TypeReference<ResponseResult<Map<String, Object>>>() {}, req);
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(), new TypeReference<ResponseResult<Map<String, Object>>>() {}, req);
+        if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
 
     }
 
@@ -44,52 +44,50 @@ public class CloudFileApiImpl extends CloudCommonApi implements CloudFileApi {
     public ResponseResult<Boolean> deleteFile(FileDeleteParamReq req) {
         TakinResponseEntity<Boolean> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.FILE_DELETE_URL,
-                getHeaders(req), Boolean.class,req);
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(), Boolean.class, req);
+        if (takinResponseEntity.getSuccess()) {
             return ResponseResult.success(takinResponseEntity.getBody());
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
     @Override
     public ResponseResult<Boolean> copyFile(FileCopyParamReq req) {
         TakinResponseEntity<Boolean> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.FILE_COPY_URL,
-                getHeaders(req), Boolean.class,req);
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(), Boolean.class, req);
+        if (takinResponseEntity.getSuccess()) {
             return ResponseResult.success(takinResponseEntity.getBody());
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
 
     }
 
     @Override
-    public  ResponseResult<Boolean>  zipFile(FileZipParamReq req) {
+    public ResponseResult<Boolean> zipFile(FileZipParamReq req) {
         TakinResponseEntity<Boolean> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.FILE_ZIP_URL,
-                getHeaders(req), Boolean.class,req);
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(), Boolean.class, req);
+        if (takinResponseEntity.getSuccess()) {
             return ResponseResult.success(takinResponseEntity.getBody());
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
 
     }
 
     @Override
-    public  ResponseResult<Boolean>  createFileByPathAndString(FileCreateByStringParamReq req) {
+    public ResponseResult<Boolean> createFileByPathAndString(FileCreateByStringParamReq req) {
         TakinResponseEntity<Boolean> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.FILE_CREATE_BY_STRING,
-                getHeaders(req), Boolean.class,req);
-        if(takinResponseEntity.getSuccess()) {
+                getHeaders(), Boolean.class, req);
+        if (takinResponseEntity.getSuccess()) {
             return ResponseResult.success(takinResponseEntity.getBody());
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-            takinResponseEntity.getErrorMsg(),"查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
-
-
 
 }

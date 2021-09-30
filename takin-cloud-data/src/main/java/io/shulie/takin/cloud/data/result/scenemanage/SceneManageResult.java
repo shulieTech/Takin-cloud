@@ -17,7 +17,7 @@ public class SceneManageResult {
     /**
      * 客户id
      */
-    private Long customerId;
+    private Long tenantId;
 
     /**
      * 部门id

@@ -65,7 +65,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
     @Override
     public Workbook importMJ(MultipartFile file) {
         // 分布式锁, 同一个文件, 防止重复点击
-        String lockKey = String.format(LOCK_IMPORT_MIDDLEWARE_JAR, CloudPluginUtils.getCustomerId());
+        String lockKey = String.format(LOCK_IMPORT_MIDDLEWARE_JAR, CloudPluginUtils.getTenantId());
         this.isImportException(!distributedLock.tryLock(lockKey, 0L, -1L, TimeUnit.SECONDS), TOO_FREQUENTLY);
 
         try {
@@ -93,7 +93,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
         this.isCompareException(files.size() > 12, "文件个数太多, 请选择12个以下进行比对!");
 
         // 分布式锁, 同一个文件, 防止重复点击
-        String lockKey = String.format(LOCK_COMPARE_MIDDLEWARE_JAR, CloudPluginUtils.getCustomerId());
+        String lockKey = String.format(LOCK_COMPARE_MIDDLEWARE_JAR, CloudPluginUtils.getTenantId());
         this.isCompareException(!distributedLock.tryLock(lockKey, 0L, -1L, TimeUnit.SECONDS), TOO_FREQUENTLY);
 
         try {

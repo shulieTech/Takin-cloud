@@ -1,6 +1,5 @@
 package io.shulie.takin.ext.content.script;
 
-import java.io.Serializable;
 
 import lombok.Data;
 
@@ -9,9 +8,7 @@ import lombok.Data;
  * @date 2020/4/22 上午4:14
  */
 @Data
-public class ScriptUrlExt implements Serializable {
-
-    private static final long serialVersionUID = 2155178590508223791L;
+public class ScriptUrlExt {
 
     private String name;
 

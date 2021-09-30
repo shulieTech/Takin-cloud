@@ -191,7 +191,7 @@ public class SceneManageController {
         @ApiParam(name = "current", value = "页码", required = true) Integer current,
         @ApiParam(name = "pageSize", value = "页大小", required = true) Integer pageSize,
         @ApiParam(name = "customerName", value = "客户名称") String customerName,
-        @ApiParam(name = "customerId", value = "客户ID") Long customerId,
+        @ApiParam(name = "tenantId", value = "客户ID") Long tenantId,
         @ApiParam(name = "sceneId", value = "压测场景ID") Long sceneId,
         @ApiParam(name = "sceneName", value = "压测场景名称") String sceneName,
         @ApiParam(name = "status", value = "压测状态") Integer status,
@@ -207,8 +207,7 @@ public class SceneManageController {
         SceneManageQueryInput queryVO = new SceneManageQueryInput();
         queryVO.setCurrentPage(current);
         queryVO.setPageSize(pageSize);
-        queryVO.setCustomerName(customerName);
-        queryVO.setCustomerId(customerId);
+        queryVO.setTenantId(tenantId);
         queryVO.setSceneId(sceneId);
         queryVO.setSceneName(sceneName);
         queryVO.setStatus(status);
@@ -285,8 +284,6 @@ public class SceneManageController {
         //基本信息
         detailDTO.setId(wrapperDTO.getId());
         detailDTO.setSceneName(wrapperDTO.getPressureTestSceneName());
-        // 补充数据
-        CloudPluginUtils.fillCustomerName(wrapperDTO, detailDTO);
 
         detailDTO.setUpdateTime(wrapperDTO.getUpdateTime());
         detailDTO.setLastPtTime(wrapperDTO.getLastPtTime());

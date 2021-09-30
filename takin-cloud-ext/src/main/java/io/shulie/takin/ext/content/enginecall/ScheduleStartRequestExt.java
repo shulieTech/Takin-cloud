@@ -1,6 +1,5 @@
 package io.shulie.takin.ext.content.enginecall;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +12,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements Serializable {
+public class ScheduleStartRequestExt extends ScheduleEventRequestExt {
 
     /**
      * 脚本引擎
@@ -128,7 +127,7 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
     }
 
     @Data
-    public static class DataFile implements Serializable {
+    public static class DataFile {
 
         /**
          * 文件名称
@@ -168,7 +167,7 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
     }
 
     @Data
-    public static class StartEndPosition implements Serializable {
+    public static class StartEndPosition {
 
         /**
          * 分区

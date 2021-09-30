@@ -1,12 +1,12 @@
 package com.pamirs.takin.entity.domain.vo.report;
 
-import java.io.Serializable;
-
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+import io.shulie.takin.ext.content.trace.PagingContextExt;
 
 /**
  * @author 莫问
@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @ApiModel
 @EqualsAndHashCode(callSuper = true)
-public class ReportQueryParam extends CloudUserCommonRequestExt implements Serializable {
+public class ReportQueryParam extends PagingContextExt {
 
     /**
      * 场景名称

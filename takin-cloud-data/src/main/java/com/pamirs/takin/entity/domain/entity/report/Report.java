@@ -21,7 +21,7 @@ public class Report {
     /**
      * 客户ID
      */
-    private Long customerId;
+    private Long tenantId;
 
     /**
      * 流量

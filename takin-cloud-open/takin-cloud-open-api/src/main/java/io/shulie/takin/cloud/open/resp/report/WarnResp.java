@@ -3,7 +3,6 @@ package io.shulie.takin.cloud.open.resp.report;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
 
 /**
  * @author mubai
@@ -11,9 +10,7 @@ import java.io.Serializable;
  */
 
 @Data
-public class WarnResp implements Serializable {
-
-    private static final long serialVersionUID = 7641125133561940724L;
+public class WarnResp {
 
     @ApiModelProperty(value = "报告 ID")
     private Long reportId;

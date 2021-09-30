@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.common.pojo.vo.middleware;
 
-import java.io.Serializable;
 
 import cn.afterturn.easypoi.excel.annotation.Excel;
 import lombok.Data;
@@ -14,9 +13,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @ToString(callSuper = true)
-public class CompareMiddlewareJarResultVO extends CompareMiddlewareJarVO implements Serializable {
-
-    private static final long serialVersionUID = -1L;
+public class CompareMiddlewareJarResultVO extends CompareMiddlewareJarVO {
 
     @Excel(name = "比对结果", orderNum = "4")
     private String statusDesc;

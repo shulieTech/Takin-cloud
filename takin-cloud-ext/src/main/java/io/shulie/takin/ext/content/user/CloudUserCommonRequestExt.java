@@ -1,6 +1,5 @@
 package io.shulie.takin.ext.content.user;
 
-import java.io.Serializable;
 import java.util.List;
 
 import io.shulie.takin.common.beans.page.PagingDevice;
@@ -15,9 +14,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CloudUserCommonRequestExt extends PagingDevice implements Serializable {
-
-    private static final long serialVersionUID = -1529428936481160409L;
+public class CloudUserCommonRequestExt extends PagingDevice {
 
     /**
      * 用户字段 源字段 为 uid
@@ -28,15 +25,15 @@ public class CloudUserCommonRequestExt extends PagingDevice implements Serializa
     /**
      * 租户字段
      */
-    private Long customerId;
+    private Long tenantId;
 
     /**
      * 租户ids
      */
-    private List<Long> customerIds;
+    private List<Long> tenantIds;
 
     /**
-     * license  转化成 customerId
+     * license  转化成 tenantId
      */
     private transient String license;
 

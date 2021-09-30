@@ -1,10 +1,11 @@
 package io.shulie.takin.ext.content.asset;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
+import io.shulie.takin.ext.content.trace.ContextExt;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 资产拓展模块
@@ -14,7 +15,8 @@ import lombok.Data;
  * @author 张天赐
  */
 @Data
-public class AssetInvoiceExt extends CloudUserCommonRequestExt implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class AssetInvoiceExt extends ContextExt {
     /**
      * 场景ID
      */
