@@ -5,7 +5,7 @@
     <!--@mbg.generated-->
     <!--@Table t_report-->
     <id column="id" jdbcType="BIGINT" property="id" />
-    <result column="customer_id" jdbcType="BIGINT" property="customerId" />
+    <result column="customer_id" jdbcType="BIGINT" property="tenantId" />
     <result column="amount" jdbcType="DECIMAL" property="amount" />
     <result column="scene_id" jdbcType="BIGINT" property="sceneId" />
     <result column="scene_name" jdbcType="VARCHAR" property="sceneName" />

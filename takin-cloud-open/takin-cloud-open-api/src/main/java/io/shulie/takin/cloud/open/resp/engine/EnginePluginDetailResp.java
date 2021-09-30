@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -15,7 +14,7 @@ import java.util.List;
  */
 @Data
 @ApiModel("引擎插件详情出参")
-public class EnginePluginDetailResp implements Serializable {
+public class EnginePluginDetailResp {
 
     @ApiModelProperty("插件ID")
     private Long pluginId;

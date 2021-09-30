@@ -77,7 +77,7 @@ public interface MPUtil<T> {
      * @return query 普通包装类
      */
     default QueryWrapper<T> getTenantQW() {
-        return this.getQW().eq("custom_id", CloudPluginUtils.getCustomerId())
+        return this.getQW().eq("custom_id", CloudPluginUtils.getTenantId())
             .in(StringUtils.isNotBlank(CloudPluginUtils.getFilterSql()), "user_id", CloudPluginUtils.getFilterSql());
     }
 

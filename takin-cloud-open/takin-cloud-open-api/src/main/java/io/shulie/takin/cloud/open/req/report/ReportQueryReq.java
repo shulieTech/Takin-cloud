@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
 
 /**
  * @author shiyajian
@@ -13,7 +12,7 @@ import java.io.Serializable;
 
 @Data
 @ApiModel
-public class ReportQueryReq implements Serializable {
+public class ReportQueryReq {
 
     /**
      * 场景名称

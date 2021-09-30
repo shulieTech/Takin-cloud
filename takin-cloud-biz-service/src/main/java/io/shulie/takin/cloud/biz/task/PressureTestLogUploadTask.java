@@ -30,7 +30,7 @@ public class PressureTestLogUploadTask implements Runnable {
 
     private Long reportId;
 
-    private Long customerId;
+    private Long tenantId;
 
     private SceneTaskPressureTestLogUploadDAO logUploadDAO;
 
@@ -44,13 +44,13 @@ public class PressureTestLogUploadTask implements Runnable {
 
     private String fileName;
 
-    public PressureTestLogUploadTask(Long sceneId, Long reportId, Long customerId,
+    public PressureTestLogUploadTask(Long sceneId, Long reportId, Long tenantId,
         SceneTaskPressureTestLogUploadDAO logUploadDAO, RedisClientUtils redisClientUtils,
         PushLogService pushLogService, SceneManageDAO sceneManageDAO,
         String logDir, String fileName) {
         this.sceneId = sceneId;
         this.reportId = reportId;
-        this.customerId = customerId;
+        this.tenantId = tenantId;
         this.logUploadDAO = logUploadDAO;
         this.redisClientUtils = redisClientUtils;
         this.pushLogService = pushLogService;
@@ -123,7 +123,7 @@ public class PressureTestLogUploadTask implements Runnable {
                         }
                         log.info("上传压测明细日志--文件【{}】上传完成，文件大小【{}】", this.fileName, position);
                         //删除缓存的key，记录文件上传大小
-                        createUploadRecord(this.sceneId, this.reportId, this.customerId,
+                        createUploadRecord(this.sceneId, this.reportId, this.tenantId,
                             ptlFile.getAbsolutePath(), position);
                         cleanCache(subFileName);
                         fileFetcher.close();
@@ -232,12 +232,12 @@ public class PressureTestLogUploadTask implements Runnable {
      * @param fileName -
      * @param fileSize -
      */
-    private void createUploadRecord(Long sceneId, Long reportId, Long customerId, String fileName, Long fileSize) {
+    private void createUploadRecord(Long sceneId, Long reportId, Long tenantId, String fileName, Long fileSize) {
         log.info("上传压测明细日志--文件【{}】上传完成，创建上传记录", fileName);
         ScenePressureTestLogUploadEntity entity = new ScenePressureTestLogUploadEntity() {{
             setSceneId(sceneId);
             setReportId(reportId);
-            setCustomerId(customerId);
+            setTenantId(tenantId);
             setFileName(fileName);
             setTaskStatus(SceneRunTaskStatusEnum.ENDED.getCode());
             setUploadStatus(2);

@@ -1,20 +1,21 @@
 package com.pamirs.takin.entity.domain.entity.schedule;
 
-import java.math.BigDecimal;
 import java.util.Date;
+import java.math.BigDecimal;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import io.shulie.takin.ext.content.trace.ContextExt;
 
 @Data
-public class ScheduleRecord {
+@EqualsAndHashCode(callSuper = true)
+public class ScheduleRecord extends ContextExt {
     private Long id;
 
     private Long sceneId;
 
     private Long taskId;
-
-    // todo 新增字段 客户id
-    private Long customerId;
 
     private Integer podNum;
 

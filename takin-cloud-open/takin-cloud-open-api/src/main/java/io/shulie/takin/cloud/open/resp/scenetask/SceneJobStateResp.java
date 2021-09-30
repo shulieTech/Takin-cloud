@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
 
 /**
  * ClassName:    SceneJobStateResp
@@ -15,8 +14,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel("压测任务状态返回值")
-public class SceneJobStateResp implements Serializable {
-    private static final long serialVersionUID = -8246217201102669377L;
+public class SceneJobStateResp {
     /**
      * 状态 未运行：none 运行中：running 运行失败：failed
      */

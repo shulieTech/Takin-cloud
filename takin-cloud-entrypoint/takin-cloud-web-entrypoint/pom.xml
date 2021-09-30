@@ -5,7 +5,7 @@
     <parent>
         <artifactId>takin-cloud-entrypoint</artifactId>
         <groupId>io.shulie.takin</groupId>
-        <version>takin-cloud-2.0.3</version>
+        <version>remove_auth</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>

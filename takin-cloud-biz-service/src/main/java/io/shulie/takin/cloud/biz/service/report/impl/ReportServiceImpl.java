@@ -52,7 +52,6 @@ import io.shulie.takin.cloud.common.bean.task.TaskResult;
 import io.shulie.takin.cloud.common.influxdb.InfluxDBUtil;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
@@ -72,11 +71,10 @@ import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import org.springframework.transaction.annotation.Transactional;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
+import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import com.pamirs.takin.entity.domain.vo.report.ReportQueryParam;
 import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
-import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
@@ -132,8 +130,6 @@ public class ReportServiceImpl implements ReportService {
     @Resource
     SceneManageService sceneManageService;
     @Resource
-    TSceneManageMapper tSceneManageMapper;
-    @Resource
     SceneTaskEventServie sceneTaskEventServie;
     @Resource
     TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
@@ -150,8 +146,6 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public PageInfo<CloudReportDTO> listReport(ReportQueryParam param) {
-        // 补充数据
-        CloudPluginUtils.fillReportData(param, null);
 
         PageHelper.startPage(param.getCurrentPage() + 1, param.getPageSize());
         //默认只查询普通场景的报告
@@ -179,13 +173,6 @@ public class ReportServiceImpl implements ReportService {
                 dto.setErrorMsg(errorMsgMap.get(dto.getId()));
             }
         }
-        List<Long> customerIds = list.stream().map(CloudReportDTO::getTenantId)
-            .filter(Objects::nonNull).distinct().collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(customerIds)) {
-            // 获取租户数据
-            Map<Long, String> userMap = CloudPluginUtils.getUserNameMap(customerIds);
-            list.forEach(data -> CloudPluginUtils.fillCustomerName(data, userMap));
-        }
         PageInfo<CloudReportDTO> data = new PageInfo<>(list);
         data.setTotal(old.getTotal());
 
@@ -200,9 +187,6 @@ public class ReportServiceImpl implements ReportService {
             return null;
         }
         ReportDetailOutput detail = ReportConverter.INSTANCE.ofReportDetail(report);
-
-        //补充操作用户 && 客户id
-        CloudPluginUtils.fillReportData(report, detail);
 
         //警告列表
         List<WarnBean> warnList = listWarn(reportId);
@@ -278,9 +262,6 @@ public class ReportServiceImpl implements ReportService {
         reportDetail.setTestTime(getTaskTime(reportResult.getStartTime(), new Date(), wrapper.getTotalTestTime()));
         reportDetail.setTestTotalTime(
             String.format("%d'%d\"", wrapper.getTotalTestTime() / 60, wrapper.getTotalTestTime() % 60));
-
-        // 补充操作人
-        CloudPluginUtils.fillReportData(reportResult, reportDetail);
 
         List<SceneBusinessActivityRefOutput> refList = wrapper.getBusinessActivityConfig();
         List<BusinessActivitySummaryBean> list = Lists.newArrayList();
@@ -609,14 +590,14 @@ public class ReportServiceImpl implements ReportService {
      *
      * @return -
      */
-    private StatReportDTO statTempReport(Long sceneId, Long reportId, Long customerId, String transaction) {
+    private StatReportDTO statTempReport(Long sceneId, Long reportId, Long tenantId, String transaction) {
         StringBuilder influxDbSql = new StringBuilder();
         influxDbSql.append("select");
         influxDbSql.append(
             " count as totalRequest, fail_count as failRequest, avg_tps as tps , avg_rt as avgRt, sa_count as saCount,"
                 + " active_threads as avgConcurrenceNum");
         influxDbSql.append(" from ");
-        influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, customerId));
+        influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, tenantId));
         influxDbSql.append(" where ");
         influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
         influxDbSql.append(" order by time desc limit 1");
@@ -626,13 +607,13 @@ public class ReportServiceImpl implements ReportService {
     /**
      * 巡检报告取值
      */
-    private StatInspectReportDTO statInspectReport(Long sceneId, Long reportId, Long customerId, String transaction, String startTime, String endTime) {
+    private StatInspectReportDTO statInspectReport(Long sceneId, Long reportId, Long tenantId, String transaction, String startTime, String endTime) {
         StringBuilder influxDbSql = new StringBuilder();
         influxDbSql.append("select");
         influxDbSql.append(
             " sum(count) as totalRequest,mean(avg_tps) as avgTps , sum(sum_rt)/sum(count) as avgRt , mean(success_rate) as avgSuccessRate");
         influxDbSql.append(" from ");
-        influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, customerId));
+        influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, tenantId));
         influxDbSql.append(" where ");
         influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
         influxDbSql.append(" and time >= ").append("'").append(startTime).append("'");
@@ -771,13 +752,13 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     @Override
-    public List<Metrices> metric(Long reportId, Long sceneId, Long customerId) {
+    public List<Metrices> metric(Long reportId, Long sceneId, Long tenantId) {
         List<Metrices> metricList = Lists.newArrayList();
         if (StringUtils.isBlank(String.valueOf(reportId))) {
             return metricList;
         }
         try {
-            String measurement = InfluxDBUtil.getMeasurement(sceneId, reportId, customerId);
+            String measurement = InfluxDBUtil.getMeasurement(sceneId, reportId, tenantId);
             metricList = influxWriter.query(
                 "select time,avg_tps as avgTps from " + measurement + " where transaction='all'", Metrices.class);
         } catch (Throwable e) {
@@ -856,10 +837,10 @@ public class ReportServiceImpl implements ReportService {
             long start = System.currentTimeMillis();
             TaskResult taskResult = (TaskResult)event.getExt();
             log.info("通知报告模块，开始生成本次压测{}-{}-{}的报告", taskResult.getSceneId(), taskResult.getTaskId(),
-                taskResult.getCustomerId());
+                taskResult.getTenantId());
             modifyReport(taskResult);
             log.info("本次压测{}-{}-{}的报告生成时间-{}", taskResult.getSceneId(), taskResult.getTaskId(),
-                taskResult.getCustomerId(), System.currentTimeMillis() - start);
+                taskResult.getTenantId(), System.currentTimeMillis() - start);
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：生成报告异常 --> 【通知报告模块】处理finished事件异常: {}",
                 TakinCloudExceptionEnum.TASK_STOP_DEAL_REPORT_ERROR, e);
@@ -892,8 +873,9 @@ public class ReportServiceImpl implements ReportService {
             log.error("not find reportId= {}", reportId);
             return;
         }
-        Boolean updateVersion = CloudPluginUtils.checkVersion(reportResult);
-        log.info("ReportId={}, customerId={}, CompareResult={}", reportId, reportResult.getTenantId(), updateVersion);
+        // 现版本应固定为true
+        Boolean updateVersion = true;
+        log.info("ReportId={}, tenantId={}, CompareResult={}", reportId, reportResult.getTenantId(), updateVersion);
         if (updateVersion) {
             UpdateStatusBean reportStatus = new UpdateStatusBean();
             reportStatus.setResultId(reportId);
@@ -911,7 +893,7 @@ public class ReportServiceImpl implements ReportService {
         }
 
         //汇总所有业务活动数据
-        StatReportDTO statReport = statReport(taskResult.getSceneId(), reportId, taskResult.getCustomerId(),
+        StatReportDTO statReport = statReport(taskResult.getSceneId(), reportId, taskResult.getTenantId(),
             ReportConstans.ALL_BUSINESS_ACTIVITY);
         if (statReport == null) {
             log.warn("没有找到报表数据，报表生成失败。报告ID：{}", reportId);
@@ -920,7 +902,7 @@ public class ReportServiceImpl implements ReportService {
 
         //更新报表业务活动 isConclusion 指标是否通过
         boolean isConclusion = updateReportBusinessActivity(taskResult.getSceneId(), taskResult.getTaskId(),
-            taskResult.getCustomerId());
+            taskResult.getTenantId());
 
         //保存报表结果
         saveReportResult(reportResult, taskResult, statReport, isConclusion);
@@ -945,11 +927,11 @@ public class ReportServiceImpl implements ReportService {
      *
      * @param sceneId     场景ID
      * @param reportId    报表ID
-     * @param customerId  顾客ID
+     * @param tenantId  顾客ID
      * @param transaction 业务活动
      * @return -
      */
-    private StatReportDTO statReport(Long sceneId, Long reportId, Long customerId, String transaction) {
+    private StatReportDTO statReport(Long sceneId, Long reportId, Long tenantId, String transaction) {
         StringBuilder influxDbSql = new StringBuilder();
         influxDbSql.append("select");
         influxDbSql.append(
@@ -959,7 +941,7 @@ public class ReportServiceImpl implements ReportService {
                 // 20210621 active_threads有可能出现0的情况，所以这里取平均后可能不为整数，加round取整
                 + "maxRt, count(avg_rt) as recordCount ,round(mean(active_threads)) as avgConcurrenceNum");
         influxDbSql.append(" from ");
-        influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, customerId));
+        influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, tenantId));
         influxDbSql.append(" where ");
         influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
 
@@ -971,7 +953,7 @@ public class ReportServiceImpl implements ReportService {
      *
      * @return -
      */
-    private boolean updateReportBusinessActivity(Long sceneId, Long reportId, Long customerId) {
+    private boolean updateReportBusinessActivity(Long sceneId, Long reportId, Long tenantId) {
         //报表活动
         List<ReportBusinessActivityDetail> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportId);
@@ -979,13 +961,13 @@ public class ReportServiceImpl implements ReportService {
         //业务活动是否匹配
         boolean totalPassFlag = true;
         boolean passFlag;
-        String tableName = InfluxDBUtil.getMeasurement(sceneId, reportId, customerId);
+        String tableName = InfluxDBUtil.getMeasurement(sceneId, reportId, tenantId);
         for (ReportBusinessActivityDetail reportBusinessActivityDetail : reportBusinessActivityDetails) {
             if (StringUtils.isBlank(reportBusinessActivityDetail.getBindRef())) {
                 continue;
             }
             //统计某个业务活动的数据
-            StatReportDTO data = statReport(sceneId, reportId, customerId,
+            StatReportDTO data = statReport(sceneId, reportId, tenantId,
                 reportBusinessActivityDetail.getBindRef());
             if (data == null) {
                 log.warn("没有找到匹配的压测数据：场景ID[{}],报告ID:[{}],业务活动:[{}]", sceneId, reportId,
@@ -1042,9 +1024,9 @@ public class ReportServiceImpl implements ReportService {
     private void getRedisInfo(ReportResult reportResult, TaskResult taskResult) {
         // 压力节点 启动情况
         String podName = ScheduleConstants.getPressureNodeName(taskResult.getSceneId(), taskResult.getTaskId(),
-            taskResult.getCustomerId());
+            taskResult.getTenantId());
         String podTotalName = ScheduleConstants.getPressureNodeTotalKey(taskResult.getSceneId(), taskResult.getTaskId(),
-            taskResult.getCustomerId());
+            taskResult.getTenantId());
         String podTotal = redisClientUtils.getString(podTotalName);
         if (!podTotal.equals(redisClientUtils.getObject(podName))) {
             // 两者不同
@@ -1053,7 +1035,7 @@ public class ReportServiceImpl implements ReportService {
         }
         // 压测引擎
         String engineName = ScheduleConstants.getEngineName(taskResult.getSceneId(), taskResult.getTaskId(),
-            taskResult.getCustomerId());
+            taskResult.getTenantId());
         if (redisClientUtils.getObject(engineName) == null || !podTotal.equals(redisClientUtils.getString(engineName))) {
             // 两者不同
             getReportFeatures(reportResult, ReportConstans.PRESSURE_MSG,

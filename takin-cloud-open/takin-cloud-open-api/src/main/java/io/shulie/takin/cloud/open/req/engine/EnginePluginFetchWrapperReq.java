@@ -1,10 +1,11 @@
 package io.shulie.takin.cloud.open.req.engine;
 
+import io.shulie.takin.ext.content.trace.ContextExt;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -15,7 +16,8 @@ import java.util.List;
  */
 @Data
 @ApiModel("获取引擎插件列表入参")
-public class EnginePluginFetchWrapperReq extends CloudUserCommonRequestExt implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class EnginePluginFetchWrapperReq extends ContextExt {
 
     private List<String> pluginTypes;
 

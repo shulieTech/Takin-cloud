@@ -1,6 +1,5 @@
 package io.shulie.takin.ext.content.enginecall;
 
-import java.io.Serializable;
 import java.util.Map;
 
 import lombok.Data;
@@ -10,7 +9,7 @@ import lombok.Data;
  * @date 2020-05-14
  */
 @Data
-public class ScheduleResponseExt implements Serializable {
+public class ScheduleResponseExt {
 
     /**
      * 场景ID

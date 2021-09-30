@@ -1,8 +1,8 @@
 package io.shulie.takin.cloud.common.bean.scenemanage;
 
-import java.io.Serializable;
 import java.util.List;
 
+import io.shulie.takin.ext.content.trace.ContextExt;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SceneManageQueryBean extends CloudUserCommonRequestExt implements Serializable {
+public class SceneManageQueryBean extends ContextExt {
 
     private Long sceneId;
 

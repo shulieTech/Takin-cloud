@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
 
 /**
  * 引擎插件文件信息出参
@@ -14,7 +13,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel("引擎插件文件信息出参")
-public class EnginePluginFileResp implements Serializable {
+public class EnginePluginFileResp {
 
     @ApiModelProperty("文件ID")
     private Long fileId;

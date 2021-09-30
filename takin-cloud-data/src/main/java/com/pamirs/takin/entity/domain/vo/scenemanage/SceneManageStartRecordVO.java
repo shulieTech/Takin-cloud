@@ -22,17 +22,17 @@ public class SceneManageStartRecordVO {
     /**
      * 客户Id 新增
      */
-    private Long customerId;
+    private Long tenantId;
 
     private Boolean success;
 
     private String errorMsg;
 
-    public SceneManageStartRecordVO(Long resultId, Long sceneId, Long customerId, Boolean success,
+    public SceneManageStartRecordVO(Long resultId, Long sceneId, Long tenantId, Boolean success,
         String errorMsg) {
         this.resultId = resultId;
         this.sceneId = sceneId;
-        this.customerId = customerId;
+        this.tenantId = tenantId;
         this.success = success;
         this.errorMsg = errorMsg;
     }
@@ -40,21 +40,21 @@ public class SceneManageStartRecordVO {
     /**
      * create Builder method
      **/
-    public static SceneManageStartRecordVO.Builder build(Long sceneId, Long resultId, Long customerId) {
-        return new SceneManageStartRecordVO.Builder(sceneId, resultId, customerId);
+    public static SceneManageStartRecordVO.Builder build(Long sceneId, Long resultId, Long tenantId) {
+        return new SceneManageStartRecordVO.Builder(sceneId, resultId, tenantId);
     }
 
     public static class Builder {
         private Long resultId;
         private Long sceneId;
-        private Long customerId;
+        private Long tenantId;
         private Boolean success;
         private String errorMsg;
 
-        Builder(Long sceneId, Long resultId, Long customerId) {
+        Builder(Long sceneId, Long resultId, Long tenantId) {
             this.sceneId = sceneId;
             this.resultId = resultId;
-            this.customerId = customerId;
+            this.tenantId = tenantId;
         }
 
         public SceneManageStartRecordVO.Builder success(Boolean success) {
@@ -68,7 +68,7 @@ public class SceneManageStartRecordVO {
         }
 
         public SceneManageStartRecordVO build() {
-            return new SceneManageStartRecordVO(resultId, sceneId, customerId, success, errorMsg);
+            return new SceneManageStartRecordVO(resultId, sceneId, tenantId, success, errorMsg);
         }
     }
 

@@ -1,12 +1,11 @@
 package io.shulie.takin.eventcenter;
 
 
-import java.io.Serializable;
 
 /**
  * 事件
  */
-public class Event implements Serializable {
+public class Event {
 
     private String eventName;
 

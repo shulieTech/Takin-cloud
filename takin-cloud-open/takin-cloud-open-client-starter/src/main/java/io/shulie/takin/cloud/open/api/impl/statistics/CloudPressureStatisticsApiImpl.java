@@ -31,7 +31,7 @@ public class CloudPressureStatisticsApiImpl extends CloudCommonApi implements Cl
     public ResponseResult<PressurePieTotalResp> getPressurePieTotal(PressureTotalReq req) {
         TakinResponseEntity<ResponseResult<PressurePieTotalResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.STATISTIC_PRESSUREPIE_URL,
-                getHeaders(req), req, new TypeReference<ResponseResult<PressurePieTotalResp>>() {});
+                getHeaders(), req, new TypeReference<ResponseResult<PressurePieTotalResp>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -42,7 +42,7 @@ public class CloudPressureStatisticsApiImpl extends CloudCommonApi implements Cl
     public ResponseResult<ReportTotalResp> getReportTotal(PressureTotalReq req) {
         TakinResponseEntity<ResponseResult<ReportTotalResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.STATISTIC_REPORT_URL,
-                getHeaders(req), req, new TypeReference<ResponseResult<ReportTotalResp>>() {});
+                getHeaders(), req, new TypeReference<ResponseResult<ReportTotalResp>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -53,7 +53,7 @@ public class CloudPressureStatisticsApiImpl extends CloudCommonApi implements Cl
     public ResponseResult<List<PressureListTotalResp>> getPressureListTotal(PressureTotalReq req) {
         TakinResponseEntity<ResponseResult<List<PressureListTotalResp>>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.STATISTIC_PRESSURELIST_URL,
-                getHeaders(req), req, new TypeReference<ResponseResult<List<PressureListTotalResp>>>() {});
+                getHeaders(), req, new TypeReference<ResponseResult<List<PressureListTotalResp>>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }

@@ -100,7 +100,7 @@
 ////            setFileName("/Users/moriarty/Documents/shulie/tetFile.jtl");
 ////            setSceneId(123L);
 ////            setReportId(1901L);
-////            setCustomerId(9725L);
+////            setTenantId(9725L);
 ////            setTaskStatus(SceneRunTaskStatusEnum.ENDED.getCode());
 ////            setUploadStatus(2);
 ////            setCreateTime(new Date());

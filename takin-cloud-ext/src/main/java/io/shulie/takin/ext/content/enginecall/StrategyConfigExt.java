@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
@@ -13,9 +12,7 @@ import java.math.BigDecimal;
  */
 @Data
 @ApiModel(description = "分配策略列表")
-public class StrategyConfigExt implements Serializable {
-
-    private static final long serialVersionUID = -8740307347149572470L;
+public class StrategyConfigExt {
 
     @ApiModelProperty(value = "ID")
     private Long id;

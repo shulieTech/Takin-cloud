@@ -1,8 +1,8 @@
 package io.shulie.takin.cloud.open.req.statistics;
 
-import java.io.Serializable;
 import java.util.List;
 
+import io.shulie.takin.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
@@ -13,7 +13,7 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PressureTotalReq extends CloudUserCommonRequestExt implements Serializable {
+public class PressureTotalReq extends ContextExt {
     private String type;
     private String startTime;
     private String endTime;

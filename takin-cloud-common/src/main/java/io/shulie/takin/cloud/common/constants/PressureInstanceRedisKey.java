@@ -35,7 +35,7 @@ public class PressureInstanceRedisKey {
     }
 
 
-    public static String getEngineInstanceRedisKey(Long sceneId, Long taskId, Long customerId){
-        return String.format(PressureInstanceRedisKey.PRESSURE_ENGINE_INSTANCE_REDIS_KEY, sceneId, taskId, customerId);
+    public static String getEngineInstanceRedisKey(Long sceneId, Long taskId, Long tenantId){
+        return String.format(PressureInstanceRedisKey.PRESSURE_ENGINE_INSTANCE_REDIS_KEY, sceneId, taskId, tenantId);
     }
 }

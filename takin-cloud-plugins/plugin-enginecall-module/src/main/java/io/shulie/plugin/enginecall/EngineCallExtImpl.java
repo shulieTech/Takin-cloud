@@ -95,7 +95,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         notifyTaskResult(request);
         // 启动压测
         return engineCallService.createJob(request.getRequest().getSceneId(), request.getRequest().getTaskId(),
-                request.getRequest().getCustomerId());
+                request.getRequest().getTenantId());
 
     }
 
@@ -144,7 +144,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         Map<String, Object> configMap = new HashMap<>();
         ScheduleStartRequestExt scheduleStartRequest = request.getRequest();
         configMap.put("name", ScheduleConstants.getConfigMapName(scheduleStartRequest.getSceneId(), scheduleStartRequest.getTaskId(),
-                scheduleStartRequest.getCustomerId()));
+                scheduleStartRequest.getTenantId()));
         JSONObject param = new JSONObject();
         param.put("scriptPath", scriptPath + SceneManageConstant.FILE_SPLIT + scheduleStartRequest.getScriptPath());
         param.put("pressureEnginePathUrl",scriptPath + SceneManageConstant.FILE_SPLIT);
@@ -209,7 +209,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         param.put("enginePressureParams", enginePressureParams);
 
         String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(scheduleStartRequest.getSceneId(), scheduleStartRequest.getTaskId(),
-                scheduleStartRequest.getCustomerId());
+                scheduleStartRequest.getTenantId());
         redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_ALL_LIMIT, scheduleStartRequest.getTps() + "");
         redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_LIMIT, podTpsNum + "");
         redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_POD_NUM, scheduleStartRequest.getTotalIp() + "");
@@ -217,12 +217,12 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         param.put(TakinRequestConstant.CLUSTER_TEST_SCENE_HEADER_VALUE, scheduleStartRequest.getSceneId());
         param.put(TakinRequestConstant.CLUSTER_TEST_TASK_HEADER_VALUE, scheduleStartRequest.getTaskId());
         //  客户id
-        param.put(TakinRequestConstant.CLUSTER_TEST_CUSTOMER_HEADER_VALUE, scheduleStartRequest.getCustomerId());
+        param.put(TakinRequestConstant.CLUSTER_TEST_CUSTOMER_HEADER_VALUE, scheduleStartRequest.getTenantId());
 
         param.put("consoleUrl",
                 console + ScheduleConstants.getConsoleUrl(request.getRequest().getSceneId(),
                         request.getRequest().getTaskId(),
-                        request.getRequest().getCustomerId()));
+                        request.getRequest().getTenantId()));
         param.put("takinCloudCallbackUrl", console + "/api/engine/callback");
         // 解决 单个pod ,但文件处于需要切割分类状态的bug
         param.put("podCount", scheduleStartRequest.getTotalIp());
@@ -231,14 +231,14 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         param.put("memSetting", pressureEngineMemSetting);
         configMap.put("engine.conf", param.toJSONString());
         engineCallService.createConfigMap(configMap, PressureInstanceRedisKey.getEngineInstanceRedisKey(request.getRequest().getSceneId(),
-                request.getRequest().getTaskId(), request.getRequest().getCustomerId()));
+                request.getRequest().getTaskId(), request.getRequest().getTenantId()));
     }
 
     private void notifyTaskResult(ScheduleRunRequest request) {
         SceneTaskNotifyParam notify = new SceneTaskNotifyParam();
         notify.setSceneId(request.getRequest().getSceneId());
         notify.setTaskId(request.getRequest().getTaskId());
-        notify.setCustomerId(request.getRequest().getCustomerId());
+        notify.setTenantId(request.getRequest().getTenantId());
         notify.setStatus("started");
         sceneTaskService.taskResultNotify(notify);
     }

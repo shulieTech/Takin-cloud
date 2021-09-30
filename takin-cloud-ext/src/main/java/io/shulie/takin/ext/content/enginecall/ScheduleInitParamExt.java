@@ -22,7 +22,7 @@ public class ScheduleInitParamExt {
     /**
      * 客户id 新增
      */
-    private Long customerId;
+    private Long tenantId;
 
     /**
      * POD总数

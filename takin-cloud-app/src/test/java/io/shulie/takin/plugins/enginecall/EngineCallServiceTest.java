@@ -25,7 +25,7 @@ public class EngineCallServiceTest {
     public void createJob() {
         Long sceneId = 1L;
         Long taskId = 1L;
-        Long customerId = -1L;
+        Long tenantId = -1L;
         ScheduleRunRequest request = new ScheduleRunRequest();
         request.setScheduleId(1L);
         ScheduleStartRequestExt requestExt = new ScheduleStartRequestExt();
@@ -57,7 +57,7 @@ public class EngineCallServiceTest {
         requestExt.setTryRun(false);
         requestExt.setSceneId(sceneId);
         requestExt.setTaskId(taskId);
-        requestExt.setCustomerId(customerId);
+        requestExt.setTenantId(tenantId);
 //        requestExt.setExtend();
 
         request.setRequest(requestExt);

@@ -75,12 +75,12 @@ public abstract class AbstractIndicators {
      * @param reportId 报告主键
      * @return -
      */
-    protected String getPressureTaskKey(Long sceneId, Long reportId, Long customerId) {
+    protected String getPressureTaskKey(Long sceneId, Long reportId, Long tenantId) {
         // 兼容原始redis key
-        if (customerId == null) {
+        if (tenantId == null) {
             return String.format("COLLECTOR:TASK:%s:%s", sceneId, reportId);
         }
-        return String.format("COLLECTOR:TASK:%s:%s:%S", sceneId, reportId, customerId);
+        return String.format("COLLECTOR:TASK:%s:%s:%S", sceneId, reportId, tenantId);
     }
 
     public boolean lock(String key, String value) {
@@ -113,24 +113,24 @@ public abstract class AbstractIndicators {
         return String.format("%s:%s:%s", taskKey, time, transaction);
     }
 
-    public String getTaskKey(Long sceneId, Long reportId, Long customerId) {
+    public String getTaskKey(Long sceneId, Long reportId, Long tenantId) {
         // 兼容原始redis key
-        if (customerId == null) {
+        if (tenantId == null) {
             return String.format("%s_%s", sceneId, reportId);
         }
-        return String.format("%s_%s_%s", sceneId, reportId, customerId);
+        return String.format("%s_%s_%s", sceneId, reportId, tenantId);
     }
 
-    public static String getRedisTpsLimitKey(Long sceneId, Long reportId, Long customerId) {
-        return String.format("__REDIS_TPS_LIMIT_KEY_%s_%s_%s__", sceneId, reportId, customerId);
+    public static String getRedisTpsLimitKey(Long sceneId, Long reportId, Long tenantId) {
+        return String.format("__REDIS_TPS_LIMIT_KEY_%s_%s_%s__", sceneId, reportId, tenantId);
     }
 
-    public static String getRedisTpsAllLimitKey(Long sceneId, Long reportId, Long customerId) {
-        return String.format("__REDIS_TPS_ALL_LIMIT_KEY_%s_%s_%s__", sceneId, reportId, customerId);
+    public static String getRedisTpsAllLimitKey(Long sceneId, Long reportId, Long tenantId) {
+        return String.format("__REDIS_TPS_ALL_LIMIT_KEY_%s_%s_%s__", sceneId, reportId, tenantId);
     }
 
-    public static String getRedisTpsPodNumKey(Long sceneId, Long reportId, Long customerId) {
-        return String.format("__REDIS_TPS_POD_NUM_KEY_%s_%s_%s__", sceneId, reportId, customerId);
+    public static String getRedisTpsPodNumKey(Long sceneId, Long reportId, Long tenantId) {
+        return String.format("__REDIS_TPS_POD_NUM_KEY_%s_%s_%s__", sceneId, reportId, tenantId);
     }
 
     /**

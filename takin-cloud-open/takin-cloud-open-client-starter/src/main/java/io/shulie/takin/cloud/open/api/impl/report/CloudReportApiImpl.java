@@ -39,7 +39,7 @@ public class CloudReportApiImpl extends CloudCommonApi implements CloudReportApi
     public ResponseResult<String> addWarn(WarnCreateReq req) {
         TakinResponseEntity<ResponseResult<String>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_WARN_URL,
-                getHeaders(req), new TypeReference<ResponseResult<String>>() {}, req);
+                getHeaders(), new TypeReference<ResponseResult<String>>() {}, req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -51,7 +51,7 @@ public class CloudReportApiImpl extends CloudCommonApi implements CloudReportApi
     public ResponseResult<String> updateReportConclusion(UpdateReportConclusionReq req) {
         TakinResponseEntity<ResponseResult<String>> takinResponseEntity =
             HttpHelper.doPut(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_UPDATE_STATE_URL,
-                getHeaders(req), new TypeReference<ResponseResult<String>>() {}, req);
+                getHeaders(), new TypeReference<ResponseResult<String>>() {}, req);
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -63,7 +63,7 @@ public class CloudReportApiImpl extends CloudCommonApi implements CloudReportApi
     public ResponseResult<ReportDetailResp> getReportByReportId(ReportDetailByIdReq req) {
         TakinResponseEntity<ResponseResult<ReportDetailResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_DETAIL_GET_URL,
-                getHeaders(req), req, new TypeReference<ResponseResult<ReportDetailResp>>() {});
+                getHeaders(), req, new TypeReference<ResponseResult<ReportDetailResp>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
@@ -75,7 +75,7 @@ public class CloudReportApiImpl extends CloudCommonApi implements CloudReportApi
     public ResponseResult<ReportDetailResp> tempReportDetail(ReportDetailBySceneIdReq req) {
         TakinResponseEntity<ResponseResult<ReportDetailResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_TEMP_DETAIL_GET_URL,
-                getHeaders(req), req, new TypeReference<ResponseResult<ReportDetailResp>>() {});
+                getHeaders(), req, new TypeReference<ResponseResult<ReportDetailResp>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }

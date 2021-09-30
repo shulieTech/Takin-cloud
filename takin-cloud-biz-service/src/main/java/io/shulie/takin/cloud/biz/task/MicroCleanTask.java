@@ -87,15 +87,15 @@ public class MicroCleanTask implements InitializingBean {
                             if (reportId == -1){
                                 return;
                             }
-                            Long customerId = getCustomerId(sceneTaskJobName,sceneId,reportId);
-                            if (customerId != null && customerId == 0){
+                            Long tenantId = getCustomerId(sceneTaskJobName,sceneId,reportId);
+                            if (tenantId != null && tenantId == 0){
                                 return;
                             }
                             SceneManageListResult sceneManage = sceneManageDAO.querySceneManageById(sceneId);
                             if (sceneManage != null && clearSceneStatus.contains(sceneManage.getStatus())){
                                 log.info("兜底任务删除匹配到的任务:{},场景状态：{}",sceneTaskJobName,sceneManage.getStatus());
                                 String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(sceneId, reportId,
-                                        customerId);
+                                        tenantId);
                                 ScheduleStopRequestExt scheduleStopRequest = new ScheduleStopRequestExt();
                                 scheduleStopRequest.setJobName(sceneTaskJobName);
                                 scheduleStopRequest.setEngineInstanceRedisKey(engineInstanceRedisKey);
@@ -111,7 +111,7 @@ public class MicroCleanTask implements InitializingBean {
     private Long getCustomerId(String jobName, Long sceneId, Long reportId) {
         try {
             String tempString = jobName.replace(ScheduleConstants.SCENE_TASK + sceneId + "-" + reportId + "-", "");
-            //如果为空说明没有customerId
+            //如果为空说明没有tenantId
             if ("".equals(tempString)){
                 return null;
             }
@@ -126,7 +126,7 @@ public class MicroCleanTask implements InitializingBean {
     private Long getReportId(String jobName, Long sceneId) {
         try {
             String tempString = jobName.replace(ScheduleConstants.SCENE_TASK + sceneId + "-", "");
-            //包含"-"说明有customerId
+            //包含"-"说明有tenantId
             if (tempString.contains("-")){
                 tempString = tempString.substring(0, tempString.indexOf("-"));
             }

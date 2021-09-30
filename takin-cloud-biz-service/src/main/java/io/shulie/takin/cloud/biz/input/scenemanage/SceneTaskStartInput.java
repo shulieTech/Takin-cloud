@@ -1,9 +1,10 @@
 package io.shulie.takin.cloud.biz.input.scenemanage;
 
+import lombok.Data;
+
 import java.util.List;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
-import lombok.Data;
+import io.shulie.takin.ext.content.trace.ContextExt;
 import lombok.EqualsAndHashCode;
 
 /**
@@ -12,7 +13,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SceneTaskStartInput extends CloudUserCommonRequestExt {
+public class SceneTaskStartInput extends ContextExt {
 
     private Long sceneId;
 

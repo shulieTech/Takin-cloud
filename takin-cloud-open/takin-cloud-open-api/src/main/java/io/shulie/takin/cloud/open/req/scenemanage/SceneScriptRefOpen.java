@@ -3,7 +3,6 @@ package io.shulie.takin.cloud.open.req.scenemanage;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
 
 /**
  * @author mubai
@@ -11,9 +10,7 @@ import java.io.Serializable;
  */
 
 @Data
-public class SceneScriptRefOpen implements Serializable {
-
-    private static final long serialVersionUID = -639740802985171268L;
+public class SceneScriptRefOpen {
 
     @ApiModelProperty(value = "ID")
     private Long id;

@@ -64,7 +64,7 @@ public class SceneManageDAOImpl
     @Override
     public List<SceneManageEntity> listFromUpdateScript() {
         return this.list(this.getTenantLQW().select(SceneManageEntity::getId,
-            SceneManageEntity::getCustomerId, SceneManageEntity::getFeatures));
+            SceneManageEntity::getTenantId, SceneManageEntity::getFeatures));
     }
 
     @Override

@@ -1,18 +1,19 @@
 package com.pamirs.takin.entity.domain.entity.scene.manage;
 
 import java.util.Date;
-import java.io.Serializable;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import io.shulie.takin.ext.content.trace.ContextExt;
 
 @Data
-public class SceneManage implements Serializable {
-
-    private static final long serialVersionUID = -5922461634087976404L;
+@EqualsAndHashCode(callSuper = true)
+public class SceneManage extends ContextExt {
 
     private Long id;
 
-    private Long customerId;
+    private Long tenantId;
 
     private String sceneName;
 
@@ -37,10 +38,4 @@ public class SceneManage implements Serializable {
     private String updateName;
 
     private String ptConfig;
-
-    private Long deptId;
-    /**
-     * 用户id
-     */
-    private Long userId;
 }

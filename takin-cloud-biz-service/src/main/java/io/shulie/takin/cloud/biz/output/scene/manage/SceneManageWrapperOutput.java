@@ -1,6 +1,8 @@
 package io.shulie.takin.cloud.biz.output.scene.manage;
 
-import java.io.Serializable;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -9,11 +11,9 @@ import javax.validation.constraints.NotNull;
 import io.shulie.takin.cloud.common.bean.RuleBean;
 import io.shulie.takin.cloud.common.bean.TimeBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneBusinessActivityRefBean;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.ext.content.trace.ContextExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * @author qianshui
@@ -22,9 +22,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "场景详情出参")
-public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = 7324148443733465383L;
+public class SceneManageWrapperOutput extends ContextExt {
 
     @ApiModelProperty(value = "压测场景ID")
     private Long id;
@@ -121,8 +119,6 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
     @EqualsAndHashCode(callSuper = true)
     public static class SceneBusinessActivityRefOutput extends SceneBusinessActivityRefBean {
 
-        private static final long serialVersionUID = -6384484202725660595L;
-
         @ApiModelProperty(value = "ID")
         private Long id;
 
@@ -143,9 +139,7 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
     }
 
     @Data
-    public static class SceneSlaRefOutput implements Serializable {
-
-        private static final long serialVersionUID = 5117439939447730586L;
+    public static class SceneSlaRefOutput {
 
         @ApiModelProperty(value = "ID")
         private Long id;
@@ -167,9 +161,7 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
     }
 
     @Data
-    public static class SceneScriptRefOutput implements Serializable {
-
-        private static final long serialVersionUID = -1038145286303661484L;
+    public static class SceneScriptRefOutput {
 
         @ApiModelProperty(value = "ID")
         private Long id;
@@ -206,7 +198,7 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
     }
 
     @Data
-    public static class EnginePluginRefOutput implements Serializable {
+    public static class EnginePluginRefOutput {
         @ApiModelProperty(value = "插件ID")
         private Long id;
         @ApiModelProperty(value = "插件版本")

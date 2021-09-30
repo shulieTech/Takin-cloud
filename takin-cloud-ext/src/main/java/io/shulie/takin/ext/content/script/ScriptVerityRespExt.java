@@ -2,14 +2,13 @@ package io.shulie.takin.ext.content.script;
 
 import lombok.Data;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author zhaoyong
  */
 @Data
-public class ScriptVerityRespExt implements Serializable {
+public class ScriptVerityRespExt {
 
     /**
      * 错误信息列表

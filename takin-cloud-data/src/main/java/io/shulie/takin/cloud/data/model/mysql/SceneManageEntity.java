@@ -14,20 +14,11 @@ import lombok.Data;
 @TableName(value = "t_scene_manage")
 public class SceneManageEntity {
 
+    /**
+     * 自增主键
+     */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-
-    /**
-     * 客户id
-     */
-    @TableField(value = "customer_id", fill = FieldFill.INSERT)
-    private Long customerId;
-
-    /**
-     * 部门id
-     */
-    @TableField(value = "dept_id", fill = FieldFill.INSERT)
-    private Long deptId;
 
     /**
      * 场景名称
@@ -84,7 +75,6 @@ public class SceneManageEntity {
     @TableField(value = "features")
     private String features;
 
-
     /**
      * 创建人
      */
@@ -104,10 +94,20 @@ public class SceneManageEntity {
     private String updateName;
 
     /**
-     * 用户id
+     * 用户主键
      */
-    @TableField(value = "user_id", fill = FieldFill.INSERT)
+    @TableField(value = "user_id")
     private Long userId;
+    /**
+     * 租户主键
+     */
+    @TableField(value = "tenant_id")
+    private Long tenantId;
+    /**
+     * 环境编码
+     */
+    @TableField(value = "env_code")
+    private String envCode;
 
 }
 

@@ -19,7 +19,7 @@ public class ReportEntity {
      * 客户id
      */
     @TableField(value = "customer_id")
-    private Long customerId;
+    private Long tenantId;
 
     /**
      * 流量消耗

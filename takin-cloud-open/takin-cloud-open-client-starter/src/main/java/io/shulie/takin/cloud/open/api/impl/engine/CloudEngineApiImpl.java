@@ -39,8 +39,7 @@ public class CloudEngineApiImpl extends CloudCommonApi implements CloudEngineApi
     public ResponseResult<Map<String, List<EnginePluginSimpleInfoResp>>> listEnginePlugins(
         EnginePluginFetchWrapperReq request) {
         return HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.ENGINE_FETCH_PLUGINS_URI,
-            getHeaders(request),
-            new TypeReference<ResponseResult<Map<String, List<EnginePluginSimpleInfoResp>>>>() {}, request).getBody();
+            getHeaders(), new TypeReference<ResponseResult<Map<String, List<EnginePluginSimpleInfoResp>>>>() {}, request).getBody();
     }
 
     /**
@@ -52,7 +51,7 @@ public class CloudEngineApiImpl extends CloudCommonApi implements CloudEngineApi
     @Override
     public ResponseResult<EnginePluginDetailResp> getEnginePluginDetails(EnginePluginDetailsWrapperReq request) {
         return HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.ENGINE_FETCH_PLUGIN_DETAILS_URI,
-            getHeaders(request), new TypeReference<ResponseResult<EnginePluginDetailResp>>() {}, request)
+                getHeaders(), new TypeReference<ResponseResult<EnginePluginDetailResp>>() {}, request)
             .getBody();
     }
 

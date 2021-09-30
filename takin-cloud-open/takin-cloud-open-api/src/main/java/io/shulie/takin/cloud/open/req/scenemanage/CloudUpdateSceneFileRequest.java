@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import io.shulie.takin.cloud.common.constants.ValidConstants;
 import io.shulie.takin.cloud.common.pojo.dto.scenemanage.UploadFileDTO;
+import io.shulie.takin.ext.content.trace.ContextExt;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -20,7 +21,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @ApiModel("请求类-更新场景对应的脚本文件")
-public class CloudUpdateSceneFileRequest extends CloudUserCommonRequestExt {
+public class CloudUpdateSceneFileRequest extends ContextExt {
 
     /**
      * 脚本发布id, 弃用

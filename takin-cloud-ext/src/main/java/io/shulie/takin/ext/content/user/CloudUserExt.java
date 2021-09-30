@@ -15,8 +15,8 @@ public class CloudUserExt {
     @ApiModelProperty(name = "id", value = "用户id")
     private Long id;
 
-    @ApiModelProperty(name = "customerId", value = "租户id")
-    private Long customerId;
+    @ApiModelProperty(name = "tenantId", value = "租户id")
+    private Long tenantId;
 
     @ApiModelProperty(name = "name", value = "登录账号")
     private String name;

@@ -1,8 +1,11 @@
 package io.shulie.takin.cloud.open.api.impl;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.google.common.collect.Maps;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import io.shulie.takin.cloud.common.utils.AppBusinessUtil;
@@ -18,18 +21,15 @@ public class CloudCommonApi {
     /**
      * 转化 header
      *
-     * @param ext -
      * @return -
      */
-    protected Map<String, String> getHeaders(CloudUserCommonRequestExt ext) {
-        Map<String, String> map = Maps.newHashMap();
-        map.put(CloudApiConstant.LICENSE_REQUIRED, "true");
-        //map.put(CloudApiConstant.LICENSE_KEY, this.getDevLicense(ext.getLicense()));
-        if (StringUtils.isNotBlank(ext.getFilterSql())) {
-            map.put(CloudApiConstant.FILTER_SQL, ext.getFilterSql());
-        }
-        map.put(CloudApiConstant.USER_ID, String.valueOf(ext.getUserId()));
-        return map;
+    protected Map<String, String> getHeaders() {
+        // 格式转换
+        Map<String, Object> header = BeanUtil.beanToMap(CloudPluginUtils.getContext());
+        Map<String, String> headerMap = new HashMap<>(header.size());
+        header.forEach((k, v) -> headerMap.put(k, v.toString()));
+        // 返回数据
+        return headerMap;
     }
 
     /**

@@ -1,9 +1,9 @@
 package io.shulie.takin.cloud.open.req.scenemanage;
 
-import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
+import io.shulie.takin.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
@@ -15,9 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SceneManageDeleteReq extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = 5258828941952507100L;
+public class SceneManageDeleteReq extends ContextExt {
 
     @NotNull
     @ApiModelProperty(value = "ID")

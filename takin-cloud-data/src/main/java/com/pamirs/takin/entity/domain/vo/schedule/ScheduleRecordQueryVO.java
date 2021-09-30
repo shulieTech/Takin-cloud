@@ -1,6 +1,5 @@
 package com.pamirs.takin.entity.domain.vo.schedule;
 
-import java.io.Serializable;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,7 +11,7 @@ import io.shulie.takin.common.beans.page.PagingDevice;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ScheduleRecordQueryVO extends PagingDevice implements Serializable {
+public class ScheduleRecordQueryVO extends PagingDevice {
 
     private Long sceneId;
 }

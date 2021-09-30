@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -12,9 +11,7 @@ import java.util.List;
  */
 @Data
 @ApiModel("状态检查返回值")
-public class SceneActionResp implements Serializable {
-
-    private static final long serialVersionUID = 5802897364685645749L;
+public class SceneActionResp {
 
     @ApiModelProperty(value = "状态值")
     private Long data;

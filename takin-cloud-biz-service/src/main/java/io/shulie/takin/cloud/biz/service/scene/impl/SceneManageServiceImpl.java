@@ -345,12 +345,9 @@ public class SceneManageServiceImpl implements SceneManageService {
             .stream().map(Report::getSceneId).distinct().collect(Collectors.toList());
         resultList.forEach(data -> data.setHasReport(sceneIds.contains(data.getId())));
 
-        List<Long> customerIds = resultList.stream().map(SceneManageListOutput::getTenantId).distinct()
+        List<Long> tenantIds = resultList.stream().map(SceneManageListOutput::getTenantId).distinct()
             .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(customerIds)) {
-            Map<Long, String> userMap = CloudPluginUtils.getUserNameMap(customerIds);
-            resultList.forEach(data -> CloudPluginUtils.fillCustomerName(data, userMap));
-        }
+
         // 状态适配
         resultList.forEach(data -> data.setStatus(SceneManageStatusEnum.getAdaptStatus(data.getStatus())));
 
@@ -556,7 +553,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (!Arrays.asList(statusVO.getCheckEnum()).contains(statusEnum)) {
             log.error("异常代码【{}】,异常内容：更新生命周期失败 --> check状态错误,本次压测 {}-{}-{} 状态更新失败，更新生命周期：{} -> {},check:{}",
                 TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId(), statusVO.getResultId(),
-                statusVO.getCustomerId(), statusMsg, updateStatus, checkStatus);
+                statusVO.getTenantId(), statusMsg, updateStatus, checkStatus);
             toFailureState(statusVO.getSceneId(), statusVO.getResultId(),
                 SceneManageErrorEnum.SCENEMANAGE_UPDATE_LIFECYCLE_CHECK_FAILED.getErrorMessage());
             return false;
@@ -572,7 +569,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             // 压测引擎启动状态是 更新下 再次更新报告开始时间
             if (statusVO.getUpdateEnum().equals(SceneManageStatusEnum.ENGINE_RUNNING)) {
                 String engineName = ScheduleConstants.getEngineName(statusVO.getSceneId(), statusVO.getResultId(),
-                    statusVO.getCustomerId());
+                    statusVO.getTenantId());
                 String startTime = engineName + ScheduleConstants.FIRST_SIGN;
                 tReportMapper.updateStartTime(statusVO.getResultId(), new Date(Long.parseLong(
                     Optional.ofNullable(redisClientUtils.getString(startTime))
@@ -590,11 +587,11 @@ public class SceneManageServiceImpl implements SceneManageService {
             //        report.setStartTime(new Date());
             sceneManageDAO.update(updateParam);
             log.info("本次压测{}-{}-{} 状态更新成功，更新生命周期：{} -> {},check:{}", statusVO.getSceneId(), statusVO.getResultId(),
-                statusVO.getCustomerId(), statusMsg, updateStatus, checkStatus);
+                statusVO.getTenantId(), statusMsg, updateStatus, checkStatus);
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：更新生命周期失败 --> 本次压测{}-{}-{} 状态更新失败，更新生命周期：{} -> {},check:{},异常信息:{}",
                 TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId(), statusVO.getResultId(),
-                statusVO.getCustomerId(), statusMsg, updateStatus, checkStatus, e);
+                statusVO.getTenantId(), statusMsg, updateStatus, checkStatus, e);
             toFailureState(statusVO.getSceneId(), statusVO.getResultId(), "状态更新失败" + e.getLocalizedMessage());
             return false;
 
@@ -917,7 +914,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         wrapperOutput.setType(sceneManageResult.getType());
         // 状态适配
         wrapperOutput.setStatus(SceneManageStatusEnum.getAdaptStatus(sceneManageResult.getStatus()));
-        wrapperOutput.setTenantId(sceneManageResult.getCustomerId());
+        wrapperOutput.setTenantId(sceneManageResult.getTenantId());
         wrapperOutput.setUpdateTime(DateUtil.formatDateTime(sceneManageResult.getUpdateTime()));
         wrapperOutput.setLastPtTime(DateUtil.formatDateTime(sceneManageResult.getLastPtTime()));
         fillPtConfig(wrapperOutput, sceneManageResult);

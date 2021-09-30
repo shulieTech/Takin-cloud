@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.data.result.scenemanage;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,6 +10,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import io.shulie.takin.cloud.common.enums.machine.EnumResult;
 import io.shulie.takin.cloud.common.bean.TimeBean;
+import io.shulie.takin.ext.content.trace.ContextExt;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,9 +21,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SceneDetailResult extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = 1453217777875591954L;
+public class SceneDetailResult extends ContextExt {
 
     private Long id;
 

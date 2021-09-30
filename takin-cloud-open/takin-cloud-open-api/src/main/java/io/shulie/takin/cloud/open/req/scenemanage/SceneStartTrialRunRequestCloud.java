@@ -1,17 +1,18 @@
 package io.shulie.takin.cloud.open.req.scenemanage;
 
+import io.shulie.takin.ext.content.trace.ContextExt;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
 
 /**
  * @author zhaoyong
  * 试跑启动参数
  */
 @Data
-public class SceneStartTrialRunRequestCloud extends CloudUserCommonRequestExt implements Serializable {
-    private static final long serialVersionUID = 2712267844636591660L;
+@EqualsAndHashCode(callSuper = true)
+public class SceneStartTrialRunRequestCloud extends ContextExt {
 
     /**
      * 场景id

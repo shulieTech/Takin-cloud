@@ -1,6 +1,5 @@
 package io.shulie.takin.ext.content.enginecall;
 
-import java.io.Serializable;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,7 +10,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ScheduleStopRequestExt extends ScheduleEventRequestExt implements Serializable {
+public class ScheduleStopRequestExt extends ScheduleEventRequestExt {
 
     private String jobName;
 

@@ -66,7 +66,6 @@ public class GsonUtil {
 
     //    public static void main(String[] args) {
     //        Map<String, Object> anonymousClassMap = new HashMap<String, Object>() {
-    //            private static final long serialVersionUID = 1L;
     //
     //            {
     //                put("item", 10135668);

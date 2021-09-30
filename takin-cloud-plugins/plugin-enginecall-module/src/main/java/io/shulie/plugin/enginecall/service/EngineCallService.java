@@ -15,7 +15,7 @@ public interface EngineCallService {
      * @param taskId
      * @return -
      */
-    String createJob(Long sceneId,Long taskId,Long customerId);
+    String createJob(Long sceneId,Long taskId,Long tenantId);
 
     /**
      * 删除任务

@@ -1,6 +1,5 @@
 package com.pamirs.takin.entity.domain.dto.report;
 
-import java.io.Serializable;
 import java.util.List;
 
 import io.swagger.annotations.ApiModel;
@@ -15,9 +14,7 @@ import lombok.Data;
  */
 @ApiModel
 @Data
-public class RiskApplicationCountDTO implements Serializable {
-
-    private static final long serialVersionUID = 4060772976299354894L;
+public class RiskApplicationCountDTO {
 
     /**
      * 应用数量

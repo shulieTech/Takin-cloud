@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.common.bean;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -11,9 +10,7 @@ import lombok.Data;
  * @date 2020/4/18 上午10:58
  */
 @Data
-public class RuleBean implements Serializable {
-
-    private static final long serialVersionUID = 1789327058040467753L;
+public class RuleBean {
 
     @ApiModelProperty(value = "指标类型")
     private Integer indexInfo;
