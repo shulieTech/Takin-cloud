@@ -84,11 +84,17 @@ public class SceneManageWrapperInput extends CloudUserCommonRequestExt implement
 
     private Long scriptId;
 
+    private Long scriptDeployId;
+
     private Long fixTimer;
 
     private Integer loopsNum;
 
     private Integer concurrencyNum;
+
+    private Long creatorId;
+
+    private String scriptName;
     //
     //    @Data
     //    public static class SceneScriptRefInput implements Serializable {

@@ -1,4 +1,4 @@
-package io.shulie.takin.sys;
+package io.shulie.tro.sys;
 
 import io.shulie.takin.app.Application;
 import org.junit.Test;
