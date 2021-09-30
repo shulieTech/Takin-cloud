@@ -104,16 +104,16 @@
                 <type>pom</type>
             </dependency>
 
-<!--            <dependency>-->
-<!--                <groupId>org.quartz-scheduler</groupId>-->
-<!--                <artifactId>quartz</artifactId>-->
-<!--                <version>${quartz.version}</version>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>org.quartz-scheduler</groupId>-->
-<!--                <artifactId>quartz-jobs</artifactId>-->
-<!--                <version>${quartz.version}</version>-->
-<!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.quartz-scheduler</groupId>-->
+            <!--                <artifactId>quartz</artifactId>-->
+            <!--                <version>${quartz.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.quartz-scheduler</groupId>-->
+            <!--                <artifactId>quartz-jobs</artifactId>-->
+            <!--                <version>${quartz.version}</version>-->
+            <!--            </dependency>-->
             <!-- zk客户端框架 -->
             <dependency>
                 <groupId>org.apache.curator</groupId>
@@ -277,18 +277,18 @@
     </dependencyManagement>
 
 
-    <distributionManagement>
-        <repository>
-            <id>${releases.id}</id>
-            <name>${releases.name}</name>
-            <url>${releases.url}</url>
-        </repository>
-        <snapshotRepository>
-            <id>${snapshots.id}</id>
-            <name>${snapshots.name}</name>
-            <url>${snapshots.url}</url>
-        </snapshotRepository>
-    </distributionManagement>
+<!--    <distributionManagement>-->
+<!--        <repository>-->
+<!--            <id>${releases.id}</id>-->
+<!--            <name>${releases.name}</name>-->
+<!--            <url>${releases.url}</url>-->
+<!--        </repository>-->
+<!--        <snapshotRepository>-->
+<!--            <id>${snapshots.id}</id>-->
+<!--            <name>${snapshots.name}</name>-->
+<!--            <url>${snapshots.url}</url>-->
+<!--        </snapshotRepository>-->
+<!--    </distributionManagement>-->
 
     <url>https://github.com/shulieTech/Takin-cloud.git</url>
     <description>takin-cloud</description>

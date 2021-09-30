@@ -34,7 +34,7 @@ public interface SceneManageDTOConvert {
 
     @Mappings({
         @Mapping(source = "id", target = "id"),
-        @Mapping(source = "customerId", target = "customerId"),
+        @Mapping(source = "customerId", target = "tenantId"),
         @Mapping(source = "sceneName", target = "sceneName"),
         @Mapping(source = "lastPtTime", target = "lastPtTime", dateFormat = "yyyy-MM-dd HH:mm:ss"),
         @Mapping(source = "status", target = "status")
