@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.open.api.scenetask;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneManageIdReq;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneStartPreCheckReq;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneTaskStartReq;
+import io.shulie.takin.cloud.open.req.scenemanage.ScriptAssetBalanceReq;
 import io.shulie.takin.cloud.open.req.scenetask.SceneStartCheckResp;
 import io.shulie.takin.cloud.open.req.scenetask.SceneTaskQueryTpsReq;
 import io.shulie.takin.cloud.open.req.scenetask.SceneTaskUpdateTpsReq;
@@ -19,6 +20,7 @@ import io.shulie.takin.cloud.open.resp.scenetask.SceneActionResp;
 import io.shulie.takin.cloud.open.resp.scenetask.SceneJobStateResp;
 import io.shulie.takin.cloud.open.resp.scenetask.SceneTaskAdjustTpsResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.ext.content.asset.AssetBalanceExt;
 
 /**
  * 压测任务
@@ -108,4 +110,9 @@ public interface CloudTaskApi {
      */
     ResponseResult<SceneStartCheckResp> sceneStartPreCheck(SceneStartPreCheckReq req);
 
+    /**
+     * @param req
+     * @return
+     */
+    ResponseResult callBackToWriteBalance(ScriptAssetBalanceReq req);
 }

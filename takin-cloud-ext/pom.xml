@@ -11,6 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>takin-cloud-ext</artifactId>
+
     <dependencies>
         <dependency>
             <groupId>io.shulie.takin.plugin.framework</groupId>
@@ -25,6 +26,11 @@
         <dependency>
             <groupId>io.shulie.takin</groupId>
             <artifactId>takin-common-beans</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

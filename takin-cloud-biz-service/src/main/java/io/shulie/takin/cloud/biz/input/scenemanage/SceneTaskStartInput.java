@@ -24,4 +24,19 @@ public class SceneTaskStartInput extends ContextExt {
     private SceneTryRunInput sceneTryRunInput;
 
     private Boolean continueRead;
+
+    /**
+     * 流量类型
+     * @see io.shulie.takin.ext.content.enums.AssetTypeEnum
+     */
+    private Integer assetType;
+
+    private Long resourceId;
+
+    private String resourceName;
+
+    /**
+     * 创建者
+     */
+    private Long creatorId;
 }

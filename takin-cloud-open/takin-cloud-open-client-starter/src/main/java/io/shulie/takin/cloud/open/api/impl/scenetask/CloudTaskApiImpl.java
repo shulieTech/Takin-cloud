@@ -7,6 +7,7 @@ import io.shulie.takin.cloud.open.constant.CloudApiConstant;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneManageIdReq;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneStartPreCheckReq;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneTaskStartReq;
+import io.shulie.takin.cloud.open.req.scenemanage.ScriptAssetBalanceReq;
 import io.shulie.takin.cloud.open.req.scenetask.SceneStartCheckResp;
 import io.shulie.takin.cloud.open.req.scenetask.SceneTaskQueryTpsReq;
 import io.shulie.takin.cloud.open.req.scenetask.SceneTaskUpdateTpsReq;
@@ -182,5 +183,17 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
             takinResponseEntity.getErrorMsg(), "查看cloud日志");
+    }
+
+    @Override
+    public ResponseResult callBackToWriteBalance(ScriptAssetBalanceReq req) {
+        TakinResponseEntity<ResponseResult<Boolean>> takinResponseEntity =
+                HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_TASK_WRITE_BALANCE,
+                        getHeaders(req), req, new TypeReference<ResponseResult<Boolean>>() {});
+        if (takinResponseEntity.getSuccess()) {
+            return takinResponseEntity.getBody();
+        }
+        return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
+                takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 }

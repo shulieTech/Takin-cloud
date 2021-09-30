@@ -28,41 +28,7 @@ public class CloudUserCommonRequestExt extends PagingDevice {
     private Long tenantId;
 
     /**
-     * 租户ids
-     */
-    private List<Long> tenantIds;
-
-    /**
-     * license  转化成 tenantId
-     */
-    private transient String license;
-
-    /**
      * 查询过滤sql
      */
     private transient String filterSql;
-
-    /**
-     * 对应字段 name
-     */
-    @ApiModelProperty(value = "客户名称")
-    private String customerName;
-
-    /**
-     * 操作用户ID
-     */
-    private Long operateId;
-
-    @ApiModelProperty(value = "操作人")
-    private String operateName;
-
-    /**
-     * 报告模块用
-     */
-    @ApiModelProperty(name = "userIdStr", value = "负责人ids")
-    private String userIdStr;
-    private List<Long> userIds;
-
-    private Long deptId;
-
 }

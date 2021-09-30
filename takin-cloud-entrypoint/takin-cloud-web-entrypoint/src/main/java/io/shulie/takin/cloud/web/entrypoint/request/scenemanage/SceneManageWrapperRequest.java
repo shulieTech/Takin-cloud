@@ -42,6 +42,9 @@ public class SceneManageWrapperRequest extends ContextExt {
     @ApiModelProperty(value = "脚本id")
     private Long scriptId;
 
+    @ApiModelProperty(value = "脚本实例id")
+    private Long scriptDeployId;
+
     @ApiModelProperty(value = "业务活动配置")
     @NotEmpty(message = "业务活动配置不能为空")
     private List<SceneBusinessActivityRefRequest> businessActivityConfig;

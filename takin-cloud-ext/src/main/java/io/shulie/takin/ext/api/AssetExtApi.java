@@ -3,6 +3,7 @@ package io.shulie.takin.ext.api;
 import java.util.List;
 import java.math.BigDecimal;
 
+import io.shulie.takin.ext.content.asset.AssetBalanceExt;
 import io.shulie.takin.ext.content.asset.AssetBillExt;
 import io.shulie.takin.ext.content.asset.AccountInfoExt;
 import io.shulie.takin.ext.content.asset.AssetInvoiceExt;
@@ -70,4 +71,10 @@ public interface AssetExtApi extends ExtensionPoint {
      * @param userId 用户主键
      */
     void init(Long userId);
+
+    /**
+     * 脚本调试回写流量账户
+     * @param balanceExt 入参
+     */
+    void writeBalance(AssetBalanceExt balanceExt);
 }

@@ -31,17 +31,8 @@ import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
-import io.shulie.takin.cloud.biz.input.scenemanage.EnginePluginInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneInspectInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneStartTrialRunInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskQueryTpsInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput;
+import io.shulie.takin.cloud.biz.input.scenemanage.*;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput.FileInfo;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskUpdateTpsInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTryRunInput;
 import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStartOutput;
 import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStopOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
@@ -85,14 +76,15 @@ import io.shulie.takin.cloud.data.dao.sceneTask.SceneTaskPressureTestLogUploadDA
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
 import io.shulie.takin.ext.api.AssetExtApi;
 import io.shulie.takin.ext.api.EngineCallExtApi;
 import io.shulie.takin.ext.content.asset.AccountInfoExt;
+import io.shulie.takin.ext.content.asset.AssetBalanceExt;
 import io.shulie.takin.ext.content.asset.AssetInvoiceExt;
+import io.shulie.takin.ext.content.enums.AssetTypeEnum;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.utils.json.JsonHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -167,11 +159,14 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     @Override
     @Transactional
     public SceneActionOutput start(SceneTaskStartInput input) {
+        CloudPluginUtils.fillUserData(input);
+        input.setAssetType(AssetTypeEnum.PRESS_REPORT.getCode());
+        input.setResourceId(null);
         return startTask(input, null);
     }
 
     private SceneActionOutput startTask(SceneTaskStartInput input, SceneStartTrialRunInput trialRunInput) {
-
+        log.warn("启动任务接收到入参：{}", JSON.toJSONString(input));
         SceneManageQueryOpitons options = new SceneManageQueryOpitons();
         options.setIncludeBusinessActivity(true);
         options.setIncludeScript(true);
@@ -238,6 +233,12 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //冻结流量
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
+            //得到数据来源ID
+            Long resourceId = input.getResourceId();
+            if (AssetTypeEnum.PRESS_REPORT.getCode().equals(input.getAssetType())) {
+                resourceId = report.getId();
+            }
+            Long finalResourceId = resourceId;
             assetExtApi.lock(new AssetInvoiceExt() {{
                 setExpectThroughput(sceneData.getConcurrenceNum());
                 setIncreasingTime(sceneData.getIncreasingSecond());
@@ -248,6 +249,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 setPressureType(sceneData.getPressureType());
                 setTenantId(sceneData.getTenantId());
                 setStep(sceneData.getStep());
+                setResourceId(finalResourceId);
+                setResourceName(input.getResourceName());
+                setResourceType(input.getAssetType());
+                setCreatorId(input.getCreatorId());
             }});
         }
 
@@ -388,7 +393,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         Long sceneManageId;
         CloudPluginUtils.fillUserData(input);
         //首先根据脚本实例id构建压测场景名称
-        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_FLOW_DEBUG + input.getTenantId() + "_" + input.getScriptId();
+        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_FLOW_DEBUG + input.getTenantId() + "_" + input.getScriptDeployId();
 
         //根据场景名称查询是否已经存在场景
         SceneManageListResult sceneManageResult = sceneManageDao.queryBySceneName(pressureTestSceneName);
@@ -428,7 +433,11 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setSceneId(sceneManageId);
         sceneTaskStartInput.setEnginePlugins(enginePlugins);
         sceneTaskStartInput.setContinueRead(false);
-        sceneTaskStartInput.setContinueRead(false);
+        SceneBusinessActivityRefInput activityRefInput = input.getBusinessActivityConfig().get(0);
+        sceneTaskStartInput.setAssetType(AssetTypeEnum.ACTIVITY_CHECK.getCode());
+        sceneTaskStartInput.setResourceId(activityRefInput.getBusinessActivityId());
+        sceneTaskStartInput.setResourceName(activityRefInput.getBusinessActivityName());
+        sceneTaskStartInput.setCreatorId(input.getCreatorId());
         SceneActionOutput sceneActionDTO = startTask(sceneTaskStartInput, null);
         //返回报告id
         return sceneActionDTO.getData();
@@ -531,7 +540,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         CloudPluginUtils.fillUserData(input);
         //首先根据脚本实例id构建压测场景名称
         String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_TRY_RUN + input.getTenantId() + "_" + input
-            .getScriptId();
+            .getScriptDeployId();
         //根据场景名称查询是否已经存在场景
         SceneManageListResult sceneManageResult = sceneManageDao.queryBySceneName(pressureTestSceneName);
         SceneTryRunTaskStartOutput sceneTryRunTaskStartOutput = new SceneTryRunTaskStartOutput();
@@ -573,6 +582,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //TODO 根据次数，设置时间
         SceneTryRunInput tryRunInput = new SceneTryRunInput(input.getLoopsNum(), input.getConcurrencyNum());
         sceneTaskStartInput.setSceneTryRunInput(tryRunInput);
+        sceneTaskStartInput.setAssetType(AssetTypeEnum.SCRIPT_DEBUG.getCode());
+        sceneTaskStartInput.setResourceId(input.getScriptDeployId());
+        sceneTaskStartInput.setResourceName(input.getScriptName());
+        sceneTaskStartInput.setCreatorId(input.getCreatorId());
         SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput, null);
         sceneTryRunTaskStartOutput.setReportId(sceneActionOutput.getData());
 
@@ -704,7 +717,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         report.setStatus(ReportConstans.INIT_STATUS);
         // 初始化
         report.setTenantId(scene.getTenantId());
-        report.setOperateId(CloudPluginUtils.getUserId());
+        report.setOperateId(input.getUserId());
+        //report.setDeptId(input.getDeptId());
         // 解决开始时间 偏移10s
         report.setStartTime(new Date(System.currentTimeMillis() + offsetStartTime * 1000));
         //负责人默认启动人
@@ -897,6 +911,15 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             output.setHasUnread(false);
         }
         return output;
+    }
+
+    @Override
+    public void writeBalance(AssetBalanceExt balanceExt) {
+        log.warn("回写流量接收到入参:{}", JSON.toJSONString(balanceExt));
+        AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
+        if (assetExtApi != null) {
+            assetExtApi.writeBalance(balanceExt);
+        }
     }
 
     private Boolean compareScript(long sceneId, String scriptId) {
