@@ -1,5 +1,8 @@
 package io.shulie.takin.cloud.common.constants;
 
+/**
+ * @author -
+ */
 public interface SceneStartCheckConstants {
 
     String SCENE_KEY = "CSV_READ_POSITION_%s";

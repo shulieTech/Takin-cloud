@@ -2,7 +2,7 @@ package io.shulie.takin.cloud.open.entrypoint.controller.common;
 
 import io.shulie.takin.cloud.biz.output.common.CommonInfosOutput;
 import io.shulie.takin.cloud.biz.service.common.CommonInfoService;
-import io.shulie.takin.cloud.common.constants.APIUrls;
+import io.shulie.takin.cloud.common.constants.ApiUrls;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @Api(tags = "公共信息管理")
-@RequestMapping(APIUrls.TRO_OPEN_API_URL + "common/info")
+@RequestMapping(ApiUrls.TRO_OPEN_API_URL + "common/info")
 public class CommonInfoOpenController {
 
     @Autowired

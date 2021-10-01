@@ -20,7 +20,7 @@ import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStartOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStatusOutput;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
-import io.shulie.takin.cloud.common.constants.APIUrls;
+import io.shulie.takin.cloud.common.constants.ApiUrls;
 import io.shulie.takin.cloud.open.entrypoint.convert.SceneTaskOpenConverter;
 import io.shulie.takin.cloud.open.req.engine.EnginePluginsRefOpen;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneManageIdReq;
@@ -39,7 +39,6 @@ import io.shulie.takin.cloud.open.resp.scenetask.SceneActionResp;
 import io.shulie.takin.cloud.open.resp.scenetask.SceneJobStateResp;
 import io.shulie.takin.cloud.open.resp.scenetask.SceneTaskAdjustTpsResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.ext.api.AssetExtApi;
 import io.shulie.takin.ext.content.asset.AssetBalanceExt;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -54,10 +53,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@RequestMapping(APIUrls.TRO_OPEN_API_URL + "scene/task/")
-@Api(tags = "场景任务OPEN")
+/**
+ * 场景任务开启控制器
+ *
+ * @author -
+ */
 @Slf4j
+@RestController
+@Api(tags = "场景任务OPEN")
+@RequestMapping(ApiUrls.TRO_OPEN_API_URL + "scene/task/")
 public class SceneTaskOpenController {
 
     @Autowired
@@ -77,10 +81,9 @@ public class SceneTaskOpenController {
         return ResponseResult.success(resp);
     }
 
-
     @PostMapping("/startFlowDebugTask")
     @ApiOperation(value = "启动调试流量任务")
-    ResponseResult<Long> startFlowDebugTask(@RequestBody TaskFlowDebugStartReq taskFlowDebugStartReq){
+    ResponseResult<Long> startFlowDebugTask(@RequestBody TaskFlowDebugStartReq taskFlowDebugStartReq) {
         SceneManageWrapperInput input = SceneTaskOpenConverter.INSTANCE.ofTaskDebugDataStartReq(taskFlowDebugStartReq);
         //压测引擎插件需要传入插件id和插件版本 modified by xr.l 20210712
         List<EnginePluginInput> enginePluginInputs = null;
@@ -97,7 +100,7 @@ public class SceneTaskOpenController {
 
     @PostMapping("/startInspectTask")
     @ApiOperation(value = "启动巡检任务")
-    ResponseResult<SceneInspectTaskStartResp> startInspectTask(@RequestBody TaskInspectStartReq taskFlowDebugStartReq){
+    ResponseResult<SceneInspectTaskStartResp> startInspectTask(@RequestBody TaskInspectStartReq taskFlowDebugStartReq) {
         SceneManageWrapperInput input = SceneTaskOpenConverter.INSTANCE.ofTaskInspectStartReq(taskFlowDebugStartReq);
 
         //压测引擎插件需要传入插件id和插件版本 modified by xr.l 20210712
@@ -111,22 +114,22 @@ public class SceneTaskOpenController {
         }
         SceneInspectTaskStartOutput output = sceneTaskService.startInspectTask(input, enginePluginInputs);
         SceneInspectTaskStartResp startResp = new SceneInspectTaskStartResp();
-        BeanUtils.copyProperties(output,startResp);
+        BeanUtils.copyProperties(output, startResp);
         return ResponseResult.success(startResp);
     }
 
     @PostMapping("/stopInspectTask")
     @ApiOperation(value = "停止巡检任务")
-    ResponseResult<SceneInspectTaskStopResp> stopInspectTask(@RequestBody TaskInspectStopReq taskFlowDebugStopReq){
+    ResponseResult<SceneInspectTaskStopResp> stopInspectTask(@RequestBody TaskInspectStopReq taskFlowDebugStopReq) {
         SceneInspectTaskStopOutput output = sceneTaskService.stopInspectTask(taskFlowDebugStopReq.getSceneId());
         SceneInspectTaskStopResp stopResp = new SceneInspectTaskStopResp();
-        BeanUtils.copyProperties(output,stopResp);
+        BeanUtils.copyProperties(output, stopResp);
         return ResponseResult.success(stopResp);
     }
 
     @PostMapping("/updateSceneTaskTps")
     @ApiOperation(value = "调整压测任务tps")
-    ResponseResult<String> updateSceneTaskTps(@RequestBody SceneTaskUpdateTpsReq sceneTaskUpdateTpsReq){
+    ResponseResult<String> updateSceneTaskTps(@RequestBody SceneTaskUpdateTpsReq sceneTaskUpdateTpsReq) {
 
         SceneTaskUpdateTpsInput input = new SceneTaskUpdateTpsInput();
         input.setSceneId(sceneTaskUpdateTpsReq.getSceneId());
@@ -138,13 +141,13 @@ public class SceneTaskOpenController {
 
     @GetMapping("/queryAdjustTaskTps")
     @ApiOperation(value = "获取调整的任务tps")
-    ResponseResult<SceneTaskAdjustTpsResp> queryAdjustTaskTps(@RequestParam Long sceneId,@RequestParam Long reportId){
+    ResponseResult<SceneTaskAdjustTpsResp> queryAdjustTaskTps(@RequestParam Long sceneId, @RequestParam Long reportId) {
 
         SceneTaskQueryTpsInput input = new SceneTaskQueryTpsInput();
         input.setSceneId(sceneId);
         input.setReportId(reportId);
         SceneTaskQueryTpsOutput sceneTaskQueryTpsOutput = sceneTaskService.queryAdjustTaskTps(input);
-        if (sceneTaskQueryTpsOutput != null){
+        if (sceneTaskQueryTpsOutput != null) {
             SceneTaskAdjustTpsResp sceneTaskAdjustTpsResp = new SceneTaskAdjustTpsResp();
             sceneTaskAdjustTpsResp.setTotalTps(sceneTaskQueryTpsOutput.getTotalTps());
             return ResponseResult.success(sceneTaskAdjustTpsResp);
@@ -156,30 +159,28 @@ public class SceneTaskOpenController {
     @ApiOperation(value = "结束场景测试")
     public ResponseResult<String> stop(@RequestBody SceneManageIdReq req) {
         //记录下sla的数据
-        if(req.getReportId() != null) {
+        if (req.getReportId() != null) {
             UpdateReportSlaDataInput slaDataInput = new UpdateReportSlaDataInput();
             slaDataInput.setReportId(req.getReportId());
             slaDataInput.setSlaBean(req.getSlaBean());
             reportService.updateReportSlaData(slaDataInput);
         }
-        log.info("任务{}-{} ，原因：web 调 cloud 触发停止", req.getId(),req.getReportId());
+        log.info("任务{}-{} ，原因：web 调 cloud 触发停止", req.getId(), req.getReportId());
         // 与sla操作是一致的
         sceneTaskService.stop(req.getId());
         return ResponseResult.success("停止场景成功");
     }
 
-
-
     @GetMapping("/checkStartStatus")
     @ApiOperation(value = "检查启动状态")
     public ResponseResult<SceneActionResp> checkStartStatus(@RequestParam("id") Long id,
-        @RequestParam(value = "reportId",required = false) Long reportId) {
-            SceneActionOutput sceneAction = sceneTaskService.checkSceneTaskStatus(id,reportId);
-            SceneActionResp resp = new SceneActionResp();
-            resp.setData(sceneAction.getData());
-            resp.setMsg(sceneAction.getMsg());
-            resp.setReportId(sceneAction.getReportId());
-            return ResponseResult.success(resp);
+        @RequestParam(value = "reportId", required = false) Long reportId) {
+        SceneActionOutput sceneAction = sceneTaskService.checkSceneTaskStatus(id, reportId);
+        SceneActionResp resp = new SceneActionResp();
+        resp.setData(sceneAction.getData());
+        resp.setMsg(sceneAction.getMsg());
+        resp.setReportId(sceneAction.getReportId());
+        return ResponseResult.success(resp);
 
     }
 
@@ -217,7 +218,7 @@ public class SceneTaskOpenController {
         SceneTryRunTaskStatusOutput sceneTryRunTaskStatusOutput = sceneTaskService.checkTaskStatus(sceneId,
             reportId);
         SceneTryRunTaskStatusResp resp = new SceneTryRunTaskStatusResp();
-        BeanUtils.copyProperties(sceneTryRunTaskStatusOutput,resp);
+        BeanUtils.copyProperties(sceneTryRunTaskStatusOutput, resp);
         return ResponseResult.success(resp);
     }
 

@@ -36,13 +36,13 @@ import io.shulie.takin.cloud.common.bean.task.TaskResult;
 import io.shulie.takin.cloud.common.constants.CollectorConstants;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.influxdb.InfluxDBUtil;
+import io.shulie.takin.cloud.common.influxdb.InfluxUtil;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.utils.CollectorUtil;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
@@ -134,7 +134,11 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             redisKey, taskTimeout, refList);
     }
 
-    // todo 没有用到
+    /**
+     * 没有用到
+     *
+     * @param event-
+     */
     @IntrestFor(event = "stop")
     public void doStopTaskEvent(Event event) {
         TaskConfig taskConfig = (TaskConfig)event.getExt();
@@ -200,7 +204,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     @Async("collectorSchedulerPool")
     @Scheduled(cron = "0/5 * * * * ? ")
     public void pushData() {
-        if(!schedulingEnabled) {
+        if (!schedulingEnabled) {
             return;
         }
         try {
@@ -221,8 +225,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                             tenantId = Long.valueOf(split[2]);
                         }
                         SceneManageEntity sceneManageEntity = sceneManageDAO.queueSceneById(sceneId);
-                        if (SceneManageStatusEnum.ifFree(sceneManageEntity.getStatus())){
-                            delTask(sceneId,reportId,tenantId);
+                        if (SceneManageStatusEnum.ifFree(sceneManageEntity.getStatus())) {
+                            delTask(sceneId, reportId, tenantId);
                             return;
                         }
 
@@ -252,21 +256,21 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                                     THREAD_POOL.execute(new Runnable() {
                                         @Override
                                         public void run() {
-                                            writeInfluxDB(transactions, taskKey, delayTmp, sceneId, reportId, tenantIdTmp);
+                                            writeInflux(transactions, taskKey, delayTmp, sceneId, reportId, tenantIdTmp);
                                         }
                                     });
                                     timeWindow = refreshTimeWindow(engineName);
                                 }
                             }
                             // 写入数据
-                            writeInfluxDB(transactions, taskKey, timeWindow, sceneId, reportId, tenantId);
+                            writeInflux(transactions, taskKey, timeWindow, sceneId, reportId, tenantId);
                             // 读取结束标识   手动收尾
                             String last = String.valueOf(redisTemplate.opsForValue().get(last(taskKey)));
                             if (ScheduleConstants.LAST_SIGN.equals(last)) {
                                 // 只需触发一次即可
                                 String endTimeKey = engineName + ScheduleConstants.LAST_SIGN;
                                 long endTime = CollectorUtil.getEndWindowTime((Long)redisTemplate.opsForValue().get(endTimeKey));
-                                log.info("触发手动收尾操作，当前时间窗口：{},结束时间窗口：{},",timeWindow, endTime);
+                                log.info("触发手动收尾操作，当前时间窗口：{},结束时间窗口：{},", timeWindow, endTime);
                                 // 比较 endTime timeWindow
                                 // 如果结束时间 小于等于当前时间，数据不用补充，
                                 // 如果结束时间 大于 当前时间，需要补充期间每5秒的数据 延后5s
@@ -275,7 +279,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                                     timeWindow = CollectorUtil.addWindowTime(timeWindow);
                                     // 1、确保 redis->influxDB
                                     log.info("redis->influxDB，当前时间窗口：{},", timeWindow);
-                                    writeInfluxDB(transactions, taskKey, timeWindow, sceneId, reportId, tenantId);
+                                    writeInflux(transactions, taskKey, timeWindow, sceneId, reportId, tenantId);
                                 }
                                 log.info("本次压测{}-{}-{},metric数据已经全部上报influxDB", sceneId, reportId, tenantId);
                                 // 清除 SLA配置 清除PushWindowDataScheduled 删除pod job configMap  生成报告
@@ -289,7 +293,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                                 timeWindowMap.remove(tempTimestamp);
                             }
                             // 超时自动检修，强行触发关闭
-                            forceClose(taskKey,timeWindow,sceneId,reportId,tenantId);
+                            forceClose(taskKey, timeWindow, sceneId, reportId, tenantId);
 
                         }
                     } catch (Exception e) {
@@ -343,7 +347,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         }
     }
 
-    private void writeInfluxDB(List<String> transactions, String taskKey, long timeWindow, Long sceneId, Long reportId,
+    private void writeInflux(List<String> transactions, String taskKey, long timeWindow, Long sceneId, Long reportId,
         Long tenantId) {
         long start = System.currentTimeMillis();
         for (String transaction : transactions) {
@@ -351,7 +355,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             if (null == count || count < 1) {
                 log.error(
                     "【collector metric】【null == count || count < 1】 write influxDB time : {},{}-{}-{}-{}, ", timeWindow,
-                    sceneId, reportId, tenantId,transaction);
+                    sceneId, reportId, tenantId, transaction);
                 continue;
             }
             Integer failCount = getIntValue(failCountKey(taskKey, transaction, timeWindow));
@@ -361,27 +365,25 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             Double maxRt = getDoubleValue(maxRtKey(taskKey, transaction, timeWindow));
             Double minRt = getDoubleValue(minRtKey(taskKey, transaction, timeWindow));
 
-
             Integer activeThreads = getIntValue(activeThreadsKey(taskKey, transaction, timeWindow));
             Double avgTps = getAvgTps(count);
             // 算平均rt
-            Double avgRt = getAvgRt(count,sumRt);
+            Double avgRt = getAvgRt(count, sumRt);
             Double saRate = getSaRate(count, saCount);
             Double successRate = getSuccessRate(count, failCount);
 
-
-            List<String> percentDatas = getStringValue(percentDataKey(taskKey,transaction,timeWindow));
+            List<String> percentDatas = getStringValue(percentDataKey(taskKey, transaction, timeWindow));
             String percentSa = calculateSaPercent(percentDatas);
 
-            Map<String, String> tags = new HashMap<>();
+            Map<String, String> tags = new HashMap<>(0);
             tags.put("transaction", transaction);
             Map<String, Object> fields = getInfluxdbFieldMap(count, failCount,
                 saCount, sumRt, maxRt, minRt, avgTps, avgRt, saRate, successRate, activeThreads, percentSa);
-            log.debug("metrics数据入库:时间窗:{},percentSa:{}",timeWindow,percentDatas);
-            influxWriter.insert(InfluxDBUtil.getMeasurement(sceneId, reportId, tenantId), tags,
+            log.debug("metrics数据入库:时间窗:{},percentSa:{}", timeWindow, percentDatas);
+            influxWriter.insert(InfluxUtil.getMeasurement(sceneId, reportId, tenantId), tags,
                 fields, timeWindow);
             try {
-                SendMetricsEvent metrics = getSendMetricsEvent(sceneId, reportId,tenantId, timeWindow,
+                SendMetricsEvent metrics = getSendMetricsEvent(sceneId, reportId, tenantId, timeWindow,
                     transaction, count, failCount, maxRt, minRt, avgTps, avgRt,
                     saRate, successRate);
                 //未finish，发事件
@@ -407,6 +409,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
 
     /**
      * 计算sa
+     *
      * @param percentDatas
      * @return
      */
@@ -455,8 +458,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     }
 
     private Map<String, Object> getInfluxdbFieldMap(Integer count, Integer failCount, Integer saCount, Long sumRt,
-        Double maxRt, Double minRt, Double avgTps, Double avgRt, Double saRate, Double successRate,Integer activeThreads,String saPercent) {
-        Map<String, Object> fields = new HashMap<>();
+        Double maxRt, Double minRt, Double avgTps, Double avgRt, Double saRate, Double successRate, Integer activeThreads, String saPercent) {
+        Map<String, Object> fields = new HashMap<>(0);
         fields.put("count", count);
         fields.put("fail_count", failCount);
         fields.put("sa_count", saCount);
@@ -467,10 +470,10 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         fields.put("avg_tps", avgTps);
         fields.put("avg_rt", avgRt);
         fields.put("sa", saRate);
-        fields.put("sa_percent",saPercent);
+        fields.put("sa_percent", saPercent);
         fields.put("success_rate", successRate);
-        fields.put("active_threads",activeThreads);
-        fields.put("write_time",System.currentTimeMillis());
+        fields.put("active_threads", activeThreads);
+        fields.put("write_time", System.currentTimeMillis());
         return fields;
     }
 

@@ -1,10 +1,11 @@
 package io.shulie.takin.ext.content.enginecall;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author qianshui
@@ -32,13 +33,15 @@ public class StrategyConfigExt {
     @ApiModelProperty(value = "内存")
     private BigDecimal memorySize;
 
-    //add by lipeng 20210623 添加限制cpu和限制内存
+    /**
+     * 添加限制cpu和限制内存
+     * add by 李鹏 2021/06/23
+     */
     @ApiModelProperty(value = "限制cpu")
     private BigDecimal limitCpuNum;
 
     @ApiModelProperty(value = "限制内存")
     private BigDecimal limitMemorySize;
-    //add end
 
     @ApiModelProperty(value = "最后修改时间")
     private String updateTime;

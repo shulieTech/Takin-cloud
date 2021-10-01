@@ -63,7 +63,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
 
     @Transactional(rollbackFor = Throwable.class)
     @Override
-    public Workbook importMJ(MultipartFile file) {
+    public Workbook importMiddlewareJar(MultipartFile file) {
         // 分布式锁, 同一个文件, 防止重复点击
         String lockKey = String.format(LOCK_IMPORT_MIDDLEWARE_JAR, CloudPluginUtils.getTenantId());
         this.isImportException(!distributedLock.tryLock(lockKey, 0L, -1L, TimeUnit.SECONDS), TOO_FREQUENTLY);
@@ -88,7 +88,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
     }
 
     @Override
-    public Workbook compareMJ(List<MultipartFile> files) {
+    public Workbook compareMiddlewareJar(List<MultipartFile> files) {
         this.isCompareException(CollectionUtil.isEmpty(files), "文件不存在!");
         this.isCompareException(files.size() > 12, "文件个数太多, 请选择12个以下进行比对!");
 
@@ -106,7 +106,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
 
             this.isCompareException(CollectionUtil.isEmpty(importList), "文件内没有数据!");
 
-            // 数据不完整的数据, 先整理
+            // 数据不完整的数据, 先整理一遍
             List<CompareMiddlewareJarResultVO> incorrectList = this.listIncorrectResult(importList);
 
             // 收集完整的数据, 比对
@@ -201,26 +201,26 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
     private void fillGroupId(CompareMiddlewareJarResultVO middlewareJarResult) {
         String groupId = searchGroupIdFromAliYun(middlewareJarResult.getArtifactId(),
             middlewareJarResult.getVersion());
-        if(StrUtil.isBlank(groupId)){
-            groupId = searchGroupIdFromOrg(middlewareJarResult.getArtifactId(),middlewareJarResult.getVersion());
+        if (StrUtil.isBlank(groupId)) {
+            groupId = searchGroupIdFromOrg(middlewareJarResult.getArtifactId(), middlewareJarResult.getVersion());
         }
         middlewareJarResult.setGroupId(groupId);
     }
 
     /**
      * @param artifactId artifactId
-     * @param version version
+     * @param version    version
      * @return 经过查找并去除部分错误信息的groupId
      */
-    private String searchGroupIdFromAliYun(String artifactId,String version) {
+    private String searchGroupIdFromAliYun(String artifactId, String version) {
         String getGroupId = null;
         try {
             String responseString;
             try {
-                responseString = HttpUtil.get(String.format(SEARCH_MAVEN_URL_ALIYUN, artifactId,version));
+                responseString = HttpUtil.get(String.format(SEARCH_MAVEN_URL_ALIYUN, artifactId, version));
             } catch (Exception e) {
                 //Avoid network instability，try it again
-                responseString = HttpUtil.get(String.format(SEARCH_MAVEN_URL_ALIYUN, artifactId,version));
+                responseString = HttpUtil.get(String.format(SEARCH_MAVEN_URL_ALIYUN, artifactId, version));
             }
             final JSONObject jsonObject = JSONUtil.parseObj(responseString);
             if (jsonObject.getBool("successful")) {
@@ -249,38 +249,39 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
             }
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容:中间件对比异常 --> searchGroupIdFromAliYun: artifactId:{},fillGroupId exception: {}",
-                    TakinCloudExceptionEnum.MIDDLEWARE_JAR_COMPARE_ERROR,artifactId,e);
+                TakinCloudExceptionEnum.MIDDLEWARE_JAR_COMPARE_ERROR, artifactId, e);
         }
         return getGroupId;
     }
 
     private static final String SEARCH_MAVEN_URL_ORG
         = "https://search.maven.org/solrsearch/select?q=a:%s%%20AND%%20v:%s&start=0&rows=20";
+
     /**
      * @param artifactId artifactId
-     * @param version version
+     * @param version    version
      * @return 查找到的groupId
      */
-    private String searchGroupIdFromOrg(String artifactId,String version) {
+    private String searchGroupIdFromOrg(String artifactId, String version) {
         String getGroupId = null;
         try {
             String responseString;
             try {
-                responseString = HttpUtil.get(String.format(SEARCH_MAVEN_URL_ORG, artifactId,version));
+                responseString = HttpUtil.get(String.format(SEARCH_MAVEN_URL_ORG, artifactId, version));
             } catch (Exception e) {
                 //Avoid network instability，try it again
-                responseString = HttpUtil.get(String.format(SEARCH_MAVEN_URL_ORG, artifactId,version));
+                responseString = HttpUtil.get(String.format(SEARCH_MAVEN_URL_ORG, artifactId, version));
             }
             final JSONObject jsonObject = JSONUtil.parseObj(responseString);
             final JSONArray jsonArray = jsonObject.getJSONObject("response").getJSONArray("docs");
-            if(jsonArray == null || jsonArray.size() == 0){
+            if (jsonArray == null || jsonArray.size() == 0) {
                 log.info("searchGroupIdFromOrg: search empty result,artifactId:{},response:{}", artifactId, responseString);
                 return null;
             }
             getGroupId = jsonArray.getJSONObject(0).getStr("g");
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容:中间件对比异常 --> searchGroupIdFromOrg: artifactId:{},fillGroupId exception: {}",
-                    TakinCloudExceptionEnum.MIDDLEWARE_JAR_COMPARE_ERROR,artifactId,e);
+                TakinCloudExceptionEnum.MIDDLEWARE_JAR_COMPARE_ERROR, artifactId, e);
         }
         return getGroupId;
     }
@@ -365,11 +366,11 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
     }
 
     /**
-     * 根据传入的标识, 获取标识的前两位
+     * 根据传入的标识, 获取前两位字符
      *
      * @param version 版本
      * @param flag    标识
-     * @return 前两位
+     * @return 前两位字符
      */
     private String getFirstTwoByFlag(String version, String flag) {
         int endIndex = version.indexOf(flag, 2);
@@ -456,40 +457,40 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
     private void enduranceData(List<ImportMiddlewareJarVO> importList) {
         // 导入数据库
         List<CreateMiddleWareJarParam> createParams = importList.stream().map(importVO -> {
-            String groupId = importVO.getGroupId();
-            String artifactId = importVO.getArtifactId();
-            String statusDesc = importVO.getStatusDesc();
+                String groupId = importVO.getGroupId();
+                String artifactId = importVO.getArtifactId();
+                String statusDesc = importVO.getStatusDesc();
 
-            // groupId, artifactId 必填
-            if (StrUtil.isBlank(groupId) || StrUtil.isBlank(artifactId) ||
-                StrUtil.isBlank(statusDesc) || StrUtil.isBlank(importVO.getName()) ||
-                StrUtil.isBlank(importVO.getType())) {
-                return null;
-            }
+                // groupId, artifactId 必填
+                if (StrUtil.isBlank(groupId) || StrUtil.isBlank(artifactId) ||
+                    StrUtil.isBlank(statusDesc) || StrUtil.isBlank(importVO.getName()) ||
+                    StrUtil.isBlank(importVO.getType())) {
+                    return null;
+                }
 
-            // 导入数据version为null的默认空字符串
-            if (importVO.getVersion() == null) {
-                importVO.setVersion("");
-            }
+                // 导入数据version为null的默认空字符串
+                if (importVO.getVersion() == null) {
+                    importVO.setVersion("");
+                }
 
-            // 不是无需支持的, version 必填
-            String version = importVO.getVersion();
-            if (!isNoRequired(statusDesc) && StrUtil.isBlank(version)) {
-                return null;
-            }
+                // 不是无需支持的, version 必填
+                String version = importVO.getVersion();
+                if (!isNoRequired(statusDesc) && StrUtil.isBlank(version)) {
+                    return null;
+                }
 
-            // 根据状态字符串获得枚举
-            MiddlewareJarStatusEnum middlewareJarStatusEnum = MiddlewareJarStatusEnum.getByDesc(statusDesc);
-            if (middlewareJarStatusEnum == null) {
-                return null;
-            }
+                // 根据状态字符串获得枚举
+                MiddlewareJarStatusEnum middlewareJarStatusEnum = MiddlewareJarStatusEnum.getByDesc(statusDesc);
+                if (middlewareJarStatusEnum == null) {
+                    return null;
+                }
 
-            CreateMiddleWareJarParam param = new CreateMiddleWareJarParam();
-            BeanUtils.copyProperties(importVO, param);
-            param.setStatus(middlewareJarStatusEnum.getCode());
-            param.setAgv(String.format("%s_%s_%s", artifactId, groupId, version));
-            return param;
-        }).filter(Objects::nonNull)
+                CreateMiddleWareJarParam param = new CreateMiddleWareJarParam();
+                BeanUtils.copyProperties(importVO, param);
+                param.setStatus(middlewareJarStatusEnum.getCode());
+                param.setAgv(String.format("%s_%s_%s", artifactId, groupId, version));
+                return param;
+            }).filter(Objects::nonNull)
             .collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
                 new TreeSet<>(Comparator.comparing(CreateMiddleWareJarParam::getAgv))), ArrayList::new));
 

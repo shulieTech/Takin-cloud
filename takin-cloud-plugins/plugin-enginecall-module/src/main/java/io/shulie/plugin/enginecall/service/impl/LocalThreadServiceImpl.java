@@ -147,9 +147,9 @@ public class LocalThreadServiceImpl implements EngineCallService {
     @Override
     public String getJobStatus(String jobName) {
         if (shellProcess.get(jobName) == null || !shellProcess.get(jobName).isAlive()) {
-            return SceneManageConstant.SCENETASK_JOB_STATUS_NONE;
+            return SceneManageConstant.SCENE_TASK_JOB_STATUS_NONE;
         }
-        return SceneManageConstant.SCENETASK_JOB_STATUS_RUNNING;
+        return SceneManageConstant.SCENE_TASK_JOB_STATUS_RUNNING;
     }
 
     private String getEnginePackBin(String enginePackDir) {

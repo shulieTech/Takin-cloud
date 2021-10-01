@@ -39,12 +39,10 @@ public class CloudReportDTO extends ContextExt {
     private Date endTime;
 
     @ApiModelProperty(value = "压测结果")
-    private int conclusion;
+    private Integer conclusion;
 
     @ApiModelProperty(value = "压测总计时")
     private String totalTime;
-
-    // private String features
 
     @ApiModelProperty(value = "压测不通过的原因")
     private String errorMsg;

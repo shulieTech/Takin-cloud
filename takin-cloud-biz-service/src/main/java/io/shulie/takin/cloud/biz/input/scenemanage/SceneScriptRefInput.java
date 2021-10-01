@@ -46,8 +46,12 @@ public class SceneScriptRefInput {
 
     private String fileExtend;
 
-    //脚本id
+    /**
+     * 脚本id
+     */
     private Long scriptId;
-    //文件大小
+    /**
+     * 文件大小
+     */
     private String fileSize;
 }

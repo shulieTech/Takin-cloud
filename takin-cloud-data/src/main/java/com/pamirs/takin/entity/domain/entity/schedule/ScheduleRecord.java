@@ -8,6 +8,9 @@ import lombok.EqualsAndHashCode;
 
 import io.shulie.takin.ext.content.trace.ContextExt;
 
+/**
+ * @author -
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ScheduleRecord extends ContextExt {

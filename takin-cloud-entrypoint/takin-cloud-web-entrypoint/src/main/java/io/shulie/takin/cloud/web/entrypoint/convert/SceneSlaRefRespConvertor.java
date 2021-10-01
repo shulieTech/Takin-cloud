@@ -17,7 +17,19 @@ public interface SceneSlaRefRespConvertor {
 
     SceneSlaRefRespConvertor INSTANCE = Mappers.getMapper(SceneSlaRefRespConvertor.class);
 
+    /**
+     * 数据转换
+     *
+     * @param output 原数据
+     * @return 转换后数据
+     */
     SceneManageWrapperResponse.SceneSlaRefResponse of(SceneManageWrapperOutput.SceneSlaRefOutput output);
 
+    /**
+     * 数据转换(批量)
+     *
+     * @param output 原数据
+     * @return 转换后数据
+     */
     List<SceneManageWrapperResponse.SceneSlaRefResponse> ofList(List<SceneManageWrapperOutput.SceneSlaRefOutput> output);
 }

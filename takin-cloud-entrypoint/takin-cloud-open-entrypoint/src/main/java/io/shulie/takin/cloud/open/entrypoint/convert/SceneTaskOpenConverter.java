@@ -19,6 +19,12 @@ public interface SceneTaskOpenConverter {
 
     SceneTaskOpenConverter INSTANCE = Mappers.getMapper(SceneTaskOpenConverter.class);
 
+    /**
+     * 脚本验证拓展
+     *
+     * @param scriptVerityRespExt 验证信息
+     * @return 验证结果信息
+     */
     ScriptCheckResp ofScriptVerityRespExt(ScriptVerityRespExt scriptVerityRespExt);
 
     /**

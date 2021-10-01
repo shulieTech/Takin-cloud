@@ -108,6 +108,12 @@ public interface CloudSceneApi {
      */
     ResponseResult<ScriptCheckResp> checkAndUpdateScript(ScriptCheckAndUpdateReq scriptCheckAndUpdateReq);
 
+    /**
+     * 根据主键查询
+     *
+     * @param req 入参(主键)
+     * @return 查询列表
+     */
     ResponseResult<List<SceneManageWrapperResp>> queryByIds(SceneManageQueryByIdsReq req);
 
 }

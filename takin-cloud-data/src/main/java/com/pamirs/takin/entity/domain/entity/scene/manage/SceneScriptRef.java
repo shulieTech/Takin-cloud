@@ -5,6 +5,11 @@ import java.util.Date;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+/**
+ * -
+ *
+ * @author -
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class SceneScriptRef extends SceneRef {

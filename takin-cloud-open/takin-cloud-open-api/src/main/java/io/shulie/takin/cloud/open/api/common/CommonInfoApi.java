@@ -15,6 +15,7 @@ public interface CommonInfoApi {
     /**
      * 获取cloud配置信息
      *
+     * @param request 入参
      * @return -
      */
     ResponseResult<CommonInfosResp> getCloudConfigurationInfos(CloudCommonInfoWrapperReq request);

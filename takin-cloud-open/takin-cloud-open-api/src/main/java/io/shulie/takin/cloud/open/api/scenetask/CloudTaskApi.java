@@ -38,8 +38,20 @@ public interface CloudTaskApi {
      */
     ResponseResult<SceneActionResp> start(SceneTaskStartReq req);
 
+    /**
+     * 停止任务
+     *
+     * @param req 入参
+     * @return 停止结果
+     */
     ResponseResult<String> stopTask(SceneManageIdReq req);
 
+    /**
+     * 检查任务状态
+     *
+     * @param req 入参
+     * @return 状态检查返回值
+     */
     ResponseResult<SceneActionResp> checkTask(SceneManageIdReq req);
 
     /**
@@ -99,20 +111,26 @@ public interface CloudTaskApi {
     ResponseResult<SceneTryRunTaskStatusResp> checkTaskStatus(SceneTryRunTaskCheckReq sceneTryRunTaskCheckReq);
 
     /**
+     * 检查压测场景任务状态
+     *
      * @param req -
      * @return -
      */
-    ResponseResult<SceneJobStateResp> checkSceneJobSstatus(SceneManageIdReq req);
+    ResponseResult<SceneJobStateResp> checkSceneJobStatus(SceneManageIdReq req);
 
     /**
+     * 压测场景启动前检查
+     *
      * @param req -
      * @return -
      */
     ResponseResult<SceneStartCheckResp> sceneStartPreCheck(SceneStartPreCheckReq req);
 
     /**
-     * @param req
-     * @return
+     * 回调写入余额
+     *
+     * @param req 入参
+     * @return 操作结果
      */
-    ResponseResult callBackToWriteBalance(ScriptAssetBalanceReq req);
+    ResponseResult<Boolean> callBackToWriteBalance(ScriptAssetBalanceReq req);
 }

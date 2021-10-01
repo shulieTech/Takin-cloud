@@ -36,7 +36,11 @@ public class ReportQueryParam extends PagingContextExt {
     private String endTime;
 
     /**
-     * 报告类型；0普通场景，1流量调试
+     * 报告类型
+     * <ul>
+     *     <li>0:普通场景</li>
+     *     <li>1:流量调试</li>
+     * </ul>
      */
     private Integer type;
 }

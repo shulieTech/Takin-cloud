@@ -15,6 +15,12 @@ public interface SceneManageRespConvertor {
 
     SceneManageRespConvertor INSTANCE = Mappers.getMapper(SceneManageRespConvertor.class);
 
+    /**
+     * 数据转换
+     *
+     * @param output 原数据
+     * @return 转换后数据
+     */
     SceneManageWrapperResponse of(SceneManageWrapperOutput output);
 
 }

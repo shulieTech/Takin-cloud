@@ -4,6 +4,9 @@ import java.util.Date;
 
 import lombok.Data;
 
+/**
+ * @author -
+ */
 @Data
 public class WarnDetail {
 

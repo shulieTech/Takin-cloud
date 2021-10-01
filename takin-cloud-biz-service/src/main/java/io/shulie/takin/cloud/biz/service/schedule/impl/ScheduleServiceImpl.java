@@ -54,7 +54,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private StrategyConfigService strategyConfigService;
 
     @Resource
-    private TScheduleRecordMapper TScheduleRecordMapper;
+    private TScheduleRecordMapper tScheduleRecordMapper;
 
     @Autowired
     private ScheduleEventService scheduleEvent;
@@ -89,7 +89,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     public void startSchedule(ScheduleStartRequestExt request) {
         log.info("启动调度, 请求数据：{}", request);
         //任务只处理一次
-        ScheduleRecord schedule = TScheduleRecordMapper.getScheduleByTaskId(request.getTaskId());
+        ScheduleRecord schedule = tScheduleRecordMapper.getScheduleByTaskId(request.getTaskId());
         if (schedule != null) {
             log.error("异常代码【{}】,异常内容：启动调度失败 --> 调度任务[{}]已经启动",
                 TakinCloudExceptionEnum.SCHEDULE_START_ERROR, request.getTaskId());
@@ -115,7 +115,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         scheduleRecord.setTenantId(request.getTenantId());
         scheduleRecord.setPodClass(
             ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getTenantId()));
-        TScheduleRecordMapper.insertSelective(scheduleRecord);
+        tScheduleRecordMapper.insertSelective(scheduleRecord);
 
         //add by lipeng 保存调度对应压测引擎插件记录信息
         scheduleRecordEnginePluginService.saveScheduleRecordEnginePlugins(
@@ -143,7 +143,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public void stopSchedule(ScheduleStopRequestExt request) {
         log.info("停止调度, 请求数据：{}", request);
-        ScheduleRecord scheduleRecord = TScheduleRecordMapper.getScheduleByTaskId(request.getTaskId());
+        ScheduleRecord scheduleRecord = tScheduleRecordMapper.getScheduleByTaskId(request.getTaskId());
         if (scheduleRecord != null) {
             // 增加中断
             String scheduleName = ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getTenantId());

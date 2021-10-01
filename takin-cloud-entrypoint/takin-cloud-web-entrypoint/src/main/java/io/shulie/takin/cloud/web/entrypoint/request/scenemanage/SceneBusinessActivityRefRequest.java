@@ -41,6 +41,8 @@ public class SceneBusinessActivityRefRequest {
 
     private String applicationIds;
 
-    //关联上传脚本id
+    /**
+     * 关联上传脚本id
+     */
     private Long scriptId;
 }

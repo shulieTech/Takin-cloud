@@ -18,7 +18,19 @@ public interface EnginePluginSimpleResultConvert {
 
     EnginePluginSimpleResultConvert INSTANCE = Mappers.getMapper(EnginePluginSimpleResultConvert.class);
 
+    /**
+     * 转换
+     *
+     * @param result 入参
+     * @return 出参
+     */
     EnginePluginSimpleInfoOutput of(EnginePluginSimpleInfoResult result);
 
+    /**
+     * 批量转换
+     *
+     * @param results 入参(批量)
+     * @return 出参(批量)
+     */
     List<EnginePluginSimpleInfoOutput> ofs(List<EnginePluginSimpleInfoResult> results);
 }

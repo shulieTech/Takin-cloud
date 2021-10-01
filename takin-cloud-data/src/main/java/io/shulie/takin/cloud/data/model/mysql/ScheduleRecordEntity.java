@@ -9,6 +9,9 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+/**
+ * @author -
+ */
 @Data
 @TableName(value = "t_schedule_record")
 public class ScheduleRecordEntity {

@@ -40,7 +40,7 @@ public class EngineExtImpl implements EngineExtApi {
 
         Set<String> errorSet = new HashSet<>();
         int unbindCount = 0;
-        Map<String, Integer> urlMap = new HashMap<>();
+        Map<String, Integer> urlMap = new HashMap<>(0);
         for (String request : scriptVerityExt.getRequest()){
             Set<String> tempErrorSet = new HashSet<>();
             for (ScriptUrlExt urlVO : requestUrl) {

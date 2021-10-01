@@ -6,7 +6,7 @@ import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
-import io.shulie.takin.cloud.common.constants.APIUrls;
+import io.shulie.takin.cloud.common.constants.ApiUrls;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.open.req.report.UpdateReportConclusionReq;
@@ -16,7 +16,6 @@ import io.shulie.takin.common.beans.response.ResponseResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020-04-17
  */
 @RestController
-@RequestMapping(APIUrls.TRO_OPEN_API_URL)
+@RequestMapping(ApiUrls.TRO_OPEN_API_URL)
 @Api(tags = "场景报告模块", value = "场景报告")
 public class ReportOpenController {
 

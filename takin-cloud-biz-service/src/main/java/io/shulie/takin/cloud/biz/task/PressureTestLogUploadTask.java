@@ -7,8 +7,8 @@ import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.data.dao.sceneTask.SceneTaskPressureTestLogUploadDAO;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
+import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 压测日志上传任务
+ *
+ * @author -
  */
 @Slf4j
 public class PressureTestLogUploadTask implements Runnable {
@@ -189,6 +191,7 @@ public class PressureTestLogUploadTask implements Runnable {
 
     /**
      * todo 这个方法需要修改，不能按照压测场景的状态来判断是否停止压测，最新的方案是按照job状态来判断。
+     *
      * @param sceneId
      * @return
      */

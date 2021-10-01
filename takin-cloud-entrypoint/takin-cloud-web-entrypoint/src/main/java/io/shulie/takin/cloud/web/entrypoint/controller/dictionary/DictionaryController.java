@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.shulie.takin.cloud.biz.cache.DictionaryCache;
-import io.shulie.takin.cloud.common.constants.APIUrls;
+import io.shulie.takin.cloud.common.constants.ApiUrls;
 import io.shulie.takin.cloud.common.enums.machine.EnumResult;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.swagger.annotations.ApiOperation;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/10/19 11:07 上午
  */
 @RestController
-@RequestMapping(APIUrls.TRO_API_URL)
+@RequestMapping(ApiUrls.TRO_API_URL)
 public class DictionaryController {
     @Autowired
     private DictionaryCache dictionaryCache;

@@ -1,9 +1,9 @@
 package io.shulie.takin.eventcenter;
 
-
-
 /**
  * 事件
+ *
+ * @author -
  */
 public class Event {
 
@@ -30,8 +30,8 @@ public class Event {
     @Override
     public String toString() {
         return "Event{" +
-                "eventName='" + eventName + '\'' +
-                ", ext=" + ext +
-                '}';
+            "eventName='" + eventName + '\'' +
+            ", ext=" + ext +
+            '}';
     }
 }
