@@ -10,6 +10,9 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+/**
+ * @author -
+ */
 @Data
 @TableName(value = "t_scene_manage")
 public class SceneManageEntity {

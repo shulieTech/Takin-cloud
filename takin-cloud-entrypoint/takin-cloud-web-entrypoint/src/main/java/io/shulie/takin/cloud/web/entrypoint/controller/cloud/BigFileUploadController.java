@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import io.shulie.takin.cloud.biz.service.cloudServer.BigFileService;
+import io.shulie.takin.cloud.biz.service.cloud.server.BigFileService;
 import org.springframework.web.multipart.MultipartFile;
 
 /**

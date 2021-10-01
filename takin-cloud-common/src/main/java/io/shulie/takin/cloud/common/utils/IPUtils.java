@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author shulie
  * @version v1.0
- * @2018年5月21日
+ * @date 2018年5月21日
  */
 public class IPUtils {
 
@@ -30,7 +30,7 @@ public class IPUtils {
      * @param httpServletRequest http请求
      * @return 用户的ip地址
      * @author shulie
-     * @2018年5月21日
+     * @date 2018年5月21日
      * @version v1.0
      */
     public static String getIP(HttpServletRequest httpServletRequest) {
@@ -74,7 +74,7 @@ public class IPUtils {
      * @param strIP 字符串ip地址
      * @return long型的ip地址
      * @author shulie
-     * @2018年5月21日
+     * @date 2018年5月21日
      * @version v1.0
      */
     public static long ipToLong(String strIP) {
@@ -140,10 +140,10 @@ public class IPUtils {
             }
         } catch (UnknownHostException e) {
             LOGGER.error("异常代码【{}】,异常内容：未知的ip端口，获取远程ip地址失败 --> 异常信息: {}",
-                    TakinCloudExceptionEnum.UNKNOWN_HOST_ERROR,e);
+                TakinCloudExceptionEnum.UNKNOWN_HOST_ERROR, e);
         } catch (SocketException e) {
             LOGGER.error("异常代码【{}】,异常内容：socket异常，获取远程ip地址失败 --> 异常信息: {}",
-                    TakinCloudExceptionEnum.SOCKET_CONNECT_ERROR,e);
+                TakinCloudExceptionEnum.SOCKET_CONNECT_ERROR, e);
         }
         return null;
     }

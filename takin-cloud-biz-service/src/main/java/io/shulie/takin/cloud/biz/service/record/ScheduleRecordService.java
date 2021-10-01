@@ -9,6 +9,11 @@ import com.pamirs.takin.entity.domain.vo.schedule.ScheduleRecordQueryVO;
  * @date 2020/5/9 下午2:10
  */
 public interface ScheduleRecordService {
-
+    /**
+     * 分页查询列表
+     *
+     * @param queryVO 查询条件
+     * @return 查询结果
+     */
     PageInfo<ScheduleRecordDTO> queryPageList(ScheduleRecordQueryVO queryVO);
 }

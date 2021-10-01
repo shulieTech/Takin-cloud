@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * prada获取http接口表
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_prada_http_data")

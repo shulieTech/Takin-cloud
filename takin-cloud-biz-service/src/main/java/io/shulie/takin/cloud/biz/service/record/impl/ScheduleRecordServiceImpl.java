@@ -27,13 +27,13 @@ import org.springframework.stereotype.Service;
 public class ScheduleRecordServiceImpl implements ScheduleRecordService {
 
     @Resource
-    private TScheduleRecordMapper TScheduleRecordMapper;
+    private TScheduleRecordMapper tScheduleRecordMapper;
 
     @Override
     public PageInfo<ScheduleRecordDTO> queryPageList(ScheduleRecordQueryVO queryVO) {
         Page<ScheduleRecord> page = PageHelper.startPage(queryVO.getCurrentPage() + 1, queryVO.getPageSize());
 
-        List<ScheduleRecord> queryList = TScheduleRecordMapper.getPageList(queryVO);
+        List<ScheduleRecord> queryList = tScheduleRecordMapper.getPageList(queryVO);
         if (CollectionUtils.isEmpty(queryList)) {
             return new PageInfo<>(Lists.newArrayList());
         }

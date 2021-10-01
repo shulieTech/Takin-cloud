@@ -5,7 +5,7 @@ import io.shulie.takin.cloud.biz.input.engine.EnginePluginWrapperInput;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginDetailOutput;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginSimpleInfoOutput;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginService;
-import io.shulie.takin.cloud.common.constants.APIUrls;
+import io.shulie.takin.cloud.common.constants.ApiUrls;
 import io.shulie.takin.cloud.common.constants.EnginePluginConstants;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
@@ -36,7 +36,7 @@ import java.util.Objects;
 @Slf4j
 @RestController
 @Api(tags = "压测引擎管理")
-@RequestMapping(APIUrls.TRO_OPEN_API_URL + "engine")
+@RequestMapping(ApiUrls.TRO_OPEN_API_URL + "engine")
 public class EnginePluginOpenController {
 
     @Resource

@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * 压测报告整体概况
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_whole_report")

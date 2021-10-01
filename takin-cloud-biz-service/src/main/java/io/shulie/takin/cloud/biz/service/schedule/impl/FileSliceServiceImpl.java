@@ -10,7 +10,6 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSONObject;
 
-import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
@@ -21,10 +20,10 @@ import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.utils.FileSliceByLine;
 import io.shulie.takin.cloud.common.utils.FileSliceByLine.FileSliceInfo;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.Builder;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneBigFileSliceDAO;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneBigFileSliceDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
@@ -33,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**

@@ -72,12 +72,11 @@ import io.shulie.takin.cloud.common.pojo.dto.scenemanage.UploadFileDTO;
 import io.shulie.takin.cloud.common.pojo.vo.scenemanage.SceneMangeFeaturesVO;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.LinuxUtil;
 import io.shulie.takin.cloud.common.utils.UrlUtil;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
@@ -165,7 +164,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (isScriptManage) {
             matchScriptBusinessActivity(businessActivityRefs, sceneScriptRefList);
         }
-        Long sceneId = saveToDB((SceneManageCreateOrUpdateParam)maps.get(SCENE_MANAGE),
+        Long sceneId = saveToDatabase((SceneManageCreateOrUpdateParam)maps.get(SCENE_MANAGE),
             businessActivityRefs, sceneScriptRefList, sceneSlaRefs, isScriptManage);
 
         //使用了脚本，需要转移文件
@@ -275,7 +274,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         }
     }
 
-    private Long saveToDB(SceneManageCreateOrUpdateParam createParam, List<SceneBusinessActivityRef> businessActivityList,
+    private Long saveToDatabase(SceneManageCreateOrUpdateParam createParam, List<SceneBusinessActivityRef> businessActivityList,
         List<SceneScriptRef> scriptList, List<SceneSlaRef> slaList, boolean isScriptManage) {
         //负责人默认创建人
         Long sceneId = sceneManageDAO.insert(createParam);
@@ -402,7 +401,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (isScriptManage) {
             matchScriptBusinessActivity(businessActivityRefs, sceneScriptRefList);
         }
-        updateToDB(manageCreateOrUpdateParam, businessActivityRefs, sceneScriptRefList, sceneSlaRefs, isScriptManage);
+        updateToDatabase(manageCreateOrUpdateParam, businessActivityRefs, sceneScriptRefList, sceneSlaRefs, isScriptManage);
         //删除脚本文件、从新从文件库重新copy
         Long sceneId = wrapperRequest.getId();
         if (isScriptManage && fileNeedChange && StringUtils.isNotBlank(scriptPath) && sceneId != null) {
@@ -410,7 +409,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         }
     }
 
-    private void updateToDB(SceneManageCreateOrUpdateParam updateParam, List<SceneBusinessActivityRef> businessActivityList,
+    private void updateToDatabase(SceneManageCreateOrUpdateParam updateParam, List<SceneBusinessActivityRef> businessActivityList,
         List<SceneScriptRef> scriptList, List<SceneSlaRef> slaList, boolean isScriptManage) {
         sceneManageDAO.update(updateParam);
         Long sceneId = updateParam.getId();

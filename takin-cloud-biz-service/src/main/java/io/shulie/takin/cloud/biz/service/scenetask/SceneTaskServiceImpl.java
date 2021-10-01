@@ -72,8 +72,7 @@ import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
-import io.shulie.takin.cloud.data.dao.sceneTask.SceneTaskPressureTestLogUploadDAO;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
@@ -91,7 +90,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -104,52 +102,39 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 public class SceneTaskServiceImpl implements SceneTaskService {
-
     @Resource
-    private TSceneManageMapper tSceneManageMapper;
-    ;
-
-    @Autowired
-    private SceneManageService sceneManageService;
-
-    @Autowired
-    private SceneTaskEventServie sceneTaskEventServie;
-
-    @Resource
-    private TReportMapper tReportMapper;
-    // 初始化报告开始时间偏移时间
-    @Value("${init.report.startTime.Offset:10}")
-    private Long offsetStartTime;
-
-    @Resource
-    private TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
-
-    @Autowired
-    private RedisClientUtils redisClientUtils;
-
-    @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
-    @Autowired
-    private SceneManageDAO sceneManageDao;
-
-    @Autowired
-    private SceneTaskPressureTestLogUploadDAO sceneTaskPressureTestLogUploadDao;
-
-    @Autowired
+    @Resource(type = ReportDao.class)
     private ReportDao reportDao;
-
-    @Autowired
+    @Resource(type = PluginManager.class)
     private PluginManager pluginManager;
-
-    @Autowired
-    private FileSliceService fileSliceService;
-
-    @Autowired
+    @Resource(type = TReportMapper.class)
+    private TReportMapper tReportMapper;
+    @Resource(type = SceneManageDAO.class)
+    private SceneManageDAO sceneManageDao;
+    @Resource(type = SceneManageDAO.class)
     private SceneManageDAO sceneManageDAO;
-
-    @Autowired
+    @Resource(type = RedisClientUtils.class)
+    private RedisClientUtils redisClientUtils;
+    @Resource(type = FileSliceService.class)
+    private FileSliceService fileSliceService;
+    @Resource(type = EnginePluginUtils.class)
     private EnginePluginUtils enginePluginUtils;
+    @Resource(type = SceneManageService.class)
+    private SceneManageService sceneManageService;
+    @Resource(type = TSceneManageMapper.class)
+    private TSceneManageMapper tSceneManageMapper;
+    @Resource(type = SceneTaskEventServie.class)
+    private SceneTaskEventServie sceneTaskEventServie;
+    @Resource(type = TReportBusinessActivityDetailMapper.class)
+    private TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
+
+    /**
+     * 初始化报告开始时间偏移时间
+     */
+    @Value("${init.report.startTime.Offset:10}")
+    private Long offsetStartTime;
 
     private static final Long KB = 1024L;
     private static final Long MB = KB * 1024;
@@ -157,7 +142,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     private static final Long TB = GB * 1024;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public SceneActionOutput start(SceneTaskStartInput input) {
         CloudPluginUtils.fillUserData(input);
         input.setAssetType(AssetTypeEnum.PRESS_REPORT.getCode());
@@ -621,7 +606,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         SceneJobStateOutput state = new SceneJobStateOutput();
         SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (Objects.isNull(sceneManage)) {
-            state.setState(SceneManageConstant.SCENETASK_JOB_STATUS_NONE);
+            state.setState(SceneManageConstant.SCENE_TASK_JOB_STATUS_NONE);
             state.setMsg("未查询到相应的压测场景");
             return state;
         }
@@ -633,12 +618,12 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 reportId = report.getId().toString();
             }
         } else {
-            state.setState(SceneManageConstant.SCENETASK_JOB_STATUS_NONE);
+            state.setState(SceneManageConstant.SCENE_TASK_JOB_STATUS_NONE);
             state.setMsg("压测任务未启动");
             return state;
         }
         if (StringUtils.isEmpty(reportId)) {
-            state.setState(SceneManageConstant.SCENETASK_JOB_STATUS_NONE);
+            state.setState(SceneManageConstant.SCENE_TASK_JOB_STATUS_NONE);
             state.setMsg("未获取到相应压测报告");
             return state;
         }
@@ -647,9 +632,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         String status = engineCallExtApi.getJobStatus(jobName);
         state.setState(status);
 
-        if (Objects.equals(status, SceneManageConstant.SCENETASK_JOB_STATUS_RUNNING)) {
+        if (Objects.equals(status, SceneManageConstant.SCENE_TASK_JOB_STATUS_RUNNING)) {
             state.setMsg("任务执行中");
-        } else if (Objects.equals(status, SceneManageConstant.SCENETASK_JOB_STATUS_NONE)) {
+        } else if (Objects.equals(status, SceneManageConstant.SCENE_TASK_JOB_STATUS_NONE)) {
             state.setMsg("任务已停止");
         } else {
             state.setMsg("任务执行错误");
@@ -802,7 +787,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     /**
      * 压测任务启动失败
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void testFailed(TaskResult taskResult) {
         log.info("场景[{}]压测任务启动失败，失败原因:{}", taskResult.getSceneId(), taskResult.getMsg());
         Report report = tReportMapper.selectByPrimaryKey(taskResult.getTaskId());

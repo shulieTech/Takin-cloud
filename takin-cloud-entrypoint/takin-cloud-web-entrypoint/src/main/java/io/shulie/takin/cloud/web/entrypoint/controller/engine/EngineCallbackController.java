@@ -2,7 +2,7 @@ package io.shulie.takin.cloud.web.entrypoint.controller.engine;
 
 import com.pamirs.takin.entity.domain.vo.engine.EngineNotifyParam;
 import io.shulie.takin.cloud.biz.service.scene.EngineCallbackService;
-import io.shulie.takin.cloud.common.constants.APIUrls;
+import io.shulie.takin.cloud.common.constants.ApiUrls;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/9/23 2:42 下午
  */
 @RestController
-@RequestMapping(APIUrls.TRO_API_URL + "engine/callback")
+@RequestMapping(ApiUrls.TRO_API_URL + "engine/callback")
 public class EngineCallbackController {
 
     @Autowired

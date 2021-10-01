@@ -25,13 +25,12 @@ import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 import io.shulie.takin.cloud.biz.utils.SlaUtil;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
-import io.shulie.takin.cloud.common.constants.APIUrls;
+import io.shulie.takin.cloud.common.constants.ApiUrls;
 import io.shulie.takin.cloud.common.constants.DicKeyConstant;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.ListHelper;
 import io.shulie.takin.cloud.open.entrypoint.convert.SceneBusinessActivityRefInputConvert;
@@ -75,7 +74,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @RestController
-@RequestMapping(APIUrls.TRO_OPEN_API_URL + "scenemanage")
+@RequestMapping(ApiUrls.TRO_OPEN_API_URL + "scenemanage")
 @Api(tags = "压测场景管理")
 public class SceneManageOpenController {
 

@@ -11,6 +11,8 @@ import lombok.Data;
 
 /**
  * 压测上传jmeter日志任务状态表
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_scene_jmeterlog_upload")

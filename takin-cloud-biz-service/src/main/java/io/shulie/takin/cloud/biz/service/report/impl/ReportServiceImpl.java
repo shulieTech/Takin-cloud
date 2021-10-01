@@ -49,7 +49,7 @@ import io.shulie.takin.ext.content.asset.AssetInvoiceExt;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
 import org.springframework.beans.factory.annotation.Value;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
-import io.shulie.takin.cloud.common.influxdb.InfluxDBUtil;
+import io.shulie.takin.cloud.common.influxdb.InfluxUtil;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.plugin.framework.core.PluginManager;
@@ -70,7 +70,7 @@ import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import org.springframework.transaction.annotation.Transactional;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import com.pamirs.takin.entity.domain.vo.report.ReportQueryParam;
 import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
@@ -157,7 +157,7 @@ public class ReportServiceImpl implements ReportService {
             return new PageInfo<>(new ArrayList<>(0));
         }
         PageInfo<Report> old = new PageInfo<>(reportList);
-        Map<Long, String> errorMsgMap = new HashMap<>();
+        Map<Long, String> errorMsgMap = new HashMap<>(0);
         for (Report report : reportList) {
             if (report.getConclusion() != null && report.getConclusion() == 0 && report.getFeatures() != null) {
                 JSONObject jsonObject = JSON.parseObject(report.getFeatures());
@@ -597,7 +597,7 @@ public class ReportServiceImpl implements ReportService {
             " count as totalRequest, fail_count as failRequest, avg_tps as tps , avg_rt as avgRt, sa_count as saCount,"
                 + " active_threads as avgConcurrenceNum");
         influxDbSql.append(" from ");
-        influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, tenantId));
+        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, tenantId));
         influxDbSql.append(" where ");
         influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
         influxDbSql.append(" order by time desc limit 1");
@@ -613,7 +613,7 @@ public class ReportServiceImpl implements ReportService {
         influxDbSql.append(
             " sum(count) as totalRequest,mean(avg_tps) as avgTps , sum(sum_rt)/sum(count) as avgRt , mean(success_rate) as avgSuccessRate");
         influxDbSql.append(" from ");
-        influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, tenantId));
+        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, tenantId));
         influxDbSql.append(" where ");
         influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
         influxDbSql.append(" and time >= ").append("'").append(startTime).append("'");
@@ -660,7 +660,7 @@ public class ReportServiceImpl implements ReportService {
             " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps , sum(sum_rt)/sum(count) as "
                 + "avgRt, sum(sa_count) as saCount, count(avg_rt) as recordCount ,mean(active_threads) as avgConcurrenceNum ");
         influxDbSql.append(" from ");
-        influxDbSql.append(InfluxDBUtil.getMeasurement(reportResult.getSceneId(), reportResult.getId(), reportResult.getTenantId()));
+        influxDbSql.append(InfluxUtil.getMeasurement(reportResult.getSceneId(), reportResult.getId(), reportResult.getTenantId()));
         influxDbSql.append(" where ");
         influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
 
@@ -758,7 +758,7 @@ public class ReportServiceImpl implements ReportService {
             return metricList;
         }
         try {
-            String measurement = InfluxDBUtil.getMeasurement(sceneId, reportId, tenantId);
+            String measurement = InfluxUtil.getMeasurement(sceneId, reportId, tenantId);
             metricList = influxWriter.query(
                 "select time,avg_tps as avgTps from " + measurement + " where transaction='all'", Metrices.class);
         } catch (Throwable e) {
@@ -927,7 +927,7 @@ public class ReportServiceImpl implements ReportService {
      *
      * @param sceneId     场景ID
      * @param reportId    报表ID
-     * @param tenantId  顾客ID
+     * @param tenantId    顾客ID
      * @param transaction 业务活动
      * @return -
      */
@@ -941,7 +941,7 @@ public class ReportServiceImpl implements ReportService {
                 // 20210621 active_threads有可能出现0的情况，所以这里取平均后可能不为整数，加round取整
                 + "maxRt, count(avg_rt) as recordCount ,round(mean(active_threads)) as avgConcurrenceNum");
         influxDbSql.append(" from ");
-        influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, tenantId));
+        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, tenantId));
         influxDbSql.append(" where ");
         influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
 
@@ -961,7 +961,7 @@ public class ReportServiceImpl implements ReportService {
         //业务活动是否匹配
         boolean totalPassFlag = true;
         boolean passFlag;
-        String tableName = InfluxDBUtil.getMeasurement(sceneId, reportId, tenantId);
+        String tableName = InfluxUtil.getMeasurement(sceneId, reportId, tenantId);
         for (ReportBusinessActivityDetail reportBusinessActivityDetail : reportBusinessActivityDetails) {
             if (StringUtils.isBlank(reportBusinessActivityDetail.getBindRef())) {
                 continue;

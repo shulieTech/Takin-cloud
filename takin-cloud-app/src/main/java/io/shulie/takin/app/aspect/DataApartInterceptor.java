@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 })
 public class DataApartInterceptor implements Interceptor {
 
-    private static final String[] tables = new String[] {"t_scene_manage", "t_report"};
+    private static final String[] TABLES = new String[] {"t_scene_manage", "t_report"};
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
@@ -142,14 +142,14 @@ public class DataApartInterceptor implements Interceptor {
             sb.append(" and ");
             sb.append(sql.substring(pos + " where ".length()));
         } else {
-            int index = lowerIndexOf(sql, tables[tableIndex]);
+            int index = lowerIndexOf(sql, TABLES[tableIndex]);
             sb.append(sql.substring(0, index));
-            sb.append(tables[tableIndex]);
+            sb.append(TABLES[tableIndex]);
             sb.append(" where customer_id = " + userId);
             if (StringUtils.isNoneBlank(filterSql)) {
                 sb.append(" and " + filterSql);
             }
-            sb.append(sql.substring(index + tables[tableIndex].length()));
+            sb.append(sql.substring(index + TABLES[tableIndex].length()));
         }
         return sb.toString();
     }
@@ -161,9 +161,9 @@ public class DataApartInterceptor implements Interceptor {
      * @return
      */
     private int matchTableIndex(String sql) {
-        for (int i = 0; i < tables.length; i++) {
-            if (lowerIndexOf(sql, tables[i]) > 0
-                && lowerIndexOf(sql, tables[i] + "_") == -1) {
+        for (int i = 0; i < TABLES.length; i++) {
+            if (lowerIndexOf(sql, TABLES[i]) > 0
+                && lowerIndexOf(sql, TABLES[i] + "_") == -1) {
                 return i;
             }
         }

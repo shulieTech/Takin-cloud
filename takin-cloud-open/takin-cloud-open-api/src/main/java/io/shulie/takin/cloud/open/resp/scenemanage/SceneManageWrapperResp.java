@@ -92,7 +92,7 @@ public class SceneManageWrapperResp extends ContextExt {
 
     private Long scriptId;
 
-    private String BusinessFlowId;
+    private String businessFlowId;
 
     @ApiModelProperty(name = "executeTime", value = "定时执行时间")
     private String executeTime;

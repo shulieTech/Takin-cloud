@@ -60,7 +60,7 @@ public class SlaServiceImpl implements SlaService {
     @Resource
     private RedisClientUtils redisClientUtils;
     @Resource
-    private TWarnDetailMapper TWarnDetailMapper;
+    private TWarnDetailMapper tWarnDetailMapper;
     @Resource
     private SceneManageService sceneManageService;
 
@@ -161,7 +161,7 @@ public class SlaServiceImpl implements SlaService {
                     if (redisClientUtils.hasKey(PREFIX_TASK + metricsEvent.getSceneId())) {
                         // 熔断数据也记录到告警明细中
                         WarnDetail warnDetail = buildWarnDetail(conditionMap, businessActivityDTO, metricsEvent, dto);
-                        TWarnDetailMapper.insertSelective(warnDetail);
+                        tWarnDetailMapper.insertSelective(warnDetail);
                         // 记录sla熔断数据
                         UpdateReportSlaDataInput slaDataInput = new UpdateReportSlaDataInput();
                         SlaBean slaBean = new SlaBean();
@@ -213,7 +213,7 @@ public class SlaServiceImpl implements SlaService {
                 WarnDetail warnDetail = buildWarnDetail(conditionMap, businessActivityDTO, metricsEvent, dto);
                 //报告未结束，才insert
                 if (redisClientUtils.hasKey(PREFIX_TASK + metricsEvent.getSceneId())) {
-                    TWarnDetailMapper.insertSelective(warnDetail);
+                    tWarnDetailMapper.insertSelective(warnDetail);
                 }
             } else {
                 redisClientUtils.hmset(SLA_WARN_KEY, String.valueOf(dto.getId()), JSON.toJSONString(model));

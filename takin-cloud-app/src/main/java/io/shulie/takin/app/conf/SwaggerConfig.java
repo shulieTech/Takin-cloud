@@ -18,6 +18,8 @@ import springfox.documentation.spring.web.plugins.Docket;
 
 /**
  * The type Swagger config.
+ *
+ * @author -
  */
 @Configuration
 //@EnableSwagger2

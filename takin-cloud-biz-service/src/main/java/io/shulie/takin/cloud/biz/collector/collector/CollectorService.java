@@ -29,8 +29,8 @@ import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CollectorUtil;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
-import io.shulie.takin.cloud.data.dao.sceneTask.SceneTaskPressureTestLogUploadDAO;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
+import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.utils.json.JsonHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +49,7 @@ public class CollectorService extends AbstractIndicators {
     public static final String METRICS_EVENTS_STARTED = "started";
     public static final String METRICS_EVENTS_ENDED = "ended";
 
-    private static final Map<String, List<String>> cacheTasks = new ConcurrentHashMap<>();
+    private static final Map<String, List<String>> CACHE_TASKS = new ConcurrentHashMap<>();
 
     @Resource
     private TReportMapper tReportMapper;
@@ -264,7 +264,7 @@ public class CollectorService extends AbstractIndicators {
      * @return -
      */
     private boolean validate(long time, Long sceneId, Long reportId, Long tenantId, List<ResponseMetrics> metrics) {
-        if ((System.currentTimeMillis() - time) > CollectorConstants.overdueTime) {
+        if ((System.currentTimeMillis() - time) > CollectorConstants.OVERDUE_TIME) {
             log.info("{}-{}-{}数据丢失,超时时间{}，数据原文：{}", sceneId, reportId, tenantId,
                 System.currentTimeMillis() - time, JsonHelper.bean2Json(metrics));
             return false;
@@ -274,7 +274,7 @@ public class CollectorService extends AbstractIndicators {
 
     public boolean cacheCheck(Long scenId, Long reportId, Long tenantId, List<String> transactions) {
         String hashKey = getTaskKey(scenId, reportId, tenantId);
-        List<String> list = cacheTasks.get(hashKey);
+        List<String> list = CACHE_TASKS.get(hashKey);
         boolean flag = true;
         if (null != list) {
             for (String transaction : transactions) {
@@ -284,7 +284,7 @@ public class CollectorService extends AbstractIndicators {
                 }
             }
         } else {
-            cacheTasks.put(hashKey, transactions);
+            CACHE_TASKS.put(hashKey, transactions);
             flag = false;
         }
         return flag;

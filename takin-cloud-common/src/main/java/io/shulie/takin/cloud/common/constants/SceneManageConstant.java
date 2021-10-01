@@ -11,6 +11,7 @@ public class SceneManageConstant {
     public static final String SCENE_TOPIC_PREFIX = "TRO_SCENE_";
 
     // ---- 施压配置
+
     public static final String THREAD_NUM = "threadNum";
 
     public static final String HOST_NUM = "hostNum";
@@ -43,6 +44,7 @@ public class SceneManageConstant {
     public static final String IS_ORDERED_SPLIT = "isOrderSplit";
 
     // ---- 业务活动目标
+
     public static final String TPS = "TPS";
 
     public static final String RT = "RT";
@@ -52,6 +54,7 @@ public class SceneManageConstant {
     public static final String SA = "SA";
 
     // ---- SLA配置
+
     public static final String COMPARE_TYPE = "compareType";
 
     public static final String COMPARE_VALUE = "compareValue";
@@ -64,7 +67,8 @@ public class SceneManageConstant {
 
     public static final String EVENT_DESTORY = "destory";
 
-    //features ,扩展字段
+    // features ,扩展字段
+
     public static final String FEATURES_CONFIG_TYPE = "configType";
 
     public static final String FEATURES_SCRIPT_ID = "scriptId";
@@ -74,6 +78,7 @@ public class SceneManageConstant {
     public static final String FEATURES_SCHEDULE_INTERVAL = "scheduleInterval";
 
     //压测场景模拟业务流量启动场景
+
     public static final String SCENE_MANAGER_FLOW_DEBUG = "SCENE_MANAGER_FLOW_DEBUG_";
 
     public static final String SCENE_MANAGER_INSPECT = "SCENE_MANAGER_INSPECT_";
@@ -83,10 +88,20 @@ public class SceneManageConstant {
      */
     public static final String SCENE_MANAGER_TRY_RUN = "SCENE_MANAGER_TRY_RUN_";
 
+    // ---- 压测任务状态
     /**
-     * 压测任务状态 job不存在：none 运行中：running 运行失败：failed
+     * 压测任务状态
+     * <p>job不存在</p>
      */
-    public static String SCENETASK_JOB_STATUS_NONE = "none";
-    public static String SCENETASK_JOB_STATUS_RUNNING = "running";
-    public static String SCENETASK_JOB_STATUS_FAILED = "failed";
+    public static String SCENE_TASK_JOB_STATUS_NONE = "none";
+    /**
+     * 压测任务状态
+     * <p>运行中</p>
+     */
+    public static String SCENE_TASK_JOB_STATUS_RUNNING = "running";
+    /**
+     * 压测任务状态
+     * <p>运行失败</p>
+     */
+    public static String SCENE_TASK_JOB_STATUS_FAILED = "failed";
 }

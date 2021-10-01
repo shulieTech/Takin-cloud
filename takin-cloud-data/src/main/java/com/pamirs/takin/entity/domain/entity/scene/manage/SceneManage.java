@@ -7,6 +7,9 @@ import lombok.EqualsAndHashCode;
 
 import io.shulie.takin.ext.content.trace.ContextExt;
 
+/**
+ * @author -
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class SceneManage extends ContextExt {

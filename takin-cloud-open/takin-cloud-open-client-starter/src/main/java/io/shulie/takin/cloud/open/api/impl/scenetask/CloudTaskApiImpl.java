@@ -162,7 +162,7 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
     }
 
     @Override
-    public ResponseResult<SceneJobStateResp> checkSceneJobSstatus(SceneManageIdReq req) {
+    public ResponseResult<SceneJobStateResp> checkSceneJobStatus(SceneManageIdReq req) {
         TakinResponseEntity<ResponseResult<SceneJobStateResp>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.CHECK_SCENE_JOB_STATUS,
                 getHeaders(), req, new TypeReference<ResponseResult<SceneJobStateResp>>() {});
@@ -186,14 +186,14 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
     }
 
     @Override
-    public ResponseResult callBackToWriteBalance(ScriptAssetBalanceReq req) {
+    public ResponseResult<Boolean> callBackToWriteBalance(ScriptAssetBalanceReq req) {
         TakinResponseEntity<ResponseResult<Boolean>> takinResponseEntity =
-                HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_TASK_WRITE_BALANCE,
-                        getHeaders(req), req, new TypeReference<ResponseResult<Boolean>>() {});
+            HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_TASK_WRITE_BALANCE,
+                getHeaders(), req, new TypeReference<ResponseResult<Boolean>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-                takinResponseEntity.getErrorMsg(), "查看cloud日志");
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 }

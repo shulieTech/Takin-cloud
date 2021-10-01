@@ -14,7 +14,9 @@ import lombok.Data;
 @ApiModel("文件请求信息")
 public class FileManageInfo {
 
-    //数据库字表id
+    /**
+     * 数据库字表id
+     */
     @ApiModelProperty(value = "文件ID", dataType = "long")
     private Long fileId;
 

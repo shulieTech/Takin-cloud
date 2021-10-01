@@ -72,7 +72,9 @@ public class SceneManageWrapperReq extends ContextExt {
     @ApiModelProperty(name = "warningCondition", value = "SLA警告配置")
     private List<SceneSlaRefOpen> warningCondition;
 
-    //扩展字段
+    /**
+     * 扩展字段
+     */
     private String features;
 
     private Long scriptId;

@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * 业务链路管理表
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_business_link_manage_table")

@@ -17,8 +17,20 @@ import io.shulie.takin.common.beans.response.ResponseResult;
  */
 public interface CloudReportApi {
 
+    /**
+     * 列出报告
+     *
+     * @param req 入参
+     * @return 报告列表
+     */
     ResponseResult<List<ReportResp>> listReport(ReportQueryReq req);
 
+    /**
+     * 添加警告
+     *
+     * @param req 入参
+     * @return 操作结果
+     */
     ResponseResult<String> addWarn(WarnCreateReq req);
 
     /**

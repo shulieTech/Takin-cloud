@@ -3,7 +3,6 @@ package io.shulie.takin.cloud.open.req.scenemanage;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-
 /**
  * @author mubai
  * @date 2020-10-29 16:05
@@ -47,9 +46,13 @@ public class SceneScriptRefOpen {
 
     private String fileExtend;
 
-    //脚本id
+    /**
+     * 脚本id
+     */
     private Long scriptId;
 
-    //文件大小
+    /**
+     * 文件大小
+     */
     private String fileSize;
 }

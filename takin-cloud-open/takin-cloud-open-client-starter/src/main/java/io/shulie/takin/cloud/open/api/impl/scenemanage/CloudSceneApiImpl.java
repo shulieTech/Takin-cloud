@@ -100,7 +100,7 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     @Override
     public ResponseResult<List<SceneManageListResp>> getSceneManageList(CloudUserCommonRequestExt req) {
         TakinResponseEntity<ResponseResult<List<SceneManageListResp>>> takinResponseEntity =
-            HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_All_LIST_URL,
+            HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_ALL_LIST_URL,
                 getHeaders(), req, new TypeReference<ResponseResult<List<SceneManageListResp>>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();

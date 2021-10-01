@@ -16,7 +16,19 @@ import java.util.List;
 public interface WarnDetailRespConvertor {
     WarnDetailRespConvertor INSTANCE = Mappers.getMapper(WarnDetailRespConvertor.class);
 
+    /**
+     * 转换
+     *
+     * @param output 入参
+     * @return 出参
+     */
     WarnDetailResponse of(WarnDetailOutput output);
 
+    /**
+     * 批量转换
+     *
+     * @param warnDetailOutputs 入参
+     * @return 出参
+     */
     List<WarnDetailResponse> ofList(List<WarnDetailOutput> warnDetailOutputs);
 }

@@ -34,11 +34,11 @@ public class MachineDetailDTO {
     @ApiModelProperty(value = "是否风险机器")
     private Boolean riskFlag;
 
-    private MachineTPSTargetDTO tpsTarget;
+    private MachineTpsTargetDTO tpsTarget;
 
     @ApiModel
     @Data
-    public class MachineTPSTargetDTO {
+    public static class MachineTpsTargetDTO {
 
         private String[] tps;
 

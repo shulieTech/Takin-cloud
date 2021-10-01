@@ -2,11 +2,7 @@ package io.shulie.takin.cloud.biz.service.middleware;
 
 import java.util.List;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-
 import org.apache.poi.ss.usermodel.Workbook;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -23,7 +19,7 @@ public interface MiddlewareJarService {
      * @param file excel 文件
      * @return 处理的数据相关备注
      */
-    Workbook importMJ(MultipartFile file);
+    Workbook importMiddlewareJar(MultipartFile file);
 
     /**
      * 中间件jar 比对
@@ -31,6 +27,6 @@ public interface MiddlewareJarService {
      * @param files excel 文件列表
      * @return 处理的数据相关备注
      */
-    Workbook compareMJ(List<MultipartFile> files);
+    Workbook compareMiddlewareJar(List<MultipartFile> files);
 
 }

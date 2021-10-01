@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -141,7 +142,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
      * 创建引擎配置文件
      */
     public void createEngineConfigMap(ScheduleRunRequest request) {
-        Map<String, Object> configMap = new HashMap<>();
+        Map<String, Object> configMap = new HashMap<>(0);
         ScheduleStartRequestExt scheduleStartRequest = request.getRequest();
         configMap.put("name", ScheduleConstants.getConfigMapName(scheduleStartRequest.getSceneId(), scheduleStartRequest.getTaskId(),
                 scheduleStartRequest.getTenantId()));
@@ -198,10 +199,10 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         if (scheduleStartRequest.getBusinessTpsData() != null) {
             List<Map<String, String>> businessActivities = new ArrayList<>();
             scheduleStartRequest.getBusinessTpsData().forEach((k, v) -> {
-                Map<String, String> businessActivity = new HashMap<>();
+                Map<String, String> businessActivity = new HashMap<>(0);
                 businessActivity.put("elementTestName", k);
                 businessActivity.put("throughputPercent", new BigDecimal(v).multiply(new BigDecimal(100))
-                        .divide(new BigDecimal(scheduleStartRequest.getTps()), 0, BigDecimal.ROUND_UP).toString());
+                        .divide(new BigDecimal(scheduleStartRequest.getTps()), 0, RoundingMode.UP).toString());
                 businessActivities.add(businessActivity);
             });
             enginePressureParams.put("businessActivities", businessActivities);
