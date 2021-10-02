@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.shulie.takin.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 
 /**
  * @author qianshui

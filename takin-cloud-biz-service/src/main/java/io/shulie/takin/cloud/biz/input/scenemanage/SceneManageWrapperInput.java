@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import io.shulie.takin.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 
 /**
  * @author qianshui

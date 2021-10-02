@@ -11,7 +11,7 @@ import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigUpdateVO;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 import io.shulie.takin.cloud.web.entrypoint.request.scenemanage.SceneManageDeleteRequest;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.ext.content.enginecall.StrategyConfigExt;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;

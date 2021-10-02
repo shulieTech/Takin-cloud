@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.biz.service.async;
 
-import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
 
 /**
  * 异步服务

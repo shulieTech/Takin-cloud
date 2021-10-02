@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.shulie.takin.ext.content.enginecall.ScheduleRunRequest;
-import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.app.Application;
 import org.apache.commons.lang.math.RandomUtils;
 import org.junit.Test;

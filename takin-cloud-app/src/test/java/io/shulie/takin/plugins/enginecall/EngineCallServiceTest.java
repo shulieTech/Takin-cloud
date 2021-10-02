@@ -3,9 +3,8 @@ package io.shulie.takin.plugins.enginecall;
 
 import io.shulie.takin.app.Application;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
-import io.shulie.takin.ext.api.EngineCallExtApi;
-import io.shulie.takin.ext.content.enginecall.ScheduleRunRequest;
-import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

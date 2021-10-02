@@ -1,10 +1,11 @@
 package io.shulie.takin.cloud.biz.input.scenemanage;
 
+import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
 import lombok.Data;
 
 import java.util.List;
 
-import io.shulie.takin.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.EqualsAndHashCode;
 
 /**
@@ -27,7 +28,7 @@ public class SceneTaskStartInput extends ContextExt {
 
     /**
      * 流量类型
-     * @see io.shulie.takin.ext.content.enums.AssetTypeEnum
+     * @see AssetTypeEnum
      */
     private Integer assetType;
 

@@ -15,7 +15,7 @@ import io.shulie.takin.cloud.data.result.scenemanage.ScriptDetailResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SlaDetailResult;
 import io.shulie.takin.cloud.common.enums.machine.EnumResult;
 import io.shulie.takin.cloud.common.bean.TimeBean;
-import io.shulie.takin.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 
 /**
  * @author qianshui

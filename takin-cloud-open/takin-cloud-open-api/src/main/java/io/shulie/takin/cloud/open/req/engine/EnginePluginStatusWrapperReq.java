@@ -1,7 +1,6 @@
 package io.shulie.takin.cloud.open.req.engine;
 
-import io.shulie.takin.ext.content.trace.ContextExt;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

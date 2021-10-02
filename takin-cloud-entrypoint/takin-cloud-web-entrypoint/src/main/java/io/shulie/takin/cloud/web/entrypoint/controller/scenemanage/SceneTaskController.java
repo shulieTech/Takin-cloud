@@ -2,7 +2,7 @@ package io.shulie.takin.cloud.web.entrypoint.controller.scenemanage;
 
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import com.pamirs.takin.entity.domain.vo.scenemanage.FileSplitResultVO;
-import io.shulie.takin.ext.content.enginecall.ScheduleInitParamExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleInitParamExt;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartInput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneActionOutput;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;

@@ -1,9 +1,9 @@
 package io.shulie.takin.cloud.open.req.report;
 
-import io.shulie.takin.ext.content.trace.ContextExt;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 
 /**
  * 创建告警

@@ -5,8 +5,7 @@ import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import io.shulie.takin.ext.content.trace.ContextExt;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.open.req.engine.EnginePluginsRefOpen;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneBusinessActivityRefOpen;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneScriptRefOpen;

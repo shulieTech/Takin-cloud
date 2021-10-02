@@ -5,13 +5,12 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotEmpty;
 
-import io.shulie.takin.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.shulie.takin.cloud.common.bean.TimeBean;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 
 /**
  * @author 无涯

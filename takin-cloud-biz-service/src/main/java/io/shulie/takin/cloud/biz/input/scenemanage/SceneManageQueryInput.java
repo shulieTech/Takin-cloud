@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import io.shulie.takin.ext.content.trace.PagingContextExt;
+import io.shulie.takin.cloud.ext.content.trace.PagingContextExt;
 
 /**
  * 场景列表查询

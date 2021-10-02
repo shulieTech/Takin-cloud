@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import io.shulie.takin.ext.content.trace.PagingContextExt;
+import io.shulie.takin.cloud.ext.content.trace.PagingContextExt;
 
 /**
  * @author 莫问
