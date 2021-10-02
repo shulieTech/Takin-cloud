@@ -1,16 +1,10 @@
 package io.shulie.takin.cloud.common.utils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
-import com.google.common.collect.Maps;
-import io.shulie.takin.ext.api.DataTraceExtApi;
-import io.shulie.takin.ext.content.trace.ContextExt;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.api.DataTraceExtApi;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import org.springframework.stereotype.Component;
 

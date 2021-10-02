@@ -7,7 +7,7 @@ import io.shulie.takin.cloud.open.req.scenetask.SceneTryRunTaskStartReq;
 import io.shulie.takin.cloud.open.req.scenetask.TaskFlowDebugStartReq;
 import io.shulie.takin.cloud.open.resp.scenetask.SceneActionResp;
 import io.shulie.takin.cloud.open.req.scenetask.TaskInspectStartReq;
-import io.shulie.takin.ext.content.script.ScriptVerityRespExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

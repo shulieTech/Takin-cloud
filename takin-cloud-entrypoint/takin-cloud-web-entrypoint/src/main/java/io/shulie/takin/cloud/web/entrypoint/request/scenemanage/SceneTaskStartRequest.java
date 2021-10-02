@@ -3,8 +3,7 @@ package io.shulie.takin.cloud.web.entrypoint.request.scenemanage;
 import java.util.List;
 
 import io.shulie.takin.cloud.biz.input.scenemanage.EnginePluginInput;
-import io.shulie.takin.ext.content.trace.ContextExt;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

@@ -4,11 +4,11 @@ import io.shulie.plugin.engine.util.SaxUtil;
 import io.shulie.takin.cloud.common.utils.UrlUtil;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.ext.api.EngineExtApi;
-import io.shulie.takin.ext.content.script.ScriptParseExt;
-import io.shulie.takin.ext.content.script.ScriptUrlExt;
-import io.shulie.takin.ext.content.script.ScriptVerityExt;
-import io.shulie.takin.ext.content.script.ScriptVerityRespExt;
+import io.shulie.takin.cloud.ext.api.EngineExtApi;
+import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptUrlExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptVerityExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
 import org.apache.commons.collections4.CollectionUtils;
 import org.pf4j.Extension;
 
@@ -67,11 +67,11 @@ public class EngineExtImpl implements EngineExtApi {
             }
         });
         if (urlErrorSet.size() > 0) {
-            errorMsgList.add("脚本文件配置不正确:" + urlErrorSet.toString());
+            errorMsgList.add("脚本文件配置不正确:" + urlErrorSet);
         }
         //存在业务活动都关联不上脚本中的请求连接
         if (scriptVerityExt.getRequest().size() > unbindCount) {
-            errorMsgList.add("业务活动与脚本文件不匹配:" + errorSet.toString());
+            errorMsgList.add("业务活动与脚本文件不匹配:" + errorSet);
         }
         return scriptVerityRespExt;
     }

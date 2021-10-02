@@ -5,8 +5,8 @@ import com.pamirs.takin.entity.domain.dto.strategy.StrategyConfigDetailDTO;
 import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigAddVO;
 import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigQueryVO;
 import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigUpdateVO;
-import io.shulie.takin.ext.content.enginecall.StrategyConfigExt;
-import io.shulie.takin.ext.content.enginecall.StrategyOutputExt;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyOutputExt;
 import org.apache.ibatis.annotations.Param;
 
 /**

@@ -2,8 +2,7 @@ package io.shulie.takin.cloud.web.entrypoint.response.scenemanage;
 
 import java.math.BigDecimal;
 
-import io.shulie.takin.ext.content.trace.ContextExt;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

@@ -2,8 +2,8 @@ package io.shulie.takin.cloud.common.utils;
 
 import java.util.List;
 
-import io.shulie.takin.ext.api.EngineCallExtApi;
-import io.shulie.takin.ext.api.EngineExtApi;
+import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
+import io.shulie.takin.cloud.ext.api.EngineExtApi;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

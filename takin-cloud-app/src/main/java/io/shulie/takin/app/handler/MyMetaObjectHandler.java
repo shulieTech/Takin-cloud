@@ -5,7 +5,7 @@ import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
-import io.shulie.takin.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 
 /**
  * @author fanxx

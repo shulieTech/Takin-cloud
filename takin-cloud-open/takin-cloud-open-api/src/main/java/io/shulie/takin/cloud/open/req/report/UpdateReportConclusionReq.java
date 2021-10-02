@@ -1,10 +1,11 @@
 package io.shulie.takin.cloud.open.req.report;
 
-import io.shulie.takin.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
 import io.swagger.annotations.ApiModel;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 
 /**
  * @author 无涯

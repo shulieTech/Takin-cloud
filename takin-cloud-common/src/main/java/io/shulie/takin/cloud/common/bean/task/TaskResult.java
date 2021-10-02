@@ -3,7 +3,7 @@ package io.shulie.takin.cloud.common.bean.task;
 import java.util.Map;
 
 import io.shulie.takin.cloud.common.enums.scenemanage.TaskStatusEnum;
-import io.shulie.takin.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
