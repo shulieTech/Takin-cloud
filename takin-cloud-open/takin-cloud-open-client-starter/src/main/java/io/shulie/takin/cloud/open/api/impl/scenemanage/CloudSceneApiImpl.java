@@ -23,7 +23,7 @@ import io.shulie.takin.cloud.open.resp.scenemanage.SceneManageWrapperResp;
 import io.shulie.takin.cloud.open.resp.scenemanage.ScriptCheckResp;
 import io.shulie.takin.cloud.open.resp.strategy.StrategyResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.cloud.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.user.CloudUserExt;
 import io.shulie.takin.utils.http.HttpHelper;
 import io.shulie.takin.utils.http.TakinResponseEntity;
 import org.apache.commons.lang3.StringUtils;
@@ -98,7 +98,7 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     }
 
     @Override
-    public ResponseResult<List<SceneManageListResp>> getSceneManageList(CloudUserCommonRequestExt req) {
+    public ResponseResult<List<SceneManageListResp>> getSceneManageList(CloudUserExt req) {
         TakinResponseEntity<ResponseResult<List<SceneManageListResp>>> takinResponseEntity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_ALL_LIST_URL,
                 getHeaders(), req, new TypeReference<ResponseResult<List<SceneManageListResp>>>() {});
