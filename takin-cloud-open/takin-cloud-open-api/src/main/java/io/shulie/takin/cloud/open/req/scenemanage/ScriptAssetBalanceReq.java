@@ -3,14 +3,14 @@ package io.shulie.takin.cloud.open.req.scenemanage;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import io.shulie.takin.cloud.ext.content.user.CloudUserExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 
 /**
  * @author moriarty
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ScriptAssetBalanceReq extends CloudUserExt {
+public class ScriptAssetBalanceReq extends ContextExt {
     /**
      * 脚本调试主键
      */
