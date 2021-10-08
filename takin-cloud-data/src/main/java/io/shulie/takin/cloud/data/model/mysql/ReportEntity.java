@@ -19,12 +19,6 @@ public class ReportEntity {
     private Long id;
 
     /**
-     * 客户id
-     */
-    @TableField(value = "customer_id")
-    private Long tenantId;
-
-    /**
      * 流量消耗
      */
     @TableField(value = "amount")
@@ -153,9 +147,6 @@ public class ReportEntity {
     @TableField(value = "dept_id")
     private Long deptId;
 
-    @TableField(value = "user_id")
-    private Long userId;
-
     @TableField(value = "script_id")
     private Long scriptId;
 
@@ -164,4 +155,20 @@ public class ReportEntity {
      */
     @TableField(value = "`lock`")
     private Integer lock;
+
+    /**
+     * 用户主键
+     */
+    @TableField(value = "user_id")
+    private Long userId;
+    /**
+     * 租户主键
+     */
+    @TableField(value = "tenant_id")
+    private Long tenantId;
+    /**
+     * 用户id
+     */
+    @TableField(value = "env_code")
+    private String envCode;
 }

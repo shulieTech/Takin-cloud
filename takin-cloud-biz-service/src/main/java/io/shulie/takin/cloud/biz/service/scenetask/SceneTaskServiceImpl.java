@@ -73,6 +73,8 @@ import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
+import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
@@ -109,6 +111,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     private ReportDao reportDao;
     @Resource(type = PluginManager.class)
     private PluginManager pluginManager;
+    @Resource(type = TReportMapper.class)
+    private ReportMapper reportMapper;
     @Resource(type = TReportMapper.class)
     private TReportMapper tReportMapper;
     @Resource(type = SceneManageDAO.class)
@@ -203,7 +207,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         preCheckStart(sceneData);
 
         //创建临时报表数据
-        Report report = initReport(sceneData, input);
+        ReportEntity report = initReport(sceneData, input);
 
         SceneActionOutput sceneAction = new SceneActionOutput();
         sceneAction.setData(report.getId());
@@ -695,8 +699,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
      *
      * @return -
      */
-    public Report initReport(SceneManageWrapperOutput scene, SceneTaskStartInput input) {
-        Report report = new Report();
+    public ReportEntity initReport(SceneManageWrapperOutput scene, SceneTaskStartInput input) {
+        ReportEntity report = new ReportEntity();
         report.setSceneId(scene.getId());
         report.setConcurrent(scene.getConcurrenceNum());
         report.setStatus(ReportConstans.INIT_STATUS);
@@ -722,7 +726,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         report.setTps(sumTps);
         report.setPressureType(scene.getPressureType());
         report.setType(scene.getType());
-        tReportMapper.insertSelective(report);
+        report.setUserId(input.getUserId());
+        report.setTenantId(input.getTenantId());
+        report.setEnvCode(input.getEnvCode());
+        reportMapper.insert(report);
 
         //标记场景
         // 待启动,压测失败，停止压测（压测工作已停止） 强制停止 ---> 启动中
@@ -732,8 +739,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 .updateEnum(SceneManageStatusEnum.STARTING).build());
         if (!updateFlag) {
             //失败状态 获取最新的报告
-            report = tReportMapper.selectByPrimaryKey(report.getId());
-            return report;
+            return reportMapper.selectById(report.getId());
         }
         Long reportId = report.getId();
         //初始化业务活动

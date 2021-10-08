@@ -38,6 +38,9 @@ public class SceneManageDAOImpl
     public void update(SceneManageCreateOrUpdateParam updateParam) {
         SceneManageEntity sceneManageEntity = new SceneManageEntity();
         BeanUtils.copyProperties(updateParam, sceneManageEntity);
+        updateParam.setUserId(null);
+        updateParam.setTenantId(null);
+        updateParam.setEnvCode(null);
         this.updateById(sceneManageEntity);
     }
 
