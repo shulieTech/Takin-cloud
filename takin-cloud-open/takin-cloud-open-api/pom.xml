@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>takin-cloud-open-api</artifactId>
-    <version>takin-cloud-open-5.0.0</version>
+    <version>takin-cloud-open-5.0.0-SNAPSHOT</version>
     <dependencies>
         <dependency>
             <groupId>io.shulie.takin</groupId>
