@@ -115,7 +115,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     @Resource
     private TSceneManageMapper tSceneManageMapper;
-    ;
 
     @Autowired
     private SceneManageService sceneManageService;
@@ -430,7 +429,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setUserId(input.getUserId());
         //sceneTaskStartInput.setEnginePluginIds(enginePluginIds);
         sceneTaskStartInput.setEnginePlugins(enginePlugins);
-        sceneTaskStartInput.setContinueRead(false);
         sceneTaskStartInput.setContinueRead(false);
         SceneActionOutput sceneActionDTO = startTask(sceneTaskStartInput, null);
         //返回报告id
