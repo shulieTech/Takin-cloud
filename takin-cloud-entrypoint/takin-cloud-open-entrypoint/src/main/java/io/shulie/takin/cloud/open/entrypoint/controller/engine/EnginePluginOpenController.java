@@ -36,7 +36,7 @@ import java.util.Objects;
 @Slf4j
 @RestController
 @Api(tags = "压测引擎管理")
-@RequestMapping(ApiUrls.TRO_OPEN_API_URL + "engine")
+@RequestMapping(ApiUrls.TAKIN_OPEN_API_URL + "engine")
 public class EnginePluginOpenController {
 
     @Resource

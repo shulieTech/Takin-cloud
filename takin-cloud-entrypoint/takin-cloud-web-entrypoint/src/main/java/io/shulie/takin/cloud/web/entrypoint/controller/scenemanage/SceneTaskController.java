@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
  * @date 2020-04-27
  */
 @RestController
-@RequestMapping(ApiUrls.TRO_API_URL + "scene/task/")
+@RequestMapping(ApiUrls.TAKIN_API_URL + "scene/task/")
 @Api(tags = "场景任务", value = "场景任务")
 public class SceneTaskController {
 

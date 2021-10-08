@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/11/30 7:07 下午
  */
 @RestController
-@RequestMapping(ApiUrls.TRO_OPEN_API_URL + "/statistic")
+@RequestMapping(ApiUrls.TAKIN_OPEN_API_URL + "/statistic")
 public class PressureStatisticsOpenController {
 
     @Autowired

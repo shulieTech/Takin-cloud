@@ -28,7 +28,7 @@ import io.shulie.takin.cloud.biz.service.middleware.MiddlewareJarService;
  * @since 2021-06-01 10:58:08
  */
 @RestController
-@RequestMapping(ApiUrls.TRO_API_URL + "middlewareJar")
+@RequestMapping(ApiUrls.TAKIN_API_URL + "middlewareJar")
 @Api(tags = "接口: 中间件jar包")
 public class MiddlewareJarController {
 

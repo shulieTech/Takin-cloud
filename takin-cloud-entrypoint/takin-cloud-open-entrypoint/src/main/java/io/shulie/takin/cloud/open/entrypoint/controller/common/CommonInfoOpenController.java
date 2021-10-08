@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @Api(tags = "公共信息管理")
-@RequestMapping(ApiUrls.TRO_OPEN_API_URL + "common/info")
+@RequestMapping(ApiUrls.TAKIN_OPEN_API_URL + "common/info")
 public class CommonInfoOpenController {
 
     @Autowired

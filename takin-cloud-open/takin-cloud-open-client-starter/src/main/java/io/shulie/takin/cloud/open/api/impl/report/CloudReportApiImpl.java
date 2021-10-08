@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.shulie.takin.cloud.open.api.impl.CloudCommonApi;
 import io.shulie.takin.cloud.open.api.report.CloudReportApi;
 import io.shulie.takin.cloud.open.constant.CloudApiConstant;
+import io.shulie.takin.cloud.open.req.common.CloudCommonInfoWrapperReq;
 import io.shulie.takin.cloud.open.req.report.JtlDownloadReq;
 import io.shulie.takin.cloud.open.req.report.ReportDetailByIdReq;
 import io.shulie.takin.cloud.open.req.report.ReportDetailBySceneIdReq;
@@ -83,4 +84,15 @@ public class CloudReportApiImpl extends CloudCommonApi implements CloudReportApi
             takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
+    @Override
+    public ResponseResult<List<Long>> queryListRunningReport(CloudCommonInfoWrapperReq req) {
+        TakinResponseEntity<ResponseResult<List<Long>>> takinResponseEntity =
+            HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_RUNNING_LIST,
+                getHeaders(), req, new TypeReference<ResponseResult<List<Long>>>() {});
+        if (takinResponseEntity.getSuccess()) {
+            return takinResponseEntity.getBody();
+        }
+        return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
+    }
 }

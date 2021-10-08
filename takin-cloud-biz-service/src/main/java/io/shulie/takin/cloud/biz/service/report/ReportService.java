@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.github.pagehelper.PageInfo;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
+import io.shulie.takin.cloud.biz.input.report.ListRunningReportInput;
 import io.shulie.takin.cloud.biz.output.report.ReportOutput;
 import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
@@ -112,9 +113,9 @@ public interface ReportService {
     Long queryRunningReport();
 
     /**
-     * 获取运行中的报告列表
-     *
-     * @return -
+     * 根据租户 获取运行中的报告列表
+     * @param
+     * @return
      */
     List<Long> queryListRunningReport();
 

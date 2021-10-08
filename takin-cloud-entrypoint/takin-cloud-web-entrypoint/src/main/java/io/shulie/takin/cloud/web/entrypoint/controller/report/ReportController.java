@@ -47,7 +47,7 @@ import io.shulie.takin.cloud.web.entrypoint.response.scenemanage.WarnDetailRespo
  * @date 2020-04-17
  */
 @RestController
-@RequestMapping(ApiUrls.TRO_API_URL)
+@RequestMapping(ApiUrls.TAKIN_API_URL)
 @Api(tags = "场景报告模块", value = "场景报告")
 public class ReportController {
     /**
@@ -187,6 +187,7 @@ public class ReportController {
 
     @GetMapping("/report/running/list")
     @ApiOperation("查询正在生成的报告列表")
+    @Deprecated
     public ResponseResult<List<Long>> queryListRunningReport() {
         return ResponseResult.success(reportService.queryListRunningReport());
     }

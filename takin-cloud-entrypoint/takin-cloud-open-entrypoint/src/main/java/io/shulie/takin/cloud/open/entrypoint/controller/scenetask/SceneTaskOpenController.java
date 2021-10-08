@@ -61,7 +61,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @Api(tags = "场景任务OPEN")
-@RequestMapping(ApiUrls.TRO_OPEN_API_URL + "scene/task/")
+@RequestMapping(ApiUrls.TAKIN_OPEN_API_URL + "scene/task/")
 public class SceneTaskOpenController {
 
     @Autowired

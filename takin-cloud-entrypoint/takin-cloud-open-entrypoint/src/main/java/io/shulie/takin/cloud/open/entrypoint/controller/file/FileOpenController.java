@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/4/17 下午5:50
  */
 @RestController
-@RequestMapping(ApiUrls.TRO_OPEN_API_URL + "file")
+@RequestMapping(ApiUrls.TAKIN_OPEN_API_URL + "file")
 @Api(tags = "文件管理")
 @Slf4j
 public class FileOpenController {

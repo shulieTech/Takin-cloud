@@ -70,7 +70,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/4/17 下午2:31
  */
 @RestController
-@RequestMapping(ApiUrls.TRO_API_URL + "scene_manage")
+@RequestMapping(ApiUrls.TAKIN_API_URL + "scene_manage")
 @Api(tags = "压测场景管理")
 public class SceneManageController {
 

@@ -74,7 +74,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @RestController
-@RequestMapping(ApiUrls.TRO_OPEN_API_URL + "scenemanage")
+@RequestMapping(ApiUrls.TAKIN_OPEN_API_URL + "scenemanage")
 @Api(tags = "压测场景管理")
 public class SceneManageOpenController {
 

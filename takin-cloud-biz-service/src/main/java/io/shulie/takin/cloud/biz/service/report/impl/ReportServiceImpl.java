@@ -20,6 +20,7 @@ import javax.annotation.Resource;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+import io.shulie.takin.cloud.biz.input.report.ListRunningReportInput;
 import lombok.extern.slf4j.Slf4j;
 import org.influxdb.impl.TimeUtil;
 import cn.hutool.core.util.StrUtil;

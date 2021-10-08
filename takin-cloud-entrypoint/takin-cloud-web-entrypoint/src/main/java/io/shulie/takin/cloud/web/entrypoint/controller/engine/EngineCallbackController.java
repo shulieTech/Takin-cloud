@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/9/23 2:42 下午
  */
 @RestController
-@RequestMapping(ApiUrls.TRO_API_URL + "engine/callback")
+@RequestMapping(ApiUrls.TAKIN_API_URL + "engine/callback")
 public class EngineCallbackController {
 
     @Autowired

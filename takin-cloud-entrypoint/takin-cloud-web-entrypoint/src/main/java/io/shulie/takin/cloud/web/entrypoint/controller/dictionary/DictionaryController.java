@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/10/19 11:07 上午
  */
 @RestController
-@RequestMapping(ApiUrls.TRO_API_URL)
+@RequestMapping(ApiUrls.TAKIN_API_URL)
 public class DictionaryController {
     @Autowired
     private DictionaryCache dictionaryCache;

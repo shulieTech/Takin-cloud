@@ -63,7 +63,10 @@ public class CloudApiConstant {
     public static final String REPORT_DETAIL_GET_URL = "/open-api/report/getReportByReportId";
     public static final String REPORT_TEMP_DETAIL_GET_URL = "/open-api/report/tempReportDetail";
     public static final String INSPECT_REPORT_DETAIL_GET_URL = "/open-api/report/inspect";
-
+    /**
+     * 返回正在压测的报告
+     */
+    public static final String REPORT_RUNNING_LIST = "/open-api/report/running/list";
     /**
      * 统计相关接口
      */

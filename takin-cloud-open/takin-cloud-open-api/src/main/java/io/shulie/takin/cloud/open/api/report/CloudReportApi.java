@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.open.api.report;
 
 import java.util.List;
 
+import io.shulie.takin.cloud.open.req.common.CloudCommonInfoWrapperReq;
 import io.shulie.takin.cloud.open.req.report.ReportDetailByIdReq;
 import io.shulie.takin.cloud.open.req.report.ReportDetailBySceneIdReq;
 import io.shulie.takin.cloud.open.req.report.ReportQueryReq;
@@ -56,5 +57,12 @@ public interface CloudReportApi {
      * @return -
      */
     ResponseResult<ReportDetailResp> tempReportDetail(ReportDetailBySceneIdReq req);
+
+    /**
+     * 根据租户查询报告数据
+     * @param req
+     * @return
+     */
+    ResponseResult<List<Long>> queryListRunningReport(CloudCommonInfoWrapperReq req);
 
 }

@@ -2,6 +2,8 @@
 
 package io.shulie.takin.cloud.open.entrypoint.controller.report;
 
+import java.util.List;
+
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
@@ -30,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020-04-17
  */
 @RestController
-@RequestMapping(ApiUrls.TRO_OPEN_API_URL)
+@RequestMapping(ApiUrls.TAKIN_OPEN_API_URL)
 @Api(tags = "场景报告模块", value = "场景报告")
 public class ReportOpenController {
 
@@ -87,4 +89,10 @@ public class ReportOpenController {
         return ResponseResult.success(resp);
     }
 
+
+    @GetMapping("/report/running/list")
+    @ApiOperation("查询正在生成的报告列表")
+    public ResponseResult<List<Long>> queryListRunningReport() {
+        return ResponseResult.success(reportService.queryListRunningReport());
+    }
 }
