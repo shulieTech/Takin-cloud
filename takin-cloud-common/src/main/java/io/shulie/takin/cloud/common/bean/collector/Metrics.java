@@ -28,5 +28,6 @@ public class Metrics {
     private Double maxRt;
     private Double minRt;
     private long timestamp;
+    private String percentData;
 
 }

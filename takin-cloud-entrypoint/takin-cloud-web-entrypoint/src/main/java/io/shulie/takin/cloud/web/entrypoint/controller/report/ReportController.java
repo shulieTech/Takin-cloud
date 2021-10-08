@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.web.entrypoint.controller.report;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -14,6 +15,7 @@ import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
 import io.shulie.takin.cloud.common.constants.APIUrls;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
@@ -99,6 +101,12 @@ public class ReportController {
             ReportTrendDTO data;
             if (redisClientUtils.hasKey(key)) {
                 data = JSON.parseObject(redisClientUtils.getString(key), ReportTrendDTO.class);
+                if (Objects.isNull(data) ||CollectionUtils.isEmpty(data.getConcurrent()) || CollectionUtils.isEmpty(data.getSa())
+                    || CollectionUtils.isEmpty(data.getRt()) || CollectionUtils.isEmpty(data.getTps())
+                    || CollectionUtils.isEmpty(data.getSuccessRate())) {
+                    data = reportService.queryReportTrend(reportTrendQuery);
+                    redisClientUtils.setString(key, JSON.toJSONString(data));
+                }
             } else {
                 data = reportService.queryReportTrend(reportTrendQuery);
                 redisClientUtils.setString(key, JSON.toJSONString(data));

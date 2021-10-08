@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.common.utils;
 
 import java.io.File;
+import java.io.RandomAccessFile;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -12,6 +13,7 @@ import java.io.InputStreamReader;
 import com.alibaba.fastjson.JSONObject;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
@@ -47,35 +49,37 @@ public class FileSliceByLine {
         BufferedReader reader = null;
         try {
             String fileEncoder = "UTF-8";
+            File file = new File(this.filePath);
+            int lineBreakSize = getLineBreakSize(file);
             reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(this.filePath), fileEncoder));
-            String line;
-            String partition;
-            while ((line = reader.readLine()) != null) {
-                String[] contents = line.split(this.separator);
-                //根据用户输入的列号来进行排序，如果为空，则默认最后一列
-                if (orderColumnNum == null || contents.length - 1 > orderColumnNum) {
-                    partition = contents[contents.length - 1];
-                } else {
-                    partition = contents[orderColumnNum];
+            reader.lines().filter(StringUtils::isNotBlank).forEach(
+                line -> {
+                    String[] values = line.split(this.separator);
+                    String partition;
+                    if (orderColumnNum == null || values.length - 1 > orderColumnNum) {
+                        partition = values[values.length - 1];
+                    } else {
+                        partition = values[orderColumnNum];
+                    }
+                    Integer partitionNum = partitionMap.get(partition);
+                    if (partitionNum != null) {
+                        FileSliceInfo fileSliceInfo = this.fileSliceInfoMap.get(partitionNum);
+                        fileSliceInfo.setEnd(fileSliceInfo.getEnd() + line.getBytes().length + lineBreakSize);
+                        this.fileSliceInfoMap.put(partitionNum, fileSliceInfo);
+                        prePosition = fileSliceInfo.end;
+                    } else {
+                        partitionMap.put(partition, nextPartitionNum);
+                        FileSliceInfo fileSliceInfo = new FileSliceInfo();
+                        fileSliceInfo.setPartition(nextPartitionNum);
+                        fileSliceInfo.setStart(prePosition);
+                        fileSliceInfo.setEnd(prePosition + line.getBytes().length + lineBreakSize);
+                        fileSliceInfoMap.put(nextPartitionNum, fileSliceInfo);
+                        prePosition = fileSliceInfo.end + 1;
+                        nextPartitionNum++;
+                    }
                 }
-                Integer partitionNum = partitionMap.get(partition);
-                if (partitionNum != null) {
-                    FileSliceInfo fileSliceInfo = this.fileSliceInfoMap.get(partitionNum);
-                    fileSliceInfo.setEnd(fileSliceInfo.getEnd() + line.getBytes().length + 1);
-                    this.fileSliceInfoMap.put(partitionNum, fileSliceInfo);
-                    prePosition = fileSliceInfo.end;
-                } else {
-                    partitionMap.put(partition, nextPartitionNum);
-                    FileSliceInfo fileSliceInfo = new FileSliceInfo();
-                    fileSliceInfo.setPartition(nextPartitionNum);
-                    fileSliceInfo.setStart(prePosition);
-                    fileSliceInfo.setEnd(prePosition + line.getBytes().length + 1);
-                    fileSliceInfoMap.put(nextPartitionNum, fileSliceInfo);
-                    prePosition = prePosition + line.getBytes().length;
-                    nextPartitionNum++;
-                }
-            }
+            );
             Map<Integer, FileSliceInfo> resultMap = new HashMap<>(fileSliceInfoMap.size());
             FileSliceInfo sliceInfo;
             for (Map.Entry<Integer, FileSliceInfo> entry : fileSliceInfoMap.entrySet()) {
@@ -99,6 +103,44 @@ public class FileSliceByLine {
                     TakinCloudExceptionEnum.FILE_CLOSE_ERROR, ex);
             }
         }
+    }
+
+    private int getLineBreakSize(File file) {
+        BufferedReader reader = null;
+        RandomAccessFile rAccessFile = null;
+        try {
+            reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(this.filePath), "UTF-8"));
+            int lineLength = reader.readLine().length();
+            rAccessFile = new RandomAccessFile(file, "r");
+            rAccessFile.seek(lineLength);
+            byte tmp = (byte)rAccessFile.read();
+            while (tmp != '\r' && tmp != '\n') {
+                rAccessFile.seek(++lineLength);
+                tmp = (byte)rAccessFile.read();
+            }
+            rAccessFile.seek(++lineLength);
+            tmp = (byte)rAccessFile.read();
+            if (tmp == '\r' || tmp == '\n') {
+                return 2;
+            } else {
+                return 1;
+            }
+        } catch (IOException e) {
+            System.err.println();
+        } finally {
+            try {
+                if (rAccessFile != null) {
+                    rAccessFile.close();
+                }
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return 1;
     }
 
     public static class Builder {

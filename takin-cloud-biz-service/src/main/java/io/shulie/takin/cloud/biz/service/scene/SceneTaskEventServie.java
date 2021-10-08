@@ -103,17 +103,6 @@ public class SceneTaskEventServie {
         scheduleStartRequest.setTps(tps);
         scheduleStartRequest.setBusinessData(businessData);
         scheduleStartRequest.setBusinessTpsData(businessTpsData);
-        //add by lipeng 添加压测引擎插件路径
-        //List<Long> enginePluginIds = scene.getEnginePluginIds();
-        ////有插件信息才加载
-        //if (CollectionUtils.isNotEmpty(enginePluginIds)) {
-        //    scheduleStartRequest.setEnginePluginsFilePath(
-        //        enginePluginFilesService.findPluginFilesPathByPluginIds(enginePluginIds));
-        //} else { //没有插件信息设置空列表
-        //    scheduleStartRequest.setEnginePluginsFilePath(
-        //        Lists.newArrayList());
-        //}
-        //add end
 
         //一个插件可能会有多个版本，需要根据版本号来获取相应的文件路径 modified by xr.l 20210712
         if (CollectionUtils.isNotEmpty(scene.getEnginePlugins())) {
@@ -122,15 +111,6 @@ public class SceneTaskEventServie {
             scheduleStartRequest.setEnginePluginsFilePath(
                 Lists.newArrayList());
         }
-
-        //一个插件可能会有多个版本，需要根据版本号来获取相应的文件路径 modified by xr.l 20210712
-        //if (CollectionUtils.isNotEmpty(scene.getEnginePlugins())){
-        //    scheduleStartRequest.setEnginePluginsFilePath(enginePluginFilesService.findPluginFilesPathByPluginIdAndVersion(scene.getEnginePlugins()));
-        //}else {
-        //    scheduleStartRequest.setEnginePluginsFilePath(
-        //        Lists.newArrayList());
-        //}
-        //add end
 
         //添加巡检参数
         scheduleStartRequest.setLoopsNum(scene.getLoopsNum());
