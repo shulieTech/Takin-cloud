@@ -1,9 +1,8 @@
 package io.shulie.takin.cloud.open.resp.scenemanage;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -16,9 +15,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "列表查询出参")
-public class SceneManageListResp extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = -3967473117069389164L;
+public class SceneManageListResp extends ContextExt {
 
     @ApiModelProperty(name = "id", value = "ID")
     private Long id;

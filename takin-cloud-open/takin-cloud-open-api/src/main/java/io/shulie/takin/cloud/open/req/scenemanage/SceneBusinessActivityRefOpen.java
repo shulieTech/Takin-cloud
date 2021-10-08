@@ -5,7 +5,6 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
@@ -14,9 +13,7 @@ import java.math.BigDecimal;
  */
 
 @Data
-public class SceneBusinessActivityRefOpen implements Serializable {
-
-    private static final long serialVersionUID = -8845753866102433366L;
+public class SceneBusinessActivityRefOpen {
 
     @ApiModelProperty(name = "businessActivityId", value = "业务活动ID")
     @NotNull(message = "业务活动ID不能为空")

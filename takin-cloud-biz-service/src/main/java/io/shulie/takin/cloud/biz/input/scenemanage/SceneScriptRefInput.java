@@ -3,17 +3,13 @@ package io.shulie.takin.cloud.biz.input.scenemanage;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
-
 /**
  * @author mubai
  * @date 2020-10-29 16:11
  */
 
 @Data
-public class SceneScriptRefInput implements Serializable {
-
-    private static final long serialVersionUID = 1871907182952930624L;
+public class SceneScriptRefInput {
 
     @ApiModelProperty(value = "ID")
     private Long id;
@@ -50,8 +46,12 @@ public class SceneScriptRefInput implements Serializable {
 
     private String fileExtend;
 
-    //脚本id
+    /**
+     * 脚本id
+     */
     private Long scriptId;
-    //文件大小
+    /**
+     * 文件大小
+     */
     private String fileSize;
 }

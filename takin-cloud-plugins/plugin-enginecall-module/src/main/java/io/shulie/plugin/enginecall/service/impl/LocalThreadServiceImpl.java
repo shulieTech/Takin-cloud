@@ -59,9 +59,9 @@ public class LocalThreadServiceImpl implements EngineCallService {
     private String taskDir;
 
     @Override
-    public String createJob(Long sceneId, Long taskId, Long customerId) {
-        String jobName = ScheduleConstants.getScheduleName(sceneId, taskId, customerId);
-        String configMapName = ScheduleConstants.getConfigMapName(sceneId, taskId, customerId);
+    public String createJob(Long sceneId, Long taskId, Long tenantId) {
+        String jobName = ScheduleConstants.getScheduleName(sceneId, taskId, tenantId);
+        String configMapName = ScheduleConstants.getConfigMapName(sceneId, taskId, tenantId);
         if (!new File(installDir).exists()) {
             return "未找到引擎包";
         }
@@ -147,9 +147,9 @@ public class LocalThreadServiceImpl implements EngineCallService {
     @Override
     public String getJobStatus(String jobName) {
         if (shellProcess.get(jobName) == null || !shellProcess.get(jobName).isAlive()) {
-            return SceneManageConstant.SCENETASK_JOB_STATUS_NONE;
+            return SceneManageConstant.SCENE_TASK_JOB_STATUS_NONE;
         }
-        return SceneManageConstant.SCENETASK_JOB_STATUS_RUNNING;
+        return SceneManageConstant.SCENE_TASK_JOB_STATUS_RUNNING;
     }
 
     private String getEnginePackBin(String enginePackDir) {

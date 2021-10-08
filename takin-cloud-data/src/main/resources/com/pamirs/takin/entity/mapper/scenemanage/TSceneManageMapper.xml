@@ -3,7 +3,7 @@
 <mapper namespace="com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper">
     <resultMap id="BaseResultMap" type="com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage">
         <id column="id" property="id" jdbcType="BIGINT"/>
-        <result column="customer_id" property="customerId" jdbcType="BIGINT"/>
+        <result column="customer_id" property="tenantId" jdbcType="BIGINT"/>
         <result column="deptId" property="deptId" jdbcType="BIGINT"/>
         <result column="user_id" property="userId" jdbcType="BIGINT"/>
         <result column="scene_name" property="sceneName" jdbcType="VARCHAR"/>
@@ -45,7 +45,7 @@
             useGeneratedKeys="true" keyProperty="id">
         insert into t_scene_manage
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="customerId != null">
+            <if test="tenantId != null">
                 customer_id,
             </if>
             <if test="deptId != null">
@@ -92,8 +92,8 @@
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="customerId != null">
-                #{customerId,jdbcType=BIGINT},
+            <if test="tenantId != null">
+                #{tenantId,jdbcType=BIGINT},
             </if>
             <if test="deptId != null">
                 #{deptId,jdbcType=BIGINT},
@@ -143,8 +143,8 @@
             parameterType="com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage">
         update t_scene_manage
         <set>
-            <if test="customerId != null">
-                customer_id = #{customerId,jdbcType=BIGINT},
+            <if test="tenantId != null">
+                customer_id = #{tenantId,jdbcType=BIGINT},
             </if>
             <if test="sceneName != null">
                 scene_name = #{sceneName,jdbcType=VARCHAR},
@@ -214,9 +214,9 @@
             <if test="sceneId != null">
                 and id = #{sceneId}
             </if>
-            <if test="customerIds != null and customerIds.size() > 0">
+            <if test="tenantIds != null and tenantIds.size() > 0">
                 and customer_id in
-                <foreach collection="customerIds" item="item" open="(" separator="," close=")">
+                <foreach collection="tenantIds" item="item" open="(" separator="," close=")">
                     #{item}
                 </foreach>
             </if>
@@ -226,8 +226,8 @@
                     #{sceneId}
                 </foreach>
             </if>
-            <if test="customerId != null">
-                and customer_id = #{customerId}
+            <if test="tenantId != null">
+                and customer_id = #{tenantId}
             </if>
             <if test="sceneName != null">
                 and scene_name like concat('%', #{sceneName}, '%')

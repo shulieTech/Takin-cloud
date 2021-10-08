@@ -1,12 +1,11 @@
 package io.shulie.takin.eventcenter;
 
-
-import java.io.Serializable;
-
 /**
  * 事件
+ *
+ * @author -
  */
-public class Event implements Serializable {
+public class Event {
 
     private String eventName;
 
@@ -31,8 +30,8 @@ public class Event implements Serializable {
     @Override
     public String toString() {
         return "Event{" +
-                "eventName='" + eventName + '\'' +
-                ", ext=" + ext +
-                '}';
+            "eventName='" + eventName + '\'' +
+            ", ext=" + ext +
+            '}';
     }
 }

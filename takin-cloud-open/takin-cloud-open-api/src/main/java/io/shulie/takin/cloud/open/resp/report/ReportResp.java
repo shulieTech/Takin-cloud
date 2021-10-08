@@ -1,10 +1,9 @@
 package io.shulie.takin.cloud.open.resp.report;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,9 +15,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ReportResp extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = -8968593229706753112L;
+public class ReportResp extends ContextExt {
 
     @ApiModelProperty(value = "报告ID")
     private Long id;

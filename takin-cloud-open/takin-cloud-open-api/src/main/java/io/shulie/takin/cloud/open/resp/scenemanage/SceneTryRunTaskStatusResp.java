@@ -1,11 +1,12 @@
 package io.shulie.takin.cloud.open.resp.scenemanage;
 
-import java.io.Serializable;
-
 import lombok.Data;
 
+/**
+ * @author -
+ */
 @Data
-public class SceneTryRunTaskStatusResp implements Serializable {
+public class SceneTryRunTaskStatusResp {
     private Integer taskStatus;
     private String errorMsg;
 }

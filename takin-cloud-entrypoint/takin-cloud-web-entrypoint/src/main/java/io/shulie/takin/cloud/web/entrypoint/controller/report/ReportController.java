@@ -14,7 +14,7 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
-import io.shulie.takin.cloud.common.constants.APIUrls;
+import io.shulie.takin.cloud.common.constants.ApiUrls;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -47,7 +47,7 @@ import io.shulie.takin.cloud.web.entrypoint.response.scenemanage.WarnDetailRespo
  * @date 2020-04-17
  */
 @RestController
-@RequestMapping(APIUrls.TRO_API_URL)
+@RequestMapping(ApiUrls.TRO_API_URL)
 @Api(tags = "场景报告模块", value = "场景报告")
 public class ReportController {
     /**
@@ -211,8 +211,8 @@ public class ReportController {
 
     @GetMapping("/report/metrices")
     @ApiOperation("当前压测的所有数据")
-    public ResponseResult<List<Metrices>> metrics(Long reportId, Long sceneId, Long customerId) {
-        return ResponseResult.success(reportService.metric(reportId, sceneId, customerId));
+    public ResponseResult<List<Metrices>> metrics(Long reportId, Long sceneId, Long tenantId) {
+        return ResponseResult.success(reportService.metric(reportId, sceneId, tenantId));
     }
 
     /**

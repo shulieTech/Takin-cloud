@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.open.resp.scenemanage;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 import lombok.Data;
@@ -10,7 +9,7 @@ import lombok.Data;
  * @date 2020/5/18 下午8:36
  */
 @Data
-public class BusinessActivityDetailResp implements Serializable {
+public class BusinessActivityDetailResp {
 
     private transient Long businessActivityId;
 

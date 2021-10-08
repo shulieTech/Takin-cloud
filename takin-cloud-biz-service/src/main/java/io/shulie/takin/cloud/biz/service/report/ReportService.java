@@ -150,14 +150,14 @@ public interface ReportService {
     void forceFinishReport(Long reportId);
 
     /**
-     * 新增 customerId
+     * 新增 tenantId
      *
      * @param reportId   报告主键
      * @param sceneId    场景主键
-     * @param customerId 租户主键
+     * @param tenantId 租户主键
      * @return -
      */
-    List<Metrices> metric(Long reportId, Long sceneId, Long customerId);
+    List<Metrices> metric(Long reportId, Long sceneId, Long tenantId);
 
     /**
      * 更新扩展字段

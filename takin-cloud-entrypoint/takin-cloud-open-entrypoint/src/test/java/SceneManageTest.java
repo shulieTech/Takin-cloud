@@ -13,7 +13,7 @@ import org.springframework.beans.BeanUtils;
 public class SceneManageTest {
     @Test
     public void test() {
-        String json = "{\"pageSize\":20,\"current\":0,\"license\":null,\"id\":null,\"customerId\":1,"
+        String json = "{\"pageSize\":20,\"current\":0,\"license\":null,\"id\":null,\"tenantId\":1,"
                 + "\"pressureTestSceneName\":null,\"businessActivityConfig\":null,\"concurrenceNum\":null,\"ipNum\":null,"
                 + "\"pressureTestTime\":null,\"pressureMode\":null,\"increasingTime\":null,\"step\":null,"
                 + "\"scriptType\":null,\"uploadFile\":null,\"stopCondition\":null,\"warningCondition\":null,"

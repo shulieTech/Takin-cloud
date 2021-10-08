@@ -1,12 +1,11 @@
 package io.shulie.takin.cloud.open.resp.scenemanage;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
 import io.shulie.takin.cloud.common.bean.TimeBean;
 import io.shulie.takin.cloud.common.enums.machine.EnumResult;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -16,9 +15,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SceneDetailResp extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = 1453217777875591954L;
+public class SceneDetailResp extends ContextExt {
 
     private Long id;
 
@@ -53,9 +50,7 @@ public class SceneDetailResp extends CloudUserCommonRequestExt implements Serial
     private List<SlaDetailResp> warningCondition;
 
     @Data
-    public static class ScriptDetailResp implements Serializable {
-
-        private static final long serialVersionUID = 2391812420921319265L;
+    public static class ScriptDetailResp {
 
         private String fileName;
 
@@ -70,9 +65,7 @@ public class SceneDetailResp extends CloudUserCommonRequestExt implements Serial
     }
 
     @Data
-    public static class SlaDetailResp implements Serializable {
-
-        private static final long serialVersionUID = 9171434959213456889L;
+    public static class SlaDetailResp {
 
         private String ruleName;
 

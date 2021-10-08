@@ -1,17 +1,16 @@
 package io.shulie.takin.cloud.open.req.scenemanage;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotEmpty;
 
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.shulie.takin.cloud.common.bean.TimeBean;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 
 /**
  * @author 无涯
@@ -20,9 +19,8 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "场景保存入参")
-public class SceneManageWrapperReq extends CloudUserCommonRequestExt implements Serializable {
+public class SceneManageWrapperReq extends ContextExt {
 
-    private static final long serialVersionUID = -7653146473491831687L;
     @ApiModelProperty(name = "id", value = "压测场景ID")
     private Long id;
 
@@ -73,7 +71,9 @@ public class SceneManageWrapperReq extends CloudUserCommonRequestExt implements 
     @ApiModelProperty(name = "warningCondition", value = "SLA警告配置")
     private List<SceneSlaRefOpen> warningCondition;
 
-    //扩展字段
+    /**
+     * 扩展字段
+     */
     private String features;
 
     private Long scriptId;

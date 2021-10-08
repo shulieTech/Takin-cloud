@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.open.resp.scenemanage;
 
-import java.io.Serializable;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,7 +11,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel("脚本流量试跑任务启动返回值对象")
-public class SceneTryRunTaskStartResp implements Serializable {
+public class SceneTryRunTaskStartResp {
 
     @ApiModelProperty("虚拟场景ID")
     private Long sceneId;
@@ -21,5 +20,5 @@ public class SceneTryRunTaskStartResp implements Serializable {
     private Long reportId;
 
     @ApiModelProperty("用户ID")
-    private Long customerId;
+    private Long tenantId;
 }

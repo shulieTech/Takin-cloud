@@ -17,8 +17,20 @@ public interface SceneScriptRefRespConvertor {
 
     SceneScriptRefRespConvertor INSTANCE = Mappers.getMapper(SceneScriptRefRespConvertor.class);
 
+    /**
+     * 数据转换
+     *
+     * @param output 原数据
+     * @return 转换后数据
+     */
     SceneManageWrapperResponse.SceneScriptRefResponse of(SceneManageWrapperOutput.SceneScriptRefOutput output);
 
+    /**
+     * 数据转换(批量)
+     *
+     * @param output 原数据
+     * @return 转换后数据
+     */
     List<SceneManageWrapperResponse.SceneScriptRefResponse> ofList(List<SceneManageWrapperOutput.SceneScriptRefOutput> output);
 
 }

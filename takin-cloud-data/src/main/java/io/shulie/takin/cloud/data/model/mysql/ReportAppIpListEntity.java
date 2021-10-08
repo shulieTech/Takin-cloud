@@ -6,6 +6,11 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+/**
+ * 报告应用ip列表 entity
+ *
+ * @author -
+ */
 @Data
 @TableName(value = "t_report_app_ip_list")
 public class ReportAppIpListEntity {

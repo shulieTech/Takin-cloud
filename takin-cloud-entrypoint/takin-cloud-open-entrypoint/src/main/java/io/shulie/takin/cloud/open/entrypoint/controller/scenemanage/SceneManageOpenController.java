@@ -25,13 +25,12 @@ import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 import io.shulie.takin.cloud.biz.utils.SlaUtil;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
-import io.shulie.takin.cloud.common.constants.APIUrls;
+import io.shulie.takin.cloud.common.constants.ApiUrls;
 import io.shulie.takin.cloud.common.constants.DicKeyConstant;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.ListHelper;
 import io.shulie.takin.cloud.open.entrypoint.convert.SceneBusinessActivityRefInputConvert;
@@ -48,8 +47,8 @@ import io.shulie.takin.cloud.open.resp.scenemanage.SceneManageWrapperResp;
 import io.shulie.takin.cloud.open.resp.scenemanage.ScriptCheckResp;
 import io.shulie.takin.cloud.open.resp.strategy.StrategyResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.ext.content.enginecall.StrategyOutputExt;
-import io.shulie.takin.ext.content.script.ScriptVerityRespExt;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyOutputExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -75,7 +74,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @RestController
-@RequestMapping(APIUrls.TRO_OPEN_API_URL + "scenemanage")
+@RequestMapping(ApiUrls.TRO_OPEN_API_URL + "scenemanage")
 @Api(tags = "压测场景管理")
 public class SceneManageOpenController {
 
@@ -313,8 +312,6 @@ public class SceneManageOpenController {
         //基本信息
         detailDTO.setId(wrapperResp.getId());
         detailDTO.setSceneName(wrapperResp.getPressureTestSceneName());
-        // 补充插件信息
-        CloudPluginUtils.fillCustomerName(wrapperResp, detailDTO);
 
         detailDTO.setUpdateTime(wrapperResp.getUpdateTime());
         detailDTO.setLastPtTime(wrapperResp.getLastPtTime());

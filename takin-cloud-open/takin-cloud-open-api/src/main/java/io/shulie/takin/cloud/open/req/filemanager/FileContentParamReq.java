@@ -2,9 +2,9 @@ package io.shulie.takin.cloud.open.req.filemanager;
 
 import java.util.List;
 
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 
 /**
  * @author 无涯
@@ -12,6 +12,6 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class FileContentParamReq extends CloudUserCommonRequestExt {
+public class FileContentParamReq extends ContextExt {
     private List<String> paths;
 }

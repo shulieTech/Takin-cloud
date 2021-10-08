@@ -1,16 +1,14 @@
 package io.shulie.takin.cloud.web.entrypoint.controller.scenemanage;
 
-import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import com.pamirs.takin.entity.domain.vo.scenemanage.FileSplitResultVO;
-import com.pamirs.takin.entity.domain.vo.scenemanage.ScriptFileSplitVO;
-import io.shulie.takin.ext.content.enginecall.ScheduleInitParamExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleInitParamExt;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartInput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneActionOutput;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
 import io.shulie.takin.cloud.biz.service.schedule.ScheduleService;
-import io.shulie.takin.cloud.common.constants.APIUrls;
+import io.shulie.takin.cloud.common.constants.ApiUrls;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import io.shulie.takin.cloud.web.entrypoint.request.scenemanage.SceneManageIdRequest;
 import io.shulie.takin.cloud.web.entrypoint.request.scenemanage.SceneTaskStartRequest;
@@ -28,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
  * @date 2020-04-27
  */
 @RestController
-@RequestMapping(APIUrls.TRO_API_URL + "scene/task/")
+@RequestMapping(ApiUrls.TRO_API_URL + "scene/task/")
 @Api(tags = "场景任务", value = "场景任务")
 public class SceneTaskController {
 

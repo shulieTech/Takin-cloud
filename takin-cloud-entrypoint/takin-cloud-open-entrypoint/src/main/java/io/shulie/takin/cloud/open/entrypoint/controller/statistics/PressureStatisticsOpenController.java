@@ -7,7 +7,7 @@ import io.shulie.takin.cloud.biz.output.statistics.PressureListTotalOutput;
 import io.shulie.takin.cloud.biz.output.statistics.PressurePieTotalOutput;
 import io.shulie.takin.cloud.biz.output.statistics.ReportTotalOutput;
 import io.shulie.takin.cloud.biz.service.statistics.PressureStatisticsService;
-import io.shulie.takin.cloud.common.constants.APIUrls;
+import io.shulie.takin.cloud.common.constants.ApiUrls;
 import io.shulie.takin.cloud.open.entrypoint.convert.StatisticsConvert;
 import io.shulie.takin.cloud.open.req.statistics.PressureTotalReq;
 import io.shulie.takin.cloud.open.resp.statistics.PressureListTotalResp;
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/11/30 7:07 下午
  */
 @RestController
-@RequestMapping(APIUrls.TRO_OPEN_API_URL + "/statistic")
+@RequestMapping(ApiUrls.TRO_OPEN_API_URL + "/statistic")
 public class PressureStatisticsOpenController {
 
     @Autowired

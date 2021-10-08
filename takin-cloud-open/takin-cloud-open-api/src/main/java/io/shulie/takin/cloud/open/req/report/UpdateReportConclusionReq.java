@@ -2,8 +2,10 @@ package io.shulie.takin.cloud.open.req.report;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
 import io.swagger.annotations.ApiModel;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 
 /**
  * @author 无涯
@@ -12,7 +14,7 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 @Data
 @ApiModel
 @EqualsAndHashCode(callSuper = true)
-public class UpdateReportConclusionReq extends CloudUserCommonRequestExt {
+public class UpdateReportConclusionReq extends ContextExt {
     private Long id;
     private String errorMessage;
     private Integer conclusion;

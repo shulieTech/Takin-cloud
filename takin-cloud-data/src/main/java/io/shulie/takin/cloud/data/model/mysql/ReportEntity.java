@@ -9,6 +9,9 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+/**
+ * @author -
+ */
 @Data
 @TableName(value = "t_report")
 public class ReportEntity {
@@ -19,7 +22,7 @@ public class ReportEntity {
      * 客户id
      */
     @TableField(value = "customer_id")
-    private Long customerId;
+    private Long tenantId;
 
     /**
      * 流量消耗
@@ -92,7 +95,6 @@ public class ReportEntity {
      */
     @TableField(value = "tps")
     private Integer tps;
-
 
     /**
      * 平均tps

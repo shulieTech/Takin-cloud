@@ -1,14 +1,13 @@
 package io.shulie.takin.cloud.open.req.scenemanage;
 
-import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import io.swagger.annotations.ApiModelProperty;
 import io.shulie.takin.cloud.common.bean.sla.SlaBean;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 
 /**
  * @author 无涯
@@ -16,9 +15,7 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SceneManageIdReq extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = 5258828941952507100L;
+public class SceneManageIdReq extends ContextExt {
 
     @NotNull
     @ApiModelProperty(value = "ID")

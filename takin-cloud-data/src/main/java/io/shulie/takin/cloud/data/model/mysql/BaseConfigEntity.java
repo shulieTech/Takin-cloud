@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * tro配置表
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_base_config")

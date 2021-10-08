@@ -23,7 +23,7 @@ public class CloudApiConstant {
     public static final String SCENE_MANAGE_UPDATE_FILE_URL = "/open-api/scenemanage/updateFile";
     public static final String SCENE_MANAGE_URL = "/open-api/scenemanage";
     public static final String SCENE_MANAGE_LIST_URL = "/open-api/scenemanage/list";
-    public static final String SCENE_MANAGE_All_LIST_URL = "/open-api/scenemanage/listSceneManage";
+    public static final String SCENE_MANAGE_ALL_LIST_URL = "/open-api/scenemanage/listSceneManage";
     public static final String SCENE_MANAGE_DETAIL_URL = "/api/scenemanage/detail";
     public static final String SCENE_MANAGE_IPNUM_URL = "/open-api/scenemanage/ipnum";
 
@@ -31,21 +31,21 @@ public class CloudApiConstant {
     public static final String SCENE_MANAGE_CHECK_AND_UPDATE_URL = "/open-api/scenemanage/checkAndUpdate/script";
 
     //task
+
     public static final String SCENE_TASK_UPDATE_TPS = "/open-api/scene/task/updateSceneTaskTps";
 
     public static final String SCENE_TASK_QUERY_ADJUST_TPS = "/open-api/scene/task/queryAdjustTaskTps";
 
-    public static final String SCENE_MANAGE_BY_SCENE_IDS = "/open-api/scenemanage/query/ids" ;
-
+    public static final String SCENE_MANAGE_BY_SCENE_IDS = "/open-api/scenemanage/query/ids";
 
     public static final String SCENE_START_TRIAL_RUN_URL = "/open-api/scene/task/startTrialRun";
 
     /**
      * 压测任务
      */
-    public static final String SCENE_TASK_START= "/open-api/scene/task/start";
-    public static final String SCENE_TASK_STOP= "/open-api/scene/task/stop";
-    public static final String SCENE_TASK_CHECK= "/open-api/scene/task/checkStartStatus";
+    public static final String SCENE_TASK_START = "/open-api/scene/task/start";
+    public static final String SCENE_TASK_STOP = "/open-api/scene/task/stop";
+    public static final String SCENE_TASK_CHECK = "/open-api/scene/task/checkStartStatus";
     public static final String START_FLOW_DEBUG_TASK = "/open-api/scene/task/startFlowDebugTask";
     public static final String START_INSPECT_TASK = "/open-api/scene/task/startInspectTask";
     public static final String STOP_INSPECT_TASK = "/open-api/scene/task/stopInspectTask";
@@ -53,7 +53,7 @@ public class CloudApiConstant {
     public static final String CHECK_TRY_RUN_TASK_STATUS = "/open-api/scene/task/checkTaskStatus";
     public static final String CHECK_SCENE_JOB_STATUS = "/open-api/scene/task/checkJobStatus";
     public static final String SCENE_START_PRE_CHECK = "/open-api/scene/task/preCheck";
-
+    public static final String SCENE_TASK_WRITE_BALANCE = "/open-api/scene/task/writeBalance";
     public static final String REPORT_WARN_URL = "/open-api/report/warn";
 
     /**
@@ -70,13 +70,18 @@ public class CloudApiConstant {
     public static final String STATISTIC_PRESSUREPIE_URL = "/open-api/statistic/getPressurePieTotal";
     public static final String STATISTIC_REPORT_URL = "/open-api/statistic/getReportTotal";
     public static final String STATISTIC_PRESSURELIST_URL = "/open-api/statistic/getPressureListTotal";
-    //engine
-    //获取引擎支持的插件信息
+    //引擎
+    /**
+     * 获取引擎支持的插件信息
+     */
     public static final String ENGINE_FETCH_PLUGINS_URI = "/open-api/engine/fetchAvailableEnginePlugins";
-    //获取引擎插件详情
+    /**
+     * 获取引擎插件详情
+     */
     public static final String ENGINE_FETCH_PLUGIN_DETAILS_URI = "/open-api/engine/fetchEnginePluginDetails";
-    //公共信息接口
+    /**
+     * 公共信息接口
+     */
     public static final String TROCLOUD_COMMON_INFOS_URI = "/open-api/common/info/getCloudConfigurationInfos";
-
 
 }

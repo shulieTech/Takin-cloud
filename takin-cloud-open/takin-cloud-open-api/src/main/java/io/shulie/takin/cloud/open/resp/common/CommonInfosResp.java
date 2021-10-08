@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
 
 /**
  * 公共信息返回报文
@@ -14,7 +13,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel("公共信息返回报文")
-public class CommonInfosResp implements Serializable {
+public class CommonInfosResp {
 
     @ApiModelProperty("压测引擎版本号")
     private String pressureEngineVersion;

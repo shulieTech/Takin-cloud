@@ -16,10 +16,10 @@ import io.shulie.takin.cloud.biz.service.scene.SceneScriptRefService;
 @Service
 public class SceneScriptRefServiceImpl implements SceneScriptRefService {
     @Resource
-    private TSceneScriptRefMapper TSceneScriptRefMapper;
+    private TSceneScriptRefMapper tSceneScriptRefMapper;
 
     @Override
     public synchronized SceneScriptRef selectByExample(SceneScriptRefQueryParam param) {
-        return TSceneScriptRefMapper.selectByExample(param);
+        return tSceneScriptRefMapper.selectByExample(param);
     }
 }

@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.web.entrypoint.response;
 
-import java.io.Serializable;
 import java.util.List;
 
 import io.swagger.annotations.ApiModel;
@@ -13,9 +12,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel("状态检查返回值")
-public class SceneActionResponse implements Serializable {
-
-    private static final long serialVersionUID = -2592300523249555242L;
+public class SceneActionResponse {
 
     @ApiModelProperty(value = "状态值")
     private Long data;

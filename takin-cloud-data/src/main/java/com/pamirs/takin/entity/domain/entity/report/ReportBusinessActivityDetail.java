@@ -5,6 +5,9 @@ import java.util.Date;
 
 import lombok.Data;
 
+/**
+ * @author -
+ */
 @Data
 public class ReportBusinessActivityDetail {
     private Long id;

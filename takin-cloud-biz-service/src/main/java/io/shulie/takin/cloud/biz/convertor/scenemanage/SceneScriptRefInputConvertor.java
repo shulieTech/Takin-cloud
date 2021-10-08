@@ -15,7 +15,19 @@ import java.util.List;
 public interface SceneScriptRefInputConvertor {
     SceneScriptRefInputConvertor INSTANCE = Mappers.getMapper(SceneScriptRefInputConvertor.class);
 
+    /**
+     * 数据转换
+     *
+     * @param scriptRef 原数据
+     * @return 转换后数据
+     */
     SceneScriptRefInput of(SceneScriptRef scriptRef);
 
+    /**
+     * 数据转换(批量)
+     *
+     * @param scriptRefs 原数据(批量)
+     * @return 转换后数据(批量)
+     */
     List<SceneScriptRefInput> ofList(List<SceneScriptRef> scriptRefs);
 }

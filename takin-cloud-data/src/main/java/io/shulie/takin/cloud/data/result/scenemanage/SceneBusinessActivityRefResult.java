@@ -13,8 +13,6 @@ import io.shulie.takin.cloud.common.bean.scenemanage.SceneBusinessActivityRefBea
 @EqualsAndHashCode(callSuper = true)
 public class SceneBusinessActivityRefResult extends SceneBusinessActivityRefBean {
 
-    private static final long serialVersionUID = -6384484202725660595L;
-
     @ApiModelProperty(value = "ID")
     private Long id;
 

@@ -1,7 +1,7 @@
 package io.shulie.plugin.enginecall;
 
-
 import com.alibaba.fastjson.JSONObject;
+
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import io.shulie.plugin.enginecall.service.EngineCallService;
 import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
@@ -10,9 +10,13 @@ import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyOutputExt;
 import io.shulie.takin.constants.TakinRequestConstant;
-import io.shulie.takin.ext.api.EngineCallExtApi;
-import io.shulie.takin.ext.content.enginecall.*;
+import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -95,7 +100,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         notifyTaskResult(request);
         // 启动压测
         return engineCallService.createJob(request.getRequest().getSceneId(), request.getRequest().getTaskId(),
-                request.getRequest().getCustomerId());
+            request.getRequest().getTenantId());
 
     }
 
@@ -141,13 +146,13 @@ public class EngineCallExtImpl implements EngineCallExtApi {
      * 创建引擎配置文件
      */
     public void createEngineConfigMap(ScheduleRunRequest request) {
-        Map<String, Object> configMap = new HashMap<>();
+        Map<String, Object> configMap = new HashMap<>(0);
         ScheduleStartRequestExt scheduleStartRequest = request.getRequest();
         configMap.put("name", ScheduleConstants.getConfigMapName(scheduleStartRequest.getSceneId(), scheduleStartRequest.getTaskId(),
-                scheduleStartRequest.getCustomerId()));
+            scheduleStartRequest.getTenantId()));
         JSONObject param = new JSONObject();
         param.put("scriptPath", scriptPath + SceneManageConstant.FILE_SPLIT + scheduleStartRequest.getScriptPath());
-        param.put("pressureEnginePathUrl",scriptPath + SceneManageConstant.FILE_SPLIT);
+        param.put("pressureEnginePathUrl", scriptPath + SceneManageConstant.FILE_SPLIT);
         param.put("extJarPath", "");
         param.put("isLocal", true);
         param.put("taskDir", taskDir);
@@ -159,9 +164,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         //将jar包放入引擎目录中，打包后会放入ext目录
         if (CollectionUtils.isNotEmpty(scheduleStartRequest.getDataFile())) {
             List<String> jarFilePaths = scheduleStartRequest.getDataFile().stream().filter(o -> o.getName().endsWith(".jar"))
-                    .map(reqExt ->{
-                        return scriptPath + SceneManageConstant.FILE_SPLIT + reqExt.getPath();
-                    }).collect(Collectors.toList());
+                .map(reqExt -> scriptPath + SceneManageConstant.FILE_SPLIT + reqExt.getPath()).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(jarFilePaths)) {
                 jarFilePaths.forEach(scheduleStartRequest::addEnginePluginsFilePath);
             }
@@ -180,7 +183,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         enginePressureParams.put("engineRedisSentinelMaster", engineRedisSentinelMaster);
         enginePressureParams.put("engineRedisPassword", engineRedisPassword);
         BigDecimal podTpsNum = new BigDecimal(0);
-        if (scheduleStartRequest.getTps() != null){
+        if (scheduleStartRequest.getTps() != null) {
             podTpsNum = new BigDecimal(scheduleStartRequest.getTps()).divide(new BigDecimal(scheduleStartRequest.getTotalIp()), 0, BigDecimal.ROUND_UP);
         }
         if (scheduleStartRequest.isTryRun()) {
@@ -192,16 +195,16 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         enginePressureParams.put("tpsTargetLevel", podTpsNum.longValue());
         enginePressureParams.put("enginePressureMode", scheduleStartRequest.getPressureType() == null ? "" : scheduleStartRequest.getPressureType().toString());
         enginePressureParams.put("traceSampling", StringUtils.isBlank(engineConfigService.getLogSimpling()) ? "1" : engineConfigService.getLogSimpling());
-        enginePressureParams.put("ptlLogConfig",JSONObject.toJSONString(engineConfigService.getEnginePtlConfig()));
-        enginePressureParams.put("zkServers",zkServers);
-        enginePressureParams.put("logQueueSize",logQueueSize);
+        enginePressureParams.put("ptlLogConfig", JSONObject.toJSONString(engineConfigService.getEnginePtlConfig()));
+        enginePressureParams.put("zkServers", zkServers);
+        enginePressureParams.put("logQueueSize", logQueueSize);
         if (scheduleStartRequest.getBusinessTpsData() != null) {
             List<Map<String, String>> businessActivities = new ArrayList<>();
             scheduleStartRequest.getBusinessTpsData().forEach((k, v) -> {
-                Map<String, String> businessActivity = new HashMap<>();
+                Map<String, String> businessActivity = new HashMap<>(0);
                 businessActivity.put("elementTestName", k);
                 businessActivity.put("throughputPercent", new BigDecimal(v).multiply(new BigDecimal(100))
-                        .divide(new BigDecimal(scheduleStartRequest.getTps()), 0, BigDecimal.ROUND_UP).toString());
+                    .divide(new BigDecimal(scheduleStartRequest.getTps()), 0, RoundingMode.UP).toString());
                 businessActivities.add(businessActivity);
             });
             enginePressureParams.put("businessActivities", businessActivities);
@@ -209,7 +212,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         param.put("enginePressureParams", enginePressureParams);
 
         String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(scheduleStartRequest.getSceneId(), scheduleStartRequest.getTaskId(),
-                scheduleStartRequest.getCustomerId());
+            scheduleStartRequest.getTenantId());
         redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_ALL_LIMIT, scheduleStartRequest.getTps() + "");
         redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_LIMIT, podTpsNum + "");
         redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_POD_NUM, scheduleStartRequest.getTotalIp() + "");
@@ -217,12 +220,12 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         param.put(TakinRequestConstant.CLUSTER_TEST_SCENE_HEADER_VALUE, scheduleStartRequest.getSceneId());
         param.put(TakinRequestConstant.CLUSTER_TEST_TASK_HEADER_VALUE, scheduleStartRequest.getTaskId());
         //  客户id
-        param.put(TakinRequestConstant.CLUSTER_TEST_CUSTOMER_HEADER_VALUE, scheduleStartRequest.getCustomerId());
+        param.put(TakinRequestConstant.CLUSTER_TEST_CUSTOMER_HEADER_VALUE, scheduleStartRequest.getTenantId());
 
         param.put("consoleUrl",
-                console + ScheduleConstants.getConsoleUrl(request.getRequest().getSceneId(),
-                        request.getRequest().getTaskId(),
-                        request.getRequest().getCustomerId()));
+            console + ScheduleConstants.getConsoleUrl(request.getRequest().getSceneId(),
+                request.getRequest().getTaskId(),
+                request.getRequest().getTenantId()));
         param.put("takinCloudCallbackUrl", console + "/api/engine/callback");
         // 解决 单个pod ,但文件处于需要切割分类状态的bug
         param.put("podCount", scheduleStartRequest.getTotalIp());
@@ -231,14 +234,14 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         param.put("memSetting", pressureEngineMemSetting);
         configMap.put("engine.conf", param.toJSONString());
         engineCallService.createConfigMap(configMap, PressureInstanceRedisKey.getEngineInstanceRedisKey(request.getRequest().getSceneId(),
-                request.getRequest().getTaskId(), request.getRequest().getCustomerId()));
+            request.getRequest().getTaskId(), request.getRequest().getTenantId()));
     }
 
     private void notifyTaskResult(ScheduleRunRequest request) {
         SceneTaskNotifyParam notify = new SceneTaskNotifyParam();
         notify.setSceneId(request.getRequest().getSceneId());
         notify.setTaskId(request.getRequest().getTaskId());
-        notify.setCustomerId(request.getRequest().getCustomerId());
+        notify.setTenantId(request.getRequest().getTenantId());
         notify.setStatus("started");
         sceneTaskService.taskResultNotify(notify);
     }

@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.open.req.scenemanage;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -10,8 +10,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SceneTaskStartReq extends CloudUserCommonRequestExt {
-    private static final long serialVersionUID = -508486534071711694L;
+public class SceneTaskStartReq extends ContextExt {
 
     private Long sceneId;
 }

@@ -1,10 +1,10 @@
 package io.shulie.takin.cloud.open.req.common;
 
-import java.io.Serializable;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 公共信息请求
@@ -14,6 +14,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel("公共信息请求入参")
-public class CloudCommonInfoWrapperReq extends CloudUserCommonRequestExt implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class CloudCommonInfoWrapperReq extends ContextExt {
     //暂时无入参
 }

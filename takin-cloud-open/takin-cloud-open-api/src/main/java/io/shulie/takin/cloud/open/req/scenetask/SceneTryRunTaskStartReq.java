@@ -1,25 +1,25 @@
 package io.shulie.takin.cloud.open.req.scenetask;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.open.req.engine.EnginePluginsRefOpen;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneBusinessActivityRefOpen;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneScriptRefOpen;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author xr.l
  * @date 2021-05-10
  */
 @Data
-public class SceneTryRunTaskStartReq extends CloudUserCommonRequestExt implements Serializable {
-    private static final long serialVersionUID = -9162208161836587615L;
+@EqualsAndHashCode(callSuper = true)
+public class SceneTryRunTaskStartReq extends ContextExt {
 
     @ApiModelProperty(value = "业务活动配置")
     @NotEmpty(message = "业务活动配置不能为空")
@@ -42,12 +42,21 @@ public class SceneTryRunTaskStartReq extends CloudUserCommonRequestExt implement
     @ApiModelProperty(value = "扩展字段")
     private String features;
 
-    @ApiModelProperty(value = "脚本ID")
-    private Long scriptId;
-
     @ApiModelProperty(value = "试跑流量条数")
     private Integer loopsNum;
 
     @ApiModelProperty(value = "并发数")
     private Integer concurrencyNum;
+
+    @ApiModelProperty(value = "脚本版本号ID")
+    private Long scriptId;
+
+    @ApiModelProperty(value = "脚本版本号ID")
+    private Long scriptDeployId;
+
+    @ApiModelProperty(value = "脚本名称")
+    private String scriptName;
+
+    @ApiModelProperty(value = "创建者")
+    private Long creatorId;
 }

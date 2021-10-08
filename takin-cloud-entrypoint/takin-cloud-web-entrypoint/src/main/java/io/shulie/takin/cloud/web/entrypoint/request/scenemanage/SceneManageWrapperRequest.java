@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.web.entrypoint.request.scenemanage;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
@@ -8,7 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import io.shulie.takin.cloud.common.bean.RuleBean;
 import io.shulie.takin.cloud.common.bean.TimeBean;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -21,9 +20,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "场景保存入参")
-public class SceneManageWrapperRequest extends CloudUserCommonRequestExt {
-
-    private static final long serialVersionUID = -7653146473491831687L;
+public class SceneManageWrapperRequest extends ContextExt {
 
     @ApiModelProperty(name = "id", value = "压测场景ID")
     private Long id;
@@ -43,6 +40,9 @@ public class SceneManageWrapperRequest extends CloudUserCommonRequestExt {
 
     @ApiModelProperty(value = "脚本id")
     private Long scriptId;
+
+    @ApiModelProperty(value = "脚本实例id")
+    private Long scriptDeployId;
 
     @ApiModelProperty(value = "业务活动配置")
     @NotEmpty(message = "业务活动配置不能为空")
@@ -89,9 +89,7 @@ public class SceneManageWrapperRequest extends CloudUserCommonRequestExt {
     private List<SceneSlaRefRequest> warningCondition;
 
     @Data
-    public static class SceneScriptRefRequest implements Serializable {
-
-        private static final long serialVersionUID = -2991318843153108331L;
+    public static class SceneScriptRefRequest {
 
         @ApiModelProperty(value = "ID")
         private Long id;
@@ -125,9 +123,7 @@ public class SceneManageWrapperRequest extends CloudUserCommonRequestExt {
     }
 
     @Data
-    public static class SceneSlaRefRequest implements Serializable {
-
-        private static final long serialVersionUID = 4747478435828708203L;
+    public static class SceneSlaRefRequest {
 
         @ApiModelProperty(value = "规则名称")
         private String ruleName;

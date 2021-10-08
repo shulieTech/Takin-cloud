@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
-import io.shulie.takin.cloud.common.constants.APIUrls;
+import io.shulie.takin.cloud.common.constants.ApiUrls;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.open.req.filemanager.FileContentParamReq;
 import io.shulie.takin.common.beans.response.ResponseResult;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/4/17 下午5:50
  */
 @RestController
-@RequestMapping(APIUrls.TRO_OPEN_API_URL + "file")
+@RequestMapping(ApiUrls.TRO_OPEN_API_URL + "file")
 @Api(tags = "文件管理")
 @Slf4j
 public class FileOpenController {

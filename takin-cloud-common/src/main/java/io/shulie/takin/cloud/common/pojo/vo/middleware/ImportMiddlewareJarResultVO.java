@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.common.pojo.vo.middleware;
 
-import java.io.Serializable;
 
 import cn.afterturn.easypoi.excel.annotation.Excel;
 import lombok.Data;
@@ -16,9 +15,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @ToString(callSuper = true)
-public class ImportMiddlewareJarResultVO extends ImportMiddlewareJarVO implements Serializable {
-
-    private static final long serialVersionUID = -1L;
+public class ImportMiddlewareJarResultVO extends ImportMiddlewareJarVO {
 
     @Excel(name = "备注信息", orderNum = "7")
     private String remark;

@@ -1,8 +1,8 @@
 package io.shulie.takin.cloud.open.req.report;
 
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 
 /**
  * @author 无涯
@@ -10,7 +10,7 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class JtlDownloadReq extends CloudUserCommonRequestExt {
+public class JtlDownloadReq extends ContextExt {
     private Long sceneId;
     private Long reportId;
 }

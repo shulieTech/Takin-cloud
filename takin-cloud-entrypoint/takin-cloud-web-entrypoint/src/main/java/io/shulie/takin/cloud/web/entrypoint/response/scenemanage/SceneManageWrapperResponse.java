@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.web.entrypoint.response.scenemanage;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -9,7 +8,7 @@ import javax.validation.constraints.NotNull;
 import io.shulie.takin.cloud.common.bean.RuleBean;
 import io.shulie.takin.cloud.common.bean.TimeBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneBusinessActivityRefBean;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -22,9 +21,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "场景详情出参")
-public class SceneManageWrapperResponse extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = 7324148443733465383L;
+public class SceneManageWrapperResponse extends ContextExt {
 
     @ApiModelProperty(value = "压测场景ID")
     private Long id;
@@ -102,8 +99,6 @@ public class SceneManageWrapperResponse extends CloudUserCommonRequestExt implem
     @EqualsAndHashCode(callSuper = true)
     public static class SceneBusinessActivityRefResponse extends SceneBusinessActivityRefBean {
 
-        private static final long serialVersionUID = -6384484202725660595L;
-
         @ApiModelProperty(value = "ID")
         private Long id;
 
@@ -122,9 +117,7 @@ public class SceneManageWrapperResponse extends CloudUserCommonRequestExt implem
     }
 
     @Data
-    public static class SceneScriptRefResponse implements Serializable {
-
-        private static final long serialVersionUID = -1038145286303661484L;
+    public static class SceneScriptRefResponse {
 
         @ApiModelProperty(value = "ID")
         private Long id;
@@ -159,9 +152,7 @@ public class SceneManageWrapperResponse extends CloudUserCommonRequestExt implem
     }
 
     @Data
-    public static class SceneSlaRefResponse implements Serializable {
-
-        private static final long serialVersionUID = 5117439939447730586L;
+    public static class SceneSlaRefResponse {
 
         @ApiModelProperty(value = "ID")
         private Long id;

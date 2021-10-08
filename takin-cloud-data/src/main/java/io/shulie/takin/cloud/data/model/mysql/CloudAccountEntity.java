@@ -8,6 +8,11 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+/**
+ * 账户
+ *
+ * @author -
+ */
 @Data
 @TableName(value = "t_cloud_account")
 public class CloudAccountEntity {

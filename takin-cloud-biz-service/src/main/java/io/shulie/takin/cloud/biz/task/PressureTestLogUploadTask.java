@@ -7,8 +7,8 @@ import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.data.dao.sceneTask.SceneTaskPressureTestLogUploadDAO;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
+import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 压测日志上传任务
+ *
+ * @author -
  */
 @Slf4j
 public class PressureTestLogUploadTask implements Runnable {
@@ -30,7 +32,7 @@ public class PressureTestLogUploadTask implements Runnable {
 
     private Long reportId;
 
-    private Long customerId;
+    private Long tenantId;
 
     private SceneTaskPressureTestLogUploadDAO logUploadDAO;
 
@@ -44,13 +46,13 @@ public class PressureTestLogUploadTask implements Runnable {
 
     private String fileName;
 
-    public PressureTestLogUploadTask(Long sceneId, Long reportId, Long customerId,
+    public PressureTestLogUploadTask(Long sceneId, Long reportId, Long tenantId,
         SceneTaskPressureTestLogUploadDAO logUploadDAO, RedisClientUtils redisClientUtils,
         PushLogService pushLogService, SceneManageDAO sceneManageDAO,
         String logDir, String fileName) {
         this.sceneId = sceneId;
         this.reportId = reportId;
-        this.customerId = customerId;
+        this.tenantId = tenantId;
         this.logUploadDAO = logUploadDAO;
         this.redisClientUtils = redisClientUtils;
         this.pushLogService = pushLogService;
@@ -123,7 +125,7 @@ public class PressureTestLogUploadTask implements Runnable {
                         }
                         log.info("上传压测明细日志--文件【{}】上传完成，文件大小【{}】", this.fileName, position);
                         //删除缓存的key，记录文件上传大小
-                        createUploadRecord(this.sceneId, this.reportId, this.customerId,
+                        createUploadRecord(this.sceneId, this.reportId, this.tenantId,
                             ptlFile.getAbsolutePath(), position);
                         cleanCache(subFileName);
                         fileFetcher.close();
@@ -189,6 +191,7 @@ public class PressureTestLogUploadTask implements Runnable {
 
     /**
      * todo 这个方法需要修改，不能按照压测场景的状态来判断是否停止压测，最新的方案是按照job状态来判断。
+     *
      * @param sceneId
      * @return
      */
@@ -232,12 +235,12 @@ public class PressureTestLogUploadTask implements Runnable {
      * @param fileName -
      * @param fileSize -
      */
-    private void createUploadRecord(Long sceneId, Long reportId, Long customerId, String fileName, Long fileSize) {
+    private void createUploadRecord(Long sceneId, Long reportId, Long tenantId, String fileName, Long fileSize) {
         log.info("上传压测明细日志--文件【{}】上传完成，创建上传记录", fileName);
         ScenePressureTestLogUploadEntity entity = new ScenePressureTestLogUploadEntity() {{
             setSceneId(sceneId);
             setReportId(reportId);
-            setCustomerId(customerId);
+            setTenantId(tenantId);
             setFileName(fileName);
             setTaskStatus(SceneRunTaskStatusEnum.ENDED.getCode());
             setUploadStatus(2);

@@ -18,7 +18,7 @@ import io.shulie.takin.cloud.open.resp.scenemanage.SceneManageWrapperResp;
 import io.shulie.takin.cloud.open.resp.scenemanage.ScriptCheckResp;
 import io.shulie.takin.cloud.open.resp.strategy.StrategyResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -74,7 +74,7 @@ public interface CloudSceneApi {
      * @param request -
      * @return -
      */
-    ResponseResult<List<SceneManageListResp>> getSceneManageList(CloudUserCommonRequestExt request);
+    ResponseResult<List<SceneManageListResp>> getSceneManageList(ContextExt request);
 
     /**
      * 获取压测场景列表
@@ -108,6 +108,12 @@ public interface CloudSceneApi {
      */
     ResponseResult<ScriptCheckResp> checkAndUpdateScript(ScriptCheckAndUpdateReq scriptCheckAndUpdateReq);
 
+    /**
+     * 根据主键查询
+     *
+     * @param req 入参(主键)
+     * @return 查询列表
+     */
     ResponseResult<List<SceneManageWrapperResp>> queryByIds(SceneManageQueryByIdsReq req);
 
 }

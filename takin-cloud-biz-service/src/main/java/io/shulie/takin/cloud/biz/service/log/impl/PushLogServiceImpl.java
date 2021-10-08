@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.biz.service.log.impl;
 
-
 import com.pamirs.pradar.log.parser.DataType;
 import com.pamirs.pradar.log.parser.packet.Request;
 import com.pamirs.pradar.remoting.RemotingClient;
@@ -16,8 +15,13 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 
-@Service
+/**
+ * 日志推送 service - 实现
+ *
+ * @author -
+ */
 @Slf4j
+@Service
 public class PushLogServiceImpl implements PushLogService {
 
     @Autowired
@@ -28,7 +32,6 @@ public class PushLogServiceImpl implements PushLogService {
 
     @Autowired
     private EngineConfigService engineConfigService;
-
 
     @Override
     public void pushLogToAmdb(byte[] data, String version) {
@@ -72,12 +75,12 @@ public class PushLogServiceImpl implements PushLogService {
                 return true;
             } else if (responseCommand.getCode() == CommandCode.SYSTEM_ERROR) {
                 log.error("异常代码【{}】,异常内容：日志推送处理异常 --> 日志上传失败: {}",
-                        TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR,new String(responseCommand.getBody()));
+                    TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, new String(responseCommand.getBody()));
                 return false;
             }
         } catch (Throwable e) {
             log.error("异常代码【{}】,异常内容：日志推送处理异常 --> 日志上传失败: {}",
-                    TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, e);
+                TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, e);
             return false;
         }
         return true;

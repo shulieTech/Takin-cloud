@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.open.req.report;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -10,6 +10,6 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ReportDetailBySceneIdReq extends CloudUserCommonRequestExt {
+public class ReportDetailBySceneIdReq extends ContextExt {
     private Long sceneId;
 }

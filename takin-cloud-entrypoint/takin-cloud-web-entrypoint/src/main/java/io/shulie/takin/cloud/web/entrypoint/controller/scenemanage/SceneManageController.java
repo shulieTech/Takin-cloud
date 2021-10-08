@@ -9,16 +9,14 @@ import java.util.Map;
 
 import javax.validation.Valid;
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSON;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.ext.api.AssetExtApi;
-import io.shulie.takin.ext.content.asset.AssetBillExt;
+import io.shulie.takin.cloud.ext.api.AssetExtApi;
+import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.cloud.biz.cache.DictionaryCache;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageQueryInput;
@@ -31,13 +29,12 @@ import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 import io.shulie.takin.cloud.biz.utils.SlaUtil;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
-import io.shulie.takin.cloud.common.constants.APIUrls;
+import io.shulie.takin.cloud.common.constants.ApiUrls;
 import io.shulie.takin.cloud.common.constants.DicKeyConstant;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.utils.ListHelper;
-import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.web.entrypoint.convert.SceneBusinessActivityRefRespConvertor;
 import io.shulie.takin.cloud.web.entrypoint.convert.SceneManageReqConvertor;
 import io.shulie.takin.cloud.web.entrypoint.convert.SceneManageRespConvertor;
@@ -53,14 +50,13 @@ import io.shulie.takin.cloud.web.entrypoint.response.scenemanage.SceneManageWrap
 import io.shulie.takin.cloud.web.entrypoint.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 import io.shulie.takin.cloud.web.entrypoint.response.strategy.StrategyResponse;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.ext.content.enginecall.StrategyOutputExt;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyOutputExt;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -68,46 +64,35 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * @author qianshui
  * @date 2020/4/17 下午2:31
  */
 @RestController
-@RequestMapping(APIUrls.TRO_API_URL + "scenemanage")
+@RequestMapping(ApiUrls.TRO_API_URL + "scene_manage")
 @Api(tags = "压测场景管理")
 public class SceneManageController {
 
-    //原本调用方式，需要将token放入header中
-    public static final String PAGE_TOTAL_HEADER = "x-total-count";
-
-    @Autowired
-    private SceneManageService sceneManageService;
-
-    @Autowired
-    private StrategyConfigService strategyConfigService;
-
-    @Autowired
-    private DictionaryCache dictionaryCache;
-
-    @Autowired
-    private EnginePluginUtils pluginUtils;
-
-    @Resource
+    @Resource(type = PluginManager.class)
     private PluginManager pluginManager;
+    @Resource(type = DictionaryCache.class)
+    private DictionaryCache dictionaryCache;
+    @Resource(type = SceneManageService.class)
+    private SceneManageService sceneManageService;
+    @Resource(type = StrategyConfigService.class)
+    private StrategyConfigService strategyConfigService;
 
     @PostMapping
     @ApiOperation(value = "新增压测场景")
-    public ResponseResult add(@RequestBody @Valid SceneManageWrapperRequest wrapperRequest) {
+    public ResponseResult<Long> add(@RequestBody @Valid SceneManageWrapperRequest wrapperRequest) {
         SceneManageWrapperInput input = SceneManageReqConvertor.INSTANCE.ofSceneManageWrapperInput(wrapperRequest);
         return ResponseResult.success(sceneManageService.addSceneManage(input));
     }
 
     @PutMapping
     @ApiOperation(value = "修改压测场景")
-    public ResponseResult update(@RequestBody @Valid SceneManageWrapperRequest wrapperRequest) {
+    public ResponseResult<?> update(@RequestBody @Valid SceneManageWrapperRequest wrapperRequest) {
         SceneManageWrapperInput input = SceneManageReqConvertor.INSTANCE.ofSceneManageWrapperInput(wrapperRequest);
         sceneManageService.updateSceneManage(input);
         return ResponseResult.success();
@@ -116,7 +101,7 @@ public class SceneManageController {
 
     @DeleteMapping
     @ApiOperation(value = "删除压测场景")
-    public ResponseResult delete(@RequestBody SceneManageDeleteRequest deleteRequest) {
+    public ResponseResult<?> delete(@RequestBody SceneManageDeleteRequest deleteRequest) {
         sceneManageService.delete(deleteRequest.getId());
         return ResponseResult.success();
     }
@@ -167,8 +152,8 @@ public class SceneManageController {
         resp.setBusinessFlowId(businessFlowId == null ? null : Long.valueOf(businessFlowId.toString()));
 
         if (map.containsKey(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL)) {
-            Integer schedualInterval = (Integer)map.get(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL);
-            resp.setScheduleInterval(schedualInterval);
+            Integer scheduleInterval = (Integer)map.get(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL);
+            resp.setScheduleInterval(scheduleInterval);
         }
     }
 
@@ -182,7 +167,7 @@ public class SceneManageController {
         if (!resDTO.getSuccess()) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, resDTO.getError().getMsg());
         }
-        return ResponseResult.success(convertSceneManageWrapperDTO2SceneDetailDTO(resDTO.getData()));
+        return ResponseResult.success(convertSceneManageWrapper2SceneDetail(resDTO.getData()));
     }
 
     @GetMapping("/list")
@@ -191,7 +176,7 @@ public class SceneManageController {
         @ApiParam(name = "current", value = "页码", required = true) Integer current,
         @ApiParam(name = "pageSize", value = "页大小", required = true) Integer pageSize,
         @ApiParam(name = "customerName", value = "客户名称") String customerName,
-        @ApiParam(name = "customerId", value = "客户ID") Long customerId,
+        @ApiParam(name = "tenantId", value = "客户ID") Long tenantId,
         @ApiParam(name = "sceneId", value = "压测场景ID") Long sceneId,
         @ApiParam(name = "sceneName", value = "压测场景名称") String sceneName,
         @ApiParam(name = "status", value = "压测状态") Integer status,
@@ -207,8 +192,7 @@ public class SceneManageController {
         SceneManageQueryInput queryVO = new SceneManageQueryInput();
         queryVO.setCurrentPage(current);
         queryVO.setPageSize(pageSize);
-        queryVO.setTenantName(customerName);
-        queryVO.setTenantId(customerId);
+        queryVO.setTenantId(tenantId);
         queryVO.setSceneId(sceneId);
         queryVO.setSceneName(sceneName);
         queryVO.setStatus(status);
@@ -228,7 +212,7 @@ public class SceneManageController {
 
     @PostMapping("/flow/calc")
     @ApiOperation(value = "流量计算")
-    public ResponseResult calcFlow(@RequestBody SceneManageWrapperRequest wrapperRequest) {
+    public ResponseResult<BigDecimal> calcFlow(@RequestBody SceneManageWrapperRequest wrapperRequest) {
 
         SceneManageWrapperInput input = new SceneManageWrapperInput();
         BeanUtils.copyProperties(wrapperRequest, input);
@@ -246,7 +230,7 @@ public class SceneManageController {
      * @param concurrenceNum 并发数量
      * @return -
      */
-    @GetMapping("/ipnum")
+    @GetMapping("/ip_num")
     @ApiOperation(value = "获取机器数量范围")
     public ResponseResult<StrategyResponse> getIpNum(@ApiParam(name = "concurrenceNum", value = "并发数量") Integer concurrenceNum) {
         StrategyOutputExt output = strategyConfigService.getStrategy(concurrenceNum, null);
@@ -280,13 +264,11 @@ public class SceneManageController {
         return ResponseResult.success(response);
     }
 
-    private SceneDetailResponse convertSceneManageWrapperDTO2SceneDetailDTO(SceneManageWrapperResponse wrapperDTO) {
+    private SceneDetailResponse convertSceneManageWrapper2SceneDetail(SceneManageWrapperResponse wrapperDTO) {
         SceneDetailResponse detailDTO = new SceneDetailResponse();
         //基本信息
         detailDTO.setId(wrapperDTO.getId());
         detailDTO.setSceneName(wrapperDTO.getPressureTestSceneName());
-        // 补充数据
-        CloudPluginUtils.fillCustomerName(wrapperDTO, detailDTO);
 
         detailDTO.setUpdateTime(wrapperDTO.getUpdateTime());
         detailDTO.setLastPtTime(wrapperDTO.getLastPtTime());
@@ -367,15 +349,13 @@ public class SceneManageController {
         SceneSlaRefInput input = new SceneSlaRefInput();
         BeanUtils.copyProperties(slaRefDTO, input);
         Map<String, Object> dataMap = SlaUtil.matchCondition(input, new SendMetricsEvent());
-        StringBuilder sb = new StringBuilder();
-        sb.append(dataMap.get("type"));
-        sb.append(dataMap.get("compare"));
-        sb.append(slaRefDTO.getRule().getDuring());
-        sb.append(dataMap.get("unit"));
-        sb.append("连续出现");
-        sb.append(slaRefDTO.getRule().getTimes());
-        sb.append("次");
-        return sb.toString();
+        return String.valueOf(dataMap.get("type"))
+            + dataMap.get("compare")
+            + slaRefDTO.getRule().getDuring()
+            + dataMap.get("unit")
+            + "连续出现"
+            + slaRefDTO.getRule().getTimes()
+            + "次";
     }
 
     private String convertIdsToNames(String[] ids, List<BusinessActivityDetailResponse> detailList) {
@@ -397,14 +377,5 @@ public class SceneManageController {
         }
         sb.deleteCharAt(sb.lastIndexOf(","));
         return sb.toString();
-    }
-
-    /**
-     * todo 临时方案，后面逐渐去掉这种网络请求
-     */
-    private void setHttpResponseHeader(Long total) {
-        HttpServletResponse response = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getResponse();
-        response.setHeader("Access-Control-Expose-Headers", PAGE_TOTAL_HEADER);
-        response.setHeader(PAGE_TOTAL_HEADER, total + "");
     }
 }

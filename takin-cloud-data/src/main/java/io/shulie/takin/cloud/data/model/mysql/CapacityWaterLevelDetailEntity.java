@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * 压测报告容量水位详情
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_capacity_water_level_detail")
