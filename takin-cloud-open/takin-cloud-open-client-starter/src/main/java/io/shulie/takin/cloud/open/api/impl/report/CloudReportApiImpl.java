@@ -7,7 +7,6 @@ import io.shulie.takin.cloud.open.api.impl.CloudCommonApi;
 import io.shulie.takin.cloud.open.api.report.CloudReportApi;
 import io.shulie.takin.cloud.open.constant.CloudApiConstant;
 import io.shulie.takin.cloud.open.req.common.CloudCommonInfoWrapperReq;
-import io.shulie.takin.cloud.open.req.report.JtlDownloadReq;
 import io.shulie.takin.cloud.open.req.report.ReportDetailByIdReq;
 import io.shulie.takin.cloud.open.req.report.ReportDetailBySceneIdReq;
 import io.shulie.takin.cloud.open.req.report.ReportQueryReq;
@@ -87,7 +86,7 @@ public class CloudReportApiImpl extends CloudCommonApi implements CloudReportApi
     @Override
     public ResponseResult<List<Long>> queryListRunningReport(CloudCommonInfoWrapperReq req) {
         TakinResponseEntity<ResponseResult<List<Long>>> takinResponseEntity =
-            HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_RUNNING_LIST,
+            HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_RUNNING_LIST_GET_URL,
                 getHeaders(), req, new TypeReference<ResponseResult<List<Long>>>() {});
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
