@@ -74,7 +74,7 @@ public class ScenePressureTestLogUploadEntity {
     /**
      * 用户主键
      */
-    @TableField(value = "customer_id")
+    @TableField(value = "user_id")
     private Long userId;
     /**
      * 租户主键

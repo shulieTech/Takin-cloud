@@ -26,14 +26,6 @@ public interface TSceneManageMapper {
     int deleteByPrimaryKey(Long id);
 
     /**
-     * 插入
-     *
-     * @param record 入参
-     * @return -
-     */
-    Long insertSelective(SceneManage record);
-
-    /**
      * 依据主键更新
      *
      * @param record 数据内容(包括主键)

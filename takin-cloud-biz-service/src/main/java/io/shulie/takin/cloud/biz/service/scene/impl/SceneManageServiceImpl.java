@@ -979,6 +979,9 @@ public class SceneManageServiceImpl implements SceneManageService {
         param.setStatus(SceneManageStatusEnum.WAIT.getValue());
         param.setType(wrapperVO.getType() == null ? 0 : wrapperVO.getType());
         param.setFeatures(wrapperVO.getFeatures());
+        param.setUserId(wrapperVO.getUserId());
+        param.setTenantId(wrapperVO.getTenantId());
+        param.setEnvCode(wrapperVO.getEnvCode());
         return param;
     }
 
