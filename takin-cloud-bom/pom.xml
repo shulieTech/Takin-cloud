@@ -10,7 +10,7 @@
 
     <properties>
         <takin.cloud.version>takin-cloud-2.0.3</takin.cloud.version>
-        <takin.cloud.open.version>takin-cloud-open-2.0.2.1</takin.cloud.open.version>
+        <takin.cloud.open.version>takin-cloud-open-2.0.2.2</takin.cloud.open.version>
     </properties>
 
     <dependencyManagement>
