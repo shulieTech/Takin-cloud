@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONObject;
@@ -60,9 +62,6 @@ public class FileSplitService {
     private FileSliceService fileSliceService;
 
     @Autowired
-    private EngineConfigService engineConfigService;
-
-    @Autowired
     private RedisTemplate<String,String> redisTemplate;
 
     @Value("${script.path}")
@@ -111,83 +110,59 @@ public class FileSplitService {
         //1.如果是正常上传的，不需要区分顺序的文件，直接用nio去拆，效率高
         //2.如果是通过大文件上传（>200M），要保证顺序，则需要逐行去读，区分partition,sf需求
         if (CollectionUtils.isNotEmpty(needToSplit)) {
+            AtomicBoolean sliceResult = new AtomicBoolean(true);
             result.addAll(needToSplit.stream().peek(dataFile -> {
                 String filePath = dataFile.getPath();
                 int totalPod = startRequest.getTotalIp();
-                //文件不拆分
-                if (!dataFile.isSplit()) {
-                    List<StartEndPair> pairs = slice(filePath);
-                    //如果文件需要从上次已经读取的位置继续读，从缓存中取已经读取数据，计算最大位置，从最大位置继续读
-                    if (startRequest.getFileContinueRead() && CollectionUtils.isNotEmpty(pairs)) {
-                        pairs.forEach(pair ->{
+                FileSliceRequest fileSliceRequest = new FileSliceRequest() {{
+                    setSceneId(startRequest.getSceneId());
+                    setRefId(dataFile.getRefId());
+                    setFilePath(filePath);
+                    setFileName(dataFile.getName());
+                    setPodNum(totalPod);
+                    setSplit(dataFile.isSplit());
+                    setOrderSplit(dataFile.isOrdered());
+                    setForceSplit(false);
+                }};
+                boolean fileSliced = fileSliceService.fileSlice(fileSliceRequest);
+                if (fileSliced){
+                    List<StartEndPair> pairs = new ArrayList<>();
+                    SceneBigFileSliceEntity sliceEntity = fileSliceService.getOneByParam(fileSliceRequest);
+                    if (Objects.isNull(sliceEntity)) {
+                        log.error("启动场景失败:场景ID:{},文件名:{}，未查询到分片信息", startRequest.getSceneId(),dataFile.getName());
+                        sliceResult.set(false);
+                        return;
+                    }
+                    //文件由拆分改为不拆分
+                    if (!dataFile.isSplit() && sliceEntity.getSliceCount() > 1) {
+                        fileSliceRequest.setPodNum(1);
+                        fileSliceRequest.setForceSplit(true);
+                        fileSliced = fileSliceService.fileSlice(fileSliceRequest);
+                        if (fileSliced) {
+                            sliceEntity = fileSliceService.getOneByParam(fileSliceRequest);
+                        }
+                    }else if (!dataFile.isOrdered()) {
+                        if (totalPod != sliceEntity.getSliceCount()) {
+                            fileSliceRequest.setForceSplit(true);
+                            fileSliced = fileSliceService.fileSlice(fileSliceRequest);
+                            if (fileSliced) {
+                                sliceEntity = fileSliceService.getOneByParam(fileSliceRequest);
+                            }
+                        }
+                    }
+                    List<FileSliceInfo> list = JSONObject.parseArray(sliceEntity.getSliceInfo(), FileSliceInfo.class);
+                    for (int i = 0, size = list.size(); i < size; i++) {
+                        StartEndPair pair = new StartEndPair();
+                        pair.setEnd(list.get(i).getEnd());
+                        pair.setPartition(list.get(i).getPartition() + "");
+                        //如果文件要继续从上次读取的位置继续读，从缓存中取数据，替换开始位置
+                        if (startRequest.getFileContinueRead()) {
                             String key = String.format(SceneStartCheckConstants.SCENE_KEY, startRequest.getSceneId());
                             Map<Object, Object> positionMap = redisTemplate.opsForHash().entries(key);
-                            long readSize = 0;
-                            for (Entry<Object,Object> entry : positionMap.entrySet()) {
-                                if (!SceneStartCheckConstants.SCRIPT_ID_KEY.equals(entry.getKey())) {
-                                    SceneFileReadPosition readPosition = JSONUtil.toBean(entry.getValue().toString(),
-                                            SceneFileReadPosition.class);
-                                    if (readPosition.getReadPosition() > readSize) {
-                                        readSize = readPosition.getReadPosition();
-                                    }
-                                }
-                            }
-                            pair.setStart(readSize);
-                        });
-                    }
-                    fillDataFile(dataFile, pairs, startRequest.getTotalIp());
-                } else {
-                    //文件拆分
-                    FileSliceRequest fileSliceRequest = new FileSliceRequest() {{
-                        setSceneId(startRequest.getSceneId());
-                        setRefId(dataFile.getRefId());
-                        setFilePath(filePath);
-                        setFileName(dataFile.getName());
-                        setPodNum(totalPod);
-                        setSplit(dataFile.isSplit());
-                        setOrderSplit(dataFile.isOrdered());
-                        setForceSplit(false);
-                    }};
-                    //根据场景判断是否是预分片的数据，预分片的数据一定是按照顺序分片的
-                    boolean fileSliced = false;
-                    String[] localMountSceneIds = engineConfigService.getLocalMountSceneIds();
-                    if (localMountSceneIds != null && localMountSceneIds.length > 0
-                        && ArrayUtils.contains(localMountSceneIds, startRequest.getSceneId() + "")) {
-                        fileSliced = true;
-                        dataFile.setOrdered(true);
-                    }
-                    if (!fileSliced) {
-                        fileSliced = fileSliceService.fileSlice(fileSliceRequest);
-                    }
-
-                    if (fileSliced) {
-                        List<StartEndPair> pairs = new ArrayList<>();
-                        SceneBigFileSliceEntity sliceEntity = fileSliceService.getOneByParam(fileSliceRequest);
-                        if (sliceEntity == null) {
-                            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_START_ERROR_FILE_SLICING,
-                                "场景启动失败，未查询到文件分片信息");
-                        }
-                        //顺序拆分判断pod数量与partition数量
-                        if (dataFile.isOrdered() && totalPod > sliceEntity.getSliceCount()) {
-                            //如果要启动的 POD 数量大于partition数量，
-                            log.error("启动场景失败：场景ID:{},异常信息：pod数量:{},大于可分配文件分片数量{}", startRequest.getSceneId(),
-                                totalPod,
-                                sliceEntity.getSliceCount());
-                            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_POD_NOT_FETCH,
-                                String.format("pod数量：%s,大于可分配文件分片数量%s", totalPod, sliceEntity.getSliceCount()));
-                        }
-                        List<FileSliceInfo> list = JSONObject.parseArray(sliceEntity.getSliceInfo(), FileSliceInfo.class);
-                        for (int i = 0; i < list.size(); i++) {
-                            StartEndPair pair = new StartEndPair();
-                            pair.setEnd(list.get(i).getEnd());
-                            pair.setPartition(list.get(i).getPartition() + "");
-                            //如果文件要继续从上次读取的位置继续读，从缓存中取数据，替换开始位置
-                            if (startRequest.getFileContinueRead()) {
-                                String key = String.format(SceneStartCheckConstants.SCENE_KEY, startRequest.getSceneId(),
-                                    dataFile.getName());
-                                Map<Object, Object> positionMap =  redisTemplate.opsForHash().entries(key);
-                                SceneFileReadPosition position = JSONUtil.toBean(
-                                    positionMap.get(String.format(SceneStartCheckConstants.FILE_POD_FIELD_KEY,dataFile.getName(), i + 1)).toString(),
+                            String podKey = String.format(SceneStartCheckConstants.FILE_POD_FIELD_KEY, dataFile.getName(), i + 1);
+                            Object podReadPosition = positionMap.get(podKey);
+                            if (Objects.nonNull(podReadPosition)) {
+                                SceneFileReadPosition position = JSONUtil.toBean(podReadPosition.toString(),
                                     SceneFileReadPosition.class);
                                 if (position.getReadPosition() >= list.get(i).getStart()
                                     && position.getReadPosition() <= list.get(i).getEnd()) {
@@ -198,10 +173,15 @@ public class FileSplitService {
                             } else {
                                 pair.setStart(list.get(i).getStart());
                             }
-                            pairs.add(pair);
+                        } else {
+                            pair.setStart(list.get(i).getStart());
                         }
-                        fillDataFile(dataFile, pairs, startRequest.getTotalIp());
+                        pairs.add(pair);
                     }
+                    fillDataFile(dataFile, pairs, startRequest.getTotalIp());
+                }else {
+                    log.error("启动场景失败:场景ID:{},文件分片出错", startRequest.getSceneId());
+                    sliceResult.set(false);
                 }
             }).collect(Collectors.toList()));
             return result;

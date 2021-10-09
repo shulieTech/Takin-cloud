@@ -2,6 +2,9 @@ package io.shulie.takin.cloud.common.enums;
 
 import lombok.Getter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author zhaoyong
  */
@@ -51,9 +54,31 @@ public enum PressureTypeEnums {
     @Getter
     private final int code;
 
+    private static final Map<Integer, PressureTypeEnums> pool = new HashMap<>();
+    static {
+        for (PressureTypeEnums e : PressureTypeEnums.values()) {
+            pool.put(e.getCode(), e);
+        }
+    }
+
+    public static PressureTypeEnums value(Integer code) {
+        if (null == code) {
+            return PressureTypeEnums.CONCURRENCY;
+        }
+        return pool.get(code);
+    }
+
     PressureTypeEnums(String text, int code) {
         this.text = text;
         this.code = code;
+    }
+
+    /**
+     * PressureTypeEnums.equels(code)
+     */
+    public boolean equels(Integer code) {
+        PressureTypeEnums pressureType = value(code);
+        return this == pressureType;
     }
 
 

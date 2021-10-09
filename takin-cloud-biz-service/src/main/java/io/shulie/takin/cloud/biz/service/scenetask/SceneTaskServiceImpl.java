@@ -70,6 +70,7 @@ import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
+import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.data.dao.sceneTask.SceneTaskPressureTestLogUploadDAO;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
@@ -154,6 +155,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     private static final Long KB = 1024L;
     private static final Long MB = KB * 1024;
     private static final Long GB = MB * 1024;
+    private static final Long TB = GB * 1024;
 
     @Override
     @Transactional
@@ -499,10 +501,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         Integer loopsNum = input.getLoopsNum();
         SceneInspectInput inspectInput = new SceneInspectInput().setFixedTimer(fixTimer).setLoopsNum(loopsNum);
         sceneTaskStartInput.setSceneInspectInput(inspectInput);
+        sceneTaskStartInput.setContinueRead(false);
         SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput, null);
         startOutput.setSceneId(sceneManageId);
         startOutput.setReportId(sceneActionOutput.getData());
-        sceneTaskStartInput.setContinueRead(false);
         //开始试跑就设置一个状态，后面区分试跑任务和正常压测
         String key = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneManageId, sceneActionOutput.getData());
         redisClientUtils.hmset(key, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY, SceneRunTaskStatusEnum.STARTING.getText());
@@ -592,18 +594,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         return sceneTryRunTaskStartOutput;
     }
 
-    @Override
-    public int saveUnUploadJmeterLogScene(Long sceneId, Long reportId, Long customerId, Integer taskStatus) {
-        ScenePressureTestLogUploadEntity entity = new ScenePressureTestLogUploadEntity();
-        entity.setSceneId(sceneId);
-        entity.setReportId(reportId);
-        entity.setCustomerId(customerId);
-        ScenePressureTestLogUploadEntity entity1 = sceneTaskPressureTestLogUploadDao.selectRecord(entity);
-        if (Objects.nonNull(entity1) && entity1.getId() > 0) {
-            entity1.setTaskStatus(taskStatus);
-        }
-        return 0;
-    }
 
     @Override
     public SceneTryRunTaskStatusOutput checkTaskStatus(Long sceneId, Long reportId) {
@@ -856,7 +846,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //3.查询缓存值是否小于预分片end
         //4.查询脚本是否变更
         SceneTaskStartCheckOutput output = new SceneTaskStartCheckOutput();
-        try {
+        try{
             SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(input.getSceneId(),
                     new SceneManageQueryOpitons() {{
                         setIncludeBusinessActivity(false);
@@ -866,7 +856,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             input.setPodNum(sceneManage.getIpNum());
             long sceneId = input.getSceneId();
             List<SceneScriptRefOutput> uploadFile = sceneManage.getUploadFile();
-            if (CollectionUtils.isEmpty(uploadFile)) {
+            if (CollectionUtils.isEmpty(uploadFile)){
                 output.setHasUnread(false);
                 return output;
             }
@@ -888,7 +878,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             //判断脚本是否变更
             JSONObject features = JSONObject.parseObject(sceneManage.getFeatures());
             Boolean scriptChange = compareScript(sceneId, features.getString("scriptId"));
-            if (!scriptChange) {
+            if (!scriptChange){
                 output.setHasUnread(false);
                 cleanCachedPosition(sceneId);
                 return output;
@@ -901,19 +891,26 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 }
                 String key = String.format(SceneStartCheckConstants.SCENE_KEY, sceneId);
                 Map<Object, Object> positionMap = redisTemplate.opsForHash().entries(key);
-                for (FileInfo info : fileInfoList) {
-                    comparePosition(output, sceneId, info.getFileName(), input.getPodNum(), info.isSplit(),
+                if (Objects.nonNull(positionMap)) {
+                    for (FileInfo info : fileInfoList) {
+                        comparePosition(output, sceneId, info.getFileName(), input.getPodNum(), info.isSplit(),
                             positionMap);
-                    if (!output.getHasUnread()) {
-                        cleanCachedPosition(sceneId);
-                        output.setFileReadInfos(new ArrayList<>());
-                        return output;
+                        if (!output.getHasUnread()) {
+                            cleanCachedPosition(sceneId);
+                            output.setFileReadInfos(new ArrayList<>());
+                            return output;
+                        }
                     }
+                } else {
+                    cleanCachedPosition(sceneId);
+                    output.setHasUnread(false);
+                    output.setFileReadInfos(new ArrayList<>());
+                    return output;
                 }
             }
             output.setHasUnread(true);
-        } catch (Exception e) {
-            log.error("获取文件读取位点信息失败：场景ID：{}，错误信息:{}", input.getSceneId(), e.getMessage());
+        }catch (Exception e){
+            log.error("获取文件读取位点信息失败：场景ID：{}，错误信息:{}",input.getSceneId(),e.getMessage());
             output.setHasUnread(false);
         }
         return output;
@@ -928,60 +925,65 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         }
     }
 
-    private Boolean compareScript(long sceneId, String scriptId) {
+    private Boolean compareScript(long sceneId,String scriptId) {
         Object scriptIdObj = redisClientUtils.hmget(String.format(SceneStartCheckConstants.SCENE_KEY, sceneId), SceneStartCheckConstants.SCRIPT_ID_KEY);
         return scriptIdObj != null && scriptId.equals(scriptIdObj.toString());
     }
 
     private boolean comparePod(long sceneId, int podNum) {
         Object podObj = redisClientUtils.hmget(ScheduleConstants.SCHEDULE_POD_NUM, String.valueOf(sceneId));
-        if (Objects.nonNull(podObj)) {
+        if (Objects.nonNull(podObj)){
             int cachedPodNum = Integer.parseInt(podObj.toString());
             return cachedPodNum == podNum;
         }
         return false;
     }
 
-    private void comparePosition(SceneTaskStartCheckOutput output, long sceneId, String fileName, int podNum, boolean isSplit,
-                                 Map<Object, Object> positionMap) {
+    private void comparePosition(SceneTaskStartCheckOutput output,long sceneId, String fileName, int podNum,boolean isSplit,
+        Map<Object, Object> positionMap) {
         SceneBigFileSliceEntity sliceEntity = fileSliceService.getOneByParam(new FileSliceRequest() {{
             setSceneId(sceneId);
             setFileName(fileName);
         }});
-        if (Objects.isNull(sliceEntity) || sliceEntity.getSliceCount() != podNum) {
+        if (Objects.isNull(sliceEntity) || sliceEntity.getSliceCount() != podNum || StringUtils.isBlank(sliceEntity.getSliceInfo())) {
             output.setHasUnread(false);
             return;
         }
+
         List<FileReadInfo> fileReadInfos = output.getFileReadInfos();
-        if (CollectionUtils.isEmpty(fileReadInfos)) {
+        if (CollectionUtils.isEmpty(fileReadInfos)){
             fileReadInfos = new ArrayList<>();
         }
+        List<StartEndPair> startEndPairs = JSONArray.parseArray(sliceEntity.getSliceInfo(), StartEndPair.class);
+        long fileSize = startEndPairs.stream().filter(Objects::nonNull)
+            .mapToLong(StartEndPair::getEnd)
+            .filter(Objects::nonNull)
+            .max()
+            .orElse(0L);
+        if (fileSize == 0){
+            output.setHasUnread(false);
+            return;
+        }
         //文件拆分，计算已读、文件大小
-        if (isSplit) {
-            JSONArray list = JSONObject.parseArray(sliceEntity.getSliceInfo());
+        if (isSplit){
             long readSize = 0;
-            long fileSize = 0;
             for (int i = 0; i < podNum; i++) {
-                JSONObject pair = list.getJSONObject(i);
+                StartEndPair pair = startEndPairs.get(i);
                 Object o = positionMap.get(String.format(SceneStartCheckConstants.FILE_POD_FIELD_KEY, fileName, i + 1));
                 if (Objects.isNull(o)) {
                     output.setHasUnread(false);
                     return;
                 }
                 SceneFileReadPosition position = JSONUtil.toBean(o.toString(), SceneFileReadPosition.class);
-                if (position.getReadPosition() < pair.getLong("start") || position.getReadPosition() > pair.getLong(
-                        "end")) {
+                if (position.getReadPosition() < pair.getStart() || position.getReadPosition() > pair.getEnd()) {
                     output.setHasUnread(false);
                     return;
                 }
-                readSize += position.getReadPosition() - pair.getLong("start");
-                if (pair.getLong("end") > fileSize) {
-                    fileSize = pair.getLong("end");
-                }
+                readSize += position.getReadPosition() - pair.getStart();
             }
             String fileSizeStr = getPositionSize(fileSize);
             String readSizeStr = getPositionSize(readSize);
-            FileReadInfo info = new FileReadInfo() {{
+            FileReadInfo info = new FileReadInfo(){{
                 setFileName(fileName);
                 setFileSize(fileSizeStr);
                 setReadSize(readSizeStr);
@@ -995,8 +997,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             FileReadInfo info = new FileReadInfo();
             info.setFileName(fileName);
             long readSize = 0;
-            long fileSize = 0;
-            for (Entry<Object, Object> entry : positionMap.entrySet()) {
+            for (Entry<Object,Object> entry : positionMap.entrySet()) {
                 if (!SceneStartCheckConstants.SCRIPT_ID_KEY.equals(entry.getKey().toString())
                         && entry.getKey().toString().contains(fileName)) {
                     SceneFileReadPosition readPosition = JSONUtil.toBean(entry.getValue().toString(),
@@ -1004,7 +1005,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                     if (readPosition.getReadPosition() > readSize) {
                         readSize = readPosition.getReadPosition();
                     }
-                    fileSize = readPosition.getEndPosition();
                 }
             }
             String fileSizeStr = getPositionSize(fileSize);
@@ -1017,16 +1017,20 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         }
     }
 
-    private void cleanCachedPosition(long sceneId) {
+    @Override
+    public void cleanCachedPosition(Long sceneId) {
         String key = String.format(SceneStartCheckConstants.SCENE_KEY, sceneId);
         redisClientUtils.del(key);
     }
 
     private String getPositionSize(Long position) {
-        if (position > GB) {
+        if (position > TB){
+            return position / TB + "TB";
+        }
+        if (position > GB){
             return position / GB + "GB";
         }
-        if (position > MB) {
+        if (position > MB){
             return position / MB + "MB";
         }
         if (position > KB) {
