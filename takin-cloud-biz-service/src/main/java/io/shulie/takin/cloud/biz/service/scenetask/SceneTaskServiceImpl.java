@@ -111,7 +111,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     private ReportDao reportDao;
     @Resource(type = PluginManager.class)
     private PluginManager pluginManager;
-    @Resource(type = TReportMapper.class)
+    @Resource(type = ReportMapper.class)
     private ReportMapper reportMapper;
     @Resource(type = TReportMapper.class)
     private TReportMapper tReportMapper;
