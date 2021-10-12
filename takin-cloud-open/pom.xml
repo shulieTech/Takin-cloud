@@ -11,6 +11,8 @@
     <packaging>pom</packaging>
 
     <artifactId>takin-cloud-open</artifactId>
+    <version>takin-cloud-open-5.0.1-SNAPSHOT</version>
+
     <modules>
         <module>takin-cloud-open-api</module>
         <module>takin-cloud-open-client-starter</module>
