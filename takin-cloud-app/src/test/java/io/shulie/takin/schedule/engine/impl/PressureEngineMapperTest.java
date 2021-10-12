@@ -1,25 +1,26 @@
 package io.shulie.takin.schedule.engine.impl;
 
-import io.shulie.takin.app.Application;
-import io.shulie.takin.cloud.biz.input.engine.EnginePluginWrapperInput;
-import io.shulie.takin.cloud.biz.output.engine.EnginePluginSimpleInfoOutput;
-import io.shulie.takin.cloud.biz.service.engine.EnginePluginFilesService;
-import io.shulie.takin.cloud.biz.service.engine.EnginePluginService;
-import io.shulie.takin.cloud.data.mapper.mysql.EnginePluginMapper;
-import io.shulie.takin.cloud.open.api.engine.CloudEngineApi;
-import io.shulie.takin.cloud.open.req.engine.EnginePluginFetchWrapperReq;
-import io.shulie.takin.cloud.open.resp.engine.EnginePluginSimpleInfoResp;
-import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.utils.json.JsonHelper;
-import org.assertj.core.util.Lists;
+import javax.annotation.Resource;
+
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.assertj.core.util.Lists;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.annotation.Resource;
-import java.util.List;
-import java.util.Map;
+import io.shulie.takin.app.Application;
+import io.shulie.takin.utils.json.JsonHelper;
+import io.shulie.takin.cloud.open.api.engine.CloudEngineApi;
+import io.shulie.takin.cloud.data.mapper.mysql.EnginePluginMapper;
+import io.shulie.takin.cloud.biz.service.engine.EnginePluginService;
+import io.shulie.takin.cloud.biz.input.engine.EnginePluginWrapperInput;
+import io.shulie.takin.cloud.open.resp.engine.EnginePluginSimpleInfoResp;
+import io.shulie.takin.cloud.open.req.engine.EnginePluginFetchWrapperReq;
+import io.shulie.takin.cloud.biz.service.engine.EnginePluginFilesService;
+import io.shulie.takin.cloud.biz.output.engine.EnginePluginSimpleInfoOutput;
 
 /**
  * 引擎测试
@@ -87,13 +88,9 @@ public class PressureEngineMapperTest {
         List<String> req = Lists.newArrayList();
         req.add("dubbo");
         request.setPluginTypes(req);
-        ResponseResult<Map<String, List<EnginePluginSimpleInfoResp>>> res = cloudEngineApi.listEnginePlugins(request);
-        if(res != null) {
-            List<EnginePluginSimpleInfoResp> resp = res.getData().get("dubbo");
-            resp.forEach(item -> {
-                System.out.println(item.getPluginName());
-            });
-        }
+        Map<String, List<EnginePluginSimpleInfoResp>> res = cloudEngineApi.listEnginePlugins(request);
+        List<EnginePluginSimpleInfoResp> resp = res.get("dubbo");
+        resp.forEach(item -> System.out.println(item.getPluginName()));
     }
 
 }

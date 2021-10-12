@@ -1,25 +1,25 @@
 package io.shulie.takin.cloud.open.api.scenemanage;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.math.BigDecimal;
 
 import javax.validation.Valid;
 
-import io.shulie.takin.cloud.open.req.scenemanage.CloudUpdateSceneFileRequest;
+import org.springframework.validation.annotation.Validated;
+
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.open.resp.strategy.StrategyResp;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneIpNumReq;
-import io.shulie.takin.cloud.open.req.scenemanage.SceneManageDeleteReq;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneManageIdReq;
-import io.shulie.takin.cloud.open.req.scenemanage.SceneManageQueryByIdsReq;
+import io.shulie.takin.cloud.open.resp.scenemanage.ScriptCheckResp;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneManageQueryReq;
+import io.shulie.takin.cloud.open.req.scenemanage.SceneManageDeleteReq;
+import io.shulie.takin.cloud.open.resp.scenemanage.SceneManageListResp;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneManageWrapperReq;
 import io.shulie.takin.cloud.open.req.scenemanage.ScriptCheckAndUpdateReq;
-import io.shulie.takin.cloud.open.resp.scenemanage.SceneManageListResp;
 import io.shulie.takin.cloud.open.resp.scenemanage.SceneManageWrapperResp;
-import io.shulie.takin.cloud.open.resp.scenemanage.ScriptCheckResp;
-import io.shulie.takin.cloud.open.resp.strategy.StrategyResp;
-import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import org.springframework.validation.annotation.Validated;
+import io.shulie.takin.cloud.open.req.scenemanage.SceneManageQueryByIdsReq;
+import io.shulie.takin.cloud.open.req.scenemanage.CloudUpdateSceneFileRequest;
 
 /**
  * @author 何仲奇
@@ -32,9 +32,8 @@ public interface CloudSceneApi {
      * 根据脚本实例id, 更新所有的场景对应该脚本的文件
      *
      * @param updateSceneFileRequest 请求入参
-     * @return 是否成功结果
      */
-    Object updateSceneFileByScriptId(@Valid CloudUpdateSceneFileRequest updateSceneFileRequest);
+    void updateSceneFileByScriptId(@Valid CloudUpdateSceneFileRequest updateSceneFileRequest);
 
     /**
      * 保存
@@ -42,7 +41,7 @@ public interface CloudSceneApi {
      * @param sceneManageWrapperReq -
      * @return -
      */
-    ResponseResult<Long> saveScene(SceneManageWrapperReq sceneManageWrapperReq);
+    Long saveScene(SceneManageWrapperReq sceneManageWrapperReq);
 
     /**
      * 更新
@@ -50,7 +49,7 @@ public interface CloudSceneApi {
      * @param sceneManageWrapperReq -
      * @return -
      */
-    ResponseResult<String> updateScene(SceneManageWrapperReq sceneManageWrapperReq);
+    String updateScene(SceneManageWrapperReq sceneManageWrapperReq);
 
     /**
      * 删除
@@ -58,7 +57,7 @@ public interface CloudSceneApi {
      * @param sceneManageDeleteReq -
      * @return -
      */
-    ResponseResult<String> deleteScene(SceneManageDeleteReq sceneManageDeleteReq);
+    String deleteScene(SceneManageDeleteReq sceneManageDeleteReq);
 
     /**
      * 获取场景明细 供编辑使用
@@ -66,7 +65,7 @@ public interface CloudSceneApi {
      * @param sceneManageIdVO -
      * @return -
      */
-    ResponseResult<SceneManageWrapperResp> getSceneDetail(SceneManageIdReq sceneManageIdVO);
+    SceneManageWrapperResp getSceneDetail(SceneManageIdReq sceneManageIdVO);
 
     /**
      * 不分页查询所有场景带脚本信息
@@ -74,7 +73,7 @@ public interface CloudSceneApi {
      * @param request -
      * @return -
      */
-    ResponseResult<List<SceneManageListResp>> getSceneManageList(ContextExt request);
+    List<SceneManageListResp> getSceneManageList(ContextExt request);
 
     /**
      * 获取压测场景列表
@@ -82,7 +81,7 @@ public interface CloudSceneApi {
      * @param sceneManageQueryReq -
      * @return -
      */
-    ResponseResult<List<SceneManageListResp>> getSceneList(SceneManageQueryReq sceneManageQueryReq);
+    List<SceneManageListResp> getSceneList(SceneManageQueryReq sceneManageQueryReq);
 
     /**
      * 流量计算
@@ -90,7 +89,7 @@ public interface CloudSceneApi {
      * @param sceneManageWrapperReq -
      * @return -
      */
-    ResponseResult<BigDecimal> calcFlow(SceneManageWrapperReq sceneManageWrapperReq);
+    BigDecimal calcFlow(SceneManageWrapperReq sceneManageWrapperReq);
 
     /**
      * 获取机器数量范围
@@ -98,7 +97,7 @@ public interface CloudSceneApi {
      * @param sceneIpNumReq -
      * @return -
      */
-    ResponseResult<StrategyResp> getIpNum(SceneIpNumReq sceneIpNumReq);
+    StrategyResp getIpNum(SceneIpNumReq sceneIpNumReq);
 
     /**
      * 校验并更新脚本
@@ -106,7 +105,7 @@ public interface CloudSceneApi {
      * @param scriptCheckAndUpdateReq -
      * @return 返回解析失败信息，如果为空，表示解析成功
      */
-    ResponseResult<ScriptCheckResp> checkAndUpdateScript(ScriptCheckAndUpdateReq scriptCheckAndUpdateReq);
+    ScriptCheckResp checkAndUpdateScript(ScriptCheckAndUpdateReq scriptCheckAndUpdateReq);
 
     /**
      * 根据主键查询
@@ -114,6 +113,6 @@ public interface CloudSceneApi {
      * @param req 入参(主键)
      * @return 查询列表
      */
-    ResponseResult<List<SceneManageWrapperResp>> queryByIds(SceneManageQueryByIdsReq req);
+    List<SceneManageWrapperResp> queryByIds(SceneManageQueryByIdsReq req);
 
 }

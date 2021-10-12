@@ -3,10 +3,9 @@ package io.shulie.takin.cloud.open.api.statistics;
 import java.util.List;
 
 import io.shulie.takin.cloud.open.req.statistics.PressureTotalReq;
-import io.shulie.takin.cloud.open.resp.statistics.PressureListTotalResp;
-import io.shulie.takin.cloud.open.resp.statistics.PressurePieTotalResp;
 import io.shulie.takin.cloud.open.resp.statistics.ReportTotalResp;
-import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.open.resp.statistics.PressurePieTotalResp;
+import io.shulie.takin.cloud.open.resp.statistics.PressureListTotalResp;
 
 /**
  * @author 无涯
@@ -19,7 +18,7 @@ public interface CloudPressureStatisticsApi {
      * @param input -
      * @return -
      */
-    ResponseResult<PressurePieTotalResp> getPressurePieTotal(PressureTotalReq input);
+    PressurePieTotalResp getPressurePieTotal(PressureTotalReq input);
 
     /**
      * 统计报告通过/未通过
@@ -27,7 +26,7 @@ public interface CloudPressureStatisticsApi {
      * @param input -
      * @return -
      */
-    ResponseResult<ReportTotalResp> getReportTotal(PressureTotalReq input);
+    ReportTotalResp getReportTotal(PressureTotalReq input);
 
     /**
      * 压测场景次数统计 && 压测脚本次数统计
@@ -35,5 +34,5 @@ public interface CloudPressureStatisticsApi {
      * @param input -
      * @return -
      */
-    ResponseResult<List<PressureListTotalResp>> getPressureListTotal(PressureTotalReq input);
+    List<PressureListTotalResp> getPressureListTotal(PressureTotalReq input);
 }

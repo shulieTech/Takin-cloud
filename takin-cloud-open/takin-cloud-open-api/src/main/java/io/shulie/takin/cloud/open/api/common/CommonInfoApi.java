@@ -1,8 +1,7 @@
 package io.shulie.takin.cloud.open.api.common;
 
-import io.shulie.takin.cloud.open.req.common.CloudCommonInfoWrapperReq;
 import io.shulie.takin.cloud.open.resp.common.CommonInfosResp;
-import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.open.req.common.CloudCommonInfoWrapperReq;
 
 /**
  * 公共信息接口Api
@@ -18,5 +17,5 @@ public interface CommonInfoApi {
      * @param request 入参
      * @return -
      */
-    ResponseResult<CommonInfosResp> getCloudConfigurationInfos(CloudCommonInfoWrapperReq request);
+    CommonInfosResp getCloudConfigurationInfos(CloudCommonInfoWrapperReq request);
 }

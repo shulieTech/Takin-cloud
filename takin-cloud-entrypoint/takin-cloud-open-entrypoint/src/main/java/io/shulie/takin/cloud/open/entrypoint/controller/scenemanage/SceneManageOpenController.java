@@ -92,7 +92,7 @@ public class SceneManageOpenController {
 
     @ApiOperation(value = "|_ 更改脚本对应的压测场景的文件")
     @PutMapping("/updateFile")
-    public ResponseResult<Object> updateFile(@RequestBody @Validated UpdateSceneFileRequest request) {
+    public ResponseResult<?> updateFile(@RequestBody @Validated UpdateSceneFileRequest request) {
         sceneManageService.updateFileByScriptId(request);
         return ResponseResult.success();
     }
