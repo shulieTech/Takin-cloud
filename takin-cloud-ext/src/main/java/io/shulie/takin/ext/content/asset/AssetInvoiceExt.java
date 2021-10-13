@@ -78,4 +78,6 @@ public class AssetInvoiceExt extends CloudUserCommonRequestExt implements Serial
      * 创建者
      */
     private Long creatorId;
+
+    private String creatorName;
 }

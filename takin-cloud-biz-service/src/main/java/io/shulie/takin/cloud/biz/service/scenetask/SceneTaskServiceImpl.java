@@ -254,6 +254,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 setResourceName(input.getResourceName());
                 setResourceType(input.getAssetType());
                 setCreatorId(input.getCreatorId());
+                setCreatorName(input.getCreatorName());
             }});
         }
 

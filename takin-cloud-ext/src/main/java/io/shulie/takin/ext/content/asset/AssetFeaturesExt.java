@@ -13,7 +13,7 @@ public class AssetFeaturesExt  implements Serializable {
     /**
      * 并发数
      */
-    private Integer concurrenceNum;
+    private Integer concurrencyCount;
 
     /**
      * 压测时长
@@ -24,4 +24,6 @@ public class AssetFeaturesExt  implements Serializable {
      * 脚本调试ID
      */
     private Long scriptDebugId;
+
+    private String creatorName;
 }

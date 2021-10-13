@@ -38,4 +38,6 @@ public class SceneTaskStartInput extends CloudUserCommonRequestExt {
      * 创建者
      */
     private Long creatorId;
+
+    private String creatorName;
 }
