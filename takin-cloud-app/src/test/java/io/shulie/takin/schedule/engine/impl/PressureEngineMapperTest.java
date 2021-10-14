@@ -13,12 +13,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import io.shulie.takin.app.Application;
 import io.shulie.takin.utils.json.JsonHelper;
-import io.shulie.takin.cloud.open.api.engine.CloudEngineApi;
 import io.shulie.takin.cloud.data.mapper.mysql.EnginePluginMapper;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginService;
 import io.shulie.takin.cloud.biz.input.engine.EnginePluginWrapperInput;
-import io.shulie.takin.cloud.open.resp.engine.EnginePluginSimpleInfoResp;
-import io.shulie.takin.cloud.open.req.engine.EnginePluginFetchWrapperReq;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginFilesService;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginSimpleInfoOutput;
 
@@ -40,9 +37,6 @@ public class PressureEngineMapperTest {
 
     @Resource
     private EnginePluginFilesService enginePluginFilesService;
-
-    @Resource
-    private CloudEngineApi cloudEngineApi;
 
     @Test
     public void testFindPluginFilesPathByPluginIds() {
@@ -81,16 +75,4 @@ public class PressureEngineMapperTest {
         input.setSupportedVersions(versions);
         enginePluginService.saveEnginePlugin(input);
     }
-
-    @Test
-    public void testSdk() {
-        EnginePluginFetchWrapperReq request = new EnginePluginFetchWrapperReq();
-        List<String> req = Lists.newArrayList();
-        req.add("dubbo");
-        request.setPluginTypes(req);
-        Map<String, List<EnginePluginSimpleInfoResp>> res = cloudEngineApi.listEnginePlugins(request);
-        List<EnginePluginSimpleInfoResp> resp = res.get("dubbo");
-        resp.forEach(item -> System.out.println(item.getPluginName()));
-    }
-
 }

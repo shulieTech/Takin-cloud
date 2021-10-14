@@ -23,11 +23,11 @@ public class SceneTaskPressureTestLogUploadDAOImpl implements SceneTaskPressureT
     public int insertRecord(ScenePressureTestLogUploadEntity entity) {
         entity.setCreateTime(new Date());
         entity.setModifyTime(new Date());
-        return  uploadMapper.insert(entity);
+        return uploadMapper.insert(entity);
     }
 
     @Override
-    public int countRecord(ScenePressureTestLogUploadEntity entity) {
+    public Integer countRecord(ScenePressureTestLogUploadEntity entity) {
         LambdaQueryWrapper<ScenePressureTestLogUploadEntity> wrapper = new LambdaQueryWrapper<>();
         return uploadMapper.selectCount(wrapper);
     }

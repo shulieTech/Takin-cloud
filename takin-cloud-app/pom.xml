@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.shulie.takin</groupId>
         <artifactId>takin-cloud</artifactId>
-        <version>takin-cloud-5.0.1-SNAPSHOT</version>
+        <version>takin-cloud-5.0.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -21,19 +21,12 @@
         </dependency>
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
-            <artifactId>swagger-bootstrap-ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>io.shulie.takin</groupId>
-            <artifactId>takin-cloud-open-entrypoint</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.shulie.takin</groupId>
-            <artifactId>takin-cloud-web-entrypoint</artifactId>
+            <artifactId>takin-cloud-entrypoint</artifactId>
+            <version>${takin.cloud.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>guava</artifactId>

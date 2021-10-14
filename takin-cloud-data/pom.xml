@@ -6,17 +6,22 @@
     <parent>
         <groupId>io.shulie.takin</groupId>
         <artifactId>takin-cloud</artifactId>
-        <version>takin-cloud-5.0.1-SNAPSHOT</version>
+        <version>takin-cloud-5.0.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
 
     </parent>
     <artifactId>takin-cloud-data</artifactId>
 
+    <properties>
+        <mybatis-spring-boot-starter.version>3.4.2</mybatis-spring-boot-starter.version>
+    </properties>
+
+
     <dependencies>
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus</artifactId>
-            <version>${mybatis.plus.version}</version>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis-spring-boot-starter.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation -->
         <dependency>

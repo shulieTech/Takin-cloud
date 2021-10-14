@@ -21,7 +21,7 @@ public interface SceneTaskPressureTestLogUploadDAO {
      * @param entity -
      * @return -
      */
-    int countRecord(ScenePressureTestLogUploadEntity entity);
+    Integer countRecord(ScenePressureTestLogUploadEntity entity);
 
     /**
      * 根据sceneId，reportId 查询是否已经存在数据
