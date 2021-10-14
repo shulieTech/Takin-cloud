@@ -48,10 +48,4 @@ public class TaskFlowDebugStartReq extends CloudUserCommonRequestExt implements 
     private Long scriptId;
 
     private Long scriptDeployId;
-
-    private Long creatorId;
-    /**
-     * 由web传到cloud 存储一次快照
-     */
-    private String creatorName;
 }

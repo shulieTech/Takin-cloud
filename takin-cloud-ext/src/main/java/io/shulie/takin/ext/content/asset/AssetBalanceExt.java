@@ -14,7 +14,7 @@ public class AssetBalanceExt extends CloudUserCommonRequestExt implements Serial
     @ApiModelProperty("cloud场景ID")
     private Long sceneId;
     @ApiModelProperty("cloud压测报告ID")
-    private Long reportId;
+    private Long cloudReportId;
     @ApiModelProperty("脚本调试ID")
     private Long scriptDebugId;
 }

@@ -56,7 +56,4 @@ public class SceneTryRunTaskStartReq extends CloudUserCommonRequestExt implement
 
     @ApiModelProperty(value = "脚本名称")
     private String scriptName;
-
-    @ApiModelProperty(value = "创建者")
-    private Long creatorId;
 }
