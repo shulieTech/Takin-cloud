@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>takin-cloud-open-client-starter</artifactId>
-    <version>takin-cloud-open-5.0.0</version>
+    <version>takin-cloud-open-5.0.1</version>
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>
