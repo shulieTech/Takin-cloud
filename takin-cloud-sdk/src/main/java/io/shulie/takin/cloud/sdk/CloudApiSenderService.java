@@ -33,7 +33,7 @@ import io.shulie.takin.common.beans.response.ResponseResult;
 @Component
 public class CloudApiSenderService {
 
-    @Value("${takin.cloud.url}")
+    @Value("${takin.cloud.url:}")
     private String cloudUrl;
 
     /**
