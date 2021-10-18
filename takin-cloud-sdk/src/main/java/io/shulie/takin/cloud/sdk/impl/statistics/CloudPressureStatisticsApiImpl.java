@@ -6,16 +6,17 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.sdk.constant.CloudApiConstant;
-import io.shulie.takin.cloud.sdk.req.statistics.PressureTotalReq;
-import io.shulie.takin.cloud.sdk.resp.statistics.ReportTotalResp;
-import io.shulie.takin.cloud.sdk.resp.statistics.PressurePieTotalResp;
-import io.shulie.takin.cloud.sdk.impl.sender.CloudApiSenderService;
-import io.shulie.takin.cloud.sdk.resp.statistics.PressureListTotalResp;
-import io.shulie.takin.cloud.sdk.api.statistics.CloudPressureStatisticsApi;
+import io.shulie.takin.cloud.sdk.model.request.statistics.PressureTotalReq;
+import io.shulie.takin.cloud.sdk.model.response.statistics.ReportTotalResp;
+import io.shulie.takin.cloud.sdk.model.response.statistics.PressurePieTotalResp;
+import io.shulie.takin.cloud.sdk.CloudApiSenderService;
+import io.shulie.takin.cloud.sdk.model.response.statistics.PressureListTotalResp;
+import io.shulie.takin.cloud.entrypoint.statistics.CloudPressureStatisticsApi;
 
 /**
  * @author 无涯
@@ -29,23 +30,23 @@ public class CloudPressureStatisticsApiImpl implements CloudPressureStatisticsAp
 
     @Override
     public PressurePieTotalResp getPressurePieTotal(PressureTotalReq req) {
-        return cloudApiSenderService.get(CloudApiConstant.STATISTIC_PRESSUREPIE_URL, req,
-                new TypeReference<ResponseResult<PressurePieTotalResp>>() {})
-            .getData();
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_SCENE_MANAGE_UPDATE),
+            req, new TypeReference<ResponseResult<PressurePieTotalResp>>() {}).getData();
     }
 
     @Override
     public ReportTotalResp getReportTotal(PressureTotalReq req) {
-        return cloudApiSenderService.get(CloudApiConstant.STATISTIC_REPORT_URL, req,
-                new TypeReference<ResponseResult<ReportTotalResp>>() {})
-            .getData();
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_SCENE_MANAGE_UPDATE),
+            req, new TypeReference<ResponseResult<ReportTotalResp>>() {}).getData();
     }
 
     @Override
     public List<PressureListTotalResp> getPressureListTotal(PressureTotalReq req) {
-        return cloudApiSenderService.get(CloudApiConstant.STATISTIC_PRESSURELIST_URL, req,
-                new TypeReference<ResponseResult<List<PressureListTotalResp>>>() {})
-            .getData();
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_SCENE_MANAGE_UPDATE),
+            req, new TypeReference<ResponseResult<List<PressureListTotalResp>>>() {}).getData();
     }
 
 }

@@ -1,7 +1,7 @@
 package io.shulie.takin.cloud.entrypoint.convert;
 
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneBusinessActivityRefInput;
-import io.shulie.takin.cloud.sdk.req.scenemanage.SceneBusinessActivityRefOpen;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneBusinessActivityRefOpen;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 

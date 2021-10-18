@@ -1,7 +1,7 @@
 package io.shulie.takin.cloud.entrypoint.convert;
 
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.sdk.response.scenemanage.SceneManageWrapperResponse;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

@@ -7,16 +7,17 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import org.springframework.stereotype.Component;
 
 import io.shulie.takin.cloud.sdk.constant.CloudApiConstant;
-import io.shulie.takin.cloud.sdk.api.engine.CloudEngineApi;
+import io.shulie.takin.cloud.entrypoint.engine.CloudEngineApi;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.cloud.sdk.resp.engine.EnginePluginDetailResp;
-import io.shulie.takin.cloud.sdk.impl.sender.CloudApiSenderService;
-import io.shulie.takin.cloud.sdk.resp.engine.EnginePluginSimpleInfoResp;
-import io.shulie.takin.cloud.sdk.req.engine.EnginePluginFetchWrapperReq;
-import io.shulie.takin.cloud.sdk.req.engine.EnginePluginDetailsWrapperReq;
+import io.shulie.takin.cloud.sdk.model.response.engine.EnginePluginDetailResp;
+import io.shulie.takin.cloud.sdk.CloudApiSenderService;
+import io.shulie.takin.cloud.sdk.model.response.engine.EnginePluginSimpleInfoResp;
+import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginFetchWrapperReq;
+import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginDetailsWrapperReq;
 
 /**
  * 引擎接口实现
@@ -39,9 +40,9 @@ public class CloudEngineApiImpl implements CloudEngineApi {
      */
     @Override
     public Map<String, List<EnginePluginSimpleInfoResp>> listEnginePlugins(EnginePluginFetchWrapperReq request) {
-        return cloudApiSenderService.post(CloudApiConstant.ENGINE_FETCH_PLUGINS_URI, request,
-                new TypeReference<ResponseResult<Map<String, List<EnginePluginSimpleInfoResp>>>>() {})
-            .getData();
+        return cloudApiSenderService.post(
+            EntrypointUrl.join(EntrypointUrl.MODULE_ENGINE_PLUGIN, EntrypointUrl.METHOD_ENGINE_PLUGIN_LIST),
+            request, new TypeReference<ResponseResult<Map<String, List<EnginePluginSimpleInfoResp>>>>() {}).getData();
     }
 
     /**
@@ -52,9 +53,9 @@ public class CloudEngineApiImpl implements CloudEngineApi {
      */
     @Override
     public EnginePluginDetailResp getEnginePluginDetails(EnginePluginDetailsWrapperReq request) {
-        return cloudApiSenderService.post(CloudApiConstant.ENGINE_FETCH_PLUGIN_DETAILS_URI, request,
-                new TypeReference<ResponseResult<EnginePluginDetailResp>>() {})
-            .getData();
+        return cloudApiSenderService.post(
+            EntrypointUrl.join(EntrypointUrl.MODULE_ENGINE_PLUGIN, EntrypointUrl.METHOD_ENGINE_PLUGIN_DETAILS),
+            request, new TypeReference<ResponseResult<EnginePluginDetailResp>>() {}).getData();
 
     }
 

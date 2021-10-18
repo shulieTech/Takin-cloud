@@ -1,8 +1,16 @@
 package io.shulie.takin.cloud.entrypoint.controller.common;
 
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import io.shulie.takin.cloud.biz.cache.DictionaryCache;
 import io.shulie.takin.cloud.biz.output.common.CommonInfosOutput;
 import io.shulie.takin.cloud.biz.service.common.CommonInfoService;
 import io.shulie.takin.cloud.common.constants.ApiUrls;
+import io.shulie.takin.cloud.common.enums.machine.EnumResult;
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,11 +29,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @Api(tags = "公共信息管理")
-@RequestMapping(ApiUrls.TAKIN_OPEN_API_URL + "common/info")
+@RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_COMMON)
 public class CommonInfoOpenController {
 
-    @Autowired
-    private CommonInfoService commonInfoService;
+    @Resource(type = DictionaryCache.class)
+    DictionaryCache dictionaryCache;
+    @Resource(type = CommonInfoService.class)
+    CommonInfoService commonInfoService;
 
     /**
      * 获取cloud配置信息接口
@@ -33,8 +43,14 @@ public class CommonInfoOpenController {
      * @return -
      */
     @ApiOperation(value = "获取cloud配置信息接口")
-    @GetMapping("/getCloudConfigurationInfos")
+    @GetMapping(EntrypointUrl.METHOD_COMMON_CONFIG)
     public ResponseResult<CommonInfosOutput> getCloudConfigurationInfos() {
         return ResponseResult.success(commonInfoService.getCommonConfigurationInfos());
+    }
+
+    @GetMapping(EntrypointUrl.METHOD_COMMON_DICTIONARY)
+    @ApiOperation(value = "全局字典")
+    public ResponseResult<Map<String, List<EnumResult>>> dictionary() {
+        return ResponseResult.success(dictionaryCache.getDicMap());
     }
 }

@@ -7,9 +7,9 @@ import cn.hutool.core.bean.BeanUtil;
 import io.shulie.takin.cloud.biz.output.statistics.PressureListTotalOutput;
 import io.shulie.takin.cloud.biz.output.statistics.PressurePieTotalOutput;
 import io.shulie.takin.cloud.biz.output.statistics.ReportTotalOutput;
-import io.shulie.takin.cloud.sdk.resp.statistics.PressureListTotalResp;
-import io.shulie.takin.cloud.sdk.resp.statistics.PressurePieTotalResp;
-import io.shulie.takin.cloud.sdk.resp.statistics.ReportTotalResp;
+import io.shulie.takin.cloud.sdk.model.response.statistics.PressureListTotalResp;
+import io.shulie.takin.cloud.sdk.model.response.statistics.PressurePieTotalResp;
+import io.shulie.takin.cloud.sdk.model.response.statistics.ReportTotalResp;
 import org.springframework.beans.BeanUtils;
 
 /**

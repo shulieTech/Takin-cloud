@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.entrypoint.controller.file;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.io.FileReader;
 import java.io.IOException;
@@ -17,6 +18,9 @@ import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.common.collect.Maps;
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
+import io.shulie.takin.cloud.sdk.model.request.filemanager.FileContentParamReq;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.annotations.Api;
 import cn.hutool.core.date.DateUtil;
@@ -41,19 +45,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.entrypoint.controller.strategy.LocalFileStrategy;
-import io.shulie.takin.cloud.sdk.request.filemanage.FileZipParamRequest;
-import io.shulie.takin.cloud.sdk.request.filemanage.FileCopyParamRequest;
-import io.shulie.takin.cloud.sdk.request.filemanage.FileDeleteParamRequest;
-import io.shulie.takin.cloud.sdk.request.filemanage.FileCreateByStringParamRequest;
+import io.shulie.takin.cloud.sdk.model.request.filemanage.FileZipParamRequest;
+import io.shulie.takin.cloud.sdk.model.request.filemanage.FileCopyParamRequest;
+import io.shulie.takin.cloud.sdk.model.request.filemanage.FileDeleteParamRequest;
+import io.shulie.takin.cloud.sdk.model.request.filemanage.FileCreateByStringParamRequest;
 
 /**
  * @author qianshui
  * @date 2020/4/17 下午5:50
  */
-@RestController
-@RequestMapping("/api/file")
-@Api(tags = "文件管理")
 @Slf4j
+@RestController
+@Api(tags = "文件管理")
+@RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_FILE)
 public class FileController {
 
     @Value("${script.temp.path}")
@@ -65,7 +69,7 @@ public class FileController {
     @Resource
     private LocalFileStrategy fileStrategy;
 
-    @PostMapping("/upload")
+    @PostMapping(EntrypointUrl.METHOD_FILE_UPLOAD)
     @ApiOperation(value = "文件上传")
     public ResponseResult<List<FileDTO>> upload(List<MultipartFile> file) {
         List<FileDTO> dtoList = Lists.newArrayList();
@@ -73,7 +77,8 @@ public class FileController {
             String uploadId = UUID.randomUUID().toString();
             File targetDir = new File(tempPath + SceneManageConstant.FILE_SPLIT + uploadId);
             if (!targetDir.exists()) {
-                targetDir.mkdirs();
+                boolean mkdirs = targetDir.mkdirs();
+                log.debug("mkdirs result : {}.", mkdirs);
             }
             File targetFile = new File(tempPath + SceneManageConstant.FILE_SPLIT
                 + uploadId + SceneManageConstant.FILE_SPLIT + mf.getOriginalFilename());
@@ -100,7 +105,7 @@ public class FileController {
         return ResponseResult.success(dtoList);
     }
 
-    @DeleteMapping
+    @DeleteMapping(EntrypointUrl.METHOD_FILE_DELETE_TEMP)
     @ApiOperation(value = "临时文件删除")
     public ResponseResult<?> delete(@RequestBody FileDeleteVO vo) {
         if (vo.getUploadId() != null) {
@@ -133,7 +138,7 @@ public class FileController {
     }
 
     @ApiOperation("文件下载")
-    @GetMapping(value = "/downloadFileByPath")
+    @GetMapping(value = EntrypointUrl.METHOD_FILE_DOWNLOAD)
     public void downloadFileByPath(@RequestParam("filePath") String filePath, HttpServletResponse response) {
         try {
             //反编码
@@ -159,13 +164,13 @@ public class FileController {
         }
     }
 
-    @PostMapping("/deleteFile")
+    @PostMapping(EntrypointUrl.METHOD_FILE_DELETE)
     @ApiOperation(value = "文件删除")
     public Boolean deleteFile(@RequestBody FileDeleteParamRequest fileDeleteParamDTO) {
         return FileManagerHelper.deleteFiles(fileDeleteParamDTO.getPaths());
     }
 
-    @PostMapping("/copyFile")
+    @PostMapping(EntrypointUrl.METHOD_FILE_COPY)
     @ApiOperation(value = "复制文件")
     public Boolean copyFile(@RequestBody FileCopyParamRequest fileCopyParamDTO) {
         try {
@@ -178,7 +183,7 @@ public class FileController {
         return Boolean.TRUE;
     }
 
-    @PostMapping("/zipFile")
+    @PostMapping(EntrypointUrl.METHOD_FILE_ZIP)
     @ApiOperation(value = "打包文件")
     public Boolean zipFile(@RequestBody FileZipParamRequest fileZipParamDTO) {
         try {
@@ -192,7 +197,7 @@ public class FileController {
         return Boolean.TRUE;
     }
 
-    @PostMapping("/createFileByPathAndString")
+    @PostMapping(EntrypointUrl.METHOD_FILE_CREATE_BY_STRING)
     @ApiOperation(value = "根据字符串创建文件")
     public Boolean createFileByPathAndString(@RequestBody FileCreateByStringParamRequest fileContent) {
         return FileManagerHelper.createFileByPathAndString(fileContent.getFilePath(), fileContent.getFileContent());
@@ -229,5 +234,22 @@ public class FileController {
                 }
             }
         }
+    }
+
+    @ApiOperation("文件内容获取")
+    @PostMapping(value = EntrypointUrl.METHOD_FILE_CONTENT)
+    public ResponseResult<Map<String, Object>> getFileContentByPaths(@RequestBody FileContentParamReq req) {
+        Map<String, Object> result = Maps.newHashMap();
+        try {
+            for (String filePath : req.getPaths()) {
+                if (new File(filePath).exists()) {
+                    result.put(filePath, FileManagerHelper.readFileToString(new File(filePath), "UTF-8"));
+                }
+            }
+        } catch (IOException e) {
+            log.error("异常代码【{}】,异常内容：文件内容获取异常 --> 异常信息: {}",
+                TakinCloudExceptionEnum.FILE_READ_ERROR, e);
+        }
+        return ResponseResult.success(result);
     }
 }

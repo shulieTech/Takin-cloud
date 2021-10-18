@@ -10,6 +10,7 @@ import io.shulie.takin.cloud.biz.service.record.ScheduleRecordService;
 import io.shulie.takin.cloud.common.constants.DicKeyConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/5/9 下午2:05
  */
 @RestController
-@RequestMapping("/api/schedulerecord")
+@RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_SCHEDULE)
 @Api(tags = "调度记录")
 public class ScheduleRecordController {
 
@@ -35,7 +36,7 @@ public class ScheduleRecordController {
     @Autowired
     private DictionaryCache dictionaryCache;
 
-    @GetMapping("/list")
+    @GetMapping(EntrypointUrl.METHOD_SCHEDULE_LIST)
     @ApiOperation(value = "调度记录列表")
     public ResponseResult<List<ScheduleRecordDTO>> getList(
         @ApiParam(name = "current", value = "页码", required = true) Integer current,

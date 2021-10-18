@@ -6,6 +6,7 @@ import java.io.IOException;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
@@ -28,8 +29,8 @@ import io.shulie.takin.cloud.biz.service.middleware.MiddlewareJarService;
  * @since 2021-06-01 10:58:08
  */
 @RestController
-@RequestMapping(ApiUrls.TAKIN_API_URL + "middlewareJar")
 @Api(tags = "接口: 中间件jar包")
+@RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_MIDDLEWARE_JAR)
 public class MiddlewareJarController {
 
     @Resource(type = MiddlewareJarService.class)
@@ -40,7 +41,7 @@ public class MiddlewareJarController {
         @ApiImplicitParam(name = "file", value = "导入文件 excel", required = true,
             dataType = "file", paramType = "form")
     })
-    @PostMapping("/import")
+    @PostMapping(EntrypointUrl.METHOD_MODULE_MIDDLEWARE_JAR_IMPORT)
     public void importMiddlewareJar(@RequestParam MultipartFile file, HttpServletResponse response) throws IOException {
         Workbook workbook = middlewareJarService.importMiddlewareJar(file);
         response.setHeader("content-Type", "application/vnd.ms-excel");
@@ -54,7 +55,7 @@ public class MiddlewareJarController {
         @ApiImplicitParam(name = "files", value = "导入文件 excel 列表形式", required = true,
             dataType = "file", paramType = "form")
     })
-    @PostMapping("/compare")
+    @PostMapping(EntrypointUrl.METHOD_MODULE_MIDDLEWARE_JAR_COMPARE)
     public void compareMiddlewareJar(@RequestParam List<MultipartFile> files, HttpServletResponse response) throws IOException {
         Workbook workbook = middlewareJarService.compareMiddlewareJar(files);
         response.setHeader("content-Type", "application/vnd.ms-excel");

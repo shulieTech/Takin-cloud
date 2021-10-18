@@ -2,11 +2,11 @@ package io.shulie.takin.cloud.entrypoint.convert;
 
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneStartTrialRunOutput;
-import io.shulie.takin.cloud.sdk.resp.scenemanage.ScriptCheckResp;
-import io.shulie.takin.cloud.sdk.req.scenetask.SceneTryRunTaskStartReq;
-import io.shulie.takin.cloud.sdk.req.scenetask.TaskFlowDebugStartReq;
-import io.shulie.takin.cloud.sdk.resp.scenetask.SceneActionResp;
-import io.shulie.takin.cloud.sdk.req.scenetask.TaskInspectStartReq;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.ScriptCheckResp;
+import io.shulie.takin.cloud.sdk.model.request.scenetask.SceneTryRunTaskStartReq;
+import io.shulie.takin.cloud.sdk.model.request.scenetask.TaskFlowDebugStartReq;
+import io.shulie.takin.cloud.sdk.model.response.scenetask.SceneActionResp;
+import io.shulie.takin.cloud.sdk.model.request.scenetask.TaskInspectStartReq;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

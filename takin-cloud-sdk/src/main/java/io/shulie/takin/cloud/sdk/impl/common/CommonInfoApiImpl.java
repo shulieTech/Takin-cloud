@@ -2,14 +2,16 @@ package io.shulie.takin.cloud.sdk.impl.common;
 
 import javax.annotation.Resource;
 
+import com.alibaba.fastjson.TypeReference;
+
 import org.springframework.stereotype.Component;
 
-import io.shulie.takin.cloud.sdk.api.common.CommonInfoApi;
-import io.shulie.takin.cloud.sdk.constant.CloudApiConstant;
+import io.shulie.takin.cloud.sdk.CloudApiSenderService;
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.cloud.sdk.resp.common.CommonInfosResp;
-import io.shulie.takin.cloud.sdk.req.common.CloudCommonInfoWrapperReq;
-import io.shulie.takin.cloud.sdk.impl.sender.CloudApiSenderService;
+import io.shulie.takin.cloud.entrypoint.common.CommonInfoApi;
+import io.shulie.takin.cloud.sdk.model.response.common.CommonInfosResp;
+import io.shulie.takin.cloud.sdk.model.request.common.CloudCommonInfoWrapperReq;
 
 /**
  * 公共信息接口Api实现
@@ -30,8 +32,8 @@ public class CommonInfoApiImpl implements CommonInfoApi {
      */
     @Override
     public CommonInfosResp getCloudConfigurationInfos(CloudCommonInfoWrapperReq request) {
-        return cloudApiSenderService.get(CloudApiConstant.TROCLOUD_COMMON_INFOS_URI, request,
-                new com.alibaba.fastjson.TypeReference<ResponseResult<CommonInfosResp>>() {})
-            .getData();
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_COMMON, EntrypointUrl.METHOD_COMMON_CONFIG),
+            request, new TypeReference<ResponseResult<CommonInfosResp>>() {}).getData();
     }
 }

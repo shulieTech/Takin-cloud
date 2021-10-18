@@ -1,7 +1,7 @@
 package io.shulie.takin.cloud.entrypoint.convert;
 
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
-import io.shulie.takin.cloud.sdk.req.scenemanage.SceneSlaRefOpen;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneSlaRefOpen;
 import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;

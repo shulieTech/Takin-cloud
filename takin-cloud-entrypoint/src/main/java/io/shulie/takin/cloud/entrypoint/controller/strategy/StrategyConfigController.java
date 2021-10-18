@@ -9,7 +9,8 @@ import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigAddVO;
 import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigQueryVO;
 import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigUpdateVO;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
-import io.shulie.takin.cloud.sdk.request.scenemanage.SceneManageDeleteRequest;
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageDeleteRequest;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
 import io.swagger.annotations.Api;
@@ -30,32 +31,32 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/5/9 下午3:27
  */
 @RestController
-@RequestMapping("/api/strategyconfig")
+@RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_STATISTICS)
 @Api(tags = "策略配置管理")
 public class StrategyConfigController {
 
     @Autowired
     private StrategyConfigService strategyConfigService;
 
-    @PostMapping
+    @PostMapping(EntrypointUrl.METHOD_STRATEGY_ADD)
     @ApiOperation(value = "新增分配策略")
     public ResponseResult<?> add(@RequestBody @Valid StrategyConfigAddVO addVO) {
         return ResponseResult.success(strategyConfigService.add(addVO));
     }
 
-    @PutMapping
+    @PutMapping(EntrypointUrl.METHOD_STRATEGY_UPDATE)
     @ApiOperation(value = "修改分配策略")
     public ResponseResult<?> update(@RequestBody @Valid StrategyConfigUpdateVO updateVO) {
         return ResponseResult.success(strategyConfigService.update(updateVO));
     }
 
-    @GetMapping
+    @GetMapping(EntrypointUrl.METHOD_STRATEGY_DETAIL)
     @ApiOperation(value = "分配策略详情")
     public ResponseResult<StrategyConfigDetailDTO> getDetail(@RequestParam(value = "id") Long id) {
         return ResponseResult.success(strategyConfigService.getDetail(id));
     }
 
-    @DeleteMapping
+    @DeleteMapping(EntrypointUrl.METHOD_STRATEGY_DELETE)
     @ApiOperation(value = "删除分配策略")
     public ResponseResult<?> delete(@RequestBody @Valid SceneManageDeleteRequest deleteVO) {
         strategyConfigService.delete(deleteVO.getId());
@@ -65,7 +66,7 @@ public class StrategyConfigController {
     @GetMapping("/list")
     @ApiOperation(value = "分配策略列表")
     public ResponseResult<List<StrategyConfigExt>> getList(@ApiParam(name = "current", value = "页码") Integer current,
-                                                           @ApiParam(name = "pageSize", value = "页大小") Integer pageSize) {
+        @ApiParam(name = "pageSize", value = "页大小") Integer pageSize) {
 
         /*
          * 1、封装参数
