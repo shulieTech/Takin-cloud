@@ -69,7 +69,7 @@ public class BigFileController {
         }
     }
 
-    @PostMapping("upload")
+    @PostMapping(EntrypointUrl.METHOD_BIG_FILE_UPLOAD)
     public ResponseResult<?> upload(HttpServletRequest request, String param, @RequestBody List<MultipartFile> file) {
 
         Part uploadVO = JSON.parseObject(param, Part.class);
@@ -114,7 +114,7 @@ public class BigFileController {
         return param;
     }
 
-    @PostMapping("compact")
+    @PostMapping(EntrypointUrl.METHOD_BIG_FILE_COMPACT)
     public ResponseResult<Map<String, Object>> compact(HttpServletRequest request, @RequestBody Part param) {
         //BigFileUploadVO param = JSON.parseObject(json,BigFileUploadVO.class);
         if (param.getUserAppKey() == null || param.getSceneId() == null || param.getOriginalName() == null) {
@@ -125,7 +125,7 @@ public class BigFileController {
     }
 
     @ApiOperation("客户端下载")
-    @GetMapping(value = "download", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = EntrypointUrl.METHOD_BIG_FILE_DOWNLOAD, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public void downloadFile(HttpServletResponse response) {
         logger.info("上传客户端下载...");
         File pradarUploadFile = bigFileService.getPradarUploadFile();

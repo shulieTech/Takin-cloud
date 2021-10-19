@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
@@ -24,6 +25,7 @@ import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStartOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStatusOutput;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
+import io.shulie.takin.cloud.common.bean.sla.SlaBean;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
@@ -209,7 +211,7 @@ public class SceneTaskController {
         if (req.getReportId() != null) {
             UpdateReportSlaDataInput slaDataInput = new UpdateReportSlaDataInput();
             slaDataInput.setReportId(req.getReportId());
-            slaDataInput.setSlaBean(req.getSlaBean());
+            slaDataInput.setSlaBean(BeanUtil.copyProperties(req.getSlaBean(), SlaBean.class));
             reportService.updateReportSlaData(slaDataInput);
         }
         log.info("任务{}-{} ，原因：web 调 cloud 触发停止", req.getId(), req.getReportId());

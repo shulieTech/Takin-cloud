@@ -58,8 +58,6 @@
         <module>takin-cloud-entrypoint</module>
         <module>takin-cloud-ext</module>
         <module>takin-cloud-plugins</module>
-        <module>takin-cloud-plugins/plugin-enginecall-module</module>
-        <module>takin-cloud-plugins/plugin-engine-module</module>
         <module>takin-cloud-sdk</module>
     </modules>
 

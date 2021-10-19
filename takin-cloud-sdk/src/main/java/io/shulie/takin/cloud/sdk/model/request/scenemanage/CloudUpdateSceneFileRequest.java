@@ -5,8 +5,7 @@ import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import io.shulie.takin.cloud.common.constants.ValidConstants;
-import io.shulie.takin.cloud.common.pojo.dto.scenemanage.UploadFileDTO;
+import io.shulie.takin.cloud.sdk.model.common.UploadFileDTO;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -32,19 +31,19 @@ public class CloudUpdateSceneFileRequest extends ContextExt {
      * 新的脚本发布id
      */
     @ApiModelProperty("新的脚本发布id")
-    @NotNull(message = "新的脚本发布id" + ValidConstants.MUST_NOT_BE_NULL)
+    @NotNull(message = "新的脚本发布id不能为空")
     private Long newScriptId;
     /**
      * 旧的脚本发布id
      */
     @ApiModelProperty("旧的脚本发布id")
-    @NotNull(message = "旧的脚本发布id" + ValidConstants.MUST_NOT_BE_NULL)
+    @NotNull(message = "旧的脚本发布id不能为空")
     private Long oldScriptId;
     /**
      * 脚本类型
      */
     @ApiModelProperty("脚本类型")
-    @NotNull(message = "脚本类型" + ValidConstants.MUST_NOT_BE_NULL)
+    @NotNull(message = "脚本类型不能为空")
     private Integer scriptType;
     /**
      * 上传文件

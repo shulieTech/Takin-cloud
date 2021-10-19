@@ -260,8 +260,9 @@ public class SceneManageController {
 
         detailDTO.setUpdateTime(wrapperDTO.getUpdateTime());
         detailDTO.setLastPtTime(wrapperDTO.getLastPtTime());
-        detailDTO.setStatus(
-            dictionaryCache.getObjectByParam(DicKeyConstant.SCENE_MANAGE_STATUS, wrapperDTO.getStatus()));
+        detailDTO.setStatus(BeanUtil.copyProperties(
+            dictionaryCache.getObjectByParam(DicKeyConstant.SCENE_MANAGE_STATUS, wrapperDTO.getStatus())
+            , io.shulie.takin.cloud.sdk.model.common.EnumResult.class));
         //业务活动
         if (CollectionUtils.isNotEmpty(wrapperDTO.getBusinessActivityConfig())) {
             List<BusinessActivityDetailResponse> activity = Lists.newArrayList();
@@ -280,8 +281,9 @@ public class SceneManageController {
         //施压配置
         detailDTO.setConcurrenceNum(wrapperDTO.getConcurrenceNum());
         detailDTO.setIpNum(wrapperDTO.getIpNum());
-        detailDTO.setPressureMode(
-            dictionaryCache.getObjectByParam(DicKeyConstant.PT_MODEL, wrapperDTO.getPressureMode()));
+        detailDTO.setPressureMode(BeanUtil.copyProperties(
+            dictionaryCache.getObjectByParam(DicKeyConstant.PT_MODEL, wrapperDTO.getPressureMode())
+            , io.shulie.takin.cloud.sdk.model.common.EnumResult.class));
         detailDTO.setPressureTestTime(wrapperDTO.getPressureTestTime());
         detailDTO.setIncreasingTime(wrapperDTO.getIncreasingTime());
         detailDTO.setStep(wrapperDTO.getStep());
@@ -293,9 +295,12 @@ public class SceneManageController {
                 ScriptDetailResponse dto = new ScriptDetailResponse();
                 dto.setFileName(data.getFileName());
                 dto.setUploadTime(data.getUploadTime());
-                dto.setFileType(dictionaryCache.getObjectByParam(DicKeyConstant.FILE_TYPE, data.getFileType()));
+                dto.setFileType(BeanUtil.copyProperties(
+                    dictionaryCache.getObjectByParam(DicKeyConstant.FILE_TYPE, data.getFileType())
+                    , io.shulie.takin.cloud.sdk.model.common.EnumResult.class));
                 dto.setUploadedData(data.getUploadedData());
-                dto.setIsSplit(dictionaryCache.getObjectByParam(DicKeyConstant.IS_DELETED, data.getIsSplit()));
+                dto.setIsSplit(BeanUtil.copyProperties(dictionaryCache.getObjectByParam(DicKeyConstant.IS_DELETED, data.getIsSplit())
+                    , io.shulie.takin.cloud.sdk.model.common.EnumResult.class));
                 script.add(dto);
             });
             detailDTO.setUploadFile(script);
@@ -310,7 +315,8 @@ public class SceneManageController {
                 stop.setBusinessActivity(
                     convertIdsToNames(data.getBusinessActivity(), detailDTO.getBusinessActivityConfig()));
                 stop.setRule(buildRule(data));
-                stop.setStatus(dictionaryCache.getObjectByParam(DicKeyConstant.LIVE_STATUS, data.getStatus()));
+                stop.setStatus(BeanUtil.copyProperties(dictionaryCache.getObjectByParam(DicKeyConstant.LIVE_STATUS, data.getStatus())
+                    , io.shulie.takin.cloud.sdk.model.common.EnumResult.class));
                 sla.add(stop);
             });
             detailDTO.setStopCondition(sla);
@@ -324,7 +330,9 @@ public class SceneManageController {
                 stop.setBusinessActivity(
                     convertIdsToNames(data.getBusinessActivity(), detailDTO.getBusinessActivityConfig()));
                 stop.setRule(buildRule(data));
-                stop.setStatus(dictionaryCache.getObjectByParam(DicKeyConstant.LIVE_STATUS, data.getStatus()));
+                stop.setStatus(BeanUtil.copyProperties(
+                    dictionaryCache.getObjectByParam(DicKeyConstant.LIVE_STATUS, data.getStatus())
+                    , io.shulie.takin.cloud.sdk.model.common.EnumResult.class));
                 sla.add(stop);
             });
             detailDTO.setWarningCondition(sla);

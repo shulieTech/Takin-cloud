@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.sdk.model.request.engine;
 
-import io.shulie.takin.cloud.common.bean.file.FileManageInfo;
+import io.shulie.takin.cloud.sdk.model.common.FileManageInfo;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

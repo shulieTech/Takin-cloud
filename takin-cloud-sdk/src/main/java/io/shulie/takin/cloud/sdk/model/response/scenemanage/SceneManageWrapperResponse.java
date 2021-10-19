@@ -5,9 +5,9 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import io.shulie.takin.cloud.common.bean.RuleBean;
-import io.shulie.takin.cloud.common.bean.TimeBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneBusinessActivityRefBean;
+import io.shulie.takin.cloud.sdk.model.common.RuleBean;
+import io.shulie.takin.cloud.sdk.model.common.TimeBean;
+import io.shulie.takin.cloud.sdk.model.common.SceneBusinessActivityRefBean;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

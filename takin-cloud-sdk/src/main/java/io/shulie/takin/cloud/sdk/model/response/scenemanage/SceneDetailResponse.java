@@ -3,8 +3,8 @@ package io.shulie.takin.cloud.sdk.model.response.scenemanage;
 import java.math.BigDecimal;
 import java.util.List;
 
-import io.shulie.takin.cloud.common.bean.TimeBean;
-import io.shulie.takin.cloud.common.enums.machine.EnumResult;
+import io.shulie.takin.cloud.sdk.model.common.TimeBean;
+import io.shulie.takin.cloud.sdk.model.common.EnumResult;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
