@@ -59,4 +59,6 @@ public class TaskInspectStartReq extends CloudUserCommonRequestExt implements Se
      * 循环次数
      */
     private Integer loopsNum;
+
+    private Long scriptDeployId;
 }
