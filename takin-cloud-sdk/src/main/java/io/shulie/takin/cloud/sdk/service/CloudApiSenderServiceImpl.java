@@ -180,7 +180,12 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
             if (apiResponse == null) {throw new NullPointerException();}
             if (ResponseResult.class.equals(apiResponse.getClass())) {
                 ResponseResult<?> cloudResult = (ResponseResult<?>)apiResponse;
-                if (!cloudResult.getSuccess()) {throw new RuntimeException(cloudResult.getError().getMsg());}
+                // 接口成功
+                if (Boolean.TRUE.equals(cloudResult.getSuccess())) {return apiResponse;}
+                // success == null || success == false
+                else if (cloudResult.getError() != null) {throw new RuntimeException(cloudResult.getError().getMsg());}
+                // cloud 回传的 error 信息为空
+                else {throw new RuntimeException("无法展示更多信息,请参照cloud日志");}
             }
             return apiResponse;
         } catch (JSONException e) {
