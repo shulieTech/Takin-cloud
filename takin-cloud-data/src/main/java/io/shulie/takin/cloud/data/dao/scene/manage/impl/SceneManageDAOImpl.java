@@ -3,6 +3,8 @@ package io.shulie.takin.cloud.data.dao.scene.manage.impl;
 import java.util.List;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
@@ -28,20 +30,23 @@ public class SceneManageDAOImpl
 
     @Override
     public Long insert(SceneManageCreateOrUpdateParam createParam) {
-        SceneManageEntity sceneManageEntity = new SceneManageEntity();
-        BeanUtils.copyProperties(createParam, sceneManageEntity);
-        this.save(sceneManageEntity);
-        return sceneManageEntity.getId();
+        SceneManageEntity entity = new SceneManageEntity();
+        BeanUtils.copyProperties(createParam, entity);
+        entity.setUserId(CloudPluginUtils.getContext().getUserId());
+        entity.setTenantId(CloudPluginUtils.getContext().getTenantId());
+        entity.setEnvCode(CloudPluginUtils.getContext().getEnvCode());
+        this.save(entity);
+        return entity.getId();
     }
 
     @Override
     public void update(SceneManageCreateOrUpdateParam updateParam) {
-        SceneManageEntity sceneManageEntity = new SceneManageEntity();
-        BeanUtils.copyProperties(updateParam, sceneManageEntity);
-        updateParam.setUserId(null);
-        updateParam.setTenantId(null);
-        updateParam.setEnvCode(null);
-        this.updateById(sceneManageEntity);
+        SceneManageEntity entity = new SceneManageEntity();
+        BeanUtils.copyProperties(updateParam, entity);
+        entity.setUserId(null);
+        entity.setTenantId(null);
+        entity.setEnvCode(null);
+        this.updateById(entity);
     }
 
     @Override
@@ -89,4 +94,17 @@ public class SceneManageDAOImpl
         return this.getBaseMapper().selectOne(wrapper);
     }
 
+    /**
+     * 根据场景主键设置场景状态
+     *
+     * @param sceneId 场景主键
+     * @param status  状态值
+     * @return 操作影响行数
+     */
+    @Override
+    public int updateStatus(Long sceneId, Integer status) {
+        return this.baseMapper.update(
+            new SceneManageEntity() {{setStatus(status);}},
+            Wrappers.lambdaQuery(SceneManageEntity.class).eq(SceneManageEntity::getId, sceneId));
+    }
 }

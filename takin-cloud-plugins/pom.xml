@@ -12,7 +12,8 @@
     <artifactId>takin-cloud-plugins</artifactId>
 
     <modules>
-<!--        <module>log</module>-->
+        <module>plugin-engine-module</module>
+        <module>plugin-enginecall-module</module>
     </modules>
 
     <dependencies>

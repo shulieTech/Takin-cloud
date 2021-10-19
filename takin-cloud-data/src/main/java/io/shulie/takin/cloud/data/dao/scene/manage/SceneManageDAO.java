@@ -78,4 +78,12 @@ public interface SceneManageDAO extends IService<SceneManageEntity> {
      */
     SceneManageEntity queueSceneById(Long sceneId);
 
+    /**
+     * 根据场景主键设置场景状态
+     *
+     * @param sceneId 场景主键
+     * @param status  状态值
+     * @return 操作影响行数
+     */
+    int updateStatus(Long sceneId, Integer status);
 }

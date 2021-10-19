@@ -1,13 +1,5 @@
 package io.shulie.takin.cloud.sdk.constant;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import cn.hutool.core.util.ArrayUtil;
-
 /**
  * 入口配置
  *
@@ -35,7 +27,7 @@ public class EntrypointUrl {
     /**
      * 模块 - 文件管理
      */
-    public final static String MODULE_FILE = "XXXXXXXXXX";
+    public final static String MODULE_FILE = "file";
     public final static String METHOD_FILE_UPLOAD = "upload";
     public final static String METHOD_FILE_DOWNLOAD = "downloadFileByPath";
     public final static String METHOD_FILE_CONTENT = "getFileContentByPaths";
@@ -49,7 +41,9 @@ public class EntrypointUrl {
      * 模块 - 大文件管理
      */
     public final static String MODULE_FILE_BIG = MODULE_FILE + "/big";
-    public final static String METHOD_BIG_FILE_UPLOAD = "xxxxxxxxxx";
+    public final static String METHOD_BIG_FILE_UPLOAD = "upload";
+    public final static String METHOD_BIG_FILE_COMPACT = "compact";
+    public final static String METHOD_BIG_FILE_DOWNLOAD = "download";
 
     /**
      * 模块 - 引擎
@@ -83,14 +77,14 @@ public class EntrypointUrl {
      */
     public final static String MODULE_REPORT = "report";
     public final static String METHOD_REPORT_LIST = "listReport";
-    public final static String METHOD_REPORT_COUNT= "count";
-    public final static String METHOD_REPORT_LOCK= "lock";
-    public final static String METHOD_REPORT_UNLOCK= "unlock";
-    public final static String METHOD_REPORT_FINISH= "finish";
-    public final static String METHOD_REPORT_METRICES= "metrices";
+    public final static String METHOD_REPORT_COUNT = "count";
+    public final static String METHOD_REPORT_LOCK = "lock";
+    public final static String METHOD_REPORT_UNLOCK = "unlock";
+    public final static String METHOD_REPORT_FINISH = "finish";
+    public final static String METHOD_REPORT_METRICES = "metrices";
     public final static String METHOD_REPORT_SUMMARY = "businessActivity/summary/list";
     public final static String METHOD_REPORT_ACTIVITY_REPORT_ID = "queryReportActivityByReportId";
-    public final static String METHOD_REPORT_ACTIVITY_SCENE_ID = "queryReportActivityByReportId";
+    public final static String METHOD_REPORT_ACTIVITY_SCENE_ID = "queryReportActivityBySceneId";
     public final static String METHOD_REPORT_WARN_ADD = "warn";
     public final static String METHOD_REPORT_WARN_LIST = "listWarn";
     public final static String METHOD_REPORT_UPDATE_CONCLUSION = "updateReportConclusion";
@@ -144,7 +138,6 @@ public class EntrypointUrl {
     public final static String METHOD_SCENE_TASK_TASK_RESULT_NOTIFY = "taskResultNotify";
     public final static String METHOD_SCENE_TASK_SCRIPT_PRE_SPLIT = "script/preSplit";
 
-
     /**
      * 模块 - 调度记录
      */
@@ -157,15 +150,15 @@ public class EntrypointUrl {
     public final static String MODULE_STATISTICS = "statistic";
     public final static String METHOD_STATISTICS_PRESSURE_PIE_TOTAL = "getPressurePieTotal";
     public final static String METHOD_STATISTICS_REPORT_TOTAL = "getReportTotal";
-    public final static String METHOD_STATISTICS_PRESSURE_LIST_TOTAL= "getPressureListTotal";
+    public final static String METHOD_STATISTICS_PRESSURE_LIST_TOTAL = "getPressureListTotal";
 
     /**
      * 模块 - 策略
      */
     public final static String MODULE_STRATEGY = "strategy";
-    public final static String METHOD_STRATEGY_LIST  = "list";
-    public final static String METHOD_STRATEGY_ADD  = "";
-    public final static String METHOD_STRATEGY_UPDATE  = "";
-    public final static String METHOD_STRATEGY_DETAIL  = "";
-    public final static String METHOD_STRATEGY_DELETE  = "";
+    public final static String METHOD_STRATEGY_LIST = "list";
+    public final static String METHOD_STRATEGY_ADD = "";
+    public final static String METHOD_STRATEGY_UPDATE = "";
+    public final static String METHOD_STRATEGY_DETAIL = "";
+    public final static String METHOD_STRATEGY_DELETE = "";
 }

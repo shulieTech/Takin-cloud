@@ -10,7 +10,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.shulie.takin.cloud.common.bean.TimeBean;
+import io.shulie.takin.cloud.sdk.model.common.TimeBean;
 
 /**
  * @author 无涯

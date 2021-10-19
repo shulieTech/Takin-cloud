@@ -7,7 +7,7 @@ import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import io.swagger.annotations.ApiModelProperty;
-import io.shulie.takin.cloud.common.bean.sla.SlaBean;
+import io.shulie.takin.cloud.sdk.model.common.SlaBean;
 
 /**
  * @author 无涯

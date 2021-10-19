@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSON;
 
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
@@ -188,15 +189,15 @@ public class ReportController {
 
     @GetMapping(EntrypointUrl.METHOD_REPORT_LIST_RUNNING)
     @ApiOperation("查询正在生成的报告")
-    public ResponseResult<Long> queryRunningReport() {
-        return ResponseResult.success(reportService.queryRunningReport());
+    public ResponseResult<Long> queryRunningReport(ContextExt contextExt) {
+        return ResponseResult.success(reportService.queryRunningReport(contextExt));
     }
 
     @GetMapping(EntrypointUrl.METHOD_REPORT_LIST_ID_RUNNING)
     @ApiOperation("查询正在生成的报告列表")
     @Deprecated
-    public ResponseResult<List<Long>> queryListRunningReport() {
-        return ResponseResult.success(reportService.queryListRunningReport());
+    public ResponseResult<List<Long>> queryListRunningReport(ContextExt contextExt) {
+        return ResponseResult.success(reportService.queryListRunningReport(contextExt));
     }
 
     @PutMapping(EntrypointUrl.METHOD_REPORT_LOCK)

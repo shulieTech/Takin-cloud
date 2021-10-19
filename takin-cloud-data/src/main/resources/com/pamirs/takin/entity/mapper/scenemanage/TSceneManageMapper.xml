@@ -34,13 +34,14 @@
         <include refid="Base_Column_List"/>
         from t_scene_manage
         where is_deleted = 0
+        <if test="tenantId != null">
+            and `tenant_id` = #{tenantId}
+        </if>
+        <if test="envCode != null">
+            and `env_code` = #{envCode}
+        </if>
     </select>
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-        update t_scene_manage
-        set is_deleted = 1
-        where id = #{id,jdbcType=BIGINT}
-    </delete>
     <update id="updateByPrimaryKeySelective"
             parameterType="com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage">
         update t_scene_manage
@@ -95,18 +96,6 @@
           and status = #{preStatus}
     </update>
 
-    <update id="resumeStatus">
-        update t_scene_manage
-        set status = 0
-        where id = #{id}
-    </update>
-
-    <update id="updateSceneUserById">
-        update t_scene_manage
-        set user_id = #{userId}
-        where id = #{id}
-    </update>
-
     <select id="getPageList" parameterType="com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageQueryVO"
             resultMap="BaseResultMap">
         select
@@ -147,6 +136,12 @@
             <if test="lastPtStartTime != null and lastPtStartTime != ''">
                 and last_pt_time &gt;= #{lastPtStartTime,jdbcType=VARCHAR}
             </if>
+            <if test="tenantId != null">
+                and `tenant_id` = #{tenantId}
+            </if>
+            <if test="envCode != null">
+                and `env_code` = #{envCode}
+            </if>
             and is_deleted = 0
         </where>
         order by last_pt_time desc, id desc
@@ -159,6 +154,12 @@
             #{sceneId}
         </foreach>
         and is_deleted = 0
+        <if test="tenantId != null">
+            and `tenant_id` = #{tenantId}
+        </if>
+        <if test="envCode != null">
+            and `env_code` = #{envCode}
+        </if>
 
     </select>
 </mapper>

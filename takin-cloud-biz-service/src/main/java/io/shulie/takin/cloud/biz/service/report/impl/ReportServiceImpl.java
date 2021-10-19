@@ -20,7 +20,7 @@ import javax.annotation.Resource;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import io.shulie.takin.cloud.biz.input.report.ListRunningReportInput;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.extern.slf4j.Slf4j;
 import org.influxdb.impl.TimeUtil;
 import cn.hutool.core.util.StrUtil;
@@ -481,14 +481,14 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Long queryRunningReport() {
-        Report report = tReportMapper.selectOneRunningReport();
+    public Long queryRunningReport(ContextExt contextExt) {
+        Report report = tReportMapper.selectOneRunningReport(contextExt);
         return report == null ? null : report.getId();
     }
 
     @Override
-    public List<Long> queryListRunningReport() {
-        List<Report> report = tReportMapper.selectListRunningReport();
+    public List<Long> queryListRunningReport(ContextExt contextExt) {
+        List<Report> report = tReportMapper.selectListRunningReport(contextExt);
         return CollectionUtils.isEmpty(report) ? null : report.stream().map(Report::getId).collect(Collectors.toList());
     }
 

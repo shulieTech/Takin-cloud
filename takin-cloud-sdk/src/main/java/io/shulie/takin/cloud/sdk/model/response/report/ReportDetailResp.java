@@ -8,10 +8,10 @@ import java.util.List;
 
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.EqualsAndHashCode;
-import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
-import io.shulie.takin.cloud.common.bean.sla.SlaBean;
+import io.shulie.takin.cloud.sdk.model.common.BusinessActivitySummaryBean;
+import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
+import io.shulie.takin.cloud.sdk.model.common.WarnBean;
+import io.shulie.takin.cloud.sdk.model.common.SlaBean;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

@@ -19,6 +19,7 @@ import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 
 /**
  * @author 数列科技
@@ -110,14 +111,15 @@ public interface ReportService {
      *
      * @return -
      */
-    Long queryRunningReport();
+    Long queryRunningReport(ContextExt contextExt);
 
     /**
      * 根据租户 获取运行中的报告列表
-     * @param
-     * @return
+     *
+     * @param contextExt 数据溯源上下文
+     * @return 报告主键列表
      */
-    List<Long> queryListRunningReport();
+    List<Long> queryListRunningReport(ContextExt contextExt);
 
     /**
      * 锁定报告
@@ -153,8 +155,8 @@ public interface ReportService {
     /**
      * 新增 tenantId
      *
-     * @param reportId   报告主键
-     * @param sceneId    场景主键
+     * @param reportId 报告主键
+     * @param sceneId  场景主键
      * @param tenantId 租户主键
      * @return -
      */

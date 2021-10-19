@@ -77,6 +77,8 @@ import io.shulie.takin.cloud.common.utils.LinuxUtil;
 import io.shulie.takin.cloud.common.utils.UrlUtil;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
@@ -108,6 +110,8 @@ public class SceneManageServiceImpl implements SceneManageService {
     private ReportDao reportDao;
     @Resource
     private TReportMapper tReportMapper;
+    @Resource
+    private ReportMapper reportMapper;
     @Resource
     private PluginManager pluginManager;
     @Resource
@@ -569,10 +573,20 @@ public class SceneManageServiceImpl implements SceneManageService {
             if (statusVO.getUpdateEnum().equals(SceneManageStatusEnum.ENGINE_RUNNING)) {
                 String engineName = ScheduleConstants.getEngineName(statusVO.getSceneId(), statusVO.getResultId(),
                     statusVO.getTenantId());
-                String startTime = engineName + ScheduleConstants.FIRST_SIGN;
-                tReportMapper.updateStartTime(statusVO.getResultId(), new Date(Long.parseLong(
-                    Optional.ofNullable(redisClientUtils.getString(startTime))
-                        .orElse(String.valueOf(System.currentTimeMillis())))));
+                final Date startTime;
+                // 设定开始时间
+                {
+                    // 1.从REDIS中取
+                    String redisKey = engineName + ScheduleConstants.FIRST_SIGN;
+                    String dateTimeString = redisClientUtils.getString(redisKey);
+                    if (StrUtil.isNotBlank(dateTimeString)) {startTime = new Date(Long.parseLong(dateTimeString));}
+                    // 2.设定为当前时间
+                    else {startTime = new Date();}
+                }
+                reportMapper.updateById(new ReportEntity() {{
+                    setId(statusVO.getResultId());
+                    setStartTime(startTime);
+                }});
             }
 
             ReportResult recentlyReport = reportDao.getRecentlyReport(statusVO.getSceneId());

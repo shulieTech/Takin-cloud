@@ -225,7 +225,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                             tenantId = Long.valueOf(split[2]);
                         }
                         SceneManageEntity sceneManageEntity = sceneManageDAO.queueSceneById(sceneId);
-                        if (SceneManageStatusEnum.ifFree(sceneManageEntity.getStatus())) {
+                        if (sceneManageEntity == null || SceneManageStatusEnum.ifFree(sceneManageEntity.getStatus())) {
                             delTask(sceneId, reportId, tenantId);
                             return;
                         }
@@ -253,12 +253,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                                     log.warn("当前push Data延迟时间为{}", timeWindow);
                                     final Long tenantIdTmp = tenantId;
                                     final long delayTmp = timeWindow;
-                                    THREAD_POOL.execute(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            writeInflux(transactions, taskKey, delayTmp, sceneId, reportId, tenantIdTmp);
-                                        }
-                                    });
+                                    THREAD_POOL.execute(() -> writeInflux(transactions, taskKey, delayTmp, sceneId, reportId, tenantIdTmp));
                                     timeWindow = refreshTimeWindow(engineName);
                                 }
                             }
@@ -297,8 +292,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
 
                         }
                     } catch (Exception e) {
-                        log.error("【collector】Real-time data analysis for anomalies hashkey:{}, error:{}", sceneReportKey,
-                            e.getMessage());
+                        log.error("【采集器】异常实时数据分析。hashKey:{}", sceneReportKey, e);
                     } finally {
                         unlock(sceneReportKey, "collectorSchedulerPool");
                     }
@@ -410,8 +404,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     /**
      * 计算sa
      *
-     * @param percentDatas
-     * @return
+     * @param percentDatas 百分比数据
+     * @return 计算值
      */
     private String calculateSaPercent(List<String> percentDatas) {
         List<Map<Integer, RtDataOutput>> percentMapList = percentDatas.stream().filter(StringUtils::isNotBlank)
@@ -443,8 +437,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             int hits = 0;
             int time = 0;
             double need = total * i / 100d;
-            for (int j = 0; j < rtDatas.size(); j++) {
-                RtDataOutput d = rtDatas.get(j);
+            for (RtDataOutput d : rtDatas) {
                 if (hits < need || d.getTime() <= time) {
                     hits += d.getHits();
                     if (d.getTime() > time) {
