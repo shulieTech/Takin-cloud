@@ -84,5 +84,7 @@ public class CloudPluginUtils {
     public static void fillUserData(ContextExt ext) {
         ext.setUserId(getContext().getUserId());
         ext.setTenantId(getContext().getTenantId());
+        ext.setEnvCode(getContext().getEnvCode());
+        ext.setFilterSql(getContext().getFilterSql());
     }
 }
