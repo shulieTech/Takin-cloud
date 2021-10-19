@@ -20,7 +20,6 @@ import io.shulie.takin.cloud.open.resp.scenetask.SceneActionResp;
 import io.shulie.takin.cloud.open.resp.scenetask.SceneJobStateResp;
 import io.shulie.takin.cloud.open.resp.scenetask.SceneTaskAdjustTpsResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.ext.content.asset.AssetBalanceExt;
 
 /**
  * 压测任务
