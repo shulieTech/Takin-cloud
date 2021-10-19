@@ -40,4 +40,10 @@ public interface StrategyConfigService {
      * @return -
      */
     StrategyConfigExt getDefaultStrategyConfig();
+
+    /**
+     * 获取当前使用的策略
+     * @return
+     */
+    StrategyConfigExt getCurrentStrategyConfig();
 }

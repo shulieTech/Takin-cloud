@@ -38,6 +38,8 @@ public class SceneManageConstant {
 
     public static final String IS_SPLIT = "isSplit";
 
+    public static final String IS_BIG_FILE = "isBigFile";
+
     public static final String TOPIC = "topic";
 
     public static final String IS_ORDERED_SPLIT = "isOrderSplit";

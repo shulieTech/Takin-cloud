@@ -1,12 +1,5 @@
 package io.shulie.takin.cloud.biz.collector.collector;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-
 import io.shulie.takin.cloud.common.bean.collector.Constants;
 import io.shulie.takin.cloud.common.bean.collector.EventMetrics;
 import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
@@ -29,6 +22,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
@@ -62,16 +62,19 @@ public class CollectorApplication {
             if (null == metrics || metrics.size() < 1) {
                 return ResponseEntity.ok("metrics数据为空");
             }
-
             // 分类
-            List<ResponseMetrics> responseMetrics =
-                metrics.stream().filter(metric -> Constants.METRICS_TYPE_RESPONSE.equals(metric.get("type"))).map(
-                    metric -> GsonUtil.gsonToBean(GsonUtil.gsonToString(metric), ResponseMetrics.class)).collect(
-                    Collectors.toList());
-            List<EventMetrics> eventMetrics =
-                metrics.stream().filter(metric -> Constants.METRICS_TYPE_EVENTS.equals(metric.get("type"))).map(
-                    metric -> GsonUtil.gsonToBean(GsonUtil.gsonToString(metric), EventMetrics.class)).collect(
-                    Collectors.toList());
+            List<ResponseMetrics> responseMetrics = metrics.stream().filter(Objects::nonNull)
+                    .filter(metric -> null != metric.get("type"))
+                    .filter(metric -> Constants.METRICS_TYPE_RESPONSE.equals(metric.get("type")))
+                    .map(GsonUtil::gsonToString)
+                    .map(s -> GsonUtil.gsonToBean(s, ResponseMetrics.class))
+                    .collect(Collectors.toList());
+            List<EventMetrics> eventMetrics = metrics.stream().filter(Objects::nonNull)
+                    .filter(metric -> null != metric.get("type"))
+                    .filter(metric -> Constants.METRICS_TYPE_EVENTS.equals(metric.get("type")))
+                    .map(GsonUtil::gsonToString)
+                    .map(s -> GsonUtil.gsonToBean(s, EventMetrics.class))
+                    .collect(Collectors.toList());
             culTransaction(responseMetrics, sceneId, reportId, customerId);
             long time = System.currentTimeMillis();
             if (responseMetrics.size() > 0) {

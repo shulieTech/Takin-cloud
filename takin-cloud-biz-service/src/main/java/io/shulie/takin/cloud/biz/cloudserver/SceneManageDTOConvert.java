@@ -101,6 +101,7 @@ public interface SceneManageDTOConvert {
         dto.setIsSplit(jsonObject.getInteger(SceneManageConstant.IS_SPLIT));
         dto.setTopic(jsonObject.getString(SceneManageConstant.TOPIC));
         dto.setIsOrderSplit(jsonObject.getInteger(SceneManageConstant.IS_ORDERED_SPLIT));
+        dto.setIsBigFile(jsonObject.getInteger(SceneManageConstant.IS_BIG_FILE));
     }
 
     @Mappings({

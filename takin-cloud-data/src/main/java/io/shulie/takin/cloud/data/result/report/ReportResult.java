@@ -17,6 +17,11 @@ public class ReportResult extends CloudUserCommonRequestExt {
     private Long id;
 
     /**
+     * 客户id
+     */
+    private Long customerId;
+
+    /**
      * 流量消耗
      */
     private BigDecimal amount;

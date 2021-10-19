@@ -165,6 +165,7 @@ public class SceneBigFileSliceDAOImpl extends ServiceImpl<SceneBigFileSliceMappe
         wrapper.eq(SceneScriptRefEntity::getFileName, param.getFileName());
         //只查type=1的文件
         wrapper.eq(SceneScriptRefEntity::getFileType, 1);
+        wrapper.eq(SceneScriptRefEntity::getIsDeleted,0);
         return sceneScriptRefMapper.selectOne(wrapper);
     }
 

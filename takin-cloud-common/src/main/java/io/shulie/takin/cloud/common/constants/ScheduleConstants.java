@@ -16,6 +16,7 @@ public class ScheduleConstants {
      *
      */
     public static final String RESTART_POLICY_NEVER = "Never";
+    public static final String RESTART_POLICY_ONFAILURE = "OnFailure";
 
     /**
      * 引擎脚本文件名称
@@ -158,6 +159,24 @@ public class ScheduleConstants {
         }
         return String.format("pressure-node-engine-%s-%s-%s", sceneId, reportId, customerId);
     }
+
+    /**
+     * pod启动结束事件去重key
+     * @param sceneId
+     * @param reportId
+     * @param customerId
+     * @param podNo
+     * @param eventName
+     * @return
+     */
+    public static String getEnginePodNoStartKey(Long sceneId, Long reportId, Long customerId, String podNo, String eventName) {
+        // 兼容原始redis key
+        if (null == customerId) {
+            return String.format("pod-engine-%s-%s-%s-%s", sceneId, reportId, podNo, eventName);
+        }
+        return String.format("pod-engine-%s-%s-%s-%s-%s", sceneId, reportId, customerId, podNo, eventName);
+    }
+
 
     /**
      * 压力节点名总数名称

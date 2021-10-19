@@ -78,7 +78,9 @@ public class FileSliceServiceImpl implements FileSliceService {
                 ":场景ID【{" + request.getSceneId() + "}】,文件名【{" + request.getFileName() + "}】");
         }
         //根据请求，更新关联的scriptRef
-        updateFileRefExtend(request);
+        if (request.getSplit()) {
+            updateFileRefExtend(request);
+        }
         //填充request
         fillRequest(request);
 
@@ -94,8 +96,14 @@ public class FileSliceServiceImpl implements FileSliceService {
             param.setFileUploadTime(entity.getUploadTime());
         }
         if (fileSliceStatus == FileSliceStatusEnum.FILE_CHANGED) {
+            if (request.isBigFile() && request.getOrderSplit()){
+                return false;
+            }
             fileSliceDAO.update(param);
         } else if (fileSliceStatus == FileSliceStatusEnum.UNSLICED) {
+            if (request.isBigFile() && request.getOrderSplit()){
+                return false;
+            }
             fileSliceDAO.create(param);
         }
         if (request.getOrderSplit() != null && request.getOrderSplit()) {
@@ -137,6 +145,7 @@ public class FileSliceServiceImpl implements FileSliceService {
             insertParam.setSceneId(request.getSceneId());
             insertParam.setScriptType(0);
             insertParam.setFileType(1);
+            insertParam.setUploadTime(new Date());
             insertParam.setUploadPath(request.getSceneId() + DEFAULT_PATH_SEPARATOR + request.getFileName());
             jsonObject = new JSONObject();
             if (request.getSplit()) {
@@ -179,7 +188,8 @@ public class FileSliceServiceImpl implements FileSliceService {
                 setUploadPath(param.getSceneId() + DEFAULT_PATH_SEPARATOR + param.getFileName());
                 JSONObject extJson = new JSONObject();
                 extJson.put("isSplit", param.getIsSplit());
-                extJson.put("isOrderSplit", param.getIsOrderSplit());
+                extJson.put("isOrderSplit", 1);
+                extJson.put("isBigFile",1);
                 setFileExtend(extJson.toJSONString());
                 setUploadTime(finalCurrentDate);
                 setFileType(1);
@@ -191,8 +201,10 @@ public class FileSliceServiceImpl implements FileSliceService {
         } else {
             JSONObject extJson = JSONObject.parseObject(entity.getFileExtend());
             extJson.put("isSplit", param.getIsSplit());
-            extJson.put("isOrderSplit", param.getIsOrderSplit());
+            extJson.put("isOrderSplit", 1);
+            extJson.put("isBigFile",1);
             currentDate = entity.getUploadTime();
+            entity.setFileExtend(extJson.toJSONString());
             fileSliceDAO.updateRef(entity);
         }
         param.setFileRefId(entity.getId());
@@ -205,7 +217,7 @@ public class FileSliceServiceImpl implements FileSliceService {
         } else {
             fileSliceDAO.update(param);
         }
-        //清理位点缓存
+        //加文件分片清除位点缓存的逻辑
         sceneTaskService.cleanCachedPosition(param.getSceneId());
     }
 
@@ -289,18 +301,8 @@ public class FileSliceServiceImpl implements FileSliceService {
             request.setFilePath(entity.getUploadPath());
         }
         //podNum
-        if (request.getSplit()) {
-            if (request.getOrderSplit() == null || !request.getOrderSplit()) {
-                SceneManageResult sceneManage = sceneManageDao.getSceneById(request.getSceneId());
-                if (Objects.isNull(sceneManage)) {
-                    throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR,
-                        "未查询到ID为{" + request.getSceneId() + "}的场景!");
-                }
-                JSONObject jsonObject = JSONObject.parseObject(sceneManage.getPtConfig());
-                request.setPodNum(jsonObject.getInteger("hostNum"));
-            }
-        } else if (!request.getSplit()) {
-            request.setPodNum(1);
+        if (request.getForceSplit() && request.getPodNum() > 0) {
+            request.setPodNum(request.getPodNum());
         }
     }
 

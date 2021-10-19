@@ -96,12 +96,14 @@ public class ScheduleServiceImpl implements ScheduleService {
             return;
         }
         //获取策略
-        StrategyConfigExt config = strategyConfigService.getDefaultStrategyConfig();
+        StrategyConfigExt config = strategyConfigService.getCurrentStrategyConfig();
         if (config == null) {
             log.error("异常代码【{}】,异常内容：启动调度失败 --> 调度策略未配置",
                 TakinCloudExceptionEnum.SCHEDULE_START_ERROR);
             return;
         }
+
+        String scheduleName = ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getCustomerId());
 
         //保存调度记录
         ScheduleRecord scheduleRecord = new ScheduleRecord();
@@ -113,8 +115,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         scheduleRecord.setStatus(ScheduleConstants.SCHEDULE_STATUS_1);
 
         scheduleRecord.setCustomerId(request.getCustomerId());
-        scheduleRecord.setPodClass(
-            ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getCustomerId()));
+        scheduleRecord.setPodClass(scheduleName);
         TScheduleRecordMapper.insertSelective(scheduleRecord);
 
         //add by lipeng 保存调度对应压测引擎插件记录信息
@@ -126,11 +127,9 @@ public class ScheduleServiceImpl implements ScheduleService {
         ScheduleRunRequest eventRequest = new ScheduleRunRequest();
         eventRequest.setScheduleId(scheduleRecord.getId());
         eventRequest.setRequest(request);
-        eventRequest.setStrategyConfig(ScheduleConvertor.INSTANCE.ofStrategyConfig(config));
+        eventRequest.setStrategyConfig(config);
         //把数据放入缓存，初始化回调调度需要
-        redisClientUtils.setString(
-            ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getCustomerId()),
-            JSON.toJSONString(eventRequest));
+        redisClientUtils.setString(scheduleName, JSON.toJSONString(eventRequest));
         // 需要将 本次调度 pod数量存入redis,报告中用到
         // 总计 报告生成用到 调度期间出现错误，这份数据只存24小时
         redisClientUtils.set(
@@ -158,15 +157,18 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public void runSchedule(ScheduleRunRequest request) {
+        ScheduleStartRequestExt startRequest = request.getRequest();
         // 压力机数目记录
-        push(request.getRequest());
+        push(startRequest);
+
+        Long sceneId = startRequest.getSceneId();
+        Long taskId = startRequest.getTaskId();
+        Long customerId = startRequest.getCustomerId();
 
         // 场景生命周期更新 启动中(文件拆分完成) ---> 创建Job中
         sceneManageService.updateSceneLifeCycle(
-            UpdateStatusBean.build(request.getRequest().getSceneId(),
-                    request.getRequest().getTaskId(),
-                    request.getRequest().getCustomerId()).checkEnum(
-                    SceneManageStatusEnum.STARTING, SceneManageStatusEnum.FILESPLIT_END)
+            UpdateStatusBean.build(sceneId, taskId, customerId)
+                .checkEnum(SceneManageStatusEnum.STARTING, SceneManageStatusEnum.FILESPLIT_END)
                 .updateEnum(SceneManageStatusEnum.JOB_CREATEING)
                 .build());
         EngineCallExtApi engineCallExtApi = pluginUtils.getEngineCallExtApi();

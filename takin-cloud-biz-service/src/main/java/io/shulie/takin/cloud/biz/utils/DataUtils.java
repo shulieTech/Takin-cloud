@@ -50,9 +50,6 @@ public class DataUtils {
                     .orElse(0);
 
         }
-        //if (maxRt.intValue() != percentMaxRt) {
-        //    logger.info("maxRt is error！maxRt="+maxRt+", percentMaxRt="+percentMaxRt+", metric="+ GsonUtil.gsonToString(metric));
-        //}
         return Math.max(percentMaxRt, maxRt);
     }
 

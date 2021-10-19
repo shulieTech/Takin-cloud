@@ -14,6 +14,7 @@ import com.pamirs.takin.entity.domain.entity.strategy.StrategyConfig;
 import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigAddVO;
 import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigQueryVO;
 import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigUpdateVO;
+import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 import io.shulie.takin.cloud.common.enums.deployment.DeploymentMethodEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
@@ -30,6 +31,7 @@ import javax.annotation.Resource;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author qianshui
@@ -44,6 +46,9 @@ public class StrategyConfigServiceImpl implements StrategyConfigService {
 
     @Autowired
     private EnginePluginUtils pluginUtils;
+
+    @Autowired
+    private AppConfig appConfig;
 
     @Override
     public Boolean add(StrategyConfigAddVO addVO) {
@@ -99,6 +104,19 @@ public class StrategyConfigServiceImpl implements StrategyConfigService {
     }
 
     @Override
+    public StrategyConfigExt getCurrentStrategyConfig() {
+        StrategyConfigExt strategyConfig = null;
+        PageInfo<StrategyConfigExt> pageInfo = queryPageList(new StrategyConfigQueryVO());
+        if (null != pageInfo && CollectionUtils.isNotEmpty(pageInfo.getList())) {
+            strategyConfig = pageInfo.getList().stream().filter(Objects::nonNull)
+                    .filter(config -> appConfig.getDeploymentMethod().equals(config.getDeploymentMethod()))
+                    .findFirst()
+                    .orElse(pageInfo.getList().get(0));
+        }
+        return strategyConfig;
+    }
+
+    @Override
     public PageInfo<StrategyConfigExt> queryPageList(StrategyConfigQueryVO queryVO) {
         Page<?> pageInfo = PageHelper.startPage(queryVO.getCurrentPage() + 1, queryVO.getPageSize());
         List<StrategyConfig> queryList = tStrategyConfigMapper.getPageList(queryVO);
@@ -138,6 +156,16 @@ public class StrategyConfigServiceImpl implements StrategyConfigService {
             dto.setLimitMemorySize(limitMemorySize == null ? memorySize : limitMemorySize);
             dto.setTpsNum(object.getInteger("tpsNum"));
             dto.setDeploymentMethod(DeploymentMethodEnum.getByType(object.getInteger("deploymentMethod")));
+
+            dto.setTpsThreadMode(object.getInteger("tpsThreadMode"));
+            Double tpsTargetLevelFactor = object.getDouble("tpsTargetLevelFactor");
+            if (null != tpsTargetLevelFactor) {
+                dto.setTpsTargetLevelFactor(tpsTargetLevelFactor);
+            }
+            dto.setTpsRealThreadNum(object.getInteger("tpsRealThreadNum"));
+            dto.setPressureEngineImage(object.getString("pressureEngineImage"));
+            dto.setPressureEngineName(object.getString("pressureEngineName"));
+            dto.setK8sJvmSettings(object.getString("k8sJvmSettings"));
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：解析配置失败 --> Parse Config Failure = {}，异常信息: {}",
                 TakinCloudExceptionEnum.SCHEDULE_START_ERROR, config, e);
