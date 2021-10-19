@@ -90,7 +90,7 @@ public class EntrypointUrl {
     public final static String METHOD_REPORT_METRICES= "metrices";
     public final static String METHOD_REPORT_SUMMARY = "businessActivity/summary/list";
     public final static String METHOD_REPORT_ACTIVITY_REPORT_ID = "queryReportActivityByReportId";
-    public final static String METHOD_REPORT_ACTIVITY_SCENE_ID = "queryReportActivityByReportId";
+    public final static String METHOD_REPORT_ACTIVITY_SCENE_ID = "queryReportActivityBySceneId";
     public final static String METHOD_REPORT_WARN_ADD = "warn";
     public final static String METHOD_REPORT_WARN_LIST = "listWarn";
     public final static String METHOD_REPORT_UPDATE_CONCLUSION = "updateReportConclusion";

@@ -227,21 +227,6 @@ public class SceneManageController {
         return ResponseResult.success(pageInfo.getList(), pageInfo.getTotal());
     }
 
-    @PostMapping(EntrypointUrl.METHOD_SCENE_MANAGE_CALC_FLOW)
-    @ApiOperation(value = "流量计算")
-    public ResponseResult<BigDecimal> calcFlow(@RequestBody SceneManageWrapperRequest wrapperRequest) {
-
-        SceneManageWrapperInput input = new SceneManageWrapperInput();
-        BeanUtils.copyProperties(wrapperRequest, input);
-        BigDecimal flow = new BigDecimal(0);
-        AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
-        if (assetExtApi != null) {
-            flow = assetExtApi.calcEstimateAmount(BeanUtil.copyProperties(input, AssetBillExt.class, ""));
-        }
-        return ResponseResult.success(flow.setScale(2, RoundingMode.HALF_UP));
-    }
-
-
     private ResponseResult<SceneManageWrapperResponse> wrapperSceneManage(SceneManageWrapperOutput sceneManage) {
 
         SceneManageWrapperResponse response = SceneManageRespConvertor.INSTANCE.of(sceneManage);
