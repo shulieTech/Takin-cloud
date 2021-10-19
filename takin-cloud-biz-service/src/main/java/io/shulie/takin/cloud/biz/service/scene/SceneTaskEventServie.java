@@ -130,6 +130,7 @@ public class SceneTaskEventServie {
                 dataFile.setOrdered(file.getIsOrderSplit() != null && file.getIsOrderSplit() == 1);
                 dataFile.setRefId(file.getId());
                 dataFile.setFileType(file.getFileType());
+                dataFile.setBigFile(file.getIsBigFile() != null && file.getIsBigFile() == 1);
                 dataFileList.add(dataFile);
             }
         });

@@ -7,6 +7,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,6 +45,9 @@ public class BigFileUploadController {
 
     @Autowired
     private BigFileService bigFileService;
+
+    @Autowired
+    private ThreadPoolExecutor bigFileThreadPool;
 
     private static void writeFile(HttpServletResponse response, File file) {
         response.setHeader("Content-Type", "application/octet-stream");
@@ -81,15 +87,27 @@ public class BigFileUploadController {
             throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "upload file can not be null");
         }
 
-        try {
-            MultipartFile multipartFile = file.get(0);
-            byte[] bytes = multipartFile.getBytes();
-            uploadVO.setByteData(bytes);
-            return bigFileService.upload(uploadVO);
-        } catch (IOException e) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_ERROR, "文件上传失败!", e);
-        }
+        Future<ResponseResult> responseResultFuture = bigFileThreadPool.submit(() -> {
+            try {
+                MultipartFile multipartFile = file.get(0);
+                byte[] bytes = multipartFile.getBytes();
+                uploadVO.setByteData(bytes);
+                return bigFileService.upload(uploadVO);
+            } catch (IOException e) {
+                logger.error("文件上传失败！", e);
+                return ResponseResult.fail("0", "文件上传失败!", "");
+            }
+        });
 
+        try {
+            return responseResultFuture.get();
+        } catch (InterruptedException e) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "文件上传失败:文件上传线程出现中断",e);
+        } catch (ExecutionException e) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "文件上传失败:获取异常线程的执行结果，发生异常",e);
+        } catch (Exception e){
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "文件上传失败:线程处理出现未知异常",e);
+        }
     }
 
     private Part getBigFileUploadVO(HttpServletRequest request) {

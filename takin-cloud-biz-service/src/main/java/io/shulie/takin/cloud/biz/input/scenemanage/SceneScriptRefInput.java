@@ -42,6 +42,9 @@ public class SceneScriptRefInput implements Serializable {
     @ApiModelProperty(value = "是否按顺序拆分")
     private Integer isOrderSplit;
 
+    @ApiModelProperty(value = "是否大文件")
+    private Integer isBigFile;
+
     @ApiModelProperty(value = "Topic")
     private String topic;
 

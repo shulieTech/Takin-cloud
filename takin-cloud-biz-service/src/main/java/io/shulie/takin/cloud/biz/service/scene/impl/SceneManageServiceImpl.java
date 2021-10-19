@@ -90,6 +90,8 @@ import io.shulie.takin.ext.content.script.ScriptVerityExt;
 import io.shulie.takin.ext.content.script.ScriptVerityRespExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.utils.file.FileManagerHelper;
+import io.shulie.takin.utils.json.JsonHelper;
+import io.shulie.takin.utils.string.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -740,7 +742,12 @@ public class SceneManageServiceImpl implements SceneManageService {
                 continue;
             }
 
-            this.operateFileOnSystem(inputList, sceneId);
+            //如果覆盖大文件 就直接️删整个场景目录 否则只保留大文件,其他文件删除
+            if (request.getIfCoverBigFile().equals(1)) {
+                this.operateFileOnSystem(inputList, sceneId);
+            } else {
+                this.updateFilesExceptBigFile(inputList, sceneId);
+            }
         }
 
         // 更新 scene
@@ -749,6 +756,15 @@ public class SceneManageServiceImpl implements SceneManageService {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_ERROR, "场景数据更新失败!");
         }
 
+    }
+    private void updateFilesExceptBigFile(List<SceneScriptRefInput> inputList, Long sceneId) {
+        String destPath = scriptPath + SceneManageConstant.FILE_SPLIT + sceneId + SceneManageConstant.FILE_SPLIT;
+        try {
+            this.delFilesByDirExceptBigFile(inputList, destPath);
+            this.transferTo(inputList, destPath);
+        } catch (Exception e) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_ERROR, "updateFilesExceptBigFile 更新文件失败：" + e.getMessage());
+        }
     }
 
     /**
@@ -759,12 +775,25 @@ public class SceneManageServiceImpl implements SceneManageService {
      */
     private void operateFileOnSystem(List<SceneScriptRefInput> inputList, Long sceneId) {
         String destPath = scriptPath + SceneManageConstant.FILE_SPLIT + sceneId + SceneManageConstant.FILE_SPLIT;
-        this.delDirFile(scriptPath + SceneManageConstant.FILE_SPLIT + sceneId);
+        try {
+            this.delDirFile(scriptPath + SceneManageConstant.FILE_SPLIT + sceneId);
+            this.transferTo(inputList, destPath);
+        } catch (Exception e) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_FILE_COPY_ERROR, "operateFileOnSystem 更新文件失败,原因：", e);
+        }
+    }
 
+    /**
+     * 文件迁移
+     *
+     * @param inputList
+     * @param destPath
+     */
+    private void transferTo(List<SceneScriptRefInput> inputList, String destPath) {
         // 数据文件、脚本文件
         List<SceneScriptRefInput> normalFileList = inputList.stream()
-            .filter(input -> FileTypeBusinessUtil.isScriptOrData(input.getFileType()))
-            .collect(Collectors.toList());
+                .filter(input -> FileTypeBusinessUtil.isScriptOrData(input.getFileType()))
+                .collect(Collectors.toList());
 
         if (CollectionUtils.isNotEmpty(normalFileList)) {
             for (SceneScriptRefInput file : normalFileList) {
@@ -774,12 +803,39 @@ public class SceneManageServiceImpl implements SceneManageService {
 
         // 附件
         List<SceneScriptRefInput> attachmentFileList = inputList.stream()
-            .filter(input -> FileTypeBusinessUtil.isAttachment(input.getFileType()))
-            .collect(Collectors.toList());
+                .filter(input -> FileTypeBusinessUtil.isAttachment(input.getFileType()))
+                .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(attachmentFileList)) {
             String attachmentPath = destPath + SceneManageConstant.FILE_SPLIT + "attachments";
             for (SceneScriptRefInput file : attachmentFileList) {
                 this.copyFile(file.getUploadPath(), attachmentPath);
+            }
+        }
+    }
+
+    private void delFilesByDirExceptBigFile(List<SceneScriptRefInput> inputList, String destPath) {
+        //找到大文件
+        List<String> bigFileNames = inputList.stream()
+                .filter(t -> StringUtil.isNotBlank(t.getFileExtend()))
+                .filter(file -> {
+                    JSONObject json2Bean = JsonHelper.json2Bean(file.getFileExtend(), JSONObject.class);
+                    if (null != json2Bean) {
+                        Integer isBigFile = json2Bean.getInteger("isBigFile");
+                        return isBigFile != null && isBigFile.equals(1);
+                    }
+                    return false;
+                }).map(SceneScriptRefInput::getFileName).collect(Collectors.toList());
+        String bigFileName = CollectionUtils.isEmpty(bigFileNames) ? null : bigFileNames.get(0);
+        //删除除了大文件之外的文件
+        File destDir = new File(destPath);
+        if (destDir.exists()) {
+            File[] listFiles = destDir.listFiles();
+            if (null != listFiles) {
+                for (File file : listFiles) {
+                    if (!file.getName().equals(bigFileName)) {
+                        file.delete();
+                    }
+                }
             }
         }
     }
@@ -920,6 +976,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         wrapperOutput.setCustomerId(sceneManageResult.getCustomerId());
         wrapperOutput.setUpdateTime(DateUtil.formatDateTime(sceneManageResult.getUpdateTime()));
         wrapperOutput.setLastPtTime(DateUtil.formatDateTime(sceneManageResult.getLastPtTime()));
+        wrapperOutput.setLastPtDateTime(sceneManageResult.getLastPtTime());
         fillPtConfig(wrapperOutput, sceneManageResult);
         wrapperOutput.setFeatures(sceneManageResult.getFeatures());
 

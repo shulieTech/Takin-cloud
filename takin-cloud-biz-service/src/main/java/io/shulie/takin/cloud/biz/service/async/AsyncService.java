@@ -12,5 +12,5 @@ public interface AsyncService {
 
     void checkStartedTask(ScheduleStartRequestExt startRequest);
 
-    void updateSceneRunningStatus(Long sceneId, Long reportId);
+    void updateSceneRunningStatus(Long sceneId, Long reportId,Long customerId);
 }

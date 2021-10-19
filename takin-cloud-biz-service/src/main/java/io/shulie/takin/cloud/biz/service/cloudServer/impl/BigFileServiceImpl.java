@@ -21,6 +21,7 @@ import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import com.pamirs.takin.entity.domain.query.SceneScriptRefQueryParam;
 import com.pamirs.takin.entity.domain.vo.file.Part;
 import io.shulie.takin.cloud.biz.service.cloudServer.BigFileService;
+import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
@@ -61,7 +62,7 @@ public class BigFileServiceImpl implements BigFileService {
     private String scriptPath;
 
     @Autowired
-    private FileSliceService fileSliceService;
+    private SceneTaskService sceneTaskService;
 
     @Override
     public ResponseResult<?> upload(Part dto) {
@@ -138,6 +139,15 @@ public class BigFileServiceImpl implements BigFileService {
             destFile.getParentFile().mkdirs();
         }
 
+        //原本的同名文件删除
+        if (destFile.exists()) {
+            if (!destFile.delete()) {
+                log.error("原同名文件【{}】删除失败！", destFile.getAbsolutePath());
+            } else {
+                log.info("原同名文件【{}】删除成功！", destFile.getAbsolutePath());
+            }
+        }
+
         long fileSize;
         try {
             FileOutputStream dest = new FileOutputStream(destFile, true);
@@ -174,11 +184,16 @@ public class BigFileServiceImpl implements BigFileService {
         //log.info("开始移动文件结束，耗时：{}", end - removeFileStart);
 
         long length = destFile.length();
-        Map<String, Object> map = new HashMap<>(2);
+        Map<String, Object> map = new HashMap<>(4);
         map.put("fileLength", length);
         map.put("mergeCost", end - start);
         log.info("big file merge time cost: {}", end - start);
-
+        //清除位点
+        try {
+            sceneTaskService.cleanCachedPosition(part.getSceneId());
+        } catch (Exception e) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_ERROR, "重置位点失败:" + part, e);
+        }
         return success(map);
     }
 
@@ -300,6 +315,8 @@ public class BigFileServiceImpl implements BigFileService {
         if (part.getDataCount() != null) {
             map.put("dataCount", String.valueOf(part.getDataCount()));
         }
+        //大文件标识
+        map.put("isBigFile", "1");
         updateParam.setFileExtend(JsonHelper.bean2Json(map));
     }
 

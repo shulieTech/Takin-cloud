@@ -1,12 +1,21 @@
 package io.shulie.takin.cloud.biz.service.async.impl;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.entity.report.Report;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
+import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
+import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
+import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import io.shulie.takin.ext.api.EngineCallExtApi;
 import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.cloud.biz.service.async.AsyncService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
@@ -43,13 +52,16 @@ public class AsyncServiceImpl implements AsyncService {
     private SceneManageService sceneManageService;
 
     @Resource
-    private TReportMapper tReportMapper;
+    private SceneManageDAO sceneManageDAO;
 
     /**
      * 压力节点 启动时间超时
      */
     @Value("${pressure.node.start.expireTime: 30}")
     private Integer pressureNodeStartExpireTime;
+
+    @Autowired
+    private EnginePluginUtils enginePluginUtils;
 
     /**
      * 线程定时检查休眠时间
@@ -65,8 +77,8 @@ public class AsyncServiceImpl implements AsyncService {
 
         String pressureNodeTotalName = ScheduleConstants.getPressureNodeTotalKey(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getCustomerId());
         String pressureNodeName = ScheduleConstants.getPressureNodeName(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getCustomerId());
+        String pressureNodeTotal = redisClientUtils.getString(pressureNodeTotalName);
         while (currentTime <= pressureNodeStartExpireTime) {
-            String pressureNodeTotal = redisClientUtils.getString(pressureNodeTotalName);
             String pressureNodeNum = redisClientUtils.getString(pressureNodeName);
             log.info("任务id={}, 计划启动【{}】个节点，当前启动【{}】个节点.....", startRequest.getTaskId(), pressureNodeTotal, pressureNodeNum);
             if (pressureNodeTotal != null && pressureNodeNum != null) {
@@ -92,6 +104,17 @@ public class AsyncServiceImpl implements AsyncService {
         if (!checkPass) {
             log.info("调度任务{}-{}-{},压力节点 没有在设定时间{}s内启动，停止压测,", startRequest.getSceneId(), startRequest.getTaskId(),
                 startRequest.getCustomerId(), CHECK_INTERVAL_TIME);
+
+            if (pressureNodeTotal != null) {
+                int podTotalNum = Integer.parseInt(pressureNodeTotal);
+                for (int i = 1; i <= podTotalNum; i++) {
+                    String enginePodNoStartKey = ScheduleConstants.getEnginePodNoStartKey(startRequest.getSceneId(), startRequest.getTaskId(),
+                            startRequest.getCustomerId(), i + "", CollectorService.METRICS_EVENTS_STARTED);
+                    if (!redisClientUtils.hasKey(enginePodNoStartKey)) {
+                        log.warn("调度任务 pod " + i + "没有在设定时间启动，redisKey为" + enginePodNoStartKey);
+                    }
+                }
+            }
             // 记录停止原因
             // 补充停止原因
             //设置缓存，用以检查压测场景启动状态 lxr 20210623
@@ -105,18 +128,19 @@ public class AsyncServiceImpl implements AsyncService {
 
     @Async("updateStatusPool")
     @Override
-    public void updateSceneRunningStatus(Long sceneId, Long reportId) {
+    public void updateSceneRunningStatus(Long sceneId, Long reportId,Long customerId) {
         while (true) {
-            boolean reportFinished = isReportFinished(reportId);
-            if (reportFinished) {
+            boolean isSceneFinished = isSceneFinished(reportId);
+            boolean jobFinished = isJobFinished(sceneId,reportId,customerId);
+            if (jobFinished || isSceneFinished) {
                 String statusKey = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneId,
                     reportId);
                 boolean updateResult = redisClientUtils.hmset(statusKey, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY,
                     SceneRunTaskStatusEnum.ENDED.getText());
                 if (updateResult) {
-                    log.info("更新场景运行状态缓存成功，报告已完成。场景ID:{},报告ID:{}", sceneId, reportId);
+                    log.info("更新场景运行状态缓存成功。场景ID:{},报告ID:{}", sceneId, reportId);
                 } else {
-                    log.error("更新场景运行状态缓存失败，报告已完成。场景ID:{},报告ID:{}", sceneId, reportId);
+                    log.error("更新场景运行状态缓存失败。场景ID:{},报告ID:{}", sceneId, reportId);
                 }
                 break;
             }
@@ -128,9 +152,18 @@ public class AsyncServiceImpl implements AsyncService {
         }
     }
 
-    private boolean isReportFinished(Long reportId) {
-        Report report = tReportMapper.selectByPrimaryKey(reportId);
-        return report.getStatus() == ReportConstans.FINISH_STATUS;
+    private boolean isSceneFinished(Long sceneId) {
+        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+        if (Objects.isNull(sceneManage) || Objects.isNull(sceneManage.getStatus())){
+            return true;
+        }
+        return SceneManageStatusEnum.ifFinished(sceneManage.getStatus());
+    }
+
+    private boolean isJobFinished(Long sceneId, Long reportId, Long customerId) {
+        String jobName = ScheduleConstants.getScheduleName(sceneId, reportId, customerId);
+        EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
+        return !SceneManageConstant.SCENETASK_JOB_STATUS_RUNNING.equals(engineCallExtApi.getJobStatus(jobName));
     }
 
     private void callStop(ScheduleStartRequestExt startRequest) {

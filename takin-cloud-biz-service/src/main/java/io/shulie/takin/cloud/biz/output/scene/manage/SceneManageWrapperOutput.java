@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.biz.output.scene.manage;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -87,6 +88,12 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
     private transient String updateTime;
 
     private transient String lastPtTime;
+
+    /**
+     * 最后压测时间
+     */
+    private Date lastPtDateTime;
+
 
     private String features;
 
@@ -203,6 +210,9 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
 
         @ApiModelProperty(value = "是否按顺序拆分")
         private Integer isOrderSplit;
+
+        @ApiModelProperty(value = "是否大文件")
+        private Integer isBigFile;
     }
 
     @Data

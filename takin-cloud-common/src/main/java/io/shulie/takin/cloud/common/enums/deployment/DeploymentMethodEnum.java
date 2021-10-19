@@ -2,6 +2,10 @@ package io.shulie.takin.cloud.common.enums.deployment;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author 无涯
@@ -14,6 +18,20 @@ public enum DeploymentMethodEnum {
     PUBLIC( 1,"public");
     public Integer type;
     private String desc;
+
+    private static Map<String, DeploymentMethodEnum> pool = new HashMap<>();
+    static {
+        for (DeploymentMethodEnum e : DeploymentMethodEnum.values()) {
+            pool.put(e.getDesc(), e);
+        }
+    }
+
+    public static DeploymentMethodEnum valueBy(String desc) {
+        if (StringUtils.isBlank(desc)) {
+            return null;
+        }
+        return pool.get(desc);
+    }
 
     public static String getByType(Integer type) {
         if(type == null) {
@@ -28,4 +46,11 @@ public enum DeploymentMethodEnum {
         return DeploymentMethodEnum.PRIVATE.getDesc();
     }
 
+    public boolean equals(String desc) {
+        if (StringUtils.isBlank(desc)) {
+            return false;
+        }
+        DeploymentMethodEnum input = DeploymentMethodEnum.valueBy(desc);
+        return this == input;
+    }
 }

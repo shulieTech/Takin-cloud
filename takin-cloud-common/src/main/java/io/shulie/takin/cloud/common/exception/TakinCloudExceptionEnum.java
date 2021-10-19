@@ -140,6 +140,7 @@ public enum TakinCloudExceptionEnum implements ExceptionReadable {
     REDIS_CMD_EXECUTE_ERROR("cloud-009-s0209","REDIS命令执行异常"),
     HTTP_CMD_EXECUTE_ERROR("cloud-009-s0210","HTTP命令执行异常"),
     DATE_PARSE_ERROR("cloud-009-s0211","时间解析异常"),
+    JSON_PARSE_ERROR("cloud-009-s0212","json处理失败"),
 
     FILE_COPY_ERROR("cloud-009-s0300","复制文件失败"),
     FILE_READ_ERROR("cloud-009-s0301","读取文件失败"),

@@ -34,6 +34,12 @@ public class ReportDaoImpl implements ReportDao {
         if (StringUtils.isNotBlank(param.getEndTime())) {
             wrapper.le(ReportEntity::getGmtCreate, param.getEndTime());
         }
+        if (null != param.getStatus()) {
+            wrapper.eq(ReportEntity::getStatus, param.getStatus());
+        }
+        if (null != param.getIsDel()) {
+            wrapper.eq(ReportEntity::getIsDeleted, param.getIsDel());
+        }
         List<ReportEntity> entities = reportMapper.selectList(wrapper);
         if (entities != null && entities.size() > 0) {
             List<ReportResult> results = entities.stream().map(entity -> {

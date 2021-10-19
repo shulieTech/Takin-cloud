@@ -92,11 +92,17 @@ public class InfluxWriter {
         if (time > 0) {
             builder.time(time, TimeUnit.MILLISECONDS);
         }
+        return insert(builder.build());
+    }
+
+    /**
+     * 插入数据
+     */
+    public boolean insert(Point point) {
         try {
-            influxDB.write(database, "", builder.build());
+            influxDB.write(database, "", point);
         } catch (Exception ex) {
-            logger.error("异常代码【{}】,异常内容：influxdb写数据异常 --> 异常信息: {}",
-                TakinCloudExceptionEnum.TASK_RUNNING_RECEIVE_PT_DATA_ERROR, ex);
+            logger.error(ex.toString());
             return false;
         }
         return true;

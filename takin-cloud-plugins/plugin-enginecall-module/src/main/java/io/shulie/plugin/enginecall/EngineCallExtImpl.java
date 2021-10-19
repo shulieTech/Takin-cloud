@@ -4,11 +4,14 @@ package io.shulie.plugin.enginecall;
 import com.alibaba.fastjson.JSONObject;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import io.shulie.plugin.enginecall.service.EngineCallService;
+import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.common.enums.PressureTypeEnums;
+import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.constants.TakinRequestConstant;
 import io.shulie.takin.ext.api.EngineCallExtApi;
@@ -69,11 +72,6 @@ public class EngineCallExtImpl implements EngineCallExtApi {
 
     @Value("${script.path}")
     private String scriptPath;
-    /**
-     * 调度任务设置
-     */
-    @Value("${pressure.engine.memSetting:-Xmx512m -Xms512m -Xss256K -XX:MaxMetaspaceSize=256m}")
-    private String pressureEngineMemSetting;
 
     @Autowired
     private SceneTaskService sceneTaskService;
@@ -85,6 +83,9 @@ public class EngineCallExtImpl implements EngineCallExtApi {
 
     @Autowired
     private EngineConfigService engineConfigService;
+
+    @Autowired
+    private AppConfig appConfig;
 
     @Override
     public String buildJob(ScheduleRunRequest request) {
@@ -143,6 +144,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
     public void createEngineConfigMap(ScheduleRunRequest request) {
         Map<String, Object> configMap = new HashMap<>();
         ScheduleStartRequestExt scheduleStartRequest = request.getRequest();
+        StrategyConfigExt config = request.getStrategyConfig();
         configMap.put("name", ScheduleConstants.getConfigMapName(scheduleStartRequest.getSceneId(), scheduleStartRequest.getTaskId(),
                 scheduleStartRequest.getCustomerId()));
         JSONObject param = new JSONObject();
@@ -189,9 +191,17 @@ public class EngineCallExtImpl implements EngineCallExtApi {
             enginePressureParams.put("fixed_timer", String.valueOf(scheduleStartRequest.getFixedTimer()));
             enginePressureParams.put("loops_num", String.valueOf(scheduleStartRequest.getLoopsNum()));
         }
-        enginePressureParams.put("tpsTargetLevel", podTpsNum.longValue());
+        enginePressureParams.put("tpsTargetLevel", podTpsNum.longValue()+"");
         enginePressureParams.put("enginePressureMode", scheduleStartRequest.getPressureType() == null ? "" : scheduleStartRequest.getPressureType().toString());
-        enginePressureParams.put("traceSampling", StringUtils.isBlank(engineConfigService.getLogSimpling()) ? "1" : engineConfigService.getLogSimpling());
+        //巡检和脚本调试采样率都为1
+        String traceSampling = "1";
+        if (scheduleStartRequest.getPressureType().equals(PressureTypeEnums.TRY_RUN.getCode())
+                || scheduleStartRequest.getPressureType().equals(PressureTypeEnums.INSPECTION_MODE.getCode())) {
+            enginePressureParams.put("traceSampling", traceSampling);
+        } else {
+            enginePressureParams.put("traceSampling",
+                    StringUtils.isBlank(engineConfigService.getLogSimpling()) ? traceSampling : engineConfigService.getLogSimpling());
+        }
         enginePressureParams.put("ptlLogConfig",JSONObject.toJSONString(engineConfigService.getEnginePtlConfig()));
         enginePressureParams.put("zkServers",zkServers);
         enginePressureParams.put("logQueueSize",logQueueSize);
@@ -205,6 +215,16 @@ public class EngineCallExtImpl implements EngineCallExtApi {
                 businessActivities.add(businessActivity);
             });
             enginePressureParams.put("businessActivities", businessActivities);
+        }
+
+        if (null != config) {
+            if (null != config.getTpsThreadMode()) {
+                enginePressureParams.put("tpsThreadMode", String.valueOf(config.getTpsThreadMode()));
+            }
+            enginePressureParams.put("tpsTargetLevelFactor", String.valueOf(config.getTpsTargetLevelFactor()));
+            if (null != config.getTpsRealThreadNum()) {
+                enginePressureParams.put("maxThreadNum", String.valueOf(config.getTpsRealThreadNum()));
+            }
         }
         param.put("enginePressureParams", enginePressureParams);
 
@@ -226,9 +246,18 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         param.put("takinCloudCallbackUrl", console + "/api/engine/callback");
         // 解决 单个pod ,但文件处于需要切割分类状态的bug
         param.put("podCount", scheduleStartRequest.getTotalIp());
+        //拼接文件路径
+        if (CollectionUtils.isNotEmpty(scheduleStartRequest.getDataFile())) {
+            scheduleStartRequest.getDataFile().forEach(
+                    dataFile -> {
+                        dataFile.setPath(ScheduleConstants.ENGINE_SCRIPT_FILE_PATH + dataFile.getPath());
+                    }
+            );
+        }
         param.put("fileSets", scheduleStartRequest.getDataFile());
         param.put("businessMap", GsonUtil.gsonToString(scheduleStartRequest.getBusinessData()));
-        param.put("memSetting", pressureEngineMemSetting);
+        String memSetting = CommonUtil.getValue(appConfig.getK8sJvmSettings(), config, StrategyConfigExt::getK8sJvmSettings);
+        param.put("memSetting", memSetting);
         configMap.put("engine.conf", param.toJSONString());
         engineCallService.createConfigMap(configMap, PressureInstanceRedisKey.getEngineInstanceRedisKey(request.getRequest().getSceneId(),
                 request.getRequest().getTaskId(), request.getRequest().getCustomerId()));

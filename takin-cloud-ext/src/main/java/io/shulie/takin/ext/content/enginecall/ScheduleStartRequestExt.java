@@ -160,6 +160,12 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
          */
         private Long refId;
 
+
+        /**
+         * 是否大文件
+         */
+        private boolean isBigFile;
+
         /**
          * 文件分片信息,key-排序，引擎会用到；value-需要读取的分区数据
          */

@@ -64,6 +64,24 @@ public class CollectorUtil {
         }
         return instance;
     }
+    public static long getTimeWindowTime(long timestamp) {
+        return getTimeWindow(timestamp).getTimeInMillis();
+    }
+
+    public static long getNextTimeWindow(long timestamp) {
+        Calendar instance = getTimeWindow(timestamp);
+        instance.add(Calendar.SECOND, CollectorConstants.SEND_TIME);
+        return instance.getTimeInMillis();
+    }
+
+    /**
+     * 获取当前时间的时间窗口，时间窗口在当前时间搓往前推一个窗口
+     */
+    public static long getNowTimeWindow() {
+        Calendar instance = getTimeWindow(System.currentTimeMillis());
+        instance.add(Calendar.SECOND, -CollectorConstants.SEND_TIME);
+        return instance.getTimeInMillis();
+    }
 
     /**
      * 获取延迟10S的写入窗口格式化时间。

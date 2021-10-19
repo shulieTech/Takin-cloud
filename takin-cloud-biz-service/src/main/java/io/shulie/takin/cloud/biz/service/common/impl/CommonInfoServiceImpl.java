@@ -1,8 +1,13 @@
 package io.shulie.takin.cloud.biz.service.common.impl;
 
+import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.output.common.CommonInfosOutput;
 import io.shulie.takin.cloud.biz.service.common.CommonInfoService;
+import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
+import io.shulie.takin.cloud.common.utils.CommonUtil;
+import io.shulie.takin.ext.content.enginecall.StrategyConfigExt;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,24 +20,31 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class CommonInfoServiceImpl implements CommonInfoService {
+    @Autowired
+    private AppConfig appConfig;
 
-    @Value("${pressure.engine.images}")
-    private String pressureEngineImage;
-
-    @Value("${info.app.version}")
-    private String cloudVersion;
+    @Autowired
+    private StrategyConfigService strategyConfigService;
 
     /**
      * 获取公共配置信息
      *
-     * @return -
+     * @return
      */
     @Override
     public CommonInfosOutput getCommonConfigurationInfos() {
         CommonInfosOutput result = new CommonInfosOutput();
-        result.setPressureEngineVersion(this.pressureEngineImage);
-        result.setCloudVersion(cloudVersion);
-        log.info("压测引擎版本：{},cloud版本:{}",this.pressureEngineImage,this.cloudVersion);
+        result.setPressureEngineVersion(getCurrentPressureEngineImage());
+        result.setCloudVersion(appConfig.getCloudVersion());
+        log.info("压测引擎版本：{},cloud版本:{}", result.getPressureEngineVersion(), result.getCloudVersion());
         return result;
+    }
+
+    /**
+     * 当前压测引擎版本
+     */
+    private String getCurrentPressureEngineImage() {
+        StrategyConfigExt config = strategyConfigService.getCurrentStrategyConfig();
+        return CommonUtil.getValue(appConfig.getPressureEngineImage(), config, StrategyConfigExt::getPressureEngineImage);
     }
 }
