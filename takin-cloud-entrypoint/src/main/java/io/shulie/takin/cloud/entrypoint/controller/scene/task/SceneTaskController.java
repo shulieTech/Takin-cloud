@@ -26,6 +26,8 @@ import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStatusOutput;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.data.dao.report.ReportDao;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.entrypoint.convert.SceneTaskOpenConverter;
 import io.shulie.takin.cloud.ext.content.asset.AssetBalanceExt;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleInitParamExt;
@@ -34,7 +36,6 @@ import io.shulie.takin.cloud.biz.output.scenetask.SceneActionOutput;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
 import io.shulie.takin.cloud.biz.service.schedule.ScheduleService;
-import io.shulie.takin.cloud.common.constants.ApiUrls;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginsRefOpen;
@@ -46,8 +47,6 @@ import io.shulie.takin.cloud.sdk.model.request.scenetask.SceneTryRunTaskStartReq
 import io.shulie.takin.cloud.sdk.model.request.scenetask.TaskFlowDebugStartReq;
 import io.shulie.takin.cloud.sdk.model.request.scenetask.TaskInspectStartReq;
 import io.shulie.takin.cloud.sdk.model.request.scenetask.TaskInspectStopReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdRequest;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneTaskStartRequest;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneInspectTaskStartResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneInspectTaskStopResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneTryRunTaskStartResp;
@@ -55,7 +54,6 @@ import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneTryRunTaskStatu
 import io.shulie.takin.cloud.sdk.model.response.scenetask.SceneActionResp;
 import io.shulie.takin.cloud.sdk.model.response.scenetask.SceneJobStateResp;
 import io.shulie.takin.cloud.sdk.model.response.scenetask.SceneTaskAdjustTpsResp;
-import io.shulie.takin.cloud.sdk.model.response.SceneActionResponse;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
@@ -75,10 +73,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_SCENE_TASK)
 public class SceneTaskController {
 
-    @Resource(type = TReportMapper.class)
-    TReportMapper tReportMapper;
+    @Resource(type = ReportDao.class)
+    ReportDao reportDao;
     @Resource(type = ReportService.class)
     ReportService reportService;
+    @Resource(type = SceneManageDAO.class)
+    SceneManageDAO sceneManageDao;
     @Resource(type = ScheduleService.class)
     ScheduleService scheduleService;
     @Resource(type = SceneTaskService.class)
@@ -304,8 +304,9 @@ public class SceneTaskController {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_RUNNING_PARAM_VERIFY_ERROR, "sceneId cannot be null");
         }
         Long sceneId = Long.parseLong(String.valueOf(paramMap.get("sceneId")));
-        tReportMapper.resumeStatus(sceneId);
-        tSceneManageMapper.resumeStatus(sceneId);
+        int rows = reportDao.updateStatus(sceneId, 2);
+        log.debug("resumeSceneTask 影响行数:{}", rows);
+        sceneManageDao.updateStatus(sceneId, 0);
         return ResponseResult.success("resume success");
     }
 }

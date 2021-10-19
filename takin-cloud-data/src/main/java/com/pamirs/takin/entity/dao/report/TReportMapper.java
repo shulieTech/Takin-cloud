@@ -7,19 +7,13 @@ import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.vo.report.ReportQueryParam;
 import io.shulie.takin.cloud.common.annotation.DataApartInterceptAnnotation;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import org.apache.ibatis.annotations.Param;
 
 /**
  * @author -
  */
 public interface TReportMapper {
-    /**
-     * 插入
-     *
-     * @param record -
-     * @return -
-     */
-    int insertSelective(Report record);
 
     /**
      * 查询一个运行中的报告
@@ -27,7 +21,7 @@ public interface TReportMapper {
      * @return 压测报告
      */
     @DataApartInterceptAnnotation
-    Report selectOneRunningReport();
+    Report selectOneRunningReport(ContextExt contextExt);
 
     /**
      * 查询所有运行中的报告
@@ -35,7 +29,7 @@ public interface TReportMapper {
      * @return 压测报告列表
      */
     @DataApartInterceptAnnotation
-    List<Report> selectListRunningReport();
+    List<Report> selectListRunningReport(ContextExt contextExt);
 
     /**
      * 依据主键更新
@@ -102,29 +96,4 @@ public interface TReportMapper {
      */
     Report getTempReportBySceneId(Long sceneId);
 
-    /**
-     * 刷新状态
-     *
-     * @param sceneId 场景主键
-     * @return 操作结果
-     */
-    int resumeStatus(Long sceneId);
-
-    /**
-     * 引擎启动，才更新开始时间
-     *
-     * @param id        报告主键
-     * @param startTime 启动时间
-     * @return -
-     */
-    int updateStartTime(@Param("id") Long id, @Param("startTime") Date startTime);
-
-    /**
-     * 依据数据主键&用户主键更新报告状态
-     *
-     * @param id     压测报告数据主键
-     * @param userId 用户主键
-     * @return 操作结果
-     */
-    int updateReportUserById(@Param("id") Long id, @Param("userId") Long userId);
 }
