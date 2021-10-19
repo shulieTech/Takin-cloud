@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.sdk.model.request.report;
 
-import io.shulie.takin.common.beans.page.PagingDevice;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class WarnQueryReq extends PagingDevice {
+public class WarnQueryReq extends ContextExt {
 
     @ApiModelProperty(value = "报告ID")
     private Long reportId;
@@ -21,4 +21,15 @@ public class WarnQueryReq extends PagingDevice {
 
     @ApiModelProperty(value = "业务活动ID")
     private Long businessActivityId;
+    /**
+     * 每页条数
+     */
+    @ApiModelProperty(value = "每页条数")
+    private int pageSize = 20;
+
+    /**
+     * 当前页码
+     */
+    @ApiModelProperty(value = "当前页码")
+    private int current = 0;
 }

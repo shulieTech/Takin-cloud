@@ -104,7 +104,7 @@ public interface ReportService {
      * @param reportId 报告主键
      * @return -
      */
-    Map<String, Object> getReportCount(Long reportId);
+    Map<String, Object> getReportWarnCount(Long reportId);
 
     /**
      * 查询正在生成的报告

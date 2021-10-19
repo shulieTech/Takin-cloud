@@ -1,9 +1,10 @@
 package io.shulie.takin.cloud.sdk.model.request.report;
 
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
+import lombok.EqualsAndHashCode;
 
 /**
  * @author shiyajian
@@ -12,7 +13,8 @@ import lombok.Data;
 
 @Data
 @ApiModel
-public class ReportQueryReq {
+@EqualsAndHashCode(callSuper = true)
+public class ReportQueryReq extends ContextExt {
 
     /**
      * 场景名称

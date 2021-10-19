@@ -471,7 +471,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Map<String, Object> getReportCount(Long reportId) {
+    public Map<String, Object> getReportWarnCount(Long reportId) {
         Map<String, Object> dataMap = tReportBusinessActivityDetailMapper.selectCountByReportId(reportId);
         if (MapUtils.isEmpty(dataMap)) {
             dataMap = Maps.newHashMap();
