@@ -28,21 +28,28 @@ public class CloudUpdateSceneFileRequest extends ContextExt {
     @Deprecated
     @ApiModelProperty(hidden = true)
     private Long scriptId;
-
+    /**
+     * 新的脚本发布id
+     */
     @ApiModelProperty("新的脚本发布id")
     @NotNull(message = "新的脚本发布id" + ValidConstants.MUST_NOT_BE_NULL)
     private Long newScriptId;
-
+    /**
+     * 旧的脚本发布id
+     */
     @ApiModelProperty("旧的脚本发布id")
     @NotNull(message = "旧的脚本发布id" + ValidConstants.MUST_NOT_BE_NULL)
     private Long oldScriptId;
-
+    /**
+     * 脚本类型
+     */
     @ApiModelProperty("脚本类型")
     @NotNull(message = "脚本类型" + ValidConstants.MUST_NOT_BE_NULL)
     private Integer scriptType;
-
+    /**
+     * 上传文件
+     */
     @ApiModelProperty("上传文件")
     @NotEmpty(message = "上传文件不能为空")
     private List<UploadFileDTO> uploadFiles;
-
 }

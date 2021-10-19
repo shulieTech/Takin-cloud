@@ -1,20 +1,20 @@
-package io.shulie.takin.cloud.sdk;
+package io.shulie.takin.cloud.sdk.service;
 
 import lombok.extern.slf4j.Slf4j;
 
 import cn.hutool.http.Method;
 import cn.hutool.http.HttpUtil;
-import cn.hutool.http.HttpRequest;
 import cn.hutool.http.ContentType;
+import cn.hutool.http.HttpRequest;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.net.url.UrlQuery;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.nio.charset.StandardCharsets;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.TypeReference;
 
 import org.springframework.stereotype.Component;
@@ -31,19 +31,22 @@ import io.shulie.takin.common.beans.response.ResponseResult;
  */
 @Slf4j
 @Component
-public class CloudApiSenderService {
+public class CloudApiSenderServiceImpl implements CloudApiSenderService {
 
     @Value("${takin.cloud.url:}")
     private String cloudUrl;
+    @Value("${takin.cloud.timeout:-1}")
+    private int timeout;
 
     /**
-     * 调用AMDB接口的统一方法-GET
+     * 调用CLOUD接口的统一方法-GET
      *
      * @param <T>           响应类型
      * @param url           请求路径
      * @param responseClass 响应类型
-     * @return AMDB接口响应
+     * @return CLOUD接口响应
      */
+    @Override
     public <T> T get(String url, TypeReference<T> responseClass) {
         // 组装请求路径
         String requestUrl = "";
@@ -58,13 +61,14 @@ public class CloudApiSenderService {
     }
 
     /**
-     * 调用AMDB接口的统一方法-GET
+     * 调用CLOUD接口的统一方法-GET
      *
      * @param <T>           响应类型
      * @param url           请求路径
      * @param responseClass 响应类型
-     * @return AMDB接口响应
+     * @return CLOUD接口响应
      */
+    @Override
     public <T> T get(String url, Object param, TypeReference<T> responseClass) {
         // 组装请求路径
         String requestUrl = "";
@@ -80,14 +84,15 @@ public class CloudApiSenderService {
     }
 
     /**
-     * 调用AMDB接口的统一方法-POST
+     * 调用CLOUD接口的统一方法-POST
      *
      * @param url           请求路径
      * @param request       请求参数
      * @param responseClass 响应类型
      * @param <T>           响应类型
-     * @return AMDB接口响应
+     * @return CLOUD接口响应
      */
+    @Override
     public <T> T post(String url, Object request, TypeReference<T> responseClass) {
         String requestUrl = "";
         String requestBodyString = "";
@@ -108,14 +113,15 @@ public class CloudApiSenderService {
     }
 
     /**
-     * 调用AMDB接口的统一方法-PUT
+     * 调用CLOUD接口的统一方法-PUT
      *
      * @param url           请求路径
      * @param request       请求参数
      * @param responseClass 响应类型
      * @param <T>           响应类型
-     * @return AMDB接口响应
+     * @return CLOUD接口响应
      */
+    @Override
     public <T> T put(String url, Object request, TypeReference<T> responseClass) {
         String requestUrl = "";
         String requestBodyString = "";
@@ -136,14 +142,15 @@ public class CloudApiSenderService {
     }
 
     /**
-     * 调用AMDB接口的统一方法-DELETE
+     * 调用CLOUD接口的统一方法-DELETE
      *
      * @param url           请求路径
      * @param request       请求参数
      * @param responseClass 响应类型
      * @param <T>           响应类型
-     * @return AMDB接口响应
+     * @return CLOUD接口响应
      */
+    @Override
     public <T> T delete(String url, Object request, TypeReference<T> responseClass) {
         String requestUrl = "";
         String requestBodyString = "";
@@ -164,14 +171,15 @@ public class CloudApiSenderService {
     }
 
     /**
-     * 调用AMDB接口的统一方法-POST
+     * 调用CLOUD接口的统一方法-POST
      *
      * @param method        请求方式
      * @param url           请求路径
      * @param requestBody   请求参数
      * @param responseClass 响应类型
      * @param <T>           响应类型
-     * @return AMDB接口响应
+     * @return CLOUD接口响应
+     * @throws RuntimeException 在网络异常\请求失败的时候抛出异常
      */
     private <T> T requestApi(Method method, String url, byte[] requestBody, TypeReference<T> responseClass) {
         String responseBody = "";
@@ -182,6 +190,8 @@ public class CloudApiSenderService {
                 .contentType(ContentType.JSON.getValue())
                 .headerMap(getDataTrace(), true)
                 .body(requestBody);
+            // 设置超时时间
+            if (timeout > 0) {request.timeout(timeout * 1000);}
             // 监控接口耗时
             long startTime = System.currentTimeMillis();
             responseBody = request.execute().body();
@@ -192,12 +202,15 @@ public class CloudApiSenderService {
             T apiResponse = JSON.parseObject(responseBody, responseClass);
             if (apiResponse == null) {throw new NullPointerException();}
             if (ResponseResult.class.equals(apiResponse.getClass())) {
-                ResponseResult<?> amdbResult = (ResponseResult<?>)apiResponse;
-                if (!amdbResult.getSuccess()) {throw new RuntimeException(amdbResult.getError().getMsg());}
+                ResponseResult<?> CLOUDResult = (ResponseResult<?>)apiResponse;
+                if (!CLOUDResult.getSuccess()) {throw new RuntimeException(CLOUDResult.getError().getMsg());}
             }
             return apiResponse;
+        } catch (JSONException e) {
+            log.error("请求Cloud接口异常-JSON序列化失败.\n请求路径:{}.\n请求参数:{}\n请求结果:{}", url, new String(requestBody), responseBody);
+            throw e;
         } catch (Throwable throwable) {
-            log.error("请求Cloud接口异常.\n请求路径:{}.\n请求参数:{}.\n请求结果:{}.", url, new String(requestBody), responseBody, throwable);
+            log.error("请求Cloud接口异常.\n请求路径:{}.\n请求参数:{}\n请求结果:{}", url, new String(requestBody), responseBody, throwable);
             throw throwable;
         }
     }

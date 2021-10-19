@@ -10,11 +10,10 @@ import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.cloud.sdk.constant.CloudApiConstant;
 import io.shulie.takin.cloud.sdk.model.request.statistics.PressureTotalReq;
 import io.shulie.takin.cloud.sdk.model.response.statistics.ReportTotalResp;
 import io.shulie.takin.cloud.sdk.model.response.statistics.PressurePieTotalResp;
-import io.shulie.takin.cloud.sdk.CloudApiSenderService;
+import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
 import io.shulie.takin.cloud.sdk.model.response.statistics.PressureListTotalResp;
 import io.shulie.takin.cloud.entrypoint.statistics.CloudPressureStatisticsApi;
 

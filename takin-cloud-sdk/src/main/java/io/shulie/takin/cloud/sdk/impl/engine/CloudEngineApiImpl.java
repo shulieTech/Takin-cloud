@@ -10,11 +10,10 @@ import com.alibaba.fastjson.TypeReference;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import org.springframework.stereotype.Component;
 
-import io.shulie.takin.cloud.sdk.constant.CloudApiConstant;
 import io.shulie.takin.cloud.entrypoint.engine.CloudEngineApi;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.sdk.model.response.engine.EnginePluginDetailResp;
-import io.shulie.takin.cloud.sdk.CloudApiSenderService;
+import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
 import io.shulie.takin.cloud.sdk.model.response.engine.EnginePluginSimpleInfoResp;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginFetchWrapperReq;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginDetailsWrapperReq;

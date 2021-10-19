@@ -8,7 +8,7 @@ import com.alibaba.fastjson.TypeReference;
 
 import org.springframework.stereotype.Component;
 
-import io.shulie.takin.cloud.sdk.CloudApiSenderService;
+import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.entrypoint.report.CloudReportApi;

@@ -2,7 +2,6 @@ package io.shulie.takin.cloud.sdk.model.request.scenemanage;
 
 import java.util.List;
 
-import io.shulie.takin.cloud.biz.input.scenemanage.EnginePluginInput;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,4 +21,16 @@ public class SceneTaskStartRequest extends ContextExt {
     private List<EnginePluginInput> enginePlugins;
 
     private Boolean continueRead;
+
+    @Data
+    public static class EnginePluginInput {
+        /**
+         * 插件标识
+         */
+        private Long pluginId;
+        /**
+         * 插件版本
+         */
+        private String pluginVersion;
+    }
 }

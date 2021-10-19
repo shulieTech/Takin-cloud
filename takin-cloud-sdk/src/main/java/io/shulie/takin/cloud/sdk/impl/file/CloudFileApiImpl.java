@@ -10,13 +10,12 @@ import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import org.springframework.stereotype.Component;
 
 import io.shulie.takin.cloud.entrypoint.file.CloudFileApi;
-import io.shulie.takin.cloud.sdk.constant.CloudApiConstant;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.sdk.model.request.filemanager.FileZipParamReq;
 import io.shulie.takin.cloud.sdk.model.request.filemanager.FileCopyParamReq;
 import io.shulie.takin.cloud.sdk.model.request.filemanager.FileDeleteParamReq;
 import io.shulie.takin.cloud.sdk.model.request.filemanager.FileContentParamReq;
-import io.shulie.takin.cloud.sdk.CloudApiSenderService;
+import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
 import io.shulie.takin.cloud.sdk.model.request.filemanager.FileCreateByStringParamReq;
 
 /**
