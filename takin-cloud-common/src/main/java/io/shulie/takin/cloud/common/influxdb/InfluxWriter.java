@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,25 +36,25 @@ public class InfluxWriter {
     /**
      * 连接地址
      */
-    @Value("${spring.influxdb.url}")
+    @Value("${spring.influxdb.url:}")
     private String influxdbUrl;
 
     /**
      * 用户名
      */
-    @Value("${spring.influxdb.user}")
+    @Value("${spring.influxdb.user:}")
     private String userName;
 
     /**
      * 密码
      */
-    @Value("${spring.influxdb.password}")
+    @Value("${spring.influxdb.password:}")
     private String password;
 
     /**
      * 数据库库名
      */
-    @Value("${spring.influxdb.database}")
+    @Value("${spring.influxdb.database:}")
     private String database;
 
     private InfluxDB influx;
@@ -64,6 +65,9 @@ public class InfluxWriter {
 
     @PostConstruct
     public void init() {
+        if (StringUtils.isBlank(influxdbUrl)) {
+            return;
+        }
         influx = InfluxDBFactory.connect(influxdbUrl, userName, password);
         influx.enableBatch(1000, 40, TimeUnit.MILLISECONDS);
     }
