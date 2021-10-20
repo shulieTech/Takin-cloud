@@ -181,10 +181,10 @@ public class ReportController {
         return ResponseResult.success(reportService.getBusinessActivitySummaryList(reportId));
     }
 
-    @GetMapping(EntrypointUrl.METHOD_REPORT_COUNT)
+    @GetMapping(EntrypointUrl.METHOD_REPORT_WARN_COUNT)
     @ApiOperation("报告汇总")
-    public ResponseResult<Map<String, Object>> getReportCount(Long reportId) {
-        return ResponseResult.success(reportService.getReportCount(reportId));
+    public ResponseResult<Map<String, Object>> getReportWarnCount(Long reportId) {
+        return ResponseResult.success(reportService.getReportWarnCount(reportId));
     }
 
     @GetMapping(EntrypointUrl.METHOD_REPORT_LIST_RUNNING)
