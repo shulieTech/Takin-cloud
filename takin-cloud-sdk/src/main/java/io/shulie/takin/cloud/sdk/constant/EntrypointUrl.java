@@ -77,10 +77,10 @@ public class EntrypointUrl {
      */
     public final static String MODULE_REPORT = "report";
     public final static String METHOD_REPORT_LIST = "listReport";
-    public final static String METHOD_REPORT_COUNT = "count";
     public final static String METHOD_REPORT_LOCK = "lock";
     public final static String METHOD_REPORT_UNLOCK = "unlock";
     public final static String METHOD_REPORT_FINISH = "finish";
+    public final static String METHOD_REPORT_WARN_COUNT = "warn/count";
     public final static String METHOD_REPORT_METRICES = "metrices";
     public final static String METHOD_REPORT_SUMMARY = "businessActivity/summary/list";
     public final static String METHOD_REPORT_ACTIVITY_REPORT_ID = "queryReportActivityByReportId";

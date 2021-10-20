@@ -1,7 +1,11 @@
 package io.shulie.takin.cloud.entrypoint.file;
 
 import java.util.Map;
+import java.util.List;
 
+import io.shulie.takin.cloud.sdk.model.request.file.DeleteTempRequest;
+import io.shulie.takin.cloud.sdk.model.request.file.UploadRequest;
+import io.shulie.takin.cloud.sdk.model.response.file.UploadResponse;
 import io.shulie.takin.cloud.sdk.model.request.filemanager.FileZipParamReq;
 import io.shulie.takin.cloud.sdk.model.request.filemanager.FileCopyParamReq;
 import io.shulie.takin.cloud.sdk.model.request.filemanager.FileDeleteParamReq;
@@ -31,6 +35,13 @@ public interface CloudFileApi {
     Boolean deleteFile(FileDeleteParamReq fileDeleteParamReq);
 
     /**
+     * 删除临时文件
+     *
+     * @param req -
+     */
+    void deleteTempFile(DeleteTempRequest req);
+
+    /**
      * 复制文件到指定目录
      *
      * @param fileCopyParamReq -
@@ -53,4 +64,12 @@ public interface CloudFileApi {
      * @return -
      */
     Boolean createFileByPathAndString(FileCreateByStringParamReq fileCreateByStringParamReq);
+
+    /**
+     * 上传文件
+     *
+     * @param req 请求
+     * @return 上传结果
+     */
+    List<UploadResponse> upload(UploadRequest req);
 }

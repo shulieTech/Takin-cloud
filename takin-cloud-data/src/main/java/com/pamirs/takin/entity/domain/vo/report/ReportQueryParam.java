@@ -42,5 +42,6 @@ public class ReportQueryParam extends PagingContextExt {
      *     <li>1:流量调试</li>
      * </ul>
      */
+    @ApiModelProperty(value = "报告类型")
     private Integer type;
 }
