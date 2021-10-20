@@ -19,6 +19,7 @@ import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneInspectTaskStop
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneTryRunTaskStartResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneInspectTaskStartResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneTryRunTaskStatusResp;
+import io.shulie.takin.common.beans.response.ResponseResult;
 
 /**
  * 压测任务
@@ -131,4 +132,6 @@ public interface CloudTaskApi {
      * @return 操作结果
      */
     Boolean callBackToWriteBalance(ScriptAssetBalanceReq req);
+
+
 }

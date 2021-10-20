@@ -31,6 +31,11 @@ public class ContextExt {
     String filterSql;
 
     /**
+     * 操作人名称
+     */
+    String userName;
+
+    /**
      * 清除上下文信息
      */
     public void clean() {
@@ -38,5 +43,6 @@ public class ContextExt {
         this.setTenantId(null);
         this.setEnvCode(null);
         this.setFilterSql(null);
+        this.setUserName(null);
     }
 }

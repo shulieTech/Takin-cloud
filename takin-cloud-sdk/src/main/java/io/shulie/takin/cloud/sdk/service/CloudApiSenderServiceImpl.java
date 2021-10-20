@@ -207,7 +207,7 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
         // 纯净对象
         ContextExt context = new ContextExt(
             param.getUserId(), param.getTenantId(),
-            param.getEnvCode(), param.getFilterSql());
+            param.getEnvCode(), param.getFilterSql(),param.getUserName());
         // 清理原来的上下文
         param.clean();
         // 返回对象

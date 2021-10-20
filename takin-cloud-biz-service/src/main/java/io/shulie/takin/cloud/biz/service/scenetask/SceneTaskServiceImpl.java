@@ -242,8 +242,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 setResourceId(finalResourceId);
                 setResourceName(input.getResourceName());
                 setResourceType(input.getAssetType());
-                setCreatorId(input.getOperateId());
-                setCreatorName(input.getOperateName());
+                setCreatorId(input.getUserId());
+                setCreatorName(input.getUserName());
             }});
         }
 
@@ -257,13 +257,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(), report.getId(), CloudPluginUtils.getTenantId());
         List<String> activityRefs = sceneData.getBusinessActivityConfig().stream().map(SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getBindRef)
             .collect(Collectors.toList());
+
         redisClientUtils.hmset(ScheduleConstants.SCHEDULE_POD_NUM, String.valueOf(input.getSceneId()),
             sceneData.getIpNum());
-        String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(),
-            report.getId(), input.getCustomerId());
-        List<String> activityRefs = sceneData.getBusinessActivityConfig().stream().map(
-            SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getBindRef)
-            .collect(Collectors.toList());
+
         redisClientUtils.hmset(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REFS
             , JsonHelper.bean2Json(activityRefs));
         //广播事件
@@ -362,17 +359,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(), input.getReportId(),
             input.getTenantId());
         Object totalIp = redisTemplate.opsForHash().get(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_POD_NUM);
-        String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(),
-            input.getReportId(),
-            input.getCustomerId());
-        Object totalIp = redisTemplate.opsForHash().get(engineInstanceRedisKey,
-            PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_POD_NUM);
         if (totalIp == null) {
             log.error("异常代码【{}】,异常内容：更新运行任务tps，获取不到pod总数 --> 异常信息:SceneId:{},ReportId:{}, CustomerId:{}",
                 TakinCloudExceptionEnum.TASK_START_ERROR_CHECK_POD, input.getSceneId(), input.getReportId(),
                 input.getTenantId());
-                TakinCloudExceptionEnum.TASK_START_ERROR_CHECK_POD, input.getSceneId(), input.getReportId(),
-                input.getCustomerId());
             return;
         }
         BigDecimal podTpsNum = new BigDecimal(input.getTpsNum()).divide(new BigDecimal(totalIp.toString()), 0,
@@ -389,11 +379,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(), input.getReportId(),
             input.getTenantId());
         Object object = redisTemplate.opsForHash().get(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_ALL_LIMIT);
-        String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(),
-            input.getReportId(),
-            input.getCustomerId());
-        Object object = redisTemplate.opsForHash().get(engineInstanceRedisKey,
-            PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_ALL_LIMIT);
 
         SceneTaskQueryTpsOutput sceneTaskQueryTpsOutput = new SceneTaskQueryTpsOutput();
         if (object != null) {
@@ -406,15 +391,13 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     @Override
     public Long startFlowDebugTask(SceneManageWrapperInput input, List<EnginePluginInput> enginePlugins) {
         //获取web传过来的操作人
-        Long operateId = input.getOperateId();
-        String operateName = input.getOperateName();
+        Long operateId = input.getUserId();
+        String operateName = input.getUserName();
 
         Long sceneManageId;
         CloudPluginUtils.fillUserData(input);
         //首先根据脚本实例id构建压测场景名称
         String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_FLOW_DEBUG + input.getTenantId() + "_" + input.getScriptDeployId();
-        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_FLOW_DEBUG + input.getCustomerId() + "_"
-            + input.getScriptDeployId();
 
         //根据场景名称查询是否已经存在场景
         SceneManageListResult sceneManageResult = sceneManageDao.queryBySceneName(pressureTestSceneName);
@@ -458,8 +441,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setAssetType(AssetTypeEnum.ACTIVITY_CHECK.getCode());
         sceneTaskStartInput.setResourceId(activityRefInput.getBusinessActivityId());
         sceneTaskStartInput.setResourceName(activityRefInput.getBusinessActivityName());
-        sceneTaskStartInput.setOperateId(operateId);
-        sceneTaskStartInput.setOperateName(operateName);
+        sceneTaskStartInput.setUserId(operateId);
+        sceneTaskStartInput.setUserName(operateName);
         SceneActionOutput sceneActionDTO = startTask(sceneTaskStartInput, null);
         //返回报告id
         return sceneActionDTO.getData();
@@ -473,8 +456,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         Long sceneManageId = null;
         //首先根据脚本实例id构建压测场景名称
         String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_INSPECT + input.getTenantId() + "_" + input.getScriptId();
-        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_INSPECT + input.getCustomerId() + "_" + input
-            .getScriptDeployId();
 
         //根据场景名称查询是否已经存在场景
         SceneManageListResult sceneManageResult = sceneManageDao.queryBySceneName(pressureTestSceneName);
@@ -569,8 +550,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //首先根据脚本实例id构建压测场景名称
         String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_TRY_RUN + input.getTenantId() + "_" + input
             .getScriptDeployId();
-        String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_TRY_RUN + input.getCustomerId() + "_" + input
-            .getScriptDeployId();
         //根据场景名称查询是否已经存在场景
         SceneManageListResult sceneManageResult = sceneManageDao.queryBySceneName(pressureTestSceneName);
         SceneTryRunTaskStartOutput sceneTryRunTaskStartOutput = new SceneTryRunTaskStartOutput();
@@ -615,8 +594,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setAssetType(AssetTypeEnum.SCRIPT_DEBUG.getCode());
         sceneTaskStartInput.setResourceId(input.getScriptDeployId());
         sceneTaskStartInput.setResourceName(input.getScriptName());
-        sceneTaskStartInput.setOperateId(input.getOperateId());
-        sceneTaskStartInput.setOperateName(input.getOperateName());
+        sceneTaskStartInput.setUserId(input.getUserId());
+        sceneTaskStartInput.setUserName(input.getUserName());
         SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput, null);
         sceneTryRunTaskStartOutput.setReportId(sceneActionOutput.getData());
 
@@ -674,8 +653,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             return state;
         }
         String jobName = ScheduleConstants.getScheduleName(sceneId, Long.parseLong(reportId), sceneManage.getTenantId());
-        String jobName = ScheduleConstants.getScheduleName(sceneId, Long.parseLong(reportId),
-            sceneManage.getCustomerId());
         EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
         String status = engineCallExtApi.getJobStatus(jobName);
         state.setState(status);
@@ -705,9 +682,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                     new ArrayList<Long>(1) {{
                         add(sceneData.getTenantId());
                     }});
-                    new ArrayList<Long>(1) {{
-                        add(sceneData.getCustomerId());
-                    }});
                 if (accountInfoList != null && accountInfoList.size() >= 1) {
                     if (accountInfoList.get(0).getBalance().compareTo(sceneData.getEstimateFlow()) < 0) {
                         throw new TakinCloudException(TakinCloudExceptionEnum.TASK_START_VERIFY_ERROR, "压测流量不足！");
@@ -732,20 +706,11 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                     String substring = tempString.substring(0, tempString.indexOf("-"));
                     return Long.parseLong(substring);
                 }).collect(Collectors.toList());
-            List<Long> sceneTaskJobNames = allRunningJobName.stream().filter(
-                jobName -> jobName.startsWith(ScheduleConstants.SCENE_TASK))
-                .map(jobName -> {
-                    String tempString = jobName.replace(ScheduleConstants.SCENE_TASK, "");
-                    String substring = tempString.substring(0, tempString.indexOf("-"));
-                    return Long.parseLong(substring);
-                }).collect(Collectors.toList());
+
             log.info("获取到正在运行的job:{}", JsonHelper.bean2Json(sceneTaskJobNames));
             if (sceneTaskJobNames.contains(sceneData.getId())) {
                 throw new TakinCloudException(TakinCloudExceptionEnum.TASK_START_VERIFY_ERROR, "场景【" + sceneData.getId() + "】"
                     + "存在未删除的job,请等待删除或者人为判断是否可以手工删除~");
-                throw new TakinCloudException(TakinCloudExceptionEnum.TASK_START_VERIFY_ERROR,
-                    "场景【" + sceneData.getId() + "】"
-                        + "存在未删除的job,请等待删除或者人为判断是否可以手工删除~");
             }
 
         }
@@ -795,10 +760,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             UpdateStatusBean.build(scene.getId(), report.getId(), scene.getTenantId())
                 .checkEnum(SceneManageStatusEnum.WAIT, SceneManageStatusEnum.FAILED, SceneManageStatusEnum.STOP, SceneManageStatusEnum.FORCE_STOP)
                 .updateEnum(SceneManageStatusEnum.STARTING).build());
-            UpdateStatusBean.build(scene.getId(), report.getId(), scene.getCustomerId())
-                .checkEnum(SceneManageStatusEnum.WAIT, SceneManageStatusEnum.FAILED, SceneManageStatusEnum.STOP,
-                    SceneManageStatusEnum.FORCE_STOP)
-                .updateEnum(SceneManageStatusEnum.STARTING).build());
         if (!updateFlag) {
             //失败状态 获取最新的报告
             return reportMapper.selectById(report.getId());
@@ -838,7 +799,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         // 进行计数
         String pressureNodeName = ScheduleConstants.getPressureNodeName(taskResult.getSceneId(), taskResult.getTaskId(),
             taskResult.getTenantId());
-            taskResult.getCustomerId());
 
         // cloud集群 redis同步操作，increment 直接拿数据，无需重新获取key的value
         long num = redisClientUtils.increment(pressureNodeName, 1);
@@ -847,9 +807,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             // 启动只更新一次
             sceneManageService.updateSceneLifeCycle(
                 UpdateStatusBean.build(taskResult.getSceneId(), taskResult.getTaskId(), taskResult.getTenantId())
-                    .checkEnum(SceneManageStatusEnum.JOB_CREATEING)
-                    .updateEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING).build());
-                UpdateStatusBean.build(taskResult.getSceneId(), taskResult.getTaskId(), taskResult.getCustomerId())
                     .checkEnum(SceneManageStatusEnum.JOB_CREATEING)
                     .updateEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING).build());
         }
@@ -981,8 +938,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     private Boolean compareScript(long sceneId, String scriptId) {
         Object scriptIdObj = redisClientUtils.hmget(String.format(SceneStartCheckConstants.SCENE_KEY, sceneId), SceneStartCheckConstants.SCRIPT_ID_KEY);
-        Object scriptIdObj = redisClientUtils.hmget(String.format(SceneStartCheckConstants.SCENE_KEY, sceneId),
-            SceneStartCheckConstants.SCRIPT_ID_KEY);
         return scriptIdObj != null && scriptId.equals(scriptIdObj.toString());
     }
 
@@ -996,8 +951,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     }
 
     private void comparePosition(SceneTaskStartCheckOutput output, long sceneId, String fileName, int podNum, boolean isSplit,
-    private void comparePosition(SceneTaskStartCheckOutput output, long sceneId, String fileName, int podNum,
-        boolean isSplit,
         Map<Object, Object> positionMap) {
         SceneBigFileSliceEntity sliceEntity = fileSliceService.getOneByParam(new FileSliceRequest() {{
             setSceneId(sceneId);
