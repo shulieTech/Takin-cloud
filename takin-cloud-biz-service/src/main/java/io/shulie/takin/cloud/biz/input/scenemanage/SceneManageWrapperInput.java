@@ -89,8 +89,6 @@ public class SceneManageWrapperInput extends ContextExt {
 
     private Integer concurrencyNum;
 
-    private Long creatorId;
-
     private String scriptName;
     //
     //    @Data

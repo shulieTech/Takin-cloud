@@ -57,4 +57,6 @@ public class TaskInspectStartReq extends ContextExt {
      * 循环次数
      */
     private Integer loopsNum;
+
+    private Long scriptDeployId;
 }

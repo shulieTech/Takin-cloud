@@ -256,7 +256,7 @@ public class SceneTaskController {
 
     @GetMapping(EntrypointUrl.METHOD_SCENE_TASK_CALL_BACK_TO_WRITE_BALANCE)
     @ApiOperation(value = "脚本调试回调写入流量账户")
-    public ResponseResult<SceneStartCheckResp> writeBalance(@RequestBody AssetBalanceExt balanceExt) {
+    public ResponseResult<SceneStartCheckResp> writeBalance(AssetBalanceExt balanceExt) {
         sceneTaskService.writeBalance(balanceExt);
         return ResponseResult.success();
     }

@@ -35,9 +35,4 @@ public class SceneTaskStartInput extends ContextExt {
     private Long resourceId;
 
     private String resourceName;
-
-    /**
-     * 创建者
-     */
-    private Long creatorId;
 }

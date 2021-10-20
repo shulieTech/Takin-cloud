@@ -79,4 +79,6 @@ public class AssetInvoiceExt extends ContextExt {
      * 创建者
      */
     private Long creatorId;
+
+    private String creatorName;
 }

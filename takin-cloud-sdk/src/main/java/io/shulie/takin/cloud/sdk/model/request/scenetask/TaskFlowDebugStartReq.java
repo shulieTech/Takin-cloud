@@ -48,6 +48,4 @@ public class TaskFlowDebugStartReq extends ContextExt {
     private Long scriptId;
 
     private Long scriptDeployId;
-
-    private Long creatorId;
 }
