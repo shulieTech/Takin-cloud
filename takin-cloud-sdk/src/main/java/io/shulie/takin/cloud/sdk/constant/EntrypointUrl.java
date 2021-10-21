@@ -136,7 +136,7 @@ public class EntrypointUrl {
     public final static String METHOD_SCENE_TASK_CALL_BACK_TO_WRITE_BALANCE = "writeBalance";
     public final static String METHOD_SCENE_TASK_INIT_CALL_BACK = "initCallback";
     public final static String METHOD_SCENE_TASK_TASK_RESULT_NOTIFY = "taskResultNotify";
-    public final static String METHOD_SCENE_TASK_SCRIPT_PRE_SPLIT = "script/preSplit";
+    public final static String METHOD_SCENE_TASK_FILE_CONTACT = "script/contactScene";
 
     /**
      * 模块 - 调度记录

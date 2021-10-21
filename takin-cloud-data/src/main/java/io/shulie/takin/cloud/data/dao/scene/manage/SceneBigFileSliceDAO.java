@@ -51,13 +51,6 @@ public interface SceneBigFileSliceDAO extends IService<SceneBigFileSliceEntity> 
      */
     int updateRef(SceneScriptRefEntity entity);
 
-    /**
-     * 文件是否需要分配
-     *
-     * @param refId 关联主键
-     * @return true/false
-     */
-    boolean isFileNeedSlice(Long refId);
 
     /**
      * 查询一个匹配项

@@ -104,14 +104,12 @@ public class SceneTaskController {
         return ResponseResult.success();
     }
 
-    @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_SCRIPT_PRE_SPLIT)
-    @ApiModelProperty(value = "文件预拆分结果")
+    @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_FILE_CONTACT)
+    @ApiModelProperty(value = "大文件关联场景")
     public ResponseResult<?> preSplitFile(@RequestBody FileSplitResultVO resultVO) {
-        fileSliceService.preSlice(new SceneBigFileSliceParam() {{
+        fileSliceService.contactScene(new SceneBigFileSliceParam() {{
             setFileName(resultVO.getFileName());
-            setSliceCount(resultVO.getSliceCount());
             setSceneId(resultVO.getSceneId());
-            setSliceInfo(resultVO.getSliceInfo());
             setIsSplit(resultVO.getIsSplit());
             setIsOrderSplit(resultVO.getIsOrderSplit());
         }});

@@ -30,6 +30,7 @@ import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
+import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
 import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
 import io.shulie.takin.cloud.biz.input.scenemanage.*;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput.FileInfo;
@@ -39,6 +40,7 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneScriptRefOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneActionOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneJobStateOutput;
+import io.shulie.takin.cloud.biz.output.scenetask.SceneRunTaskStatusOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskQueryTpsOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput.FileReadInfo;
@@ -132,12 +134,17 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     private SceneTaskEventServie sceneTaskEventServie;
     @Resource(type = TReportBusinessActivityDetailMapper.class)
     private TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
+    @Resource(type = SceneTaskStatusCache.class)
+    private SceneTaskStatusCache taskStatusCache;
 
     /**
      * 初始化报告开始时间偏移时间
      */
     @Value("${init.report.startTime.Offset:10}")
     private Long offsetStartTime;
+
+
+
 
     private static final Long KB = 1024L;
     private static final Long MB = KB * 1024;
@@ -247,18 +254,13 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         }
 
         //设置缓存，用以检查压测场景启动状态 lxr 20210623
-        String key = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", input.getSceneId(),
-            report.getId());
-        redisClientUtils.hmset(key, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY,
-            SceneRunTaskStatusEnum.STARTING.getText());
+
+        taskStatusCache.cacheStatus(input.getSceneId(),report.getId(),SceneRunTaskStatusEnum.STARTING);
         //缓存pod数量，上传jmeter日志时判断是否所有文件都上传完成
-        redisClientUtils.hmset(ScheduleConstants.SCHEDULE_POD_NUM, String.valueOf(input.getSceneId()), sceneData.getIpNum());
+        taskStatusCache.cachePodNum(input.getSceneId(),sceneData.getIpNum());
         String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(), report.getId(), CloudPluginUtils.getTenantId());
         List<String> activityRefs = sceneData.getBusinessActivityConfig().stream().map(SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getBindRef)
             .collect(Collectors.toList());
-
-        redisClientUtils.hmset(ScheduleConstants.SCHEDULE_POD_NUM, String.valueOf(input.getSceneId()),
-            sceneData.getIpNum());
 
         redisClientUtils.hmset(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REFS
             , JsonHelper.bean2Json(activityRefs));
@@ -291,7 +293,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         if (sceneManage != null) {
             // 监测启动状态
             scene.setData(SceneManageStatusEnum.getAdaptStatus(sceneManage.getStatus()).longValue());
-            if (sceneManage.getStatus() >= 1) {
+            if (sceneManage.getStatus() >= 0) {
                 ReportResult reportResult;
                 if (reportId == null) {
                     //report = TReportMapper.getReportBySceneId(sceneId);
@@ -303,11 +305,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                     // 记录错误信息
                     List<String> errorMsgs = Lists.newArrayList();
                     // 检查压测引擎返回内容
-                    String key = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneId,
-                        reportResult.getId());
-                    Object errorObj = redisClientUtils.hmget(key, SceneTaskRedisConstants.SCENE_RUN_TASK_ERROR);
-                    if (Objects.nonNull(errorObj) && !Constants.NULL_SIGN.equals(errorObj)) {
-                        errorMsgs.add(SceneStopReasonEnum.ENGINE.getType() + ":" + errorObj);
+                    SceneRunTaskStatusOutput status = taskStatusCache.getStatus(sceneId, reportResult.getId());
+                    if (Objects.nonNull(status) && status.getTaskStatus() == SceneRunTaskStatusEnum.FAILED.getCode()){
+                        errorMsgs.add(SceneStopReasonEnum.ENGINE.getType() + ":" + status.getErrorMsg());
                     }
                     scene.setReportId(reportResult.getId());
                     if (StringUtils.isNotEmpty(reportResult.getFeatures())) {

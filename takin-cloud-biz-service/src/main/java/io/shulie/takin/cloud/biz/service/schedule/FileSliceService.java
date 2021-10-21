@@ -1,6 +1,8 @@
 package io.shulie.takin.cloud.biz.service.schedule;
 
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneContactFileOutput;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 
@@ -45,14 +47,17 @@ public interface FileSliceService {
      * 更新SceneScriptRef
      *
      * @param request
+     * @param param
      * @return -
      */
-    Boolean updateFileRefExtend(FileSliceRequest request);
+    Boolean updateFileRefExtend(FileSliceRequest request,SceneBigFileSliceParam param);
+
 
     /**
-     * 文件预分片
-     *
+     * 关联文件与脚本、场景，并对顺序分片的文件进行预分片
      * @param param
+     * @return
+     * @throws TakinCloudException
      */
-    void preSlice(SceneBigFileSliceParam param);
+    SceneContactFileOutput contactScene(SceneBigFileSliceParam param) throws TakinCloudException;
 }
