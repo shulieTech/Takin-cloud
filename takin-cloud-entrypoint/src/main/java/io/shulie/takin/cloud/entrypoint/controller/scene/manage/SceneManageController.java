@@ -17,22 +17,14 @@ import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
-import io.shulie.takin.cloud.entrypoint.convert.SceneBusinessActivityRefInputConvert;
-import io.shulie.takin.cloud.entrypoint.convert.SceneScriptRefInputConvert;
-import io.shulie.takin.cloud.entrypoint.convert.SceneSlaRefInputConverter;
 import io.shulie.takin.cloud.entrypoint.convert.SceneTaskOpenConverter;
-import io.shulie.takin.cloud.ext.api.AssetExtApi;
-import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageDeleteReq;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageWrapperReq;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.ScriptCheckAndUpdateReq;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageListResp;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.ScriptCheckResp;
 import io.shulie.takin.cloud.sdk.model.response.strategy.StrategyResp;
-import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.cloud.biz.cache.DictionaryCache;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageQueryInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
@@ -44,7 +36,6 @@ import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 import io.shulie.takin.cloud.biz.utils.SlaUtil;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
-import io.shulie.takin.cloud.common.constants.ApiUrls;
 import io.shulie.takin.cloud.common.constants.DicKeyConstant;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
@@ -63,7 +54,6 @@ import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResponse.
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResponse.SlaDetailResponse;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
-import io.shulie.takin.cloud.sdk.model.response.strategy.StrategyResponse;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.ext.content.enginecall.StrategyOutputExt;
 import io.swagger.annotations.Api;
@@ -90,9 +80,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_SCENE_MANAGE)
 @Api(tags = "压测场景管理")
 public class SceneManageController {
-
-    @Resource(type = PluginManager.class)
-    private PluginManager pluginManager;
     @Resource(type = DictionaryCache.class)
     private DictionaryCache dictionaryCache;
     @Resource(type = SceneManageService.class)

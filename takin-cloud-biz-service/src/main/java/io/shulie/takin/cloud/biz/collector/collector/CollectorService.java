@@ -14,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -56,50 +55,47 @@ import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadD
 @Service
 public class CollectorService extends AbstractIndicators {
 
-    public static final String METRICS_EVENTS_STARTED = "started";
     public static final String METRICS_EVENTS_ENDED = "ended";
-
-    private static final Map<String, List<String>> CACHE_TASKS = new ConcurrentHashMap<>();
+    public static final String METRICS_EVENTS_STARTED = "started";
 
     @Resource
     private TReportMapper tReportMapper;
-    @Autowired
+    @Resource
     private RedisClientUtils redisClientUtils;
-    @Autowired
+    @Resource
     private AsyncService asyncService;
-    @Autowired
+    @Resource
     private SceneTaskPressureTestLogUploadDAO logUploadDAO;
-    @Autowired
+    @Resource
     private PushLogService pushLogService;
-    @Autowired
+    @Resource
     private SceneManageDAO sceneManageDAO;
-    @Autowired
+    @Resource
     private SceneTaskStatusCache taskStatusCache;
 
     @Value("${script.path}")
     private String ptlDir;
     @Value("${cloud.push.log:false}")
     private boolean cloudPushPtlLog;
-    @Autowired
+    @Resource
     private EnginePluginUtils enginePluginUtils;
-    @Autowired
+    @Resource
     private InfluxWriter influxWriter;
-    @Autowired
+    @Resource
     private AppConfig appConfig;
-
 
     private final static ExecutorService THREAD_POOL = new ThreadPoolExecutor(5, 200,
         300L, TimeUnit.SECONDS,
         new NoLengthBlockingQueue<>(), new ThreadFactoryBuilder()
         .setNameFormat("ptl-log-push-%d").build(), new ThreadPoolExecutor.AbortPolicy());
 
-    public void collectorToInfluxdb(Long sceneId, Long reportId, Long customerId, List<ResponseMetrics> metricses) {
-        if (CollectionUtils.isEmpty(metricses)) {
+    public void collectorToInfluxdb(Long sceneId, Long reportId, Long customerId, List<ResponseMetrics> metrics) {
+        if (CollectionUtils.isEmpty(metrics)) {
             return;
         }
         String measurement = InfluxUtil.getMetricsMeasurement(sceneId, reportId, customerId);
-        metricses.stream().filter(Objects::nonNull)
-            .map(metrics -> InfluxUtil.toPoint(measurement, metrics.getTimestamp(), metrics))
+        metrics.stream().filter(Objects::nonNull)
+            .map(t -> InfluxUtil.toPoint(measurement, t.getTimestamp(), t))
             .forEach(influxWriter::insert);
     }
 
@@ -232,9 +228,8 @@ public class CollectorService extends AbstractIndicators {
 
     }
 
-
     private void cacheTryRunTaskStatus(Long sceneId, Long reportId, Long customerId, SceneRunTaskStatusEnum status) {
-        taskStatusCache.cacheStatus(sceneId,reportId,status);
+        taskStatusCache.cacheStatus(sceneId, reportId, status);
         Report report = tReportMapper.selectByPrimaryKey(reportId);
         if (Objects.nonNull(report) && report.getPressureType() != PressureTypeEnums.FLOW_DEBUG.getCode()
             && report.getPressureType() != PressureTypeEnums.INSPECTION_MODE.getCode()
@@ -253,8 +248,11 @@ public class CollectorService extends AbstractIndicators {
     }
 
     private boolean isLastSign(Long lastSignCount, String engineName) {
-        if (StringUtils.isNotEmpty(redisClientUtils.getString(engineName))
-            && lastSignCount.equals(Long.valueOf(redisClientUtils.getString(engineName)))) {
+        if (
+            // redis中有信息
+            StringUtils.isNotEmpty(redisClientUtils.getString(engineName))
+                // 且信息匹配
+                && lastSignCount.equals(Long.valueOf(redisClientUtils.getString(engineName)))) {
             return true;
         }
         return false;
@@ -265,22 +263,22 @@ public class CollectorService extends AbstractIndicators {
      */
     public void statisticalIp(Long sceneId, Long reportId, Long tenantId, long time, String ip) {
 
-        String windosTimeKey = String.format("%s:%s", getPressureTaskKey(sceneId, reportId, tenantId),
-            "windosTime");
+        String windowsTimeKey = String.format("%s:%s", getPressureTaskKey(sceneId, reportId, tenantId),
+            "windowsTime");
         String timeInMillis = String.valueOf(CollectorUtil.getTimeWindow(time).getTimeInMillis());
         List<String> ips;
-        if (redisTemplate.getExpire(windosTimeKey) == -2) {
+        if (redisTemplate.getExpire(windowsTimeKey) == -2) {
             ips = new ArrayList<>();
             ips.add(ip);
-            redisTemplate.opsForHash().put(windosTimeKey, timeInMillis, ips);
-            redisTemplate.expire(windosTimeKey, 60 * 60 * 2, TimeUnit.SECONDS);
+            redisTemplate.opsForHash().put(windowsTimeKey, timeInMillis, ips);
+            redisTemplate.expire(windowsTimeKey, 60 * 60 * 2, TimeUnit.SECONDS);
         } else {
-            ips = (List<String>)redisTemplate.opsForHash().get(windosTimeKey, timeInMillis);
+            ips = (List<String>)redisTemplate.opsForHash().get(windowsTimeKey, timeInMillis);
             if (null == ips) {
                 ips = new ArrayList<>();
             }
             ips.add(ip);
-            redisTemplate.opsForHash().put(windosTimeKey, timeInMillis, ips);
+            redisTemplate.opsForHash().put(windowsTimeKey, timeInMillis, ips);
         }
 
     }
@@ -299,21 +297,4 @@ public class CollectorService extends AbstractIndicators {
         return true;
     }
 
-    public boolean cacheCheck(Long scenId, Long reportId, Long tenantId, List<String> transactions) {
-        String hashKey = getTaskKey(scenId, reportId, tenantId);
-        List<String> list = CACHE_TASKS.get(hashKey);
-        boolean flag = true;
-        if (null != list) {
-            for (String transaction : transactions) {
-                if (!list.contains(transaction)) {
-                    list.add(transaction);
-                    flag = false;
-                }
-            }
-        } else {
-            CACHE_TASKS.put(hashKey, transactions);
-            flag = false;
-        }
-        return flag;
-    }
 }
