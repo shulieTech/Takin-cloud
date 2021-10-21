@@ -23,5 +23,5 @@ public interface AsyncService {
      * @param sceneId  场景主键
      * @param reportId 报告主键
      */
-    void updateSceneRunningStatus(Long sceneId, Long reportId);
+    void updateSceneRunningStatus(Long sceneId, Long reportId, Long customerId);
 }

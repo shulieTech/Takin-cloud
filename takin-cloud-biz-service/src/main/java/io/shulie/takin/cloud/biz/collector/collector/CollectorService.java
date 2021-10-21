@@ -9,41 +9,43 @@ import java.util.concurrent.*;
 
 import javax.annotation.Resource;
 
-import com.baomidou.mybatisplus.core.toolkit.PluginUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.entity.report.Report;
-import io.shulie.takin.cloud.biz.config.AppConfig;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.biz.service.async.AsyncService;
-import io.shulie.takin.cloud.biz.service.log.PushLogService;
-import io.shulie.takin.cloud.biz.task.PressureTestLogUploadTask;
-import io.shulie.takin.cloud.biz.utils.DataUtils;
-import io.shulie.takin.cloud.common.bean.collector.EventMetrics;
-import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
-import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+
+import io.shulie.takin.utils.json.JsonHelper;
 import io.shulie.takin.cloud.common.constants.*;
-import io.shulie.takin.cloud.common.enums.PressureTypeEnums;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.influxdb.InfluxDBUtil;
+import io.shulie.takin.cloud.biz.utils.DataUtils;
+import io.shulie.takin.cloud.biz.config.AppConfig;
+import io.shulie.takin.cloud.common.utils.GsonUtil;
+import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
+import io.shulie.takin.cloud.common.influxdb.InfluxUtil;
+import io.shulie.takin.cloud.common.utils.CollectorUtil;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.common.utils.CollectorUtil;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
-import io.shulie.takin.cloud.common.utils.GsonUtil;
-import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
+import io.shulie.takin.cloud.biz.service.async.AsyncService;
+import io.shulie.takin.cloud.biz.service.log.PushLogService;
+import io.shulie.takin.cloud.common.enums.PressureTypeEnums;
+import io.shulie.takin.cloud.biz.task.PressureTestLogUploadTask;
+import io.shulie.takin.cloud.common.bean.collector.EventMetrics;
 import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
-import io.shulie.takin.ext.api.EngineCallExtApi;
-import io.shulie.takin.utils.json.JsonHelper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
+import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
 
 /**
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
@@ -90,29 +92,30 @@ public class CollectorService extends AbstractIndicators {
         if (CollectionUtils.isEmpty(metricses)) {
             return;
         }
-        String measurement = InfluxDBUtil.getMetricsMeasurement(sceneId, reportId, customerId);
+        String measurement = InfluxUtil.getMetricsMeasurement(sceneId, reportId, customerId);
         metricses.stream().filter(Objects::nonNull)
-                .map(metrics -> InfluxDBUtil.toPoint(measurement, metrics.getTimestamp(), metrics))
-                .forEach(influxWriter::insert);
+            .map(metrics -> InfluxUtil.toPoint(measurement, metrics.getTimestamp(), metrics))
+            .forEach(influxWriter::insert);
     }
+
     /**
      * 记录时间
      */
-    public void collector(Long sceneId, Long reportId, Long customerId, List<ResponseMetrics> metrics) {
+    public void collector(Long sceneId, Long reportId, Long tenantId, List<ResponseMetrics> metrics) {
         if (StringUtils.isNotBlank(appConfig.getCollector()) && "influxdb".equalsIgnoreCase(appConfig.getCollector())) {
-            collectorToInfluxdb(sceneId, reportId, customerId, metrics);
+            collectorToInfluxdb(sceneId, reportId, tenantId, metrics);
             return;
         }
-        String taskKey = getPressureTaskKey(sceneId, reportId, customerId);
+        String taskKey = getPressureTaskKey(sceneId, reportId, tenantId);
         for (ResponseMetrics metric : metrics) {
             try {
                 long timeWindow = CollectorUtil.getTimeWindow(metric.getTimestamp()).getTimeInMillis();
-                if (validate(timeWindow,sceneId,reportId,tenantId,metrics)) {
+                if (validate(timeWindow, sceneId, reportId, tenantId, metrics)) {
                     // 写入redis
-                    log.info("{}-{}-{} write redis , timestamp-{},timeWindow-{}",sceneId,reportId,tenantId,
-                        metric.getTimestamp(),timeWindow);
+                    log.info("{}-{}-{} write redis , timestamp-{},timeWindow-{}", sceneId, reportId, tenantId,
+                        metric.getTimestamp(), timeWindow);
                     String transaction = metric.getTransaction();
-                    String timePod = CollectorUtil.getTimestampPodNum(metric.getTimestamp(),metric.getPodNum());
+                    String timePod = CollectorUtil.getTimestampPodNum(metric.getTimestamp(), metric.getPodNum());
                     intSaveRedisMap(countKey(taskKey, transaction, timeWindow), timePod, metric.getCount());
                     intSaveRedisMap(failCountKey(taskKey, transaction, timeWindow), timePod, metric.getFailCount());
                     intSaveRedisMap(saCountKey(taskKey, transaction, timeWindow), timePod, metric.getSaCount());
@@ -123,12 +126,12 @@ public class CollectorService extends AbstractIndicators {
                     //1-100%每个百分点位sa数据
                     saveRedisMap(percentDataKey(taskKey, transaction, timeWindow), timePod, metric.getPercentData());
 
-                    /**
+                    /*
                      * all指标额外计算，累加所有业务活动的saCount all 为空
                      */
                     intSaveRedisMap(saCountKey(taskKey, "all", timeWindow),
                         // 计算所有业务活动的saCount 用特殊标识 _transaction
-                        timePod + "_" + transaction ,
+                        timePod + "_" + transaction,
                         metric.getSaCount());
 
                     longSaveRedisMap(rtKey(taskKey, transaction, timeWindow), timePod, metric.getSumRt());
@@ -140,7 +143,7 @@ public class CollectorService extends AbstractIndicators {
                     mostValue(minRtKey(taskKey, transaction, timeWindow), metric.getMinRt(), 1);
                 }
             } catch (Exception e) {
-                log.error("write redis error :{}",e.getMessage());
+                log.error("write redis error :{}", e.getMessage());
             }
         }
     }
@@ -155,10 +158,10 @@ public class CollectorService extends AbstractIndicators {
                 boolean isFirst = METRICS_EVENTS_STARTED.equals(metric.getEventName());
                 boolean isLast = METRICS_EVENTS_ENDED.equals(metric.getEventName());
                 //每个pod只会启动或者一次，处理数据重复发送问题
-                String enginePodNoStartKey = ScheduleConstants.getEnginePodNoStartKey(sceneId, reportId, customerId,
-                        metric.getPodNo(), metric.getEventName());
+                String enginePodNoStartKey = ScheduleConstants.getEnginePodNoStartKey(sceneId, reportId, tenantId,
+                    metric.getPodNo(), metric.getEventName());
                 Long startPod = redisClientUtils.increment(enginePodNoStartKey, 1);
-                if (startPod > 1){
+                if (startPod > 1) {
                     continue;
                 }
                 if (isFirst) {
@@ -182,19 +185,15 @@ public class CollectorService extends AbstractIndicators {
                             .updateEnum(SceneManageStatusEnum.ENGINE_RUNNING)
                             .build());
                     }
+                    cacheTryRunTaskStatus(sceneId, reportId, tenantId, SceneRunTaskStatusEnum.RUNNING);
+                }
+                if (cloudPushPtlLog) {
+                    log.info("开始异步上传ptl日志，场景ID：{},报告ID:{}", sceneId, reportId);
+                    EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
                     String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_JTL_FILE_NAME_SYSTEM_PROP_KEY);
-                    cacheTryRunTaskStatus(sceneId, reportId, tenantId, SceneRunTaskStatusEnum.STARTED, fileName);
-
-                        cacheTryRunTaskStatus(sceneId, reportId, customerId, SceneRunTaskStatusEnum.RUNNING);
-                    }
-                    if (cloudPushPtlLog) {
-                        log.info("开始异步上传ptl日志，场景ID：{},报告ID:{}", sceneId, reportId);
-                        EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
-                        String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_JTL_FILE_NAME_SYSTEM_PROP_KEY);
-                        THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, tenantId, logUploadDAO, redisClientUtils,
-                            pushLogService, sceneManageDAO, ptlDir, fileName,engineCallExtApi) {
-                        });
-                    }
+                    THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, tenantId, logUploadDAO, redisClientUtils,
+                        pushLogService, sceneManageDAO, ptlDir, fileName, engineCallExtApi) {
+                    });
                 }
                 if (isLast) {
                     // 取max flag 是否更新过
@@ -225,6 +224,7 @@ public class CollectorService extends AbstractIndicators {
                     TakinCloudExceptionEnum.TASK_RUNNING_RECEIVE_PT_DATA_ERROR, e);
             }
         }
+
     }
 
     private void cacheTryRunTaskStatus(Long sceneId, Long reportId, Long customerId, SceneRunTaskStatusEnum status) {
@@ -236,7 +236,7 @@ public class CollectorService extends AbstractIndicators {
         if (Objects.nonNull(report) && report.getPressureType() != PressureTypeEnums.FLOW_DEBUG.getCode()
             && report.getPressureType() != PressureTypeEnums.INSPECTION_MODE.getCode()
             && status.getCode() == SceneRunTaskStatusEnum.RUNNING.getCode()) {
-            asyncService.updateSceneRunningStatus(sceneId, reportId,customerId);
+            asyncService.updateSceneRunningStatus(sceneId, reportId, customerId);
         }
     }
 
@@ -251,7 +251,7 @@ public class CollectorService extends AbstractIndicators {
 
     private boolean isLastSign(Long lastSignCount, String engineName) {
         if (StringUtils.isNotEmpty(redisClientUtils.getString(engineName))
-                && lastSignCount.equals(Long.valueOf(redisClientUtils.getString(engineName)))) {
+            && lastSignCount.equals(Long.valueOf(redisClientUtils.getString(engineName)))) {
             return true;
         }
         return false;

@@ -76,7 +76,7 @@ public class CollectorApplication {
                 .map(GsonUtil::gsonToString)
                 .map(s -> GsonUtil.gsonToBean(s, EventMetrics.class))
                 .collect(Collectors.toList());
-            culTransaction(responseMetrics, sceneId, reportId, customerId);
+            culTransaction(responseMetrics, sceneId, reportId, tenantId);
             long time = System.currentTimeMillis();
             if (responseMetrics.size() > 0) {
                 long timestamp = responseMetrics.get(0).getTimestamp();

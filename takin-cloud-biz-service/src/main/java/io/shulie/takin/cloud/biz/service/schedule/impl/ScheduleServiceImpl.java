@@ -107,7 +107,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             return;
         }
 
-        String scheduleName = ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getCustomerId());
+        String scheduleName = ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getTenantId());
 
         //保存调度记录
         ScheduleRecord scheduleRecord = new ScheduleRecord();
@@ -120,7 +120,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         scheduleRecord.setTenantId(request.getTenantId());
         scheduleRecord.setPodClass(scheduleName);
-        TScheduleRecordMapper.insertSelective(scheduleRecord);
+        tScheduleRecordMapper.insertSelective(scheduleRecord);
 
         //add by lipeng 保存调度对应压测引擎插件记录信息
         scheduleRecordEnginePluginService.saveScheduleRecordEnginePlugins(

@@ -1,33 +1,36 @@
 package io.shulie.takin.cloud.biz.task;
 
-import io.shulie.takin.cloud.biz.service.log.PushLogService;
-import io.shulie.takin.cloud.biz.utils.FileFetcher;
-import io.shulie.takin.cloud.common.constants.SceneManageConstant;
-import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
-import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
-import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
-import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
-import io.shulie.takin.ext.api.EngineCallExtApi;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import io.shulie.takin.cloud.biz.utils.FileFetcher;
+import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
+import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.takin.cloud.biz.service.log.PushLogService;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
+import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
+import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
+
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Date;
 import java.util.Objects;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.io.FileNotFoundException;
 
 /**
  * 压测日志上传任务
  *
  * @author -
  */
+@Data
 @Slf4j
 public class PressureTestLogUploadTask implements Runnable {
 
@@ -52,9 +55,9 @@ public class PressureTestLogUploadTask implements Runnable {
     private EngineCallExtApi engineCallExtApi;
 
     public PressureTestLogUploadTask(Long sceneId, Long reportId, Long tenantId,
-                                     SceneTaskPressureTestLogUploadDAO logUploadDAO, RedisClientUtils redisClientUtils,
-                                     PushLogService pushLogService, SceneManageDAO sceneManageDAO,
-                                     String logDir, String fileName, EngineCallExtApi engineCallExtApi) {
+        SceneTaskPressureTestLogUploadDAO logUploadDAO, RedisClientUtils redisClientUtils,
+        PushLogService pushLogService, SceneManageDAO sceneManageDAO,
+        String logDir, String fileName, EngineCallExtApi engineCallExtApi) {
         this.sceneId = sceneId;
         this.reportId = reportId;
         this.tenantId = tenantId;
@@ -114,16 +117,16 @@ public class PressureTestLogUploadTask implements Runnable {
                     boolean sceneEnded = isSceneEnded(this.sceneId);
                     if (sceneEnded) {
                         //等待job删除
-                        String jobName = ScheduleConstants.getScheduleName(sceneId, reportId, customerId);
-                        while (SceneManageConstant.SCENETASK_JOB_STATUS_RUNNING.equals(engineCallExtApi.getJobStatus(jobName))) {
-                            log.info("上传Jmeter日志--场景ID:{},job【{}】还在运行中，等待job停止",sceneId,jobName);
+                        String jobName = ScheduleConstants.getScheduleName(sceneId, reportId, tenantId);
+                        while (SceneManageConstant.SCENE_TASK_JOB_STATUS_RUNNING.equals(engineCallExtApi.getJobStatus(jobName))) {
+                            log.info("上传Jmeter日志--场景ID:{},job【{}】还在运行中，等待job停止", sceneId, jobName);
                             TimeUnit.SECONDS.sleep(5);
                         }
-                        log.info("上传Jmeter日志--场景ID:{}，报告ID:{},job【{}】已停止，最后一次上传", this.sceneId, this.reportId,jobName);
+                        log.info("上传Jmeter日志--场景ID:{}，报告ID:{},job【{}】已停止，最后一次上传", this.sceneId, this.reportId, jobName);
                         long fileSize = getFileSize(ptlFile);
                         long lastSize = Math.max(fileSize - position, MAX_PUSH_SIZE);
                         data = readFile(ptlFile, subFileName, position, ptlFile.getAbsolutePath(), fileFetcher,
-                                lastSize);
+                            lastSize);
                         if (data != null && data.length > 0) {
                             pushLogService.pushLogToAmdb(data, VERSION);
                         }
@@ -195,13 +198,13 @@ public class PressureTestLogUploadTask implements Runnable {
     }
 
     /**
-     * @param sceneId
-     * @return
+     * @param sceneId 场景主键
+     * @return 是否启用
      */
     private boolean isSceneEnded(Long sceneId) {
         SceneManageResult manageResult = this.sceneManageDAO.getSceneById(sceneId);
         if (Objects.isNull(manageResult) || Objects.isNull(manageResult.getStatus())) {
-            log.warn("上传Jmeter日志--场景ID:{},未查询到场景！",sceneId);
+            log.warn("上传Jmeter日志--场景ID:{},未查询到场景！", sceneId);
             return true;
         }
         return SceneManageStatusEnum.ifFinished(manageResult.getStatus());

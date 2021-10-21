@@ -105,15 +105,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class SceneTaskServiceImpl implements SceneTaskService {
     @Resource
-    private TSceneManageMapper tSceneManageMapper;
-
-    // 初始化报告开始时间偏移时间
-    @Value("${init.report.startTime.Offset:10}")
-    private Long offsetStartTime;
-
-    @Resource
-    private TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
-    @Resource
     private RedisTemplate<String, String> redisTemplate;
     @Resource(type = ReportDao.class)
     private ReportDao reportDao;

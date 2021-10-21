@@ -2,26 +2,27 @@ package io.shulie.takin.cloud.entrypoint.controller.statistics;
 
 import java.util.List;
 
-import io.shulie.takin.cloud.biz.input.statistics.PressureTotalInput;
-import io.shulie.takin.cloud.biz.output.statistics.PressureListTotalOutput;
-import io.shulie.takin.cloud.biz.output.statistics.PressurePieTotalOutput;
-import io.shulie.takin.cloud.biz.output.statistics.ReportTotalOutput;
-import io.shulie.takin.cloud.biz.service.statistics.PressureStatisticsService;
-import io.shulie.takin.cloud.common.constants.ApiUrls;
-import io.shulie.takin.cloud.entrypoint.convert.StatisticsConvert;
-import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
-import io.shulie.takin.cloud.sdk.model.request.statistics.PressureTotalReq;
-import io.shulie.takin.cloud.sdk.model.response.statistics.PressureListTotalResp;
-import io.shulie.takin.cloud.sdk.model.response.statistics.PressurePieTotalResp;
-import io.shulie.takin.cloud.sdk.model.response.statistics.ReportTotalResp;
-import io.shulie.takin.common.beans.response.ResponseResult;
 import io.swagger.annotations.ApiOperation;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
+import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.entrypoint.convert.StatisticsConvert;
+import io.shulie.takin.cloud.biz.output.statistics.ReportTotalOutput;
+import io.shulie.takin.cloud.biz.input.statistics.PressureTotalInput;
+import io.shulie.takin.cloud.biz.output.statistics.PressurePieTotalOutput;
+import io.shulie.takin.cloud.biz.output.statistics.PressureListTotalOutput;
+import io.shulie.takin.cloud.sdk.model.request.statistics.PressureTotalReq;
+import io.shulie.takin.cloud.sdk.model.response.statistics.ReportTotalResp;
+import io.shulie.takin.cloud.biz.service.statistics.PressureStatisticsService;
+import io.shulie.takin.cloud.sdk.model.response.statistics.PressureListTotalResp;
+import io.shulie.takin.cloud.sdk.model.response.statistics.PressurePieTotalResp;
 
 /**
  * @author 无涯
