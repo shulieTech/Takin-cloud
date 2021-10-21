@@ -1,4 +1,4 @@
-package io.shulie.takin.cloud.biz.collector.collector;
+package io.shulie.takin.cloud.entrypoint.controller.collector;
 
 import java.util.Map;
 import java.util.List;
@@ -6,30 +6,34 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiOperation;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.shulie.takin.utils.json.JsonHelper;
+import io.shulie.takin.cloud.common.utils.IPUtils;
+import io.shulie.takin.cloud.common.utils.UrlUtil;
+import io.shulie.takin.cloud.common.utils.GsonUtil;
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
+import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.bean.collector.Constants;
 import io.shulie.takin.cloud.common.bean.collector.EventMetrics;
 import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
-import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.common.utils.GsonUtil;
-import io.shulie.takin.cloud.common.utils.IPUtils;
-import io.shulie.takin.cloud.common.utils.UrlUtil;
-import io.shulie.takin.utils.json.JsonHelper;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
+import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 
 /**
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
@@ -37,24 +41,24 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/collector")
 @Api(tags = "接受压测引擎参数")
+@RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_COLLECTOR)
 public class CollectorApplication {
 
-    @Autowired
+    @Resource
     private CollectorService collectorService;
-    @Autowired
+    @Resource
     private RedisClientUtils redisClientUtils;
 
     @Value("${script.pre.match:true}")
     private boolean scriptPreMatch;
 
     @ApiOperation("接收事件和压测数据")
-    @RequestMapping("/receive")
+    @RequestMapping(EntrypointUrl.METHOD_COLLECTOR_RECEIVE)
     public ResponseEntity<String> receive(@ApiParam("场景id") @RequestParam("sceneId") Long sceneId,
         @ApiParam("报告id") @RequestParam("reportId") Long reportId,
         @ApiParam("租户id") @RequestParam(value = "tenantId", required = false) Long tenantId,
-        @ApiParam("事件或数据参数") @RequestBody List<Map> metrics,
+        @ApiParam("事件或数据参数") @RequestBody List<Map<?, ?>> metrics,
         HttpServletRequest request) {
         try {
             if (sceneId == null || reportId == null) {

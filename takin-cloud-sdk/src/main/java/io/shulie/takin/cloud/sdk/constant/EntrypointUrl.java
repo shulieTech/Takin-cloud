@@ -161,4 +161,11 @@ public class EntrypointUrl {
     public final static String METHOD_STRATEGY_UPDATE = "";
     public final static String METHOD_STRATEGY_DETAIL = "";
     public final static String METHOD_STRATEGY_DELETE = "";
+
+    /**
+     * 模块 - 接受压测引擎数据
+     */
+    public final static String MODULE_COLLECTOR = "collector";
+    public final static String METHOD_COLLECTOR_RECEIVE = "receive";
+
 }

@@ -77,8 +77,8 @@ public class PluginOpenController {
         return ResponseResult.success();
     }
 
-    @ApiOperation(EntrypointUrl.METHOD_ENGINE_PLUGIN_ENABLE)
-    @PostMapping("enableEnginePlugin")
+    @ApiOperation("启用引擎插件")
+    @PostMapping(EntrypointUrl.METHOD_ENGINE_PLUGIN_ENABLE)
     public ResponseResult<?> enableEnginePlugin(@RequestBody EnginePluginStatusWrapperReq request) {
         Long pluginId = request.getPluginId();
         if (Objects.isNull(pluginId) || pluginId == 0) {
