@@ -27,7 +27,7 @@ public class SlaListener {
      * @param event -
      */
     @IntrestFor(event = "started")
-    public void doStartSLAEvent(Event event) {
+    public void doStartSlaEvent(Event event) {
         log.info("SLA配置，从调度中心收到压测任务启动成功事件");
         Object object = event.getExt();
         TaskResult taskBean = (TaskResult)object;
@@ -40,7 +40,7 @@ public class SlaListener {
      * @param event -
      */
     @IntrestFor(event = "finished")
-    public void doStopSLAEvent(Event event) {
+    public void doStopSlaEvent(Event event) {
         log.info("通知SLA配置模块，从调度中心收到压测任务结束事件");
         try {
             Object object = event.getExt();

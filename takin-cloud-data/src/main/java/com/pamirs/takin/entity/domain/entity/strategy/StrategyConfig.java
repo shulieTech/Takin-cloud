@@ -4,6 +4,9 @@ import java.util.Date;
 
 import lombok.Data;
 
+/**
+ * @author -
+ */
 @Data
 public class StrategyConfig {
     private Long id;

@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * 压测报告业务活动
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_business_activities")

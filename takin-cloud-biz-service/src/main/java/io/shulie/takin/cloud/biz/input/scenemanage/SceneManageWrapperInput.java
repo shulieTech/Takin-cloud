@@ -1,17 +1,16 @@
 package io.shulie.takin.cloud.biz.input.scenemanage;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import io.shulie.takin.cloud.common.bean.TimeBean;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 
 /**
  * @author qianshui
@@ -20,9 +19,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "场景保存入参")
-public class SceneManageWrapperInput extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = -7653146473491831687L;
+public class SceneManageWrapperInput extends ContextExt {
 
     @ApiModelProperty(name = "id", value = "压测场景ID")
     private Long id;
@@ -84,64 +81,14 @@ public class SceneManageWrapperInput extends CloudUserCommonRequestExt implement
 
     private Long scriptId;
 
+    private Long scriptDeployId;
+
     private Long fixTimer;
 
     private Integer loopsNum;
 
     private Integer concurrencyNum;
-    //
-    //    @Data
-    //    public static class SceneScriptRefInput implements Serializable {
-    //
-    //        private static final long serialVersionUID = -2991318843153108331L;
-    //
-    //        @ApiModelProperty(value = "ID")
-    //        private Long id;
-    //
-    //        @ApiModelProperty(value = "上传ID")
-    //        private String uploadId;
-    //
-    //        @ApiModelProperty(value = "文件名称")
-    //        private String fileName;
-    //
-    //        @ApiModelProperty(value = "上传时间")
-    //        private String uploadTime;
-    //
-    //        @ApiModelProperty(value = "上传路径")
-    //        private String uploadPath;
-    //
-    //        @ApiModelProperty(value = "是否删除")
-    //        private Integer isDeleted;
-    //
-    //        @ApiModelProperty(value = "上传数据量")
-    //        private Long uploadedData;
-    //
-    //        @ApiModelProperty(value = "是否拆分")
-    //        private Integer isSplit;
-    //
-    //        @ApiModelProperty(value = "Topic")
-    //        private String topic;
-    //
-    //        @ApiModelProperty(value = "文件类型")
-    //        private Integer fileType;
-    //    }
-    //
-    //    @Data
-    //    public static class SceneSlaRefInput implements Serializable {
-    //
-    //        private static final long serialVersionUID = 4747478435828708203L;
-    //
-    //        @ApiModelProperty(value = "规则名称")
-    //        private String ruleName;
-    //
-    //        @ApiModelProperty(value = "适用对象")
-    //        private String[] businessActivity;
-    //
-    //        @ApiModelProperty(value = "规则")
-    //        private RuleBean rule;
-    //
-    //        @ApiModelProperty(value = "状态")
-    //        private Integer status = 0;
-    //    }
+
+    private String scriptName;
 
 }

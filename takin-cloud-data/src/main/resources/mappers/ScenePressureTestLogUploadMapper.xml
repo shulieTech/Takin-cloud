@@ -7,7 +7,7 @@
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="scene_id" jdbcType="BIGINT" property="sceneId" />
     <result column="report_id" jdbcType="BIGINT" property="reportId" />
-    <result column="customer_id" jdbcType="BIGINT" property="customerId" />
+    <result column="customer_id" jdbcType="BIGINT" property="tenantId" />
     <result column="task_status" jdbcType="INTEGER" property="taskStatus" />
     <result column="upload_status" jdbcType="INTEGER" property="uploadStatus" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
@@ -36,7 +36,7 @@
       </trim>
       <trim prefix="customer_id = case" suffix="end,">
         <foreach collection="list" index="index" item="item">
-          when id = #{item.id,jdbcType=BIGINT} then #{item.customerId,jdbcType=BIGINT}
+          when id = #{item.id,jdbcType=BIGINT} then #{item.tenantId,jdbcType=BIGINT}
         </foreach>
       </trim>
       <trim prefix="task_status = case" suffix="end,">

@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.data.model.mysql;
 
-import java.io.Serializable;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -15,8 +14,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "t_middleware_jar")
-public class MiddlewareJarEntity extends BaseEntity implements Serializable {
-    private static final long serialVersionUID = 220459039796531083L;
+public class MiddlewareJarEntity extends BaseEntity {
 
     /**
      * 中间件中文名称

@@ -8,6 +8,9 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+/**
+ * @author -
+ */
 @Data
 @TableName(value = "t_scene_business_activity_ref")
 public class SceneBusinessActivityRefEntity {

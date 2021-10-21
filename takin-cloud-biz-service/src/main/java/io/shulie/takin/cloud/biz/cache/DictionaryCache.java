@@ -40,10 +40,10 @@ public class DictionaryCache {
         //dicMap.put("domain", LinkDomainEnumMapping.neededEnumResults());
         //dicMap.put("changeType", LinkChangeTypeEnumMapping.neededEnumResults());
         //数据字段
-        fillDictFromDB();
+        fillDictFromDataBase();
     }
 
-    private void fillDictFromDB() {
+    private void fillDictFromDataBase() {
         Map<String, Object> paramMap = Maps.newHashMap();
         paramMap.put("valueActive", "Y");
         List<TDictionaryVo> voList = tDictionaryDataMapper.queryDictionaryList(paramMap);

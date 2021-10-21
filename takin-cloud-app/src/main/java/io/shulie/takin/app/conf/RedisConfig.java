@@ -1,5 +1,7 @@
 package io.shulie.takin.app.conf;
 
+import javax.annotation.Resource;
+
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
 
@@ -15,9 +17,11 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class RedisConfig implements InitializingBean {
-
-    @Autowired
-    private RedisTemplate redisTemplate; // 不能设置泛型，否则报错
+    /**
+     * <strong>不能设置泛型，否则报错</strong>
+     */
+    @Resource
+    private RedisTemplate redisTemplate;
 
     @SuppressWarnings("unchecked")
     @Override

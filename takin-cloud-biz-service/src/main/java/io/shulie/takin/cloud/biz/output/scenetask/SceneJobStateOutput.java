@@ -3,11 +3,10 @@ package io.shulie.takin.cloud.biz.output.scenetask;
 import lombok.Data;
 
 /**
- * ClassName:    SceneJobStateOutput
- * Package:    io.shulie.takin.cloud.biz.output.scenetask
- * Description:
- * Datetime:    2021/6/23   下午5:12
- * Author:   chenhongqiao@shulie.com
+ * 场景任务状态
+ *
+ * @author chenhongqiao@shulie.com
+ * @date 2021/6/23   下午5:12
  */
 @Data
 public class SceneJobStateOutput {

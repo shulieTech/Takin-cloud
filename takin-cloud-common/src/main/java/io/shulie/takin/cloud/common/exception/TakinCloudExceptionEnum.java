@@ -13,6 +13,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum TakinCloudExceptionEnum implements ExceptionReadable {
 
+    /**
+     * 通用校验错误
+     */
+    COMMON_VERIFY_ERROR("cloud-000-s0000", "校验失败"),
 
     /**
      * 压测场景相关模块 cloud-001-

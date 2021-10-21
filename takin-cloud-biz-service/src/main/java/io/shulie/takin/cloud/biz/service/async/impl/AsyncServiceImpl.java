@@ -9,14 +9,7 @@ import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
-import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
-import io.shulie.takin.cloud.common.constants.SceneManageConstant;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
-import io.shulie.takin.ext.api.EngineCallExtApi;
-import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.cloud.biz.service.async.AsyncService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
@@ -75,8 +68,8 @@ public class AsyncServiceImpl implements AsyncService {
         int currentTime = 0;
         boolean checkPass = false;
 
-        String pressureNodeTotalName = ScheduleConstants.getPressureNodeTotalKey(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getCustomerId());
-        String pressureNodeName = ScheduleConstants.getPressureNodeName(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getCustomerId());
+        String pressureNodeTotalName = ScheduleConstants.getPressureNodeTotalKey(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getTenantId());
+        String pressureNodeName = ScheduleConstants.getPressureNodeName(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getTenantId());
         String pressureNodeTotal = redisClientUtils.getString(pressureNodeTotalName);
         while (currentTime <= pressureNodeStartExpireTime) {
             String pressureNodeNum = redisClientUtils.getString(pressureNodeName);
@@ -103,13 +96,13 @@ public class AsyncServiceImpl implements AsyncService {
         //压力节点 没有在设定时间内启动完毕，停止压测
         if (!checkPass) {
             log.info("调度任务{}-{}-{},压力节点 没有在设定时间{}s内启动，停止压测,", startRequest.getSceneId(), startRequest.getTaskId(),
-                startRequest.getCustomerId(), CHECK_INTERVAL_TIME);
+                startRequest.getTenantId(), CHECK_INTERVAL_TIME);
 
             if (pressureNodeTotal != null) {
                 int podTotalNum = Integer.parseInt(pressureNodeTotal);
                 for (int i = 1; i <= podTotalNum; i++) {
                     String enginePodNoStartKey = ScheduleConstants.getEnginePodNoStartKey(startRequest.getSceneId(), startRequest.getTaskId(),
-                            startRequest.getCustomerId(), i + "", CollectorService.METRICS_EVENTS_STARTED);
+                        startRequest.getTenantId(), i + "", CollectorService.METRICS_EVENTS_STARTED);
                     if (!redisClientUtils.hasKey(enginePodNoStartKey)) {
                         log.warn("调度任务 pod " + i + "没有在设定时间启动，redisKey为" + enginePodNoStartKey);
                     }
@@ -170,11 +163,11 @@ public class AsyncServiceImpl implements AsyncService {
         // 汇报失败
         sceneManageService.reportRecord(SceneManageStartRecordVO.build(startRequest.getSceneId(),
             startRequest.getTaskId(),
-            startRequest.getCustomerId()).success(false).errorMsg("").build());
+            startRequest.getTenantId()).success(false).errorMsg("").build());
         // 清除 SLA配置 清除PushWindowDataScheduled 删除pod job configMap  生成报告拦截 状态拦截
         Event event = new Event();
         event.setEventName("finished");
-        event.setExt(new TaskResult(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getCustomerId()));
+        event.setExt(new TaskResult(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getTenantId()));
         eventCenterTemplate.doEvents(event);
     }
 }

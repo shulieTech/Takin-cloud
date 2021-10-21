@@ -25,6 +25,7 @@ public interface MiddlewareJarDAO {
      * 通过 avgList 批量删除
      *
      * @param agvList artifactId_groupId_version 列表
+     * @return 操作结果
      */
     boolean removeByAgvList(List<String> agvList);
 

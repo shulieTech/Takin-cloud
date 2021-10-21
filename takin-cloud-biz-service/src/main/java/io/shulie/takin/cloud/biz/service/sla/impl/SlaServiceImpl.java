@@ -32,7 +32,7 @@ import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
 import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
-import io.shulie.takin.ext.content.enginecall.ScheduleStopRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneSlaRefResult;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
@@ -60,7 +60,7 @@ public class SlaServiceImpl implements SlaService {
     @Resource
     private RedisClientUtils redisClientUtils;
     @Resource
-    private TWarnDetailMapper TWarnDetailMapper;
+    private TWarnDetailMapper tWarnDetailMapper;
     @Resource
     private SceneManageService sceneManageService;
 
@@ -153,7 +153,7 @@ public class SlaServiceImpl implements SlaService {
                     scheduleStopRequest.setTaskId(metricsEvent.getReportId());
                     scheduleStopRequest.setSceneId(sceneId);
                     // 增加顾客id
-                    scheduleStopRequest.setCustomerId(metricsEvent.getCustomerId());
+                    scheduleStopRequest.setTenantId(metricsEvent.getTenantId());
                     Map<String, Object> extendMap = Maps.newHashMap();
                     extendMap.put(Constants.SLA_DESTORY_EXTEND, "SLA发送压测任务终止事件");
                     scheduleStopRequest.setExtend(extendMap);
@@ -161,7 +161,7 @@ public class SlaServiceImpl implements SlaService {
                     if (redisClientUtils.hasKey(PREFIX_TASK + metricsEvent.getSceneId())) {
                         // 熔断数据也记录到告警明细中
                         WarnDetail warnDetail = buildWarnDetail(conditionMap, businessActivityDTO, metricsEvent, dto);
-                        TWarnDetailMapper.insertSelective(warnDetail);
+                        tWarnDetailMapper.insertSelective(warnDetail);
                         // 记录sla熔断数据
                         UpdateReportSlaDataInput slaDataInput = new UpdateReportSlaDataInput();
                         SlaBean slaBean = new SlaBean();
@@ -213,7 +213,7 @@ public class SlaServiceImpl implements SlaService {
                 WarnDetail warnDetail = buildWarnDetail(conditionMap, businessActivityDTO, metricsEvent, dto);
                 //报告未结束，才insert
                 if (redisClientUtils.hasKey(PREFIX_TASK + metricsEvent.getSceneId())) {
-                    TWarnDetailMapper.insertSelective(warnDetail);
+                    tWarnDetailMapper.insertSelective(warnDetail);
                 }
             } else {
                 redisClientUtils.hmset(SLA_WARN_KEY, String.valueOf(dto.getId()), JSON.toJSONString(model));

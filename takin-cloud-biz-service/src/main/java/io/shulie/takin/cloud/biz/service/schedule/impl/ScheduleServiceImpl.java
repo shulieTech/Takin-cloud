@@ -24,10 +24,14 @@ import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleInitParamExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
 import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
-import io.shulie.takin.ext.api.EngineCallExtApi;
-import io.shulie.takin.ext.content.enginecall.*;
+import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +58,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private StrategyConfigService strategyConfigService;
 
     @Resource
-    private TScheduleRecordMapper TScheduleRecordMapper;
+    private TScheduleRecordMapper tScheduleRecordMapper;
 
     @Autowired
     private ScheduleEventService scheduleEvent;
@@ -89,7 +93,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     public void startSchedule(ScheduleStartRequestExt request) {
         log.info("启动调度, 请求数据：{}", request);
         //任务只处理一次
-        ScheduleRecord schedule = TScheduleRecordMapper.getScheduleByTaskId(request.getTaskId());
+        ScheduleRecord schedule = tScheduleRecordMapper.getScheduleByTaskId(request.getTaskId());
         if (schedule != null) {
             log.error("异常代码【{}】,异常内容：启动调度失败 --> 调度任务[{}]已经启动",
                 TakinCloudExceptionEnum.SCHEDULE_START_ERROR, request.getTaskId());
@@ -114,7 +118,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         scheduleRecord.setTaskId(request.getTaskId());
         scheduleRecord.setStatus(ScheduleConstants.SCHEDULE_STATUS_1);
 
-        scheduleRecord.setCustomerId(request.getCustomerId());
+        scheduleRecord.setTenantId(request.getTenantId());
         scheduleRecord.setPodClass(scheduleName);
         TScheduleRecordMapper.insertSelective(scheduleRecord);
 
@@ -133,7 +137,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         // 需要将 本次调度 pod数量存入redis,报告中用到
         // 总计 报告生成用到 调度期间出现错误，这份数据只存24小时
         redisClientUtils.set(
-            ScheduleConstants.getPressureNodeTotalKey(request.getSceneId(), request.getTaskId(), request.getCustomerId()),
+            ScheduleConstants.getPressureNodeTotalKey(request.getSceneId(), request.getTaskId(), request.getTenantId()),
             request.getTotalIp(), 24 * 60 * 60 * 1000);
         //调度初始化
         scheduleEvent.initSchedule(eventRequest);
@@ -142,10 +146,10 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public void stopSchedule(ScheduleStopRequestExt request) {
         log.info("停止调度, 请求数据：{}", request);
-        ScheduleRecord scheduleRecord = TScheduleRecordMapper.getScheduleByTaskId(request.getTaskId());
+        ScheduleRecord scheduleRecord = tScheduleRecordMapper.getScheduleByTaskId(request.getTaskId());
         if (scheduleRecord != null) {
             // 增加中断
-            String scheduleName = ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getCustomerId());
+            String scheduleName = ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getTenantId());
             boolean flag = redisClientUtils.set(ScheduleConstants.INTERRUPT_POD + scheduleName, true, 24 * 60 * 60 * 1000);
             if (flag && !Boolean.parseBoolean(redisClientUtils.getString(ScheduleConstants.FORCE_STOP_POD + scheduleName))) {
                 // 3分钟没有停止成功 ，将强制停止
@@ -163,7 +167,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         Long sceneId = startRequest.getSceneId();
         Long taskId = startRequest.getTaskId();
-        Long customerId = startRequest.getCustomerId();
+        Long customerId = startRequest.getTenantId();
 
         // 场景生命周期更新 启动中(文件拆分完成) ---> 创建Job中
         sceneManageService.updateSceneLifeCycle(
@@ -178,7 +182,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             // 是空的
             log.info("场景{},任务{},顾客{}开始创建压测引擎Job，压测引擎job创建成功", request.getRequest().getSceneId(),
                 request.getRequest().getTaskId(),
-                request.getRequest().getCustomerId());
+                request.getRequest().getTenantId());
             // 创建job 开始监控 压力节点 启动情况 起一个线程监控  。
             // 启动检查压力节点启动线程，在允许时间内压力节点未启动完成，主动停止任务
             asyncService.checkStartedTask(request.getRequest());
@@ -186,10 +190,10 @@ public class ScheduleServiceImpl implements ScheduleService {
             // 创建失败
             log.info("场景{},任务{},顾客{}开始创建压测引擎Job，压测引擎job创建失败", request.getRequest().getSceneId(),
                 request.getRequest().getTaskId(),
-                request.getRequest().getCustomerId());
+                request.getRequest().getTenantId());
             sceneManageService.reportRecord(SceneManageStartRecordVO.build(request.getRequest().getSceneId(),
                     request.getRequest().getTaskId(),
-                    request.getRequest().getCustomerId()).success(false)
+                    request.getRequest().getTenantId()).success(false)
                 .errorMsg("压测引擎job创建失败，失败原因：" + msg).build());
         }
     }
@@ -205,7 +209,7 @@ public class ScheduleServiceImpl implements ScheduleService {
      */
     private void push(ScheduleStartRequestExt request) {
         //把数据放入队列
-        String key = ScheduleConstants.getFileSplitQueue(request.getSceneId(), request.getTaskId(), request.getCustomerId());
+        String key = ScheduleConstants.getFileSplitQueue(request.getSceneId(), request.getTaskId(), request.getTenantId());
 
         List<String> numList = Lists.newArrayList();
         for (int i = 1; i <= request.getTotalIp(); i++) {
@@ -226,9 +230,9 @@ public class ScheduleServiceImpl implements ScheduleService {
             TaskResult taskResult = (TaskResult)object;
             // 删除 压测任务
             String jobName = ScheduleConstants.getScheduleName(taskResult.getSceneId(), taskResult.getTaskId(),
-                taskResult.getCustomerId());
+                taskResult.getTenantId());
             String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(taskResult.getSceneId(), taskResult.getTaskId(),
-                taskResult.getCustomerId());
+                taskResult.getTenantId());
             ScheduleStopRequestExt scheduleStopRequest = new ScheduleStopRequestExt();
             scheduleStopRequest.setJobName(jobName);
             scheduleStopRequest.setEngineInstanceRedisKey(engineInstanceRedisKey);
@@ -257,7 +261,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         @Override
         public void run() {
-            String scheduleName = ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getCustomerId());
+            String scheduleName = ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getTenantId());
             boolean flag = redisClientUtils.set(ScheduleConstants.FORCE_STOP_POD + scheduleName, true, 24 * 60 * 60 * 1000);
             if (flag) {
                 try {
@@ -278,7 +282,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                     TaskResult taskResult = new TaskResult();
                     taskResult.setSceneId(request.getSceneId());
                     taskResult.setTaskId(request.getTaskId());
-                    taskResult.setCustomerId(request.getCustomerId());
+                    taskResult.setTenantId(request.getTenantId());
                     event.setExt(taskResult);
                     doDeleteJob(event);
                 }

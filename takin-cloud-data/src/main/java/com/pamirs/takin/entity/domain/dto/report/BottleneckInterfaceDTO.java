@@ -1,6 +1,5 @@
 package com.pamirs.takin.entity.domain.dto.report;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 import lombok.Data;
@@ -15,9 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel
 @Data
-public class BottleneckInterfaceDTO implements Serializable {
-
-    private static final long serialVersionUID = -7218988438361002963L;
+public class BottleneckInterfaceDTO {
 
     /**
      * 排名

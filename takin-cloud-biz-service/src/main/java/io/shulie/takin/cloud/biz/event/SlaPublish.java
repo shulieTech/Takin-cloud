@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.biz.event;
 
-import io.shulie.takin.ext.content.enginecall.ScheduleStopRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
 import io.shulie.takin.cloud.common.constants.ScheduleEventConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.eventcenter.Event;

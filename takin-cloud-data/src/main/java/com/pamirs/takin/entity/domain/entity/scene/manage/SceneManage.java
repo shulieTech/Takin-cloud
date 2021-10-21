@@ -12,8 +12,6 @@ public class SceneManage implements Serializable {
 
     private Long id;
 
-    private Long customerId;
-
     private String sceneName;
 
     private Integer status;
@@ -43,4 +41,9 @@ public class SceneManage implements Serializable {
      * 用户id
      */
     private Long userId;
+
+    /**
+     * 租户
+     */
+    private Long tenantId;
 }

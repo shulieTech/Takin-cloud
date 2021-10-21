@@ -5,8 +5,8 @@ import java.util.Map;
 
 import com.google.common.collect.Lists;
 import io.shulie.takin.constants.TakinRequestConstant;
-import io.shulie.takin.ext.content.script.ScriptParseExt;
-import io.shulie.takin.ext.content.script.ScriptUrlExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptUrlExt;
 import io.shulie.takin.cloud.common.utils.ParseXmlUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -99,7 +99,7 @@ public class XmlHttpJmxParser extends JmxParser {
     /**
      * 获取第httpIndex对应的headerManager
      *
-     * @param -
+     * @param httpIndex -
      * @return -
      */
     private static String getHeaderXml(String xml, int httpIndex) {

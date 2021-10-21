@@ -18,31 +18,49 @@ public class DicKeyConstant {
 
     public static final String CLOUD_SERVER = "CLOUD_SERVER";
 
-    //压测场景状态
+    /**
+     * 压测场景状态
+     */
     public static final String SCENE_MANAGE_STATUS = "SCENE_MANAGE_STATUS";
 
-    //是否删除
+    /**
+     * 是否删除
+     */
     public static final String IS_DELETED = "IS_DELETED";
 
-    //脚本类型
+    /**
+     * 脚本类型
+     */
     public static final String SCRIPT_TYPE = "SCRIPT_TYPE";
 
-    //文件类型
+    /**
+     * 文件类型
+     */
     public static final String FILE_TYPE = "FILE_TYPE";
 
-    //SLA指标类型
+    /**
+     * SLA指标类型
+     */
     public static final String SLA_TARGER_TYPE = "SLA_TARGER_TYPE";
 
-    //比较类型
+    /**
+     * 比较类型
+     */
     public static final String COMPARE_TYPE = "COMPARE_TYPE";
 
-    //存活状态
+    /**
+     * 存活状态
+     */
     public static final String LIVE_STATUS = "LIVE_STATUS";
 
-    //施压模式
+    /**
+     * 施压模式
+     */
     public static final String PT_MODEL = "PT_MODEL";
 
-    //成功状态
+    /**
+     * 成功状态
+     */
     public static final String SUCCESS_STATUS = "SUCCESS_STATUS";
 
     public static final String MACHINE_TASK_TYPE = "MACHINE_TASK_TYPE";

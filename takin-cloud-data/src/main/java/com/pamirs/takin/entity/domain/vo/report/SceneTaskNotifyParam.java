@@ -22,7 +22,7 @@ public class SceneTaskNotifyParam {
     /**
      * 客户Id 新增
      */
-    private Long customerId;
+    private Long tenantId;
 
     /**
      * 状态

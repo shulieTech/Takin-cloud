@@ -3,13 +3,17 @@ package io.shulie.takin.cloud.data.param.scenemanage;
 import java.util.Date;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 
 /**
- * @author by: hezhongqi
+ * @author hezhongqi
  * @date 2021/8/3 15:06
  */
 @Data
-public class SceneManageCreateOrUpdateParam {
+@EqualsAndHashCode(callSuper = true)
+public class SceneManageCreateOrUpdateParam extends ContextExt {
 
     private Long id;
 

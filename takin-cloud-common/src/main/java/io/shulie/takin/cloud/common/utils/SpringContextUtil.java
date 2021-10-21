@@ -4,9 +4,15 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 
+/**
+ * @author -
+ */
 public class SpringContextUtil {
 
-    private static ApplicationContext applicationContext;     //Spring应用上下文环境
+    /**
+     * Spring应用上下文环境
+     */
+    private static ApplicationContext applicationContext;
 
     /**
      * @return ApplicationContext

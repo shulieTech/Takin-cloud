@@ -1,6 +1,5 @@
 package com.pamirs.takin.entity.domain.dto.schedule;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 import io.shulie.takin.cloud.common.enums.machine.EnumResult;
@@ -14,8 +13,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel(description = "列表查询出参")
-public class ScheduleRecordDTO implements Serializable {
-    private static final long serialVersionUID = -9035230941808348639L;
+public class ScheduleRecordDTO {
 
     @ApiModelProperty(value = "ID")
     private Long id;

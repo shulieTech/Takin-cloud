@@ -1,10 +1,9 @@
 package com.pamirs.takin.entity.domain.dto.file;
 
-import java.io.Serializable;
+import lombok.Data;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
 
 /**
  * @author qianshui
@@ -12,10 +11,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel(description = "上传结果")
-public class FileDTO implements Serializable {
-
-    private static final long serialVersionUID = 5387746625644354640L;
-
+public class FileDTO {
     @ApiModelProperty(value = "上传文件ID")
     private String uploadId;
 

@@ -8,6 +8,8 @@ import lombok.Data;
 
 /**
  * 场景添加暂存表
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_scene_add_temp_table")

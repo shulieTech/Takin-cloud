@@ -1,5 +1,13 @@
 package io.shulie.takin.cloud.biz.collector.collector;
 
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+
 import io.shulie.takin.cloud.common.bean.collector.Constants;
 import io.shulie.takin.cloud.common.bean.collector.EventMetrics;
 import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
@@ -23,13 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 /**
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
  * @date 2020-04-17 17:20
@@ -51,9 +52,9 @@ public class CollectorApplication {
     @ApiOperation("接收事件和压测数据")
     @RequestMapping("/receive")
     public ResponseEntity<String> receive(@ApiParam("场景id") @RequestParam("sceneId") Long sceneId,
-                                          @ApiParam("报告id") @RequestParam("reportId") Long reportId,
-                                          @ApiParam("租户id") @RequestParam(value = "customerId", required = false) Long customerId,
-                                          @ApiParam("事件或数据参数") @RequestBody List<Map> metrics,
+        @ApiParam("报告id") @RequestParam("reportId") Long reportId,
+        @ApiParam("租户id") @RequestParam(value = "tenantId", required = false) Long tenantId,
+        @ApiParam("事件或数据参数") @RequestBody List<Map> metrics,
         HttpServletRequest request) {
         try {
             if (sceneId == null || reportId == null) {
@@ -64,32 +65,32 @@ public class CollectorApplication {
             }
             // 分类
             List<ResponseMetrics> responseMetrics = metrics.stream().filter(Objects::nonNull)
-                    .filter(metric -> null != metric.get("type"))
-                    .filter(metric -> Constants.METRICS_TYPE_RESPONSE.equals(metric.get("type")))
-                    .map(GsonUtil::gsonToString)
-                    .map(s -> GsonUtil.gsonToBean(s, ResponseMetrics.class))
-                    .collect(Collectors.toList());
+                .filter(metric -> null != metric.get("type"))
+                .filter(metric -> Constants.METRICS_TYPE_RESPONSE.equals(metric.get("type")))
+                .map(GsonUtil::gsonToString)
+                .map(s -> GsonUtil.gsonToBean(s, ResponseMetrics.class))
+                .collect(Collectors.toList());
             List<EventMetrics> eventMetrics = metrics.stream().filter(Objects::nonNull)
-                    .filter(metric -> null != metric.get("type"))
-                    .filter(metric -> Constants.METRICS_TYPE_EVENTS.equals(metric.get("type")))
-                    .map(GsonUtil::gsonToString)
-                    .map(s -> GsonUtil.gsonToBean(s, EventMetrics.class))
-                    .collect(Collectors.toList());
+                .filter(metric -> null != metric.get("type"))
+                .filter(metric -> Constants.METRICS_TYPE_EVENTS.equals(metric.get("type")))
+                .map(GsonUtil::gsonToString)
+                .map(s -> GsonUtil.gsonToBean(s, EventMetrics.class))
+                .collect(Collectors.toList());
             culTransaction(responseMetrics, sceneId, reportId, customerId);
             long time = System.currentTimeMillis();
             if (responseMetrics.size() > 0) {
                 long timestamp = responseMetrics.get(0).getTimestamp();
-                log.debug("【Collector-metrics-debug】{}-{}-{}:receive metrics data:{}", sceneId, reportId, customerId, GsonUtil.gsonToString(responseMetrics));
+                log.debug("【Collector-metrics-debug】{}-{}-{}:receive metrics data:{}", sceneId, reportId, tenantId, GsonUtil.gsonToString(responseMetrics));
                 log.info("【Collector-metrics】{}-{}-{}: receive metrics data:{},metrics time:{},elapsed time:{}",
-                    sceneId, reportId, customerId, responseMetrics.size(), timestamp, (System.currentTimeMillis() - time));
+                    sceneId, reportId, tenantId, responseMetrics.size(), timestamp, (System.currentTimeMillis() - time));
 
-                collectorService.collector(sceneId, reportId, customerId, responseMetrics);
-                collectorService.statisticalIp(sceneId, reportId, customerId, timestamp, IPUtils.getIP(request));
+                collectorService.collector(sceneId, reportId, tenantId, responseMetrics);
+                collectorService.statisticalIp(sceneId, reportId, tenantId, timestamp, IPUtils.getIP(request));
             }
             if (eventMetrics.size() > 0) {
-                log.info("Collector-metrics-event】{}-{}-{}:{}", sceneId, reportId, customerId,
+                log.info("Collector-metrics-event】{}-{}-{}:{}", sceneId, reportId, tenantId,
                     GsonUtil.gsonToString(eventMetrics));
-                collectorService.verifyEvent(sceneId, reportId, customerId, eventMetrics);
+                collectorService.verifyEvent(sceneId, reportId, tenantId, eventMetrics);
             }
             return ResponseEntity.ok("success");
         } catch (Exception e) {
@@ -99,10 +100,10 @@ public class CollectorApplication {
         }
     }
 
-    private void culTransaction(List<ResponseMetrics> responseMetrics, Long sceneId, Long reportId, Long customerId) {
+    private void culTransaction(List<ResponseMetrics> responseMetrics, Long sceneId, Long reportId, Long tenantId) {
         //后置匹配处理逻辑，如果是前置匹配，不需要处理
         if (!scriptPreMatch && CollectionUtils.isNotEmpty(responseMetrics)) {
-            String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(sceneId, reportId, customerId);
+            String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(sceneId, reportId, tenantId);
             Object activityRefMapObj = redisClientUtils.hmget(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REF_MAP);
             Map<String, String> activityRefMap = activityRefMapObj == null ? new HashMap<>(0) :
                 JsonHelper.json2Map(activityRefMapObj.toString(), String.class, String.class);

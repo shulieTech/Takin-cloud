@@ -1,7 +1,5 @@
 package io.shulie.takin.cloud.biz.output.engine;
 
-import java.io.Serializable;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -11,7 +9,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel("引擎配置日志输出参数")
-public class EngineLogPtlConfigOutput implements Serializable {
+public class EngineLogPtlConfigOutput {
 
     @ApiModelProperty("是否输出ptl日志文件")
     private boolean ptlFileEnable;
@@ -27,6 +25,5 @@ public class EngineLogPtlConfigOutput implements Serializable {
 
     @ApiModelProperty("ptl日志是否截断")
     private boolean logCutOff;
-
 
 }

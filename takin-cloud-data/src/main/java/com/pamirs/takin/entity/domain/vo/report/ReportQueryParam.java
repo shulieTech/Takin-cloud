@@ -1,12 +1,12 @@
 package com.pamirs.takin.entity.domain.vo.report;
 
-import java.io.Serializable;
-
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+import io.shulie.takin.cloud.ext.content.trace.PagingContextExt;
 
 /**
  * @author 莫问
@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @ApiModel
 @EqualsAndHashCode(callSuper = true)
-public class ReportQueryParam extends CloudUserCommonRequestExt implements Serializable {
+public class ReportQueryParam extends PagingContextExt {
 
     /**
      * 场景名称
@@ -36,7 +36,12 @@ public class ReportQueryParam extends CloudUserCommonRequestExt implements Seria
     private String endTime;
 
     /**
-     * 报告类型；0普通场景，1流量调试
+     * 报告类型
+     * <ul>
+     *     <li>0:普通场景</li>
+     *     <li>1:流量调试</li>
+     * </ul>
      */
+    @ApiModelProperty(value = "报告类型")
     private Integer type;
 }

@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * 性能标准配置
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_performance_criteria_config")

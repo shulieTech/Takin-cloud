@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.common.bean;
 
-import java.io.Serializable;
 
 import lombok.Data;
 
@@ -9,9 +8,7 @@ import lombok.Data;
  * @date 2020/4/17 下午9:51
  */
 @Data
-public class TimeBean implements Serializable {
-
-    private static final long serialVersionUID = -4490980949244068326L;
+public class TimeBean {
 
     private Long time;
 

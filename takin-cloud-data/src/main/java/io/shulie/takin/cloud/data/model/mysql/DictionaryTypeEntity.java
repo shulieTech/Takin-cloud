@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * 数据字典分类表
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_dictionary_type")

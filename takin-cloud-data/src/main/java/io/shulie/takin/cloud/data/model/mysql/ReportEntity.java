@@ -9,17 +9,14 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+/**
+ * @author -
+ */
 @Data
 @TableName(value = "t_report")
 public class ReportEntity {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-
-    /**
-     * 客户id
-     */
-    @TableField(value = "customer_id")
-    private Long customerId;
 
     /**
      * 流量消耗
@@ -93,7 +90,6 @@ public class ReportEntity {
     @TableField(value = "tps")
     private Integer tps;
 
-
     /**
      * 平均tps
      */
@@ -151,9 +147,6 @@ public class ReportEntity {
     @TableField(value = "dept_id")
     private Long deptId;
 
-    @TableField(value = "user_id")
-    private Long userId;
-
     @TableField(value = "script_id")
     private Long scriptId;
 
@@ -162,4 +155,20 @@ public class ReportEntity {
      */
     @TableField(value = "`lock`")
     private Integer lock;
+
+    /**
+     * 用户主键
+     */
+    @TableField(value = "user_id")
+    private Long userId;
+    /**
+     * 租户主键
+     */
+    @TableField(value = "tenant_id")
+    private Long tenantId;
+    /**
+     * 用户id
+     */
+    @TableField(value = "env_code")
+    private String envCode;
 }

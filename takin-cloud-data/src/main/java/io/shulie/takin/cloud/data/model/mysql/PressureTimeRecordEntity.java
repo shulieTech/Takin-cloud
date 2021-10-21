@@ -8,6 +8,8 @@ import lombok.Data;
 
 /**
  * 压测时间记录表
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_pressure_time_record")

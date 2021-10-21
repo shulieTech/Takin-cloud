@@ -15,6 +15,6 @@ public class SendMetricsEvent extends Metrics {
 
     private Long sceneId;
     private Long reportId;
-    private Long customerId;
+    private Long tenantId;
 
 }

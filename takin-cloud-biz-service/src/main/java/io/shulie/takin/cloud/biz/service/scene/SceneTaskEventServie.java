@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
-import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
-import io.shulie.takin.ext.content.enginecall.ScheduleStopRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginFilesService;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
@@ -83,7 +83,7 @@ public class SceneTaskEventServie {
         scheduleStartRequest.setSceneId(scene.getId());
         scheduleStartRequest.setTaskId(reportId);
         // 客户id
-        scheduleStartRequest.setCustomerId(scene.getCustomerId());
+        scheduleStartRequest.setTenantId(scene.getTenantId());
         String pressureMode = scene.getPressureMode() == 1 ? "fixed"
             : scene.getPressureMode() == 2 ? "linear" : "stair";
         scheduleStartRequest.setPressureMode(pressureMode);
@@ -152,7 +152,7 @@ public class SceneTaskEventServie {
         ScheduleStopRequestExt scheduleStopRequest = new ScheduleStopRequestExt();
         scheduleStopRequest.setSceneId(reportResult.getSceneId());
         scheduleStopRequest.setTaskId(reportResult.getId());
-        scheduleStopRequest.setCustomerId(reportResult.getCustomerId());
+        scheduleStopRequest.setTenantId(reportResult.getTenantId());
         Event event = new Event();
         event.setEventName(ScheduleEventConstant.STOP_SCHEDULE_EVENT);
         event.setExt(scheduleStopRequest);
@@ -173,7 +173,7 @@ public class SceneTaskEventServie {
             TaskResult result = new TaskResult();
             result.setSceneId(param.getSceneId());
             result.setTaskId(param.getTaskId());
-            result.setCustomerId(param.getCustomerId());
+            result.setTenantId(param.getTenantId());
             result.setMsg(param.getMsg());
 
             boolean isNotify = true;
@@ -195,7 +195,7 @@ public class SceneTaskEventServie {
                 }
                 result.setExtendMap(extendMap);
                 String key = ScheduleConstants.getFileSplitQueue(param.getSceneId(), param.getTaskId(),
-                    param.getCustomerId());
+                    param.getTenantId());
                 index = stringRedisTemplate.opsForList().leftPop(key);
 
             } else if ("failed".equals(param.getStatus())) {
@@ -211,7 +211,7 @@ public class SceneTaskEventServie {
                 log.info("成功处理压力引擎节点通知事件: {}", param);
             }
             log.info("pressureNode {}-{}-{}: Accept the start result ,pressureNode number :{}",
-                param.getSceneId(), param.getTaskId(), param.getCustomerId(), index);
+                param.getSceneId(), param.getTaskId(), param.getTenantId(), index);
         }
         return index;
     }
