@@ -1,21 +1,21 @@
 package io.shulie.takin.cloud.sdk.impl.engine;
 
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 
 import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
-import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import org.springframework.stereotype.Component;
 
-import io.shulie.takin.cloud.entrypoint.engine.CloudEngineApi;
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.cloud.sdk.model.response.engine.EnginePluginDetailResp;
+import io.shulie.takin.cloud.entrypoint.engine.CloudEngineApi;
 import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
-import io.shulie.takin.cloud.sdk.model.response.engine.EnginePluginSimpleInfoResp;
+import io.shulie.takin.cloud.sdk.model.response.engine.EnginePluginDetailResp;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginFetchWrapperReq;
+import io.shulie.takin.cloud.sdk.model.response.engine.EnginePluginSimpleInfoResp;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginDetailsWrapperReq;
 
 /**
@@ -39,8 +39,7 @@ public class CloudEngineApiImpl implements CloudEngineApi {
      */
     @Override
     public Map<String, List<EnginePluginSimpleInfoResp>> listEnginePlugins(EnginePluginFetchWrapperReq request) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_ENGINE_PLUGIN, EntrypointUrl.METHOD_ENGINE_PLUGIN_LIST),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_ENGINE_PLUGIN, EntrypointUrl.METHOD_ENGINE_PLUGIN_LIST),
             request, new TypeReference<ResponseResult<Map<String, List<EnginePluginSimpleInfoResp>>>>() {}).getData();
     }
 
@@ -52,8 +51,7 @@ public class CloudEngineApiImpl implements CloudEngineApi {
      */
     @Override
     public EnginePluginDetailResp getEnginePluginDetails(EnginePluginDetailsWrapperReq request) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_ENGINE_PLUGIN, EntrypointUrl.METHOD_ENGINE_PLUGIN_DETAILS),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_ENGINE_PLUGIN, EntrypointUrl.METHOD_ENGINE_PLUGIN_DETAILS),
             request, new TypeReference<ResponseResult<EnginePluginDetailResp>>() {}).getData();
 
     }

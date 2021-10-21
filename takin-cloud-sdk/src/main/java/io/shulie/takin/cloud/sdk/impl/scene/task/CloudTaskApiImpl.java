@@ -6,10 +6,10 @@ import com.alibaba.fastjson.TypeReference;
 
 import org.springframework.stereotype.Component;
 
-import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.entrypoint.scenetask.CloudTaskApi;
+import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
 import io.shulie.takin.cloud.sdk.model.response.scenetask.SceneActionResp;
 import io.shulie.takin.cloud.sdk.model.request.scenetask.TaskInspectStopReq;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdReq;
@@ -42,93 +42,80 @@ public class CloudTaskApiImpl implements CloudTaskApi {
 
     @Override
     public SceneActionResp start(SceneTaskStartReq req) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_START),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_START),
             req, new TypeReference<ResponseResult<SceneActionResp>>() {}).getData();
     }
 
     @Override
     public String stopTask(SceneManageIdReq req) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_STOP),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_STOP),
             req, new TypeReference<ResponseResult<String>>() {}).getData();
 
     }
 
     @Override
     public SceneActionResp checkTask(SceneManageIdReq req) {
-        return cloudApiSenderService.get(
-            EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_CHECK_TASK),
+        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_CHECK_TASK),
             req, new TypeReference<ResponseResult<SceneActionResp>>() {}).getData();
     }
 
     @Override
     public String updateSceneTaskTps(SceneTaskUpdateTpsReq req) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_UPDATE_TPS),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_UPDATE_TPS),
             req, new TypeReference<ResponseResult<String>>() {}).getData();
     }
 
     @Override
     public SceneTaskAdjustTpsResp queryAdjustTaskTps(SceneTaskQueryTpsReq req) {
-        return cloudApiSenderService.get(
-            EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_ADJUST_TPS),
+        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_ADJUST_TPS),
             req, new TypeReference<ResponseResult<SceneTaskAdjustTpsResp>>() {}).getData();
     }
 
     @Override
     public Long startFlowDebugTask(TaskFlowDebugStartReq req) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_START_FLOW_DEBUG),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_START_FLOW_DEBUG),
             req, new TypeReference<ResponseResult<Long>>() {}).getData();
     }
 
     @Override
     public SceneInspectTaskStartResp startInspectTask(TaskInspectStartReq req) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_START_INSPECT),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_START_INSPECT),
             req, new TypeReference<ResponseResult<SceneInspectTaskStartResp>>() {}).getData();
     }
 
     @Override
     public SceneInspectTaskStopResp stopInspectTask(TaskInspectStopReq req) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_STOP_INSPECT),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_STOP_INSPECT),
             req, new TypeReference<ResponseResult<SceneInspectTaskStopResp>>() {}).getData();
     }
 
     @Override
     public SceneTryRunTaskStartResp startTryRunTask(SceneTryRunTaskStartReq req) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_START_TRY_RUN),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_START_TRY_RUN),
             req, new TypeReference<ResponseResult<SceneTryRunTaskStartResp>>() {}).getData();
     }
 
     @Override
     public SceneTryRunTaskStatusResp checkTaskStatus(SceneTryRunTaskCheckReq req) {
-        return cloudApiSenderService.get(
-            EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_CHECK_STATUS),
+        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_CHECK_STATUS),
             req, new TypeReference<ResponseResult<SceneTryRunTaskStatusResp>>() {}).getData();
     }
 
     @Override
     public SceneJobStateResp checkSceneJobStatus(SceneManageIdReq req) {
-        return cloudApiSenderService.get(
-            EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_CHECK_JOB_STATUS),
+        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_CHECK_JOB_STATUS),
             req, new TypeReference<ResponseResult<SceneJobStateResp>>() {}).getData();
     }
 
     @Override
     public SceneStartCheckResp sceneStartPreCheck(SceneStartPreCheckReq req) {
-        return cloudApiSenderService.get(
-            EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_START_PRE_CHECK),
+        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_START_PRE_CHECK),
             req, new TypeReference<ResponseResult<SceneStartCheckResp>>() {}).getData();
     }
 
     @Override
     public Boolean callBackToWriteBalance(ScriptAssetBalanceReq req) {
-        return cloudApiSenderService.get(
-            EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_CALL_BACK_TO_WRITE_BALANCE),
+        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_CALL_BACK_TO_WRITE_BALANCE),
             req, new TypeReference<ResponseResult<Boolean>>() {}).getData();
     }
 }

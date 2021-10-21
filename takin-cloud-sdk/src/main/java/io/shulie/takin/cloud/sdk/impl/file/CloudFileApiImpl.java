@@ -35,44 +35,38 @@ public class CloudFileApiImpl implements CloudFileApi {
 
     @Override
     public Map<String, Object> getFileContent(FileContentParamReq req) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_CONTENT),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_CONTENT),
             req, new TypeReference<ResponseResult<Map<String, Object>>>() {}).getData();
     }
 
     @Override
     public Boolean deleteFile(FileDeleteParamReq req) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_DELETE),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_DELETE),
             req, new TypeReference<ResponseResult<Boolean>>() {}).getData();
     }
 
     @Override
     public void deleteTempFile(DeleteTempRequest req) {
-        cloudApiSenderService.delete(
-            EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_DELETE_TEMP),
+        cloudApiSenderService.delete(EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_DELETE_TEMP),
             req, new TypeReference<ResponseResult<?>>() {});
     }
 
     @Override
     public Boolean copyFile(FileCopyParamReq req) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_COPY),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_COPY),
             req, new TypeReference<ResponseResult<Boolean>>() {}).getData();
 
     }
 
     @Override
     public Boolean zipFile(FileZipParamReq req) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_ZIP),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_ZIP),
             req, new TypeReference<ResponseResult<Boolean>>() {}).getData();
     }
 
     @Override
     public Boolean createFileByPathAndString(FileCreateByStringParamReq req) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_CREATE_BY_STRING),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_CREATE_BY_STRING),
             req, new TypeReference<ResponseResult<Boolean>>() {}).getData();
     }
 
@@ -84,8 +78,7 @@ public class CloudFileApiImpl implements CloudFileApi {
      */
     @Override
     public List<UploadResponse> upload(UploadRequest req) {
-        return cloudApiSenderService.post(
-            EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_UPLOAD),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_UPLOAD),
             req, new TypeReference<ResponseResult<List<UploadResponse>>>() {}).getData();
     }
 
