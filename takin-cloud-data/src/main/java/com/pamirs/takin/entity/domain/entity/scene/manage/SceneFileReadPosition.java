@@ -2,6 +2,9 @@ package com.pamirs.takin.entity.domain.entity.scene.manage;
 
 import lombok.Data;
 
+/**
+ * @author -
+ */
 @Data
 public class SceneFileReadPosition {
     /**

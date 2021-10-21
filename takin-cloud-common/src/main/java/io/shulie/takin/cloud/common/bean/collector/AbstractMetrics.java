@@ -19,6 +19,7 @@ package io.shulie.takin.cloud.common.bean.collector;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.influxdb.annotation.Column;
 
 /**
  * @author shiyajian
@@ -27,7 +28,15 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class AbstractMetrics {
+    /**
+     * 类型：response上报的统计数据，events事件数据
+     */
     private String type;
+    /**
+     * pod的编号
+     */
+    @Column(tag = true, name = "pod_no")
+    private String podNo;
 
     public AbstractMetrics(String type) {
         this.type = type;

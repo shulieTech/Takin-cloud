@@ -1,13 +1,13 @@
 package com.pamirs.takin.entity.domain.dto.report;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
+import java.math.BigDecimal;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import io.swagger.annotations.ApiModelProperty;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 
 /**
  * @author 莫问
@@ -15,9 +15,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CloudReportDTO extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = 4235565595934721788L;
+public class CloudReportDTO extends ContextExt {
 
     @ApiModelProperty(value = "报告ID")
     private Long id;
@@ -41,12 +39,10 @@ public class CloudReportDTO extends CloudUserCommonRequestExt implements Seriali
     private Date endTime;
 
     @ApiModelProperty(value = "压测结果")
-    private int conclusion;
+    private Integer conclusion;
 
     @ApiModelProperty(value = "压测总计时")
     private String totalTime;
-
-    // private String features
 
     @ApiModelProperty(value = "压测不通过的原因")
     private String errorMsg;

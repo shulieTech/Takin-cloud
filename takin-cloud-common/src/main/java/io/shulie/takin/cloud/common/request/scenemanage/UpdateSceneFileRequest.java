@@ -42,4 +42,7 @@ public class UpdateSceneFileRequest {
     @NotEmpty(message = "上传文件不能为空")
     private List<UploadFileDTO> uploadFiles;
 
+    @ApiModelProperty("是否覆盖大文件 1=覆盖 0=不覆盖")
+    private Integer ifCoverBigFile;
+
 }

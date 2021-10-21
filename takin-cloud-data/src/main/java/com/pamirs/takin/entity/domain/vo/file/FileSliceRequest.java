@@ -28,4 +28,6 @@ public class FileSliceRequest {
     private String columnSeparator;
     @ApiModelProperty(name = "是否强制重新分片")
     private Boolean forceSplit;
+    @ApiModelProperty(name = "文件分隔符")
+    private String delimiter;
 }

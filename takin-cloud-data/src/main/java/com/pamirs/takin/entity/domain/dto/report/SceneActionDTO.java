@@ -1,6 +1,5 @@
 package com.pamirs.takin.entity.domain.dto.report;
 
-import java.io.Serializable;
 import java.util.List;
 
 import lombok.Data;
@@ -10,7 +9,7 @@ import lombok.Data;
  * @date 2020-04-21
  */
 @Data
-public class SceneActionDTO implements Serializable {
+public class SceneActionDTO {
 
     /**
      *

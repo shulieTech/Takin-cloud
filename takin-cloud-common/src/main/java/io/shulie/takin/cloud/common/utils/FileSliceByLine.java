@@ -86,7 +86,11 @@ public class FileSliceByLine {
                 sliceInfo = new FileSliceInfo() {{
                     setPartition(entry.getValue().getPartition());
                     setStart(entry.getValue().getStart());
-                    setEnd(entry.getValue().getEnd() - 1);
+                    if (entry.getKey().equals(nextPartitionNum - 1)) {
+                        setEnd(file.length());
+                    } else {
+                        setEnd(entry.getValue().getEnd() - 1);
+                    }
                 }};
                 resultMap.put(entry.getKey(), sliceInfo);
             }
@@ -127,7 +131,8 @@ public class FileSliceByLine {
                 return 1;
             }
         } catch (IOException e) {
-            System.err.println();
+            logger.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
+                    TakinCloudExceptionEnum.FILE_READ_ERROR, e);
         } finally {
             try {
                 if (rAccessFile != null) {
@@ -137,7 +142,8 @@ public class FileSliceByLine {
                     reader.close();
                 }
             } catch (IOException ex) {
-                ex.printStackTrace();
+                logger.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
+                        TakinCloudExceptionEnum.FILE_CLOSE_ERROR, ex);
             }
         }
         return 1;

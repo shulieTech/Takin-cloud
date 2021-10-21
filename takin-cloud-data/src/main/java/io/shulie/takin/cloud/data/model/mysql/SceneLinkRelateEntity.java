@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * 链路场景关联表
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_scene_link_relate")

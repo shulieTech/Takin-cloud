@@ -1,7 +1,5 @@
 package io.shulie.takin.cloud.biz.input.scenemanage;
 
-import java.io.Serializable;
-
 import lombok.Data;
 
 /**
@@ -9,9 +7,7 @@ import lombok.Data;
  * @date 2020/5/15 下午4:13
  */
 @Data
-public class SceneParseInput implements Serializable {
-
-    private static final long serialVersionUID = 33734315777916535L;
+public class SceneParseInput {
 
     private Long scriptId;
 

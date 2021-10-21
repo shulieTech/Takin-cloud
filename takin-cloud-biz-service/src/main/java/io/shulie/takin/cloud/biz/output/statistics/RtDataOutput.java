@@ -17,6 +17,9 @@ package io.shulie.takin.cloud.biz.output.statistics;
 
 import lombok.Data;
 
+/**
+ * @author -
+ */
 @Data
 public class RtDataOutput {
     /**

@@ -1,16 +1,16 @@
 package com.pamirs.takin.entity.domain.entity.scene.manage;
 
 import java.util.Date;
-import java.io.Serializable;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+/**
+ * @author -
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SceneSlaRef extends SceneRef implements Serializable {
-
-    private static final long serialVersionUID = 7858797202756518503L;
+public class SceneSlaRef extends SceneRef {
 
     private Long id;
 

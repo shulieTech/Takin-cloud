@@ -6,7 +6,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Map;
 
 /**
  * 说明: 序列化
@@ -15,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
  * @version v1.0
  * @date Create in 2018/7/16 10:18
  */
+@Slf4j
 public class GsonUtil {
 
     /**
@@ -58,15 +63,29 @@ public class GsonUtil {
      */
     public static String gsonToString(Object object) {
         String result = "";
-        if (object != null) {
-            result = GSON.toJson(object);
+        try{
+            if (object != null) {
+                result = GSON.toJson(object);
+            }
+        }catch (Exception e){
+            StringBuilder builder = new StringBuilder("object = {");
+            if (object instanceof Map){
+                Map mapObj = (Map)object;
+                for (Object key : mapObj.keySet()){
+                    Object value = mapObj.get(key);
+                    builder.append(key).append("=").append(value.toString()).append(",");
+                }
+            }
+            builder.append("}");
+            log.error("异常代码【{}】,异常内容：gsonToString失败,内容为:{} --> 异常信息: {}",
+                    TakinCloudExceptionEnum.JSON_PARSE_ERROR, builder.toString() ,e);
+
         }
         return EMPTY_JSON.equals(result) ? GsonUtil.EMPTY_STRING : result;
     }
 
     //    public static void main(String[] args) {
     //        Map<String, Object> anonymousClassMap = new HashMap<String, Object>() {
-    //            private static final long serialVersionUID = 1L;
     //
     //            {
     //                put("item", 10135668);

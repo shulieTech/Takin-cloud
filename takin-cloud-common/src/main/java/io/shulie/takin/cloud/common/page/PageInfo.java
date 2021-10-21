@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.common.page;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -23,8 +22,7 @@ import org.apache.commons.collections4.MapUtils;
  * @date 2018年4月13日
  */
 @SuppressWarnings("all")
-public class PageInfo<T> implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class PageInfo<T> {
     //当前页
     private int pageNum;
 

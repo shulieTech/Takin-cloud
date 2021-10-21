@@ -3,9 +3,8 @@ package io.shulie.takin.plugins.enginecall;
 
 import io.shulie.takin.app.Application;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
-import io.shulie.takin.ext.api.EngineCallExtApi;
-import io.shulie.takin.ext.content.enginecall.ScheduleRunRequest;
-import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +24,7 @@ public class EngineCallServiceTest {
     public void createJob() {
         Long sceneId = 1L;
         Long taskId = 1L;
-        Long customerId = -1L;
+        Long tenantId = -1L;
         ScheduleRunRequest request = new ScheduleRunRequest();
         request.setScheduleId(1L);
         ScheduleStartRequestExt requestExt = new ScheduleStartRequestExt();
@@ -57,7 +56,7 @@ public class EngineCallServiceTest {
         requestExt.setTryRun(false);
         requestExt.setSceneId(sceneId);
         requestExt.setTaskId(taskId);
-        requestExt.setCustomerId(customerId);
+        requestExt.setTenantId(tenantId);
 //        requestExt.setExtend();
 
         request.setRequest(requestExt);

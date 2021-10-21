@@ -1,6 +1,5 @@
 package com.pamirs.takin.entity.domain.dto.report;
 
-import java.io.Serializable;
 
 import lombok.Data;
 
@@ -11,7 +10,7 @@ import lombok.Data;
  * @date 2020/7/22 下午3:14
  */
 @Data
-public class Metrices implements Serializable {
+public class Metrices {
     /**
      * 时间
      */

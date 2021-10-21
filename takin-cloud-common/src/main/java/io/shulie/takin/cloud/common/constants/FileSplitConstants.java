@@ -1,5 +1,10 @@
 package io.shulie.takin.cloud.common.constants;
 
+/**
+ * 文件切片常量
+ *
+ * @author -
+ */
 public interface FileSplitConstants {
 
     /**

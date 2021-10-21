@@ -21,15 +21,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author shiyajian
  * create: 2020-10-10
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class EventMetrics extends AbstractMetrics {
-
-    private static final long serialVersionUID = 1L;
 
     private String eventName;
     private Long timestamp;

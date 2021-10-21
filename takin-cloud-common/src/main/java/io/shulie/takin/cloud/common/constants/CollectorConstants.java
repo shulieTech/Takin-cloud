@@ -25,11 +25,11 @@ public class CollectorConstants {
     /**
      * 单位：秒
      */
-    public static final int overdueSecond = 10;
+    public static final int OVERDUE_SECOND = 10;
     /**
      * 10秒过期策略，超时丢弃Metrics 数据，单位：毫秒
      */
-    public static final long overdueTime = 2000 * overdueSecond;
+    public static final long OVERDUE_TIME = 2000 * OVERDUE_SECOND;
     /**
      * Metrics 统计时间间隔
      */

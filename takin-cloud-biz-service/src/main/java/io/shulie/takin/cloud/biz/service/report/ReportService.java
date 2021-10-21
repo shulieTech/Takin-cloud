@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.github.pagehelper.PageInfo;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
+import io.shulie.takin.cloud.biz.input.report.ListRunningReportInput;
 import io.shulie.takin.cloud.biz.output.report.ReportOutput;
 import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
@@ -18,6 +19,7 @@ import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 
 /**
  * @author 数列科技
@@ -102,21 +104,22 @@ public interface ReportService {
      * @param reportId 报告主键
      * @return -
      */
-    Map<String, Object> getReportCount(Long reportId);
+    Map<String, Object> getReportWarnCount(Long reportId);
 
     /**
      * 查询正在生成的报告
      *
      * @return -
      */
-    Long queryRunningReport();
+    Long queryRunningReport(ContextExt contextExt);
 
     /**
-     * 获取运行中的报告列表
+     * 根据租户 获取运行中的报告列表
      *
-     * @return -
+     * @param contextExt 数据溯源上下文
+     * @return 报告主键列表
      */
-    List<Long> queryListRunningReport();
+    List<Long> queryListRunningReport(ContextExt contextExt);
 
     /**
      * 锁定报告
@@ -150,14 +153,14 @@ public interface ReportService {
     void forceFinishReport(Long reportId);
 
     /**
-     * 新增 customerId
+     * 新增 tenantId
      *
-     * @param reportId   报告主键
-     * @param sceneId    场景主键
-     * @param customerId 租户主键
+     * @param reportId 报告主键
+     * @param sceneId  场景主键
+     * @param tenantId 租户主键
      * @return -
      */
-    List<Metrices> metric(Long reportId, Long sceneId, Long customerId);
+    List<Metrices> metric(Long reportId, Long sceneId, Long tenantId);
 
     /**
      * 更新扩展字段
@@ -197,4 +200,12 @@ public interface ReportService {
      * @return -
      */
     ReportOutput selectById(Long id);
+
+    /**
+     * 更新场景启动失败的报告的状态
+     * @param sceneId 场景ID
+     * @param reportId 报告ID
+     * @param errorMsg 异常信息
+     */
+    void updateReportOnSceneStartFailed(Long sceneId,Long reportId,String errorMsg);
 }

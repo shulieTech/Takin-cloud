@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.common.bean.scenemanage;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 import javax.validation.constraints.NotNull;
@@ -13,9 +12,7 @@ import lombok.Data;
  * @date 2020/4/17 下午5:13
  */
 @Data
-public class SceneBusinessActivityRefBean implements Serializable {
-
-    private static final long serialVersionUID = -2028726088507717658L;
+public class SceneBusinessActivityRefBean {
 
     @ApiModelProperty(name = "businessActivityId", value = "业务活动ID")
     @NotNull(message = "业务活动ID不能为空")

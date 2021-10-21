@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * 指标采集配置
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_indicators_collect_config")

@@ -18,7 +18,7 @@ import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStartOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStatusOutput;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
-import io.shulie.takin.ext.content.asset.AssetBalanceExt;
+import io.shulie.takin.cloud.ext.content.asset.AssetBalanceExt;
 
 /**
  * @author 莫问
@@ -61,15 +61,16 @@ public interface SceneTaskService {
      * 结束标识，之后并不是pod生命周期结束，而是metric数据传输完毕，将状态回置成压测停止
      *
      * @param param 入参
+     * @return -
      * @see io.shulie.takin.cloud.biz.collector.collector.CollectorService
      */
-
     String taskResultNotify(SceneTaskNotifyParam param);
 
     /**
      * 开始任务试跑
      *
-     * @param input 入参
+     * @param input         入参
+     * @param enginePlugins 压测引擎列表
      * @return -
      */
     SceneTryRunTaskStartOutput startTryRun(SceneManageWrapperInput input, List<EnginePluginInput> enginePlugins);
@@ -92,7 +93,8 @@ public interface SceneTaskService {
     /**
      * 启动流量调试，返回报告id
      *
-     * @param input 入参
+     * @param input         入参
+     * @param enginePlugins 压测引擎列表
      * @return -
      */
     Long startFlowDebugTask(SceneManageWrapperInput input, List<EnginePluginInput> enginePlugins);
@@ -100,7 +102,8 @@ public interface SceneTaskService {
     /**
      * 启动巡检场景
      *
-     * @param input 入参
+     * @param input         入参
+     * @param enginePlugins 压测引擎列表
      * @return -
      */
     SceneInspectTaskStartOutput startInspectTask(SceneManageWrapperInput input, List<EnginePluginInput> enginePlugins);
@@ -122,7 +125,6 @@ public interface SceneTaskService {
      */
     SceneTryRunTaskStatusOutput checkTaskStatus(Long sceneId, Long reportId);
 
-
     /**
      * 检查巡检任务状态：压测引擎
      *
@@ -133,8 +135,9 @@ public interface SceneTaskService {
 
     /**
      * 开始压测前检查文件位点
-     * @param input
-     * @return
+     *
+     * @param input -
+     * @return -
      */
     SceneTaskStartCheckOutput sceneStartCsvPositionCheck(SceneTaskStartCheckInput input);
 
@@ -149,4 +152,5 @@ public interface SceneTaskService {
      * @param balanceExt
      */
     void writeBalance(AssetBalanceExt balanceExt);
+
 }

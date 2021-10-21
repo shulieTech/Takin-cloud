@@ -1,17 +1,16 @@
 package io.shulie.takin.cloud.biz.input.scenemanage;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import io.shulie.takin.cloud.common.bean.TimeBean;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 
 /**
  * @author qianshui
@@ -20,9 +19,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "场景保存入参")
-public class SceneManageWrapperInput extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = -7653146473491831687L;
+public class SceneManageWrapperInput extends ContextExt {
 
     @ApiModelProperty(name = "id", value = "压测场景ID")
     private Long id;

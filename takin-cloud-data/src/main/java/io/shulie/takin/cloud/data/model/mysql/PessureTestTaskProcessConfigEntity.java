@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * 压测任务业务流程配置
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_pessure_test_task_process_config")

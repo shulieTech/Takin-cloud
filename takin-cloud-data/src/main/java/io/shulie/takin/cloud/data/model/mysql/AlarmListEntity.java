@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * 告警列表
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_alarm_list")

@@ -8,6 +8,11 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+/**
+ * 机器规格 entity
+ *
+ * @author -
+ */
 @Data
 @TableName(value = "t_machine_spec")
 public class MachineSpecEntity {

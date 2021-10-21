@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * 压测数据构建表
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_data_build")

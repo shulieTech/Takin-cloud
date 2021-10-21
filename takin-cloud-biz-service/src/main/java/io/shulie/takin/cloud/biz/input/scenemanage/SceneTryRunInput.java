@@ -2,6 +2,9 @@ package io.shulie.takin.cloud.biz.input.scenemanage;
 
 import lombok.Data;
 
+/**
+ * @author -
+ */
 @Data
 public class SceneTryRunInput {
     /**
@@ -14,7 +17,7 @@ public class SceneTryRunInput {
      */
     private Integer concurrencyNum;
 
-    public SceneTryRunInput(Integer loopsNum,Integer concurrencyNum) {
+    public SceneTryRunInput(Integer loopsNum, Integer concurrencyNum) {
         this.loopsNum = loopsNum;
         this.concurrencyNum = concurrencyNum;
     }
@@ -27,8 +30,5 @@ public class SceneTryRunInput {
         this.loopsNum = loopsNum;
         return this;
     }
-
-
-
 
 }

@@ -1,21 +1,19 @@
 package io.shulie.takin.cloud.biz.input.scenemanage;
 
-import java.io.Serializable;
+import lombok.Data;
+
 import java.math.BigDecimal;
 
 import javax.validation.constraints.NotNull;
 
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
 
 /**
  * @author qianshui
  * @date 2020/4/17 下午5:13
  */
 @Data
-public class SceneBusinessActivityRefInput implements Serializable {
-
-    private static final long serialVersionUID = -2028726088507717658L;
+public class SceneBusinessActivityRefInput {
 
     @ApiModelProperty(name = "businessActivityId", value = "业务活动ID")
     @NotNull(message = "业务活动ID不能为空")

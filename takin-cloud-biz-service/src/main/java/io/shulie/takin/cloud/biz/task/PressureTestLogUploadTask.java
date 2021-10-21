@@ -1,28 +1,36 @@
 package io.shulie.takin.cloud.biz.task;
 
-import io.shulie.takin.cloud.biz.service.log.PushLogService;
-import io.shulie.takin.cloud.biz.utils.FileFetcher;
-import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.data.dao.sceneTask.SceneTaskPressureTestLogUploadDAO;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
-import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import io.shulie.takin.cloud.biz.utils.FileFetcher;
+import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
+import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.takin.cloud.biz.service.log.PushLogService;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
+import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
+import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
+
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Date;
 import java.util.Objects;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.io.FileNotFoundException;
 
 /**
  * 压测日志上传任务
+ *
+ * @author -
  */
+@Data
 @Slf4j
 public class PressureTestLogUploadTask implements Runnable {
 
@@ -30,7 +38,7 @@ public class PressureTestLogUploadTask implements Runnable {
 
     private Long reportId;
 
-    private Long customerId;
+    private Long tenantId;
 
     private SceneTaskPressureTestLogUploadDAO logUploadDAO;
 
@@ -44,19 +52,22 @@ public class PressureTestLogUploadTask implements Runnable {
 
     private String fileName;
 
-    public PressureTestLogUploadTask(Long sceneId, Long reportId, Long customerId,
+    private EngineCallExtApi engineCallExtApi;
+
+    public PressureTestLogUploadTask(Long sceneId, Long reportId, Long tenantId,
         SceneTaskPressureTestLogUploadDAO logUploadDAO, RedisClientUtils redisClientUtils,
         PushLogService pushLogService, SceneManageDAO sceneManageDAO,
-        String logDir, String fileName) {
+        String logDir, String fileName, EngineCallExtApi engineCallExtApi) {
         this.sceneId = sceneId;
         this.reportId = reportId;
-        this.customerId = customerId;
+        this.tenantId = tenantId;
         this.logUploadDAO = logUploadDAO;
         this.redisClientUtils = redisClientUtils;
         this.pushLogService = pushLogService;
         this.sceneManageDAO = sceneManageDAO;
         this.logDir = logDir;
         this.fileName = fileName;
+        this.engineCallExtApi = engineCallExtApi;
     }
 
     private static final String VERSION = "1.6";
@@ -67,12 +78,13 @@ public class PressureTestLogUploadTask implements Runnable {
         String filePath = String.format(logDir + "/ptl/%s/%s/%s", this.sceneId, this.reportId, fileName);
         log.info("上传压测明细日志--文件路径：{}", filePath);
         //解决报告已完成，但是文件还未生成，上传大小未0
-        while (null == getFile(filePath) && !isSceneEnded(this.sceneId)) {
+        while (null == getFile(filePath)) {
             try {
                 log.info("上传Jmeter日志--场景ID:{},文件未生成{},休眠等待", this.sceneId, filePath);
-                TimeUnit.SECONDS.sleep(1);
+                TimeUnit.SECONDS.sleep(2);
             } catch (InterruptedException e) {
-                log.warn("休眠失败，文件路径【{}】,异常信息：{}", filePath, e);
+                cleanCache(this.fileName.replaceAll("\\.", ""));
+                log.warn("上传Jmeter日志--场景ID:{},休眠失败，文件路径【{}】", this.sceneId, filePath);
                 return;
             }
         }
@@ -101,29 +113,27 @@ public class PressureTestLogUploadTask implements Runnable {
                 // 如果没有读到数据需要判断是不是报告已经完成，如果报告已经完成说明任务已经结束，并且日志都已经推送完成，这时就可以结束这个文件的推送任务
                 //否则下一次继续读取
                 if (data == null || data.length == 0) {
-                    //报告是否生成
+                    //场景状态是否是完成
                     boolean sceneEnded = isSceneEnded(this.sceneId);
                     if (sceneEnded) {
-                        long lastSize = getFileSize(ptlFile) - position;
-                        if (lastSize < MAX_PUSH_SIZE) {
-                            lastSize = MAX_PUSH_SIZE;
+                        //等待job删除
+                        String jobName = ScheduleConstants.getScheduleName(sceneId, reportId, tenantId);
+                        while (SceneManageConstant.SCENE_TASK_JOB_STATUS_RUNNING.equals(engineCallExtApi.getJobStatus(jobName))) {
+                            log.info("上传Jmeter日志--场景ID:{},job【{}】还在运行中，等待job停止", sceneId, jobName);
+                            TimeUnit.SECONDS.sleep(5);
                         }
-                        data = readFile(ptlFile, subFileName, position, ptlFile.getAbsolutePath(), fileFetcher, lastSize);
+                        log.info("上传Jmeter日志--场景ID:{}，报告ID:{},job【{}】已停止，最后一次上传", this.sceneId, this.reportId, jobName);
+                        long fileSize = getFileSize(ptlFile);
+                        long lastSize = Math.max(fileSize - position, MAX_PUSH_SIZE);
+                        data = readFile(ptlFile, subFileName, position, ptlFile.getAbsolutePath(), fileFetcher,
+                            lastSize);
                         if (data != null && data.length > 0) {
                             pushLogService.pushLogToAmdb(data, VERSION);
                         }
-                        //如果文件未刷盘，等待三秒，重新读一次
-                        if (position == 0) {
-                            TimeUnit.SECONDS.sleep(3);
-                            data = readFile(ptlFile, subFileName, position, ptlFile.getAbsolutePath(), fileFetcher,
-                                lastSize);
-                            if (data != null && data.length > 0) {
-                                pushLogService.pushLogToAmdb(data, VERSION);
-                            }
-                        }
-                        log.info("上传压测明细日志--文件【{}】上传完成，文件大小【{}】", this.fileName, position);
+                        position = getPosition(subFileName);
+                        log.info("上传Jmeter日志--场景ID:{},文件【{}】上传完成，文件大小【{}】", this.sceneId, this.fileName, position);
                         //删除缓存的key，记录文件上传大小
-                        createUploadRecord(this.sceneId, this.reportId, this.customerId,
+                        createUploadRecord(this.sceneId, this.reportId, this.tenantId,
                             ptlFile.getAbsolutePath(), position);
                         cleanCache(subFileName);
                         fileFetcher.close();
@@ -188,13 +198,13 @@ public class PressureTestLogUploadTask implements Runnable {
     }
 
     /**
-     * todo 这个方法需要修改，不能按照压测场景的状态来判断是否停止压测，最新的方案是按照job状态来判断。
-     * @param sceneId
-     * @return
+     * @param sceneId 场景主键
+     * @return 是否启用
      */
     private boolean isSceneEnded(Long sceneId) {
         SceneManageResult manageResult = this.sceneManageDAO.getSceneById(sceneId);
         if (Objects.isNull(manageResult) || Objects.isNull(manageResult.getStatus())) {
+            log.warn("上传Jmeter日志--场景ID:{},未查询到场景！", sceneId);
             return true;
         }
         return SceneManageStatusEnum.ifFinished(manageResult.getStatus());
@@ -232,12 +242,12 @@ public class PressureTestLogUploadTask implements Runnable {
      * @param fileName -
      * @param fileSize -
      */
-    private void createUploadRecord(Long sceneId, Long reportId, Long customerId, String fileName, Long fileSize) {
+    private void createUploadRecord(Long sceneId, Long reportId, Long tenantId, String fileName, Long fileSize) {
         log.info("上传压测明细日志--文件【{}】上传完成，创建上传记录", fileName);
         ScenePressureTestLogUploadEntity entity = new ScenePressureTestLogUploadEntity() {{
             setSceneId(sceneId);
             setReportId(reportId);
-            setCustomerId(customerId);
+            setTenantId(tenantId);
             setFileName(fileName);
             setTaskStatus(SceneRunTaskStatusEnum.ENDED.getCode());
             setUploadStatus(2);

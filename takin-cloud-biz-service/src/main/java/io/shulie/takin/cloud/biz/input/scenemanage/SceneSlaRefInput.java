@@ -11,7 +11,6 @@ import lombok.Data;
 
 @Data
 public class SceneSlaRefInput {
-    private static final long serialVersionUID = 4747478435828708203L;
 
     @ApiModelProperty(value = "规则名称")
     private String ruleName;

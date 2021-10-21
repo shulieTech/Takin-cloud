@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.common.bean.scenemanage;
 
-import java.io.Serializable;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -10,7 +9,7 @@ import lombok.Data;
  * @date 2021/2/3 11:46 上午
  */
 @Data
-public class WarnBean implements Serializable {
+public class WarnBean {
 
     @ApiModelProperty(value = "报告 ID")
     private Long reportId;

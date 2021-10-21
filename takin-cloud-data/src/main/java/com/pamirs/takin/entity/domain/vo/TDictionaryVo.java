@@ -2,17 +2,17 @@ package com.pamirs.takin.entity.domain.vo;
 
 import java.util.Date;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.gson.Gson;
-import io.shulie.takin.cloud.common.serialize.DateToStringFormatSerialize;
 import org.springframework.format.annotation.DateTimeFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.shulie.takin.cloud.common.serialize.DateToStringFormatSerialize;
 
 /**
  * 说明：数据字典模型类
  *
  * @author shulie
  * @version 1.0
- * @create 2018/11/1 0001 17:32
+ * @date 2018/11/01 17:32
  */
 public class TDictionaryVo {
     /**
