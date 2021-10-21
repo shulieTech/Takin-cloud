@@ -16,6 +16,7 @@
 package io.shulie.takin.cloud.common.utils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * @Author: liyuanba
@@ -30,7 +31,7 @@ public class NumberUtil {
     }
 
     public static double getRate(Number a, Number b, double defValue) {
-        return getRate(a, b, false, defValue, 2, BigDecimal.ROUND_HALF_UP);
+        return getRate(a, b, false, defValue, 2, RoundingMode.HALF_UP);
     }
 
     /**
@@ -41,7 +42,7 @@ public class NumberUtil {
     }
 
     public static double getPercentRate(Number a, Number b, double defValue) {
-        return getRate(a, b, true, defValue, 2, BigDecimal.ROUND_HALF_UP);
+        return getRate(a, b, true, defValue, 2, RoundingMode.HALF_UP);
     }
 
     /**
@@ -50,27 +51,27 @@ public class NumberUtil {
      * @param b         除数
      * @param percent   是否是百分比
      * @param defValue  默认值
-     * @param scale     小数点后精度, null表示不做精度取舍
+     * @param scale     小数点后精度, 默认值10
      * @param roundMode 取整模式，默认四舍五入
-     * @return
+     * @return 返回a除以b的值
      */
-    public static Double getRate(Number a, Number b, boolean percent, Double defValue, Integer scale, Integer roundMode) {
+    public static Double getRate(Number a, Number b, boolean percent, Double defValue, Integer scale, RoundingMode roundMode) {
         if (null == b) {
             return defValue;
         }
         if (null == a) {
             return defValue;
         }
-        BigDecimal aa = new BigDecimal(a.doubleValue());
-        BigDecimal bb = new BigDecimal(b.doubleValue());
+        BigDecimal aa = BigDecimal.valueOf(a.doubleValue());
+        BigDecimal bb = BigDecimal.valueOf(b.doubleValue());
         if (percent) {
             aa = aa.multiply(new BigDecimal(100));
         }
         if (null == scale) {
-            return aa.divide(bb).doubleValue();
+            scale = 10;
         }
         if (null == roundMode) {
-            roundMode = BigDecimal.ROUND_HALF_UP;
+            roundMode = RoundingMode.HALF_UP;
         }
         return aa.divide(bb, scale, roundMode).doubleValue();
     }
