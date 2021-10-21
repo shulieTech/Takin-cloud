@@ -26,5 +26,5 @@
 http://localhost:10010/takin-cloud/doc.html
 
 6.修改版本号
-- 1. 全局修改 如 takin-cloud-5.0.0 版本号
+- 1. 全局修改 如 takin-cloud-5.0.2 版本号
 - 2. 如果涉及到takin-cloud-open模块修改，需要修改 takin-cloud-open-5.0.0 版本号，并进行deploy

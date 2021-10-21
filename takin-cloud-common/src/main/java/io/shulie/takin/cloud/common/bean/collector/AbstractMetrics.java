@@ -35,7 +35,7 @@ public class AbstractMetrics {
     /**
      * pod的编号
      */
-    @Column(name = "pod_no")
+    @Column(tag = true, name = "pod_no")
     private String podNo;
 
     public AbstractMetrics(String type) {
