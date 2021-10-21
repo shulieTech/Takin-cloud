@@ -137,14 +137,11 @@ public class FileSplitService {
         }
         AtomicBoolean sliceResult = new AtomicBoolean(true);
         result.addAll(needToSplit.stream().peek(dataFile -> {
-            String filePath = dataFile.getPath().substring(
-                    dataFile.getPath().indexOf(ScheduleConstants.ENGINE_SCRIPT_FILE_PATH)
-                            + ScheduleConstants.ENGINE_SCRIPT_FILE_PATH.length() - 1);
             int totalPod = startRequest.getTotalIp();
             FileSliceRequest fileSliceRequest = new FileSliceRequest() {{
                 setSceneId(startRequest.getSceneId());
                 setRefId(dataFile.getRefId());
-                setFilePath(filePath);
+                setFilePath(dataFile.getPath());
                 setFileName(dataFile.getName());
                 setPodNum(totalPod);
                 setSplit(dataFile.isSplit());

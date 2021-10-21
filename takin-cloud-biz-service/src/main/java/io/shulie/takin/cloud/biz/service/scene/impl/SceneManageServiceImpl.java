@@ -742,8 +742,8 @@ public class SceneManageServiceImpl implements SceneManageService {
                 continue;
             }
 
-            //如果覆盖大文件 就直接️删整个场景目录 否则只保留大文件,其他文件删除
-            if (request.getIfCoverBigFile().equals(1)) {
+            //如果覆盖大文件 就直接️删整个场景目录 否则只保留大文件,其他文件删除;如果没有值，默认覆盖
+            if (request.getIfCoverBigFile() == null || request.getIfCoverBigFile().equals(1)) {
                 this.operateFileOnSystem(inputList, sceneId);
             } else {
                 this.updateFilesExceptBigFile(inputList, sceneId);
