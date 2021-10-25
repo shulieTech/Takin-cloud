@@ -34,6 +34,10 @@ public class ContextExt {
      * 操作人名称
      */
     String userName;
+    /**
+     * 租户code
+     */
+    String tenantCode;
 
     /**
      * 清除上下文信息
