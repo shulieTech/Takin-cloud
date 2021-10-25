@@ -207,7 +207,7 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
         // 纯净对象
         ContextExt context = new ContextExt(
             param.getUserId(), param.getTenantId(),
-            param.getEnvCode(), param.getFilterSql(),param.getUserName());
+            param.getEnvCode(), param.getFilterSql(),param.getUserName(),param.getTenantCode());
         // 清理原来的上下文
         param.clean();
         // 返回对象
@@ -215,11 +215,11 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
     }
 
     // 填充请求头
-
     private static final String USER_ID = "user_id";
     private static final String ENV_CODE = "env_code";
     private static final String TENANT_ID = "tenant_id";
     private static final String FILTER_SQL = "filterSql";
+    private static final String TENANT_CODE = "tenant_code";
 
     /**
      * 获取请求头信息
@@ -231,6 +231,7 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
             put(USER_ID, String.valueOf(context.getUserId()));
             put(ENV_CODE, String.valueOf(context.getEnvCode()));
             put(TENANT_ID, String.valueOf(context.getTenantId()));
+            put(TENANT_CODE, String.valueOf(context.getTenantCode()));
             put(FILTER_SQL, String.valueOf(context.getFilterSql()));
         }};
     }
