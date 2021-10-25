@@ -6,10 +6,10 @@ import com.alibaba.fastjson.TypeReference;
 
 import org.springframework.stereotype.Component;
 
-import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.entrypoint.common.CommonInfoApi;
+import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
 import io.shulie.takin.cloud.sdk.model.response.common.CommonInfosResp;
 import io.shulie.takin.cloud.sdk.model.request.common.CloudCommonInfoWrapperReq;
 
@@ -32,8 +32,7 @@ public class CommonInfoApiImpl implements CommonInfoApi {
      */
     @Override
     public CommonInfosResp getCloudConfigurationInfos(CloudCommonInfoWrapperReq request) {
-        return cloudApiSenderService.get(
-            EntrypointUrl.join(EntrypointUrl.MODULE_COMMON, EntrypointUrl.METHOD_COMMON_CONFIG),
+        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_COMMON, EntrypointUrl.METHOD_COMMON_CONFIG),
             request, new TypeReference<ResponseResult<CommonInfosResp>>() {}).getData();
     }
 }

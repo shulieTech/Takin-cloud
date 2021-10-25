@@ -4,27 +4,30 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import com.pamirs.takin.entity.domain.dto.strategy.StrategyConfigDetailDTO;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiOperation;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigAddVO;
 import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigQueryVO;
 import com.pamirs.takin.entity.domain.vo.strategy.StrategyConfigUpdateVO;
-import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
+import com.pamirs.takin.entity.domain.dto.strategy.StrategyConfigDetailDTO;
+
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageDeleteRequest;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageDeleteRequest;
 
 /**
  * @author qianshui
@@ -63,7 +66,7 @@ public class StrategyConfigController {
         return ResponseResult.success();
     }
 
-    @GetMapping("/list")
+    @GetMapping(EntrypointUrl.METHOD_STRATEGY_LIST)
     @ApiOperation(value = "分配策略列表")
     public ResponseResult<List<StrategyConfigExt>> getList(@ApiParam(name = "current", value = "页码") Integer current,
         @ApiParam(name = "pageSize", value = "页大小") Integer pageSize) {

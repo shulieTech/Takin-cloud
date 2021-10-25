@@ -32,39 +32,6 @@ public class FileSliceTest {
     @Autowired
     SceneBigFileSliceDAO fileSliceDAO;
 
-    @Test
-    public void testFileSlice() {
-        boolean fileNeedSlice = fileSliceDAO.isFileNeedSlice(746L);
-        System.out.println(fileNeedSlice);
-        boolean b = fileSliceService.fileSlice(new FileSliceRequest() {{
-            setFileName("data01.csv");
-            setFilePath("Desktop/filetest/data01.csv");
-            setSceneId(200L);
-            setRefId(974L);
-            setSplit(true);
-            setPodNum(10);
-            setOrderSplit(false);
-            //setOrderColumnNum(2);
-        }});
-        //    SceneBigFileSliceEntity sliceEntity = fileSliceDAO.selectOne(new SceneBigFileSliceParam() {{
-        //        setFileRefId(974L);
-        //        setSceneId(200L);
-        //        setFileName("OrderInfo_02.csv");
-        //    }});
-        //
-        //Map<Integer, JSONObject> sliceInfo = JSONObject.parseObject(sliceEntity.getSliceInfo(),
-        //    Map.class);
-        //List<StartEndPair> pairs = new ArrayList<>();
-        //StartEndPair pair;
-        //for (Map.Entry<Integer, JSONObject> entry : sliceInfo.entrySet()) {
-        //    pair = new StartEndPair();
-        //    pair.setStart(entry.getValue().getLong("start"));
-        //    pair.setEnd(entry.getValue().getLong("end"));
-        //    pair.setPartition(entry.getKey().toString());
-        //    pairs.add(pair);
-        //}
-        //pairs.forEach(System.out::println);
-    }
 
     @Test
     public void testGetRef() {
