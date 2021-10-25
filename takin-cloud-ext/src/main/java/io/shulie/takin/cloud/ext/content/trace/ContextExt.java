@@ -48,5 +48,6 @@ public class ContextExt {
         this.setEnvCode(null);
         this.setFilterSql(null);
         this.setUserName(null);
+        this.setTenantCode(null);
     }
 }
