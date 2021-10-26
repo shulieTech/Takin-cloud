@@ -10,19 +10,13 @@ import io.shulie.takin.cloud.open.api.impl.aop.annotation.ApiPointCut;
 import io.shulie.takin.cloud.open.api.impl.util.UrlBusinessUtil;
 import io.shulie.takin.cloud.open.api.scenemanage.CloudSceneApi;
 import io.shulie.takin.cloud.open.constant.CloudApiConstant;
-import io.shulie.takin.cloud.open.req.scenemanage.CloudUpdateSceneFileRequest;
-import io.shulie.takin.cloud.open.req.scenemanage.SceneIpNumReq;
-import io.shulie.takin.cloud.open.req.scenemanage.SceneManageDeleteReq;
-import io.shulie.takin.cloud.open.req.scenemanage.SceneManageIdReq;
-import io.shulie.takin.cloud.open.req.scenemanage.SceneManageQueryByIdsReq;
-import io.shulie.takin.cloud.open.req.scenemanage.SceneManageQueryReq;
-import io.shulie.takin.cloud.open.req.scenemanage.SceneManageWrapperReq;
-import io.shulie.takin.cloud.open.req.scenemanage.ScriptCheckAndUpdateReq;
+import io.shulie.takin.cloud.open.req.scenemanage.*;
 import io.shulie.takin.cloud.open.resp.scenemanage.SceneManageListResp;
 import io.shulie.takin.cloud.open.resp.scenemanage.SceneManageWrapperResp;
 import io.shulie.takin.cloud.open.resp.scenemanage.ScriptCheckResp;
 import io.shulie.takin.cloud.open.resp.strategy.StrategyResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.shulie.takin.utils.http.HttpHelper;
 import io.shulie.takin.utils.http.TakinResponseEntity;
@@ -173,6 +167,18 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
         }
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
             takinResponseEntity.getErrorMsg(), "查看cloud日志");
+    }
+
+    @Override
+    public ResponseResult<List<ScriptNode>> scriptAnalyze(ScriptAnalyzeRequest request) {
+        String url = troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_SCRIPT_FILE_ANALYZE_URL;
+        TakinResponseEntity<ResponseResult<List<ScriptNode>>> takinResponseEntity =
+                HttpHelper.doPost(url, null, new TypeReference<ResponseResult<List<ScriptNode>>>() {}, request);
+        if (takinResponseEntity.getSuccess()) {
+            return takinResponseEntity.getBody();
+        }
+        return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
+                takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 
 }
