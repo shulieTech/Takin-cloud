@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package io.shulie.takin.cloud.common.utils;
+package io.shulie.plugin.engine.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
