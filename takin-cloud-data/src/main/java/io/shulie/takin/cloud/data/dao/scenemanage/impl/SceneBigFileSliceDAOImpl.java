@@ -3,11 +3,9 @@ package io.shulie.takin.cloud.data.dao.scenemanage.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import com.alibaba.fastjson.JSONObject;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -21,20 +19,18 @@ import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import io.shulie.takin.cloud.data.util.MPUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
  * @author moriarty
  */
+@Slf4j
 @Component
 public class SceneBigFileSliceDAOImpl extends ServiceImpl<SceneBigFileSliceMapper, SceneBigFileSliceEntity>
     implements SceneBigFileSliceDAO, MPUtil<SceneBigFileSliceEntity> {
-
-    private static Logger logger = LoggerFactory.getLogger(SceneBigFileSliceDAOImpl.class);
 
     @Resource
     SceneScriptRefMapper sceneScriptRefMapper;
@@ -78,60 +74,42 @@ public class SceneBigFileSliceDAOImpl extends ServiceImpl<SceneBigFileSliceMappe
         LambdaQueryWrapper<SceneScriptRefEntity> refWrapper = new LambdaQueryWrapper<>();
         refWrapper.eq(SceneScriptRefEntity::getSceneId, param.getSceneId());
         refWrapper.eq(SceneScriptRefEntity::getFileName, param.getFileName());
+        refWrapper.eq(SceneScriptRefEntity::getIsDeleted, 0);
         //文件类型有多种，只查类型为1的数据文件
         refWrapper.eq(SceneScriptRefEntity::getFileType, 1);
         List<SceneScriptRefEntity> sceneScriptRefEntities = sceneScriptRefMapper.selectList(refWrapper);
-        List<SceneScriptRefEntity> collect = sceneScriptRefEntities
+        //分片信息
+        LambdaQueryWrapper<SceneBigFileSliceEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SceneBigFileSliceEntity::getSceneId, param.getSceneId());
+        wrapper.eq(SceneBigFileSliceEntity::getFileName, param.getFileName());
+        SceneBigFileSliceEntity sliceEntity = sceneBigFileSliceMapper.selectOne(wrapper);
+
+        if (CollectionUtils.isEmpty(sceneScriptRefEntities) || Objects.isNull(sliceEntity)) {
+            return FileSliceStatusEnum.UNSLICED.getCode();
+        } else if (FileSliceStatusEnum.SLICING.getCode() == sliceEntity.getStatus()) {
+            return FileSliceStatusEnum.SLICING.getCode();
+        }
+        return sceneScriptRefEntities
             .stream()
-            .filter(sceneScriptRefEntity ->
-                sceneScriptRefEntity.getFileName().endsWith(SUFFIX)
-                    && sceneScriptRefEntity.getIsDeleted() == 0)
-            .collect(Collectors.toList());
-        if (collect.size() == 1) {
-            SceneScriptRefEntity entity = collect.get(0);
-            if (entity != null && entity.getSceneId().equals(param.getSceneId())) {
-                LambdaQueryWrapper<SceneBigFileSliceEntity> wrapper = new LambdaQueryWrapper<>();
-                wrapper.eq(SceneBigFileSliceEntity::getSceneId, param.getSceneId());
-                wrapper.eq(SceneBigFileSliceEntity::getFileName, param.getFileName());
-                SceneBigFileSliceEntity sliceEntity = sceneBigFileSliceMapper.selectOne(wrapper);
-                if (sliceEntity != null) {
+            .findFirst()
+            .map(entity -> {
                     if (Objects.isNull(sliceEntity.getSliceCount())
-                        || StringUtils.isBlank(sliceEntity.getSliceInfo())) {
+                        || Objects.isNull(sliceEntity.getSliceInfo())
+                        || Objects.isNull(sliceEntity.getFileUpdateTime())
+                        || !param.getSliceCount().equals(sliceEntity.getSliceCount())) {
+                        log.warn(
+                            "【文件拆分】--场景ID【{}】,文件名【{}】，文件变更或pod数量变更.分片信息中的文件上传时间【{}】,脚本关联的文件上传时间【{}】；已分片数量【{}】,"
+                                + "启动pod数量【{}】",
+                            param.getSceneId(), param.getFileName(), sliceEntity.getFileUpdateTime(),
+                            entity.getUploadTime(), sliceEntity.getSliceCount(), param.getSliceCount());
                         return FileSliceStatusEnum.FILE_CHANGED.getCode();
-                    }
-                    if (entity.getFileName().equals(param.getFileName())) {
-                        long scriptRefUploadTime = entity.getUploadTime().getTime();
-                        if (Objects.isNull(sliceEntity.getFileUpdateTime())) {
-                            return FileSliceStatusEnum.FILE_CHANGED.getCode();
-                        }
-                        long sliceUploadTime = sliceEntity.getFileUpdateTime().getTime();
-                        if (sliceUploadTime == scriptRefUploadTime) {
-                            return FileSliceStatusEnum.SLICED.getCode();
-                        } else {
-                            logger.error("时间不匹配，slice time is [{}], scriptRef time is [{}]", sliceUploadTime,
-                                scriptRefUploadTime);
-                            return FileSliceStatusEnum.FILE_CHANGED.getCode();
-                        }
+                    } else if (Objects.nonNull(sliceEntity.getFileUpdateTime())
+                        && sliceEntity.getFileUpdateTime().equals(entity.getUploadTime())) {
+                        return FileSliceStatusEnum.SLICED.getCode();
                     }
                     return FileSliceStatusEnum.FILE_CHANGED.getCode();
                 }
-            }
-        }
-        return FileSliceStatusEnum.UNSLICED.getCode();
-    }
-
-    @Override
-    public boolean isFileNeedSlice(Long refId) {
-        SceneScriptRefEntity entity = sceneScriptRefMapper.selectById(refId);
-        if (Objects.nonNull(entity)) {
-            String fileExtend = entity.getFileExtend();
-            JSONObject jsonObject = JSONObject.parseObject(fileExtend);
-            if (jsonObject.containsKey("isOrderSplit")) {
-                return "1".equals(jsonObject.getString("isOrderSplit"));
-            }
-            return false;
-        }
-        return false;
+            ).orElse(FileSliceStatusEnum.UNSLICED.getCode());
     }
 
     @Override
@@ -165,7 +143,7 @@ public class SceneBigFileSliceDAOImpl extends ServiceImpl<SceneBigFileSliceMappe
         wrapper.eq(SceneScriptRefEntity::getFileName, param.getFileName());
         //只查type=1的文件
         wrapper.eq(SceneScriptRefEntity::getFileType, 1);
-        wrapper.eq(SceneScriptRefEntity::getIsDeleted,0);
+        wrapper.eq(SceneScriptRefEntity::getIsDeleted, 0);
         return sceneScriptRefMapper.selectOne(wrapper);
     }
 

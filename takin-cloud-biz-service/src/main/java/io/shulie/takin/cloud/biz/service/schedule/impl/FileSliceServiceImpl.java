@@ -1,112 +1,98 @@
 package io.shulie.takin.cloud.biz.service.schedule.impl;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-
-import javax.annotation.Resource;
+import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONObject;
 
-import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
+import com.google.common.collect.Lists;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneContactFileOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneContactFileOutput.ContactFileInfo;
+import io.shulie.takin.cloud.biz.pojo.FileSplitInfo;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
+import io.shulie.takin.cloud.biz.utils.FileSplitUtil;
 import io.shulie.takin.cloud.common.enums.FileSliceStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.utils.FileSliceByLine;
-import io.shulie.takin.cloud.common.utils.FileSliceByLine.FileSliceInfo;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
-import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.Builder;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneBigFileSliceDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
- * @author moriarty
+ * @author xr.l
  */
 @Service
 @Slf4j
 public class FileSliceServiceImpl implements FileSliceService {
-    @Resource
-    SceneBigFileSliceDAO fileSliceDAO;
-    @Value("${script.path}")
-    private String nfsDir;
-    @Resource
-    SceneManageDAO sceneManageDao;
 
     @Autowired
-    SceneTaskService sceneTaskService;
+    SceneBigFileSliceDAO fileSliceDAO;
+
+    @Value("${script.path}")
+    private String nfsDir;
+
+    @Autowired
+    private SceneTaskService sceneTaskService;
+
 
     private static final String DEFAULT_PATH_SEPARATOR = "/";
 
-    private static final String DEFAULT_FILE_COLUMN_SEPARATOR = ",";
+    private static final String DEFAULT_FILE_COLUMN_SEPARATOR = "@@@";
 
     @Override
-    public boolean fileSlice(FileSliceRequest request) {
-        //1.是否分片/是否已分片
+    public boolean fileSlice(FileSliceRequest request) throws TakinCloudException {
         Integer fileSliceStatusCode = this.isFileSliced(request);
         FileSliceStatusEnum fileSliceStatus = FileSliceStatusEnum.getFileSliceStatusEnumByCode(
             fileSliceStatusCode);
-        if (Objects.nonNull(request.getForceSplit()) && request.getForceSplit()) {
-            if (fileSliceStatus == FileSliceStatusEnum.SLICED) {
-                fileSliceStatus = FileSliceStatusEnum.FILE_CHANGED;
-            }
-        }
-        //文件已拆分
-        if (fileSliceStatus == FileSliceStatusEnum.SLICED) {
-            log.info("【文件分片】--场景ID：【{}】，文件名：【{}】 文件已经分片完成.", request.getSceneId(), request.getFileName());
-            return true;
-        }
-        //文件拆分中
-        if (fileSliceStatus == FileSliceStatusEnum.SLICING) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR, "文件分片任务执行中，请勿重复发起" +
-                ":场景ID【{" + request.getSceneId() + "}】,文件名【{" + request.getFileName() + "}】");
-        }
-        //根据请求，更新关联的scriptRef
-        if (request.getSplit()) {
-            updateFileRefExtend(request);
-        }
-        //填充request
-        fillRequest(request);
-
         SceneBigFileSliceParam param = new SceneBigFileSliceParam() {{
             setSceneId(request.getSceneId());
-            setFileRefId(request.getRefId());
             setFileName(request.getFileName());
             setStatus(FileSliceStatusEnum.SLICING.getCode());
         }};
+        updateFileRefExtend(request, param);
+        if (Objects.isNull(fileSliceStatus)) {
+            log.error("【文件分片】--场景ID：【{}】，文件名：【{}】 文件分片异常，未查询到文件分片信息.", request.getSceneId(), request.getFileName());
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_START_ERROR_FILE_SLICING, "文件分片异常，未查询到分片信息");
+        }
+        switch (fileSliceStatus) {
+            case SLICED:
+                log.info("【文件分片】--场景ID：【{}】，文件名：【{}】 文件已分片.", request.getSceneId(), request.getFileName());
+                return true;
+            case UNSLICED:
+                log.info("【文件分片】--场景ID：【{}】，文件名：【{}】 文件未分片，执行分片", request.getSceneId(), request.getFileName());
+                fileSliceDAO.create(param);
+                return slice(request, param);
+            case SLICING:
+            case FILE_CHANGED:
+                log.info("【文件分片】--场景ID：【{}】，文件名：【{}】 文件或场景变更，重新分片.", request.getSceneId(), request.getFileName());
+                fileSliceDAO.update(param);
+                return slice(request, param);
+            default:
+                log.error("【文件分片】--场景ID：【{}】，文件名：【{}】 文件分片异常，未查询到文件分片信息.", request.getSceneId(), request.getFileName());
+                throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_START_ERROR_FILE_SLICING,
+                    "文件分片异常，未查询到分片信息");
+        }
+    }
 
-        SceneScriptRefEntity entity = fileSliceDAO.selectRef(param);
-        if (Objects.nonNull(entity)){
-            param.setFileUploadTime(entity.getUploadTime());
-        }
-        if (fileSliceStatus == FileSliceStatusEnum.FILE_CHANGED) {
-            if (request.isBigFile() && request.getOrderSplit()){
-                return false;
-            }
-            fileSliceDAO.update(param);
-        } else if (fileSliceStatus == FileSliceStatusEnum.UNSLICED) {
-            if (request.isBigFile() && request.getOrderSplit()){
-                return false;
-            }
-            fileSliceDAO.create(param);
-        }
-        if (request.getOrderSplit() != null && request.getOrderSplit()) {
+    private boolean slice(FileSliceRequest request, SceneBigFileSliceParam param) {
+        if (request.getSplit() && request.getOrderSplit() != null && request.getOrderSplit()) {
             sliceFileByOrder(request, param);
         } else {
             sliceFileWithoutOrder(request, param);
@@ -126,19 +112,20 @@ public class FileSliceServiceImpl implements FileSliceService {
     public Integer isFileSliced(FileSliceRequest request) {
         return fileSliceDAO.isFileSliced(new SceneBigFileSliceParam() {{
             setSceneId(request.getSceneId());
-            //setFileRefId(request.getRefId());
             setFileName(request.getFileName());
+            setSliceCount(request.getPodNum());
         }});
     }
 
     @Override
-    public Boolean updateFileRefExtend(FileSliceRequest request) {
+    public Boolean updateFileRefExtend(FileSliceRequest request, SceneBigFileSliceParam param) {
         boolean hasChange = false;
         SceneScriptRefEntity entity = fileSliceDAO.selectRef(new SceneBigFileSliceParam() {{
             setSceneId(request.getSceneId());
             setFileName(request.getFileName());
         }});
         JSONObject jsonObject;
+        Date uploadTime = new Date();
         if (entity == null || entity.getId() == null) {
             SceneScriptRef insertParam = new SceneScriptRef();
             insertParam.setFileName(request.getFileName());
@@ -146,6 +133,7 @@ public class FileSliceServiceImpl implements FileSliceService {
             insertParam.setScriptType(0);
             insertParam.setFileType(1);
             insertParam.setUploadTime(new Date());
+            insertParam.setUploadTime(uploadTime);
             insertParam.setUploadPath(request.getSceneId() + DEFAULT_PATH_SEPARATOR + request.getFileName());
             jsonObject = new JSONObject();
             if (request.getSplit()) {
@@ -156,6 +144,10 @@ public class FileSliceServiceImpl implements FileSliceService {
             }
             insertParam.setFileExtend(jsonObject.toJSONString());
             Long refId = fileSliceDAO.createRef(insertParam);
+            request.setRefId(refId);
+            request.setFilePath(request.getSceneId() + DEFAULT_PATH_SEPARATOR + request.getFileName());
+            param.setFileUploadTime(uploadTime);
+            param.setFileRefId(refId);
             return refId > 0;
         }
         jsonObject = JSONObject.parseObject(entity.getFileExtend());
@@ -167,7 +159,11 @@ public class FileSliceServiceImpl implements FileSliceService {
             jsonObject.put(FileSliceService.IS_ORDER_SPLIT, 1);
             hasChange = true;
         }
+        param.setFileUploadTime(entity.getUploadTime());
         entity.setFileExtend(jsonObject.toJSONString());
+        param.setFileRefId(entity.getId());
+        request.setRefId(entity.getId());
+        request.setFilePath(entity.getUploadPath());
         if (hasChange) {
             return fileSliceDAO.updateRef(entity) == 1;
         }
@@ -176,78 +172,84 @@ public class FileSliceServiceImpl implements FileSliceService {
 
 
     @Override
-    public void preSlice(SceneBigFileSliceParam param) {
-        //todo 时间改为一致
-        Date currentDate = new Date();
-        SceneScriptRefEntity entity = fileSliceDAO.selectRef(param);
-        if (Objects.isNull(entity)) {
-            Date finalCurrentDate = currentDate;
-            SceneScriptRef sceneScriptRef = new SceneScriptRef() {{
-                setFileName(param.getFileName());
-                setSceneId(param.getSceneId());
-                setUploadPath(param.getSceneId() + DEFAULT_PATH_SEPARATOR + param.getFileName());
-                JSONObject extJson = new JSONObject();
-                extJson.put("isSplit", param.getIsSplit());
-                extJson.put("isOrderSplit", 1);
-                extJson.put("isBigFile",1);
-                setFileExtend(extJson.toJSONString());
-                setUploadTime(finalCurrentDate);
-                setFileType(1);
-                setScriptType(0);
-                setIsDeleted(0);
-            }};
-            fileSliceDAO.createRef(sceneScriptRef);
-            entity = fileSliceDAO.selectRef(param);
+    public SceneContactFileOutput contactScene(SceneBigFileSliceParam param) throws TakinCloudException {
+        SceneContactFileOutput output = new SceneContactFileOutput();
+        output.setSceneId(param.getSceneId());
+        String fileDir = nfsDir + DEFAULT_PATH_SEPARATOR + param.getSceneId() + DEFAULT_PATH_SEPARATOR;
+        File dir = new File(fileDir);
+        File[] files;
+        File targetFile = null;
+        String errorInfo;
+        if (dir.exists() && dir.isDirectory()) {
+            files = dir.listFiles((dir1, name) -> name.endsWith(".csv"));
+            //场景文件夹下没有文件
+            if (Objects.isNull(files) || files.length == 0) {
+                errorInfo = String.format("更新关联文件异常，场景[%s]文件夹下未找到数据文件", param.getSceneId());
+                throw new TakinCloudException(TakinCloudExceptionEnum.EMPTY_DIRECTORY_ERROR, errorInfo);
+            }
+            //场景文件夹下存在多个文件，入参文件名为空
+            else if (StringUtils.isBlank(param.getFileName()) && files.length > 1) {
+                output.setFiles(Arrays.stream(files).map(file -> new ContactFileInfo() {{
+                    setFileName(file.getName());
+                    setFilePath(file.getAbsolutePath());
+                    setSize(file.length());
+                }}).collect(Collectors.toList()));
+                errorInfo = String.format("更新文件关联异常，参数未输入文件名，场景文件夹[%s]下有多个csv数据文件", param.getSceneId());
+                throw new TakinCloudException(TakinCloudExceptionEnum.TOO_MUCH_FILE_ERROR, errorInfo);
+            }
+            //场景文件夹下只有一个数据文件，入参文件名为空
+            else if (StringUtils.isBlank(param.getFileName()) && files.length == 1) {
+                targetFile = files[0];
+            }
+            //入参文件名不为空，多个文件，匹配文件
+            else if (StringUtils.isNotBlank(param.getFileName())) {
+                for (File file : files) {
+                    if (param.getFileName().equals(file.getName())) {
+                        targetFile = file;
+                        break;
+                    }
+                }
+            }
+            if (Objects.isNull(targetFile)) {
+                errorInfo = String.format("在场景[%s]文件夹下未找到对应的文件[%s]", param.getSceneId(), param.getFileName());
+                throw new TakinCloudException(TakinCloudExceptionEnum.EMPTY_DIRECTORY_ERROR, errorInfo);
+            } else {
+                param.setFileName(targetFile.getName());
+                ContactFileInfo contactFileInfo = new ContactFileInfo();
+                boolean b = contactFileAndScene(targetFile, param,contactFileInfo);
+                if (b){
+                    contactFileInfo.setSize(targetFile.length());
+                    contactFileInfo.setFileName(targetFile.getName());
+                    contactFileInfo.setFilePath(targetFile.getAbsolutePath());
+                    output.setFiles(Lists.newArrayList(contactFileInfo));
+                }
+            }
         } else {
-            JSONObject extJson = JSONObject.parseObject(entity.getFileExtend());
-            extJson.put("isSplit", param.getIsSplit());
-            extJson.put("isOrderSplit", 1);
-            extJson.put("isBigFile",1);
-            currentDate = entity.getUploadTime();
-            entity.setFileExtend(extJson.toJSONString());
-            fileSliceDAO.updateRef(entity);
+            log.error("未找到场景文件夹{}，请检查场景ID是否正确！", param.getSceneId());
+            throw new TakinCloudException(TakinCloudExceptionEnum.EMPTY_DIRECTORY_ERROR, "未找到场景文件夹，请检查场景ID是否正确！");
         }
-        param.setFileRefId(entity.getId());
-        param.setFileUploadTime(currentDate);
-        param.setStatus(FileSliceStatusEnum.SLICED.getCode());
-        param.setFilePath(param.getSceneId() + DEFAULT_PATH_SEPARATOR + param.getFileName());
-        SceneBigFileSliceEntity sliceEntity = fileSliceDAO.selectOne(param);
-        if (sliceEntity == null) {
-            fileSliceDAO.create(param);
-        } else {
-            fileSliceDAO.update(param);
-        }
-        //加文件分片清除位点缓存的逻辑
-        sceneTaskService.cleanCachedPosition(param.getSceneId());
+        return output;
     }
 
     /**
      * 文件顺序拆分，包含排序字段，排序列号如果没有传，默认按最后一列
      *
-     * @param request -
-     * @param param   -
+     * @param request
+     * @param param
      */
     private void sliceFileByOrder(FileSliceRequest request, SceneBigFileSliceParam param) {
         try {
             log.info("【文件分片】--场景ID：【{}】，文件名：【{}】 文件【顺序分片】任务执开始.", request.getSceneId(), request.getFileName());
-            FileSliceByLine fileSliceUtil =
-                new FileSliceByLine.Builder(nfsDir + DEFAULT_PATH_SEPARATOR + request.getFilePath())
-                    .withSeparator(StringUtils.isNotBlank(request.getColumnSeparator()) ? request.getColumnSeparator()
-                        : DEFAULT_FILE_COLUMN_SEPARATOR)
-                    .withOrderColumnNum(request.getOrderColumnNum())
-                    .build();
-            Map<Integer, FileSliceInfo> resultMap = fileSliceUtil.sliceFile();
+            List<FileSplitInfo> fileSplitInfos = FileSplitUtil.splitFileByPartition(
+                nfsDir + DEFAULT_PATH_SEPARATOR + request.getFilePath(),
+                StringUtils.isBlank(request.getDelimiter()) ? DEFAULT_FILE_COLUMN_SEPARATOR
+                    : request.getDelimiter());
             log.info("【文件分片】--场景ID：【{}】，文件名：【{}】 文件【顺序分片】任务执结束.", request.getSceneId(), request.getFileName());
-            if (resultMap.size() > 0) {
-                //不需要记录计算出来的partition的hash值  modified by xr.l @20210804
-                List<FileSliceInfo> resultList = new ArrayList<>();
-                for (Map.Entry<Integer, FileSliceInfo> entry : resultMap.entrySet()) {
-                    resultList.add(entry.getValue());
-                }
-                String sliceInfo = JSONObject.toJSONString(resultList);
+            if (CollectionUtils.isNotEmpty(fileSplitInfos)) {
+                String sliceInfo = JSONObject.toJSONString(fileSplitInfos);
                 param.setStatus(FileSliceStatusEnum.SLICED.getCode());
                 param.setSliceInfo(sliceInfo);
-                param.setSliceCount(resultMap.size());
+                param.setSliceCount(fileSplitInfos.size());
             }
         } catch (Exception e) {
             log.error("【文件分片】--场景ID：【{}】，文件名：【{}】 文件【顺序分片】任务异常,异常信息：【{}】", request.getSceneId(), request.getFileName(),
@@ -259,14 +261,15 @@ public class FileSliceServiceImpl implements FileSliceService {
     /**
      * 根据pod数量拆分文件
      *
-     * @param request -
-     * @param param   -
+     * @param request
+     * @param param
      */
     private void sliceFileWithoutOrder(FileSliceRequest request, SceneBigFileSliceParam param) {
         try {
             log.info("【文件分片】--场景ID：【{}】，文件名：【{}】，传入pod数量：【{}】 文件分片任务执开始.", request.getSceneId(), request.getFileName(),
                 request.getPodNum());
-            FileSliceByPodNum build = new Builder(nfsDir + DEFAULT_PATH_SEPARATOR + request.getFilePath())
+            FileSliceByPodNum build = new FileSliceByPodNum.Builder(
+                nfsDir + DEFAULT_PATH_SEPARATOR + request.getFilePath())
                 .withPartSize(request.getPodNum())
                 .build();
             ArrayList<StartEndPair> startEndPairs = build.getStartEndPairs();
@@ -285,25 +288,76 @@ public class FileSliceServiceImpl implements FileSliceService {
         }
     }
 
-    /**
-     * 填充 podNum,refId,filePath
-     *
-     * @param request -
-     */
-    private void fillRequest(FileSliceRequest request) {
-        //refId,filePath
-        if (request.getRefId() == null || StringUtils.isBlank(request.getFilePath())) {
-            SceneScriptRefEntity entity = fileSliceDAO.selectRef(new SceneBigFileSliceParam() {{
-                setSceneId(request.getSceneId());
-                setFileName(request.getFileName());
-            }});
-            request.setRefId(entity.getId());
-            request.setFilePath(entity.getUploadPath());
+
+    private boolean contactFileAndScene(File file, SceneBigFileSliceParam param,ContactFileInfo info) {
+        Date currentDate = new Date();
+        SceneScriptRefEntity entity = fileSliceDAO.selectRef(param);
+        if (Objects.isNull(entity)) {
+            Date finalCurrentDate = currentDate;
+            SceneScriptRef sceneScriptRef = new SceneScriptRef() {{
+                setFileName(param.getFileName());
+                setSceneId(param.getSceneId());
+                setUploadPath(param.getSceneId() + DEFAULT_PATH_SEPARATOR + param.getFileName());
+                JSONObject extJson = new JSONObject();
+                if (Objects.nonNull(param.getIsOrderSplit()) && param.getIsOrderSplit() == 1) {
+                    extJson.put("isSplit", 1);
+                    info.setIsSplit(1);
+                } else {
+                    extJson.put("isSplit", param.getIsSplit());
+                    info.setIsSplit(param.getIsSplit());
+                }
+                info.setIsSplit(1);
+                extJson.put("isOrderSplit", param.getIsOrderSplit());
+                info.setIsOrderSplit(param.getIsOrderSplit());
+                setFileSize(String.valueOf(file.length()));
+                setFileExtend(extJson.toJSONString());
+                setUploadTime(finalCurrentDate);
+                setFileType(1);
+                setScriptType(0);
+                setIsDeleted(0);
+            }};
+            fileSliceDAO.createRef(sceneScriptRef);
+            entity = fileSliceDAO.selectRef(param);
+        } else {
+            JSONObject extJson = JSONObject.parseObject(entity.getFileExtend());
+            if (Objects.nonNull(param.getIsOrderSplit()) && param.getIsOrderSplit() == 1) {
+                extJson.put("isSplit", 1);
+                info.setIsSplit(1);
+            } else {
+                extJson.put("isSplit", param.getIsSplit());
+                info.setIsSplit(param.getIsSplit());
+            }
+            info.setIsSplit(1);
+            extJson.put("isOrderSplit", param.getIsOrderSplit());
+            info.setIsOrderSplit(param.getIsOrderSplit());
+            entity.setFileSize(String.valueOf(file.length()));
+            currentDate = entity.getUploadTime();
+            entity.setFileExtend(extJson.toJSONString());
+            fileSliceDAO.updateRef(entity);
         }
-        //podNum
-        if (request.getForceSplit() && request.getPodNum() > 0) {
-            request.setPodNum(request.getPodNum());
+
+        //加文件分片清除位点缓存的逻辑
+        sceneTaskService.cleanCachedPosition(param.getSceneId());
+        //按顺序拆分的文件进行预分片
+        if (Objects.nonNull(param.getIsOrderSplit()) && param.getIsOrderSplit() == 1) {
+            SceneScriptRefEntity finalEntity = entity;
+            this.sliceFileByOrder(new FileSliceRequest() {{
+                setSceneId(param.getSceneId());
+                setFilePath(param.getSceneId() + DEFAULT_PATH_SEPARATOR + param.getFileName());
+                setRefId(finalEntity.getId());
+            }}, param);
+            param.setFileRefId(entity.getId());
+            param.setFileUploadTime(currentDate);
+            param.setStatus(FileSliceStatusEnum.SLICED.getCode());
+            param.setFilePath(param.getSceneId() + DEFAULT_PATH_SEPARATOR + param.getFileName());
+            SceneBigFileSliceEntity sliceEntity = fileSliceDAO.selectOne(param);
+            if (sliceEntity == null) {
+                return fileSliceDAO.create(param) == 1;
+            } else {
+                return fileSliceDAO.update(param) == 1;
+            }
         }
+        return true;
     }
 
 }

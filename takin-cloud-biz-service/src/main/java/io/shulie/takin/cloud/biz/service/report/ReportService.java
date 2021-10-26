@@ -197,4 +197,12 @@ public interface ReportService {
      * @return -
      */
     ReportOutput selectById(Long id);
+
+    /**
+     * 更新场景启动失败的报告的状态
+     * @param sceneId 场景ID
+     * @param reportId 报告ID
+     * @param errorMsg 异常信息
+     */
+    void updateReportOnSceneStartFailed(Long sceneId,Long reportId,String errorMsg);
 }

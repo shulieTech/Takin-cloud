@@ -34,6 +34,9 @@ public enum TakinCloudExceptionEnum implements ExceptionReadable {
     SCENE_MANAGE_FILE_COPY_ERROR("cloud-001-s0503", "上传文件复制失败"),
     BIGFILE_UPLOAD_VERIFY_ERROR("cloud-001-u0504","大文件上传校验失败"),
     BIGFILE_UPLOAD_ERROR("cloud-001-u0505","大文件上传失败"),
+    EMPTY_DIRECTORY_ERROR("cloud-001-u0506","场景文件夹下未找到对应的数据文件"),
+
+    TOO_MUCH_FILE_ERROR("cloud-001-u0507","场景文件夹下找到多个数据文件"),
 
     ENGINE_PLUGIN_PARAM_VERIFY_ERROR("cloud-001-s0600","引擎插件参数校验失败"),
     SCENE_MANAGE_ALLOCATION_ERROR("cloud-001-s0601","压测场景分配异常"),
