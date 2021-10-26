@@ -63,7 +63,7 @@ public class CommonUtil {
                         result = r;
                     }
                 } else if (r instanceof List) {
-                    if (CollectionUtils.isNotEmpty((List) r)) {
+                    if (CollectionUtils.isNotEmpty((List<?>) r)) {
                         result = r;
                     }
                 } else if (r instanceof Map) {

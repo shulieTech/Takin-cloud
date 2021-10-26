@@ -14,9 +14,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -25,7 +22,6 @@ import javax.annotation.Resource;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.shulie.takin.cloud.biz.collector.collector.AbstractIndicators;
 import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
@@ -61,7 +57,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.Cursor;
@@ -86,7 +81,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     private SceneManageDAO sceneManageDAO;
     @Resource
     private EventCenterTemplate eventCenterTemplate;
-    @Autowired
+    @Resource
     private AppConfig appConfig;
 
     @Value("${scheduling.enabled:true}")
@@ -101,14 +96,10 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     @Value("${report.metric.isSaveLastPoint:true}")
     private boolean isSaveLastPoint;
 
-
-    // todo 之后改成分布式，需要注意，redis 读写锁问题
     /**
      * 用于时间窗口 记忆
      */
-    // todo 本地缓存，之后都需要改成redis 解决redis锁问题，以及redis 缓存延迟问题
-
-    private static Map<String, Long> timeWindowMap = Maps.newConcurrentMap();
+    private static final Map<String, Long> timeWindowMap = Maps.newConcurrentMap();
 
     public void sendMetrics(Metrics metrics) {
         Event event = new Event();
@@ -448,7 +439,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         return p;
     }
 
-    private void finishPushData(Long sceneId, Long reportId, Long customerId, Integer podNum, Long timeWindow, Long endTime) {
+    private void finishPushData(Long sceneId, Long reportId, Long customerId, Integer podNum, Long timeWindow, long endTime) {
         String taskKey = getPressureTaskKey(sceneId, reportId, customerId);
         String last = String.valueOf(redisTemplate.opsForValue().get(last(taskKey)));
         long nowTimeWindow = CollectorUtil.getTimeWindowTime(System.currentTimeMillis());
@@ -468,6 +459,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             if (null != eTime) {
                 log.info("触发手动收尾操作，当前时间窗口：{},结束时间窗口：{},", DateUtil.showTime(timeWindow), DateUtil.showTime(eTime));
                 endTime = Math.min(endTime, eTime);
+            } else {
+                eTime = endTime;
             }
             long endTimeWindow = CollectorUtil.getTimeWindowTime(endTime);
             log.info("触发收尾操作，当前时间窗口：{},结束时间窗口：{},", DateUtil.showTime(timeWindow), DateUtil.showTime(endTimeWindow));
@@ -488,7 +481,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             // 删除 timeWindowMap 的key
             String tempTimestamp = ScheduleConstants.TEMP_TIMESTAMP_SIGN + engineName;
             timeWindowMap.remove(tempTimestamp);
-            log.info("---> 本次压测{}-{}-{}完成，已发送finished事件！<------", sceneId, sceneId, reportId, customerId);
+            log.info("---> 本次压测{}-{}-{}完成，已发送finished事件！<------", sceneId, reportId, customerId);
         }
         // 超时自动检修，强行触发关闭
         forceClose(taskKey, nowTimeWindow, sceneId, reportId, customerId);
@@ -784,8 +777,6 @@ public class PushWindowDataScheduled extends AbstractIndicators {
 
     /**
      * 计算sa
-     * @param percentDatas
-     * @return
      */
     private String calculateSaPercent(List<String> percentDatas) {
         List<Map<Integer, RtDataOutput>> percentMapList = percentDatas.stream().filter(StringUtils::isNotBlank)
@@ -817,8 +808,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             int hits = 0;
             int time = 0;
             double need = total * i / 100d;
-            for (int j = 0; j < rtDatas.size(); j++) {
-                RtDataOutput d = rtDatas.get(j);
+            for (RtDataOutput d : rtDatas) {
                 if (hits < need || d.getTime() <= time) {
                     hits += d.getHits();
                     if (d.getTime() > time) {
@@ -924,7 +914,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         }
         BigDecimal countDecimal = BigDecimal.valueOf(count);
         BigDecimal rtDecimal = BigDecimal.valueOf(sumRt);
-        return rtDecimal.divide(countDecimal, 2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return rtDecimal.divide(countDecimal, 2, RoundingMode.HALF_UP).doubleValue();
     }
 
     /**
@@ -938,7 +928,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         }
         BigDecimal countDecimal = BigDecimal.valueOf(count);
         BigDecimal saCountDecimal = BigDecimal.valueOf(saCount);
-        return saCountDecimal.divide(countDecimal, 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100))
+        return saCountDecimal.divide(countDecimal, 2, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100))
             .doubleValue();
     }
 
@@ -954,7 +944,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         BigDecimal countDecimal = BigDecimal.valueOf(count);
         BigDecimal failCountDecimal = BigDecimal.valueOf(failCount);
         return countDecimal.subtract(failCountDecimal).multiply(BigDecimal.valueOf(100)).divide(countDecimal, 2,
-                BigDecimal.ROUND_HALF_UP).doubleValue();
+                RoundingMode.HALF_UP).doubleValue();
     }
 
 }
