@@ -38,6 +38,7 @@ import io.shulie.takin.utils.json.JsonHelper;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.MapUtils;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
+import io.shulie.takin.cloud.common.utils.NumberUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.shulie.takin.cloud.common.bean.sla.SlaBean;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
@@ -701,15 +702,18 @@ public class ReportServiceImpl implements ReportService {
         List<String> successRate = Lists.newLinkedList();
         List<String> concurrent = Lists.newLinkedList();
 
-        list.stream().filter(s -> s.getTps() != null).forEach(data -> {
-            time.add(getTime(data.getTime()));
-            sa.add(data.getSa().setScale(2, RoundingMode.HALF_DOWN).toString());
-            avgRt.add(data.getAvgRt().setScale(2, RoundingMode.HALF_DOWN).toString());
-            tps.add(data.getTps().setScale(2, RoundingMode.HALF_DOWN).toString());
-            successRate.add(data.getSuccessRate().setScale(2, RoundingMode.HALF_DOWN).toString());
-            concurrent.add(data.getAvgConcurrenceNum().setScale(2, RoundingMode.HALF_DOWN).toString());
-        });
-
+        list.stream()
+            .filter(Objects::nonNull)
+            .filter(data -> data.getTps() != null)
+            .filter(data -> StringUtils.isNotBlank(data.getTime()))
+            .forEach(data -> {
+                time.add(getTime(data.getTime()));
+                sa.add(NumberUtil.decimalToString(data.getSa()));
+                avgRt.add(NumberUtil.decimalToString(data.getAvgRt()));
+                tps.add(NumberUtil.decimalToString(data.getTps()));
+                successRate.add(NumberUtil.decimalToString(data.getSuccessRate()));
+                concurrent.add(NumberUtil.decimalToString(data.getAvgConcurrenceNum()));
+            });
         //链路趋势
         reportTrend.setTps(tps);
         reportTrend.setSa(sa);
@@ -875,6 +879,18 @@ public class ReportServiceImpl implements ReportService {
         ReportOutput output = new ReportOutput();
         BeanUtils.copyProperties(reportResult, output);
         return output;
+    }
+
+    @Override
+    public void updateReportOnSceneStartFailed(Long sceneId, Long reportId, String errMsg) {
+        reportDao.updateReport(new ReportUpdateParam() {{
+            setSceneId(sceneId);
+            setId(reportId);
+            setStatus(ReportConstans.FINISH_STATUS);
+            JSONObject errorMsg = new JSONObject();
+            errorMsg.put(ReportConstans.FEATURES_ERROR_MSG, errMsg);
+            setFeatures(errorMsg.toJSONString());
+        }});
     }
 
     /**

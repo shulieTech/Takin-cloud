@@ -1,9 +1,9 @@
 package io.shulie.takin.cloud.web.entrypoint.controller.scenemanage;
 
-import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import com.pamirs.takin.entity.domain.vo.scenemanage.FileSplitResultVO;
-import com.pamirs.takin.entity.domain.vo.scenemanage.ScriptFileSplitVO;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneContactFileOutput;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.ext.content.enginecall.ScheduleInitParamExt;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartInput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneActionOutput;
@@ -81,18 +81,20 @@ public class SceneTaskController {
         return ResponseResult.success();
     }
 
-    @PostMapping("/script/preSplit")
-    @ApiModelProperty(value = "文件预拆分结果")
-    public ResponseResult<?> preSplitFile(@RequestBody FileSplitResultVO resultVO) {
-        fileSliceService.preSlice(new SceneBigFileSliceParam() {{
-            setFileName(resultVO.getFileName());
-            setSliceCount(resultVO.getSliceCount());
-            setSceneId(resultVO.getSceneId());
-            setSliceInfo(resultVO.getSliceInfo());
-            setIsSplit(resultVO.getIsSplit());
-            setIsOrderSplit(resultVO.getIsOrderSplit());
-        }});
-        return ResponseResult.success();
+    @PostMapping("/script/contactScene")
+    @ApiModelProperty(value = "关联数据文件与场景,并对顺序分片的文件进行预分片")
+    public ResponseResult contactScene(@RequestBody FileSplitResultVO resultVO){
+        try {
+            SceneContactFileOutput output = fileSliceService.contactScene(new SceneBigFileSliceParam() {{
+                setFileName(resultVO.getFileName());
+                setSceneId(resultVO.getSceneId());
+                setIsSplit(resultVO.getIsSplit());
+                setIsOrderSplit(resultVO.getIsOrderSplit());
+            }});
+            return  ResponseResult.success(output);
+        }catch (TakinCloudException e){
+            return ResponseResult.fail("关联文件与脚本、场景异常",e.getMessage());
+        }
     }
 
 }

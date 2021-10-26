@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.core.toolkit.PluginUtils;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.entity.report.Report;
+import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
 import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.async.AsyncService;
@@ -70,6 +71,9 @@ public class CollectorService extends AbstractIndicators {
     private PushLogService pushLogService;
     @Autowired
     private SceneManageDAO sceneManageDAO;
+    @Autowired
+    private SceneTaskStatusCache taskStatusCache;
+
     @Value("${script.path}")
     private String ptlDir;
     @Value("${cloud.push.log:false}")
@@ -80,6 +84,7 @@ public class CollectorService extends AbstractIndicators {
     private InfluxWriter influxWriter;
     @Autowired
     private AppConfig appConfig;
+
 
     private final static ExecutorService THREAD_POOL = new ThreadPoolExecutor(5, 200,
         300L, TimeUnit.SECONDS,
@@ -224,11 +229,9 @@ public class CollectorService extends AbstractIndicators {
         }
     }
 
+
     private void cacheTryRunTaskStatus(Long sceneId, Long reportId, Long customerId, SceneRunTaskStatusEnum status) {
-        String tryRunTaskKey = String
-            .format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneId, reportId);
-        //任务状态记录到redis
-        redisTemplate.opsForHash().put(tryRunTaskKey, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY, status.getText());
+        taskStatusCache.cacheStatus(sceneId,reportId,status);
         Report report = tReportMapper.selectByPrimaryKey(reportId);
         if (Objects.nonNull(report) && report.getPressureType() != PressureTypeEnums.FLOW_DEBUG.getCode()
             && report.getPressureType() != PressureTypeEnums.INSPECTION_MODE.getCode()

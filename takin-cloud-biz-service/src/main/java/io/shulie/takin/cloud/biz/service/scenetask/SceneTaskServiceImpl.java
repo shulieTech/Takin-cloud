@@ -85,7 +85,6 @@ import io.shulie.takin.cloud.data.dao.sceneTask.SceneTaskPressureTestLogUploadDA
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
@@ -290,7 +289,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         if (sceneManage != null) {
             // 监测启动状态
             scene.setData(SceneManageStatusEnum.getAdaptStatus(sceneManage.getStatus()).longValue());
-            if (sceneManage.getStatus() >= 1) {
+            if (sceneManage.getStatus() >= 0) {
                 ReportResult reportResult;
                 if (reportId == null) {
                     //report = TReportMapper.getReportBySceneId(sceneId);

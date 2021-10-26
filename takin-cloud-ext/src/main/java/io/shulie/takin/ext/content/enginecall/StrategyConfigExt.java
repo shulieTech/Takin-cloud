@@ -67,4 +67,7 @@ public class StrategyConfigExt implements Serializable {
 
     @ApiModelProperty(value = "单个pod的JVM信息配置")
     private String k8sJvmSettings;
+
+    @ApiModelProperty(value = "文件分隔符")
+    private String delimiter;
 }

@@ -1,10 +1,14 @@
 package io.shulie.takin.cloud.biz.service.schedule;
 
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneContactFileOutput;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 
 /**
+ * 文件切片 service
+ *
  * @author moriarty
  */
 public interface FileSliceService {
@@ -15,8 +19,9 @@ public interface FileSliceService {
 
     /**
      * 大文件分片
-     *  文件分片分两种情况：1. 根据场景要启动的pod数量分片，这种情况不保证文件中数据的顺序
-     *                   2. 根据文件中指定列的顺序拆分，这种情况耗时较长，需要逐行处理，而且要求文件顺序正确，不能存在内容的穿插
+     * 文件分片分两种情况：1. 根据场景要启动的pod数量分片，这种情况不保证文件中数据的顺序
+     * 2. 根据文件中指定列的顺序拆分，这种情况耗时较长，需要逐行处理，而且要求文件顺序正确，不能存在内容的穿插
+     *
      * @param request
      * @return -
      */
@@ -24,6 +29,7 @@ public interface FileSliceService {
 
     /**
      * 查询文件分片信息
+     *
      * @param request
      * @return -
      */
@@ -31,6 +37,7 @@ public interface FileSliceService {
 
     /**
      * 查询文件分片状态
+     *
      * @param request
      * @return -
      */
@@ -38,14 +45,19 @@ public interface FileSliceService {
 
     /**
      * 更新SceneScriptRef
+     *
      * @param request
+     * @param param
      * @return -
      */
-    Boolean updateFileRefExtend(FileSliceRequest request);
+    Boolean updateFileRefExtend(FileSliceRequest request,SceneBigFileSliceParam param);
+
 
     /**
-     * 文件预分片
+     * 关联文件与脚本、场景，并对顺序分片的文件进行预分片
      * @param param
+     * @return
+     * @throws TakinCloudException
      */
-    void preSlice(SceneBigFileSliceParam param);
+    SceneContactFileOutput contactScene(SceneBigFileSliceParam param) throws TakinCloudException;
 }
