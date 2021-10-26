@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import javax.validation.Valid;
-import javax.validation.groups.Default;
 
 import io.shulie.takin.cloud.open.req.scenemanage.*;
 import io.shulie.takin.cloud.open.resp.scenemanage.SceneManageListResp;
