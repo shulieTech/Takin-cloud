@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.shulie.takin</groupId>
     <artifactId>takin-cloud</artifactId>
-    <version>takin-cloud-5.0.2</version>
+    <version>takin-cloud-5.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
@@ -16,9 +16,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssa</maven.build.timestamp.format>
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
-        <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         <!-- biz version -->
-        <takin.cloud.version>takin-cloud-5.0.2</takin.cloud.version>
+        <takin.cloud.version>takin-cloud-5.0.2-SNAPSHOT</takin.cloud.version>
         <takin.common.version>common-1.7.4</takin.common.version>
 
         <pardar.log.protocol.version>2.0.4</pardar.log.protocol.version>
@@ -102,23 +101,6 @@
                 <version>${takin.common.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
-            </dependency>
-
-            <!-- zk客户端框架 -->
-            <dependency>
-                <groupId>org.apache.curator</groupId>
-                <artifactId>curator-client</artifactId>
-                <version>${curator-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.curator</groupId>
-                <artifactId>curator-recipes</artifactId>
-                <version>${curator-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.curator</groupId>
-                <artifactId>curator-framework</artifactId>
-                <version>${curator-version}</version>
             </dependency>
             <!-- 德鲁伊数据库连接池 -->
             <dependency>
@@ -229,12 +211,6 @@
                 <groupId>org.influxdb</groupId>
                 <artifactId>influxdb-java</artifactId>
                 <version>${influxdb.version}</version>
-            </dependency>
-            <!-- pardar相关的 -->
-            <dependency>
-                <groupId>io.shulie.pradar</groupId>
-                <artifactId>log-protocol</artifactId>
-                <version>${pardar.log.protocol.version}</version>
             </dependency>
 
             <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
