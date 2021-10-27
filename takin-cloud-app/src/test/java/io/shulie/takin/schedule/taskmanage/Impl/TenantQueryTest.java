@@ -1,7 +1,9 @@
-package io.shulie.tro.schedule.taskmanage.Impl;
+package io.shulie.takin.schedule.taskmanage.Impl;
 
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Resource;
 
 import com.google.common.collect.Maps;
 import io.shulie.takin.app.Application;
@@ -23,10 +25,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class})
 public class TenantQueryTest {
-    @Autowired
+    @Resource
     SceneManageMapper sceneManageMapper;
 
-    @Autowired
+    @Resource
     ReportMapper reportMapper;
 
     @Test

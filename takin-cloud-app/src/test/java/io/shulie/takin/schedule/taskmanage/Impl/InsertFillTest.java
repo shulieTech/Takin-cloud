@@ -1,4 +1,6 @@
-package io.shulie.tro.schedule.taskmanage.Impl;
+package io.shulie.takin.schedule.taskmanage.Impl;
+
+import javax.annotation.Resource;
 
 import io.shulie.takin.app.Application;
 import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
@@ -19,10 +21,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(classes = {Application.class})
 public class InsertFillTest {
 
-    @Autowired
+    @Resource
     SceneManageMapper sceneManageMapper;
 
-    @Autowired
+    @Resource
     ReportMapper reportMapper;
 
     @Test

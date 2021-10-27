@@ -1,4 +1,4 @@
-package io.shulie.tro.schedule.taskmanage.Impl;
+package io.shulie.takin.schedule.taskmanage.Impl;
 
 import com.github.pagehelper.PageInfo;
 import io.shulie.takin.app.Application;

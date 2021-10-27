@@ -34,18 +34,18 @@ public class FileSliceTest {
 
     @Test
     public void testFileSlice() {
-        boolean fileNeedSlice = fileSliceDAO.isFileNeedSlice(746L);
-        System.out.println(fileNeedSlice);
-        boolean b = fileSliceService.fileSlice(new FileSliceRequest() {{
-            setFileName("data01.csv");
-            setFilePath("Desktop/filetest/data01.csv");
-            setSceneId(200L);
-            setRefId(974L);
-            setSplit(true);
-            setPodNum(10);
-            setOrderSplit(false);
-            //setOrderColumnNum(2);
-        }});
+        //boolean fileNeedSlice = fileSliceDAO.isFileNeedSlice(746L);
+        //System.out.println(fileNeedSlice);
+        //boolean b = fileSliceService.fileSlice(new FileSliceRequest() {{
+        //    setFileName("data01.csv");
+        //    setFilePath("Desktop/filetest/data01.csv");
+        //    setSceneId(200L);
+        //    setRefId(974L);
+        //    setSplit(true);
+        //    setPodNum(10);
+        //    setOrderSplit(false);
+        //setOrderColumnNum(2);
+        //}});
         //    SceneBigFileSliceEntity sliceEntity = fileSliceDAO.selectOne(new SceneBigFileSliceParam() {{
         //        setFileRefId(974L);
         //        setSceneId(200L);
@@ -67,7 +67,7 @@ public class FileSliceTest {
     }
 
     @Test
-    public void testGetRef(){
+    public void testGetRef() {
         SceneScriptRefEntity entity = fileSliceDAO.selectRef(new SceneBigFileSliceParam() {{
             setFileName("OrderInfo_02.csv");
             setSceneId(180L);
@@ -76,7 +76,7 @@ public class FileSliceTest {
     }
 
     @Test
-    public void sliceFileWithOrder(){
+    public void sliceFileWithOrder() {
         FileSliceByLine fileSliceUtil =
             new FileSliceByLine.Builder("/Users/moriarty/Desktop/test/data.csv")
                 .withSeparator(",")
@@ -84,14 +84,14 @@ public class FileSliceTest {
                 .build();
         Map<Integer, FileSliceInfo> resultMap = fileSliceUtil.sliceFile();
 
-        for (Map.Entry<Integer, FileSliceInfo> entry: resultMap.entrySet()){
+        for (Map.Entry<Integer, FileSliceInfo> entry : resultMap.entrySet()) {
             System.out.println(entry.getKey());
             System.out.println(entry.getValue().toString());
         }
     }
 
     @Test
-    public void  sliceFileWithoutOrder() throws Exception {
+    public void sliceFileWithoutOrder() {
         FileSliceByPodNum build = new Builder("/Users/moriarty/Desktop/OrderInfo_01.csv")
             .withPartSize(3)
             .build();
