@@ -1,7 +1,7 @@
-package io.shulie.takin.cloud.common.pojo;
+package io.shulie.takin.ext.content;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 import java.io.Serializable;
 

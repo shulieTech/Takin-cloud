@@ -39,6 +39,7 @@ public class CloudApiConstant {
 
 
     public static final String SCENE_START_TRIAL_RUN_URL = "/open-api/scene/task/startTrialRun";
+    public static final String SCENE_SCRIPT_FILE_ANALYZE_URL = "/open-api/scene/scriptAnalyze";
 
     /**
      * 压测任务

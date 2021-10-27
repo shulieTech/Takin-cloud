@@ -1,14 +1,12 @@
 package io.shulie.plugin.engine;
 
+import io.shulie.plugin.engine.util.JmxUtil;
 import io.shulie.plugin.engine.util.SaxUtil;
 import io.shulie.takin.cloud.common.utils.UrlUtil;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.ext.api.EngineExtApi;
-import io.shulie.takin.ext.content.script.ScriptParseExt;
-import io.shulie.takin.ext.content.script.ScriptUrlExt;
-import io.shulie.takin.ext.content.script.ScriptVerityExt;
-import io.shulie.takin.ext.content.script.ScriptVerityRespExt;
+import io.shulie.takin.ext.content.script.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.pf4j.Extension;
 
@@ -84,6 +82,11 @@ public class EngineExtImpl implements EngineExtApi {
     @Override
     public ScriptParseExt parseScriptFile(String uploadPath) {
         return SaxUtil.parseJmx(uploadPath);
+    }
+
+    @Override
+    public List<ScriptNode> buildNodeTree(String scriptFile) {
+        return JmxUtil.buildNodeTree(scriptFile);
     }
 
     @Override

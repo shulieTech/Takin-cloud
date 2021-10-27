@@ -1,5 +1,6 @@
 package io.shulie.takin.ext.api;
 
+import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.ext.content.script.ScriptParseExt;
 import io.shulie.takin.ext.content.script.ScriptVerityExt;
 import io.shulie.takin.ext.content.script.ScriptVerityRespExt;
@@ -36,4 +37,6 @@ public interface EngineExtApi extends ExtensionPoint, Typed {
      * @return -
      */
     ScriptParseExt parseScriptFile(String uploadPath);
+
+    List<ScriptNode> buildNodeTree(String scriptFile);
 }

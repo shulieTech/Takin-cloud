@@ -43,6 +43,10 @@ public enum TakinCloudExceptionEnum implements ExceptionReadable {
 
     SCRIPT_VERITY_ERROR("cloud-001-s0701","脚本校验异常"),
 
+    SCRIPT_ANALYZE_PARAMS_ERROR("cloud-001-s0800","脚本解析参数错误"),
+    SCRIPT_FILE_NOT_EXISTS("cloud-001-s0801","脚本文件不存在"),
+    SCRIPT_ANALYZE_FAILED("cloud-001-s0802","脚本解析失败"),
+
     /**
      * 压测任务、压测报告模块 cloud-002-
      * 0200+启动   0300+查询  0400+停止 0500+压测中
