@@ -90,9 +90,7 @@ public class PressureEngineMapperTest {
         ResponseResult<Map<String, List<EnginePluginSimpleInfoResp>>> res = cloudEngineApi.listEnginePlugins(request);
         if(res != null) {
             List<EnginePluginSimpleInfoResp> resp = res.getData().get("dubbo");
-            resp.forEach(item -> {
-                System.out.println(item.getPluginName());
-            });
+            resp.forEach(item -> System.out.println(item.getPluginName()));
         }
     }
 

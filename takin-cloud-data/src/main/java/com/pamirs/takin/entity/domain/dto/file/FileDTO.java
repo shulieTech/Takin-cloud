@@ -22,6 +22,9 @@ public class FileDTO implements Serializable {
     @ApiModelProperty(value = "文件名称")
     private String fileName;
 
+    @ApiModelProperty(value = "文件MD5值")
+    private String md5;
+
     @ApiModelProperty(value = "上传时间")
     private String uploadTime;
 

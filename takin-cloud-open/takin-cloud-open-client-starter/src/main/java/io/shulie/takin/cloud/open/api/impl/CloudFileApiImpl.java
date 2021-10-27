@@ -79,10 +79,10 @@ public class CloudFileApiImpl extends CloudCommonApi implements CloudFileApi {
     }
 
     @Override
-    public  ResponseResult<Boolean>  createFileByPathAndString(FileCreateByStringParamReq req) {
-        TakinResponseEntity<Boolean> takinResponseEntity =
+    public  ResponseResult<String>  createFileByPathAndString(FileCreateByStringParamReq req) {
+        TakinResponseEntity<String> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.FILE_CREATE_BY_STRING,
-                getHeaders(req), Boolean.class,req);
+                getHeaders(req), String.class,req);
         if(takinResponseEntity.getSuccess()) {
             return ResponseResult.success(takinResponseEntity.getBody());
         }

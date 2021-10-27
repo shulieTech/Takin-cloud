@@ -14,6 +14,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
 
+import javax.annotation.Resource;
+
 /**
  * @author liuchuan
  * @date 2021/5/17 5:09 下午
@@ -23,7 +25,7 @@ import java.util.Arrays;
 @SpringBootTest(classes = Application.class)
 public class MiddlewareJarServiceTest {
 
-    @Autowired
+    @Resource
     private MiddlewareJarMapper middlewareJarMapper;
 
     @Autowired

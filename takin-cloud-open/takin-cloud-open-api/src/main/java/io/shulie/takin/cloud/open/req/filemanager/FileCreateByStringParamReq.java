@@ -1,12 +1,15 @@
 package io.shulie.takin.cloud.open.req.filemanager;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 
 /**
  * @author zhaoyong
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class FileCreateByStringParamReq extends CloudUserCommonRequestExt {
 
     /**

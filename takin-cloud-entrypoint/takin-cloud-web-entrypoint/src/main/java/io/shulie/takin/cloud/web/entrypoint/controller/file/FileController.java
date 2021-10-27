@@ -10,8 +10,10 @@ import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.BufferedReader;
+import java.util.stream.Collectors;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -19,11 +21,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.annotations.Api;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.date.DateUtil;
-import com.google.common.collect.Lists;
 import org.springframework.http.MediaType;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
+import io.shulie.takin.cloud.common.utils.Md5Util;
 import io.shulie.takin.cloud.common.utils.LinuxUtil;
 import io.shulie.takin.utils.file.FileManagerHelper;
 import org.springframework.web.multipart.MultipartFile;
@@ -67,37 +70,43 @@ public class FileController {
 
     @PostMapping("/upload")
     @ApiOperation(value = "文件上传")
-    public ResponseResult<List<FileDTO>> upload(List<MultipartFile> file) {
-        List<FileDTO> dtoList = Lists.newArrayList();
-        for (MultipartFile mf : file) {
+    public ResponseResult<List<FileDTO>> upload(List<MultipartFile> files) {
+        List<FileDTO> result = files.stream().map(t -> {
             String uploadId = UUID.randomUUID().toString();
             File targetDir = new File(tempPath + SceneManageConstant.FILE_SPLIT + uploadId);
             if (!targetDir.exists()) {
-                targetDir.mkdirs();
+                boolean mkdirResult = targetDir.mkdirs();
+                log.debug("io.shulie.takin.cloud.web.entrypoint.controller.file.NewFileController#upload-mkdirResult:{}", mkdirResult);
             }
             File targetFile = new File(tempPath + SceneManageConstant.FILE_SPLIT
-                + uploadId + SceneManageConstant.FILE_SPLIT + mf.getOriginalFilename());
+                + uploadId + SceneManageConstant.FILE_SPLIT + t.getOriginalFilename());
             FileDTO dto = new FileDTO();
             try {
+                if (StrUtil.isBlank(t.getOriginalFilename())) {
+                    throw new FileAlreadyExistsException("不允许空名文件");
+                }
+                // 保存文件
+                t.transferTo(targetFile);
+
                 dto.setUploadId(uploadId);
-                dto.setUploadTime(DateUtil.formatDateTime(new Date()));
-                dto.setFileName(mf.getOriginalFilename());
-                dto.setIsDeleted(0);
-                dto.setIsSplit(0);
-                dto.setDownloadUrl(targetDir + SceneManageConstant.FILE_SPLIT + mf.getOriginalFilename());
-                mf.transferTo(targetFile);
                 setDataCount(targetFile, dto);
+                dto.setMd5(Md5Util.md5File(targetFile));
+                dto.setFileName(t.getOriginalFilename());
+                dto.setFileType(t.getOriginalFilename().endsWith("jmx") ? 0 : 1);
+                dto.setDownloadUrl(targetDir + SceneManageConstant.FILE_SPLIT + t.getOriginalFilename());
+                // 默认数据
+                dto.setIsSplit(0);
+                dto.setIsDeleted(0);
                 dto.setUploadResult(true);
-                dto.setFileType(mf.getOriginalFilename().endsWith("jmx") ? 0 : 1);
+                dto.setUploadTime(DateUtil.formatDateTime(new Date()));
             } catch (IOException e) {
-                log.error("异常代码【{}】,异常内容：文件处理异常 --> 异常信息: {}",
-                    TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR, e);
+                log.error("文件处理异常:【{}】\n", TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR, e);
                 dto.setUploadResult(false);
                 dto.setErrorMsg(e.getMessage());
             }
-            dtoList.add(dto);
-        }
-        return ResponseResult.success(dtoList);
+            return dto;
+        }).collect(Collectors.toList());
+        return ResponseResult.success(result);
     }
 
     @DeleteMapping
@@ -107,7 +116,6 @@ public class FileController {
             String targetDir = tempPath + SceneManageConstant.FILE_SPLIT + vo.getUploadId();
             LinuxUtil.executeLinuxCmd("rm -rf " + targetDir);
         }
-
         //根据文件： 删除大文件行数，删除大文件起始位置
         return ResponseResult.success();
     }
@@ -194,8 +202,11 @@ public class FileController {
 
     @PostMapping("/createFileByPathAndString")
     @ApiOperation(value = "根据字符串创建文件")
-    public Boolean createFileByPathAndString(@RequestBody FileCreateByStringParamRequest fileContent) {
-        return FileManagerHelper.createFileByPathAndString(fileContent.getFilePath(), fileContent.getFileContent());
+    public String createFileByPathAndString(@RequestBody FileCreateByStringParamRequest fileContent) {
+        Boolean fileCreateResult = FileManagerHelper.createFileByPathAndString(fileContent.getFilePath(), fileContent.getFileContent());
+        if (!fileCreateResult) {return "";}
+        // 返回文件的MD5值
+        else {return Md5Util.md5File(fileContent.getFilePath());}
     }
 
     private void setDataCount(File file, FileDTO dto) {

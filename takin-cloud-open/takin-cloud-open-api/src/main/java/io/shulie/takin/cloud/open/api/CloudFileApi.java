@@ -17,6 +17,7 @@ public interface CloudFileApi {
 
     /**
      * 获取文件内容
+     *
      * @param fileContentParamReq
      * @return -
      */
@@ -48,8 +49,9 @@ public interface CloudFileApi {
 
     /**
      * 将字符串转为指定文件
+     *
      * @param fileCreateByStringParamReq
      * @return -
      */
-    ResponseResult<Boolean>  createFileByPathAndString(FileCreateByStringParamReq fileCreateByStringParamReq);
+    ResponseResult<String> createFileByPathAndString(FileCreateByStringParamReq fileCreateByStringParamReq);
 }
