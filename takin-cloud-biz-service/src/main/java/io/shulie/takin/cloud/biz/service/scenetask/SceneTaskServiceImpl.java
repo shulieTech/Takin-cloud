@@ -30,6 +30,7 @@ import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
+import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
 import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
 import io.shulie.takin.cloud.biz.input.scenemanage.EnginePluginInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneInspectInput;
@@ -157,6 +158,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     @Autowired
     private EnginePluginUtils enginePluginUtils;
 
+    @Autowired
+    private SceneTaskStatusCache taskStatusCache;
+
     private static final Long KB = 1024L;
     private static final Long MB = KB * 1024;
     private static final Long GB = MB * 1024;
@@ -251,10 +255,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         }
 
         //设置缓存，用以检查压测场景启动状态 lxr 20210623
-        String key = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", input.getSceneId(), report.getId());
-        redisClientUtils.hmset(key, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY, SceneRunTaskStatusEnum.STARTING.getText());
+        taskStatusCache.cacheStatus(input.getSceneId(),report.getId(),SceneRunTaskStatusEnum.STARTING);
         //缓存pod数量，上传jmeter日志时判断是否所有文件都上传完成
-        redisClientUtils.hmset(ScheduleConstants.SCHEDULE_POD_NUM, String.valueOf(input.getSceneId()), sceneData.getIpNum());
+        taskStatusCache.cachePodNum(input.getSceneId(),sceneData.getIpNum());
         String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(), report.getId(), input.getCustomerId());
         List<String> activityRefs = sceneData.getBusinessActivityConfig().stream().map(SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getBindRef)
             .collect(Collectors.toList());
