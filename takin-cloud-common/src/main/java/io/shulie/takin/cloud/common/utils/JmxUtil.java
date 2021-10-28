@@ -722,4 +722,47 @@ public class JmxUtil {
         }
         return list;
     }
+
+    /**
+     * 根据节点类型获取节点数量
+     * @param typeEnum
+     * @param data
+     * @return
+     */
+    public static int getNodeNumByType(NodeTypeEnum typeEnum,List<ScriptNode> data){
+        int nodeNum = 0;
+        if (CollectionUtils.isNotEmpty(data)){
+            for (ScriptNode scriptNode : data){
+                if (scriptNode.getType() == typeEnum){
+                    nodeNum ++;
+                }
+                if (CollectionUtils.isNotEmpty(scriptNode.getChildren())){
+                    nodeNum = nodeNum + getNodeNumByType(typeEnum,scriptNode.getChildren());
+                }
+            }
+        }
+        return nodeNum;
+    }
+
+    /**
+     * 获取对应类型的节点展开列表
+     * @param typeEnum
+     * @param data
+     * @return
+     */
+    public static List<ScriptNode> getScriptNodeByType(NodeTypeEnum typeEnum,List<ScriptNode> data){
+        List<ScriptNode> result = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(data)){
+            for (ScriptNode scriptNode : data){
+                if (scriptNode.getType() == typeEnum){
+                    result.add(scriptNode);
+                }
+                if (CollectionUtils.isNotEmpty(scriptNode.getChildren())){
+                    List<ScriptNode> scriptNodeByType = getScriptNodeByType(typeEnum, scriptNode.getChildren());
+                    result.addAll(scriptNodeByType);
+                }
+            }
+        }
+        return result;
+    }
 }
