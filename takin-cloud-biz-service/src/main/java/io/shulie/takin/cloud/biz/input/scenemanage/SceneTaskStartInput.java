@@ -23,4 +23,14 @@ public class SceneTaskStartInput extends CloudUserCommonRequestExt {
     private SceneTryRunInput sceneTryRunInput;
 
     private Boolean continueRead;
+
+    /**
+     * 流量类型
+     * @see io.shulie.takin.ext.content.enums.AssetTypeEnum
+     */
+    private Integer assetType;
+
+    private Long resourceId;
+
+    private String resourceName;
 }

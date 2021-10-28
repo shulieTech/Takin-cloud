@@ -196,14 +196,13 @@ public class CloudTaskApiImpl extends CloudCommonApi implements CloudTaskApi {
 
     @Override
     public ResponseResult callBackToWriteBalance(ScriptAssetBalanceReq req) {
-//        TakinResponseEntity<ResponseResult<Boolean>> takinResponseEntity =
-//                HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_TASK_WRITE_BALANCE,
-//                        getHeaders(req), req, new TypeReference<ResponseResult<Boolean>>() {});
-//        if (takinResponseEntity.getSuccess()) {
-//            return takinResponseEntity.getBody();
-//        }
-//        return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
-//                takinResponseEntity.getErrorMsg(), "查看cloud日志");
-        return ResponseResult.success(true);
+        TakinResponseEntity<ResponseResult<Boolean>> takinResponseEntity =
+                HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_TASK_WRITE_BALANCE,
+                        getHeaders(req), req, new TypeReference<ResponseResult<Boolean>>() {});
+        if (takinResponseEntity.getSuccess()) {
+            return takinResponseEntity.getBody();
+        }
+        return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
+                takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }
 }

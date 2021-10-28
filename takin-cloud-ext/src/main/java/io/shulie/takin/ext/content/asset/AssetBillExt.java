@@ -21,6 +21,11 @@ public class AssetBillExt {
     private BigDecimal avgConcurrent;
     private Integer pressureType;
 
+    /**
+     * 压测总时长 1h2'34"
+     */
+    private String pressureTestTimeCost;
+
     @Data
     public static class TimeBean {
         private Long time;

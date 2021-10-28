@@ -51,4 +51,29 @@ public class AccountInfoExt {
     private Date gmtUpdate;
 
     private String features;
+
+    /**
+     * 流量类型
+     */
+    private Integer flowType;
+
+    /**
+     * 并发数
+     */
+    private Integer concurrenceNum;
+
+    /**
+     * 压测时长
+     */
+    private String pressureTestCost;
+
+    /**
+     * 流量结算
+     */
+    private BigDecimal balanceAmount;
+
+    /**
+     * 对应的详情ID
+     */
+    private Long linkId;
 }

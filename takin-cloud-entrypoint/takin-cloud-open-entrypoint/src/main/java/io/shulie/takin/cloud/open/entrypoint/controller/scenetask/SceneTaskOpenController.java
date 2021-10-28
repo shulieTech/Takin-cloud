@@ -39,6 +39,8 @@ import io.shulie.takin.cloud.open.resp.scenetask.SceneActionResp;
 import io.shulie.takin.cloud.open.resp.scenetask.SceneJobStateResp;
 import io.shulie.takin.cloud.open.resp.scenetask.SceneTaskAdjustTpsResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.ext.api.AssetExtApi;
+import io.shulie.takin.ext.content.asset.AssetBalanceExt;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -202,6 +204,13 @@ public class SceneTaskOpenController {
         return ResponseResult.success(sceneTryRunTaskStartResp);
     }
 
+    @GetMapping("/writeBalance")
+    @ApiOperation(value = "脚本调试回调写入流量账户")
+    public ResponseResult<SceneStartCheckResp> writeBalance(AssetBalanceExt balanceExt) {
+        sceneTaskService.writeBalance(balanceExt);
+        return ResponseResult.success();
+    }
+
     @GetMapping("/checkTaskStatus")
     @ApiOperation(value = "查询试跑状态")
     public ResponseResult<SceneTryRunTaskStatusResp> checkTaskStatus(@RequestParam Long sceneId, @RequestParam Long reportId) {
@@ -232,6 +241,5 @@ public class SceneTaskOpenController {
         BeanUtils.copyProperties(output, resp);
         return ResponseResult.success(resp);
     }
-
 }
 
