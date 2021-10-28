@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.open.api.scenetask;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneManageIdReq;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneStartPreCheckReq;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneTaskStartReq;
+import io.shulie.takin.cloud.open.req.scenemanage.ScriptAssetBalanceReq;
 import io.shulie.takin.cloud.open.req.scenetask.SceneStartCheckResp;
 import io.shulie.takin.cloud.open.req.scenetask.SceneTaskQueryTpsReq;
 import io.shulie.takin.cloud.open.req.scenetask.SceneTaskUpdateTpsReq;
@@ -108,4 +109,9 @@ public interface CloudTaskApi {
      */
     ResponseResult<SceneStartCheckResp> sceneStartPreCheck(SceneStartPreCheckReq req);
 
+    /**
+     * @param req
+     * @return
+     */
+    ResponseResult callBackToWriteBalance(ScriptAssetBalanceReq req);
 }
