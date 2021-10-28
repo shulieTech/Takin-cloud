@@ -1,4 +1,4 @@
-package io.shulie.plugin.engine.util;
+package io.shulie.takin.cloud.common.utils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
