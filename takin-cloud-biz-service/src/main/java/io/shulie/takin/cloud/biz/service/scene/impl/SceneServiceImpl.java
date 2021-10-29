@@ -37,6 +37,7 @@ import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
 import io.shulie.takin.cloud.data.mapper.mysql.SceneScriptRefMapper;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest;
+import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
 import io.shulie.takin.cloud.data.model.mysql.SceneBusinessActivityRefEntity;
 import io.shulie.takin.cloud.data.mapper.mysql.SceneBusinessActivityRefMapper;
 import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Goal;
@@ -84,6 +85,51 @@ public class SceneServiceImpl implements SceneService {
         createStepSla(sceneId, in.getMonitoringGoal());
         //      返回信息
         return sceneId;
+    }
+
+    /**
+     * 更新压测场景
+     *
+     * @param in 入参
+     * @return 场景主键
+     */
+    @Override
+    public Boolean update(WriteSceneRequest in) {
+        // 1.   创建场景
+        int updateRows = updateStepScene(in.getBasicInfo(), in.getConfig(), in.getAnalysisResult(), in.getDataValidation());
+        if (updateRows == 0) {return false;}
+        if (updateRows == 1) {
+            long sceneId = in.getBasicInfo().getSceneId();
+            // 2. 更新场景&业务活动关联关系
+            createStepBusinessActivity(sceneId, in.getContent(), in.getGoal());
+            // 3.   处理脚本
+            createStepScript(sceneId, in.getBasicInfo().getScriptId(), in.getBasicInfo().getScriptType(), in.getFile());
+            // 4.  保存SLA信息
+            createStepSla(sceneId, in.getMonitoringGoal());
+            //      返回信息
+            return true;
+        } else {
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_ERROR, "意外的逻辑");
+        }
+    }
+
+    /**
+     * 获取场景详情
+     *
+     * @param sceneId 场景主键
+     * @return 场景详情
+     */
+    @Override
+    public SceneDetailResponse detail(long sceneId) {
+        return new SceneDetailResponse() {{
+            setGoal(getGoal());
+            setConfig(getConfig());
+            setContent(getContent());
+            setBasicInfo(getBasicInfo());
+            setAnalysisResult(getAnalysisResult());
+            setDataValidation(getDataValidation());
+            setMonitoringGoal(getMonitoringGoal());
+        }};
     }
 
     /**
@@ -347,7 +393,64 @@ public class SceneServiceImpl implements SceneService {
     }
 
     /**
-     * 创建压测场景 - 步骤2 : 关联业务活动
+     * 更新压测场景 - 步骤1 : 基础信息
+     *
+     * @param basicInfo      基础信息
+     *                       <p>场景名称</p>
+     *                       <p>场景类型
+     *                       <ul>
+     *                           <li>0:普通场景</li>
+     *                           <li>1:流量调试场景</li>
+     *                       </ul>
+     *                       </p>
+     *                       <p>
+     *                       脚本类型
+     *                       <ul>
+     *                           <li>0:Jmeter</li>
+     *                           <li>1:Gatling</li>
+     *                       </ul>
+     *                       </p>
+     *                       <p>脚本实例主键</p>
+     *                       <p>业务流程主键</p>
+     * @param config         施压配置
+     * @param analysisResult 脚本解析结果
+     * @param dataValidation 数据验证配置
+     * @return 数据库更新行数 - 应当为 1
+     */
+    private int updateStepScene(BasicInfo basicInfo,
+        Map<String, Config> config, List<?> analysisResult, DataValidation dataValidation) {
+        Map<String, Object> feature = new HashMap<String, Object>(4) {{
+            put("scriptId", basicInfo.getScriptId());
+            put("analysisResult", analysisResult);
+            put("businessFlowId", basicInfo.getBusinessFlowId());
+            put("dataValidation", dataValidation);
+        }};
+        SceneManageEntity sceneEntity = new SceneManageEntity() {{
+            setId(basicInfo.getSceneId());
+            setSceneName(basicInfo.getName());
+            setFeatures(JSONObject.toJSONString(feature));
+            setPtConfig(JSONObject.toJSONString(config));
+            setStatus(0);
+            setType(basicInfo.getType());
+            setUserId(-1L);
+            setDeptId(null);
+            setCustomerId(null);
+            setLastPtTime(null);
+            setScriptType(basicInfo.getScriptType());
+            setIsDeleted(0);
+            Date now = new Date();
+            setCreateTime(now);
+            setUpdateTime(now);
+            setCreateName(null);
+            setUpdateName(null);
+        }};
+        int updateRows = sceneManageMapper.updateById(sceneEntity);
+        log.info("更新了业务活动「{}」。自增主键：{}。操作行数：{}。", basicInfo.getName(), sceneEntity.getId(), updateRows);
+        return updateRows;
+    }
+
+    /**
+     * 创建/更新 压测场景 - 步骤2 : 关联业务活动
      *
      * @param sceneId 场景主键
      * @param content 压测内容
@@ -377,7 +480,7 @@ public class SceneServiceImpl implements SceneService {
     }
 
     /**
-     * 创建压测场景 - 步骤3 : 关联压测文件
+     * 创建/更新 压测场景 - 步骤3 : 关联压测文件
      *
      * @param sceneId    场景主键
      * @param scriptId   脚本主键
@@ -429,7 +532,7 @@ public class SceneServiceImpl implements SceneService {
     }
 
     /**
-     * 创建压测场景 - 步骤4 : 关联SLA
+     * 创建/更新 压测场景 - 步骤4 : 关联SLA
      *
      * @param sceneId        场景主键
      * @param monitoringGoal 监控目标

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.List;
 
 import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest;
+import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
 import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Goal;
 import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Config;
 import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Content;
@@ -23,6 +24,27 @@ public interface SceneService {
      * @return 场景主键
      */
     Long create(WriteSceneRequest in);
+
+    /**
+     * 更新压测场景
+     *
+     * @param in 入参
+     * @return 场景主键
+     * <ul>
+     *     <li>true :更新</li>
+     *     <li>false:未找到业务活动</li>
+     *     <li>异常  :运行时异常</li>
+     * </ul>
+     */
+    Boolean update(WriteSceneRequest in);
+
+    /**
+     * 获取场景详情
+     *
+     * @param sceneId 场景主键
+     * @return 场景详情
+     */
+    SceneDetailResponse detail(long sceneId);
 
     /**
      * 获取场景的基础信息
