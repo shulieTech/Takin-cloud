@@ -46,4 +46,7 @@ public class SceneManageListOutput extends CloudUserCommonRequestExt implements 
 
     @ApiModelProperty(value = "拓展字段")
     private String features;
+
+    @ApiModelProperty(value = "是否存在脚本解析结果")
+    private Boolean hasAnalysisResult;
 }

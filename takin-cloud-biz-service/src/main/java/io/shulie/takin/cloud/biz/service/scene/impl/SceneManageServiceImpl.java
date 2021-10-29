@@ -328,23 +328,28 @@ public class SceneManageServiceImpl implements SceneManageService {
             return new PageInfo<>(Lists.newArrayList());
         }
         List<SceneManageListOutput> resultList = SceneManageDTOConvert.INSTANCE.ofs(queryList);
-        Map<Long, Integer> threadNum = new HashMap<>(1);
+        Map<Long, Integer> threadNum = new HashMap<>(queryList.size());
+        Map<Long, Boolean> hasAnalysisResult = new HashMap<>(queryList.size());
         for (SceneManage sceneManage : queryList) {
             if (sceneManage.getPtConfig() == null) {
                 continue;
             }
             JSONObject object = JSON.parseObject(sceneManage.getPtConfig());
+            // 新版本{}
+            if (object.containsKey("threadNum")) {
+                // TODO 新版本解析最大并发数
+                threadNum.put(sceneManage.getId(), -1);
+                hasAnalysisResult.put(sceneManage.getId(), true);
+            }
+            // 旧版本
             if (object.containsKey("threadNum")) {
                 threadNum.put(sceneManage.getId(), object.getIntValue("threadNum"));
             }
         }
-        for (SceneManageListOutput dto : resultList) {
-            dto.setThreadNum(threadNum.get(dto.getId()));
-        }
+
         List<Long> sceneIds = tReportMapper.listReportSceneIds(
                 resultList.stream().map(SceneManageListOutput::getId).collect(Collectors.toList()))
             .stream().map(Report::getSceneId).distinct().collect(Collectors.toList());
-        resultList.forEach(data -> data.setHasReport(sceneIds.contains(data.getId())));
 
         List<Long> customerIds = resultList.stream().map(SceneManageListOutput::getCustomerId).distinct()
             .collect(Collectors.toList());
@@ -352,8 +357,13 @@ public class SceneManageServiceImpl implements SceneManageService {
             Map<Long, String> userMap = CloudPluginUtils.getUserNameMap(customerIds);
             resultList.forEach(data -> CloudPluginUtils.fillCustomerName(data, userMap));
         }
-        // 状态适配
-        resultList.forEach(data -> data.setStatus(SceneManageStatusEnum.getAdaptStatus(data.getStatus())));
+
+        resultList.forEach(t -> {
+            t.setThreadNum(threadNum.get(t.getId()));
+            t.setHasReport(sceneIds.contains(t.getId()));
+            t.setStatus(SceneManageStatusEnum.getAdaptStatus(t.getStatus()));
+            t.setHasAnalysisResult(hasAnalysisResult.getOrDefault(t.getId(), false));
+        });
 
         PageInfo<SceneManageListOutput> pageInfo = new PageInfo<>(resultList);
         pageInfo.setTotal(page.getTotal());
@@ -756,6 +766,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         }
 
     }
+
     private void updateFilesExceptBigFile(List<SceneScriptRefInput> inputList, Long sceneId) {
         String destPath = scriptPath + SceneManageConstant.FILE_SPLIT + sceneId + SceneManageConstant.FILE_SPLIT;
         try {
@@ -785,14 +796,14 @@ public class SceneManageServiceImpl implements SceneManageService {
     /**
      * 文件迁移
      *
-     * @param inputList
-     * @param destPath
+     * @param inputList -
+     * @param destPath  -
      */
     private void transferTo(List<SceneScriptRefInput> inputList, String destPath) {
         // 数据文件、脚本文件
         List<SceneScriptRefInput> normalFileList = inputList.stream()
-                .filter(input -> FileTypeBusinessUtil.isScriptOrData(input.getFileType()))
-                .collect(Collectors.toList());
+            .filter(input -> FileTypeBusinessUtil.isScriptOrData(input.getFileType()))
+            .collect(Collectors.toList());
 
         if (CollectionUtils.isNotEmpty(normalFileList)) {
             for (SceneScriptRefInput file : normalFileList) {
@@ -802,8 +813,8 @@ public class SceneManageServiceImpl implements SceneManageService {
 
         // 附件
         List<SceneScriptRefInput> attachmentFileList = inputList.stream()
-                .filter(input -> FileTypeBusinessUtil.isAttachment(input.getFileType()))
-                .collect(Collectors.toList());
+            .filter(input -> FileTypeBusinessUtil.isAttachment(input.getFileType()))
+            .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(attachmentFileList)) {
             String attachmentPath = destPath + SceneManageConstant.FILE_SPLIT + "attachments";
             for (SceneScriptRefInput file : attachmentFileList) {
@@ -815,15 +826,15 @@ public class SceneManageServiceImpl implements SceneManageService {
     private void delFilesByDirExceptBigFile(List<SceneScriptRefInput> inputList, String destPath) {
         //找到大文件
         List<String> bigFileNames = inputList.stream()
-                .filter(t -> StringUtil.isNotBlank(t.getFileExtend()))
-                .filter(file -> {
-                    JSONObject json2Bean = JsonHelper.json2Bean(file.getFileExtend(), JSONObject.class);
-                    if (null != json2Bean) {
-                        Integer isBigFile = json2Bean.getInteger("isBigFile");
-                        return isBigFile != null && isBigFile.equals(1);
-                    }
-                    return false;
-                }).map(SceneScriptRefInput::getFileName).collect(Collectors.toList());
+            .filter(t -> StringUtil.isNotBlank(t.getFileExtend()))
+            .filter(file -> {
+                JSONObject json2Bean = JsonHelper.json2Bean(file.getFileExtend(), JSONObject.class);
+                if (null != json2Bean) {
+                    Integer isBigFile = json2Bean.getInteger("isBigFile");
+                    return isBigFile != null && isBigFile.equals(1);
+                }
+                return false;
+            }).map(SceneScriptRefInput::getFileName).collect(Collectors.toList());
         String bigFileName = CollectionUtils.isEmpty(bigFileNames) ? null : bigFileNames.get(0);
         //删除除了大文件之外的文件
         File destDir = new File(destPath);
@@ -989,17 +1000,17 @@ public class SceneManageServiceImpl implements SceneManageService {
             wrapperOutput.setPressureTestTime(new TimeBean(ptConfig.getDuration(), ptConfig.getUnit()));
             wrapperOutput.setPressureTestSecond(convertTime(ptConfig.getDuration(), ptConfig.getUnit()));
             wrapperOutput.setThreadGroupConfig(ptConfig.getThreadGroupConfig());
-//            wrapperOutput.setPressureTestTime(new TimeBean(jsonObject.getLong(SceneManageConstant.PT_DURATION),
-//                jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
-//            wrapperOutput.setPressureTestSecond(convertTime(jsonObject.getLong(SceneManageConstant.PT_DURATION),
-//                jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
-//            wrapperOutput.setPressureMode(jsonObject.getInteger(SceneManageConstant.PT_MODE));
+            //            wrapperOutput.setPressureTestTime(new TimeBean(jsonObject.getLong(SceneManageConstant.PT_DURATION),
+            //                jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
+            //            wrapperOutput.setPressureTestSecond(convertTime(jsonObject.getLong(SceneManageConstant.PT_DURATION),
+            //                jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
+            //            wrapperOutput.setPressureMode(jsonObject.getInteger(SceneManageConstant.PT_MODE));
             //阶梯时长
-//            wrapperOutput.setIncreasingTime(new TimeBean(jsonObject.getLong(SceneManageConstant.STEP_DURATION),
-//                jsonObject.getString(SceneManageConstant.STEP_DURATION_UNIT)));
-//            wrapperOutput.setIncreasingSecond(convertTime(jsonObject.getLong(SceneManageConstant.STEP_DURATION),
-//                jsonObject.getString(SceneManageConstant.STEP_DURATION_UNIT)));
-//            wrapperOutput.setStep(jsonObject.getInteger(SceneManageConstant.STEP));
+            //            wrapperOutput.setIncreasingTime(new TimeBean(jsonObject.getLong(SceneManageConstant.STEP_DURATION),
+            //                jsonObject.getString(SceneManageConstant.STEP_DURATION_UNIT)));
+            //            wrapperOutput.setIncreasingSecond(convertTime(jsonObject.getLong(SceneManageConstant.STEP_DURATION),
+            //                jsonObject.getString(SceneManageConstant.STEP_DURATION_UNIT)));
+            //            wrapperOutput.setStep(jsonObject.getInteger(SceneManageConstant.STEP));
             //预计消耗流量
             if (null != ptConfig.getEstimateFlow()) {
                 BigDecimal flow = BigDecimal.valueOf(ptConfig.getEstimateFlow());
