@@ -7,12 +7,14 @@ import io.shulie.plugin.enginecall.service.EngineCallService;
 import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
+import io.shulie.takin.cloud.biz.utils.DataUtils;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.PressureTypeEnums;
 import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
+import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.constants.TakinRequestConstant;
 import io.shulie.takin.ext.api.EngineCallExtApi;
 import io.shulie.takin.ext.content.enginecall.*;
@@ -153,7 +155,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         param.put("extJarPath", "");
         param.put("isLocal", true);
         param.put("taskDir", taskDir);
-        param.put("pressureMode", scheduleStartRequest.getPressureMode());
+//        param.put("pressureMode", scheduleStartRequest.getPressureMode());
         param.put("continuedTime", scheduleStartRequest.getContinuedTime());
         if (scheduleStartRequest.getExpectThroughput() != null) {
             param.put("expectThroughput", scheduleStartRequest.getExpectThroughput() / scheduleStartRequest.getTotalIp());
@@ -169,42 +171,52 @@ public class EngineCallExtImpl implements EngineCallExtApi {
             }
         }
 
-        param.put("rampUp", scheduleStartRequest.getRampUp());
-        param.put("steps", scheduleStartRequest.getSteps());
+//        param.put("rampUp", scheduleStartRequest.getRampUp());
+//        param.put("steps", scheduleStartRequest.getSteps());
         // add start by lipeng 添加压测引擎插件文件夹目录 enginePluginFolderPath
         param.put("enginePluginsFilePath", scheduleStartRequest.getEnginePluginsFilePath());
         // add end
         JSONObject enginePressureParams = new JSONObject();
+        enginePressureParams.put("podNum", scheduleStartRequest.getTotalIp());
         enginePressureParams.put("pressureEngineBackendQueueCapacity", this.pressureEngineBackendQueueCapacity);
         enginePressureParams.put("engineRedisAddress", engineRedisAddress);
         enginePressureParams.put("engineRedisPort", engineRedisPort);
         enginePressureParams.put("engineRedisSentinelNodes", engineRedisSentinelNodes);
         enginePressureParams.put("engineRedisSentinelMaster", engineRedisSentinelMaster);
         enginePressureParams.put("engineRedisPassword", engineRedisPassword);
-        BigDecimal podTpsNum = new BigDecimal(0);
-        if (scheduleStartRequest.getTps() != null){
-            podTpsNum = new BigDecimal(scheduleStartRequest.getTps()).divide(new BigDecimal(scheduleStartRequest.getTotalIp()), 0, BigDecimal.ROUND_UP);
-        }
+
         if (scheduleStartRequest.isTryRun()) {
             //如果是巡检任务，则覆盖压测类型为巡检类型
             //enginePressureParams.put("enginePressureMode","4");
             enginePressureParams.put("fixed_timer", String.valueOf(scheduleStartRequest.getFixedTimer()));
             enginePressureParams.put("loops_num", String.valueOf(scheduleStartRequest.getLoopsNum()));
         }
-        enginePressureParams.put("tpsTargetLevel", podTpsNum.longValue()+"");
-        enginePressureParams.put("enginePressureMode", scheduleStartRequest.getPressureType() == null ? "" : scheduleStartRequest.getPressureType().toString());
+//        enginePressureParams.put("tpsTargetLevel", podTpsNum.longValue()+"");
+//        enginePressureParams.put("enginePressureMode", scheduleStartRequest.getPressureType() == null ? "" : scheduleStartRequest.getPressureType().toString());
         //巡检和脚本调试采样率都为1
         String traceSampling = "1";
-        if (scheduleStartRequest.getPressureType().equals(PressureTypeEnums.TRY_RUN.getCode())
-                || scheduleStartRequest.getPressureType().equals(PressureTypeEnums.INSPECTION_MODE.getCode())) {
+        if (scheduleStartRequest.isTryRun() || scheduleStartRequest.isInspect()) {
             enginePressureParams.put("traceSampling", traceSampling);
         } else {
-            enginePressureParams.put("traceSampling",
-                    StringUtils.isBlank(engineConfigService.getLogSimpling()) ? traceSampling : engineConfigService.getLogSimpling());
+            traceSampling = CommonUtil.getValue(traceSampling, engineConfigService, EngineConfigService::getLogSimpling);
+            enginePressureParams.put("traceSampling", traceSampling);
         }
-        enginePressureParams.put("ptlLogConfig",JSONObject.toJSONString(engineConfigService.getEnginePtlConfig()));
-        enginePressureParams.put("zkServers",zkServers);
-        enginePressureParams.put("logQueueSize",logQueueSize);
+//        if (scheduleStartRequest.getPressureType().equals(PressureTypeEnums.TRY_RUN.getCode())
+//                || scheduleStartRequest.getPressureType().equals(PressureTypeEnums.INSPECTION_MODE.getCode())) {
+//            enginePressureParams.put("traceSampling", traceSampling);
+//        } else {
+//            enginePressureParams.put("traceSampling",
+//                    StringUtils.isBlank(engineConfigService.getLogSimpling()) ? traceSampling : engineConfigService.getLogSimpling());
+//        }
+        enginePressureParams.put("ptlLogConfig", JsonUtil.toJson(engineConfigService.getEnginePtlConfig()));
+        enginePressureParams.put("zkServers", zkServers);
+        enginePressureParams.put("logQueueSize", logQueueSize);
+        enginePressureParams.put("threadGroupConfig", JsonUtil.toJson(scheduleStartRequest.getThreadGroupConfig()));
+        //TODO 目标参数处理
+        BigDecimal podTpsNum = new BigDecimal(0);
+        if (scheduleStartRequest.getTps() != null){
+            podTpsNum = new BigDecimal(scheduleStartRequest.getTps()).divide(new BigDecimal(scheduleStartRequest.getTotalIp()), 0, BigDecimal.ROUND_UP);
+        }
         if (scheduleStartRequest.getBusinessTpsData() != null) {
             List<Map<String, String>> businessActivities = new ArrayList<>();
             scheduleStartRequest.getBusinessTpsData().forEach((k, v) -> {

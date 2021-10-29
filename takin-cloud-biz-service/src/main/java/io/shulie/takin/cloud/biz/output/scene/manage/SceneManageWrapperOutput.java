@@ -4,12 +4,15 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
 import io.shulie.takin.cloud.common.bean.RuleBean;
 import io.shulie.takin.cloud.common.bean.TimeBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneBusinessActivityRefBean;
+import io.shulie.takin.ext.content.enginecall.PressureConfigExt;
+import io.shulie.takin.ext.content.enginecall.PtConfigExt;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -36,8 +39,11 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
     @ApiModelProperty(value = "业务活动配置")
     private List<SceneBusinessActivityRefOutput> businessActivityConfig;
 
-    @ApiModelProperty(value = "施压类型,0:并发,1:tps,2:自定义;不填默认为0")
-    private Integer pressureType;
+    @ApiModelProperty(value = "线程组施压配置")
+    private Map<String, PressureConfigExt> threadGroupConfig;
+
+//    @ApiModelProperty(value = "施压类型,0:并发,1:tps,2:自定义;不填默认为0")
+//    private Integer pressureType;
 
     @ApiModelProperty(value = "并发数量")
     private Integer concurrenceNum;
@@ -51,18 +57,18 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
     @ApiModelProperty(value = "压测时长")
     private TimeBean pressureTestTime;
 
-    @ApiModelProperty(value = "施压模式")
-    @NotNull(message = "施压模式不能为空")
-    private Integer pressureMode;
-
-    @ApiModelProperty(value = "递增时长(秒)")
-    private Long increasingSecond;
-
-    @ApiModelProperty(value = "递增时长")
-    private TimeBean increasingTime;
-
-    @ApiModelProperty(value = "阶梯层数")
-    private Integer step;
+//    @ApiModelProperty(value = "施压模式")
+//    @NotNull(message = "施压模式不能为空")
+//    private Integer pressureMode;
+//
+//    @ApiModelProperty(value = "递增时长(秒)")
+//    private Long increasingSecond;
+//
+//    @ApiModelProperty(value = "递增时长")
+//    private TimeBean increasingTime;
+//
+//    @ApiModelProperty(value = "阶梯层数")
+//    private Integer step;
 
     @ApiModelProperty(value = "预计消耗流量")
     private BigDecimal estimateFlow;
@@ -120,7 +126,7 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
     private boolean continueRead;
 
     /**
-     * 压测类型，默认为0，默认不展示到页面
+     * 场景类型:0普通场景，1流量调试
      */
     private Integer type;
 

@@ -72,6 +72,7 @@ import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
+import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.data.dao.sceneTask.SceneTaskPressureTestLogUploadDAO;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
@@ -170,7 +171,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     }
 
     private SceneActionOutput startTask(SceneTaskStartInput input, SceneStartTrialRunInput trialRunInput) {
-        log.warn("启动任务接收到入参：{}", JSON.toJSONString(input));
+        log.info("启动任务接收到入参：{}", JsonUtil.toJson(input));
         SceneManageQueryOpitons options = new SceneManageQueryOpitons();
         options.setIncludeBusinessActivity(true);
         options.setIncludeScript(true);
@@ -224,6 +225,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         preCheckStart(sceneData);
 
         //创建临时报表数据
+        //TODO initReport内需要处理pressureType
         Report report = initReport(sceneData, input);
 
         SceneActionOutput sceneAction = new SceneActionOutput();
@@ -245,16 +247,17 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 resourceId = report.getId();
             }
             Long finalResourceId = resourceId;
+            //TODO 参数改造
             assetExtApi.lock(new AssetInvoiceExt() {{
                 setExpectThroughput(sceneData.getConcurrenceNum());
-                setIncreasingTime(sceneData.getIncreasingSecond());
-                setPressureMode(sceneData.getPressureMode());
+//                setIncreasingTime(sceneData.getIncreasingSecond());
+//                setPressureMode(sceneData.getPressureMode());
                 setPressureTotalTime(sceneData.getTotalTestTime());
                 setSceneId(input.getSceneId());
                 setTaskId(report.getId());
-                setPressureType(sceneData.getPressureType());
+//                setPressureType(sceneData.getPressureType());
                 setCustomerId(sceneData.getCustomerId());
-                setStep(sceneData.getStep());
+//                setStep(sceneData.getStep());
                 setResourceId(finalResourceId);
                 setResourceName(input.getResourceName());
                 setResourceType(input.getAssetType());
@@ -771,7 +774,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         int sumTps = scene.getBusinessActivityConfig().stream().mapToInt(SceneBusinessActivityRefBean::getTargetTPS)
             .sum();
         report.setTps(sumTps);
-        report.setPressureType(scene.getPressureType());
+        //TODO 施压类型
+//        report.setPressureType(scene.getPressureType());
         report.setType(scene.getType());
         tReportMapper.insertSelective(report);
 

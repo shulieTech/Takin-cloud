@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -72,10 +73,7 @@ import io.shulie.takin.cloud.common.pojo.dto.scenemanage.UploadFileDTO;
 import io.shulie.takin.cloud.common.pojo.vo.scenemanage.SceneMangeFeaturesVO;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
-import io.shulie.takin.cloud.common.utils.LinuxUtil;
-import io.shulie.takin.cloud.common.utils.UrlUtil;
+import io.shulie.takin.cloud.common.utils.*;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
@@ -85,6 +83,7 @@ import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.ext.api.AssetExtApi;
 import io.shulie.takin.ext.api.EngineExtApi;
 import io.shulie.takin.ext.content.asset.AssetBillExt;
+import io.shulie.takin.ext.content.enginecall.PtConfigExt;
 import io.shulie.takin.ext.content.script.ScriptParseExt;
 import io.shulie.takin.ext.content.script.ScriptVerityExt;
 import io.shulie.takin.ext.content.script.ScriptVerityRespExt;
@@ -977,33 +976,35 @@ public class SceneManageServiceImpl implements SceneManageService {
         wrapperOutput.setUpdateTime(DateUtil.formatDateTime(sceneManageResult.getUpdateTime()));
         wrapperOutput.setLastPtTime(DateUtil.formatDateTime(sceneManageResult.getLastPtTime()));
         wrapperOutput.setLastPtDateTime(sceneManageResult.getLastPtTime());
-        fillPtConfig(wrapperOutput, sceneManageResult);
+        fillPtConfig(wrapperOutput, sceneManageResult.getPtConfig());
         wrapperOutput.setFeatures(sceneManageResult.getFeatures());
 
     }
 
-    private void fillPtConfig(SceneManageWrapperOutput wrapperOutput, SceneManageResult sceneManageResult) {
+    private void fillPtConfig(SceneManageWrapperOutput wrapperOutput, String config) {
         try {
-            JSONObject jsonObject = JSON.parseObject(sceneManageResult.getPtConfig());
-            wrapperOutput.setConcurrenceNum(jsonObject.getInteger(SceneManageConstant.THREAD_NUM));
-            wrapperOutput.setIpNum(jsonObject.getInteger(SceneManageConstant.HOST_NUM));
-            Integer pressureType = jsonObject.getInteger(SceneManageConstant.PT_TYPE);
-            wrapperOutput.setPressureType(pressureType == null ? 0 : pressureType);
+            PtConfigExt ptConfig = JSON.parseObject(config, PtConfigExt.class);
+            wrapperOutput.setIpNum(ptConfig.getPodNum());
             //压测时长
-            wrapperOutput.setPressureTestTime(new TimeBean(jsonObject.getLong(SceneManageConstant.PT_DURATION),
-                jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
-            wrapperOutput.setPressureTestSecond(convertTime(jsonObject.getLong(SceneManageConstant.PT_DURATION),
-                jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
-            wrapperOutput.setPressureMode(jsonObject.getInteger(SceneManageConstant.PT_MODE));
+            wrapperOutput.setPressureTestTime(new TimeBean(ptConfig.getDuration(), ptConfig.getUnit()));
+            wrapperOutput.setPressureTestSecond(convertTime(ptConfig.getDuration(), ptConfig.getUnit()));
+            wrapperOutput.setThreadGroupConfig(ptConfig.getThreadGroupConfig());
+//            wrapperOutput.setPressureTestTime(new TimeBean(jsonObject.getLong(SceneManageConstant.PT_DURATION),
+//                jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
+//            wrapperOutput.setPressureTestSecond(convertTime(jsonObject.getLong(SceneManageConstant.PT_DURATION),
+//                jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
+//            wrapperOutput.setPressureMode(jsonObject.getInteger(SceneManageConstant.PT_MODE));
             //阶梯时长
-            wrapperOutput.setIncreasingTime(new TimeBean(jsonObject.getLong(SceneManageConstant.STEP_DURATION),
-                jsonObject.getString(SceneManageConstant.STEP_DURATION_UNIT)));
-            wrapperOutput.setIncreasingSecond(convertTime(jsonObject.getLong(SceneManageConstant.STEP_DURATION),
-                jsonObject.getString(SceneManageConstant.STEP_DURATION_UNIT)));
-            wrapperOutput.setStep(jsonObject.getInteger(SceneManageConstant.STEP));
+//            wrapperOutput.setIncreasingTime(new TimeBean(jsonObject.getLong(SceneManageConstant.STEP_DURATION),
+//                jsonObject.getString(SceneManageConstant.STEP_DURATION_UNIT)));
+//            wrapperOutput.setIncreasingSecond(convertTime(jsonObject.getLong(SceneManageConstant.STEP_DURATION),
+//                jsonObject.getString(SceneManageConstant.STEP_DURATION_UNIT)));
+//            wrapperOutput.setStep(jsonObject.getInteger(SceneManageConstant.STEP));
             //预计消耗流量
-            BigDecimal flow = jsonObject.getBigDecimal(SceneManageConstant.ESTIMATE_FLOW);
-            wrapperOutput.setEstimateFlow(flow != null ? flow.setScale(2, RoundingMode.HALF_UP) : null);
+            if (null != ptConfig.getEstimateFlow()) {
+                BigDecimal flow = BigDecimal.valueOf(ptConfig.getEstimateFlow());
+                wrapperOutput.setEstimateFlow(flow.setScale(2, RoundingMode.HALF_UP));
+            }
         } catch (Exception e) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "施压配置json解析错误", e);
         }
@@ -1018,17 +1019,11 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (time == null) {
             return 0L;
         }
-        long t;
-        if (TimeUnitEnum.DAY.getValue().equals(unit)) {
-            t = time * 24 * 60 * 60;
-        } else if (TimeUnitEnum.HOUR.getValue().equals(unit)) {
-            t = time * 60 * 60;
-        } else if (TimeUnitEnum.MINUTE.getValue().equals(unit)) {
-            t = time * 60;
-        } else {
-            t = time;
+        TimeUnitEnum tue = TimeUnitEnum.value(unit);
+        if (null == tue) {
+            return time;
         }
-        return t;
+        return tue.getUnit().convert(time, TimeUnit.SECONDS);
     }
 
     private SceneManageCreateOrUpdateParam buildSceneManage(SceneManageWrapperInput wrapperVO) {

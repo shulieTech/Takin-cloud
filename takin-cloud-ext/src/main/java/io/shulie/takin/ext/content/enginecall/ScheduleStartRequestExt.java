@@ -23,7 +23,7 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
     /**
      * 施压模式
      */
-    private String pressureMode;
+//    private String pressureMode;
 
     /**
      * 脚本文件路径
@@ -53,22 +53,22 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
     /**
      * 施压类型,0:并发,1:tps,2:自定义;不填默认为0
      */
-    private Integer pressureType;
+//    private Integer pressureType;
 
     /**
      * 最大并发
      */
     private Integer expectThroughput;
 
-    /**
-     * 递增时长
-     */
-    private Long rampUp;
-
-    /**
-     * 阶梯层数
-     */
-    private Integer steps;
+//    /**
+//     * 递增时长
+//     */
+//    private Long rampUp;
+//
+//    /**
+//     * 阶梯层数
+//     */
+//    private Integer steps;
 
     /**
      * 控制台地址
@@ -114,6 +114,11 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
      * 是否为流量试跑
      */
     private boolean isTryRun;
+
+    /**
+     * 施压配置
+     */
+    private Map<String, PressureConfigExt> threadGroupConfig;
 
     /**
      * 添加引擎插件路径

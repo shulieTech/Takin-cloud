@@ -84,14 +84,16 @@ public class SceneTaskEventServie {
         scheduleStartRequest.setTaskId(reportId);
         // 客户id
         scheduleStartRequest.setCustomerId(scene.getCustomerId());
-        String pressureMode = scene.getPressureMode() == 1 ? "fixed"
-            : scene.getPressureMode() == 2 ? "linear" : "stair";
-        scheduleStartRequest.setPressureMode(pressureMode);
-        scheduleStartRequest.setPressureType(scene.getPressureType());
-        scheduleStartRequest.setRampUp(scene.getIncreasingSecond());
-        scheduleStartRequest.setSteps(scene.getStep());
+//        String pressureMode = scene.getPressureMode() == 1 ? "fixed"
+//            : scene.getPressureMode() == 2 ? "linear" : "stair";
+//        scheduleStartRequest.setPressureMode(pressureMode);
+//        scheduleStartRequest.setPressureType(scene.getPressureType());
+//        scheduleStartRequest.setRampUp(scene.getIncreasingSecond());
+//        scheduleStartRequest.setSteps(scene.getStep());
         scheduleStartRequest.setTotalIp(scene.getIpNum());
         scheduleStartRequest.setExpectThroughput(scene.getConcurrenceNum());
+        scheduleStartRequest.setThreadGroupConfig(scene.getThreadGroupConfig());
+        //TODO 目标信息
         Map<String, String> businessData = Maps.newHashMap();
         Map<String, Integer> businessTpsData = Maps.newHashMap();
         Integer tps = 0;

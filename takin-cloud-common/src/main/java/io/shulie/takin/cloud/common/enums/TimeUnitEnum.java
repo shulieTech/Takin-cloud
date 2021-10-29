@@ -1,37 +1,49 @@
 package io.shulie.takin.cloud.common.enums;
 
+import lombok.Data;
+import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author qianshui
  * @date 2020/5/11 下午7:58
  */
 public enum TimeUnitEnum {
 
-    DAY("d", "天"),
-    HOUR("h", "时"),
-    MINUTE("m", "分"),
-    SECOND("s", "秒");
+    DAY(TimeUnit.DAYS, "d", "天"),
+    HOUR(TimeUnit.HOURS, "h", "时"),
+    MINUTE(TimeUnit.MINUTES,"m", "分"),
+    SECOND(TimeUnit.SECONDS,"s", "秒");
 
+    @Getter
+    private TimeUnit unit;
+    @Getter
     private String value;
+    @Getter
     private String name;
 
-    TimeUnitEnum(String value, String name) {
+    TimeUnitEnum(TimeUnit unit, String value, String name) {
+        this.unit = unit;
         this.value = value;
         this.name = name;
     }
 
-    public String getValue() {
-        return value;
+    private static final Map<String, TimeUnitEnum> pool = new HashMap<>();
+    static {
+        for (TimeUnitEnum e : TimeUnitEnum.values()) {
+            pool.put(e.value.toLowerCase(), e);
+        }
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public static TimeUnitEnum value(String value) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        return pool.get(value.toLowerCase());
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 }
