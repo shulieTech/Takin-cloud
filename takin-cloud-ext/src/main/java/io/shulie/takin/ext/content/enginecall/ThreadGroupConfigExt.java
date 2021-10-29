@@ -8,7 +8,7 @@ import lombok.Data;
  * @Date: 2021/10/29 9:57 上午
  */
 @Data
-public class PressureConfigExt extends AbstractEntry {
+public class ThreadGroupConfigExt extends AbstractEntry {
     /**
      * 压力模式：并发、tps
      */

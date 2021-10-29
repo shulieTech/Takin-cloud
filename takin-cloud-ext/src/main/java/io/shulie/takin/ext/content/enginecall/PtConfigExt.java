@@ -31,5 +31,5 @@ public class PtConfigExt extends AbstractEntry {
     /**
      * 线程组配置
      */
-    private Map<String, PressureConfigExt> threadGroupConfig;
+    private Map<String, ThreadGroupConfigExt> threadGroupConfigMap;
 }

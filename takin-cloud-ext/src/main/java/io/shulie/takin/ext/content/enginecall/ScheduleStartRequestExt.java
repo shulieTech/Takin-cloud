@@ -119,7 +119,7 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
     /**
      * 施压配置
      */
-    private Map<String, PressureConfigExt> threadGroupConfig;
+    private Map<String, ThreadGroupConfigExt> threadGroupConfigMap;
 
     /**
      * 添加引擎插件路径

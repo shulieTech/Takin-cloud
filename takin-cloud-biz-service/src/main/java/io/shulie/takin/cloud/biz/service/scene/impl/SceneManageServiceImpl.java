@@ -999,7 +999,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             //压测时长
             wrapperOutput.setPressureTestTime(new TimeBean(ptConfig.getDuration(), ptConfig.getUnit()));
             wrapperOutput.setPressureTestSecond(convertTime(ptConfig.getDuration(), ptConfig.getUnit()));
-            wrapperOutput.setThreadGroupConfig(ptConfig.getThreadGroupConfig());
+            wrapperOutput.setThreadGroupConfigMap(ptConfig.getThreadGroupConfigMap());
             //            wrapperOutput.setPressureTestTime(new TimeBean(jsonObject.getLong(SceneManageConstant.PT_DURATION),
             //                jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
             //            wrapperOutput.setPressureTestSecond(convertTime(jsonObject.getLong(SceneManageConstant.PT_DURATION),

@@ -6,13 +6,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
-
 import io.shulie.takin.cloud.common.bean.RuleBean;
 import io.shulie.takin.cloud.common.bean.TimeBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneBusinessActivityRefBean;
-import io.shulie.takin.ext.content.enginecall.PressureConfigExt;
-import io.shulie.takin.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.ext.content.enginecall.ThreadGroupConfigExt;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -40,7 +37,7 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
     private List<SceneBusinessActivityRefOutput> businessActivityConfig;
 
     @ApiModelProperty(value = "线程组施压配置")
-    private Map<String, PressureConfigExt> threadGroupConfig;
+    private Map<String, ThreadGroupConfigExt> threadGroupConfigMap;
 
 //    @ApiModelProperty(value = "施压类型,0:并发,1:tps,2:自定义;不填默认为0")
 //    private Integer pressureType;

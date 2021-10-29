@@ -1,7 +1,6 @@
 package io.shulie.plugin.enginecall;
 
 
-import com.alibaba.fastjson.JSONObject;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import io.shulie.plugin.enginecall.contents.EnginePressureConfig;
 import io.shulie.plugin.enginecall.contents.EngineRunConfig;
@@ -13,10 +12,8 @@ import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.utils.CommonUtil;
-import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
-import io.shulie.takin.constants.TakinRequestConstant;
 import io.shulie.takin.ext.api.EngineCallExtApi;
 import io.shulie.takin.ext.content.enginecall.*;
 import lombok.extern.slf4j.Slf4j;
@@ -207,7 +204,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         pressureConfig.setPtlLogConfig(engineConfigService.getEnginePtlConfig());
         pressureConfig.setZkServers(zkServers);
         pressureConfig.setLogQueueSize(NumberUtil.parseInt(logQueueSize, 25000));
-        pressureConfig.setThreadGroupConfig(startRequest.getThreadGroupConfig());
+        pressureConfig.setThreadGroupConfigMap(startRequest.getThreadGroupConfigMap());
 
         Long podTpsNum = null;
         if (null != startRequest.getTps()){

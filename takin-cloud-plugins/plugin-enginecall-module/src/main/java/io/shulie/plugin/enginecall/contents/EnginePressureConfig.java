@@ -2,7 +2,7 @@ package io.shulie.plugin.enginecall.contents;
 
 import io.shulie.takin.cloud.biz.output.engine.EngineLogPtlConfigOutput;
 import io.shulie.takin.cloud.common.pojo.AbstractEntry;
-import io.shulie.takin.ext.content.enginecall.PressureConfigExt;
+import io.shulie.takin.ext.content.enginecall.ThreadGroupConfigExt;
 import lombok.Data;
 
 import java.util.List;
@@ -65,7 +65,7 @@ public class EnginePressureConfig extends AbstractEntry {
     /**
      * 各线程组施压配置
      */
-    private Map<String, PressureConfigExt> threadGroupConfig;
+    private Map<String, ThreadGroupConfigExt> threadGroupConfigMap;
     /**
      * 各业务活动施压目标配置
      */
