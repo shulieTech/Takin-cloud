@@ -30,7 +30,7 @@ public class WriteSceneRequest {
     private List<Content> content;
     @ApiModelProperty(value = "施压配置")
     @NotNull(message = "施压配置不能为空")
-    private Map<String, Config> config;
+    private Config config;
     @ApiModelProperty(value = "压测目标")
     @NotNull(message = "业压测目标不能为空")
     private Map<String, Goal> goal;
@@ -107,31 +107,40 @@ public class WriteSceneRequest {
      * 施压配置
      */
     @Data
-    @ApiModel(value = "施压配置")
+    @ApiModel(value = "线程组施压配置")
     public static class Config {
-        @NotNull(message = "施压模式不能为空")
-        @ApiModelProperty(value = "施压模式")
-        private Integer mode;
-        @ApiModelProperty(value = "指定Pod数")
-        @NotNull(message = "指定Pod数不能为空")
-        private Integer podNumber;
-        @ApiModelProperty(value = "压测时长")
-        @NotNull(message = "压测时长不能为空")
-        private Integer time;
-        @ApiModelProperty(value = "压测时长单位")
-        @NotNull(message = "压测时长单位不能为空")
-        private String timeUtil;
-        @ApiModelProperty(value = "施压模式类型")
-        @NotNull(message = "施压模式类型不能为空")
-        private Integer modeType;
-        @ApiModelProperty(value = "并发数")
-        private Integer concurrency;
-        @ApiModelProperty(value = "递增时长")
-        private String increaseTime;
-        @ApiModelProperty(value = "递增时长单位")
-        private Integer increaseTimeUtil;
-        @ApiModelProperty(value = "递增步骤")
-        private Integer increaseStep;
+        Map<String, ConfigItem> items;
+
+        /**
+         * 施压配置 - 具体项
+         */
+        @Data
+        @ApiModel(value = "配置项")
+        public static class ConfigItem {
+            @NotNull(message = "施压模式不能为空")
+            @ApiModelProperty(value = "施压模式")
+            private Integer mode;
+            @ApiModelProperty(value = "指定Pod数")
+            @NotNull(message = "指定Pod数不能为空")
+            private Integer podNumber;
+            @ApiModelProperty(value = "压测时长")
+            @NotNull(message = "压测时长不能为空")
+            private Integer time;
+            @ApiModelProperty(value = "压测时长单位")
+            @NotNull(message = "压测时长单位不能为空")
+            private String timeUtil;
+            @ApiModelProperty(value = "施压模式类型")
+            @NotNull(message = "施压模式类型不能为空")
+            private Integer modeType;
+            @ApiModelProperty(value = "并发数")
+            private Integer concurrency;
+            @ApiModelProperty(value = "递增时长")
+            private String increaseTime;
+            @ApiModelProperty(value = "递增时长单位")
+            private Integer increaseTimeUtil;
+            @ApiModelProperty(value = "递增步骤")
+            private Integer increaseStep;
+        }
     }
 
     /**

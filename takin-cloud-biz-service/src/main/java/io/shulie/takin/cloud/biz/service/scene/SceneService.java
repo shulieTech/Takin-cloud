@@ -92,7 +92,7 @@ public interface SceneService {
      * @param sceneId 场景主键
      * @return 线程组配置<节点MD5, 配置对象>
      */
-    Map<String, Config> getConfig(long sceneId);
+    Config getConfig(long sceneId);
 
     /**
      * 获取压测SLA

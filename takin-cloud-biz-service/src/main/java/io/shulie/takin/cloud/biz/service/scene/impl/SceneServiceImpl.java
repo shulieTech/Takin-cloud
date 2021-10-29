@@ -95,6 +95,14 @@ public class SceneServiceImpl implements SceneService {
      */
     @Override
     public Boolean update(WriteSceneRequest in) {
+        // 0.   清除历史项
+        {
+            Long sceneId = in.getBasicInfo().getSceneId();
+            int slaClearRows = sceneSlaRefMapper.delete(Wrappers.lambdaUpdate(SceneSlaRefEntity.class).eq(SceneSlaRefEntity::getSceneId, sceneId));
+            int fileClearRows = sceneScriptRefMapper.delete(Wrappers.lambdaUpdate(SceneScriptRefEntity.class).eq(SceneScriptRefEntity::getSceneId, sceneId));
+            int activityClearRows = sceneBusinessActivityRefMapper.delete(Wrappers.lambdaUpdate(SceneBusinessActivityRefEntity.class).eq(SceneBusinessActivityRefEntity::getSceneId, sceneId));
+            log.info("更新压测场景。\n清理sla数据:{}。\n清理文件数据:{}。\n清理业务活动数据:{}。", slaClearRows, fileClearRows, activityClearRows);
+        }
         // 1.   创建场景
         int updateRows = updateStepScene(in.getBasicInfo(), in.getConfig(), in.getAnalysisResult(), in.getDataValidation());
         if (updateRows == 0) {return false;}
@@ -275,10 +283,10 @@ public class SceneServiceImpl implements SceneService {
      * @return 线程组配置<节点MD5, 配置对象>
      */
     @Override
-    public Map<String, Config> getConfig(long sceneId) {
+    public Config getConfig(long sceneId) {
         try {
             SceneManageEntity scene = getScene(sceneId);
-            return JSONObject.parseObject(scene.getPtConfig(), new TypeReference<Map<String, Config>>() {});
+            return JSONObject.parseObject(scene.getPtConfig(), new TypeReference<Config>() {});
         } catch (JSONException e) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, sceneId + "压测线程组解析错误");
         }
@@ -361,32 +369,14 @@ public class SceneServiceImpl implements SceneService {
      * @return 压测场景主键
      */
     private Long createStepScene(BasicInfo basicInfo,
-        Map<String, Config> config, List<?> analysisResult, DataValidation dataValidation) {
-        Map<String, Object> feature = new HashMap<String, Object>(4) {{
-            put("scriptId", basicInfo.getScriptId());
-            put("analysisResult", analysisResult);
-            put("businessFlowId", basicInfo.getBusinessFlowId());
-            put("dataValidation", dataValidation);
-        }};
-        SceneManageEntity sceneEntity = new SceneManageEntity() {{
-            setSceneName(basicInfo.getName());
-            setFeatures(JSONObject.toJSONString(feature));
-            setPtConfig(JSONObject.toJSONString(config));
-            setStatus(0);
-            setType(basicInfo.getType());
-            setUserId(-1L);
-            setDeptId(null);
-            setCustomerId(null);
-            setLastPtTime(null);
-            setScriptType(basicInfo.getScriptType());
-            setIsDeleted(0);
-            Date now = new Date();
-            setCreateTime(now);
-            setUpdateTime(now);
-            setCreateName(null);
-            setUpdateName(null);
-        }};
+        Config config, List<?> analysisResult, DataValidation dataValidation) {
+        Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), analysisResult, dataValidation);
+        // 组装数据实体类
+        SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),
+            basicInfo.getScriptType(), config, feature);
+        // 执行数据库操作
         sceneManageMapper.insert(sceneEntity);
+        // 回填自增主键
         long sceneId = sceneEntity.getId();
         log.info("创建了业务活动「{}」。自增主键：{}.", basicInfo.getName(), sceneId);
         return sceneId;
@@ -418,32 +408,14 @@ public class SceneServiceImpl implements SceneService {
      * @return 数据库更新行数 - 应当为 1
      */
     private int updateStepScene(BasicInfo basicInfo,
-        Map<String, Config> config, List<?> analysisResult, DataValidation dataValidation) {
-        Map<String, Object> feature = new HashMap<String, Object>(4) {{
-            put("scriptId", basicInfo.getScriptId());
-            put("analysisResult", analysisResult);
-            put("businessFlowId", basicInfo.getBusinessFlowId());
-            put("dataValidation", dataValidation);
-        }};
-        SceneManageEntity sceneEntity = new SceneManageEntity() {{
-            setId(basicInfo.getSceneId());
-            setSceneName(basicInfo.getName());
-            setFeatures(JSONObject.toJSONString(feature));
-            setPtConfig(JSONObject.toJSONString(config));
-            setStatus(0);
-            setType(basicInfo.getType());
-            setUserId(-1L);
-            setDeptId(null);
-            setCustomerId(null);
-            setLastPtTime(null);
-            setScriptType(basicInfo.getScriptType());
-            setIsDeleted(0);
-            Date now = new Date();
-            setCreateTime(now);
-            setUpdateTime(now);
-            setCreateName(null);
-            setUpdateName(null);
-        }};
+        Config config, List<?> analysisResult, DataValidation dataValidation) {
+        Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), analysisResult, dataValidation);
+        // 组装数据实体类
+        SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),
+            basicInfo.getScriptType(), config, feature);
+        // 设置更新时间
+        sceneEntity.setUpdateTime(new Date());
+        // 执行数据库操作
         int updateRows = sceneManageMapper.updateById(sceneEntity);
         log.info("更新了业务活动「{}」。自增主键：{}。操作行数：{}。", basicInfo.getName(), sceneEntity.getId(), updateRows);
         return updateRows;
@@ -563,5 +535,56 @@ public class SceneServiceImpl implements SceneService {
             sceneSlaRefMapper.insert(entity);
             log.info("业务活动{}关联了SLA{}。自增主键：{}.", sceneId, mGoal.getName(), entity.getId());
         }
+    }
+
+    /**
+     * 组装拓展字段
+     *
+     * @param scriptId       脚本主键
+     * @param businessFlowId 业务流程主键
+     * @param analysisResult 脚本解析结果
+     * @param dataValidation 数据验证配置
+     * @return 拓展字段的JSON对象
+     */
+    private Map<String, Object> assembleFeature(long scriptId, long businessFlowId, Object analysisResult, DataValidation dataValidation) {
+        return new HashMap<String, Object>(4) {{
+            put("scriptId", scriptId);
+            put("analysisResult", analysisResult);
+            put("businessFlowId", businessFlowId);
+            put("dataValidation", dataValidation);
+        }};
+    }
+
+    /**
+     * 组装场景实体类
+     *
+     * @param sceneId    场景主键
+     * @param type       场景类型
+     * @param name       场景名称
+     * @param scriptType 脚本类型
+     * @param feature    拓展字段
+     * @param config     施压线程组配置
+     * @return 场景实体类
+     */
+    private SceneManageEntity assembleSceneEntity(Long sceneId, int type, String name, int scriptType, Config config, Object feature) {
+        return new SceneManageEntity() {{
+            setId(sceneId);
+            setSceneName(name);
+            setFeatures(JSONObject.toJSONString(feature));
+            setPtConfig(JSONObject.toJSONString(config));
+            setStatus(0);
+            setType(type);
+            setUserId(-1L);
+            setDeptId(null);
+            setCustomerId(null);
+            setLastPtTime(null);
+            setScriptType(scriptType);
+            setIsDeleted(0);
+            Date now = new Date();
+            setCreateTime(now);
+            setUpdateTime(now);
+            setCreateName(null);
+            setUpdateName(null);
+        }};
     }
 }
