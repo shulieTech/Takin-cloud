@@ -21,6 +21,10 @@
         </dependency>
         <dependency>
             <groupId>io.shulie.takin</groupId>
+            <artifactId>takin-cloud-open-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.shulie.takin</groupId>
             <artifactId>takin-cloud-data</artifactId>
         </dependency>
         <dependency>
