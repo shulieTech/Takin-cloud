@@ -17,7 +17,7 @@ public interface EngineConfigService {
      * 获取日志采样率
      * @return -
      */
-    String getLogSimpling();
+    Integer getLogSimpling();
 
     /**
      * 获取日志推送服务

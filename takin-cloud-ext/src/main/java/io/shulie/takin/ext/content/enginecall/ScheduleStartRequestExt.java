@@ -1,6 +1,7 @@
 package io.shulie.takin.ext.content.enginecall;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -128,6 +129,9 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
      * @author lipeng
      */
     public List<String> addEnginePluginsFilePath(String enginePluginsFilePath) {
+        if (null == this.enginePluginsFilePath) {
+            this.enginePluginsFilePath = new ArrayList<>();
+        }
         this.enginePluginsFilePath.add(enginePluginsFilePath);
         return this.enginePluginsFilePath;
     }

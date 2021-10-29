@@ -9,6 +9,7 @@ import io.shulie.takin.cloud.biz.output.engine.EngineLogPtlConfigOutput;
 import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
 import io.shulie.takin.cloud.common.constants.ZkNodePathConstants;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.utils.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -83,16 +84,15 @@ public class EngineConfigServiceImpl implements EngineConfigService {
     }
 
     @Override
-    public String getLogSimpling() {
+    public Integer getLogSimpling() {
         try {
             byte[] data = zkClient.getData(ZkNodePathConstants.LOG_SAMPLING_PATH);
             if (Objects.nonNull(data) && data.length > 0) {
-                return new String(data);
+                return NumberUtil.parseInt(new String(data), 1);
             }
         } catch (Exception e) {
-            return "1";
         }
-        return "1";
+        return 1;
     }
 
     @Override

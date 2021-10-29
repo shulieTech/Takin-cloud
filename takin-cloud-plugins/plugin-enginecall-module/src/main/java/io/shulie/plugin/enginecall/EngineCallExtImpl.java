@@ -3,18 +3,19 @@ package io.shulie.plugin.enginecall;
 
 import com.alibaba.fastjson.JSONObject;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
+import io.shulie.plugin.enginecall.contents.EnginePressureConfig;
+import io.shulie.plugin.enginecall.contents.EngineRunConfig;
 import io.shulie.plugin.enginecall.service.EngineCallService;
 import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
-import io.shulie.takin.cloud.biz.utils.DataUtils;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.enums.PressureTypeEnums;
 import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
+import io.shulie.takin.cloud.common.utils.NumberUtil;
 import io.shulie.takin.constants.TakinRequestConstant;
 import io.shulie.takin.ext.api.EngineCallExtApi;
 import io.shulie.takin.ext.content.enginecall.*;
@@ -27,10 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -144,63 +142,152 @@ public class EngineCallExtImpl implements EngineCallExtApi {
      * 创建引擎配置文件
      */
     public void createEngineConfigMap(ScheduleRunRequest request) {
+
+        ScheduleStartRequestExt startRequest = request.getRequest();
+        StrategyConfigExt strategyConfig = request.getStrategyConfig();
+        Long sceneId = startRequest.getSceneId();
+        Long taskId = startRequest.getTaskId();
+        Long customerId = startRequest.getCustomerId();
+
         Map<String, Object> configMap = new HashMap<>();
-        ScheduleStartRequestExt scheduleStartRequest = request.getRequest();
-        StrategyConfigExt config = request.getStrategyConfig();
-        configMap.put("name", ScheduleConstants.getConfigMapName(scheduleStartRequest.getSceneId(), scheduleStartRequest.getTaskId(),
-                scheduleStartRequest.getCustomerId()));
-        JSONObject param = new JSONObject();
-        param.put("scriptPath", scriptPath + SceneManageConstant.FILE_SPLIT + scheduleStartRequest.getScriptPath());
-        param.put("pressureEnginePathUrl",scriptPath + SceneManageConstant.FILE_SPLIT);
-        param.put("extJarPath", "");
-        param.put("isLocal", true);
-        param.put("taskDir", taskDir);
-//        param.put("pressureMode", scheduleStartRequest.getPressureMode());
-        param.put("continuedTime", scheduleStartRequest.getContinuedTime());
-        if (scheduleStartRequest.getExpectThroughput() != null) {
-            param.put("expectThroughput", scheduleStartRequest.getExpectThroughput() / scheduleStartRequest.getTotalIp());
-        }
-        //将jar包放入引擎目录中，打包后会放入ext目录
-        if (CollectionUtils.isNotEmpty(scheduleStartRequest.getDataFile())) {
-            List<String> jarFilePaths = scheduleStartRequest.getDataFile().stream().filter(o -> o.getName().endsWith(".jar"))
-                    .map(reqExt ->{
-                        return scriptPath + SceneManageConstant.FILE_SPLIT + reqExt.getPath();
-                    }).collect(Collectors.toList());
-            if (CollectionUtils.isNotEmpty(jarFilePaths)) {
-                jarFilePaths.forEach(scheduleStartRequest::addEnginePluginsFilePath);
-            }
-        }
+        configMap.put("name", ScheduleConstants.getConfigMapName(sceneId, taskId, customerId));
 
-//        param.put("rampUp", scheduleStartRequest.getRampUp());
-//        param.put("steps", scheduleStartRequest.getSteps());
-        // add start by lipeng 添加压测引擎插件文件夹目录 enginePluginFolderPath
-        param.put("enginePluginsFilePath", scheduleStartRequest.getEnginePluginsFilePath());
+        EngineRunConfig config = new EngineRunConfig();
+        config.setSceneId(sceneId);
+        config.setTaskId(taskId);
+        config.setCustomerId(customerId);
+        config.setConsoleUrl(console + ScheduleConstants.getConsoleUrl(sceneId, taskId, customerId));
+        config.setCallbackUrl(console + "/api/engine/callback");
+        config.setPodCount(startRequest.getTotalIp());
+        config.setScriptPath(scriptPath + SceneManageConstant.FILE_SPLIT + startRequest.getScriptPath());
+        config.setPressureEnginePathUrl(scriptPath + SceneManageConstant.FILE_SPLIT);
+        config.setExtJarPath("");
+        config.setIsLocal(true);
+        config.setTaskDir(taskDir);
+        config.setContinuedTime(startRequest.getContinuedTime());
+        if (null != startRequest.getExpectThroughput()) {
+            config.setExpectThroughput(startRequest.getExpectThroughput() / startRequest.getTotalIp());
+        }
+        if (CollectionUtils.isNotEmpty(startRequest.getDataFile())) {
+            List<String> jarFiles = startRequest.getDataFile().stream().filter(Objects::nonNull)
+                    .filter(o -> StringUtils.isNotBlank(o.getName()))
+                    .filter(o -> o.getName().startsWith(".jar"))
+                    .map(ScheduleStartRequestExt.DataFile::getPath)
+                    .filter(StringUtils::isNotBlank)
+                    .map(s -> scriptPath + SceneManageConstant.FILE_SPLIT + s)
+                    .collect(Collectors.toList());
+            config.setEnginePluginsFiles(jarFiles);
+        }
+        if (CollectionUtils.isNotEmpty(startRequest.getDataFile())) {
+            startRequest.getDataFile().forEach(
+                    dataFile -> dataFile.setPath(ScheduleConstants.ENGINE_SCRIPT_FILE_PATH + dataFile.getPath())
+            );
+            config.setFileSets(startRequest.getDataFile());
+        }
+        config.setBusinessMap(startRequest.getBusinessData());
+        String memSetting = CommonUtil.getValue(appConfig.getK8sJvmSettings(), strategyConfig, StrategyConfigExt::getK8sJvmSettings);
+        config.setMemSetting(memSetting);
+
+        EnginePressureConfig pressureConfig = new EnginePressureConfig();
+        pressureConfig.setPressureEngineBackendQueueCapacity(this.pressureEngineBackendQueueCapacity);
+        pressureConfig.setEngineRedisAddress(this.engineRedisAddress);
+        pressureConfig.setEngineRedisPort(this.engineRedisPort);
+        pressureConfig.setEngineRedisSentinelNodes(this.engineRedisSentinelNodes);
+        pressureConfig.setEngineRedisSentinelMaster(this.engineRedisSentinelMaster);
+        pressureConfig.setEngineRedisPassword(this.engineRedisPassword);
+        if (startRequest.isTryRun()) {
+            pressureConfig.setFixedTimer(startRequest.getFixedTimer());
+            pressureConfig.setLoopsNum(startRequest.getLoopsNum());
+        }
+        Integer traceSampling = 1;
+        if (!startRequest.isTryRun() && !startRequest.isInspect() && null != engineConfigService.getLogSimpling()) {
+            traceSampling = engineConfigService.getLogSimpling();
+        }
+        pressureConfig.setTraceSampling(traceSampling);
+        pressureConfig.setPtlLogConfig(engineConfigService.getEnginePtlConfig());
+        pressureConfig.setZkServers(zkServers);
+        pressureConfig.setLogQueueSize(NumberUtil.parseInt(logQueueSize, 25000));
+        pressureConfig.setThreadGroupConfig(startRequest.getThreadGroupConfig());
+
+        Long podTpsNum = null;
+        if (null != startRequest.getTps()){
+            double tps = NumberUtil.getRate(startRequest.getTps(), startRequest.getTotalIp());
+            pressureConfig.setTpsTargetLevel(tps);
+            podTpsNum = Double.doubleToLongBits(tps);
+        }
+        //TODO 目标参数处理
+        if (startRequest.getBusinessTpsData() != null) {
+            List<Map<String, String>> businessActivities = new ArrayList<>();
+            startRequest.getBusinessTpsData().forEach((k, v) -> {
+                Map<String, String> businessActivity = new HashMap<>();
+                businessActivity.put("elementTestName", k);
+                businessActivity.put("throughputPercent", new BigDecimal(v).multiply(new BigDecimal(100))
+                        .divide(new BigDecimal(startRequest.getTps()), 0, BigDecimal.ROUND_UP).toString());
+                businessActivities.add(businessActivity);
+            });
+            pressureConfig.setBusinessActivities(businessActivities);
+        }
+        if (null != strategyConfig) {
+            pressureConfig.setTpsThreadMode(strategyConfig.getTpsThreadMode());
+            pressureConfig.setTpsTargetLevelFactor(strategyConfig.getTpsTargetLevelFactor());
+            pressureConfig.setMaxThreadNum(strategyConfig.getTpsRealThreadNum());
+        }
+        config.setPressureConfig(pressureConfig);
+
+
+//        JSONObject param = new JSONObject();
+//        param.put("scriptPath", scriptPath + SceneManageConstant.FILE_SPLIT + startRequest.getScriptPath());
+//        param.put("pressureEnginePathUrl",scriptPath + SceneManageConstant.FILE_SPLIT);
+//        param.put("extJarPath", "");
+//        param.put("isLocal", true);
+//        param.put("taskDir", taskDir);
+////        param.put("pressureMode", scheduleStartRequest.getPressureMode());
+//        param.put("continuedTime", startRequest.getContinuedTime());
+//        if (null != startRequest.getExpectThroughput()) {
+//            param.put("expectThroughput", startRequest.getExpectThroughput() / startRequest.getTotalIp());
+//        }
+//        //将jar包放入引擎目录中，打包后会放入ext目录
+//        if (CollectionUtils.isNotEmpty(startRequest.getDataFile())) {
+//            List<String> jarFilePaths = startRequest.getDataFile().stream().filter(Objects::nonNull)
+//                    .filter(o -> o.getName().endsWith(".jar"))
+//                    .map(reqExt ->{
+//                        return scriptPath + SceneManageConstant.FILE_SPLIT + reqExt.getPath();
+//                    }).collect(Collectors.toList());
+//            if (CollectionUtils.isNotEmpty(jarFilePaths)) {
+//                jarFilePaths.forEach(startRequest::addEnginePluginsFilePath);
+//            }
+//        }
+//
+////        param.put("rampUp", scheduleStartRequest.getRampUp());
+////        param.put("steps", scheduleStartRequest.getSteps());
+//        // add start by lipeng 添加压测引擎插件文件夹目录 enginePluginFolderPath
+//        param.put("enginePluginsFilePath", startRequest.getEnginePluginsFilePath());
         // add end
-        JSONObject enginePressureParams = new JSONObject();
-        enginePressureParams.put("podNum", scheduleStartRequest.getTotalIp());
-        enginePressureParams.put("pressureEngineBackendQueueCapacity", this.pressureEngineBackendQueueCapacity);
-        enginePressureParams.put("engineRedisAddress", engineRedisAddress);
-        enginePressureParams.put("engineRedisPort", engineRedisPort);
-        enginePressureParams.put("engineRedisSentinelNodes", engineRedisSentinelNodes);
-        enginePressureParams.put("engineRedisSentinelMaster", engineRedisSentinelMaster);
-        enginePressureParams.put("engineRedisPassword", engineRedisPassword);
+//        JSONObject enginePressureParams = new JSONObject();
+//        enginePressureParams.put("podNum", startRequest.getTotalIp());
+//        enginePressureParams.put("pressureEngineBackendQueueCapacity", this.pressureEngineBackendQueueCapacity);
+//        enginePressureParams.put("engineRedisAddress", engineRedisAddress);
+//        enginePressureParams.put("engineRedisPort", engineRedisPort);
+//        enginePressureParams.put("engineRedisSentinelNodes", engineRedisSentinelNodes);
+//        enginePressureParams.put("engineRedisSentinelMaster", engineRedisSentinelMaster);
+//        enginePressureParams.put("engineRedisPassword", engineRedisPassword);
 
-        if (scheduleStartRequest.isTryRun()) {
-            //如果是巡检任务，则覆盖压测类型为巡检类型
-            //enginePressureParams.put("enginePressureMode","4");
-            enginePressureParams.put("fixed_timer", String.valueOf(scheduleStartRequest.getFixedTimer()));
-            enginePressureParams.put("loops_num", String.valueOf(scheduleStartRequest.getLoopsNum()));
-        }
+//        if (startRequest.isTryRun()) {
+//            //如果是巡检任务，则覆盖压测类型为巡检类型
+//            //enginePressureParams.put("enginePressureMode","4");
+//            enginePressureParams.put("fixed_timer", String.valueOf(startRequest.getFixedTimer()));
+//            enginePressureParams.put("loops_num", String.valueOf(startRequest.getLoopsNum()));
+//        }
 //        enginePressureParams.put("tpsTargetLevel", podTpsNum.longValue()+"");
 //        enginePressureParams.put("enginePressureMode", scheduleStartRequest.getPressureType() == null ? "" : scheduleStartRequest.getPressureType().toString());
         //巡检和脚本调试采样率都为1
-        String traceSampling = "1";
-        if (scheduleStartRequest.isTryRun() || scheduleStartRequest.isInspect()) {
-            enginePressureParams.put("traceSampling", traceSampling);
-        } else {
-            traceSampling = CommonUtil.getValue(traceSampling, engineConfigService, EngineConfigService::getLogSimpling);
-            enginePressureParams.put("traceSampling", traceSampling);
-        }
+//        String traceSampling = "1";
+//        if (startRequest.isTryRun() || startRequest.isInspect()) {
+//            enginePressureParams.put("traceSampling", traceSampling);
+//        } else {
+//            traceSampling = CommonUtil.getValue(traceSampling, engineConfigService, EngineConfigService::getLogSimpling);
+//            enginePressureParams.put("traceSampling", traceSampling);
+//        }
 //        if (scheduleStartRequest.getPressureType().equals(PressureTypeEnums.TRY_RUN.getCode())
 //                || scheduleStartRequest.getPressureType().equals(PressureTypeEnums.INSPECTION_MODE.getCode())) {
 //            enginePressureParams.put("traceSampling", traceSampling);
@@ -208,69 +295,68 @@ public class EngineCallExtImpl implements EngineCallExtApi {
 //            enginePressureParams.put("traceSampling",
 //                    StringUtils.isBlank(engineConfigService.getLogSimpling()) ? traceSampling : engineConfigService.getLogSimpling());
 //        }
-        enginePressureParams.put("ptlLogConfig", JsonUtil.toJson(engineConfigService.getEnginePtlConfig()));
-        enginePressureParams.put("zkServers", zkServers);
-        enginePressureParams.put("logQueueSize", logQueueSize);
-        enginePressureParams.put("threadGroupConfig", JsonUtil.toJson(scheduleStartRequest.getThreadGroupConfig()));
-        //TODO 目标参数处理
-        BigDecimal podTpsNum = new BigDecimal(0);
-        if (scheduleStartRequest.getTps() != null){
-            podTpsNum = new BigDecimal(scheduleStartRequest.getTps()).divide(new BigDecimal(scheduleStartRequest.getTotalIp()), 0, BigDecimal.ROUND_UP);
-        }
-        if (scheduleStartRequest.getBusinessTpsData() != null) {
-            List<Map<String, String>> businessActivities = new ArrayList<>();
-            scheduleStartRequest.getBusinessTpsData().forEach((k, v) -> {
-                Map<String, String> businessActivity = new HashMap<>();
-                businessActivity.put("elementTestName", k);
-                businessActivity.put("throughputPercent", new BigDecimal(v).multiply(new BigDecimal(100))
-                        .divide(new BigDecimal(scheduleStartRequest.getTps()), 0, BigDecimal.ROUND_UP).toString());
-                businessActivities.add(businessActivity);
-            });
-            enginePressureParams.put("businessActivities", businessActivities);
-        }
+//        enginePressureParams.put("ptlLogConfig", JsonUtil.toJson(engineConfigService.getEnginePtlConfig()));
+//        enginePressureParams.put("zkServers", zkServers);
+//        enginePressureParams.put("logQueueSize", logQueueSize);
+//        enginePressureParams.put("threadGroupConfig", JsonUtil.toJson(startRequest.getThreadGroupConfig()));
+//        BigDecimal podTpsNum = new BigDecimal(0);
+//        if (startRequest.getTps() != null){
+//            podTpsNum = new BigDecimal(startRequest.getTps()).divide(new BigDecimal(startRequest.getTotalIp()), 0, BigDecimal.ROUND_UP);
+//        }
+//        if (startRequest.getBusinessTpsData() != null) {
+//            List<Map<String, String>> businessActivities = new ArrayList<>();
+//            startRequest.getBusinessTpsData().forEach((k, v) -> {
+//                Map<String, String> businessActivity = new HashMap<>();
+//                businessActivity.put("elementTestName", k);
+//                businessActivity.put("throughputPercent", new BigDecimal(v).multiply(new BigDecimal(100))
+//                        .divide(new BigDecimal(startRequest.getTps()), 0, BigDecimal.ROUND_UP).toString());
+//                businessActivities.add(businessActivity);
+//            });
+//            enginePressureParams.put("businessActivities", businessActivities);
+//        }
 
-        if (null != config) {
-            if (null != config.getTpsThreadMode()) {
-                enginePressureParams.put("tpsThreadMode", String.valueOf(config.getTpsThreadMode()));
-            }
-            enginePressureParams.put("tpsTargetLevelFactor", String.valueOf(config.getTpsTargetLevelFactor()));
-            if (null != config.getTpsRealThreadNum()) {
-                enginePressureParams.put("maxThreadNum", String.valueOf(config.getTpsRealThreadNum()));
-            }
-        }
-        param.put("enginePressureParams", enginePressureParams);
+//        if (null != strategyConfig) {
+//            if (null != strategyConfig.getTpsThreadMode()) {
+//                enginePressureParams.put("tpsThreadMode", String.valueOf(strategyConfig.getTpsThreadMode()));
+//            }
+//            enginePressureParams.put("tpsTargetLevelFactor", String.valueOf(strategyConfig.getTpsTargetLevelFactor()));
+//            if (null != strategyConfig.getTpsRealThreadNum()) {
+//                enginePressureParams.put("maxThreadNum", String.valueOf(strategyConfig.getTpsRealThreadNum()));
+//            }
+//        }
+//        param.put("enginePressureParams", enginePressureParams);
 
-        String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(scheduleStartRequest.getSceneId(), scheduleStartRequest.getTaskId(),
-                scheduleStartRequest.getCustomerId());
-        redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_ALL_LIMIT, scheduleStartRequest.getTps() + "");
+        String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(startRequest.getSceneId(), startRequest.getTaskId(),
+                startRequest.getCustomerId());
+        redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_ALL_LIMIT, startRequest.getTps() + "");
         redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_LIMIT, podTpsNum + "");
-        redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_POD_NUM, scheduleStartRequest.getTotalIp() + "");
+        redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_POD_NUM, startRequest.getTotalIp() + "");
         redisTemplate.expire(engineInstanceRedisKey, 10, TimeUnit.DAYS);
-        param.put(TakinRequestConstant.CLUSTER_TEST_SCENE_HEADER_VALUE, scheduleStartRequest.getSceneId());
-        param.put(TakinRequestConstant.CLUSTER_TEST_TASK_HEADER_VALUE, scheduleStartRequest.getTaskId());
-        //  客户id
-        param.put(TakinRequestConstant.CLUSTER_TEST_CUSTOMER_HEADER_VALUE, scheduleStartRequest.getCustomerId());
+//        param.put(TakinRequestConstant.CLUSTER_TEST_SCENE_HEADER_VALUE, startRequest.getSceneId());
+//        param.put(TakinRequestConstant.CLUSTER_TEST_TASK_HEADER_VALUE, startRequest.getTaskId());
+//        //  客户id
+//        param.put(TakinRequestConstant.CLUSTER_TEST_CUSTOMER_HEADER_VALUE, startRequest.getCustomerId());
 
-        param.put("consoleUrl",
-                console + ScheduleConstants.getConsoleUrl(request.getRequest().getSceneId(),
-                        request.getRequest().getTaskId(),
-                        request.getRequest().getCustomerId()));
-        param.put("takinCloudCallbackUrl", console + "/api/engine/callback");
+//        param.put("consoleUrl",
+//                console + ScheduleConstants.getConsoleUrl(request.getRequest().getSceneId(),
+//                        request.getRequest().getTaskId(),
+//                        request.getRequest().getCustomerId()));
+//        param.put("takinCloudCallbackUrl", console + "/api/engine/callback");
         // 解决 单个pod ,但文件处于需要切割分类状态的bug
-        param.put("podCount", scheduleStartRequest.getTotalIp());
+//        param.put("podCount", startRequest.getTotalIp());
         //拼接文件路径
-        if (CollectionUtils.isNotEmpty(scheduleStartRequest.getDataFile())) {
-            scheduleStartRequest.getDataFile().forEach(
-                    dataFile -> {
-                        dataFile.setPath(ScheduleConstants.ENGINE_SCRIPT_FILE_PATH + dataFile.getPath());
-                    }
-            );
-        }
-        param.put("fileSets", scheduleStartRequest.getDataFile());
-        param.put("businessMap", GsonUtil.gsonToString(scheduleStartRequest.getBusinessData()));
-        String memSetting = CommonUtil.getValue(appConfig.getK8sJvmSettings(), config, StrategyConfigExt::getK8sJvmSettings);
-        param.put("memSetting", memSetting);
-        configMap.put("engine.conf", param.toJSONString());
+//        if (CollectionUtils.isNotEmpty(startRequest.getDataFile())) {
+//            startRequest.getDataFile().forEach(
+//                    dataFile -> {
+//                        dataFile.setPath(ScheduleConstants.ENGINE_SCRIPT_FILE_PATH + dataFile.getPath());
+//                    }
+//            );
+//        }
+//        param.put("fileSets", startRequest.getDataFile());
+//        param.put("businessMap", GsonUtil.gsonToString(startRequest.getBusinessData()));
+//        String memSetting = CommonUtil.getValue(appConfig.getK8sJvmSettings(), strategyConfig, StrategyConfigExt::getK8sJvmSettings);
+//        param.put("memSetting", memSetting);
+        configMap.put("engine.conf", JsonUtil.toJson(config));
         engineCallService.createConfigMap(configMap, PressureInstanceRedisKey.getEngineInstanceRedisKey(request.getRequest().getSceneId(),
                 request.getRequest().getTaskId(), request.getRequest().getCustomerId()));
     }
