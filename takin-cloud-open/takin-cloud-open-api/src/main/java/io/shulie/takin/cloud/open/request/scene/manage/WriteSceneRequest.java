@@ -19,24 +19,9 @@ import io.swagger.annotations.ApiModelProperty;
 @Data
 @ApiModel(value = "创建/修改 场景")
 public class WriteSceneRequest {
-
-    @ApiModelProperty(value = "场景主键")
-    private Long sceneId;
-    @ApiModelProperty(value = "场景名称")
-    @NotBlank(message = "场景名称不能为空")
-    private String name;
-    @ApiModelProperty(value = "场景类型")
-    @NotBlank(message = "场景类型不能为空")
-    private Integer type;
-    @ApiModelProperty(value = "脚本实例主键")
-    @NotNull(message = "脚本实例主键不能为空")
-    private Long scriptId;
-    @ApiModelProperty(value = "脚本类型")
-    @NotNull(message = "脚本类型不能为空")
-    private Integer scriptType;
-    @ApiModelProperty(value = "业务流程主键")
-    @NotBlank(message = "业务流程主键不能为空")
-    private Long businessFlowId;
+    @ApiModelProperty(value = "基础信息")
+    @NotBlank(message = "场景基础信息不能为空")
+    private BasicInfo basicInfo;
     @ApiModelProperty(value = "脚本解析结果")
     @NotBlank(message = "脚本解析结果不能为空")
     private List<?> analysisResult;
@@ -58,6 +43,30 @@ public class WriteSceneRequest {
     @ApiModelProperty(value = "压测文件")
     @NotNull(message = "压测文件不能为空")
     private List<File> file;
+
+    /**
+     * 基础信息
+     */
+    @Data
+    public static class BasicInfo {
+        @ApiModelProperty(value = "场景主键")
+        private Long sceneId;
+        @ApiModelProperty(value = "场景名称")
+        @NotBlank(message = "场景名称不能为空")
+        private String name;
+        @ApiModelProperty(value = "场景类型")
+        @NotBlank(message = "场景类型不能为空")
+        private Integer type;
+        @ApiModelProperty(value = "脚本实例主键")
+        @NotNull(message = "脚本实例主键不能为空")
+        private Long scriptId;
+        @ApiModelProperty(value = "脚本类型")
+        @NotNull(message = "脚本类型不能为空")
+        private Integer scriptType;
+        @ApiModelProperty(value = "业务流程主键")
+        @NotBlank(message = "业务流程主键不能为空")
+        private Long businessFlowId;
+    }
 
     /**
      * 压测内容
@@ -151,7 +160,7 @@ public class WriteSceneRequest {
         private Double formulaNumber;
         @ApiModelProperty(value = "忽略次数")
         @NotBlank(message = "连续出现次数不能为空")
-        private Double numberOfIgnore;
+        private Integer numberOfIgnore;
 
     }
 
