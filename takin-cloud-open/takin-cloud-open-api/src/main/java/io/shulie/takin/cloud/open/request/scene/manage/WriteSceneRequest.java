@@ -12,6 +12,7 @@ import javax.validation.constraints.NotBlank;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 
 /**
@@ -28,7 +29,7 @@ public class WriteSceneRequest extends CloudUserCommonRequestExt {
     private BasicInfo basicInfo;
     @ApiModelProperty(value = "脚本解析结果")
     @NotBlank(message = "脚本解析结果不能为空")
-    private List<?> analysisResult;
+    private List<ScriptNode> analysisResult;
     @ApiModelProperty(value = "压测内容")
     @NotNull(message = "压测内容不能为空")
     private List<Content> content;

@@ -1,17 +1,20 @@
 package io.shulie.takin.ext.content.script;
 
-import io.shulie.takin.ext.content.AbstractEntry;
-import io.shulie.takin.ext.content.emus.NodeTypeEnum;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 import java.util.Map;
 
+import io.shulie.takin.ext.content.AbstractEntry;
+import io.shulie.takin.ext.content.emus.NodeTypeEnum;
+
 /**
- * @Author: liyuanba
- * @Date: 2021/10/26 11:29 上午
+ * @author liyuanba
+ * @date 2021/10/26 11:29 上午
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ScriptNode extends AbstractEntry {
     /**
      * 节点名称
