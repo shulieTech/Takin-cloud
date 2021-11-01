@@ -7,7 +7,7 @@
         <groupId>io.shulie.takin</groupId>
         <artifactId>takin-cloud</artifactId>
         <relativePath>../pom.xml</relativePath>
-        <version>takin-cloud-5.0.2-SNAPSHOT</version>
+        <version>takin-cloud-tenant-SNAPSHOT</version>
     </parent>
 
     <name>takin-cloud-sdk</name>

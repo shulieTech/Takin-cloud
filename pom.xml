@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.shulie.takin</groupId>
     <artifactId>takin-cloud</artifactId>
-    <version>takin-cloud-5.0.2-SNAPSHOT</version>
+    <version>takin-cloud-tenant-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
@@ -18,7 +18,7 @@
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         <!-- biz version -->
-        <takin.cloud.version>takin-cloud-5.0.2-SNAPSHOT</takin.cloud.version>
+        <takin.cloud.version>takin-cloud-tenant-SNAPSHOT</takin.cloud.version>
         <takin.common.version>common-1.7.4</takin.common.version>
 
         <pardar.log.protocol.version>2.0.4</pardar.log.protocol.version>
