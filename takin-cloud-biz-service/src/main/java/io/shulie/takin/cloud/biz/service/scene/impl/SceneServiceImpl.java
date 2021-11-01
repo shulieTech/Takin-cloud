@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 
+import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.biz.service.scene.SceneService;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneSlaRefEntity;
@@ -129,15 +130,15 @@ public class SceneServiceImpl implements SceneService {
      */
     @Override
     public SceneDetailResponse detail(long sceneId) {
-        return new SceneDetailResponse() {{
-            setGoal(getGoal());
-            setConfig(getConfig());
-            setContent(getContent());
-            setBasicInfo(getBasicInfo());
-            setAnalysisResult(getAnalysisResult());
-            setDataValidation(getDataValidation());
-            setMonitoringGoal(getMonitoringGoal());
-        }};
+        SceneDetailResponse response = new SceneDetailResponse();
+        response.setGoal(getGoal(sceneId));
+        response.setConfig(getConfig(sceneId));
+        response.setContent(getContent(sceneId));
+        response.setBasicInfo(getBasicInfo(sceneId));
+        response.setAnalysisResult(getAnalysisResult(sceneId));
+        response.setDataValidation(getDataValidation(sceneId));
+        response.setMonitoringGoal(getMonitoringGoal(sceneId));
+        return response;
     }
 
     /**
@@ -180,19 +181,17 @@ public class SceneServiceImpl implements SceneService {
      * @return 解析结果
      */
     @Override
-    public List<?> getAnalysisResult(long sceneId) {
+    public List<ScriptNode> getAnalysisResult(long sceneId) {
         try {
             SceneManageEntity scene = getScene(sceneId);
-            String featureString = scene.getFeatures();
-            // 解析拓展字段
-            Map<String, ?> feature = JSONObject.parseObject(featureString, new TypeReference<Map<String, ?>>() {});
-            Object analysisResult = feature.get("analysisResult");
-            if (analysisResult == null) {
-                throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, sceneId + "的拓展字段缺失[脚本解析结果]");
+            String analysisResultString = scene.getScriptAnalysisResult();
+            if (StrUtil.isNotBlank(analysisResultString)) {
+                return JSONObject.parseObject(analysisResultString,
+                    new TypeReference<List<ScriptNode>>() {});
             }
-            return (List<?>)analysisResult;
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, sceneId + "的脚本解析结果不存在");
         } catch (JSONException e) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, sceneId + "的拓展字段错误");
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, sceneId + "的脚本解析结果解析错误");
         }
     }
 

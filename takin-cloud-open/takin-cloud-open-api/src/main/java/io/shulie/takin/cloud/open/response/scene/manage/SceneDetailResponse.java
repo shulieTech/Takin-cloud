@@ -11,6 +11,7 @@ import lombok.Data;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest;
 import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Goal;
 import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Config;
@@ -31,13 +32,13 @@ public class SceneDetailResponse {
     private WriteSceneRequest.BasicInfo basicInfo;
     @ApiModelProperty(value = "脚本解析结果")
     @NotBlank(message = "脚本解析结果不能为空")
-    private List<?> analysisResult;
+    private List<ScriptNode> analysisResult;
     @ApiModelProperty(value = "压测内容")
     @NotNull(message = "压测目标不能为空")
-    private List<Content> content;
+    private Map<String, Content> content;
     @ApiModelProperty(value = "施压配置")
     @NotNull(message = "施压配置不能为空")
-    private Map<String, Config> config;
+    private Config config;
     @ApiModelProperty(value = "压测目标")
     @NotNull(message = "业压测目标不能为空")
     private Map<String, Goal> goal;
