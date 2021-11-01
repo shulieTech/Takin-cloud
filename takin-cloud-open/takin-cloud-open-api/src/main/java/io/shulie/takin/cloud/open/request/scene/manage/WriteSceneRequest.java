@@ -114,6 +114,17 @@ public class WriteSceneRequest extends CloudUserCommonRequestExt {
     @Data
     @ApiModel(value = "线程组施压配置")
     public static class Config {
+        @ApiModelProperty(value = "指定Pod数")
+        @NotNull(message = "指定Pod数不能为空")
+        private Integer podNumber;
+        @ApiModelProperty(value = "压测时长")
+        @NotNull(message = "压测时长不能为空")
+        private Integer time;
+        @ApiModelProperty(value = "压测时长单位")
+        @NotNull(message = "压测时长单位不能为空")
+        private String timeUtil;
+        @ApiModelProperty(value = "线程组配置项")
+        @NotNull(message = "线程组配置项不能为空")
         Map<String, ConfigItem> items;
 
         /**
@@ -125,15 +136,6 @@ public class WriteSceneRequest extends CloudUserCommonRequestExt {
             @NotNull(message = "施压模式不能为空")
             @ApiModelProperty(value = "施压模式")
             private Integer mode;
-            @ApiModelProperty(value = "指定Pod数")
-            @NotNull(message = "指定Pod数不能为空")
-            private Integer podNumber;
-            @ApiModelProperty(value = "压测时长")
-            @NotNull(message = "压测时长不能为空")
-            private Integer time;
-            @ApiModelProperty(value = "压测时长单位")
-            @NotNull(message = "压测时长单位不能为空")
-            private String timeUtil;
             @ApiModelProperty(value = "施压模式类型")
             @NotNull(message = "施压模式类型不能为空")
             private Integer modeType;

@@ -370,10 +370,10 @@ public class SceneServiceImpl implements SceneService {
      */
     private Long createStepScene(BasicInfo basicInfo,
         Config config, List<?> analysisResult, DataValidation dataValidation) {
-        Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), analysisResult, dataValidation);
+        Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), dataValidation);
         // 组装数据实体类
         SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),
-            basicInfo.getScriptType(), config, feature);
+            basicInfo.getScriptType(), config, feature, analysisResult);
         // 执行数据库操作
         sceneManageMapper.insert(sceneEntity);
         // 回填自增主键
@@ -409,10 +409,10 @@ public class SceneServiceImpl implements SceneService {
      */
     private int updateStepScene(BasicInfo basicInfo,
         Config config, List<?> analysisResult, DataValidation dataValidation) {
-        Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), analysisResult, dataValidation);
+        Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), dataValidation);
         // 组装数据实体类
         SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),
-            basicInfo.getScriptType(), config, feature);
+            basicInfo.getScriptType(), config, feature, analysisResult);
         // 设置更新时间
         sceneEntity.setUpdateTime(new Date());
         // 执行数据库操作
@@ -542,14 +542,12 @@ public class SceneServiceImpl implements SceneService {
      *
      * @param scriptId       脚本主键
      * @param businessFlowId 业务流程主键
-     * @param analysisResult 脚本解析结果
      * @param dataValidation 数据验证配置
      * @return 拓展字段的JSON对象
      */
-    private Map<String, Object> assembleFeature(long scriptId, long businessFlowId, Object analysisResult, DataValidation dataValidation) {
-        return new HashMap<String, Object>(4) {{
+    private Map<String, Object> assembleFeature(long scriptId, long businessFlowId, DataValidation dataValidation) {
+        return new HashMap<String, Object>(3) {{
             put("scriptId", scriptId);
-            put("analysisResult", analysisResult);
             put("businessFlowId", businessFlowId);
             put("dataValidation", dataValidation);
         }};
@@ -558,20 +556,22 @@ public class SceneServiceImpl implements SceneService {
     /**
      * 组装场景实体类
      *
-     * @param sceneId    场景主键
-     * @param type       场景类型
-     * @param name       场景名称
-     * @param scriptType 脚本类型
-     * @param feature    拓展字段
-     * @param config     施压线程组配置
+     * @param sceneId        场景主键
+     * @param type           场景类型
+     * @param name           场景名称
+     * @param scriptType     脚本类型
+     * @param config         施压线程组配置
+     * @param feature        拓展字段
+     * @param analysisResult 脚本解析结果
      * @return 场景实体类
      */
-    private SceneManageEntity assembleSceneEntity(Long sceneId, int type, String name, int scriptType, Config config, Object feature) {
+    private SceneManageEntity assembleSceneEntity(Long sceneId, int type, String name, int scriptType, Config config, Object feature, Object analysisResult) {
         return new SceneManageEntity() {{
             setId(sceneId);
             setSceneName(name);
-            setFeatures(JSONObject.toJSONString(feature));
             setPtConfig(JSONObject.toJSONString(config));
+            setFeatures(JSONObject.toJSONString(feature));
+            setScriptAnalysisResult(JSONObject.toJSONString(analysisResult));
             setStatus(0);
             setType(type);
             setUserId(-1L);
