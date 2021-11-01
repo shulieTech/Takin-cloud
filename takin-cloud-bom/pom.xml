@@ -12,7 +12,7 @@
 
     <properties>
         <takin.cloud.version>takin-cloud-tenant-SNAPSHOT</takin.cloud.version>
-        <takin.cloud.sdk.version>takin-cloud-sdk-5.0.0-SNAPSHOT</takin.cloud.sdk.version>
+        <takin.cloud.sdk.version>takin-cloud-sdk-tenant-SNAPSHOT</takin.cloud.sdk.version>
     </properties>
 
     <dependencyManagement>
