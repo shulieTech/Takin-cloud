@@ -26,7 +26,7 @@ import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
  */
 @RestController
 @Api(tags = "压测场景管理-新")
-@RequestMapping(APIUrls.TRO_API_URL + "v2/scene_manage")
+@RequestMapping(APIUrls.TRO_API_URL + "v2/scene")
 public class SceneController {
 
     @Resource
@@ -44,7 +44,7 @@ public class SceneController {
         return ResponseResult.success(sceneService.update(request));
     }
 
-    @PostMapping("/detail")
+    @RequestMapping("/detail")
     @ApiOperation(value = "获取压测场景详情")
     public ResponseResult<SceneDetailResponse> detail(@RequestParam(required = false) Long sceneId) {
         if (sceneId == null) {

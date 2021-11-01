@@ -462,7 +462,7 @@ public class SceneServiceImpl implements SceneService {
     private void createStepScript(long sceneId, Long scriptId, Integer scriptType, List<File> file) {
         List<SceneScriptRefEntity> sceneScriptRefEntityList = new ArrayList<>(file.size());
         for (File t : file) {
-            String fileName = FileUtil.getName(t.getPath());
+            String fileName = t.getName();
             String destPath = sceneManageService.getDestPath(sceneId);
             switch (t.getType()) {
                 case 0:

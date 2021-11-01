@@ -4,12 +4,15 @@ import java.util.Map;
 import java.util.List;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotBlank;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 
 /**
  * 创建/修改 场景  -  请求
@@ -18,7 +21,8 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @Data
 @ApiModel(value = "创建/修改 场景")
-public class WriteSceneRequest {
+@EqualsAndHashCode(callSuper = true)
+public class WriteSceneRequest extends CloudUserCommonRequestExt {
     @ApiModelProperty(value = "基础信息")
     @NotBlank(message = "场景基础信息不能为空")
     private BasicInfo basicInfo;
@@ -26,13 +30,13 @@ public class WriteSceneRequest {
     @NotBlank(message = "脚本解析结果不能为空")
     private List<?> analysisResult;
     @ApiModelProperty(value = "压测内容")
-    @NotNull(message = "压测目标不能为空")
+    @NotNull(message = "压测内容不能为空")
     private List<Content> content;
     @ApiModelProperty(value = "施压配置")
     @NotNull(message = "施压配置不能为空")
     private Config config;
     @ApiModelProperty(value = "压测目标")
-    @NotNull(message = "业压测目标不能为空")
+    @NotNull(message = "压测目标不能为空")
     private Map<String, Goal> goal;
     @ApiModelProperty(value = "SLA配置")
     @NotNull(message = "SLA配置不能为空")
@@ -191,8 +195,17 @@ public class WriteSceneRequest {
      */
     @Data
     public static class File {
+        @ApiModelProperty(value = "文件路径")
+        @NotBlank(message = "文件路径不能为空")
         private String path;
+        @ApiModelProperty(value = "文件名称")
+        @NotBlank(message = "文件名称不能为空")
+        private String name;
+        @ApiModelProperty(value = "文件类型")
+        @NotNull(message = "文件类型不能为空")
         private Integer type;
+        @ApiModelProperty(value = "文件拓展信息")
+        @NotNull(message = "文件拓展信息不能为空")
         Map<String, Object> extend;
     }
 }

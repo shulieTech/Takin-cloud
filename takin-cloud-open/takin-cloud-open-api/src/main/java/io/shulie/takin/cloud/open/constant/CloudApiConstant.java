@@ -30,6 +30,10 @@ public class CloudApiConstant {
     public static final String SCENE_MANAGE_FLOWCALC_URL = "/open-api/scenemanage/flow/calc";
     public static final String SCENE_MANAGE_CHECK_AND_UPDATE_URL = "/open-api/scenemanage/checkAndUpdate/script";
 
+    // 混合场景压测
+    public static final String MULTIPLE_SCENE_CREATE = "/api/v2/scene/create";
+    public static final String MULTIPLE_SCENE_UPDATE = "/api/v2/scene/update";
+    public static final String MULTIPLE_SCENE_DETAIL = "/api/v2/scene/detail";
     //task
     public static final String SCENE_TASK_UPDATE_TPS = "/open-api/scene/task/updateSceneTaskTps";
 
