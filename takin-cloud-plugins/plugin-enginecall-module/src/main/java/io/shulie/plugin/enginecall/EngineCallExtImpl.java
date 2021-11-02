@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -70,18 +71,18 @@ public class EngineCallExtImpl implements EngineCallExtApi {
     @Value("${script.path}")
     private String scriptPath;
 
-    @Autowired
+    @Resource
     private SceneTaskService sceneTaskService;
-    @Autowired
+    @Resource
     private EngineCallService engineCallService;
 
-    @Autowired
+    @Resource
     private RedisTemplate<String, String> redisTemplate;
 
-    @Autowired
+    @Resource
     private EngineConfigService engineConfigService;
 
-    @Autowired
+    @Resource
     private AppConfig appConfig;
 
     @Override
@@ -161,6 +162,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         config.setExtJarPath("");
         config.setIsLocal(true);
         config.setTaskDir(taskDir);
+        config.setPressureScene(startRequest.getPressureScene());
         config.setContinuedTime(startRequest.getContinuedTime());
         if (null != startRequest.getExpectThroughput()) {
             config.setExpectThroughput(startRequest.getExpectThroughput() / startRequest.getTotalIp());
@@ -174,8 +176,6 @@ public class EngineCallExtImpl implements EngineCallExtApi {
                     .map(s -> scriptPath + SceneManageConstant.FILE_SPLIT + s)
                     .collect(Collectors.toList());
             config.setEnginePluginsFiles(jarFiles);
-        }
-        if (CollectionUtils.isNotEmpty(startRequest.getDataFile())) {
             startRequest.getDataFile().forEach(
                     dataFile -> dataFile.setPath(ScheduleConstants.ENGINE_SCRIPT_FILE_PATH + dataFile.getPath())
             );
@@ -207,19 +207,19 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         pressureConfig.setThreadGroupConfigMap(startRequest.getThreadGroupConfigMap());
 
         Long podTpsNum = null;
-        if (null != startRequest.getTps()){
+        if (null != startRequest.getTps()) {
             double tps = NumberUtil.getRate(startRequest.getTps(), startRequest.getTotalIp());
             pressureConfig.setTpsTargetLevel(tps);
             podTpsNum = Double.doubleToLongBits(tps);
         }
-        //TODO 目标参数处理
         if (startRequest.getBusinessTpsData() != null) {
             List<Map<String, String>> businessActivities = new ArrayList<>();
             startRequest.getBusinessTpsData().forEach((k, v) -> {
                 Map<String, String> businessActivity = new HashMap<>();
                 businessActivity.put("elementTestName", k);
-                businessActivity.put("throughputPercent", new BigDecimal(v).multiply(new BigDecimal(100))
-                        .divide(new BigDecimal(startRequest.getTps()), 0, BigDecimal.ROUND_UP).toString());
+                businessActivity.put("throughputPercent", String.valueOf(NumberUtil.getPercentRate(v, startRequest.getTps())));
+//                businessActivity.put("throughputPercent", new BigDecimal(v).multiply(new BigDecimal(100))
+//                        .divide(new BigDecimal(startRequest.getTps()), 0, BigDecimal.ROUND_UP).toString());
                 businessActivities.add(businessActivity);
             });
             pressureConfig.setBusinessActivities(businessActivities);

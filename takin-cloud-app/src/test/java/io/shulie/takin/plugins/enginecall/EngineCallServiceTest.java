@@ -32,18 +32,18 @@ public class EngineCallServiceTest {
         //jmeter
         requestExt.setEngineType("0");
         //并发模式
-        requestExt.setPressureMode("0");
+        requestExt.setPressureScene(0);
         requestExt.setScriptPath("/Users/shulie/Downloads/zhaoyong-test-01.jmx");
         requestExt.setTotalIp(1);
 //        requestExt.setFileContinueRead();
 //        requestExt.setDataFile();
 //        requestExt.setContinuedTime();
         //固定压力值
-        requestExt.setPressureType(1);
+//        requestExt.setPressureType(1);
         //并发
         requestExt.setExpectThroughput(2);
 //        requestExt.setRampUp();
-        requestExt.setSteps(0);
+//        requestExt.setSteps(0);
         requestExt.setConsole("http://192.168.1.71:10010/tro-cloud/api/collector/receive");
 //        requestExt.setTps();
         Map<String, String> businessData = new HashMap<>();

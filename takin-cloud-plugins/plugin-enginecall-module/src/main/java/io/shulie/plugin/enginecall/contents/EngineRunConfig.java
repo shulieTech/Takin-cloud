@@ -3,6 +3,7 @@ package io.shulie.plugin.enginecall.contents;
 import io.shulie.takin.cloud.common.pojo.AbstractEntry;
 import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.Map;
  * @Author: liyuanba
  * @Date: 2021/10/29 2:47 下午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class EngineRunConfig extends AbstractEntry {
     private Long sceneId;
@@ -46,6 +48,10 @@ public class EngineRunConfig extends AbstractEntry {
      * 调度任务路径
      */
     private String taskDir;
+    /**
+     * 施压场景：常规（压测场景页面），试跑，巡检
+     */
+    private Integer pressureScene;
     /**
      * 压测时长
      */

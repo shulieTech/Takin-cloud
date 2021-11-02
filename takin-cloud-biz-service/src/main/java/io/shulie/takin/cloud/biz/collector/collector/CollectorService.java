@@ -9,7 +9,6 @@ import java.util.concurrent.*;
 
 import javax.annotation.Resource;
 
-import com.baomidou.mybatisplus.core.toolkit.PluginUtils;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.entity.report.Report;
@@ -25,7 +24,7 @@ import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.constants.*;
-import io.shulie.takin.cloud.common.enums.PressureTypeEnums;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
@@ -128,7 +127,7 @@ public class CollectorService extends AbstractIndicators {
                     //1-100%每个百分点位sa数据
                     saveRedisMap(percentDataKey(taskKey, transaction, timeWindow), timePod, metric.getPercentData());
 
-                    /**
+                    /*
                      * all指标额外计算，累加所有业务活动的saCount all 为空
                      */
                     intSaveRedisMap(saCountKey(taskKey, "all", timeWindow),
@@ -233,8 +232,8 @@ public class CollectorService extends AbstractIndicators {
     private void cacheTryRunTaskStatus(Long sceneId, Long reportId, Long customerId, SceneRunTaskStatusEnum status) {
         taskStatusCache.cacheStatus(sceneId,reportId,status);
         Report report = tReportMapper.selectByPrimaryKey(reportId);
-        if (Objects.nonNull(report) && report.getPressureType() != PressureTypeEnums.FLOW_DEBUG.getCode()
-            && report.getPressureType() != PressureTypeEnums.INSPECTION_MODE.getCode()
+        if (Objects.nonNull(report) && report.getPressureType() != PressureSceneEnum.FLOW_DEBUG.getCode()
+            && report.getPressureType() != PressureSceneEnum.INSPECTION_MODE.getCode()
             && status.getCode() == SceneRunTaskStatusEnum.RUNNING.getCode()) {
             asyncService.updateSceneRunningStatus(sceneId, reportId,customerId);
         }

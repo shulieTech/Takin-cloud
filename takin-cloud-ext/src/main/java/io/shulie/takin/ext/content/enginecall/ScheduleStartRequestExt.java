@@ -21,9 +21,9 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
      */
     private String engineType;
 
-    /**
-     * 施压模式
-     */
+//    /**
+//     * 施压模式
+//     */
 //    private String pressureMode;
 
     /**
@@ -51,10 +51,14 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
      */
     private Long continuedTime;
 
-    /**
-     * 施压类型,0:并发,1:tps,2:自定义;不填默认为0
-     */
+//    /**
+//     * 施压类型,0:并发,1:tps,2:自定义;不填默认为0
+//     */
 //    private Integer pressureType;
+    /**
+     * 施压场景：常规（压测场景页面），试跑，巡检
+     */
+    private Integer pressureScene;
 
     /**
      * 最大并发

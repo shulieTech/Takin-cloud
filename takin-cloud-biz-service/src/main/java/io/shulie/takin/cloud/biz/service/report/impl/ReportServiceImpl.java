@@ -1138,16 +1138,17 @@ public class ReportServiceImpl implements ReportService {
         reportResult.setGmtUpdate(new Date());
         reportResult.setAvgConcurrent(statReport.getAvgConcurrenceNum());
 
+        //TODO 流量计算
         //流量结算
         AssetInvoiceExt accountTradeRequest = new AssetInvoiceExt() {{
             setPressureTotalTime(testRunTime > totalTestTime ? totalTestTime : testRunTime);
-            setPressureMode(sceneManage.getPressureMode());
-            setIncreasingTime(sceneManage.getIncreasingSecond());
+//            setPressureMode(sceneManage.getPressureMode());
+//            setIncreasingTime(sceneManage.getIncreasingSecond());
             setPressureType(sceneManage.getPressureType());
             setTaskId(reportResult.getId());
             setSceneId(reportResult.getSceneId());
             setCustomerId(reportResult.getCustomerId());
-            setStep(sceneManage.getStep());
+//            setStep(sceneManage.getStep());
             setAvgConcurrent(statReport.getAvgConcurrenceNum());
         }};
         if (statReport.getTps() == null) {

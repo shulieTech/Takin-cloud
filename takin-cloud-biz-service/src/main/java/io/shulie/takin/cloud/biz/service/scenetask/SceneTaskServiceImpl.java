@@ -62,7 +62,7 @@ import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.SceneStartCheckConstants;
 import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.enums.PressureTypeEnums;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
@@ -78,7 +78,6 @@ import io.shulie.takin.cloud.data.dao.sceneTask.SceneTaskPressureTestLogUploadDA
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
@@ -429,7 +428,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         if (sceneManageResult == null) {
 
             input.setPressureTestSceneName(pressureTestSceneName);
-            input.setPressureType(PressureTypeEnums.FLOW_DEBUG.getCode());
+            input.setPressureType(PressureSceneEnum.FLOW_DEBUG.getCode());
             // 后续会根据传入并发数进行修改
             input.setConcurrenceNum(1);
             input.setIpNum(1);
@@ -488,7 +487,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //不存在，新增压测场景
         if (sceneManageResult == null) {
             input.setPressureTestSceneName(pressureTestSceneName);
-            input.setPressureType(PressureTypeEnums.INSPECTION_MODE.getCode());
+            input.setPressureType(PressureSceneEnum.INSPECTION_MODE.getCode());
             input.setConcurrenceNum(1);
             input.setIpNum(1);
             input.setPressureTestTime(new TimeBean(365L, "d"));
@@ -583,7 +582,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         if (sceneManageResult == null) {
 
             input.setPressureTestSceneName(pressureTestSceneName);
-            input.setPressureType(PressureTypeEnums.TRY_RUN.getCode());
+            input.setPressureType(PressureSceneEnum.TRY_RUN.getCode());
             input.setConcurrenceNum(1);
             input.setIpNum(1);
             input.setPressureTestTime(new TimeBean(30L, "m"));

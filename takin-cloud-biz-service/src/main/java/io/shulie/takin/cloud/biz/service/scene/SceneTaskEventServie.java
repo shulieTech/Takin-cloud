@@ -84,6 +84,8 @@ public class SceneTaskEventServie {
         scheduleStartRequest.setTaskId(reportId);
         // 客户id
         scheduleStartRequest.setCustomerId(scene.getCustomerId());
+
+        scheduleStartRequest.setPressureScene(scene.getPressureType());
 //        String pressureMode = scene.getPressureMode() == 1 ? "fixed"
 //            : scene.getPressureMode() == 2 ? "linear" : "stair";
 //        scheduleStartRequest.setPressureMode(pressureMode);
@@ -96,7 +98,7 @@ public class SceneTaskEventServie {
         //TODO 目标信息
         Map<String, String> businessData = Maps.newHashMap();
         Map<String, Integer> businessTpsData = Maps.newHashMap();
-        Integer tps = 0;
+        int tps = 0;
         for (SceneManageWrapperOutput.SceneBusinessActivityRefOutput config : scene.getBusinessActivityConfig()) {
             businessData.put(config.getBindRef(), config.getTargetRT().toString());
             businessTpsData.put(config.getBindRef(), config.getTargetTPS());

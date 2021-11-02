@@ -63,7 +63,7 @@ import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.constants.ReportConstans;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.enums.PressureTypeEnums;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.enums.TimeUnitEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageErrorEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
@@ -1056,9 +1056,9 @@ public class SceneManageServiceImpl implements SceneManageService {
             wrapperVO.setPressureType(0);
         }
         map.put(SceneManageConstant.PT_TYPE, wrapperVO.getPressureType());
-        if (PressureTypeEnums.isConcurrency(wrapperVO.getPressureType()) && wrapperVO.getConcurrenceNum() == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_BUILD_PARAM_ERROR, "并发模式中，并发数不能为空");
-        }
+//        if (PressureSceneEnum.DEFAULT.equels(wrapperVO.getPressureType()) && wrapperVO.getConcurrenceNum() == null) {
+//            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_BUILD_PARAM_ERROR, "并发模式中，并发数不能为空");
+//        }
         map.put(SceneManageConstant.THREAD_NUM, wrapperVO.getConcurrenceNum());
         map.put(SceneManageConstant.HOST_NUM, wrapperVO.getIpNum());
         map.put(SceneManageConstant.PT_DURATION, wrapperVO.getPressureTestTime().getTime());

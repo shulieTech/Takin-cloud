@@ -39,8 +39,12 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
     @ApiModelProperty(value = "线程组施压配置")
     private Map<String, ThreadGroupConfigExt> threadGroupConfigMap;
 
-//    @ApiModelProperty(value = "施压类型,0:并发,1:tps,2:自定义;不填默认为0")
-//    private Integer pressureType;
+    /**
+     * 施压场景,0:常规;4试跑；5巡检；不填默认为0
+     * 为了兼容老的，所以1，2,3也是常规
+     */
+    @ApiModelProperty(value = "施压场景,0:常规,1:常规,2:常规;3常规；4试跑；5巡检；不填默认为0")
+    private Integer pressureType;
 
     @ApiModelProperty(value = "并发数量")
     private Integer concurrenceNum;

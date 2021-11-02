@@ -1,19 +1,22 @@
 package io.shulie.takin.cloud.common.pojo.jmeter;
 
-import io.shulie.takin.cloud.common.enums.PressureTypeEnums;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
+import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
 import io.shulie.takin.cloud.common.pojo.AbstractEntry;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @Author: liyuanba
  * @Date: 2021/10/15 10:10 上午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class ThreadGroupProperty extends AbstractEntry {
     /**
      * 压测模式
      */
-    private PressureTypeEnums type;
+    private ThreadGroupTypeEnum type;
     /**
      * 最大并发线程数
      */

@@ -3,8 +3,9 @@ package io.shulie.takin.cloud.common.utils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
 import io.shulie.takin.ext.content.emus.NodeTypeEnum;
-import io.shulie.takin.cloud.common.enums.PressureTypeEnums;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.pojo.Pair;
 import io.shulie.takin.ext.content.emus.SamplerTypeEnum;
 import io.shulie.takin.ext.content.script.ScriptNode;
@@ -135,12 +136,12 @@ public class JmxUtil {
         ThreadGroupProperty p = new ThreadGroupProperty();
         if ("ThreadGroup".equals(node.getName())) {
             //普通线程组
-            p.setType(PressureTypeEnums.CONCURRENCY);
+            p.setType(ThreadGroupTypeEnum.CONCURRENCY);
             p.setMaxThreadNum(NumberUtil.parseInt(props.get("ThreadGroup.num_threads")));
             p.setDuration(NumberUtil.parseInt(props.get("ThreadGroup.duration")));
             p.setRampUp(NumberUtil.parseInt(props.get("ThreadGroup.ramp_time")));
         } else if ("com.blazemeter.jmeter.threads.arrivals.ArrivalsThreadGroup".equals(node.getName())) {
-            p.setType(PressureTypeEnums.TPS);
+            p.setType(ThreadGroupTypeEnum.TPS);
             String unit = props.get("Unit");
             int unitRadix = 1;
             if ("M".equals(unit)) {
@@ -152,7 +153,7 @@ public class JmxUtil {
             p.setDuration(NumberUtil.parseInt(props.get("Hold"))*unitRadix+p.getRampUp());
             p.setMaxThreadNum(NumberUtil.parseInt(props.get("ConcurrencyLimit")));
         } else if ("com.blazemeter.jmeter.threads.concurrency.ConcurrencyThreadGroup".equals(node.getName())) {
-            p.setType(PressureTypeEnums.CONCURRENCY);
+            p.setType(ThreadGroupTypeEnum.CONCURRENCY);
             String unit = props.get("Unit");
             int unitRadix = 1;
             if ("M".equals(unit)) {
@@ -163,7 +164,7 @@ public class JmxUtil {
             p.setDuration(NumberUtil.parseInt(props.get("Hold"))*unitRadix+p.getRampUp());
             p.setMaxThreadNum(NumberUtil.parseInt(props.get("TargetLevel")));
         } else if ("com.blazemeter.jmeter.threads.arrivals.FreeFormArrivalsThreadGroup".equals(node.getName())) {
-            p.setType(PressureTypeEnums.CONCURRENCY);
+            p.setType(ThreadGroupTypeEnum.CONCURRENCY);
             String unit = props.get("Unit");
             int unitRadix = 1;
             if ("M".equals(unit)) {
@@ -764,9 +765,6 @@ public class JmxUtil {
 
     /**
      * 根据节点类型获取节点数量
-     * @param typeEnum
-     * @param data
-     * @return
      */
     public static int getNodeNumByType(NodeTypeEnum typeEnum,List<ScriptNode> data){
         int nodeNum = 0;
@@ -803,5 +801,11 @@ public class JmxUtil {
             }
         }
         return result;
+    }
+
+    public static void main(String[] args) {
+        String file = "/Users/liyuanba/Downloads/脚本解析校验.jmx";
+        List<ScriptNode> nodes = buildNodeTree(file);
+        System.out.println("nodes="+GsonUtil.gsonToString(nodes));
     }
 }
