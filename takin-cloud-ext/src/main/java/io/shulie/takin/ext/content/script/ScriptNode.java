@@ -1,5 +1,6 @@
 package io.shulie.takin.ext.content.script;
 
+import io.shulie.takin.ext.content.emus.SamplerTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -32,6 +33,12 @@ public class ScriptNode extends AbstractEntry {
      * 类型
      */
     private NodeTypeEnum type;
+
+    /**
+     * 采样器类型
+     */
+    private SamplerTypeEnum samplerType;
+
     /**
      * 元素的绝对路劲
      */

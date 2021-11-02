@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import io.shulie.takin.ext.content.emus.NodeTypeEnum;
 import io.shulie.takin.cloud.common.enums.PressureTypeEnums;
 import io.shulie.takin.cloud.common.pojo.Pair;
+import io.shulie.takin.ext.content.emus.SamplerTypeEnum;
 import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.common.pojo.jmeter.ThreadGroupProperty;
 import lombok.extern.slf4j.Slf4j;
@@ -298,6 +299,7 @@ public class JmxUtil {
                     node.setProps(props);
                     //protocol+#+path+method, 即第一个#号前是protocol，最后一个#之后是method，中间的#可能是path自带
                     node.setIdentification(buildHttpIdentification(node));
+                    node.setSamplerType(SamplerTypeEnum.HTTP);
                 } else if ("JavaSampler".equals(name)) {
                     Map<String, String> props = buildProps(element);
                     //找到java请求默认值
@@ -307,6 +309,7 @@ public class JmxUtil {
                     node.setProps(props);
                     //kafka:topic, 其他：返回null
                     node.setIdentification(buildJavaSamplerIdentification(node));
+                    node.setSamplerType(getJavaSamplerType(node));
                 } else if ("FTPSampler".equals(name)) {
                     Map<String, String> props = buildProps(element);
                     Element configElement = findConfigElement(element, "ConfigTestElement", "FtpConfigGui");
@@ -315,10 +318,12 @@ public class JmxUtil {
                     node.setProps(props);
                     //server host
                     node.setIdentification(buildIdentification(node,"FTPSampler.server", "FTPSampler.port"));
+                    node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 } else if ("AccessLogSampler".equals(name)) {
                     node.setProps(buildProps(element, BASE_PROP_ELEMENTS));
                     //domain+#+port
                     node.setIdentification(buildIdentification(node, "domain", "portString"));
+                    node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 } else if ("LDAPSampler".equals(name)) {
                     Map<String, String> props = buildProps(element, BASE_PROP_ELEMENTS);
                     Element configElement = findConfigElement(element, "ConfigTestElement", "LdapConfigGui");
@@ -327,6 +332,7 @@ public class JmxUtil {
                     node.setProps(props);
                     //domain+#+port
                     node.setIdentification(buildIdentification(node, "servername", "port"));
+                    node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 } else if ("JDBCSampler".equals(name)) {
                     node.setProps(buildProps(element));
                     Element childrenContainerElement = findChildrenContainerElement(element);
@@ -346,10 +352,12 @@ public class JmxUtil {
                     }
                     //dbUrl
                     node.setIdentification(buildIdentification(node, "dbUrl"));
+                    node.setSamplerType(SamplerTypeEnum.JDBC);
                 } else if ("SmtpSampler".equals(name)) {
                     node.setProps(buildProps(element));
                     //domain+#+port
                     node.setIdentification(buildIdentification(node, "SMTPSampler.server", "SMTPSampler.serverPort"));
+                    node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 } else if ("TCPSampler".equals(name)) {
                     Map<String, String> props = buildProps(element);
                     Element configElement = findConfigElement(element, "ConfigTestElement", "TCPConfigGui");
@@ -358,20 +366,43 @@ public class JmxUtil {
                     node.setProps(props);
                     //domain+#+port
                     node.setIdentification(buildIdentification(node, "TCPSampler.server", "TCPSampler.port"));
+                    node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 } else if ("kg.apc.jmeter.samplers.DummySampler".equals(name)) {
                     node.setProps(buildProps(element));
                     //url
                     node.setIdentification(buildIdentification(node, "URL"));
+                    node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 } else if ("io.github.ningyu.jmeter.plugin.dubbo.sample.DubboSample".equals(name)) {
                     node.setProps(buildProps(element));
                     //interface + # + method
                     node.setIdentification(buildIdentification(node, "FIELD_DUBBO_INTERFACE", "FIELD_DUBBO_METHOD"));
+                    node.setSamplerType(SamplerTypeEnum.DUBBO);
                 } else {
                     node.setProps(buildProps(element));
+                    node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 }
                 break;
             default:
                 break;
+        }
+    }
+
+    private static SamplerTypeEnum getJavaSamplerType(ScriptNode node) {
+        if (null == node) {
+            return SamplerTypeEnum.UNKNOWN;
+        }
+        Map<String, String> props = node.getProps();
+        if (null == props) {
+            return SamplerTypeEnum.UNKNOWN;
+        }
+        String javaClass = props.get("classname");
+        if (StringUtils.isBlank(javaClass)) {
+            return SamplerTypeEnum.UNKNOWN;
+        }
+        if ("co.signal.kafkameter.KafkaProducerSampler".equals(javaClass)) {
+            return SamplerTypeEnum.KAFKA;
+        } else {
+            return SamplerTypeEnum.UNKNOWN;
         }
     }
 
@@ -643,7 +674,7 @@ public class JmxUtil {
             }
             return topic;
         } else {
-            return javaClass;
+            return null;
         }
     }
 
