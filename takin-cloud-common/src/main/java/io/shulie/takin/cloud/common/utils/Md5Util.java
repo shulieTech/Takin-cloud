@@ -88,9 +88,11 @@ public class Md5Util {
             fileInputStream = new FileInputStream(file);
             byte[] buffer = new byte[PART_SIZE];
             for (int i = 1; i <= BIG_FILE_PART; i++) {
-                long start = i == BIG_FILE_PART ? (fileSize - per * i) + per : per;
-                long skip = fileInputStream.skip(start - PART_SIZE);
-                log.debug("io.shulie.takin.cloud.common.utils.Md5Util#md5BigFile(skip:{})", skip);
+                if (i > 1) {
+                    long start = i == BIG_FILE_PART ? (fileSize - per*i)+per : per;
+                    long skip = fileInputStream.skip(start - PART_SIZE);
+                    log.debug("io.shulie.takin.cloud.common.utils.Md5Util#md5BigFile(skip:{})", skip);
+                }
                 int length = fileInputStream.read(buffer);
                 md5.update(buffer, 0, length);
             }

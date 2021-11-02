@@ -81,9 +81,11 @@ public class JmxUtil {
             if (null == node) {
                 continue;
             }
-            Element nextElement = elements.get(i+1);
-            if ("hashTree".equals(nextElement.getName())) {
-                node.setChildren(buildNodeTree(elements(nextElement)));
+            if (i < elements.size() -1) {
+                Element nextElement = elements.get(i + 1);
+                if ("hashTree".equals(nextElement.getName())) {
+                    node.setChildren(buildNodeTree(elements(nextElement)));
+                }
             }
             nodes.add(node);
         }
@@ -454,7 +456,7 @@ public class JmxUtil {
             List<Element> elements = elements(element.getParent());
             for (int i=0; i<elements.size(); i++) {
                 Element e = elements.get(i);
-                if (e == element) {
+                if (e == element && i < elements.size() -1) {
                     Element next = elements.get(i+1);
                     if ("hashTree".equals(next.getName())) {
                         hashTree = next;
@@ -629,11 +631,17 @@ public class JmxUtil {
             return null;
         }
         if ("co.signal.kafkameter.KafkaProducerSampler".equals(javaClass)) {
-            String toppic = props.get("kafka_topic");
-            if (StringUtils.isBlank(toppic) || toppic.startsWith("$")) {
+            String topic = props.get("kafka_topic");
+            if (StringUtils.isBlank(topic) || topic.startsWith("$")) {
                 return null;
             }
-            return toppic;
+            return topic;
+        } else if ("com.gslab.pepper.sampler.PepperBoxKafkaSampler".equals(javaClass)) {
+            String topic = props.get("kafka.topic.name");
+            if (StringUtils.isBlank(topic) || topic.startsWith("$")) {
+                return null;
+            }
+            return topic;
         } else {
             return javaClass;
         }
