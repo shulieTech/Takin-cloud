@@ -109,7 +109,7 @@ public class SceneTaskEventServie {
         scheduleStartRequest.setTotalIp(scene.getIpNum());
         scheduleStartRequest.setExpectThroughput(scene.getConcurrenceNum());
         scheduleStartRequest.setThreadGroupConfigMap(scene.getThreadGroupConfigMap());
-        //TODO 目标信息
+        //todo 目标信息
         Map<String, String> businessRtData = Maps.newHashMap();
         Map<String, Integer> businessTpsData = Maps.newHashMap();
         int tps = 0;

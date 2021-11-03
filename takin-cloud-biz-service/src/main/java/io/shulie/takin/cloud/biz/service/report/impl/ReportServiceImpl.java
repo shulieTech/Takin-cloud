@@ -1138,7 +1138,7 @@ public class ReportServiceImpl implements ReportService {
         reportResult.setGmtUpdate(new Date());
         reportResult.setAvgConcurrent(statReport.getAvgConcurrenceNum());
 
-        //TODO 流量计算
+        //todo 流量计算
         //流量结算
         AssetInvoiceExt accountTradeRequest = new AssetInvoiceExt() {{
             setPressureTotalTime(testRunTime > totalTestTime ? totalTestTime : testRunTime);

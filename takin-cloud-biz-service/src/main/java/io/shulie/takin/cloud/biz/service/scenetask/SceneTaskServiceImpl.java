@@ -246,7 +246,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 resourceId = report.getId();
             }
             Long finalResourceId = resourceId;
-            //TODO 参数改造
+            //todo 流量冻结
             assetExtApi.lock(new AssetInvoiceExt() {{
                 setExpectThroughput(sceneData.getConcurrenceNum());
 //                setIncreasingTime(sceneData.getIncreasingSecond());
@@ -773,8 +773,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         int sumTps = scene.getBusinessActivityConfig().stream().mapToInt(SceneBusinessActivityRefBean::getTargetTPS)
             .sum();
         report.setTps(sumTps);
-        //TODO 施压类型
-//        report.setPressureType(scene.getPressureType());
+        report.setPressureType(scene.getPressureType());
         report.setType(scene.getType());
         tReportMapper.insertSelective(report);
 
