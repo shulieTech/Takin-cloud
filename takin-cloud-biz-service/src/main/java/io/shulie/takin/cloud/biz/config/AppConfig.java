@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Data
 public class AppConfig {
+    @Value("${console.url}")
+    private String console;
 
     /**
      * 部署方式
@@ -42,6 +44,29 @@ public class AppConfig {
      */
     @Value("${report.data.collector:redis}")
     private String collector;
+
+    @Value("${spring.redis.host}")
+    private String engineRedisAddress;
+
+    @Value("${spring.redis.port}")
+    private String engineRedisPort;
+
+    @Value("${spring.redis.sentinel.nodes:}")
+    private String engineRedisSentinelNodes;
+
+    @Value("${spring.redis.sentinel.master:}")
+    private String engineRedisSentinelMaster;
+
+    @Value("${spring.redis.password}")
+    private String engineRedisPassword;
+
+    @Value("${pradar.zk.servers}")
+    private String zkServers;
+
+    @Value("${engine.log.queue.size:25000}")
+    private String logQueueSize;
+    @Value("${pressure.engine.backendQueueCapacity:5000}")
+    private String pressureEngineBackendQueueCapacity;
 
     public DeploymentMethodEnum getDeploymentMethod() {
         return CommonUtil.getValue(DeploymentMethodEnum.PRIVATE, this.deploymentMethod, DeploymentMethodEnum::valueBy);

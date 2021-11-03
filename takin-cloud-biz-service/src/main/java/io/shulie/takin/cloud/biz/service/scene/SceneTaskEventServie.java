@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.biz.service.scene;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -8,6 +9,9 @@ import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
+import io.shulie.takin.cloud.biz.config.AppConfig;
+import io.shulie.takin.cloud.biz.utils.DataUtils;
+import io.shulie.takin.cloud.common.utils.NumberUtil;
 import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.ext.content.enginecall.ScheduleStopRequestExt;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
@@ -27,6 +31,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * @author 莫问
@@ -50,6 +56,8 @@ public class SceneTaskEventServie {
 
     @Autowired
     private EnginePluginFilesService enginePluginFilesService;
+    @Resource
+    private AppConfig appConfig;
 
     @IntrestFor(event = "failed")
     public void failed(Event event) {
@@ -78,12 +86,18 @@ public class SceneTaskEventServie {
      * @param reportId 报告主键
      */
     public void callStartEvent(SceneManageWrapperOutput scene, Long reportId) {
+        Long sceneId = scene.getId();
+        Long customerId = scene.getCustomerId();
         ScheduleStartRequestExt scheduleStartRequest = new ScheduleStartRequestExt();
         scheduleStartRequest.setContinuedTime(scene.getTotalTestTime());
-        scheduleStartRequest.setSceneId(scene.getId());
+        scheduleStartRequest.setSceneId(sceneId);
         scheduleStartRequest.setTaskId(reportId);
         // 客户id
-        scheduleStartRequest.setCustomerId(scene.getCustomerId());
+        scheduleStartRequest.setCustomerId(customerId);
+        String consoleUrl = DataUtils.mergeUrl(appConfig.getConsole(), ScheduleConstants.getConsoleUrl(sceneId, reportId, customerId));
+        scheduleStartRequest.setConsole(consoleUrl);
+        String callbackUrl = DataUtils.mergeUrl(appConfig.getConsole(), "/api/engine/callback");
+        scheduleStartRequest.setCallbackUrl(callbackUrl);
 
         scheduleStartRequest.setPressureScene(scene.getPressureType());
 //        String pressureMode = scene.getPressureMode() == 1 ? "fixed"
@@ -96,24 +110,36 @@ public class SceneTaskEventServie {
         scheduleStartRequest.setExpectThroughput(scene.getConcurrenceNum());
         scheduleStartRequest.setThreadGroupConfigMap(scene.getThreadGroupConfigMap());
         //TODO 目标信息
-        Map<String, String> businessData = Maps.newHashMap();
+        Map<String, String> businessRtData = Maps.newHashMap();
         Map<String, Integer> businessTpsData = Maps.newHashMap();
         int tps = 0;
         for (SceneManageWrapperOutput.SceneBusinessActivityRefOutput config : scene.getBusinessActivityConfig()) {
-            businessData.put(config.getBindRef(), config.getTargetRT().toString());
+            if (null != config.getTargetRT()) {
+                businessRtData.put(config.getBindRef(), config.getTargetRT().toString());
+            }
             businessTpsData.put(config.getBindRef(), config.getTargetTPS());
-            tps += config.getTargetTPS();
+            if (null != config.getTargetTPS()) {
+                tps += config.getTargetTPS();
+            }
         }
-        scheduleStartRequest.setTps(tps);
-        scheduleStartRequest.setBusinessData(businessData);
+        scheduleStartRequest.setTotalTps(tps);
+        scheduleStartRequest.setTps(NumberUtil.getRate(tps, scene.getIpNum()));
+        scheduleStartRequest.setBusinessData(businessRtData);
         scheduleStartRequest.setBusinessTpsData(businessTpsData);
+        List<Map<String, String>> businessActivities = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : businessTpsData.entrySet()) {
+            Map<String, String> businessActivity = new HashMap<>();
+            businessActivity.put("elementTestName", entry.getKey());
+            businessActivity.put("throughputPercent", String.valueOf(NumberUtil.getPercentRate(entry.getValue(), tps)));
+            businessActivities.add(businessActivity);
+        }
+        scheduleStartRequest.setBusinessActivities(businessActivities);
 
         //一个插件可能会有多个版本，需要根据版本号来获取相应的文件路径 modified by xr.l 20210712
         if (CollectionUtils.isNotEmpty(scene.getEnginePlugins())) {
             scheduleStartRequest.setEnginePluginsFilePath(enginePluginFilesService.findPluginFilesPathByPluginIdAndVersion(scene.getEnginePlugins()));
         } else {
-            scheduleStartRequest.setEnginePluginsFilePath(
-                Lists.newArrayList());
+            scheduleStartRequest.setEnginePluginsFilePath(Lists.newArrayList());
         }
 
         //添加巡检参数

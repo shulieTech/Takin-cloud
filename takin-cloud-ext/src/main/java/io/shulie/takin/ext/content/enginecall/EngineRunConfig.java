@@ -1,7 +1,6 @@
-package io.shulie.plugin.enginecall.contents;
+package io.shulie.takin.ext.content.enginecall;
 
-import io.shulie.takin.cloud.common.pojo.AbstractEntry;
-import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.ext.content.AbstractEntry;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -34,12 +33,11 @@ public class EngineRunConfig extends AbstractEntry {
     /**
      * 脚本文件完整路径和文件名
      */
-    private String scriptPath;
+    private String scriptFile;
     /**
      * 脚本文件所在目录
      */
-    private String pressureEnginePathUrl;
-    private String extJarPath;
+    private String scriptFileDir;
     /**
      * 是否是在本地启动
      */

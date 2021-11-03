@@ -1,8 +1,6 @@
-package io.shulie.plugin.enginecall.contents;
+package io.shulie.takin.ext.content.enginecall;
 
-import io.shulie.takin.cloud.biz.output.engine.EngineLogPtlConfigOutput;
-import io.shulie.takin.cloud.common.pojo.AbstractEntry;
-import io.shulie.takin.ext.content.enginecall.ThreadGroupConfigExt;
+import io.shulie.takin.ext.content.AbstractEntry;
 import lombok.Data;
 
 import java.util.List;
@@ -53,7 +51,7 @@ public class EnginePressureConfig extends AbstractEntry {
     /**
      * jtl日志配置
      */
-    private EngineLogPtlConfigOutput ptlLogConfig;
+    private PtlLogConfigExt ptlLogConfig;
     /**
      * zk地址
      */
@@ -72,6 +70,10 @@ public class EnginePressureConfig extends AbstractEntry {
     private List<Map<String, String>> businessActivities;
     /**
      * 总的施压tps目标
+     */
+    private Integer totalTpsTargetLevel;
+    /**
+     * 单引擎的施压tps目标
      */
     private Double tpsTargetLevel;
     /**

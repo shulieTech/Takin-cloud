@@ -15,19 +15,47 @@
 
 package io.shulie.takin.cloud.biz.utils;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 import io.shulie.takin.cloud.biz.output.statistics.RtDataOutput;
 import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
+import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpRequest;
 
 public class DataUtils {
     private final static Logger logger = LoggerFactory.getLogger(DataUtils.class);
+
+    /**
+     * 拼装url
+     */
+    public static String mergeUrl(String domain, String path) {
+        return mergePath(domain, path, "/");
+    }
+
+    /**
+     * 拼装文件目录路径
+     */
+    public static String mergeDirPath(String dir, String path) {
+        return mergePath(dir, path, File.separator);
+    }
+
+    public static String mergePath(String path1, String path2, String split) {
+        if (path1.endsWith(split)) {
+            path1 = path1.substring(0, path1.length() -1);
+        }
+        if (!path2.startsWith(split)) {
+            path2 = split+path2;
+        }
+        return path1+path2;
+    }
+
 
     /**
      * 最大rt和百分比中最大rt比较，取最大的

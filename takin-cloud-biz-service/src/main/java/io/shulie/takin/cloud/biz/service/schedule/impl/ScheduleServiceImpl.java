@@ -6,30 +6,38 @@ import com.google.common.collect.Lists;
 import com.pamirs.takin.entity.dao.schedule.TScheduleRecordMapper;
 import com.pamirs.takin.entity.domain.entity.schedule.ScheduleRecord;
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
+import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.convertor.ScheduleConvertor;
+import io.shulie.takin.cloud.biz.output.engine.EngineLogPtlConfigOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.async.AsyncService;
+import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
 import io.shulie.takin.cloud.biz.service.record.ScheduleRecordEnginePluginService;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.service.schedule.ScheduleEventService;
 import io.shulie.takin.cloud.biz.service.schedule.ScheduleService;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
+import io.shulie.takin.cloud.biz.utils.DataUtils;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
+import io.shulie.takin.cloud.common.utils.NumberUtil;
 import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
 import io.shulie.takin.ext.api.EngineCallExtApi;
 import io.shulie.takin.ext.content.enginecall.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -83,6 +91,10 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Autowired
     private EnginePluginUtils pluginUtils;
+    @Resource
+    private AppConfig appConfig;
+    @Autowired
+    private EngineConfigService engineConfigService;
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
@@ -102,6 +114,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 TakinCloudExceptionEnum.SCHEDULE_START_ERROR);
             return;
         }
+
 
         String scheduleName = ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getCustomerId());
 
@@ -128,6 +141,32 @@ public class ScheduleServiceImpl implements ScheduleService {
         eventRequest.setScheduleId(scheduleRecord.getId());
         eventRequest.setRequest(request);
         eventRequest.setStrategyConfig(config);
+        String memSetting = null;
+        if (PressureSceneEnum.INSPECTION_MODE.equels(request.getPressureScene())) {
+            memSetting = "-XX:MaxRAMPercentage=90.0";
+        } else {
+            memSetting = CommonUtil.getValue(appConfig.getK8sJvmSettings(), config, StrategyConfigExt::getK8sJvmSettings);
+        }
+        eventRequest.setMemSetting(memSetting);
+        eventRequest.setZkServers(appConfig.getZkServers());
+        eventRequest.setLogQueueSize(NumberUtil.parseInt(appConfig.getLogQueueSize(), 25000));
+
+        eventRequest.setPressureEngineBackendQueueCapacity(appConfig.getPressureEngineBackendQueueCapacity());
+        eventRequest.setEngineRedisAddress(appConfig.getEngineRedisAddress());
+        eventRequest.setEngineRedisPort(appConfig.getEngineRedisPort());
+        eventRequest.setEngineRedisSentinelNodes(appConfig.getEngineRedisSentinelNodes());
+        eventRequest.setEngineRedisSentinelMaster(appConfig.getEngineRedisSentinelMaster());
+        eventRequest.setEngineRedisPassword(appConfig.getEngineRedisPassword());
+        Integer traceSampling = 1;
+        if (!request.isTryRun() && !request.isInspect()) {
+            traceSampling = CommonUtil.getValue(traceSampling, engineConfigService, EngineConfigService::getLogSimpling);
+        }
+        eventRequest.setTraceSampling(traceSampling);
+        EngineLogPtlConfigOutput engineLogPtlConfigOutput = engineConfigService.getEnginePtlConfig();
+        PtlLogConfigExt ptlLogConfig = new PtlLogConfigExt();
+        BeanUtils.copyProperties(engineLogPtlConfigOutput, ptlLogConfig);
+        eventRequest.setPtlLogConfig(ptlLogConfig);
+
         //把数据放入缓存，初始化回调调度需要
         redisClientUtils.setString(scheduleName, JSON.toJSONString(eventRequest));
         // 需要将 本次调度 pod数量存入redis,报告中用到

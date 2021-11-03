@@ -2,8 +2,8 @@ package io.shulie.plugin.enginecall;
 
 
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
-import io.shulie.plugin.enginecall.contents.EnginePressureConfig;
-import io.shulie.plugin.enginecall.contents.EngineRunConfig;
+import io.shulie.takin.ext.content.enginecall.EnginePressureConfig;
+import io.shulie.takin.ext.content.enginecall.EngineRunConfig;
 import io.shulie.plugin.enginecall.service.EngineCallService;
 import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
@@ -16,11 +16,11 @@ import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
 import io.shulie.takin.ext.api.EngineCallExtApi;
 import io.shulie.takin.ext.content.enginecall.*;
+import io.shulie.takin.ext.helper.DataConvertHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.pf4j.Extension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -36,9 +36,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Extension
 public class EngineCallExtImpl implements EngineCallExtApi {
-
-    @Value("${console.url}")
-    private String console;
 
     @Value("${spring.redis.host}")
     private String engineRedisAddress;
@@ -140,7 +137,6 @@ public class EngineCallExtImpl implements EngineCallExtApi {
      * 创建引擎配置文件
      */
     public void createEngineConfigMap(ScheduleRunRequest request) {
-
         ScheduleStartRequestExt startRequest = request.getRequest();
         StrategyConfigExt strategyConfig = request.getStrategyConfig();
         Long sceneId = startRequest.getSceneId();
@@ -150,87 +146,78 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         Map<String, Object> configMap = new HashMap<>();
         configMap.put("name", ScheduleConstants.getConfigMapName(sceneId, taskId, customerId));
 
-        EngineRunConfig config = new EngineRunConfig();
-        config.setSceneId(sceneId);
-        config.setTaskId(taskId);
-        config.setCustomerId(customerId);
-        config.setConsoleUrl(console + ScheduleConstants.getConsoleUrl(sceneId, taskId, customerId));
-        config.setCallbackUrl(console + "/api/engine/callback");
-        config.setPodCount(startRequest.getTotalIp());
-        config.setScriptPath(scriptPath + SceneManageConstant.FILE_SPLIT + startRequest.getScriptPath());
-        config.setPressureEnginePathUrl(scriptPath + SceneManageConstant.FILE_SPLIT);
-        config.setExtJarPath("");
+        EngineRunConfig config = DataConvertHelper.buildEngineRunConfig(request, scriptPath);
+//        String scriptFilePath = DataUtils.mergeDirPath(scriptPath, config.getScriptFile());
+//        config.setScriptFile(scriptFilePath);
+//        String scriptFileDir = DataUtils.mergeDirPath(scriptPath, SceneManageConstant.FILE_SPLIT );
+//        config.setScriptFileDir(scriptFileDir);
         config.setIsLocal(true);
         config.setTaskDir(taskDir);
-        config.setPressureScene(startRequest.getPressureScene());
-        config.setContinuedTime(startRequest.getContinuedTime());
-        if (null != startRequest.getExpectThroughput()) {
-            config.setExpectThroughput(startRequest.getExpectThroughput() / startRequest.getTotalIp());
-        }
-        if (CollectionUtils.isNotEmpty(startRequest.getDataFile())) {
-            List<String> jarFiles = startRequest.getDataFile().stream().filter(Objects::nonNull)
-                    .filter(o -> StringUtils.isNotBlank(o.getName()))
-                    .filter(o -> o.getName().startsWith(".jar"))
-                    .map(ScheduleStartRequestExt.DataFile::getPath)
-                    .filter(StringUtils::isNotBlank)
-                    .map(s -> scriptPath + SceneManageConstant.FILE_SPLIT + s)
-                    .collect(Collectors.toList());
-            config.setEnginePluginsFiles(jarFiles);
-            startRequest.getDataFile().forEach(
-                    dataFile -> dataFile.setPath(ScheduleConstants.ENGINE_SCRIPT_FILE_PATH + dataFile.getPath())
-            );
-            config.setFileSets(startRequest.getDataFile());
-        }
-        config.setBusinessMap(startRequest.getBusinessData());
-        String memSetting = CommonUtil.getValue(appConfig.getK8sJvmSettings(), strategyConfig, StrategyConfigExt::getK8sJvmSettings);
-        config.setMemSetting(memSetting);
 
-        EnginePressureConfig pressureConfig = new EnginePressureConfig();
-        pressureConfig.setPressureEngineBackendQueueCapacity(this.pressureEngineBackendQueueCapacity);
-        pressureConfig.setEngineRedisAddress(this.engineRedisAddress);
-        pressureConfig.setEngineRedisPort(this.engineRedisPort);
-        pressureConfig.setEngineRedisSentinelNodes(this.engineRedisSentinelNodes);
-        pressureConfig.setEngineRedisSentinelMaster(this.engineRedisSentinelMaster);
-        pressureConfig.setEngineRedisPassword(this.engineRedisPassword);
-        if (startRequest.isTryRun()) {
-            pressureConfig.setFixedTimer(startRequest.getFixedTimer());
-            pressureConfig.setLoopsNum(startRequest.getLoopsNum());
-        }
-        Integer traceSampling = 1;
-        if (!startRequest.isTryRun() && !startRequest.isInspect() && null != engineConfigService.getLogSimpling()) {
-            traceSampling = engineConfigService.getLogSimpling();
-        }
-        pressureConfig.setTraceSampling(traceSampling);
-        pressureConfig.setPtlLogConfig(engineConfigService.getEnginePtlConfig());
-        pressureConfig.setZkServers(zkServers);
-        pressureConfig.setLogQueueSize(NumberUtil.parseInt(logQueueSize, 25000));
-        pressureConfig.setThreadGroupConfigMap(startRequest.getThreadGroupConfigMap());
 
-        Long podTpsNum = null;
-        if (null != startRequest.getTps()) {
-            double tps = NumberUtil.getRate(startRequest.getTps(), startRequest.getTotalIp());
-            pressureConfig.setTpsTargetLevel(tps);
-            podTpsNum = Double.doubleToLongBits(tps);
-        }
-        if (startRequest.getBusinessTpsData() != null) {
-            List<Map<String, String>> businessActivities = new ArrayList<>();
-            startRequest.getBusinessTpsData().forEach((k, v) -> {
-                Map<String, String> businessActivity = new HashMap<>();
-                businessActivity.put("elementTestName", k);
-                businessActivity.put("throughputPercent", String.valueOf(NumberUtil.getPercentRate(v, startRequest.getTps())));
-//                businessActivity.put("throughputPercent", new BigDecimal(v).multiply(new BigDecimal(100))
-//                        .divide(new BigDecimal(startRequest.getTps()), 0, BigDecimal.ROUND_UP).toString());
-                businessActivities.add(businessActivity);
-            });
-            pressureConfig.setBusinessActivities(businessActivities);
-        }
-        if (null != strategyConfig) {
-            pressureConfig.setTpsThreadMode(strategyConfig.getTpsThreadMode());
-            pressureConfig.setTpsTargetLevelFactor(strategyConfig.getTpsTargetLevelFactor());
-            pressureConfig.setMaxThreadNum(strategyConfig.getTpsRealThreadNum());
-        }
-        config.setPressureConfig(pressureConfig);
+//        if (CollectionUtils.isNotEmpty(startRequest.getDataFile())) {
+//            List<String> jarFiles = startRequest.getDataFile().stream().filter(Objects::nonNull)
+//                    .filter(o -> StringUtils.isNotBlank(o.getName()))
+//                    .filter(o -> o.getName().startsWith(".jar"))
+//                    .map(ScheduleStartRequestExt.DataFile::getPath)
+//                    .filter(StringUtils::isNotBlank)
+//                    .map(s -> scriptPath + SceneManageConstant.FILE_SPLIT + s)
+//                    .collect(Collectors.toList());
+//            config.setEnginePluginsFiles(jarFiles);
+//            startRequest.getDataFile().forEach(
+//                    dataFile -> dataFile.setPath(scriptPath +SceneManageConstant.FILE_SPLIT+ dataFile.getPath())
+//            );
+//            config.setFileSets(startRequest.getDataFile());
+//        }
+//        config.setBusinessMap(startRequest.getBusinessData());
+//        String memSetting = CommonUtil.getValue(appConfig.getK8sJvmSettings(), strategyConfig, StrategyConfigExt::getK8sJvmSettings);
+//        config.setMemSetting(memSetting);
 
+//        EnginePressureConfig pressureConfig = new EnginePressureConfig();
+//        pressureConfig.setPressureEngineBackendQueueCapacity(this.pressureEngineBackendQueueCapacity);
+//        pressureConfig.setEngineRedisAddress(this.engineRedisAddress);
+//        pressureConfig.setEngineRedisPort(this.engineRedisPort);
+//        pressureConfig.setEngineRedisSentinelNodes(this.engineRedisSentinelNodes);
+//        pressureConfig.setEngineRedisSentinelMaster(this.engineRedisSentinelMaster);
+//        pressureConfig.setEngineRedisPassword(this.engineRedisPassword);
+//        if (startRequest.isTryRun()) {
+//            pressureConfig.setFixedTimer(startRequest.getFixedTimer());
+//            pressureConfig.setLoopsNum(startRequest.getLoopsNum());
+//        }
+//        Integer traceSampling = 1;
+//        if (!startRequest.isTryRun() && !startRequest.isInspect() && null != engineConfigService.getLogSimpling()) {
+//            traceSampling = engineConfigService.getLogSimpling();
+//        }
+//        pressureConfig.setTraceSampling(traceSampling);
+//        pressureConfig.setPtlLogConfig(engineConfigService.getEnginePtlConfig());
+//        pressureConfig.setZkServers(zkServers);
+//        pressureConfig.setLogQueueSize(NumberUtil.parseInt(logQueueSize, 25000));
+//        pressureConfig.setThreadGroupConfigMap(startRequest.getThreadGroupConfigMap());
+
+//        Long podTpsNum = null;
+//        if (null != startRequest.getTotalTps()) {
+//            double tps = NumberUtil.getRate(startRequest.getTotalTps(), startRequest.getTotalIp());
+//            pressureConfig.setTpsTargetLevel(tps);
+//            podTpsNum = Double.doubleToLongBits(tps);
+//        }
+//        if (startRequest.getBusinessTpsData() != null) {
+//            List<Map<String, String>> businessActivities = new ArrayList<>();
+//            startRequest.getBusinessTpsData().forEach((k, v) -> {
+//                Map<String, String> businessActivity = new HashMap<>();
+//                businessActivity.put("elementTestName", k);
+//                businessActivity.put("throughputPercent", String.valueOf(NumberUtil.getPercentRate(v, startRequest.getTotalTps())));
+////                businessActivity.put("throughputPercent", new BigDecimal(v).multiply(new BigDecimal(100))
+////                        .divide(new BigDecimal(startRequest.getTps()), 0, BigDecimal.ROUND_UP).toString());
+//                businessActivities.add(businessActivity);
+//            });
+//            pressureConfig.setBusinessActivities(businessActivities);
+//        }
+//        if (null != strategyConfig) {
+//            pressureConfig.setTpsThreadMode(strategyConfig.getTpsThreadMode());
+//            pressureConfig.setTpsTargetLevelFactor(strategyConfig.getTpsTargetLevelFactor());
+//            pressureConfig.setMaxThreadNum(strategyConfig.getTpsRealThreadNum());
+//        }
+//        config.setPressureConfig(pressureConfig);
 
 //        JSONObject param = new JSONObject();
 //        param.put("scriptPath", scriptPath + SceneManageConstant.FILE_SPLIT + startRequest.getScriptPath());
@@ -323,9 +310,12 @@ public class EngineCallExtImpl implements EngineCallExtApi {
 //        }
 //        param.put("enginePressureParams", enginePressureParams);
 
-        String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(startRequest.getSceneId(), startRequest.getTaskId(),
-                startRequest.getCustomerId());
-        redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_ALL_LIMIT, startRequest.getTps() + "");
+        String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(sceneId, taskId, customerId);
+        redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_ALL_LIMIT, startRequest.getTotalTps() + "");
+        Long podTpsNum = null;
+        if (null != startRequest.getTps()) {
+            podTpsNum = Double.doubleToLongBits(startRequest.getTps());
+        }
         redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_LIMIT, podTpsNum + "");
         redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_POD_NUM, startRequest.getTotalIp() + "");
         redisTemplate.expire(engineInstanceRedisKey, 10, TimeUnit.DAYS);
@@ -354,8 +344,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
 //        String memSetting = CommonUtil.getValue(appConfig.getK8sJvmSettings(), strategyConfig, StrategyConfigExt::getK8sJvmSettings);
 //        param.put("memSetting", memSetting);
         configMap.put("engine.conf", JsonUtil.toJson(config));
-        engineCallService.createConfigMap(configMap, PressureInstanceRedisKey.getEngineInstanceRedisKey(request.getRequest().getSceneId(),
-                request.getRequest().getTaskId(), request.getRequest().getCustomerId()));
+        engineCallService.createConfigMap(configMap, engineInstanceRedisKey);
     }
 
     private void notifyTaskResult(ScheduleRunRequest request) {

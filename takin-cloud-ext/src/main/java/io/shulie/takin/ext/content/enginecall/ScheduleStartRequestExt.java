@@ -15,7 +15,6 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements Serializable {
-
     /**
      * 脚本引擎
      */
@@ -76,14 +75,22 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
 //    private Integer steps;
 
     /**
-     * 控制台地址
+     * cloud数据上报接口
      */
     private String console;
+    /**
+     * cloud数据回调接口
+     */
+    private String callbackUrl;
 
     /**
-     * 目标tps
+     * 总的目标tps
      */
-    private Integer tps;
+    private Integer totalTps;
+    /**
+     * 单引擎的目标tps
+     */
+    private Double tps;
 
     /**
      * 业务指标，目标rt
@@ -94,6 +101,10 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
      * 业务指标，目标tps
      */
     private Map<String, Integer> businessTpsData;
+    /**
+     * 业务目标tps占总的tps百分比
+     */
+    private List<Map<String, String>> businessActivities;
 
     /**
      * 压测引擎插件文件位置  一个压测场景可能有多个插件 一个插件也有可能有多个文件
