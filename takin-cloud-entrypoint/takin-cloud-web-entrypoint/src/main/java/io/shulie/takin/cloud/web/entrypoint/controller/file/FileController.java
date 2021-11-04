@@ -70,8 +70,8 @@ public class FileController {
 
     @PostMapping("/upload")
     @ApiOperation(value = "文件上传")
-    public ResponseResult<List<FileDTO>> upload(List<MultipartFile> files) {
-        List<FileDTO> result = files.stream().map(t -> {
+    public ResponseResult<List<FileDTO>> upload(List<MultipartFile> file) {
+        List<FileDTO> result = file.stream().map(t -> {
             String uploadId = UUID.randomUUID().toString();
             File targetDir = new File(tempPath + SceneManageConstant.FILE_SPLIT + uploadId);
             if (!targetDir.exists()) {
