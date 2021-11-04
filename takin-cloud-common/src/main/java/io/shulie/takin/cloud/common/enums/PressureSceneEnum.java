@@ -50,7 +50,7 @@ public enum PressureSceneEnum {
     /**
      * PressureTypeEnums.equels(code)
      */
-    public boolean equels(Integer code) {
+    public boolean equals(Integer code) {
         PressureSceneEnum pressureType = value(code);
         return this == pressureType;
     }
