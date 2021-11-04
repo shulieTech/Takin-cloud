@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneScriptRefMapper;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import io.shulie.takin.cloud.common.enums.FileSliceStatusEnum;
+import io.shulie.takin.cloud.common.utils.Md5Util;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneBigFileSliceDAO;
 import io.shulie.takin.cloud.data.mapper.mysql.SceneBigFileSliceMapper;
 import io.shulie.takin.cloud.data.mapper.mysql.SceneScriptRefMapper;
@@ -105,6 +106,17 @@ public class SceneBigFileSliceDAOImpl extends ServiceImpl<SceneBigFileSliceMappe
                         return FileSliceStatusEnum.FILE_CHANGED.getCode();
                     } else if (Objects.nonNull(sliceEntity.getFileUpdateTime())
                         && sliceEntity.getFileUpdateTime().equals(entity.getUploadTime())) {
+                        //如果参数验证结果为已分片，验证文件的md5值
+                        if(StringUtils.isNotBlank(param.getFileMd5()) && StringUtils.isNotBlank(entity.getFileMd5())){
+                            String fileMd5 = Md5Util.md5File(param.getFilePath());
+                            if (param.getFileMd5().equals(fileMd5)){
+                                return FileSliceStatusEnum.SLICED.getCode();
+                            }
+                            //更新文件的md5值到数据库
+                            entity.setFileMd5(fileMd5);
+                            sceneScriptRefMapper.updateById(entity);
+                            return FileSliceStatusEnum.FILE_CHANGED.getCode();
+                        }
                         return FileSliceStatusEnum.SLICED.getCode();
                     }
                     return FileSliceStatusEnum.FILE_CHANGED.getCode();
@@ -168,8 +180,6 @@ public class SceneBigFileSliceDAOImpl extends ServiceImpl<SceneBigFileSliceMappe
 
     @Override
     public int updateRef(SceneScriptRefEntity entity) {
-        SceneScriptRefEntity entity1 = sceneScriptRefMapper.selectById(entity.getId());
-        entity1.setFileExtend(entity.getFileExtend());
-        return sceneScriptRefMapper.updateById(entity1);
+        return sceneScriptRefMapper.updateById(entity);
     }
 }

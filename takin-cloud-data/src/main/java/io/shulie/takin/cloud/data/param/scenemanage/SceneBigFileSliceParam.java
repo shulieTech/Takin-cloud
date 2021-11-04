@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.data.param.scenemanage;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import lombok.Data;
@@ -21,4 +20,5 @@ public class SceneBigFileSliceParam {
     private Date fileUploadTime;
     private Integer isOrderSplit;
     private Integer isSplit;
+    private String fileMd5;
 }

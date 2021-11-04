@@ -96,8 +96,19 @@ public class CollectorService extends AbstractIndicators {
         }
         String measurement = InfluxDBUtil.getMetricsMeasurement(sceneId, reportId, customerId);
         metricses.stream().filter(Objects::nonNull)
-                .map(metrics -> InfluxDBUtil.toPoint(measurement, metrics.getTimestamp(), metrics))
-                .forEach(influxWriter::insert);
+            .peek(metrics -> {
+                //判断有没有MD5值
+                int strPosition = metrics.getTransaction().lastIndexOf(PressureEngineConstants.TRANSACTION_SPLIT_STR);
+                if(strPosition > 0){
+                    metrics.setTransaction(metrics.getTransaction().substring( strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length()));
+                    metrics.setTestName((metrics.getTransaction().substring(0, strPosition)));
+                }else {
+                    metrics.setTransaction(metrics.getTransaction());
+                    metrics.setTestName(metrics.getTestName());
+                }
+            })
+            .map(metrics -> InfluxDBUtil.toPoint(measurement, metrics.getTimestamp(), metrics))
+            .forEach(influxWriter::insert);
     }
     /**
      * 记录时间

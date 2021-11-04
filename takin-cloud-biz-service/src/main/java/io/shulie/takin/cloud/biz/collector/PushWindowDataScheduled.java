@@ -35,6 +35,7 @@ import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
 import io.shulie.takin.cloud.common.constants.CollectorConstants;
+import io.shulie.takin.cloud.common.constants.PressureEngineConstants;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.influxdb.InfluxDBUtil;
@@ -356,11 +357,23 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         if (CollectionUtils.isEmpty(metricses)) {
             return null;
         }
-        String transaction = metricses.get(0).getTransaction();
-        if (StringUtils.isBlank(transaction)) {
-            log.info("transaction is blank!metricses="+ GsonUtil.gsonToString(metricses));
+        String transactionStr = metricses.get(0).getTransaction();
+        if (StringUtils.isBlank(transactionStr)) {
+            log.info("md5 is blank!metricses="+ GsonUtil.gsonToString(metricses));
             return null;
         }
+        int strPosition = transactionStr.lastIndexOf(PressureEngineConstants.TRANSACTION_SPLIT_STR);
+        String transaction;
+        String testName;
+        if (strPosition > 0){
+            transaction = transactionStr.substring(
+                strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length());
+            testName = transactionStr.substring(0, strPosition);
+        }else {
+            transaction = transactionStr;
+            testName = transactionStr;
+        }
+
         int count = metricses.stream().filter(Objects::nonNull)
                 .map(ResponseMetrics::getCount)
                 .mapToInt(i -> Objects.nonNull(i) ? i : 0)
@@ -436,6 +449,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         p.setDataNum(dataNum);
         p.setDataRate(dataRate);
         p.setStatus(status);
+        p.setTestName(testName);
         return p;
     }
 

@@ -161,6 +161,7 @@ public class SceneTaskEventServie {
                 dataFile.setRefId(file.getId());
                 dataFile.setFileType(file.getFileType());
                 dataFile.setBigFile(file.getIsBigFile() != null && file.getIsBigFile() == 1);
+                dataFile.setFileMd5(file.getFileMd5());
                 dataFileList.add(dataFile);
             }
         });

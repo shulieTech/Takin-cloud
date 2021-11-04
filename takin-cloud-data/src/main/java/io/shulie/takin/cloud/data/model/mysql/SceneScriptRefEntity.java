@@ -82,4 +82,7 @@ public class SceneScriptRefEntity {
 
     @TableField(value = "update_name")
     private String updateName;
+
+    @TableField(value = "file_md5")
+    private String fileMd5;
 }

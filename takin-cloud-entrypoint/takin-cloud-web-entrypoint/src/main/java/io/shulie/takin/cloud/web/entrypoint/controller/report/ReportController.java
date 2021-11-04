@@ -215,6 +215,12 @@ public class ReportController {
         return ResponseResult.success(reportService.metric(reportId, sceneId, customerId));
     }
 
+    @GetMapping("/report/nodeTree")
+    @ApiOperation("场景对应的脚本树结构")
+    public ResponseResult<String> getNodeTree(Long sceneId){
+        return ResponseResult.success(reportService.getNodeTree(sceneId));
+    }
+
     /**
      * todo 临时方案，后面逐渐去掉这种网络请求
      */

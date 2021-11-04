@@ -12,6 +12,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
+import io.shulie.takin.cloud.common.utils.Md5Util;
+import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import io.shulie.takin.ext.content.enginecall.ScheduleRunRequest;
 import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt.DataFile;
@@ -19,6 +21,7 @@ import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt.StartEndPo
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +34,6 @@ import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.service.schedule.ScheduleService;
 import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
 import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
-import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.constants.SceneStartCheckConstants;
@@ -43,7 +45,6 @@ import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.common.utils.FileSliceByLine.FileSliceInfo;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 
 /**
  * @Author 莫问
@@ -67,15 +68,14 @@ public class FileSplitService {
     private EngineConfigService engineConfigService;
 
     @Autowired
-    private RedisClientUtils redisClientUtils;
-
-    @Autowired
     private SceneTaskStatusCache taskStatusCache;
 
     @Autowired
-    private ReportService reportService;
+    private RedisTemplate<String, String> redisTemplate;
 
     private static final String CSV_SUFFIX = "csv";
+
+    private static final String SCRIPT_NAME_SUFFIX = "jmx";
 
     @IntrestFor(event = ScheduleEventConstant.INIT_SCHEDULE_EVENT)
     public void initSchedule(Event event) {
@@ -88,23 +88,33 @@ public class FileSplitService {
     public void fileSplit(ScheduleRunRequest request) {
         ScheduleStartRequestExt startRequest = request.getRequest();
         try {
+            if (checkOutJmx(request.getRequest().getDataFile().stream()
+                .filter(Objects::nonNull)
+                .filter(df -> df.getFileType() == 0)
+                .filter(df -> df.getName().endsWith(SCRIPT_NAME_SUFFIX))
+                .findFirst()
+                .orElse(new DataFile()), startRequest.getSceneId())) {
+                throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR,
+                    "启动压测场景--场景ID:" + startRequest.getSceneId() + ",脚本文件校验失败！");
+            }
             List<DataFile> dataFiles = generateFileSlice(request);
             request.getRequest().setDataFile(dataFiles);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("【文件分片】--场景ID【{}】场景启动失败，文件拆分异常【{}】", request.getRequest().getSceneId(), e.getMessage());
             //更新场景状态：启动中--待启动
             sceneManageService.updateSceneLifeCycle(
-                    UpdateStatusBean.build(startRequest.getSceneId(),
-                                    startRequest.getTaskId(),
-                                    startRequest.getCustomerId()).checkEnum(
-                                    SceneManageStatusEnum.STARTING)
-                            .updateEnum(SceneManageStatusEnum.WAIT)
-                            .build());
+                UpdateStatusBean.build(startRequest.getSceneId(),
+                    startRequest.getTaskId(),
+                    startRequest.getCustomerId()).checkEnum(
+                    SceneManageStatusEnum.STARTING)
+                    .updateEnum(SceneManageStatusEnum.WAIT)
+                    .build());
             log.error(e.getMessage());
 
             //设置运行状态为启动失败
             taskStatusCache.cacheStatus(startRequest.getSceneId(), startRequest.getTaskId(),
-                SceneRunTaskStatusEnum.FAILED, String.format("启动场景失败:场景ID:%s,文件拆分异常", startRequest.getSceneId()));
+                SceneRunTaskStatusEnum.FAILED,
+                String.format("启动场景失败:场景ID:%s,文件拆分异常%s", startRequest.getSceneId(), e.getMessage()));
             return;
         }
         scheduleService.runSchedule(request);
@@ -136,6 +146,7 @@ public class FileSplitService {
                 setRefId(dataFile.getRefId());
                 setFilePath(dataFile.getPath());
                 setFileName(dataFile.getName());
+                setFileMd5(dataFile.getFileMd5());
                 //试跑或者巡检不对文件进行分片
                 if (startRequest.isTryRun() || startRequest.isInspect()) {
                     dataFile.setSplit(false);
@@ -182,7 +193,7 @@ public class FileSplitService {
                         //如果文件要继续从上次读取的位置继续读，从缓存中取数据，替换开始位置
                         if (startRequest.getFileContinueRead()) {
                             String key = String.format(SceneStartCheckConstants.SCENE_KEY, startRequest.getSceneId());
-                            Map<Object, Object> positionMap = redisClientUtils.hmget(key);
+                            Map<Object, Object> positionMap = redisTemplate.opsForHash().entries(key);
                             String podKey = String.format(SceneStartCheckConstants.FILE_POD_FIELD_KEY,
                                 dataFile.getName(), i + 1);
                             Object podReadPosition = positionMap.get(podKey);
@@ -302,5 +313,30 @@ public class FileSplitService {
             return resultMap;
         }
         return null;
+    }
+
+    /**
+     * 校验脚本文件的MD5值
+     *
+     * @param dataFile
+     * @param sceneId
+     * @return
+     */
+    private boolean checkOutJmx(DataFile dataFile, Long sceneId) {
+        if (Objects.nonNull(dataFile)) {
+            String fileMd5 = Md5Util.md5File(dataFile.getPath());
+            if (StringUtils.isNotBlank(dataFile.getFileMd5())) {
+                return dataFile.getFileMd5().equals(fileMd5);
+            } else {
+                //兼容老版本没有md5的情况，更新数据库的文件md5值
+                fileSliceService.updateFileMd5(new SceneBigFileSliceParam() {{
+                    setSceneId(sceneId);
+                    setFileName(dataFile.getName());
+                    setFileMd5(fileMd5);
+                }});
+                return true;
+            }
+        }
+        return false;
     }
 }

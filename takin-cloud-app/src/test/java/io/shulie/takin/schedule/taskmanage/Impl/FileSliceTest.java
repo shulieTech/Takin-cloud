@@ -44,7 +44,7 @@ public class FileSliceTest {
         //    setSplit(true);
         //    setPodNum(10);
         //    setOrderSplit(false);
-        //setOrderColumnNum(2);
+        //    //setOrderColumnNum(2);
         //}});
         //    SceneBigFileSliceEntity sliceEntity = fileSliceDAO.selectOne(new SceneBigFileSliceParam() {{
         //        setFileRefId(974L);

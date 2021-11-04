@@ -18,8 +18,11 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import com.jayway.jsonpath.DocumentContext;
+import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.influxdb.impl.TimeUtil;
 import cn.hutool.core.util.StrUtil;
@@ -284,32 +287,51 @@ public class ReportServiceImpl implements ReportService {
         CloudPluginUtils.fillReportData(reportResult, reportDetail);
 
         List<SceneBusinessActivityRefOutput> refList = wrapper.getBusinessActivityConfig();
-        List<BusinessActivitySummaryBean> list = Lists.newArrayList();
-        refList.forEach(businessActivityRef -> {
-            StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(), businessActivityRef.getBindRef());
-            BusinessActivitySummaryBean businessActivity = new BusinessActivitySummaryBean();
-            businessActivity.setBusinessActivityId(businessActivityRef.getBusinessActivityId());
-            businessActivity.setBusinessActivityName(businessActivityRef.getBusinessActivityName());
-            if (data != null) {
-                businessActivity.setAvgRT(new DataBean(data.getAvgRt(), businessActivityRef.getTargetRT()));
-                businessActivity.setSa(new DataBean(data.getSa(), businessActivityRef.getTargetSA()));
-                businessActivity.setTps(new DataBean(data.getTps(), businessActivityRef.getTargetTPS()));
-                businessActivity.setSucessRate(new DataBean(data.getSuccessRate(), businessActivityRef.getTargetSuccessRate()));
-                businessActivity.setAvgConcurrenceNum(data.getAvgConcurrenceNum());
-                businessActivity.setTotalRequest(data.getTotalRequest());
-            } else {
-                businessActivity.setBusinessActivityName(businessActivityRef.getBusinessActivityName());
-                businessActivity.setAvgRT(new DataBean("0", businessActivityRef.getTargetRT()));
-                businessActivity.setSa(new DataBean("0", businessActivityRef.getTargetSA()));
-                businessActivity.setTps(new DataBean("0", businessActivityRef.getTargetTPS()));
-                businessActivity.setAvgConcurrenceNum(new BigDecimal(0));
-                businessActivity.setSucessRate(new DataBean("0", businessActivityRef.getTargetSuccessRate()));
-                businessActivity.setTotalRequest(0L);
+        String nodeTree = toNodeTree(wrapper.getFeatures());
+        if (StringUtils.isNotBlank(nodeTree)){
+            Map<String,Map<String,Object>> resultMap = new HashMap<>(refList.size());
+            refList.stream()
+                .filter(Objects::nonNull)
+                .forEach(ref -> {
+                    StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
+                        ref.getBindRef());
+                    Map<String, Object> objectMap = fillMap(data, ref);
+                    resultMap.put(ref.getBindRef(), objectMap);
+                });
+            DocumentContext context = JsonPathUtil.deleteNodes(nodeTree);
+            if (Objects.nonNull(context)){
+                 context = JsonPathUtil.putNodesToJson(context, resultMap);
+                 reportDetail.setFlowDetail(context.jsonString());
             }
-            list.add(businessActivity);
-        });
-        reportDetail.setBusinessActivity(list);
-
+        }else {
+            JSONArray jsonArray = new JSONArray();
+            refList.stream()
+                .filter(Objects::nonNull)
+                .forEach(ref -> {
+                    StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
+                        ref.getBindRef());
+                    JSONObject json = new JSONObject();
+                    json.put("testName",ref.getBindRef());
+                    json.put("xpathMd5",ref.getBindRef());
+                    if (data != null) {
+                        json.put("avgRT", new DataBean(data.getAvgRt(), ref.getTargetRT()));
+                        json.put("sa", new DataBean(data.getSa(), ref.getTargetSA()));
+                        json.put("tps", new DataBean(data.getTps(), ref.getTargetTPS()));
+                        json.put("successRate", new DataBean(data.getSuccessRate(), ref.getTargetSuccessRate()));
+                        json.put("avgConcurrenceNum", data.getAvgConcurrenceNum());
+                        json.put("totalRequest", data.getTotalRequest());
+                    } else {
+                        json.put("avgRT", new DataBean("0", ref.getTargetRT()));
+                        json.put("sa", new DataBean("0", ref.getTargetSA()));
+                        json.put("tps", new DataBean("0", ref.getTargetTPS()));
+                        json.put("successRate", new DataBean("0", ref.getTargetSuccessRate()));
+                        json.put("avgConcurrenceNum", new BigDecimal(0));
+                        json.put("totalRequest", 0L);
+                    }
+                    jsonArray.add(json);
+                });
+           reportDetail.setFlowDetail(jsonArray.toJSONString());
+        }
         //检查任务是否超时
         boolean taskIsTimeOut = checkSceneTaskIsTimeOut(reportResult, wrapper);
         if (wrapper.getStatus().intValue() == SceneManageStatusEnum.PTING.getValue().intValue() && taskIsTimeOut) {
@@ -462,7 +484,7 @@ public class ReportServiceImpl implements ReportService {
                 reportBusinessActivityDetail.getTargetSa()));
             businessActivity.setTps(new DataBean(reportBusinessActivityDetail.getTps(),
                 reportBusinessActivityDetail.getTargetTps()));
-            businessActivity.setSucessRate(new DataBean(reportBusinessActivityDetail.getSuccessRate(),
+            businessActivity.setSuccessRate(new DataBean(reportBusinessActivityDetail.getSuccessRate(),
                 reportBusinessActivityDetail.getTargetSuccessRate()));
             businessActivity.setMaxRt(reportBusinessActivityDetail.getMaxRt());
             businessActivity.setMaxTps(reportBusinessActivityDetail.getMaxTps());
@@ -1192,4 +1214,77 @@ public class ReportServiceImpl implements ReportService {
             && StringUtils.isNotEmpty(jsonObject.getString(ReportConstans.SLA_ERROR_MSG));
     }
 
+    private String toNodeTree(String features){
+        if (StringUtils.isNotBlank(features)){
+            JSONObject tmpObj = JSONObject.parseObject(features);
+            if (tmpObj.containsKey("analysisResult")) {
+                return tmpObj.getString("analysisResult");
+            }
+        }
+        return null;
+    }
+
+    private Map<String,Object> fillMap(StatReportDTO statReport,SceneBusinessActivityRefOutput refOutput){
+        if (Objects.isNull(refOutput)) {
+            return null;
+        }
+        Map<String, Object> resultMap = new HashMap<>();
+        if (Objects.nonNull(statReport)) {
+            resultMap.put("avgRt", new DataBean(statReport.getAvgRt(), refOutput.getTargetRT()));
+            resultMap.put("sa", new DataBean(statReport.getSa(), refOutput.getTargetSA()));
+            resultMap.put("tps", new DataBean(statReport.getTps(), refOutput.getTargetTPS()));
+            resultMap.put("successRate", new DataBean(statReport.getSuccessRate(), refOutput.getTargetSuccessRate()));
+            resultMap.put("avgConcurrenceNum", statReport.getAvgConcurrenceNum());
+            resultMap.put("totalRequest", statReport.getTotalRequest());
+        }else {
+            resultMap.put("avgRt", new DataBean("0", refOutput.getTargetRT()));
+            resultMap.put("sa", new DataBean("0", refOutput.getTargetSA()));
+            resultMap.put("tps", new DataBean("0", refOutput.getTargetTPS()));
+            resultMap.put("successRate", new DataBean("0", refOutput.getTargetSuccessRate()));
+            resultMap.put("avgConcurrenceNum", new DataBean("0", refOutput.getTargetSuccessRate()));
+            resultMap.put("totalRequest", 0L);
+        }
+        return resultMap;
+    }
+
+    @Override
+    public String getNodeTree(Long sceneId) {
+        SceneManageQueryOpitons options = new SceneManageQueryOpitons();
+        options.setIncludeBusinessActivity(true);
+        SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(sceneId, options);
+        String features = sceneManage.getFeatures();
+        String nodeTree = toNodeTree(features);
+        List<SceneBusinessActivityRefOutput> businessActivityConfig = sceneManage.getBusinessActivityConfig();
+        if (StringUtils.isNotBlank(nodeTree)){
+            DocumentContext context = JsonPathUtil.deleteNodes(nodeTree);
+            if (Objects.nonNull(context)) {
+                businessActivityConfig.stream()
+                    .filter(Objects::nonNull)
+                    .forEach(
+                        config -> {
+                            Map<String, Map<String, Object>> nodeAddMap = new HashMap<>(businessActivityConfig.size());
+                            Map<String, Object> tmpMap = new HashMap<>();
+                            tmpMap.put("businessActivityId", config.getId());
+                            nodeAddMap.put(config.getBindRef(), tmpMap);
+                            JsonPathUtil.putNodesToJson(context, nodeAddMap);
+                        }
+                    );
+                return context.jsonString();
+            } else {
+                return nodeTree;
+            }
+        }
+
+        JSONArray resultArray = new JSONArray();
+        businessActivityConfig.stream()
+            .filter(Objects::nonNull)
+            .forEach(activity -> {
+                JSONObject json = new JSONObject();
+                json.put("businessActivityId",activity.getId());
+                json.put("testName", activity.getBindRef());
+                json.put("xpathMd5", activity.getBindRef());
+                resultArray.add(json);
+            });
+        return resultArray.toJSONString();
+    }
 }

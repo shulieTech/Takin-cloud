@@ -42,4 +42,6 @@ public class SceneScriptRef extends SceneRef implements Serializable {
      * 上传文件ID
      */
     private String uploadId;
+
+    private String fileMd5;
 }
