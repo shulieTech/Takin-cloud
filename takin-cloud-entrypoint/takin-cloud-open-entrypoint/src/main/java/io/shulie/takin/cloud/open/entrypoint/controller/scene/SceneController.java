@@ -20,10 +20,11 @@ import java.util.List;
 
 /**
  * 业务流程
- * @Author: liyuanba
- * @Date: 2021/10/26 12:02 下午
+ *
+ * @author liyuanba
+ * @date 2021/10/26 12:02 下午
  */
-@RestController
+@RestController("openSceneController")
 @RequestMapping(APIUrls.TRO_OPEN_API_URL + "scene")
 @Api(tags = "新业务流程相关接口")
 public class SceneController {

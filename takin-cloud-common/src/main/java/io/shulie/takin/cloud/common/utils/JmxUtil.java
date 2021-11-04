@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.common.utils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
 import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
 import io.shulie.takin.ext.content.emus.NodeTypeEnum;
@@ -25,8 +26,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @Author: liyuanba
- * @Date: 2021/10/13 12:02 下午
+ * @author liyuanba
+ * @date 2021/10/13 12:02 下午
  */
 @Slf4j
 public class JmxUtil {
@@ -67,7 +68,7 @@ public class JmxUtil {
             List<Element> elements = elements(childContainer);
             return buildNodeTree(elements);
         } catch (DocumentException e) {
-            log.error("buildNodeTree DocumentException, file="+file.getAbsolutePath(), e);
+            log.error("buildNodeTree DocumentException, file=" + file.getAbsolutePath(), e);
         }
         return null;
     }
@@ -77,13 +78,13 @@ public class JmxUtil {
             return null;
         }
         List<ScriptNode> nodes = Lists.newArrayList();
-        for (int i=0; i< elements.size(); i++) {
+        for (int i = 0; i < elements.size(); i++) {
             Element e = elements.get(i);
             ScriptNode node = buildNode(e);
             if (null == node) {
                 continue;
             }
-            if (i < elements.size() -1) {
+            if (i < elements.size() - 1) {
                 Element nextElement = elements.get(i + 1);
                 if ("hashTree".equals(nextElement.getName())) {
                     node.setChildren(buildNodeTree(elements(nextElement)));
@@ -147,10 +148,10 @@ public class JmxUtil {
             if ("M".equals(unit)) {
                 unitRadix = 60;
             }
-            p.setTps(NumberUtil.parseInt(props.get("TargetLevel"))*unitRadix);
-            p.setRampUp(NumberUtil.parseInt(props.get("RampUp"))*unitRadix);
+            p.setTps(NumberUtil.parseInt(props.get("TargetLevel")) * unitRadix);
+            p.setRampUp(NumberUtil.parseInt(props.get("RampUp")) * unitRadix);
             p.setSteps(NumberUtil.parseInt(props.get("Steps")));
-            p.setDuration(NumberUtil.parseInt(props.get("Hold"))*unitRadix+p.getRampUp());
+            p.setDuration(NumberUtil.parseInt(props.get("Hold")) * unitRadix + p.getRampUp());
             p.setMaxThreadNum(NumberUtil.parseInt(props.get("ConcurrencyLimit")));
         } else if ("com.blazemeter.jmeter.threads.concurrency.ConcurrencyThreadGroup".equals(node.getName())) {
             p.setType(ThreadGroupTypeEnum.CONCURRENCY);
@@ -159,9 +160,9 @@ public class JmxUtil {
             if ("M".equals(unit)) {
                 unitRadix = 60;
             }
-            p.setRampUp(NumberUtil.parseInt(props.get("RampUp"))*unitRadix);
+            p.setRampUp(NumberUtil.parseInt(props.get("RampUp")) * unitRadix);
             p.setSteps(NumberUtil.parseInt(props.get("Steps")));
-            p.setDuration(NumberUtil.parseInt(props.get("Hold"))*unitRadix+p.getRampUp());
+            p.setDuration(NumberUtil.parseInt(props.get("Hold")) * unitRadix + p.getRampUp());
             p.setMaxThreadNum(NumberUtil.parseInt(props.get("TargetLevel")));
         } else if ("com.blazemeter.jmeter.threads.arrivals.FreeFormArrivalsThreadGroup".equals(node.getName())) {
             p.setType(ThreadGroupTypeEnum.CONCURRENCY);
@@ -180,7 +181,7 @@ public class JmxUtil {
                 return p;
             }
             int duration = 0;
-            for (int i=0; i<jsonArray.size(); i++) {
+            for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject o = jsonArray.getJSONObject(i);
                 if (null == o) {
                     continue;
@@ -203,15 +204,15 @@ public class JmxUtil {
             JSONArray jsonArray = json.getJSONArray("ultimatethreadgroupdata");
             int duration = 0;
             List<Map<String, Integer>> shcdules = Lists.newArrayList();
-            for (int i=0; i<jsonArray.size(); i++) {
+            for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject o = jsonArray.getJSONObject(i);
                 if (null == o || CollectionUtils.isEmpty(o.values())) {
                     continue;
                 }
                 JSONArray arr = o.values().stream().filter(Objects::nonNull)
-                        .map(v -> (JSONArray) v)
-                        .findFirst()
-                        .orElse(null);
+                    .map(v -> (JSONArray)v)
+                    .findFirst()
+                    .orElse(null);
                 if (null == arr) {
                     continue;
                 }
@@ -234,7 +235,7 @@ public class JmxUtil {
             }
             p.setDuration(duration);
             double maxThreadNum = 0;
-            for (int i=0; i<= duration; i++) {
+            for (int i = 0; i <= duration; i++) {
                 double nowThreadNum = 0d;
                 for (Map<String, Integer> m : shcdules) {
                     int threadNum = m.get("threadNum");
@@ -256,7 +257,7 @@ public class JmxUtil {
                     } else if (i <= holdTime) {
                         nowThreadNum += threadNum;
                     } else if (i < shutDownTime) {
-                        nowThreadNum += threadNum - (((double) threadNum/shutDown) * (i - holdTime));
+                        nowThreadNum += threadNum - (((double)threadNum / shutDown) * (i - holdTime));
                     } else if (i > shutDownTime) {
                         nowThreadNum += 0;
                     }
@@ -318,7 +319,7 @@ public class JmxUtil {
                     props = mergeProps(props, configProps);
                     node.setProps(props);
                     //server host
-                    node.setIdentification(buildIdentification(node,"FTPSampler.server", "FTPSampler.port"));
+                    node.setIdentification(buildIdentification(node, "FTPSampler.server", "FTPSampler.port"));
                     node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 } else if ("AccessLogSampler".equals(name)) {
                     node.setProps(buildProps(element, BASE_PROP_ELEMENTS));
@@ -447,9 +448,10 @@ public class JmxUtil {
 
     /**
      * 查找默认请求元素
-     * @param element   当前元素
+     *
+     * @param element           当前元素
      * @param configElementName 默认请求元素名
-     * @return  返回默认请求元素
+     * @return 返回默认请求元素
      */
     public static Element findConfigElement(Element element, String configElementName, String guiClass) {
         List<?> elements = element.elements(configElementName);
@@ -458,7 +460,7 @@ public class JmxUtil {
             if (!(o instanceof Element)) {
                 continue;
             }
-            Element e = (Element) o;
+            Element e = (Element)o;
             if (isNotEnabled(e)) {
                 continue;
             }
@@ -486,10 +488,10 @@ public class JmxUtil {
             hashTree = element.element("hashTree");
         } else {
             List<Element> elements = elements(element.getParent());
-            for (int i=0; i<elements.size(); i++) {
+            for (int i = 0; i < elements.size(); i++) {
                 Element e = elements.get(i);
-                if (e == element && i < elements.size() -1) {
-                    Element next = elements.get(i+1);
+                if (e == element && i < elements.size() - 1) {
+                    Element next = elements.get(i + 1);
                     if ("hashTree".equals(next.getName())) {
                         hashTree = next;
                     }
@@ -521,12 +523,13 @@ public class JmxUtil {
     }
 
     public static Map<String, String> buildProps(Element element, List<String> propElementNames) {
-        return buildProps(element, propElementNames.toArray(new String[]{}));
+        return buildProps(element, propElementNames.toArray(new String[] {}));
     }
 
     /**
      * 提取prop数据
-     * @param element   prop的element对象
+     *
+     * @param element          prop的element对象
      * @param propElementNames 需要提取的element对象名称，为空表示不过滤
      * @return 返回prop数据
      */
@@ -539,12 +542,12 @@ public class JmxUtil {
             return null;
         }
         return elements.stream().filter(Objects::nonNull)
-                .map(e -> JmxUtil.getKeyAndValue(e, propElementNames))
-                .filter(CollectionUtils::isNotEmpty)
-                .flatMap(Collection::stream)
-                .filter(Objects::nonNull)
-                .filter(p -> StringUtils.isNotBlank(p.getKey()) && Objects.nonNull(p.getValue()))
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (o1, o2) -> o1));
+            .map(e -> JmxUtil.getKeyAndValue(e, propElementNames))
+            .filter(CollectionUtils::isNotEmpty)
+            .flatMap(Collection::stream)
+            .filter(Objects::nonNull)
+            .filter(p -> StringUtils.isNotBlank(p.getKey()) && Objects.nonNull(p.getValue()))
+            .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (o1, o2) -> o1));
     }
 
     public static Pair<String, String> getBasePropElementKeyAndValue(Element e) {
@@ -572,9 +575,10 @@ public class JmxUtil {
 
     /**
      * 获取参数的键值对
-     * @param e     对象
-     * @param propElementNames  允许获取的子元素列表
-     * @return  返回键值对列表
+     *
+     * @param e                对象
+     * @param propElementNames 允许获取的子元素列表
+     * @return 返回键值对列表
      */
     public static List<Pair<String, String>> getKeyAndValue(Element e, String[] propElementNames) {
         if (null == e) {
@@ -584,7 +588,7 @@ public class JmxUtil {
         String name = e.getName();
         if (null != propElementNames && propElementNames.length > 0) {
             boolean contains = Arrays.stream(propElementNames).filter(Objects::nonNull)
-                    .anyMatch(s -> s.equals(name));
+                .anyMatch(s -> s.equals(name));
             if (!contains) {
                 return null;
             }
@@ -600,7 +604,7 @@ public class JmxUtil {
                 return result;
             }
             String key = null;
-            String value= "";
+            String value = "";
             for (Element element : elements) {
                 if ("collectionProp".equals(element.getName())) {
                     List<Pair<String, String>> props = getKeyAndValue(element, propElementNames);
@@ -613,7 +617,7 @@ public class JmxUtil {
                                 continue;
                             }
                             if ("Argument.name".equals(p.getKey())) {
-                                key =  p.getValue();
+                                key = p.getValue();
                             } else if ("Argument.value".equals(p.getKey())) {
                                 value = p.getValue();
                             }
@@ -638,7 +642,7 @@ public class JmxUtil {
     }
 
     public static String buildIdentification(ScriptNode node, String... keys) {
-        if (null == node || null == keys || keys.length<=0) {
+        if (null == node || null == keys || keys.length <= 0) {
             return null;
         }
         Map<String, String> props = node.getProps();
@@ -646,8 +650,8 @@ public class JmxUtil {
             return null;
         }
         return Arrays.stream(keys).filter(StringUtils::isNotBlank)
-                .map(props::get)
-                .collect(Collectors.joining("#"));
+            .map(props::get)
+            .collect(Collectors.joining("#"));
     }
 
     public static String buildJavaSamplerIdentification(ScriptNode node) {
@@ -697,7 +701,7 @@ public class JmxUtil {
                 protocol = url.getProtocol();
                 path = url.getPath();
             } catch (MalformedURLException e) {
-                log.error("buildHttpIdentification MalformedURLException:path="+path, e);
+                log.error("buildHttpIdentification MalformedURLException:path=" + path, e);
             }
         }
         path = pathGuiYi(path);
@@ -715,13 +719,13 @@ public class JmxUtil {
             path = path.substring(0, path.indexOf("?"));
         }
         if (!path.startsWith("/")) {
-            path = "/"+path;
+            path = "/" + path;
         }
         if (path.contains("#")) {
             String temp = path.substring(0, path.indexOf("#"));
             if (temp.endsWith("/")) {
-                temp = temp.substring(0, temp.length()-1);
-                path = temp+path.substring(path.indexOf("#"));
+                temp = temp.substring(0, temp.length() - 1);
+                path = temp + path.substring(path.indexOf("#"));
             }
         } else {
             if (path.endsWith("/")) {
@@ -736,11 +740,11 @@ public class JmxUtil {
             return 0;
         }
         return json.values().stream().filter(Objects::nonNull)
-                .map(o -> (String) o)
-                .filter(StringUtils::isNotBlank)
-                .map(NumberUtil::parseInt)
-                .findFirst()
-                .orElse(0);
+            .map(o -> (String)o)
+            .filter(StringUtils::isNotBlank)
+            .map(NumberUtil::parseInt)
+            .findFirst()
+            .orElse(0);
     }
 
     /**
@@ -757,7 +761,7 @@ public class JmxUtil {
         List<Element> list = Lists.newArrayList();
         for (Object o : elements) {
             if (o instanceof Element) {
-                list.add((Element) o);
+                list.add((Element)o);
             }
         }
         return list;
@@ -766,15 +770,15 @@ public class JmxUtil {
     /**
      * 根据节点类型获取节点数量
      */
-    public static int getNodeNumByType(NodeTypeEnum typeEnum,List<ScriptNode> data){
+    public static int getNodeNumByType(NodeTypeEnum typeEnum, List<ScriptNode> data) {
         int nodeNum = 0;
-        if (CollectionUtils.isNotEmpty(data)){
-            for (ScriptNode scriptNode : data){
-                if (scriptNode.getType() == typeEnum){
-                    nodeNum ++;
+        if (CollectionUtils.isNotEmpty(data)) {
+            for (ScriptNode scriptNode : data) {
+                if (scriptNode.getType() == typeEnum) {
+                    nodeNum++;
                 }
-                if (CollectionUtils.isNotEmpty(scriptNode.getChildren())){
-                    nodeNum = nodeNum + getNodeNumByType(typeEnum,scriptNode.getChildren());
+                if (CollectionUtils.isNotEmpty(scriptNode.getChildren())) {
+                    nodeNum = nodeNum + getNodeNumByType(typeEnum, scriptNode.getChildren());
                 }
             }
         }
@@ -783,29 +787,24 @@ public class JmxUtil {
 
     /**
      * 获取对应类型的节点展开列表
-     * @param typeEnum
-     * @param data
-     * @return
+     *
+     * @param typeEnum 类型枚举
+     * @param data     脚本解析数据
+     * @return 结果
      */
-    public static List<ScriptNode> getScriptNodeByType(NodeTypeEnum typeEnum,List<ScriptNode> data){
+    public static List<ScriptNode> getScriptNodeByType(NodeTypeEnum typeEnum, List<ScriptNode> data) {
         List<ScriptNode> result = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(data)){
-            for (ScriptNode scriptNode : data){
-                if (scriptNode.getType() == typeEnum){
+        if (CollectionUtils.isNotEmpty(data)) {
+            for (ScriptNode scriptNode : data) {
+                if (scriptNode.getType() == typeEnum) {
                     result.add(scriptNode);
                 }
-                if (CollectionUtils.isNotEmpty(scriptNode.getChildren())){
+                if (CollectionUtils.isNotEmpty(scriptNode.getChildren())) {
                     List<ScriptNode> scriptNodeByType = getScriptNodeByType(typeEnum, scriptNode.getChildren());
                     result.addAll(scriptNodeByType);
                 }
             }
         }
         return result;
-    }
-
-    public static void main(String[] args) {
-        String file = "/Users/liyuanba/Downloads/脚本解析校验.jmx";
-        List<ScriptNode> nodes = buildNodeTree(file);
-        System.out.println("nodes="+GsonUtil.gsonToString(nodes));
     }
 }

@@ -24,7 +24,7 @@ import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
  *
  * @author 张天赐
  */
-@RestController
+@RestController("webSceneController")
 @Api(tags = "压测场景管理-新")
 @RequestMapping(APIUrls.TRO_API_URL + "v2/scene")
 public class SceneController {
