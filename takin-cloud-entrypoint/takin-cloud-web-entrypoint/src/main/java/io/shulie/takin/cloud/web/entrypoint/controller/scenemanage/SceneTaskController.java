@@ -57,6 +57,16 @@ public class SceneTaskController {
         return ResponseResult.success();
     }
 
+    @PostMapping("/stop/bolt")
+    @ApiOperation(value = "直接停止场景")
+    public ResponseResult<Integer> boltStop(@RequestBody SceneManageIdRequest request) {
+        try {
+            return ResponseResult.success(sceneTaskService.blotStop(request.getId()));
+        } catch (Exception ex) {
+            return ResponseResult.fail(ex.getMessage(), null);
+        }
+    }
+
     @GetMapping("/checkStartStatus")
     @ApiOperation(value = "检查启动状态")
     public ResponseResult<SceneActionResponse> checkStartStatus(Long sceneId) {
