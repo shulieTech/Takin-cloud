@@ -878,6 +878,17 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
+     * 获取报告的基础数据(基础表数据)
+     *
+     * @param reportId 报告主键
+     * @return 基础表数据
+     */
+    @Override
+    public ReportResult getReportBaseInfo(Long reportId) {
+        return reportDao.selectById(reportId);
+    }
+
+    /**
      * 压测完成/结束 更新报告
      * 更新报表数据
      * V4.2.2以前版本的客户端，由cloud更新报告、场景状态

@@ -41,6 +41,9 @@ public class UploadFileDTO {
     @ApiModelProperty(value = "是否拆分")
     private Integer isSplit;
 
+    @ApiModelProperty(value = "是否按分区顺序拆分")
+    private Integer isOrderSplit;
+
     @ApiModelProperty(value = "Topic")
     private String topic;
 
