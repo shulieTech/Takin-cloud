@@ -89,4 +89,9 @@ public class SceneManageResult {
      * 用户id
      */
     private Long userId;
+
+    /**
+     * 脚本解析结果
+     */
+    private String scriptAnalysisResult;
 }

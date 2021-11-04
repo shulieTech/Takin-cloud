@@ -72,10 +72,12 @@ import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
+import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.data.dao.sceneTask.SceneTaskPressureTestLogUploadDAO;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
@@ -775,6 +777,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         report.setTps(sumTps);
         report.setPressureType(scene.getPressureType());
         report.setType(scene.getType());
+        if (StringUtils.isNotBlank(scene.getScriptAnalysisResult())){
+            report.setScriptAnalysisResult(JsonPathUtil.deleteNodes(scene.getScriptAnalysisResult()).jsonString());
+        }
         tReportMapper.insertSelective(report);
 
         //标记场景

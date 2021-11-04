@@ -217,8 +217,8 @@ public class ReportController {
 
     @GetMapping("/report/nodeTree")
     @ApiOperation("场景对应的脚本树结构")
-    public ResponseResult<String> getNodeTree(Long sceneId){
-        return ResponseResult.success(reportService.getNodeTree(sceneId));
+    public ResponseResult<String> getNodeTree(ReportTrendQueryParam queryParam){
+        return ResponseResult.success(reportService.getNodeTree(queryParam));
     }
 
     /**

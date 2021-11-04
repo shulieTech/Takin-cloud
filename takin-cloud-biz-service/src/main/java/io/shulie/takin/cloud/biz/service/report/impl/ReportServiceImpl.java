@@ -22,6 +22,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.influxdb.impl.TimeUtil;
@@ -80,7 +81,6 @@ import com.pamirs.takin.entity.domain.vo.report.ReportQueryParam;
 import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
@@ -135,8 +135,6 @@ public class ReportServiceImpl implements ReportService {
     ReportEventService reportEventService;
     @Resource
     SceneManageService sceneManageService;
-    @Resource
-    TSceneManageMapper tSceneManageMapper;
     @Resource
     SceneTaskEventServie sceneTaskEventServie;
     @Resource
@@ -287,8 +285,8 @@ public class ReportServiceImpl implements ReportService {
         CloudPluginUtils.fillReportData(reportResult, reportDetail);
 
         List<SceneBusinessActivityRefOutput> refList = wrapper.getBusinessActivityConfig();
-        String nodeTree = toNodeTree(wrapper.getFeatures());
-        if (StringUtils.isNotBlank(nodeTree)){
+        if(StringUtils.isNotBlank(reportResult.getScriptAnalysisResult())){
+            String nodeTree = toNodeTree(reportResult.getScriptAnalysisResult());
             Map<String,Map<String,Object>> resultMap = new HashMap<>(refList.size());
             refList.stream()
                 .filter(Objects::nonNull)
@@ -300,8 +298,8 @@ public class ReportServiceImpl implements ReportService {
                 });
             DocumentContext context = JsonPathUtil.deleteNodes(nodeTree);
             if (Objects.nonNull(context)){
-                 context = JsonPathUtil.putNodesToJson(context, resultMap);
-                 reportDetail.setFlowDetail(context.jsonString());
+                context = JsonPathUtil.putNodesToJson(context, resultMap);
+                reportDetail.setFlowDetail(context.jsonString());
             }
         }else {
             JSONArray jsonArray = new JSONArray();
@@ -330,7 +328,7 @@ public class ReportServiceImpl implements ReportService {
                     }
                     jsonArray.add(json);
                 });
-           reportDetail.setFlowDetail(jsonArray.toJSONString());
+            reportDetail.setFlowDetail(jsonArray.toJSONString());
         }
         //检查任务是否超时
         boolean taskIsTimeOut = checkSceneTaskIsTimeOut(reportResult, wrapper);
@@ -1164,13 +1162,13 @@ public class ReportServiceImpl implements ReportService {
         //流量结算
         AssetInvoiceExt accountTradeRequest = new AssetInvoiceExt() {{
             setPressureTotalTime(testRunTime > totalTestTime ? totalTestTime : testRunTime);
-//            setPressureMode(sceneManage.getPressureMode());
-//            setIncreasingTime(sceneManage.getIncreasingSecond());
+            //            setPressureMode(sceneManage.getPressureMode());
+            //            setIncreasingTime(sceneManage.getIncreasingSecond());
             setPressureType(sceneManage.getPressureType());
             setTaskId(reportResult.getId());
             setSceneId(reportResult.getSceneId());
             setCustomerId(reportResult.getCustomerId());
-//            setStep(sceneManage.getStep());
+            //            setStep(sceneManage.getStep());
             setAvgConcurrent(statReport.getAvgConcurrenceNum());
         }};
         if (statReport.getTps() == null) {
@@ -1248,43 +1246,49 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public String getNodeTree(Long sceneId) {
-        SceneManageQueryOpitons options = new SceneManageQueryOpitons();
-        options.setIncludeBusinessActivity(true);
-        SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(sceneId, options);
-        String features = sceneManage.getFeatures();
-        String nodeTree = toNodeTree(features);
-        List<SceneBusinessActivityRefOutput> businessActivityConfig = sceneManage.getBusinessActivityConfig();
-        if (StringUtils.isNotBlank(nodeTree)){
-            DocumentContext context = JsonPathUtil.deleteNodes(nodeTree);
-            if (Objects.nonNull(context)) {
-                businessActivityConfig.stream()
-                    .filter(Objects::nonNull)
-                    .forEach(
-                        config -> {
-                            Map<String, Map<String, Object>> nodeAddMap = new HashMap<>(businessActivityConfig.size());
-                            Map<String, Object> tmpMap = new HashMap<>();
-                            tmpMap.put("businessActivityId", config.getId());
-                            nodeAddMap.put(config.getBindRef(), tmpMap);
-                            JsonPathUtil.putNodesToJson(context, nodeAddMap);
-                        }
-                    );
-                return context.jsonString();
-            } else {
-                return nodeTree;
-            }
+    public String getNodeTree(ReportTrendQueryParam param) {
+        ReportResult reportResult;
+        if (Objects.nonNull(param.getReportId())){
+            reportResult = reportDao.selectById(param.getReportId());
+        }else {
+            reportResult = reportDao.getReportBySceneId(param.getSceneId());
         }
 
-        JSONArray resultArray = new JSONArray();
-        businessActivityConfig.stream()
-            .filter(Objects::nonNull)
-            .forEach(activity -> {
-                JSONObject json = new JSONObject();
-                json.put("businessActivityId",activity.getId());
-                json.put("testName", activity.getBindRef());
-                json.put("xpathMd5", activity.getBindRef());
-                resultArray.add(json);
-            });
-        return resultArray.toJSONString();
+        if (Objects.isNull(reportResult)){
+            //todo 返回未找到
+            return null;
+        }
+        List<ReportBusinessActivityDetail> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper
+            .queryReportBusinessActivityDetailByReportId(reportResult.getId());
+        if (CollectionUtils.isEmpty(reportBusinessActivityDetails)){
+            return null;
+        }
+        if (StringUtils.isNotBlank(reportResult.getScriptAnalysisResult())){
+            String nodeTree = reportResult.getScriptAnalysisResult();
+            //todo 查询脚本对应的businessActivityId,加入到节点树中
+            DocumentContext context = JsonPath.parse(nodeTree);
+            reportBusinessActivityDetails.stream()
+                .filter(Objects::nonNull)
+                .forEach(detail ->{
+                    Map<String, Map<String, Object>> nodeAddMap = new HashMap<>(1);
+                    Map<String, Object> tmpMap = new HashMap<>();
+                    tmpMap.put("businessActivityId", detail.getBusinessActivityId());
+                    nodeAddMap.put(detail.getBindRef(), tmpMap);
+                    JsonPathUtil.putNodesToJson(context, nodeAddMap);
+                });
+            return context.jsonString();
+        }else {
+            JSONArray resultArray = new JSONArray();
+            reportBusinessActivityDetails.stream()
+                .filter(Objects::nonNull)
+                .forEach(detail ->{
+                    JSONObject json = new JSONObject();
+                    json.put("businessActivityId",detail.getBusinessActivityId());
+                    json.put("testName", detail.getBindRef());
+                    json.put("xpathMd5", detail.getBindRef());
+                    resultArray.add(json);
+                });
+            return resultArray.toJSONString();
+        }
     }
 }

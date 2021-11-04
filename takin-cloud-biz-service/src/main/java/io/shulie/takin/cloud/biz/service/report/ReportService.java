@@ -207,9 +207,9 @@ public interface ReportService {
     void updateReportOnSceneStartFailed(Long sceneId,Long reportId,String errorMsg);
 
     /**
-     * 查询场景对应的脚本树结构
-     * @param sceneId 场景ID
+     * 查询报告对应的脚本树结构
+     * @param param 查询参数
      * @return 树结构json字符串
      */
-    String getNodeTree(Long sceneId);
+    String getNodeTree(ReportTrendQueryParam param);
 }

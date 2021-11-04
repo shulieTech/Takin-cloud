@@ -123,4 +123,6 @@ public class ReportResult extends CloudUserCommonRequestExt {
     private Long scriptId;
 
     private Integer lock;
+
+    private String scriptAnalysisResult;
 }

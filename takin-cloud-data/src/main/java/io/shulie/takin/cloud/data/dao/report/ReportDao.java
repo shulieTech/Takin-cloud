@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.data.dao.report;
 
 import java.util.List;
 
+import io.shulie.takin.cloud.data.model.mysql.BusinessActivitiesEntity;
 import io.shulie.takin.cloud.data.param.report.ReportDataQueryParam;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;

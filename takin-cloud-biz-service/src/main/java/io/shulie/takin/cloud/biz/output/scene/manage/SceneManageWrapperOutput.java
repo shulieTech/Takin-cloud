@@ -104,6 +104,8 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
 
     private String features;
 
+    private String scriptAnalysisResult;
+
     private Integer configType;
 
     private Long scriptId;
