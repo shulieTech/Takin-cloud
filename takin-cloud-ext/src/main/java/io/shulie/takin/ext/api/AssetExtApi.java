@@ -48,6 +48,13 @@ public interface AssetExtApi extends ExtensionPoint {
      * @return 预估金额
      */
     BigDecimal calcEstimateAmount(AssetBillExt bill);
+    /**
+     * 计算预估金额
+     *
+     * @param bills 业务信息
+     * @return 预估金额
+     */
+    BigDecimal calcEstimateAmount(List<AssetBillExt> bills);
 
     /**
      * 计算实际金额
