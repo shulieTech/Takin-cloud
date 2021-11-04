@@ -18,6 +18,7 @@ import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
+import io.shulie.takin.cloud.data.result.report.ReportResult;
 
 /**
  * @author 数列科技
@@ -197,4 +198,12 @@ public interface ReportService {
      * @return -
      */
     ReportOutput selectById(Long id);
+
+    /**
+     * 获取报告的基础数据(基础表数据)
+     *
+     * @param reportId 报告主键
+     * @return 基础表数据
+     */
+    ReportResult getReportBaseInfo(Long reportId);
 }
