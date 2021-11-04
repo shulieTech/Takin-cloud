@@ -1,5 +1,8 @@
 package io.shulie.takin.cloud.sdk.service;
 
+import java.io.File;
+import java.util.List;
+
 import com.alibaba.fastjson.TypeReference;
 
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
@@ -58,4 +61,17 @@ public interface CloudApiSenderService {
      * @return CLOUD接口响应
      */
     <T, C extends ContextExt> T delete(String url, C request, TypeReference<T> responseClass);
+
+    /**
+     * 调用CLOUD接口的统一方法 - 文件上传
+     *
+     * @param url           请求路径
+     * @param context       数据溯源参数
+     * @param fileListName  文件名称
+     * @param fileList      文件内容
+     * @param responseClass 响应类型
+     * @param <T>           响应参数类型
+     * @return CLOUD接口响应
+     */
+    <T> T uploadFile(String url, ContextExt context, String fileListName, List<File> fileList, TypeReference<T> responseClass);
 }

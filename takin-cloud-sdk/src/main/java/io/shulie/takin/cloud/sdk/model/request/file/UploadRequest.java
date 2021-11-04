@@ -16,5 +16,12 @@ import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class UploadRequest extends ContextExt {
+    /**
+     * 接收方字段名称
+     */
+    String fieldName = "file";
+    /**
+     * 文件列表
+     */
     List<File> fileList;
 }

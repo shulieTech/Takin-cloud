@@ -12,7 +12,9 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.net.url.UrlQuery;
 
+import java.io.File;
 import java.util.Map;
+import java.util.List;
 import java.util.HashMap;
 import java.nio.charset.StandardCharsets;
 
@@ -113,6 +115,24 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
     }
 
     /**
+     * 调用CLOUD接口的统一方法 - 文件上传
+     *
+     * @param url           请求路径
+     * @param context       数据溯源参数
+     * @param fileListName  文件名称
+     * @param fileList      文件内容
+     * @param responseClass 响应类型
+     * @param <T>           响应参数类型
+     * @return CLOUD接口响应
+     */
+    @Override
+    public <T> T uploadFile(String url, ContextExt context, String fileListName, List<File> fileList, TypeReference<T> responseClass) {
+        // 组装请求路径
+        String requestUrl = cloudUrl + url;
+        return requestApi(context, Method.POST, requestUrl, fileListName, fileList.toArray(new File[0]), responseClass);
+    }
+
+    /**
      * 调用CLOUD接口的统一方法-带请求体请求
      *
      * @param method        请求方法
@@ -198,6 +218,60 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
     }
 
     /**
+     * 调用CLOUD接口的统一方法 - 文件上传
+     *
+     * @param context       数据溯源上下文
+     * @param method        请求方式
+     * @param url           请求路径
+     * @param fileListName  文件名称
+     * @param fileList      文件内容
+     * @param responseClass 响应类型
+     * @param <T>           响应参数类型
+     * @return CLOUD接口响应
+     * @throws RuntimeException 在网络异常\请求失败的时候抛出异常
+     */
+    private <T> T requestApi(ContextExt context, Method method, String url, String fileListName, File[] fileList, TypeReference<T> responseClass) {
+        String responseBody = "";
+        try {
+            // 组装HTTP请求对象
+            HttpRequest request = HttpUtil
+                .createRequest(method, url)
+                .headerMap(getDataTrace(context), true)
+                .form(fileListName, fileList);
+            // 设置超时时间
+            if (timeout > 0) {
+                int realTimeout = timeout * (Long.valueOf(DateUnit.SECOND.getMillis()).intValue());
+                request.timeout(realTimeout);
+            }
+            // 监控接口耗时
+            long startTime = System.currentTimeMillis();
+            responseBody = request.execute().body();
+            long endTime = System.currentTimeMillis();
+            log.info("请求Cloud接口耗时:{}\n请求路径:{}\n请求参数:{}\n请求结果:{}",
+                (endTime - startTime), url, StrUtil.format("{}个文件", fileList.length), responseBody);
+            // 返回接口响应
+            T apiResponse = JSON.parseObject(responseBody, responseClass);
+            if (apiResponse == null) {throw new NullPointerException();}
+            if (ResponseResult.class.equals(apiResponse.getClass())) {
+                ResponseResult<?> cloudResult = (ResponseResult<?>)apiResponse;
+                // 接口成功
+                if (Boolean.TRUE.equals(cloudResult.getSuccess())) {return apiResponse;}
+                // success == null || success == false
+                else if (cloudResult.getError() != null) {throw new RuntimeException(cloudResult.getError().getMsg());}
+                // cloud 回传的 error 信息为空
+                else {throw new RuntimeException("无法展示更多信息,请参照cloud日志");}
+            }
+            return apiResponse;
+        } catch (JSONException e) {
+            log.error("请求Cloud接口异常-JSON序列化失败。\n请求路径:{}\n请求参数:{}\n请求结果:{}", url, StrUtil.format("{}个文件", fileList.length), responseBody);
+            throw e;
+        } catch (Throwable throwable) {
+            log.error("请求Cloud接口异常。\n请求路径:{}\n请求参数:{}\n请求结果:{}", url, StrUtil.format("{}个文件", fileList.length), responseBody, throwable);
+            throw throwable;
+        }
+    }
+
+    /**
      * 抽离数据溯源参数
      *
      * @param param 数据溯源参数
@@ -206,8 +280,12 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
     private ContextExt drawDataTraceContext(ContextExt param) {
         // 纯净对象
         ContextExt context = new ContextExt(
-            param.getUserId(), param.getTenantId(),
-            param.getEnvCode(), param.getFilterSql(),param.getUserName(),param.getTenantCode());
+            param.getUserId(),
+            param.getTenantId(),
+            param.getEnvCode(),
+            param.getFilterSql(),
+            param.getUserName(),
+            param.getTenantCode());
         // 清理原来的上下文
         param.clean();
         // 返回对象

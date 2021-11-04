@@ -12,42 +12,49 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.nio.file.FileSystemException;
 import java.nio.charset.StandardCharsets;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.common.collect.Maps;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
-import io.shulie.takin.cloud.sdk.model.request.filemanager.FileContentParamReq;
 import lombok.extern.slf4j.Slf4j;
-import io.swagger.annotations.Api;
+
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.date.DateUtil;
+
+import com.google.common.collect.Maps;
 import com.google.common.collect.Lists;
-import org.springframework.http.MediaType;
+
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+
+import org.springframework.http.MediaType;
 import org.apache.commons.lang3.StringUtils;
-import io.shulie.takin.cloud.common.utils.LinuxUtil;
-import io.shulie.takin.utils.file.FileManagerHelper;
 import org.springframework.web.multipart.MultipartFile;
-import com.pamirs.takin.entity.domain.dto.file.FileDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
-import com.pamirs.takin.entity.domain.vo.file.FileDeleteVO;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import io.shulie.takin.common.beans.response.ResponseResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.pamirs.takin.entity.domain.dto.file.FileDTO;
+import com.pamirs.takin.entity.domain.vo.file.FileDeleteVO;
+
+import io.shulie.takin.cloud.common.utils.LinuxUtil;
+import io.shulie.takin.utils.file.FileManagerHelper;
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
+import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.entrypoint.controller.strategy.LocalFileStrategy;
 import io.shulie.takin.cloud.sdk.model.request.filemanage.FileZipParamRequest;
+import io.shulie.takin.cloud.sdk.model.request.filemanager.FileContentParamReq;
 import io.shulie.takin.cloud.sdk.model.request.filemanage.FileCopyParamRequest;
 import io.shulie.takin.cloud.sdk.model.request.filemanage.FileDeleteParamRequest;
 import io.shulie.takin.cloud.sdk.model.request.filemanage.FileCreateByStringParamRequest;
@@ -70,7 +77,7 @@ public class FileController {
 
     @PostMapping(EntrypointUrl.METHOD_FILE_UPLOAD)
     @ApiOperation(value = "文件上传")
-    public ResponseResult<List<FileDTO>> upload(List<MultipartFile> file) {
+    public ResponseResult<List<FileDTO>> upload(@RequestParam List<MultipartFile> file) {
         String tempPath = scriptPath + SceneManageConstant.FILE_SPLIT + CloudPluginUtils.getContext().getTenantCode();
         List<FileDTO> dtoList = Lists.newArrayList();
         for (MultipartFile mf : file) {
@@ -83,6 +90,9 @@ public class FileController {
             File targetFile = new File(targetDir + SceneManageConstant.FILE_SPLIT + mf.getOriginalFilename());
             FileDTO dto = new FileDTO();
             try {
+                if (StrUtil.isBlank(mf.getOriginalFilename())) {
+                    throw new FileSystemException("文件名不能为空");
+                }
                 dto.setUploadId(uploadId);
                 dto.setUploadTime(DateUtil.formatDateTime(new Date()));
                 dto.setFileName(mf.getOriginalFilename());

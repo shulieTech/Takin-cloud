@@ -78,8 +78,8 @@ public class CloudFileApiImpl implements CloudFileApi {
      */
     @Override
     public List<UploadResponse> upload(UploadRequest req) {
-        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_UPLOAD),
-            req, new TypeReference<ResponseResult<List<UploadResponse>>>() {}).getData();
+        return cloudApiSenderService.uploadFile(EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_UPLOAD),
+            req, "file", req.getFileList(), new TypeReference<ResponseResult<List<UploadResponse>>>() {}).getData();
     }
 
 }
