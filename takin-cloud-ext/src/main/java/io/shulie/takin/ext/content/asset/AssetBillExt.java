@@ -14,6 +14,10 @@ import lombok.Data;
 @Data
 public class AssetBillExt {
     /**
+     * 启动的ip，即pod数
+     */
+    private Integer ipNum;
+    /**
      * 并发线程数
      */
     private Integer concurrenceNum;
