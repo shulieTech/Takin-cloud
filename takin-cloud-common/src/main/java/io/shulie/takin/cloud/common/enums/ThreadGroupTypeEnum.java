@@ -37,4 +37,9 @@ public enum ThreadGroupTypeEnum {
         }
         return pool.get(code);
     }
+
+    public boolean equels(Integer code) {
+        ThreadGroupTypeEnum type = value(code);
+        return this == type;
+    }
 }
