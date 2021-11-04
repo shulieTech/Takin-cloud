@@ -35,7 +35,7 @@ public class SceneController {
     @ApiOperation(value = "脚本解析")
     @PostMapping("/scriptAnalyze")
     @ResponseBody
-    public ResponseResult<?> scriptAnalyze(ScriptAnalyzeRequest request) {
+    public ResponseResult<?> scriptAnalyze(@RequestBody ScriptAnalyzeRequest request) {
         if (StringUtils.isBlank(request.getScriptFile())) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCRIPT_ANALYZE_PARAMS_ERROR, "请提供脚本文件完整的路径和名称");
         }
