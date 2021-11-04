@@ -240,7 +240,12 @@ public class SceneServiceImpl implements SceneService {
                 setPathMd5(value.getBindRef());
                 setName(value.getBusinessActivityName());
                 setBusinessActivityId(value.getBusinessActivityId());
-                setApplicationId(Arrays.asList(value.getApplicationIds().split(",")));
+                // 设置接入的应用的标识
+                if (StrUtil.isBlank(value.getApplicationIds())) {
+                    setApplicationId(new ArrayList<>(0));
+                } else {
+                    setApplicationId(Arrays.asList(value.getApplicationIds().split(",")));
+                }
             }}));
             return result;
         } catch (
