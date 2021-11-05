@@ -1,4 +1,4 @@
-package io.shulie.takin.ext.content.emus;
+package io.shulie.takin.ext.content.enums;
 
 import lombok.Getter;
 import lombok.Setter;

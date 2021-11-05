@@ -5,10 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 
 import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
-import io.shulie.takin.ext.content.emus.NodeTypeEnum;
-import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
+import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.common.pojo.Pair;
-import io.shulie.takin.ext.content.emus.SamplerTypeEnum;
+import io.shulie.takin.ext.content.enums.SamplerTypeEnum;
 import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.common.pojo.jmeter.ThreadGroupProperty;
 import lombok.extern.slf4j.Slf4j;

@@ -1,18 +1,19 @@
 package io.shulie.takin.ext.content.asset;
 
-import java.math.BigDecimal;
-
+import io.shulie.takin.ext.content.AbstractEntry;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * 资产拓展模块
+ * 流量预估参数对象
  * <p>
  * 业务实体
  *
  * @author 张天赐
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class AssetBillExt {
+public class AssetBillExt extends AbstractEntry {
     /**
      * 启动的ip，即pod数
      */
@@ -38,10 +39,6 @@ public class AssetBillExt {
      */
     private Integer step;
     /**
-     * 平均并发数
-     */
-    private BigDecimal avgConcurrent;
-    /**
      * 压测场景类型：0-2常规，3流量调试,4巡检模式,5试跑模式
      */
     private Integer pressureScene;
@@ -55,13 +52,13 @@ public class AssetBillExt {
      */
     private String pressureTestTimeCost;
 
+    @EqualsAndHashCode(callSuper = true)
     @Data
-    public static class TimeBean {
+    public static class TimeBean extends AbstractEntry {
         private Long time;
         private String unit;
 
-        private TimeBean() {
-
+        public TimeBean() {
         }
 
         public TimeBean(Long time, String unit) {

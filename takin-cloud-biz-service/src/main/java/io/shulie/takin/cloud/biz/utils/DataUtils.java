@@ -19,18 +19,33 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import io.shulie.takin.cloud.biz.output.statistics.RtDataOutput;
 import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
-import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpRequest;
 
 public class DataUtils {
     private final static Logger logger = LoggerFactory.getLogger(DataUtils.class);
+
+    /**
+     * 将时间转化成时分秒
+     */
+    public static String formatTime(long time) {
+        return formatTime(time, "%dh%d'%d\"");
+    }
+    /**
+     * 将时间转化成时分秒
+     */
+    public static String formatTime(long time, String format) {
+        long h = TimeUnit.HOURS.convert(time, TimeUnit.SECONDS);
+        long m = (time % 3600) / 60;
+        long s = time % 60;
+        return String.format(format, h, m , s);
+    }
 
     /**
      * 拼装url

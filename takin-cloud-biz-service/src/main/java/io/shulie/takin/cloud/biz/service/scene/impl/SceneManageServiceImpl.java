@@ -963,15 +963,15 @@ public class SceneManageServiceImpl implements SceneManageService {
     }
 
     @Override
-    public BigDecimal calcEstimateFlow(SceneManageWrapperInput wrapperVO) {
+    public BigDecimal calcEstimateFlow(List<AssetBillExt> bills) {
         // 尝试调用插件
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
-            return assetExtApi.calcEstimateAmount(BeanUtil.copyProperties(wrapperVO, AssetBillExt.class, ""));
+            return assetExtApi.calcEstimateAmount(bills);
         }
         // 返回0
         else {
-            return new BigDecimal(0);
+            return BigDecimal.ZERO;
         }
 
     }
@@ -981,6 +981,10 @@ public class SceneManageServiceImpl implements SceneManageService {
         wrapperOutput.setScriptType(sceneManageResult.getScriptType());
         wrapperOutput.setPressureTestSceneName(sceneManageResult.getSceneName());
         wrapperOutput.setType(sceneManageResult.getType());
+        PressureSceneEnum type = PressureSceneEnum.value(sceneManageResult.getType());
+        if (null != type) {
+            wrapperOutput.setPressureType(type.getCode());
+        }
         // 状态适配
         wrapperOutput.setStatus(SceneManageStatusEnum.getAdaptStatus(sceneManageResult.getStatus()));
         wrapperOutput.setCustomerId(sceneManageResult.getCustomerId());
@@ -1034,7 +1038,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (null == tue) {
             return time;
         }
-        return tue.getUnit().convert(time, TimeUnit.SECONDS);
+        return TimeUnit.SECONDS.convert(time, tue.getUnit());
     }
 
     private SceneManageCreateOrUpdateParam buildSceneManage(SceneManageWrapperInput wrapperVO) {

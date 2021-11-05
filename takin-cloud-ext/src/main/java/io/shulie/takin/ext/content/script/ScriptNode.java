@@ -1,6 +1,6 @@
 package io.shulie.takin.ext.content.script;
 
-import io.shulie.takin.ext.content.emus.SamplerTypeEnum;
+import io.shulie.takin.ext.content.enums.SamplerTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.shulie.takin.ext.content.AbstractEntry;
-import io.shulie.takin.ext.content.emus.NodeTypeEnum;
+import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 
 /**
  * @author liyuanba

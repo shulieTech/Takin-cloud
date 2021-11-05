@@ -48,6 +48,7 @@ import io.shulie.takin.cloud.open.resp.scenemanage.SceneManageWrapperResp;
 import io.shulie.takin.cloud.open.resp.scenemanage.ScriptCheckResp;
 import io.shulie.takin.cloud.open.resp.strategy.StrategyResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.ext.content.asset.AssetBillExt;
 import io.shulie.takin.ext.content.enginecall.StrategyOutputExt;
 import io.shulie.takin.ext.content.script.ScriptVerityRespExt;
 import io.swagger.annotations.Api;
@@ -264,11 +265,12 @@ public class SceneManageOpenController {
 
     @PostMapping("/flow/calc")
     @ApiOperation(value = "预估流量计算")
-    public ResponseResult<BigDecimal> calcFlow(@RequestBody SceneManageWrapperReq wrapperReq) {
-        SceneManageWrapperInput input = new SceneManageWrapperInput();
-        BeanUtils.copyProperties(wrapperReq, input);
-        BigDecimal flow = sceneManageService.calcEstimateFlow(input);
-        return ResponseResult.success(flow.setScale(2, RoundingMode.HALF_UP));
+    public ResponseResult<BigDecimal> calcFlow(@RequestBody AssetBillExt bill) {
+        BigDecimal flow = sceneManageService.calcEstimateFlow(Lists.newArrayList(bill));
+        if (null == flow) {
+            flow = new BigDecimal(0);
+        }
+        return ResponseResult.success(flow);
     }
 
     /**

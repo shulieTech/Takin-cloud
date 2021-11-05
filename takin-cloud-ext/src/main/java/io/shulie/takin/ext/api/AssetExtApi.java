@@ -3,10 +3,7 @@ package io.shulie.takin.ext.api;
 import java.util.List;
 import java.math.BigDecimal;
 
-import io.shulie.takin.ext.content.asset.AssetBalanceExt;
-import io.shulie.takin.ext.content.asset.AssetBillExt;
-import io.shulie.takin.ext.content.asset.AccountInfoExt;
-import io.shulie.takin.ext.content.asset.AssetInvoiceExt;
+import io.shulie.takin.ext.content.asset.*;
 import io.shulie.takin.plugin.framework.core.extension.ExtensionPoint;
 
 /**
@@ -22,16 +19,23 @@ public interface AssetExtApi extends ExtensionPoint {
      * 冻结账户余额
      *
      * @param invoice 付款单
+     * @return 返回冻结记录ID
      */
-    void lock(AssetInvoiceExt invoice);
+    String lock(AssetInvoiceExt<List<AssetBillExt>> invoice);
+
+    /**
+     * 释放账户余额
+     * @param lockId 冻结资金记录ID,lock的返回值
+     */
+    boolean unlock(String lockId);
 
     /**
      * 释放账户余额
      *
-     * @param uid     用户主键
+     * @param customerId     租户ID
      * @param outerId 外部交易资金流水编号
      */
-    void unlock(Long uid, String outerId);
+    boolean unlock(Long customerId, String outerId);
 
     /**
      * 付款
@@ -39,7 +43,7 @@ public interface AssetExtApi extends ExtensionPoint {
      * @param invoice 付款单
      * @return 实付资产量
      */
-    BigDecimal payment(AssetInvoiceExt invoice);
+    BigDecimal payment(AssetInvoiceExt<RealAssectBillExt> invoice);
 
     /**
      * 计算预估金额
@@ -57,27 +61,21 @@ public interface AssetExtApi extends ExtensionPoint {
     BigDecimal calcEstimateAmount(List<AssetBillExt> bills);
 
     /**
-     * 计算实际金额
-     *
-     * @param bill 业务信息
-     * @return 实际金额
-     */
-    BigDecimal calcRealityAmount(AssetBillExt bill);
-
-    /**
      * 查询账户信息
      *
-     * @param userIdList 用户主键集合
+     * @param customerId 组户ID
+     * @param operateId 操作者id
      * @return 账户信息集合
      */
-    List<AccountInfoExt> queryAccountInfoByUserIds(List<Long> userIdList);
+    AccountInfoExt queryAccount(Long customerId, Long operateId);
 
     /**
      * 初始化用户资产
-     *
-     * @param userId 用户主键
+     * @param customerId    租户id
+     * @param operateId     操作者id
+     * @param operateName   操作者名称
      */
-    void init(Long userId);
+    void init(Long customerId, Long operateId, String operateName);
 
     /**
      * 脚本调试回写流量账户

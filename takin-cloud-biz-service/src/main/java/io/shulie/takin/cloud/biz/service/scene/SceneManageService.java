@@ -13,6 +13,7 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.Sc
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
+import io.shulie.takin.ext.content.asset.AssetBillExt;
 import io.shulie.takin.ext.content.script.ScriptVerityRespExt;
 
 /**
@@ -47,7 +48,10 @@ public interface SceneManageService {
      */
     List<SceneBusinessActivityRefOutput> getBusinessActivityBySceneId(Long sceneId);
 
-    BigDecimal calcEstimateFlow(SceneManageWrapperInput wrapperVO);
+    /**
+     * 预估流量计算
+     */
+    BigDecimal calcEstimateFlow(List<AssetBillExt> bills);
 
     /**
      * 获取压测场景目标路径,当前以/结尾

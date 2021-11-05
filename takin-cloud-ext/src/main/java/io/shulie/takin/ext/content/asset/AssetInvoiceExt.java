@@ -1,9 +1,7 @@
 package io.shulie.takin.ext.content.asset;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.ext.content.AbstractEntry;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
@@ -14,7 +12,7 @@ import lombok.Data;
  * @author 张天赐
  */
 @Data
-public class AssetInvoiceExt extends CloudUserCommonRequestExt implements Serializable {
+public class AssetInvoiceExt<T> extends AbstractEntry {
     /**
      * 场景ID
      */
@@ -23,35 +21,35 @@ public class AssetInvoiceExt extends CloudUserCommonRequestExt implements Serial
      * 任务ID
      */
     private Long taskId;
-    /**
-     * 并发
-     */
-    private Integer expectThroughput;
-    /**
-     * 平均并发
-     */
-    private BigDecimal avgConcurrent;
-    /**
-     * 施压类型,0:并发,1:tps,2:自定义;不填默认为0
-     */
-    private Integer pressureType;
-    /**
-     * 压测模式
-     */
-    private Integer pressureMode;
-    /**
-     * 压测总时长
-     */
-    private Long pressureTotalTime;
-    /**
-     * 递增时长
-     */
-    private Long increasingTime;
-    /**
-     * 阶梯层级
-     */
-    private Integer step;
-
+//    /**
+//     * 并发
+//     */
+//    private Integer expectThroughput;
+//    /**
+//     * 平均并发
+//     */
+//    private BigDecimal avgConcurrent;
+//    /**
+//     * 施压类型,0:并发,1:tps,2:自定义;不填默认为0
+//     */
+//    private Integer pressureType;
+//    /**
+//     * 压测模式
+//     */
+//    private Integer pressureMode;
+//    /**
+//     * 压测总时长
+//     */
+//    private Long pressureTotalTime;
+//    /**
+//     * 递增时长
+//     */
+//    private Long increasingTime;
+//    /**
+//     * 阶梯层级
+//     */
+//    private Integer step;
+//
     /**
      * 来源的详情ID
      * 压测报告 -> 报告ID
@@ -75,9 +73,19 @@ public class AssetInvoiceExt extends CloudUserCommonRequestExt implements Serial
     private Integer resourceType;
 
     /**
-     * 创建者
+     * 操作用户ID
      */
-    private Long creatorId;
-
-    private String creatorName;
+    private Long operateId;
+    /**
+     * 操作人
+     */
+    private String operateName;
+    /**
+     * 租户ID
+     */
+    private Long customerId;
+    /**
+     * 业务数据
+     */
+    private T data;
 }

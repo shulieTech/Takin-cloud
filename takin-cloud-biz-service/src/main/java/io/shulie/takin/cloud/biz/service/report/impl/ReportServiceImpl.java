@@ -20,6 +20,9 @@ import javax.annotation.Resource;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+import io.shulie.takin.cloud.common.utils.*;
+import io.shulie.takin.ext.content.asset.RealAssectBillExt;
+import io.shulie.takin.ext.content.enums.AssetTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.influxdb.impl.TimeUtil;
 import cn.hutool.core.util.StrUtil;
@@ -37,13 +40,10 @@ import org.apache.commons.lang3.StringUtils;
 import io.shulie.takin.utils.json.JsonHelper;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.MapUtils;
-import io.shulie.takin.cloud.common.utils.GsonUtil;
-import io.shulie.takin.cloud.common.utils.NumberUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.shulie.takin.cloud.common.bean.sla.SlaBean;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import org.apache.commons.collections4.CollectionUtils;
-import io.shulie.takin.cloud.common.utils.TestTimeUtil;
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
 import io.shulie.takin.ext.content.asset.AssetInvoiceExt;
@@ -53,7 +53,6 @@ import io.shulie.takin.cloud.common.bean.task.TaskResult;
 import io.shulie.takin.cloud.common.influxdb.InfluxDBUtil;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
@@ -1118,13 +1117,14 @@ public class ReportServiceImpl implements ReportService {
         //链路通知存在一定耗时，如果大于预设值，则置为预设值
         SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(reportResult.getSceneId(),
             new SceneManageQueryOpitons());
-        Long totalTestTime = sceneManage.getTotalTestTime();
+        long totalTestTime = CommonUtil.getValue(0L, sceneManage, SceneManageWrapperOutput::getTotalTestTime);
         Date curDate = new Date();
         long testRunTime = DateUtil.between(reportResult.getStartTime(), curDate, DateUnit.SECOND);
         if (testRunTime > totalTestTime) {
             //强制修改结束时间
-            curDate = DateUtil.offset(reportResult.getStartTime(), DateField.SECOND, totalTestTime.intValue());
+            curDate = DateUtil.offset(reportResult.getStartTime(), DateField.SECOND, (int) totalTestTime);
         }
+        testRunTime = Math.max(testRunTime, totalTestTime);
 
         //保存报表数据
         reportResult.setTotalRequest(statReport.getTotalRequest());
@@ -1138,32 +1138,55 @@ public class ReportServiceImpl implements ReportService {
         reportResult.setGmtUpdate(new Date());
         reportResult.setAvgConcurrent(statReport.getAvgConcurrenceNum());
 
-        //todo 流量计算
         //流量结算
-        AssetInvoiceExt accountTradeRequest = new AssetInvoiceExt() {{
-            setPressureTotalTime(testRunTime > totalTestTime ? totalTestTime : testRunTime);
-//            setPressureMode(sceneManage.getPressureMode());
-//            setIncreasingTime(sceneManage.getIncreasingSecond());
-            setPressureType(sceneManage.getPressureType());
-            setTaskId(reportResult.getId());
-            setSceneId(reportResult.getSceneId());
-            setCustomerId(reportResult.getCustomerId());
-//            setStep(sceneManage.getStep());
-            setAvgConcurrent(statReport.getAvgConcurrenceNum());
-        }};
-        if (statReport.getTps() == null) {
-            accountTradeRequest.setExpectThroughput(1);
-        } else {
-            accountTradeRequest.setExpectThroughput((
-                statReport.getTps()
-                    .divide(new BigDecimal("1000"), 2, RoundingMode.FLOOR)
-                    .multiply(statReport.getAvgRt())).intValue() + 1);
-        }
-        log.info("流量结算：{}", JSON.toJSONString(accountTradeRequest));
+
+//        AssetInvoiceExt accountTradeRequest = new AssetInvoiceExt() {{
+//            setPressureTotalTime(testRunTime > totalTestTime ? totalTestTime : testRunTime);
+////            setPressureMode(sceneManage.getPressureMode());
+////            setIncreasingTime(sceneManage.getIncreasingSecond());
+//            setPressureType(sceneManage.getPressureType());
+//            setTaskId(reportResult.getId());
+//            setSceneId(reportResult.getSceneId());
+//            setCustomerId(reportResult.getCustomerId());
+////            setStep(sceneManage.getStep());
+//            setAvgConcurrent(statReport.getAvgConcurrenceNum());
+//        }};
+//        if (statReport.getTps() == null) {
+//            accountTradeRequest.setExpectThroughput(1);
+//        } else {
+//            accountTradeRequest.setExpectThroughput((
+//                statReport.getTps()
+//                    .divide(new BigDecimal("1000"), 2, RoundingMode.FLOOR)
+//                    .multiply(statReport.getAvgRt())).intValue() + 1);
+//        }
+//        log.info("流量结算：{}", JSON.toJSONString(accountTradeRequest));
 
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
-        if (assetExtApi != null) {
-            BigDecimal amount = assetExtApi.payment(accountTradeRequest);
+        if (null != assetExtApi) {
+            AssetInvoiceExt<RealAssectBillExt> invoice = new AssetInvoiceExt<>();
+            invoice.setSceneId(reportResult.getSceneId());
+            invoice.setTaskId(reportResult.getId());
+            invoice.setCustomerId(reportResult.getCustomerId());
+            invoice.setResourceId(reportResult.getId());
+            invoice.setResourceType(AssetTypeEnum.PRESS_REPORT.getCode());
+            invoice.setResourceName(AssetTypeEnum.PRESS_REPORT.getName());
+            invoice.setOperateId(reportResult.getOperateId());
+            invoice.setOperateName(reportResult.getOperateName());
+
+            RealAssectBillExt bill = new RealAssectBillExt();
+            bill.setTime(testRunTime);
+
+            BigDecimal avgThreadNum;
+            //如果有平均rt和平均tps，则:threadNum=tps*rt/1000,否则取报告中的平均线程数
+            if (null != reportResult.getAvgTps() && null != reportResult.getAvgRt()) {
+                avgThreadNum = reportResult.getAvgTps().multiply(reportResult.getAvgRt())
+                        .divide(new BigDecimal(1000), 10, RoundingMode.HALF_UP);
+            } else {
+                avgThreadNum = reportResult.getAvgConcurrent();
+            }
+            bill.setAvgThreadNum(avgThreadNum);
+            invoice.setData(bill);
+            BigDecimal amount = assetExtApi.payment(invoice);
             reportResult.setAmount(amount);
         }
 
