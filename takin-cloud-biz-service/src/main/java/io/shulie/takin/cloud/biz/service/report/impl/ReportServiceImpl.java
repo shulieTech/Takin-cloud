@@ -149,7 +149,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo<CloudReportDTO> listReport(ReportQueryParam param) {
 
-        PageHelper.startPage(param.getCurrentPage() + 1, param.getPageSize());
+        PageHelper.startPage(param.getPageNumber(), param.getPageSize());
         //默认只查询普通场景的报告
         if (param.getType() == null) {
             param.setType(0);
@@ -589,7 +589,7 @@ public class ReportServiceImpl implements ReportService {
         }
 
         sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(),
-            reportResult.getTenantId())
+                reportResult.getTenantId())
             .checkEnum(SceneManageStatusEnum.getAll()).updateEnum(SceneManageStatusEnum.FORCE_STOP).build());
 
     }

@@ -12,21 +12,13 @@ import io.shulie.takin.common.beans.page.PagingDevice;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PagingContextExt extends PagingDevice {
+public class PagingContextExt extends ContextExt {
     /**
-     * 用户主键
+     * 分页页码
      */
-    Long userId;
+    private int pageNumber = 1;
     /**
-     * 环境编码
+     * 分页大小
      */
-    String envCode;
-    /**
-     * 租户主键
-     */
-    Long tenantId;
-    /**
-     * SQL过滤标识
-     */
-    String filterSql;
+    private int pageSize = 20;
 }

@@ -1,9 +1,9 @@
 package io.shulie.takin.cloud.sdk.model.request.scenemanage;
 
-
-import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import io.shulie.takin.cloud.ext.content.trace.PagingContextExt;
 
 /**
  * @author 无涯
@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SceneManageQueryReq extends ContextExt {
+public class SceneManageQueryReq extends PagingContextExt {
 
     private Long sceneId;
 
@@ -22,10 +22,10 @@ public class SceneManageQueryReq extends ContextExt {
     /**
      * 场景ids (逗号进行分割)
      */
-    private String sceneIds ;
+    private String sceneIds;
 
-    private String lastPtStartTime ;
+    private String lastPtStartTime;
 
-    private String lastPtEndTime ;
+    private String lastPtEndTime;
 
 }

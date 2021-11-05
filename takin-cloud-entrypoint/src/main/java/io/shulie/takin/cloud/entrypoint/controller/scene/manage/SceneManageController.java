@@ -177,7 +177,7 @@ public class SceneManageController {
     @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_SEARCH)
     @ApiOperation(value = "压测场景列表")
     public ResponseResult<List<SceneManageListOutput>> getList(
-        @ApiParam(name = "current", value = "页码", required = true) Integer current,
+        @ApiParam(name = "current", value = "页码", required = true) Integer pageNumber,
         @ApiParam(name = "pageSize", value = "页大小", required = true) Integer pageSize,
         @ApiParam(name = "customerName", value = "客户名称") String customerName,
         @ApiParam(name = "tenantId", value = "客户ID") Long tenantId,
@@ -194,8 +194,8 @@ public class SceneManageController {
          * 3、返回指定格式
          */
         SceneManageQueryInput queryVO = new SceneManageQueryInput();
-        queryVO.setCurrentPage(current);
         queryVO.setPageSize(pageSize);
+        queryVO.setPageNumber(pageNumber);
         queryVO.setTenantId(tenantId);
         queryVO.setSceneId(sceneId);
         queryVO.setSceneName(sceneName);

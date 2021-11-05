@@ -320,7 +320,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     @Override
     public PageInfo<SceneManageListOutput> queryPageList(SceneManageQueryInput queryVO) {
 
-        Page<SceneManageListOutput> page = PageHelper.startPage(queryVO.getCurrentPage() + 1, queryVO.getPageSize());
+        Page<SceneManageListOutput> page = PageHelper.startPage(queryVO.getPageNumber() , queryVO.getPageSize());
         SceneManageQueryBean sceneManageQueryBean = new SceneManageQueryBean();
         BeanUtils.copyProperties(queryVO, sceneManageQueryBean);
         //默认查询普通类型场景，场景类型目前不透出去
