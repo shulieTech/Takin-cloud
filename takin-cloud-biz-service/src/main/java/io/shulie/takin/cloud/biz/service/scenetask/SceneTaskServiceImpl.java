@@ -93,6 +93,7 @@ import io.shulie.takin.ext.content.asset.AssetBalanceExt;
 import io.shulie.takin.ext.content.asset.AssetBillExt;
 import io.shulie.takin.ext.content.asset.AssetInvoiceExt;
 import io.shulie.takin.ext.content.enums.AssetTypeEnum;
+import io.shulie.takin.ext.content.response.Response;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.utils.json.JsonHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -293,15 +294,15 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 invoice.setData(Lists.newArrayList(bill));
             }
             try {
-                String lockId = assetExtApi.lock(invoice);
-                if (StringUtils.isNotBlank(lockId)) {
+                Response<String> res = assetExtApi.lock(invoice);
+                if (null != res && res.isSuccess() && StringUtils.isNotBlank(res.getData())) {
                     ReportUpdateParam rp = new ReportUpdateParam();
                     rp.setId(report.getId());
                     JSONObject features = JsonUtil.parse(report.getFeatures());
                     if (null == features) {
                         features = new JSONObject();
                     }
-                    features.put("lockId", lockId);
+                    features.put("lockId", res.getData());
 //                rp.setLockId(lockId);
                     reportDao.updateReport(rp);
                 } else {
