@@ -6,8 +6,6 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Mapper;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
-import io.shulie.takin.cloud.common.annotation.DataApartInterceptAnnotation;
 
 /**
  * 场景 mapper
@@ -33,15 +31,6 @@ public interface TSceneManageMapper {
      * @return -
      */
     int updateStatus(UpdateStatusBean record);
-
-    /**
-     * 分页查询
-     *
-     * @param queryVO -
-     * @return -
-     */
-    @DataApartInterceptAnnotation
-    List<SceneManage> getPageList(SceneManageQueryBean queryVO);
 
     /**
      * 查询所有场景信息

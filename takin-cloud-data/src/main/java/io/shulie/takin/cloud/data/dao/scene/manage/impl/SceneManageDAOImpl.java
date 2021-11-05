@@ -1,23 +1,29 @@
 package io.shulie.takin.cloud.data.dao.scene.manage.impl;
 
 import java.util.List;
+import java.util.Objects;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.bean.BeanUtil;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
-import io.shulie.takin.cloud.data.converter.senemange.SceneManageEntityConverter;
-import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
-import io.shulie.takin.cloud.data.mapper.mysql.SceneManageMapper;
-import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
-import io.shulie.takin.cloud.data.util.MPUtil;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
+import org.apache.commons.collections4.CollectionUtils;
+
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+
+import io.shulie.takin.cloud.data.util.MPUtil;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
+import io.shulie.takin.cloud.data.mapper.mysql.SceneManageMapper;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
+import io.shulie.takin.cloud.data.converter.senemange.SceneManageEntityConverter;
+import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
 
 /**
  * @author 无涯
@@ -57,8 +63,18 @@ public class SceneManageDAOImpl
     }
 
     @Override
-    public List<SceneManageResult> getPageList(SceneManageQueryBean queryBean) {
-        return null;
+    public List<SceneManageEntity> getPageList(SceneManageQueryBean queryBean) {
+        LambdaQueryWrapper<SceneManageEntity> wrapper = Wrappers.lambdaQuery(SceneManageEntity.class)
+            .eq(!Objects.isNull(queryBean.getSceneId()), SceneManageEntity::getId, queryBean.getSceneId())
+            .in(!CollectionUtils.isEmpty(queryBean.getSceneIds()), SceneManageEntity::getId, queryBean.getSceneId())
+            .like(!StrUtil.isBlank(queryBean.getSceneName()), SceneManageEntity::getSceneName, queryBean.getSceneName())
+            .eq(!Objects.isNull(queryBean.getStatus()), SceneManageEntity::getStatus, queryBean.getStatus())
+            .eq(!Objects.isNull(queryBean.getType()), SceneManageEntity::getType, queryBean.getType())
+            .le(!Objects.isNull(queryBean.getLastPtEndTime()), SceneManageEntity::getLastPtTime, queryBean.getLastPtEndTime())
+            .ge(!Objects.isNull(queryBean.getLastPtStartTime()), SceneManageEntity::getLastPtTime, queryBean.getLastPtStartTime())
+            .eq(!Objects.isNull(queryBean.getTenantId()), SceneManageEntity::getTenantId, queryBean.getTenantId())
+            .eq(!StrUtil.isBlank(queryBean.getEnvCode()), SceneManageEntity::getEnvCode, queryBean.getEnvCode());
+        return this.baseMapper.selectList(wrapper);
     }
 
     @Override
@@ -106,5 +122,21 @@ public class SceneManageDAOImpl
         return this.baseMapper.update(
             new SceneManageEntity() {{setStatus(status);}},
             Wrappers.lambdaQuery(SceneManageEntity.class).eq(SceneManageEntity::getId, sceneId));
+    }
+
+    /**
+     * 根据场景主键设置场景状态
+     *
+     * @param sceneId       场景主键
+     * @param status        状态值
+     * @param compareStatus （CAS操作）需要比较的状态值，为空则不进行比较
+     * @return 操作影响行数
+     */
+    @Override
+    public int updateStatus(Long sceneId, Integer status, Integer compareStatus) {
+        LambdaQueryWrapper<SceneManageEntity> wrapper = Wrappers.lambdaQuery(SceneManageEntity.class)
+            .eq(!Objects.isNull(sceneId), SceneManageEntity::getId, sceneId)
+            .eq(!Objects.isNull(compareStatus), SceneManageEntity::getStatus, compareStatus);
+        return this.baseMapper.update(new SceneManageEntity() {{setStatus(status);}}, wrapper);
     }
 }

@@ -96,57 +96,6 @@
           and status = #{preStatus}
     </update>
 
-    <select id="getPageList" parameterType="com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageQueryVO"
-            resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from t_scene_manage
-        <where>
-            <if test="sceneId != null">
-                and id = #{sceneId}
-            </if>
-            <if test="tenantIds != null and tenantIds.size() > 0">
-                and customer_id in
-                <foreach collection="tenantIds" item="item" open="(" separator="," close=")">
-                    #{item}
-                </foreach>
-            </if>
-            <if test="sceneIds != null and sceneIds.size() > 0">
-                and id in
-                <foreach collection="sceneIds" item="sceneId" open="(" separator="," close=")">
-                    #{sceneId}
-                </foreach>
-            </if>
-            <if test="tenantId != null">
-                and customer_id = #{tenantId}
-            </if>
-            <if test="sceneName != null">
-                and scene_name like concat('%', #{sceneName}, '%')
-            </if>
-            <if test="status != null">
-                and status = #{status}
-            </if>
-            <if test="type != null">
-                and `type` = #{type}
-            </if>
-
-            <if test="lastPtEndTime != null and lastPtEndTime != ''">
-                and last_pt_time &lt;= #{lastPtEndTime,jdbcType=VARCHAR}
-            </if>
-            <if test="lastPtStartTime != null and lastPtStartTime != ''">
-                and last_pt_time &gt;= #{lastPtStartTime,jdbcType=VARCHAR}
-            </if>
-            <if test="tenantId != null">
-                and `tenant_id` = #{tenantId}
-            </if>
-            <if test="envCode != null">
-                and `env_code` = #{envCode}
-            </if>
-            and is_deleted = 0
-        </where>
-        order by last_pt_time desc, id desc
-    </select>
-
     <select id="getByIds" resultMap="BaseResultMap">
         select * from t_scene_manage
         where id in

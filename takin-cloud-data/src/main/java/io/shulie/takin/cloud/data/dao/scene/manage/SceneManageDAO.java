@@ -44,7 +44,7 @@ public interface SceneManageDAO extends IService<SceneManageEntity> {
      * @param queryBean -
      * @return -
      */
-    List<SceneManageResult> getPageList(SceneManageQueryBean queryBean);
+    List<SceneManageEntity> getPageList(SceneManageQueryBean queryBean);
 
     /**
      * 根据名称查询压测场景
@@ -86,4 +86,14 @@ public interface SceneManageDAO extends IService<SceneManageEntity> {
      * @return 操作影响行数
      */
     int updateStatus(Long sceneId, Integer status);
+
+    /**
+     * 根据场景主键设置场景状态
+     *
+     * @param sceneId       场景主键
+     * @param status        状态值
+     * @param compareStatus （CAS操作）需要比较的状态值，为空则不进行比较
+     * @return 操作影响行数
+     */
+    int updateStatus(Long sceneId, Integer status, Integer compareStatus);
 }

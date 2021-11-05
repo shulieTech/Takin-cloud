@@ -327,13 +327,27 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (sceneManageQueryBean.getType() == null) {
             sceneManageQueryBean.setType(0);
         }
-        List<SceneManage> queryList = tSceneManageMapper.getPageList(sceneManageQueryBean);
+        List<SceneManageEntity> queryList = sceneManageDAO.getPageList(sceneManageQueryBean);
         if (CollectionUtils.isEmpty(queryList)) {
             return new PageInfo<>(Lists.newArrayList());
         }
-        List<SceneManageListOutput> resultList = SceneManageDTOConvert.INSTANCE.ofs(queryList);
+        List<SceneManageListOutput> resultList = queryList.stream().map(t -> new SceneManageListOutput() {{
+            setStatus(t.getStatus());
+            setFeatures(t.getFeatures());
+            setId(t.getId());
+            setLastPtTime(DateUtil.formatDateTime(t.getLastPtTime()));
+            setSceneName(t.getSceneName());
+            setEstimateFlow(null);
+            setHasReport(false);
+            setThreadNum(null);
+            setType(t.getType());
+            setEnvCode(t.getEnvCode());
+            setTenantId(t.getTenantId());
+            setUserId(t.getUserId());
+            setUserName(null);
+        }}).collect(Collectors.toList());
         Map<Long, Integer> threadNum = new HashMap<>(1);
-        for (SceneManage sceneManage : queryList) {
+        for (SceneManageEntity sceneManage : queryList) {
             if (sceneManage.getPtConfig() == null) {
                 continue;
             }
@@ -527,7 +541,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     @Override
     public void updateSceneManageStatus(UpdateStatusBean statusVO) {
-        tSceneManageMapper.updateStatus(statusVO);
+        sceneManageDAO.updateStatus(statusVO.getSceneId(), statusVO.getAfterStatus(), statusVO.getPreStatus());
     }
 
     @Override
@@ -628,13 +642,13 @@ public class SceneManageServiceImpl implements SceneManageService {
             return;
         }
         // 状态 更新 失败状态
-        SceneManage sceneManage = new SceneManage();
+        SceneManageEntity sceneManage = new SceneManageEntity();
         sceneManage.setLastPtTime(new Date());
         sceneManage.setId(sceneId);
         sceneManage.setUpdateTime(new Date());
         // --->update 失败状态
         sceneManage.setStatus(SceneManageStatusEnum.FAILED.getValue());
-        tSceneManageMapper.updateByPrimaryKeySelective(sceneManage);
+        sceneManageDAO.getBaseMapper().updateById(sceneManage);
 
     }
 
@@ -767,6 +781,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         }
 
     }
+
     private void updateFilesExceptBigFile(List<SceneScriptRefInput> inputList, Long sceneId) {
         String destPath = scriptPath + SceneManageConstant.FILE_SPLIT + sceneId + SceneManageConstant.FILE_SPLIT;
         try {
@@ -796,14 +811,14 @@ public class SceneManageServiceImpl implements SceneManageService {
     /**
      * 文件迁移
      *
-     * @param inputList
-     * @param destPath
+     * @param inputList 文件列表
+     * @param destPath  目标路径
      */
     private void transferTo(List<SceneScriptRefInput> inputList, String destPath) {
         // 数据文件、脚本文件
         List<SceneScriptRefInput> normalFileList = inputList.stream()
-                .filter(input -> FileTypeBusinessUtil.isScriptOrData(input.getFileType()))
-                .collect(Collectors.toList());
+            .filter(input -> FileTypeBusinessUtil.isScriptOrData(input.getFileType()))
+            .collect(Collectors.toList());
 
         if (CollectionUtils.isNotEmpty(normalFileList)) {
             for (SceneScriptRefInput file : normalFileList) {
@@ -813,8 +828,8 @@ public class SceneManageServiceImpl implements SceneManageService {
 
         // 附件
         List<SceneScriptRefInput> attachmentFileList = inputList.stream()
-                .filter(input -> FileTypeBusinessUtil.isAttachment(input.getFileType()))
-                .collect(Collectors.toList());
+            .filter(input -> FileTypeBusinessUtil.isAttachment(input.getFileType()))
+            .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(attachmentFileList)) {
             String attachmentPath = destPath + SceneManageConstant.FILE_SPLIT + "attachments";
             for (SceneScriptRefInput file : attachmentFileList) {
@@ -826,15 +841,15 @@ public class SceneManageServiceImpl implements SceneManageService {
     private void delFilesByDirExceptBigFile(List<SceneScriptRefInput> inputList, String destPath) {
         //找到大文件
         List<String> bigFileNames = inputList.stream()
-                .filter(t -> StringUtil.isNotBlank(t.getFileExtend()))
-                .filter(file -> {
-                    JSONObject json2Bean = JsonHelper.json2Bean(file.getFileExtend(), JSONObject.class);
-                    if (null != json2Bean) {
-                        Integer isBigFile = json2Bean.getInteger("isBigFile");
-                        return isBigFile != null && isBigFile.equals(1);
-                    }
-                    return false;
-                }).map(SceneScriptRefInput::getFileName).collect(Collectors.toList());
+            .filter(t -> StringUtil.isNotBlank(t.getFileExtend()))
+            .filter(file -> {
+                JSONObject json2Bean = JsonHelper.json2Bean(file.getFileExtend(), JSONObject.class);
+                if (null != json2Bean) {
+                    Integer isBigFile = json2Bean.getInteger("isBigFile");
+                    return isBigFile != null && isBigFile.equals(1);
+                }
+                return false;
+            }).map(SceneScriptRefInput::getFileName).collect(Collectors.toList());
         String bigFileName = CollectionUtils.isEmpty(bigFileNames) ? null : bigFileNames.get(0);
         //删除除了大文件之外的文件
         File destDir = new File(destPath);
