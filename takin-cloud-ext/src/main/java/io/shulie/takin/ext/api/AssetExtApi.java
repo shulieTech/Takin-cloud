@@ -72,11 +72,9 @@ public interface AssetExtApi extends ExtensionPoint {
 
     /**
      * 初始化用户资产
-     * @param customerId    租户id
-     * @param operateId     操作者id
-     * @param operateName   操作者名称
+     * @param userId    用户id
      */
-    void init(Long customerId, Long operateId, String operateName);
+    void init(Long userId);
 
     /**
      * 脚本调试回写流量账户
