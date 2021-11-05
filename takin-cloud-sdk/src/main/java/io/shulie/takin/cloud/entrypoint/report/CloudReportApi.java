@@ -1,24 +1,25 @@
 package io.shulie.takin.cloud.entrypoint.report;
 
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import io.shulie.takin.cloud.sdk.model.common.BusinessActivitySummaryBean;
+import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportResp;
 import io.shulie.takin.cloud.sdk.model.request.report.TrendRequest;
 import io.shulie.takin.cloud.sdk.model.request.report.WarnQueryReq;
-import io.shulie.takin.cloud.sdk.model.response.report.ActivityResponse;
-import io.shulie.takin.cloud.sdk.model.response.report.MetricesResponse;
-import io.shulie.takin.cloud.sdk.model.response.report.ReportResp;
 import io.shulie.takin.cloud.sdk.model.request.report.WarnCreateReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
+import io.shulie.takin.cloud.sdk.model.response.report.TrendResponse;
+import io.shulie.takin.cloud.sdk.model.response.report.ActivityResponse;
+import io.shulie.takin.cloud.sdk.model.response.report.MetricesResponse;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportDetailResp;
+import io.shulie.takin.cloud.sdk.model.common.BusinessActivitySummaryBean;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailByIdReq;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.WarnDetailResponse;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailBySceneIdReq;
 import io.shulie.takin.cloud.sdk.model.request.common.CloudCommonInfoWrapperReq;
 import io.shulie.takin.cloud.sdk.model.request.report.UpdateReportConclusionReq;
-import io.shulie.takin.cloud.sdk.model.response.report.TrendResponse;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.WarnDetailResponse;
 
 /**
  * @author mubai
@@ -33,7 +34,7 @@ public interface CloudReportApi {
      * @param req 入参
      * @return 报告列表
      */
-    List<ReportResp> listReport(ReportQueryReq req);
+    ResponseResult<List<ReportResp>> listReport(ReportQueryReq req);
 
     /**
      * 报告详情
@@ -73,7 +74,7 @@ public interface CloudReportApi {
      * @param req 请求信息
      * @return 告警集合
      */
-    List<WarnDetailResponse> listWarn(WarnQueryReq req);
+    ResponseResult<List<WarnDetailResponse>> listWarn(WarnQueryReq req);
 
     /**
      * 根据报告主键获取业务活动

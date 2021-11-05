@@ -73,7 +73,6 @@ public class ReportController {
     @ApiOperation("报告列表")
     public ResponseResult<List<CloudReportDTO>> listReport(ReportQueryParam reportQuery) {
         PageInfo<CloudReportDTO> reportList = reportService.listReport(reportQuery);
-        setHttpResponseHeader(reportList.getTotal());
         return ResponseResult.success(reportList.getList(), reportList.getTotal());
     }
 
@@ -151,14 +150,9 @@ public class ReportController {
     @GetMapping(EntrypointUrl.METHOD_REPORT_WARN_LIST)
     @ApiOperation("警告列表")
     public ResponseResult<List<WarnDetailResponse>> listWarn(WarnQueryParam param) {
-        PageInfo<WarnDetailOutput> warnDetailOutputPageInfo = reportService.listWarn(param);
-        setHttpResponseHeader(warnDetailOutputPageInfo.getTotal());
-        if (warnDetailOutputPageInfo.getTotal() == 0) {
-            return ResponseResult.success(Lists.newArrayList());
-        }
-        List<WarnDetailResponse> responses = WarnDetailRespConvertor.INSTANCE.ofList(
-            warnDetailOutputPageInfo.getList());
-        return ResponseResult.success(responses);
+        PageInfo<WarnDetailOutput> list = reportService.listWarn(param);
+        List<WarnDetailResponse> responses = WarnDetailRespConvertor.INSTANCE.ofList(list.getList());
+        return ResponseResult.success(responses, list.getTotal());
     }
 
     @GetMapping(EntrypointUrl.METHOD_REPORT_ACTIVITY_REPORT_ID)
@@ -222,16 +216,6 @@ public class ReportController {
     @ApiOperation("当前压测的所有数据")
     public ResponseResult<List<Metrices>> metrics(Long reportId, Long sceneId, Long tenantId) {
         return ResponseResult.success(reportService.metric(reportId, sceneId, tenantId));
-    }
-
-    /**
-     * todo 临时方案，后面逐渐去掉这种网络请求
-     */
-    private void setHttpResponseHeader(Long total) {
-        HttpServletResponse response = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes())
-            .getResponse();
-        response.setHeader("Access-Control-Expose-Headers", PAGE_TOTAL_HEADER);
-        response.setHeader(PAGE_TOTAL_HEADER, total + "");
     }
 
     @PostMapping(EntrypointUrl.METHOD_REPORT_WARN_ADD)

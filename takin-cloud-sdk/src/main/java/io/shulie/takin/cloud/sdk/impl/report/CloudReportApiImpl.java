@@ -41,9 +41,10 @@ public class CloudReportApiImpl implements CloudReportApi {
     CloudApiSenderService cloudApiSenderService;
 
     @Override
-    public List<ReportResp> listReport(ReportQueryReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_LIST),
-            req, new TypeReference<ResponseResult<List<ReportResp>>>() {}).getData();
+    public ResponseResult<List<ReportResp>> listReport(ReportQueryReq req) {
+        ResponseResult<List<ReportResp>> result = cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_LIST),
+            req, new TypeReference<ResponseResult<List<ReportResp>>>() {});
+        return ResponseResult.success(result.getData(), result.getTotalNum());
     }
 
     @Override
@@ -72,9 +73,10 @@ public class CloudReportApiImpl implements CloudReportApi {
     }
 
     @Override
-    public List<WarnDetailResponse> listWarn(WarnQueryReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_WARN_LIST),
-            req, new TypeReference<ResponseResult<List<WarnDetailResponse>>>() {}).getData();
+    public ResponseResult<List<WarnDetailResponse>> listWarn(WarnQueryReq req) {
+        ResponseResult<List<WarnDetailResponse>> result = cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_WARN_LIST),
+            req, new TypeReference<ResponseResult<List<WarnDetailResponse>>>() {});
+        return ResponseResult.success(result.getData(), result.getTotalNum());
     }
 
     /**
