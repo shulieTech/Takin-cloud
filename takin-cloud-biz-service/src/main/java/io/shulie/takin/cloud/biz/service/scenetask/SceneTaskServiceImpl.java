@@ -31,7 +31,6 @@ import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
-import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
 import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
 import io.shulie.takin.cloud.biz.input.scenemanage.*;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput.FileInfo;
@@ -81,7 +80,6 @@ import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
-import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
@@ -118,10 +116,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     @Resource
     private TSceneManageMapper tSceneManageMapper;
 
-    @Autowired
+    @Resource
     private SceneManageService sceneManageService;
 
-    @Autowired
+    @Resource
     private SceneTaskEventServie sceneTaskEventServie;
 
     @Resource
@@ -156,9 +154,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     @Autowired
     private EnginePluginUtils enginePluginUtils;
-
-    @Autowired
-    private SceneTaskStatusCache taskStatusCache;
 
     private static final Long KB = 1024L;
     private static final Long MB = KB * 1024;
@@ -765,20 +760,18 @@ public class SceneTaskServiceImpl implements SceneTaskService {
      */
     private void preCheckStart(SceneManageWrapperOutput sceneData, SceneTaskStartInput input) {
         // 流量判断
-        {
-            if (sceneData.getCustomerId() == null) {
-                throw new TakinCloudException(TakinCloudExceptionEnum.TASK_START_VERIFY_ERROR, "场景没有绑定客户信息");
-            }
-            AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
-            if (assetExtApi != null) {
+        if (null == sceneData.getCustomerId()) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.TASK_START_VERIFY_ERROR, "场景没有绑定客户信息");
+        }
+        AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
+        if (assetExtApi != null) {
 //                List<AccountInfoExt> accountInfoList = assetExtApi.queryAccountInfoByUserIds(
 //                    new ArrayList<Long>(1) {{
 //                        add(sceneData.getCustomerId());
 //                    }});
-                AccountInfoExt account = assetExtApi.queryAccount(sceneData.getCustomerId(), input.getOperateId());
-                if (null == account || account.getBalance().compareTo(sceneData.getEstimateFlow()) < 0) {
-                    throw new TakinCloudException(TakinCloudExceptionEnum.TASK_START_VERIFY_ERROR, "压测流量不足！");
-                }
+            AccountInfoExt account = assetExtApi.queryAccount(sceneData.getCustomerId(), input.getOperateId());
+            if (null == account || account.getBalance().compareTo(sceneData.getEstimateFlow()) < 0) {
+                throw new TakinCloudException(TakinCloudExceptionEnum.TASK_START_VERIFY_ERROR, "压测流量不足！");
             }
         }
 
@@ -934,7 +927,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             //释放流量
             AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
             if (assetExtApi != null) {
-                boolean unLock = false;
+                boolean unLock;
                 if (StringUtils.isNotBlank(amountLockId)) {
                     unLock = assetExtApi.unlock(amountLockId);
                 } else {
@@ -1012,7 +1005,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 }
                 String key = String.format(SceneStartCheckConstants.SCENE_KEY, sceneId);
                 Map<Object, Object> positionMap = redisTemplate.opsForHash().entries(key);
-                if (Objects.nonNull(positionMap)) {
+                if (MapUtils.isNotEmpty(positionMap)) {
                     for (FileInfo info : fileInfoList) {
                         comparePosition(output, sceneId, info.getFileName(), input.getPodNum(), info.isSplit(),
                             positionMap);

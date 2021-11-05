@@ -23,6 +23,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.common.utils.*;
 import io.shulie.takin.ext.content.asset.RealAssectBillExt;
 import io.shulie.takin.ext.content.enums.AssetTypeEnum;
@@ -43,10 +44,13 @@ import org.apache.commons.lang3.StringUtils;
 import io.shulie.takin.utils.json.JsonHelper;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.MapUtils;
+import io.shulie.takin.cloud.common.utils.GsonUtil;
+import io.shulie.takin.cloud.common.utils.NumberUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.shulie.takin.cloud.common.bean.sla.SlaBean;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import org.apache.commons.collections4.CollectionUtils;
+import io.shulie.takin.cloud.common.utils.TestTimeUtil;
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
 import io.shulie.takin.ext.content.asset.AssetInvoiceExt;
@@ -56,6 +60,7 @@ import io.shulie.takin.cloud.common.bean.task.TaskResult;
 import io.shulie.takin.cloud.common.influxdb.InfluxDBUtil;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
@@ -1233,4 +1238,83 @@ public class ReportServiceImpl implements ReportService {
             && StringUtils.isNotEmpty(jsonObject.getString(ReportConstans.SLA_ERROR_MSG));
     }
 
+    private String toNodeTree(String features){
+        if (StringUtils.isNotBlank(features)){
+            JSONObject tmpObj = JSONObject.parseObject(features);
+            if (tmpObj.containsKey("analysisResult")) {
+                return tmpObj.getString("analysisResult");
+            }
+        }
+        return null;
+    }
+
+    private Map<String,Object> fillMap(StatReportDTO statReport,SceneBusinessActivityRefOutput refOutput){
+        if (Objects.isNull(refOutput)) {
+            return null;
+        }
+        Map<String, Object> resultMap = new HashMap<>();
+        if (Objects.nonNull(statReport)) {
+            resultMap.put("avgRt", new DataBean(statReport.getAvgRt(), refOutput.getTargetRT()));
+            resultMap.put("sa", new DataBean(statReport.getSa(), refOutput.getTargetSA()));
+            resultMap.put("tps", new DataBean(statReport.getTps(), refOutput.getTargetTPS()));
+            resultMap.put("successRate", new DataBean(statReport.getSuccessRate(), refOutput.getTargetSuccessRate()));
+            resultMap.put("avgConcurrenceNum", statReport.getAvgConcurrenceNum());
+            resultMap.put("totalRequest", statReport.getTotalRequest());
+        }else {
+            resultMap.put("avgRt", new DataBean("0", refOutput.getTargetRT()));
+            resultMap.put("sa", new DataBean("0", refOutput.getTargetSA()));
+            resultMap.put("tps", new DataBean("0", refOutput.getTargetTPS()));
+            resultMap.put("successRate", new DataBean("0", refOutput.getTargetSuccessRate()));
+            resultMap.put("avgConcurrenceNum", new DataBean("0", refOutput.getTargetSuccessRate()));
+            resultMap.put("totalRequest", 0L);
+        }
+        return resultMap;
+    }
+
+    @Override
+    public String getNodeTree(ReportTrendQueryParam param) {
+        ReportResult reportResult;
+        if (Objects.nonNull(param.getReportId())){
+            reportResult = reportDao.selectById(param.getReportId());
+        }else {
+            reportResult = reportDao.getReportBySceneId(param.getSceneId());
+        }
+
+        if (Objects.isNull(reportResult)){
+            //todo 返回未找到
+            return null;
+        }
+        List<ReportBusinessActivityDetail> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper
+            .queryReportBusinessActivityDetailByReportId(reportResult.getId());
+        if (CollectionUtils.isEmpty(reportBusinessActivityDetails)){
+            return null;
+        }
+        if (StringUtils.isNotBlank(reportResult.getScriptAnalysisResult())){
+            String nodeTree = reportResult.getScriptAnalysisResult();
+            //todo 查询脚本对应的businessActivityId,加入到节点树中
+            DocumentContext context = JsonPath.parse(nodeTree);
+            reportBusinessActivityDetails.stream()
+                .filter(Objects::nonNull)
+                .forEach(detail ->{
+                    Map<String, Map<String, Object>> nodeAddMap = new HashMap<>(1);
+                    Map<String, Object> tmpMap = new HashMap<>();
+                    tmpMap.put("businessActivityId", detail.getBusinessActivityId());
+                    nodeAddMap.put(detail.getBindRef(), tmpMap);
+                    JsonPathUtil.putNodesToJson(context, nodeAddMap);
+                });
+            return context.jsonString();
+        }else {
+            JSONArray resultArray = new JSONArray();
+            reportBusinessActivityDetails.stream()
+                .filter(Objects::nonNull)
+                .forEach(detail ->{
+                    JSONObject json = new JSONObject();
+                    json.put("businessActivityId",detail.getBusinessActivityId());
+                    json.put("testName", detail.getBindRef());
+                    json.put("xpathMd5", detail.getBindRef());
+                    resultArray.add(json);
+                });
+            return resultArray.toJSONString();
+        }
+    }
 }
