@@ -114,6 +114,8 @@ public class FileSliceServiceImpl implements FileSliceService {
             setSceneId(request.getSceneId());
             setFileName(request.getFileName());
             setSliceCount(request.getPodNum());
+            setFileMd5(request.getFileMd5());
+            setFilePath(request.getFilePath());
         }});
     }
 
@@ -170,6 +172,17 @@ public class FileSliceServiceImpl implements FileSliceService {
         return true;
     }
 
+    @Override
+    public void updateFileMd5(SceneBigFileSliceParam param) {
+        SceneScriptRefEntity sceneScriptRefEntity = fileSliceDAO.selectRef(new SceneBigFileSliceParam() {{
+            setSceneId(param.getSceneId());
+            setFileName(param.getFileName());
+        }});
+        if (Objects.nonNull(sceneScriptRefEntity)){
+            sceneScriptRefEntity.setFileMd5(param.getFileMd5());
+            fileSliceDAO.updateRef(sceneScriptRefEntity);
+        }
+    }
 
     @Override
     public SceneContactFileOutput contactScene(SceneBigFileSliceParam param) throws TakinCloudException {

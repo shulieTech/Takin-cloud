@@ -16,7 +16,7 @@ import io.shulie.takin.cloud.common.constants.APIUrls;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.biz.service.scene.SceneService;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
 import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
 
 /**
@@ -34,13 +34,13 @@ public class SceneController {
 
     @PostMapping("/create")
     @ApiOperation(value = "新增压测场景")
-    public ResponseResult<Long> create(@RequestBody @Valid WriteSceneRequest request) {
+    public ResponseResult<Long> create(@RequestBody @Valid SceneRequest request) {
         return ResponseResult.success(sceneService.create(request));
     }
 
     @PostMapping("/update")
     @ApiOperation(value = "更新压测场景")
-    public ResponseResult<Boolean> update(@RequestBody @Valid WriteSceneRequest request) {
+    public ResponseResult<Boolean> update(@RequestBody @Valid SceneRequest request) {
         return ResponseResult.success(sceneService.update(request));
     }
 

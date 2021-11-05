@@ -2,7 +2,7 @@ package io.shulie.takin.cloud.open.api.scene.manage;
 
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneTaskStartReq;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
 import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
 
 /**
@@ -17,7 +17,7 @@ public interface MultipleSceneApi {
      * @param request 入参
      * @return 场景自增主键
      */
-    ResponseResult<Long> create(WriteSceneRequest request);
+    ResponseResult<Long> create(SceneRequest request);
 
     /**
      * 更新压测场景 - 新
@@ -25,7 +25,7 @@ public interface MultipleSceneApi {
      * @param request 入参
      * @return 操作结果
      */
-    ResponseResult<Boolean> update(WriteSceneRequest request);
+    ResponseResult<Boolean> update(SceneRequest request);
 
     /**
      * 获取压测场景 - 新

@@ -34,15 +34,15 @@ public class ScheduleTest {
         runRequest.setScheduleId(scheduleId);
         ScheduleStartRequestExt scheduleStartRequest = new ScheduleStartRequestExt();
         scheduleStartRequest.setContinuedTime(100L);
-        scheduleStartRequest.setPressureMode("fixed");
+        //scheduleStartRequest.setPressureMode("fixed");
         scheduleStartRequest.setTaskId(scheduleId + 1);
         //        scheduleStartRequest.setScriptPath("/etc/engine/script/66/test.jmx");
         scheduleStartRequest.setScriptPath("/etc/engine/script/99/file-split.jmx");
         scheduleStartRequest.setSceneId(scheduleId + 2);
         scheduleStartRequest.setTotalIp(2);
         scheduleStartRequest.setExpectThroughput(50);
-        scheduleStartRequest.setRampUp(2L);
-        scheduleStartRequest.setSteps(3);
+        //scheduleStartRequest.setRampUp(2L);
+        //scheduleStartRequest.setSteps(3);
 
         List<ScheduleStartRequestExt.DataFile> list = new ArrayList<>();
 

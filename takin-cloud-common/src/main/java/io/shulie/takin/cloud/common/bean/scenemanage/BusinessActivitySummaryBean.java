@@ -41,7 +41,7 @@ public class BusinessActivitySummaryBean implements Serializable {
     private DataBean avgRT;
 
     @ApiModelProperty(value = "请求成功率")
-    private DataBean sucessRate;
+    private DataBean successRate;
 
     @ApiModelProperty(value = "SA")
     private DataBean sa;

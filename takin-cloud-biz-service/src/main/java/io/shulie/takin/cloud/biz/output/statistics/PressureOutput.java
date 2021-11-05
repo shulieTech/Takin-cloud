@@ -26,6 +26,8 @@ import org.influxdb.annotation.Column;
 public class PressureOutput {
     @Column(tag = true, name = "transaction")
     private String transaction;
+    @Column(name = "test_name")
+    private String testName;
     @Column(name = "time")
     private long time;
     @Column(name = "count")

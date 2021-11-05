@@ -191,6 +191,11 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
         private boolean isBigFile;
 
         /**
+         * MD5值
+         */
+        private String fileMd5;
+
+        /**
          * 文件分片信息,key-排序，引擎会用到；value-需要读取的分区数据
          */
         Map<Integer, List<StartEndPosition>> startEndPositions;

@@ -30,4 +30,6 @@ public class FileSliceRequest {
     private Boolean forceSplit;
     @ApiModelProperty(name = "文件分隔符")
     private String delimiter;
+    @ApiModelProperty(name = "文件MD5值")
+    private String fileMd5;
 }

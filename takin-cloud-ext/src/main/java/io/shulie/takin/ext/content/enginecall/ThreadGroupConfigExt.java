@@ -1,13 +1,16 @@
 package io.shulie.takin.ext.content.enginecall;
 
-import io.shulie.takin.ext.content.AbstractEntry;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import io.shulie.takin.ext.content.AbstractEntry;
 
 /**
- * @Author: liyuanba
- * @Date: 2021/10/29 9:57 上午
+ * @author liyuanba
+ * @date 2021/10/29 9:57 上午
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ThreadGroupConfigExt extends AbstractEntry {
     /**
      * 压力模式：并发、tps

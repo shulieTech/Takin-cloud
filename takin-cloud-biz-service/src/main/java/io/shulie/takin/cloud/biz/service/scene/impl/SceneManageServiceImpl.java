@@ -993,6 +993,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         wrapperOutput.setLastPtDateTime(sceneManageResult.getLastPtTime());
         fillPtConfig(wrapperOutput, sceneManageResult.getPtConfig());
         wrapperOutput.setFeatures(sceneManageResult.getFeatures());
+        wrapperOutput.setScriptAnalysisResult(sceneManageResult.getScriptAnalysisResult());
 
     }
 

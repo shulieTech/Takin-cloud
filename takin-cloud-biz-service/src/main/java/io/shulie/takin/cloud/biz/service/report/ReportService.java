@@ -205,4 +205,11 @@ public interface ReportService {
      * @param errorMsg 异常信息
      */
     void updateReportOnSceneStartFailed(Long sceneId,Long reportId,String errorMsg);
+
+    /**
+     * 查询报告对应的脚本树结构
+     * @param param 查询参数
+     * @return 树结构json字符串
+     */
+    String getNodeTree(ReportTrendQueryParam param);
 }

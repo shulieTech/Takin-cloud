@@ -4,6 +4,7 @@ import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneContactFileOutput;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
+import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 
 /**
@@ -52,6 +53,11 @@ public interface FileSliceService {
      */
     Boolean updateFileRefExtend(FileSliceRequest request,SceneBigFileSliceParam param);
 
+    /**
+     * 更新 {@link SceneScriptRefEntity} 对应文件的md5值
+     * @param param
+     */
+    void updateFileMd5(SceneBigFileSliceParam param);
 
     /**
      * 关联文件与脚本、场景，并对顺序分片的文件进行预分片

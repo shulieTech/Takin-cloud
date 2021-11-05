@@ -162,4 +162,10 @@ public class ReportEntity {
      */
     @TableField(value = "`lock`")
     private Integer lock;
+
+    /**
+     * 脚本节点树
+     */
+    @TableField(value = "script_analysis_result")
+    private String scriptAnalysisResult;
 }

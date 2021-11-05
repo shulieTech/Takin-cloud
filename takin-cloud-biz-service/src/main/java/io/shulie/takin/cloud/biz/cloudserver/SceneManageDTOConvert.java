@@ -86,6 +86,7 @@ public interface SceneManageDTOConvert {
         @Mapping(source = "uploadPath", target = "uploadPath"),
         @Mapping(source = "uploadTime", target = "uploadTime", dateFormat = "yyyy-MM-dd HH:mm:ss"),
         @Mapping(source = "isDeleted", target = "isDeleted"),
+        @Mapping(source = "fileMd5", target = "fileMd5"),
     })
     SceneManageWrapperOutput.SceneScriptRefOutput of(SceneScriptRef source);
 

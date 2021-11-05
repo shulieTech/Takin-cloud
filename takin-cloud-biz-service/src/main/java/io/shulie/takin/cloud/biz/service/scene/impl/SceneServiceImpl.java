@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 
 import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.ext.content.enginecall.PtConfigExt;
 import io.shulie.takin.cloud.biz.service.scene.SceneService;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneSlaRefEntity;
@@ -37,17 +38,16 @@ import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
 import io.shulie.takin.cloud.data.mapper.mysql.SceneScriptRefMapper;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Goal;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.File;
 import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Content;
 import io.shulie.takin.cloud.data.model.mysql.SceneBusinessActivityRefEntity;
 import io.shulie.takin.cloud.data.mapper.mysql.SceneBusinessActivityRefMapper;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Goal;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.File;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Config;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Content;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.BasicInfo;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.MonitoringGoal;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.DataValidation;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.BasicInfo;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.MonitoringGoal;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.DataValidation;
 
 /**
  * 场景 - 服务实现
@@ -75,7 +75,7 @@ public class SceneServiceImpl implements SceneService {
      * @return 场景主键
      */
     @Override
-    public Long create(WriteSceneRequest in) {
+    public Long create(SceneRequest in) {
         // 1.   创建场景
         long sceneId = createStepScene(in.getBasicInfo(), in.getConfig(), in.getAnalysisResult(), in.getDataValidation());
         // 2. 更新场景&业务活动关联关系
@@ -95,7 +95,7 @@ public class SceneServiceImpl implements SceneService {
      * @return 场景主键
      */
     @Override
-    public Boolean update(WriteSceneRequest in) {
+    public Boolean update(SceneRequest in) {
         // 0.   清除历史项
         {
             Long sceneId = in.getBasicInfo().getSceneId();
@@ -287,10 +287,10 @@ public class SceneServiceImpl implements SceneService {
      * @return 线程组配置<节点MD5, 配置对象>
      */
     @Override
-    public Config getConfig(long sceneId) {
+    public PtConfigExt getConfig(long sceneId) {
         try {
             SceneManageEntity scene = getScene(sceneId);
-            return JSONObject.parseObject(scene.getPtConfig(), new TypeReference<Config>() {});
+            return JSONObject.parseObject(scene.getPtConfig(), new TypeReference<PtConfigExt>() {});
         } catch (JSONException e) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, sceneId + "压测线程组解析错误");
         }
@@ -373,7 +373,7 @@ public class SceneServiceImpl implements SceneService {
      * @return 压测场景主键
      */
     private Long createStepScene(BasicInfo basicInfo,
-        Config config, List<?> analysisResult, DataValidation dataValidation) {
+        PtConfigExt config, List<?> analysisResult, DataValidation dataValidation) {
         Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), dataValidation);
         // 组装数据实体类
         SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),
@@ -412,7 +412,7 @@ public class SceneServiceImpl implements SceneService {
      * @return 数据库更新行数 - 应当为 1
      */
     private int updateStepScene(BasicInfo basicInfo,
-        Config config, List<?> analysisResult, DataValidation dataValidation) {
+        PtConfigExt config, List<?> analysisResult, DataValidation dataValidation) {
         Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), dataValidation);
         // 组装数据实体类
         SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),
@@ -569,7 +569,7 @@ public class SceneServiceImpl implements SceneService {
      * @param analysisResult 脚本解析结果
      * @return 场景实体类
      */
-    private SceneManageEntity assembleSceneEntity(Long sceneId, int type, String name, int scriptType, Config config, Object feature, Object analysisResult) {
+    private SceneManageEntity assembleSceneEntity(Long sceneId, int type, String name, int scriptType, PtConfigExt config, Object feature, Object analysisResult) {
         return new SceneManageEntity() {{
             setId(sceneId);
             setSceneName(name);

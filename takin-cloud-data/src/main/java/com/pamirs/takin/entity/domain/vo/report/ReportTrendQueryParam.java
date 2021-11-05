@@ -31,6 +31,12 @@ public class ReportTrendQueryParam {
     private Long businessActivityId;
 
     /**
+     * xpathMD5
+     */
+    @ApiModelProperty(value = "节点的xpathMD5值，即bindRef,老版本的压测场景是业务活动名称，新版本是md5值")
+    private String xpathMd5;
+
+    /**
      * 开始时间
      */
     @ApiModelProperty(value = "开始时间")

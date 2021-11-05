@@ -13,7 +13,7 @@ import io.shulie.takin.cloud.open.constant.CloudApiConstant;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.open.api.scene.manage.MultipleSceneApi;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneTaskStartReq;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
 import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
 
 /**
@@ -33,7 +33,7 @@ public class MultipleSceneApiImpl extends CloudCommonApi implements MultipleScen
      * @return 场景自增主键
      */
     @Override
-    public ResponseResult<Long> create(WriteSceneRequest request) {
+    public ResponseResult<Long> create(SceneRequest request) {
         TakinResponseEntity<ResponseResult<Long>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.MULTIPLE_SCENE_CREATE,
                 getHeaders(request), new TypeReference<ResponseResult<Long>>() {}, request);
@@ -51,7 +51,7 @@ public class MultipleSceneApiImpl extends CloudCommonApi implements MultipleScen
      * @return 操作结果
      */
     @Override
-    public ResponseResult<Boolean> update(WriteSceneRequest request) {
+    public ResponseResult<Boolean> update(SceneRequest request) {
         TakinResponseEntity<ResponseResult<Boolean>> takinResponseEntity =
             HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.MULTIPLE_SCENE_UPDATE,
                 getHeaders(request), new TypeReference<ResponseResult<Boolean>>() {}, request);

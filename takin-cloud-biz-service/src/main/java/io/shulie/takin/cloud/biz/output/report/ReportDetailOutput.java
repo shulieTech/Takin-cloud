@@ -104,4 +104,6 @@ public class ReportDetailOutput extends CloudUserCommonRequestExt implements Ser
 
     private Long scriptId;
 
+    private String flowDetail;
+
 }

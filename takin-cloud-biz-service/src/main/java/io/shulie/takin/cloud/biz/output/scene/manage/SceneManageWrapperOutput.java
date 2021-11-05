@@ -104,6 +104,8 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
 
     private String features;
 
+    private String scriptAnalysisResult;
+
     private Integer configType;
 
     private Long scriptId;
@@ -220,6 +222,9 @@ public class SceneManageWrapperOutput extends CloudUserCommonRequestExt implemen
 
         @ApiModelProperty(value = "是否大文件")
         private Integer isBigFile;
+
+        @ApiModelProperty(value = "文件MD5值")
+        private String fileMd5;
     }
 
     @Data

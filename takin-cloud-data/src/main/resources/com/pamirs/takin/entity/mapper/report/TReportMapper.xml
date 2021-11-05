@@ -144,6 +144,9 @@
             <if test="scriptId != null">
                 script_id,
             </if>
+            <if test="scriptAnalysisResult != null">
+            script_analysis_result,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -226,6 +229,9 @@
             </if>
             <if test="scriptId != null">
                 #{scriptId,jdbcType=DECIMAL},
+            </if>
+            <if test="scriptAnalysisResult != null">
+             #{scriptAnalysisResult,jdbcType=VARCHAR},
             </if>
         </trim>
     </insert>

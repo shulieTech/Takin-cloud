@@ -130,4 +130,9 @@ public class Report {
     private Long userId;
 
     private Long scriptId;
+
+    /**
+     * 脚本解析结果
+     */
+    private String scriptAnalysisResult;
 }

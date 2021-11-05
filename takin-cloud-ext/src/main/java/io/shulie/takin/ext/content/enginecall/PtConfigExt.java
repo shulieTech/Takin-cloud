@@ -1,16 +1,20 @@
 package io.shulie.takin.ext.content.enginecall;
 
-import io.shulie.takin.ext.content.AbstractEntry;
-import lombok.Data;
-
 import java.util.Map;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import io.shulie.takin.ext.content.AbstractEntry;
 
 /**
  * 施压配置
- * @Author: liyuanba
- * @Date: 2021/10/29 9:51 上午
+ *
+ * @author liyuanba
+ * @date 2021/10/29 9:51 上午
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class PtConfigExt extends AbstractEntry {
     /**
      * pod数

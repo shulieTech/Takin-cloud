@@ -37,6 +37,8 @@ public class ResponseMetrics extends AbstractMetrics {
     private Long time;
     @Column(tag = true, name = "transaction")
     private String transaction;
+    @Column(name = "test_name")
+    private String testName;
     @Column(name = "count")
     private Integer count;
     @Column(name = "fail_count")
@@ -67,6 +69,7 @@ public class ResponseMetrics extends AbstractMetrics {
     private Set<ErrorInfo> errorInfos;
     @Column(name = "percent_data")
     private String percentData;
+
 
     public ResponseMetrics() {
         super(Constants.METRICS_TYPE_RESPONSE);
