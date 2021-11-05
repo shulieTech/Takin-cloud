@@ -69,7 +69,7 @@ public interface AssetExtApi extends ExtensionPoint {
      * @return 账户信息集合
      */
     AccountInfoExt queryAccount(Long customerId, Long operateId);
-    List<AccountInfoExt> queryAccountByCustomerIds(Long customerId);
+    List<AccountInfoExt> queryAccountByCustomerIds(List<Long> customerIds);
 
     /**
      * 初始化用户资产
