@@ -84,6 +84,7 @@ import io.shulie.takin.ext.api.AssetExtApi;
 import io.shulie.takin.ext.api.EngineExtApi;
 import io.shulie.takin.ext.content.asset.AssetBillExt;
 import io.shulie.takin.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.ext.content.response.Response;
 import io.shulie.takin.ext.content.script.ScriptParseExt;
 import io.shulie.takin.ext.content.script.ScriptVerityExt;
 import io.shulie.takin.ext.content.script.ScriptVerityRespExt;
@@ -967,7 +968,11 @@ public class SceneManageServiceImpl implements SceneManageService {
         // 尝试调用插件
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
-            return assetExtApi.calcEstimateAmount(bills);
+            Response<BigDecimal> res = assetExtApi.calcEstimateAmount(bills);
+            if (null != res && res.isSuccess()) {
+                return res.getData();
+            }
+            return BigDecimal.ZERO;
         }
         // 返回0
         else {
@@ -1077,7 +1082,10 @@ public class SceneManageServiceImpl implements SceneManageService {
         BigDecimal value = new BigDecimal(0);
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
-            value = assetExtApi.calcEstimateAmount(BeanUtil.copyProperties(wrapperVO, AssetBillExt.class, ""));
+            Response<BigDecimal> res = assetExtApi.calcEstimateAmount(BeanUtil.copyProperties(wrapperVO, AssetBillExt.class, ""));
+            if (null != res && res.isSuccess() && null != res.getData()) {
+                value = res.getData();
+            }
         }
         map.put(SceneManageConstant.ESTIMATE_FLOW, value);
         return JSON.toJSONString(map);

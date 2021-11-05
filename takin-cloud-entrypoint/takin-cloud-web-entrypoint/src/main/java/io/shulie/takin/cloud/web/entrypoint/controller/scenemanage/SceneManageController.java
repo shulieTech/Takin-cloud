@@ -19,6 +19,7 @@ import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.ext.api.AssetExtApi;
 import io.shulie.takin.ext.content.asset.AssetBillExt;
+import io.shulie.takin.ext.content.response.Response;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.cloud.biz.cache.DictionaryCache;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageQueryInput;
@@ -233,7 +234,10 @@ public class SceneManageController {
         BigDecimal flow = new BigDecimal(0);
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
-            flow = assetExtApi.calcEstimateAmount(bill);
+            Response<BigDecimal> res = assetExtApi.calcEstimateAmount(bill);
+            if (null != res && res.isSuccess() && null != res.getData()) {
+                flow = res.getData();
+            }
         }
         return ResponseResult.success(flow);
     }

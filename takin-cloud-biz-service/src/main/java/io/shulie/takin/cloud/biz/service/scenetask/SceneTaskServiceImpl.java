@@ -292,19 +292,24 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 bill.setPressureTestTimeCost(DataUtils.formatTime(sceneData.getTotalTestTime()));
                 invoice.setData(Lists.newArrayList(bill));
             }
-            String lockId = assetExtApi.lock(invoice);
-            if (StringUtils.isNotBlank(lockId)) {
-                ReportUpdateParam rp = new ReportUpdateParam();
-                rp.setId(report.getId());
-                JSONObject features = JsonUtil.parse(report.getFeatures());
-                if (null == features) {
-                    features = new JSONObject();
-                }
-                features.put("lockId", lockId);
+            try {
+                String lockId = assetExtApi.lock(invoice);
+                if (StringUtils.isNotBlank(lockId)) {
+                    ReportUpdateParam rp = new ReportUpdateParam();
+                    rp.setId(report.getId());
+                    JSONObject features = JsonUtil.parse(report.getFeatures());
+                    if (null == features) {
+                        features = new JSONObject();
+                    }
+                    features.put("lockId", lockId);
 //                rp.setLockId(lockId);
-                reportDao.updateReport(rp);
-            } else {
-                log.error("流量冻结失败");
+                    reportDao.updateReport(rp);
+                } else {
+                    log.error("流量冻结失败");
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                throw e;
             }
 
 //            Long finalResourceId = resourceId;

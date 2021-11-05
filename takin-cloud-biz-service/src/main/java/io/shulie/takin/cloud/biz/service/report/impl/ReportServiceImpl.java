@@ -26,6 +26,7 @@ import com.jayway.jsonpath.JsonPath;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.ext.content.asset.RealAssectBillExt;
 import io.shulie.takin.ext.content.enums.AssetTypeEnum;
+import io.shulie.takin.ext.content.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.influxdb.impl.TimeUtil;
 import cn.hutool.core.util.StrUtil;
@@ -1208,8 +1209,10 @@ public class ReportServiceImpl implements ReportService {
             }
             bill.setAvgThreadNum(avgThreadNum);
             invoice.setData(bill);
-            BigDecimal amount = assetExtApi.payment(invoice);
-            reportResult.setAmount(amount);
+            Response<BigDecimal> paymentRes = assetExtApi.payment(invoice);
+            if (null != paymentRes && paymentRes.isSuccess()) {
+                reportResult.setAmount(paymentRes.getData());
+            }
         }
 
         // 更新

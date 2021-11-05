@@ -4,6 +4,7 @@ import java.util.List;
 import java.math.BigDecimal;
 
 import io.shulie.takin.ext.content.asset.*;
+import io.shulie.takin.ext.content.response.Response;
 import io.shulie.takin.plugin.framework.core.extension.ExtensionPoint;
 
 /**
@@ -21,7 +22,7 @@ public interface AssetExtApi extends ExtensionPoint {
      * @param invoice 付款单
      * @return 返回冻结记录ID
      */
-    String lock(AssetInvoiceExt<List<AssetBillExt>> invoice);
+    Response<String> lock(AssetInvoiceExt<List<AssetBillExt>> invoice);
 
     /**
      * 释放账户余额
@@ -43,7 +44,7 @@ public interface AssetExtApi extends ExtensionPoint {
      * @param invoice 付款单
      * @return 实付资产量
      */
-    BigDecimal payment(AssetInvoiceExt<RealAssectBillExt> invoice);
+    Response<BigDecimal> payment(AssetInvoiceExt<RealAssectBillExt> invoice);
 
     /**
      * 计算预估金额
@@ -51,14 +52,14 @@ public interface AssetExtApi extends ExtensionPoint {
      * @param bill 业务信息
      * @return 预估金额
      */
-    BigDecimal calcEstimateAmount(AssetBillExt bill);
+    Response<BigDecimal> calcEstimateAmount(AssetBillExt bill);
     /**
      * 计算预估金额
      *
      * @param bills 业务信息
      * @return 预估金额
      */
-    BigDecimal calcEstimateAmount(List<AssetBillExt> bills);
+    Response<BigDecimal> calcEstimateAmount(List<AssetBillExt> bills);
 
     /**
      * 查询账户信息
