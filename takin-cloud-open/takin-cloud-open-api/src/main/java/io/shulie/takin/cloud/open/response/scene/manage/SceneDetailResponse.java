@@ -12,12 +12,12 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import io.shulie.takin.ext.content.script.ScriptNode;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Goal;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Config;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Content;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.MonitoringGoal;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.DataValidation;
+import io.shulie.takin.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Goal;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Content;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.MonitoringGoal;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.DataValidation;
 
 /**
  * 场景详情  -  响应
@@ -29,7 +29,7 @@ import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.DataVal
 public class SceneDetailResponse {
     @ApiModelProperty(value = "基础信息")
     @NotBlank(message = "场景基础信息不能为空")
-    private WriteSceneRequest.BasicInfo basicInfo;
+    private SceneRequest.BasicInfo basicInfo;
     @ApiModelProperty(value = "脚本解析结果")
     @NotBlank(message = "脚本解析结果不能为空")
     private List<ScriptNode> analysisResult;
@@ -38,7 +38,7 @@ public class SceneDetailResponse {
     private Map<String, Content> content;
     @ApiModelProperty(value = "施压配置")
     @NotNull(message = "施压配置不能为空")
-    private Config config;
+    private PtConfigExt config;
     @ApiModelProperty(value = "压测目标")
     @NotNull(message = "业压测目标不能为空")
     private Map<String, Goal> goal;

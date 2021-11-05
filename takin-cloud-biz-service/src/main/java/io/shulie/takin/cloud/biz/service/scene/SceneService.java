@@ -3,13 +3,13 @@ package io.shulie.takin.cloud.biz.service.scene;
 import java.util.Map;
 import java.util.List;
 
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Goal;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Content;
 import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Goal;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Config;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.Content;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.MonitoringGoal;
-import io.shulie.takin.cloud.open.request.scene.manage.WriteSceneRequest.DataValidation;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.MonitoringGoal;
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.DataValidation;
+import io.shulie.takin.ext.content.enginecall.PtConfigExt;
 
 /**
  * 场景 - 服务
@@ -23,7 +23,7 @@ public interface SceneService {
      * @param in 入参
      * @return 场景主键
      */
-    Long create(WriteSceneRequest in);
+    Long create(SceneRequest in);
 
     /**
      * 更新压测场景
@@ -36,7 +36,7 @@ public interface SceneService {
      *     <li>异常  :运行时异常</li>
      * </ul>
      */
-    Boolean update(WriteSceneRequest in);
+    Boolean update(SceneRequest in);
 
     /**
      * 获取场景详情
@@ -92,7 +92,7 @@ public interface SceneService {
      * @param sceneId 场景主键
      * @return 线程组配置<节点MD5, 配置对象>
      */
-    Config getConfig(long sceneId);
+    PtConfigExt getConfig(long sceneId);
 
     /**
      * 获取压测SLA
