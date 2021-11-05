@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.sdk.model.response.strategy.StrategyResp;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneIpNumReq;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdReq;
@@ -79,9 +80,9 @@ public interface CloudSceneApi {
      * 获取压测场景列表
      *
      * @param sceneManageQueryReq -
-     * @return -
+     * @return 包含total
      */
-    List<SceneManageListResp> getSceneList(SceneManageQueryReq sceneManageQueryReq);
+    ResponseResult<List<SceneManageListResp>> getSceneList(SceneManageQueryReq sceneManageQueryReq);
 
     /**
      * 流量计算

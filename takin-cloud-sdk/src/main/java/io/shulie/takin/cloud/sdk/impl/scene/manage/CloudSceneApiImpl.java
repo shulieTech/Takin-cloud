@@ -74,9 +74,11 @@ public class CloudSceneApiImpl implements CloudSceneApi {
     }
 
     @Override
-    public List<SceneManageListResp> getSceneList(SceneManageQueryReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_MANAGE, EntrypointUrl.METHOD_SCENE_MANAGE_SEARCH),
-            req, new TypeReference<ResponseResult<List<SceneManageListResp>>>() {}).getData();
+    public ResponseResult<List<SceneManageListResp>> getSceneList(SceneManageQueryReq req) {
+        ResponseResult<List<SceneManageListResp>> result =
+            cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_MANAGE, EntrypointUrl.METHOD_SCENE_MANAGE_SEARCH),
+                req, new TypeReference<ResponseResult<List<SceneManageListResp>>>() {});
+        return ResponseResult.success(result.getData(), result.getTotalNum());
 
     }
 
