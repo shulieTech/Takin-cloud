@@ -935,7 +935,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             if (assetExtApi != null) {
                 boolean unLock;
                 if (StringUtils.isNotBlank(amountLockId)) {
-                    unLock = assetExtApi.unlock(amountLockId);
+                    unLock = assetExtApi.unlock(amountLockId, taskResult.getCustomerId());
                 } else {
                     unLock = assetExtApi.unlock(report.getCustomerId(), taskResult.getTaskId().toString());
                 }

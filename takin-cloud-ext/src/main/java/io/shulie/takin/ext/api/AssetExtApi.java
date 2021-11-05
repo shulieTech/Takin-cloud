@@ -28,7 +28,7 @@ public interface AssetExtApi extends ExtensionPoint {
      * 释放账户余额
      * @param lockId 冻结资金记录ID,lock的返回值
      */
-    boolean unlock(String lockId);
+    boolean unlock(String lockId, Long customerId);
 
     /**
      * 释放账户余额
@@ -72,9 +72,9 @@ public interface AssetExtApi extends ExtensionPoint {
 
     /**
      * 初始化用户资产
-     * @param userId    用户id
+     * @param uid    用户id
      */
-    void init(Long userId);
+    void init(Long uid);
 
     /**
      * 脚本调试回写流量账户
