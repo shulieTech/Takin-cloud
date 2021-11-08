@@ -25,6 +25,12 @@ import io.shulie.takin.cloud.sdk.model.request.scenemanage.ScriptCheckAndUpdateR
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageListResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.ScriptCheckResp;
 import io.shulie.takin.cloud.sdk.model.response.strategy.StrategyResp;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
+import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.ext.api.AssetExtApi;
+import io.shulie.takin.ext.content.asset.AssetBillExt;
+import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.cloud.biz.cache.DictionaryCache;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageQueryInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
@@ -86,8 +92,21 @@ public class SceneManageController {
     private SceneManageService sceneManageService;
     @Resource(type = StrategyConfigService.class)
     private StrategyConfigService strategyConfigService;
+    @Autowired
+    private DictionaryCache dictionaryCache;
 
+    @Autowired
+    private EnginePluginUtils pluginUtils;
+
+    @Resource
+    private PluginManager pluginManager;
+
+    @Autowired
+    private ReportService reportService;
     @PostMapping(value = EntrypointUrl.METHOD_SCENE_MANAGE_SAVE)
+
+
+    @PostMapping
     @ApiOperation(value = "新增压测场景")
     public ResponseResult<Long> add(@RequestBody @Valid SceneManageWrapperRequest wrapperRequest) {
         SceneManageWrapperInput input = SceneManageReqConvertor.INSTANCE.ofSceneManageWrapperInput(wrapperRequest);
@@ -115,15 +134,30 @@ public class SceneManageController {
      */
     @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_DETAIL)
     @ApiOperation(value = "压测场景编辑详情")
-    public ResponseResult<SceneManageWrapperResponse> getDetailForEdit(@ApiParam(name = "id", value = "ID") Long id) {
+    public ResponseResult<SceneManageWrapperResponse> getDetailForEdit(
+        @ApiParam(name = "id", value = "ID") Long id,
+        @ApiParam(name = "reportId", value = "reportId") Long reportId) {
+        if (reportId != null && reportId != 0) {
+            ReportResult reportBaseInfo = reportService.getReportBaseInfo(reportId);
+            if (reportBaseInfo != null) {
+                id = reportBaseInfo.getSceneId();
+            } else {
+                throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在:" + reportId);
+            }
+        }
         SceneManageQueryOpitons options = new SceneManageQueryOpitons();
         options.setIncludeBusinessActivity(true);
         options.setIncludeScript(true);
         options.setIncludeSLA(true);
 
-        SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(id, options);
-        assembleFeatures(sceneManage);
-        return wrapperSceneManage(sceneManage);
+        try {
+            SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(id, options);
+            assembleFeatures(sceneManage);
+            ResponseResult<SceneManageWrapperResponse> resp = wrapperSceneManage(sceneManage);
+            return resp;
+        } catch (TakinCloudException exception) {
+            return ResponseResult.fail(TakinCloudExceptionEnum.REPORT_GET_ERROR.getErrorCode(), exception.getMessage(), "");
+        }
     }
 
     public void assembleFeatures(SceneManageWrapperOutput resp) {
@@ -167,7 +201,7 @@ public class SceneManageController {
     @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_CONTENT)
     @ApiOperation(value = "压测场景详情")
     public ResponseResult<SceneDetailResponse> getContent(@ApiParam(value = "id") Long id) {
-        ResponseResult<SceneManageWrapperResponse> resDTO = getDetailForEdit(id);
+        ResponseResult<SceneManageWrapperResponse> resDTO = getDetailForEdit(id,0L);
         if (!resDTO.getSuccess()) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, resDTO.getError().getMsg());
         }
