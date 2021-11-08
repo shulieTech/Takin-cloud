@@ -73,6 +73,9 @@ public class CollectorApplication {
                 .filter(metric -> Constants.METRICS_TYPE_RESPONSE.equals(metric.get("type")))
                 .map(GsonUtil::gsonToString)
                 .map(s -> GsonUtil.gsonToBean(s, ResponseMetrics.class))
+                // TODO 确认方案以及发生原因
+                .filter(Objects::nonNull)
+                .peek(t -> t.setPodNo(t.getPodNo() == null ? t.getPodNum() : t.getPodNo()))
                 .collect(Collectors.toList());
             List<EventMetrics> eventMetrics = metrics.stream().filter(Objects::nonNull)
                 .filter(metric -> null != metric.get("type"))
@@ -84,8 +87,8 @@ public class CollectorApplication {
             long time = System.currentTimeMillis();
             if (responseMetrics.size() > 0) {
                 long timestamp = responseMetrics.get(0).getTimestamp();
-                log.debug("【Collector-metrics-debug】{}-{}-{}:receive metrics data:{}", sceneId, reportId, tenantId, GsonUtil.gsonToString(responseMetrics));
-                log.info("【Collector-metrics】{}-{}-{}: receive metrics data:{},metrics time:{},elapsed time:{}",
+                log.debug("【收集器调度-debug】{}-{}-{}:接受到的数据:{}", sceneId, reportId, tenantId, GsonUtil.gsonToString(responseMetrics));
+                log.info("【收集器调度-metrics】{}-{}-{}: 接收到的数据:{}条,时间范围:{},已耗时:{}",
                     sceneId, reportId, tenantId, responseMetrics.size(), timestamp, (System.currentTimeMillis() - time));
 
                 collectorService.collector(sceneId, reportId, tenantId, responseMetrics);

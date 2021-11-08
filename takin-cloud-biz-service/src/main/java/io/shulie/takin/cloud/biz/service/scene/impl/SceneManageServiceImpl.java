@@ -54,8 +54,8 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.Sc
 import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.utils.FileTypeBusinessUtil;
-import io.shulie.takin.cloud.common.bean.RuleBean;
-import io.shulie.takin.cloud.common.bean.TimeBean;
+import io.shulie.takin.cloud.sdk.model.common.RuleBean;
+import io.shulie.takin.cloud.sdk.model.common.TimeBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;

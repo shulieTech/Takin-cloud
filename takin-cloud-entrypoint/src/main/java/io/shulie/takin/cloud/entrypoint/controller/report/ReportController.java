@@ -46,6 +46,7 @@ import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import io.shulie.takin.cloud.entrypoint.convert.WarnDetailRespConvertor;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportDetailResp;
 import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.WarnDetailResponse;
 
@@ -86,12 +87,14 @@ public class ReportController {
     @GetMapping(value = EntrypointUrl.METHOD_REPORT_DETAIL)
     @ApiOperation("报告详情")
     @ApiImplicitParam(name = "reportId", value = "报告ID")
-    public ResponseResult<ReportDetailOutput> getReportByReportId(Long reportId) {
-        ReportDetailOutput detail = reportService.getReportByReportId(reportId);
-        if (detail == null) {
+    public ResponseResult<ReportDetailResp> getReportByReportId(Long reportId) {
+        ReportDetailOutput detailOutput = reportService.getReportByReportId(reportId);
+        if (detailOutput == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在");
         }
-        return ResponseResult.success(detail);
+        ReportDetailResp resp = new ReportDetailResp();
+        BeanUtils.copyProperties(detailOutput, resp);
+        return ResponseResult.success(resp);
     }
 
     /**
@@ -132,12 +135,14 @@ public class ReportController {
     @GetMapping(EntrypointUrl.METHOD_REPORT_DETAIL_TEMP)
     @ApiOperation("实况报告")
     @ApiImplicitParam(name = "sceneId", value = "场景ID")
-    public ResponseResult<ReportDetailOutput> tempReportDetail(Long sceneId) {
-        ReportDetailOutput detail = reportService.tempReportDetail(sceneId);
-        if (detail == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "实况报表不存在");
+    public ResponseResult<ReportDetailResp> tempReportDetail(Long sceneId) {
+        ReportDetailOutput detailOutput = reportService.tempReportDetail(sceneId);
+        if (detailOutput == null) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在");
         }
-        return ResponseResult.success(detail);
+        ReportDetailResp resp = new ReportDetailResp();
+        BeanUtils.copyProperties(detailOutput, resp);
+        return ResponseResult.success(resp);
     }
 
     @GetMapping(EntrypointUrl.METHOD_REPORT_TREND_TEMP)

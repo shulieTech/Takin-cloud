@@ -8,7 +8,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import io.shulie.takin.cloud.common.enums.machine.EnumResult;
-import io.shulie.takin.cloud.common.bean.TimeBean;
+import io.shulie.takin.cloud.sdk.model.common.TimeBean;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

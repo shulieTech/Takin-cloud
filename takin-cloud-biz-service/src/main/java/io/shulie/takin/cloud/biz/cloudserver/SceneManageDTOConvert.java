@@ -13,7 +13,7 @@ import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneSlaRef;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.common.bean.RuleBean;
+import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.AfterMapping;

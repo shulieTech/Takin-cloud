@@ -1,7 +1,7 @@
 package io.shulie.takin.cloud.data.result.scenemanage;
 
 
-import io.shulie.takin.cloud.common.bean.RuleBean;
+import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
