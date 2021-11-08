@@ -65,10 +65,6 @@ public class EnginePressureConfig extends AbstractEntry {
      */
     private Map<String, ThreadGroupConfigExt> threadGroupConfigMap;
     /**
-     * 各业务活动施压目标配置
-     */
-    private List<Map<String, String>> businessActivities;
-    /**
      * 总的施压tps目标
      */
     private Integer totalTpsTargetLevel;

@@ -15,6 +15,7 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.common.bean.RuleBean;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.takin.ext.content.enginecall.BusinessActivityExt;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -132,4 +133,13 @@ public interface SceneManageDTOConvert {
     }
 
     List<SceneManageWrapperOutput.SceneSlaRefOutput> ofSlaList(List<SceneSlaRef> sources);
+
+    @Mappings({
+            @Mapping(source = "bindRef", target = "bindRef"),
+            @Mapping(source = "businessActivityName", target = "activityName"),
+            @Mapping(source = "targetRT", target = "rt"),
+            @Mapping(source = "targetTPS", target = "tps")
+            @Mapping(source = "targetTPS", target = "rate", f)
+    })
+    BusinessActivityExt of(SceneManageWrapperOutput.SceneBusinessActivityRefOutput source);
 }

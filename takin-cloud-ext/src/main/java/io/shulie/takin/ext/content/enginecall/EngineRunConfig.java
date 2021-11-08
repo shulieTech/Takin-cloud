@@ -70,7 +70,10 @@ public class EngineRunConfig extends AbstractEntry {
      * 文件
      */
     private List<ScheduleStartRequestExt.DataFile> fileSets;
-    private Map<String, String> businessMap;
+    /**
+     * 业务活动配置的目标信息
+     */
+    private Map<String, BusinessActivityExt> businessMap;
     private String memSetting;
 
 }

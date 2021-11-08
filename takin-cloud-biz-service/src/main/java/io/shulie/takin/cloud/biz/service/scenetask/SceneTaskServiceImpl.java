@@ -190,7 +190,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         }
         //end
 
-        if (trialRunInput != null) {
+        if (null != trialRunInput) {
             sceneData.setPressureTestSecond(trialRunInput.getPressureTestSecond());
         }
 

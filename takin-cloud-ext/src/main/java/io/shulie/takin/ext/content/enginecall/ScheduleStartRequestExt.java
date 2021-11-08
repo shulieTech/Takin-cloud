@@ -95,16 +95,24 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt implements 
     /**
      * 业务指标，目标rt
      */
-    private Map<String, String> businessData;
+    private Map<String, BusinessActivityExt> businessData;
+    /**
+     * 是否通过xpath的md5进行关联，新老板区分
+     */
+    private Boolean bindByXpathMd5;
 
-    /**
-     * 业务指标，目标tps
-     */
-    private Map<String, Integer> businessTpsData;
-    /**
-     * 业务目标tps占总的tps百分比
-     */
-    private List<Map<String, String>> businessActivities;
+//    /**
+//     * 业务指标，目标tps
+//     */
+//    private Map<String, Integer> businessTpsData;
+//    /**
+//     * 业务目标tps占总的tps百分比
+//     */
+//    private List<Map<String, String>> businessActivities;
+//    /**
+//     * 业务活动名称和testName绑定关系
+//     */
+//    private Map<String, String> businessNameData;
 
     /**
      * 压测引擎插件文件位置  一个压测场景可能有多个插件 一个插件也有可能有多个文件

@@ -83,7 +83,6 @@ public class DataConvertHelper {
 
         pressureConfig.setTotalTpsTargetLevel(startRequest.getTotalTps());
         pressureConfig.setTpsTargetLevel(startRequest.getTps());
-        pressureConfig.setBusinessActivities(startRequest.getBusinessActivities());
 
         if (null != strategyConfig) {
             pressureConfig.setTpsThreadMode(strategyConfig.getTpsThreadMode());

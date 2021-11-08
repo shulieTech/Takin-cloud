@@ -32,6 +32,20 @@ import java.util.stream.Collectors;
  * @Date: 2021/9/27 9:12 下午
  */
 public class CommonUtil {
+
+    /**
+     * 从list中对某个字段的数字进行累加
+     */
+    public static <T> Integer sum(Collection<T> list, Function<T, Integer> func) {
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        return list.stream().filter(Objects::nonNull)
+                .map(func)
+                .filter(Objects::nonNull)
+                .mapToInt(d -> d)
+                .sum();
+    }
     /**
      * 从list中取出对象某个字段的值
      */

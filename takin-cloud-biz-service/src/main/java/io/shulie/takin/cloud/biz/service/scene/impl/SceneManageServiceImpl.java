@@ -63,6 +63,7 @@ import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.constants.ReportConstans;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.common.enums.PressureModeEnum;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.enums.TimeUnitEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageErrorEnum;
@@ -84,6 +85,7 @@ import io.shulie.takin.ext.api.AssetExtApi;
 import io.shulie.takin.ext.api.EngineExtApi;
 import io.shulie.takin.ext.content.asset.AssetBillExt;
 import io.shulie.takin.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.ext.content.enginecall.ThreadGroupConfigExt;
 import io.shulie.takin.ext.content.response.Response;
 import io.shulie.takin.ext.content.script.ScriptParseExt;
 import io.shulie.takin.ext.content.script.ScriptVerityExt;
@@ -94,6 +96,7 @@ import io.shulie.takin.utils.json.JsonHelper;
 import io.shulie.takin.utils.string.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -986,45 +989,90 @@ public class SceneManageServiceImpl implements SceneManageService {
         wrapperOutput.setScriptType(sceneManageResult.getScriptType());
         wrapperOutput.setPressureTestSceneName(sceneManageResult.getSceneName());
         wrapperOutput.setType(sceneManageResult.getType());
-        PressureSceneEnum type = PressureSceneEnum.value(sceneManageResult.getType());
-        if (null != type) {
-            wrapperOutput.setPressureType(type.getCode());
-        }
+
         // 状态适配
         wrapperOutput.setStatus(SceneManageStatusEnum.getAdaptStatus(sceneManageResult.getStatus()));
         wrapperOutput.setCustomerId(sceneManageResult.getCustomerId());
         wrapperOutput.setUpdateTime(DateUtil.formatDateTime(sceneManageResult.getUpdateTime()));
         wrapperOutput.setLastPtTime(DateUtil.formatDateTime(sceneManageResult.getLastPtTime()));
         wrapperOutput.setLastPtDateTime(sceneManageResult.getLastPtTime());
-        fillPtConfig(wrapperOutput, sceneManageResult.getPtConfig());
+        if (StringUtils.isBlank(sceneManageResult.getScriptAnalysisResult())) {
+            fillPtConfigOld(wrapperOutput, sceneManageResult.getPtConfig());
+        } else {
+            PressureSceneEnum type = PressureSceneEnum.value(sceneManageResult.getType());
+            if (null != type) {
+                wrapperOutput.setPressureType(type.getCode());
+            }
+            fillPtConfig(wrapperOutput, sceneManageResult.getPtConfig());
+        }
         wrapperOutput.setFeatures(sceneManageResult.getFeatures());
         wrapperOutput.setScriptAnalysisResult(sceneManageResult.getScriptAnalysisResult());
-
     }
 
+    /**
+     * 老版本ptConfig数据，转成新版本数据
+     */
+    private void fillPtConfigOld(SceneManageWrapperOutput wrapperOutput, String ptConfig) {
+        try {
+            JSONObject json = JsonUtil.parse(ptConfig);
+            if (null == json) {
+                return;
+            }
+
+            ThreadGroupConfigExt tgConfig = new ThreadGroupConfigExt();
+            tgConfig.setThreadNum(json.getInteger(SceneManageConstant.THREAD_NUM));
+            PressureModeEnum mode = PressureModeEnum.value(json.getInteger(SceneManageConstant.PT_MODE));
+            if (null != mode) {
+                tgConfig.setMode(mode.getCode());
+            }
+            tgConfig.setRampUp(json.getInteger(SceneManageConstant.STEP_DURATION));
+            tgConfig.setRampUpUnit(json.getString(SceneManageConstant.STEP_DURATION_UNIT));
+            tgConfig.setSteps(json.getInteger(SceneManageConstant.STEP));
+            tgConfig.setEstimateFlow(json.getDouble(SceneManageConstant.ESTIMATE_FLOW));
+
+            Map<String, ThreadGroupConfigExt> map = new HashMap<>();
+            map.put("all", tgConfig);
+
+            wrapperOutput.setIpNum(json.getInteger(SceneManageConstant.HOST_NUM));
+            PressureSceneEnum pressureType = PressureSceneEnum.value(json.getInteger(SceneManageConstant.PT_TYPE));
+            wrapperOutput.setPressureType(null == pressureType ? PressureSceneEnum.DEFAULT.getCode() : pressureType.getCode());
+            //压测时长
+            TimeBean duration = new TimeBean(json.getLong(SceneManageConstant.PT_DURATION), json.getString(SceneManageConstant.PT_DURATION_UNIT));
+            wrapperOutput.setPressureTestTime(duration);
+            wrapperOutput.setPressureTestSecond(duration.getSecondTime());
+            wrapperOutput.setThreadGroupConfigMap(map);
+            if (null != tgConfig.getEstimateFlow()) {
+                wrapperOutput.setEstimateFlow(BigDecimal.valueOf(tgConfig.getEstimateFlow()).setScale(2, RoundingMode.HALF_UP));
+            }
+        } catch (Exception e) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "施压配置json解析错误", e);
+        }
+    }
+
+    /**
+     * 新版本ptconfig数据
+     */
     private void fillPtConfig(SceneManageWrapperOutput wrapperOutput, String config) {
         try {
             PtConfigExt ptConfig = JSON.parseObject(config, PtConfigExt.class);
+            if (null == ptConfig) {
+                return;
+            }
             wrapperOutput.setIpNum(ptConfig.getPodNum());
             //压测时长
             wrapperOutput.setPressureTestTime(new TimeBean(ptConfig.getDuration(), ptConfig.getUnit()));
             wrapperOutput.setPressureTestSecond(convertTime(ptConfig.getDuration(), ptConfig.getUnit()));
             wrapperOutput.setThreadGroupConfigMap(ptConfig.getThreadGroupConfigMap());
-            //            wrapperOutput.setPressureTestTime(new TimeBean(jsonObject.getLong(SceneManageConstant.PT_DURATION),
-            //                jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
-            //            wrapperOutput.setPressureTestSecond(convertTime(jsonObject.getLong(SceneManageConstant.PT_DURATION),
-            //                jsonObject.getString(SceneManageConstant.PT_DURATION_UNIT)));
-            //            wrapperOutput.setPressureMode(jsonObject.getInteger(SceneManageConstant.PT_MODE));
-            //阶梯时长
-            //            wrapperOutput.setIncreasingTime(new TimeBean(jsonObject.getLong(SceneManageConstant.STEP_DURATION),
-            //                jsonObject.getString(SceneManageConstant.STEP_DURATION_UNIT)));
-            //            wrapperOutput.setIncreasingSecond(convertTime(jsonObject.getLong(SceneManageConstant.STEP_DURATION),
-            //                jsonObject.getString(SceneManageConstant.STEP_DURATION_UNIT)));
-            //            wrapperOutput.setStep(jsonObject.getInteger(SceneManageConstant.STEP));
             //预计消耗流量
             if (null != ptConfig.getEstimateFlow()) {
                 BigDecimal flow = BigDecimal.valueOf(ptConfig.getEstimateFlow());
                 wrapperOutput.setEstimateFlow(flow.setScale(2, RoundingMode.HALF_UP));
+            } else if (MapUtils.isNotEmpty(ptConfig.getThreadGroupConfigMap())) {
+                double flow = ptConfig.getThreadGroupConfigMap().values().stream().filter(Objects::nonNull)
+                        .map(ThreadGroupConfigExt::getEstimateFlow)
+                        .mapToDouble(d -> null == d ? 0d : d)
+                        .sum();
+                wrapperOutput.setEstimateFlow(new BigDecimal(flow).setScale(2, RoundingMode.HALF_UP));
             }
         } catch (Exception e) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "施压配置json解析错误", e);

@@ -138,7 +138,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
      */
     public void createEngineConfigMap(ScheduleRunRequest request) {
         ScheduleStartRequestExt startRequest = request.getRequest();
-        StrategyConfigExt strategyConfig = request.getStrategyConfig();
+//        StrategyConfigExt strategyConfig = request.getStrategyConfig();
         Long sceneId = startRequest.getSceneId();
         Long taskId = startRequest.getTaskId();
         Long customerId = startRequest.getCustomerId();

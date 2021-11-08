@@ -1,17 +1,17 @@
 package io.shulie.takin.cloud.biz.service.scene;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
+import io.shulie.takin.cloud.biz.cloudserver.SceneManageDTOConvert;
 import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.utils.DataUtils;
+import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
+import io.shulie.takin.ext.content.enginecall.BusinessActivityExt;
 import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.ext.content.enginecall.ScheduleStopRequestExt;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
@@ -109,31 +109,47 @@ public class SceneTaskEventServie {
         scheduleStartRequest.setTotalIp(scene.getIpNum());
         scheduleStartRequest.setExpectThroughput(scene.getConcurrenceNum());
         scheduleStartRequest.setThreadGroupConfigMap(scene.getThreadGroupConfigMap());
-        //todo 目标信息
-        Map<String, String> businessRtData = Maps.newHashMap();
-        Map<String, Integer> businessTpsData = Maps.newHashMap();
-        int tps = 0;
-        for (SceneManageWrapperOutput.SceneBusinessActivityRefOutput config : scene.getBusinessActivityConfig()) {
-            if (null != config.getTargetRT()) {
-                businessRtData.put(config.getBindRef(), config.getTargetRT().toString());
-            }
-            businessTpsData.put(config.getBindRef(), config.getTargetTPS());
-            if (null != config.getTargetTPS()) {
-                tps += config.getTargetTPS();
+
+//        Map<String, String> businessRtData = Maps.newHashMap();
+//        Map<String, Integer> businessTpsData = Maps.newHashMap();
+//        Map<String, String> businessNameData = Maps.newHashMap();
+//        int tps = 0;
+//        for (SceneManageWrapperOutput.SceneBusinessActivityRefOutput config : scene.getBusinessActivityConfig()) {
+//            if (null != config.getTargetRT()) {
+//                businessRtData.put(config.getBindRef(), config.getTargetRT().toString());
+//            }
+//            businessTpsData.put(config.getBindRef(), config.getTargetTPS());
+//            if (null != config.getTargetTPS()) {
+//                tps += config.getTargetTPS();
+//            }
+//            businessNameData.put(config.getBindRef(), config.getBusinessActivityName());
+//        }
+//        scheduleStartRequest.setTotalTps(tps);
+//        scheduleStartRequest.setTps(NumberUtil.getRate(tps, scene.getIpNum()));
+//        scheduleStartRequest.setBusinessData(businessRtData);
+//        scheduleStartRequest.setBusinessTpsData(businessTpsData);
+//        List<Map<String, String>> businessActivities = new ArrayList<>();
+//        for (Map.Entry<String, Integer> entry : businessTpsData.entrySet()) {
+//            Map<String, String> businessActivity = new HashMap<>();
+//            businessActivity.put("elementTestName", entry.getKey());
+//            businessActivity.put("throughputPercent", String.valueOf(NumberUtil.getPercentRate(entry.getValue(), tps)));
+//            businessActivities.add(businessActivity);
+//        }
+//        scheduleStartRequest.setBusinessActivities(businessActivities);
+
+        Map<String, BusinessActivityExt> businessData = Maps.newHashMap();
+        Integer tps = CommonUtil.sum(scene.getBusinessActivityConfig(), SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getTargetTPS);
+        List<BusinessActivityExt> activities = CommonUtil.getList(scene.getBusinessActivityConfig(), SceneManageDTOConvert.INSTANCE::of);
+        if (CollectionUtils.isNotEmpty(activities)) {
+            for (BusinessActivityExt d : activities) {
+                if (null != d.getTps()) {
+                    d.setRate(NumberUtil.getRate(d.getTps(), tps));
+                }
+                businessData.put(d.getBindRef(), d);
             }
         }
-        scheduleStartRequest.setTotalTps(tps);
-        scheduleStartRequest.setTps(NumberUtil.getRate(tps, scene.getIpNum()));
-        scheduleStartRequest.setBusinessData(businessRtData);
-        scheduleStartRequest.setBusinessTpsData(businessTpsData);
-        List<Map<String, String>> businessActivities = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : businessTpsData.entrySet()) {
-            Map<String, String> businessActivity = new HashMap<>();
-            businessActivity.put("elementTestName", entry.getKey());
-            businessActivity.put("throughputPercent", String.valueOf(NumberUtil.getPercentRate(entry.getValue(), tps)));
-            businessActivities.add(businessActivity);
-        }
-        scheduleStartRequest.setBusinessActivities(businessActivities);
+        scheduleStartRequest.setBusinessData(businessData);
+        scheduleStartRequest.setBindByXpathMd5(StringUtils.isNoneBlank(scene.getScriptAnalysisResult()));
 
         //一个插件可能会有多个版本，需要根据版本号来获取相应的文件路径 modified by xr.l 20210712
         if (CollectionUtils.isNotEmpty(scene.getEnginePlugins())) {
