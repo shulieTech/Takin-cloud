@@ -3,13 +3,13 @@ package io.shulie.takin.cloud.biz.service.scene;
 import java.util.Map;
 import java.util.List;
 
+import io.shulie.takin.ext.content.enginecall.PtConfigExt;
 import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
 import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Goal;
 import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Content;
 import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
 import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.MonitoringGoal;
 import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.DataValidation;
-import io.shulie.takin.ext.content.enginecall.PtConfigExt;
 
 /**
  * 场景 - 服务
@@ -101,4 +101,13 @@ public interface SceneService {
      * @return SLA列表
      */
     List<MonitoringGoal> getMonitoringGoal(long sceneId);
+
+    /**
+     * 创建/更新 压测场景 - 步骤2 : 关联业务活动
+     *
+     * @param sceneId 场景主键
+     * @param content 压测内容
+     * @param goalMap 压测目标
+     */
+    void buildBusinessActivity(long sceneId, List<Content> content, Map<String, Goal> goalMap);
 }

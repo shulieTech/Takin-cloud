@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import io.shulie.takin.cloud.common.constants.APIUrls;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.biz.service.scene.SceneService;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.biz.service.scene.SceneSynchronizeService;
+import io.shulie.takin.cloud.open.request.scene.manage.SynchronizeRequest;
 import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
 
 /**
@@ -31,6 +33,8 @@ public class SceneController {
 
     @Resource
     SceneService sceneService;
+    @Resource
+    SceneSynchronizeService sceneSynchronizeService;
 
     @PostMapping("/create")
     @ApiOperation(value = "新增压测场景")
@@ -52,4 +56,11 @@ public class SceneController {
         }
         return ResponseResult.success(sceneService.detail(sceneId));
     }
+
+    @PostMapping("/synchronize")
+    @ApiOperation(value = "同步场景信息")
+    public ResponseResult<String> update(@RequestBody @Valid SynchronizeRequest request) {
+        return ResponseResult.success(sceneSynchronizeService.synchronize(request));
+    }
+
 }
