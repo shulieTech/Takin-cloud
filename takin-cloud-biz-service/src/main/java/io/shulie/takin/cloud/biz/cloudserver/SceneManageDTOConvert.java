@@ -138,8 +138,8 @@ public interface SceneManageDTOConvert {
             @Mapping(source = "bindRef", target = "bindRef"),
             @Mapping(source = "businessActivityName", target = "activityName"),
             @Mapping(source = "targetRT", target = "rt"),
-            @Mapping(source = "targetTPS", target = "tps")
-            @Mapping(source = "targetTPS", target = "rate", f)
+            @Mapping(source = "targetTPS", target = "tps"),
+            @Mapping(source = "targetTPS", target = "rate")
     })
     BusinessActivityExt of(SceneManageWrapperOutput.SceneBusinessActivityRefOutput source);
 }
