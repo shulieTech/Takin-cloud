@@ -78,7 +78,8 @@ public class FileController {
     @PostMapping(EntrypointUrl.METHOD_FILE_UPLOAD)
     @ApiOperation(value = "文件上传")
     public ResponseResult<List<FileDTO>> upload(@RequestParam List<MultipartFile> file) {
-        String tempPath = scriptPath + SceneManageConstant.FILE_SPLIT + CloudPluginUtils.getContext().getTenantCode();
+        String tempPath = scriptPath + SceneManageConstant.FILE_SPLIT +
+            CloudPluginUtils.getContext().getTenantCode() + SceneManageConstant.FILE_SPLIT +  CloudPluginUtils.getContext().getEnvCode();
         List<FileDTO> dtoList = Lists.newArrayList();
         for (MultipartFile mf : file) {
             String uploadId = UUID.randomUUID().toString();
