@@ -50,11 +50,12 @@
         </dependencies>
     </dependencyManagement>
 
+<!--
     <distributionManagement>
         <repository>
             <id>${releases.id}</id>
             <name>${releases.name}</name>
-            <url>${releases.url}</url>
+            <url>https://packages.aliyun.com/maven/repository/2101190-release-xxuvBf/</url>
         </repository>
         <snapshotRepository>
             <id>${snapshots.id}</id>
@@ -62,4 +63,5 @@
             <url>${snapshots.url}</url>
         </snapshotRepository>
     </distributionManagement>
+-->
 </project>

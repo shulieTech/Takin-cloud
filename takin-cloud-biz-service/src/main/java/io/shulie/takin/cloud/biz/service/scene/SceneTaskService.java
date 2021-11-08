@@ -156,13 +156,15 @@ public interface SceneTaskService {
 
     /**
      * 清除位点缓存
-     * @param sceneId
+     *
+     * @param sceneId 场景主键
      */
     void cleanCachedPosition(Long sceneId);
 
     /**
      * 回写流量账户
-     * @param balanceExt
+     *
+     * @param balanceExt 账户余额数据
      */
     void writeBalance(AssetBalanceExt balanceExt);
 

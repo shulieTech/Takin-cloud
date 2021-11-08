@@ -25,12 +25,8 @@ import io.shulie.takin.cloud.sdk.model.request.scenemanage.ScriptCheckAndUpdateR
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageListResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.ScriptCheckResp;
 import io.shulie.takin.cloud.sdk.model.response.strategy.StrategyResp;
-import io.shulie.takin.cloud.biz.service.report.ReportService;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
-import io.shulie.takin.ext.api.AssetExtApi;
-import io.shulie.takin.ext.content.asset.AssetBillExt;
-import io.shulie.takin.plugin.framework.core.PluginManager;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.biz.cache.DictionaryCache;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageQueryInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
@@ -86,27 +82,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_SCENE_MANAGE)
 @Api(tags = "压测场景管理")
 public class SceneManageController {
+    @Resource(type = ReportService.class)
+    ReportService reportService;
     @Resource(type = DictionaryCache.class)
     private DictionaryCache dictionaryCache;
     @Resource(type = SceneManageService.class)
     private SceneManageService sceneManageService;
     @Resource(type = StrategyConfigService.class)
     private StrategyConfigService strategyConfigService;
-    @Autowired
-    private DictionaryCache dictionaryCache;
 
-    @Autowired
-    private EnginePluginUtils pluginUtils;
-
-    @Resource
-    private PluginManager pluginManager;
-
-    @Autowired
-    private ReportService reportService;
     @PostMapping(value = EntrypointUrl.METHOD_SCENE_MANAGE_SAVE)
-
-
-    @PostMapping
     @ApiOperation(value = "新增压测场景")
     public ResponseResult<Long> add(@RequestBody @Valid SceneManageWrapperRequest wrapperRequest) {
         SceneManageWrapperInput input = SceneManageReqConvertor.INSTANCE.ofSceneManageWrapperInput(wrapperRequest);
@@ -201,7 +186,7 @@ public class SceneManageController {
     @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_CONTENT)
     @ApiOperation(value = "压测场景详情")
     public ResponseResult<SceneDetailResponse> getContent(@ApiParam(value = "id") Long id) {
-        ResponseResult<SceneManageWrapperResponse> resDTO = getDetailForEdit(id,0L);
+        ResponseResult<SceneManageWrapperResponse> resDTO = getDetailForEdit(id, 0L);
         if (!resDTO.getSuccess()) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, resDTO.getError().getMsg());
         }

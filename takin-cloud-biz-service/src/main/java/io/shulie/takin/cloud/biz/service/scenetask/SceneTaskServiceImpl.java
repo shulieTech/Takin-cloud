@@ -24,7 +24,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
 import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
 import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
@@ -109,35 +108,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class SceneTaskServiceImpl implements SceneTaskService {
     @Resource
-    private TSceneManageMapper tSceneManageMapper;
-
-    @Autowired
-    private SceneManageService sceneManageService;
-
-    @Autowired
-    private SceneTaskEventServie sceneTaskEventServie;
-
-    @Resource
-    private TReportMapper tReportMapper;
-    // 初始化报告开始时间偏移时间
-    @Value("${init.report.startTime.Offset:10}")
-    private Long offsetStartTime;
-
-    @Resource
-    private TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
-
-    @Autowired
-    private RedisClientUtils redisClientUtils;
-
-    @Autowired
     private RedisTemplate<String, String> redisTemplate;
     @Resource(type = ReportDao.class)
-
-
-    @Autowired
-    private SceneTaskPressureTestLogUploadDAO sceneTaskPressureTestLogUploadDao;
-
-    @Autowired
     private ReportDao reportDao;
     @Resource(type = PluginManager.class)
     private PluginManager pluginManager;
@@ -155,25 +127,20 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     private FileSliceService fileSliceService;
     @Resource(type = EnginePluginUtils.class)
     private EnginePluginUtils enginePluginUtils;
+    @Resource(type = SceneTaskStatusCache.class)
+    private SceneTaskStatusCache taskStatusCache;
     @Resource(type = SceneManageService.class)
     private SceneManageService sceneManageService;
-    @Resource(type = TSceneManageMapper.class)
-    private TSceneManageMapper tSceneManageMapper;
     @Resource(type = SceneTaskEventServie.class)
     private SceneTaskEventServie sceneTaskEventServie;
     @Resource(type = TReportBusinessActivityDetailMapper.class)
     private TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
-    @Resource(type = SceneTaskStatusCache.class)
-    private SceneTaskStatusCache taskStatusCache;
 
     /**
      * 初始化报告开始时间偏移时间
      */
     @Value("${init.report.startTime.Offset:10}")
     private Long offsetStartTime;
-
-
-
 
     private static final Long KB = 1024L;
     private static final Long MB = KB * 1024;
@@ -284,9 +251,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
         //设置缓存，用以检查压测场景启动状态 lxr 20210623
 
-        taskStatusCache.cacheStatus(input.getSceneId(),report.getId(),SceneRunTaskStatusEnum.STARTING);
+        taskStatusCache.cacheStatus(input.getSceneId(), report.getId(), SceneRunTaskStatusEnum.STARTING);
         //缓存pod数量，上传jmeter日志时判断是否所有文件都上传完成
-        taskStatusCache.cachePodNum(input.getSceneId(),sceneData.getIpNum());
+        taskStatusCache.cachePodNum(input.getSceneId(), sceneData.getIpNum());
         String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(), report.getId(), CloudPluginUtils.getTenantId());
         List<String> activityRefs = sceneData.getBusinessActivityConfig().stream().map(SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getBindRef)
             .collect(Collectors.toList());
@@ -314,7 +281,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             sceneTaskEventServie.callStopEvent(reportResult);
         }
     }
-
 
     /**
      * 停止场景测试
@@ -358,7 +324,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         return 2;
     }
 
-
     @Override
     public SceneActionOutput checkSceneTaskStatus(Long sceneId, Long reportId) {
         SceneActionOutput scene = new SceneActionOutput();
@@ -379,7 +344,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                     List<String> errorMsgs = Lists.newArrayList();
                     // 检查压测引擎返回内容
                     SceneRunTaskStatusOutput status = taskStatusCache.getStatus(sceneId, reportResult.getId());
-                    if (Objects.nonNull(status) && status.getTaskStatus() == SceneRunTaskStatusEnum.FAILED.getCode()){
+                    if (Objects.nonNull(status) && status.getTaskStatus() == SceneRunTaskStatusEnum.FAILED.getCode()) {
                         errorMsgs.add(SceneStopReasonEnum.ENGINE.getType() + ":" + status.getErrorMsg());
                     }
                     scene.setReportId(reportResult.getId());
@@ -913,12 +878,11 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                     taskResult.getSceneId(), taskResult.getTaskId(), recentlyReport.getId());
                 return;
             }
-
-            SceneManage sceneManage = new SceneManage();
-            sceneManage.setId(taskResult.getSceneId());
-            sceneManage.setUpdateTime(new Date());
-            sceneManage.setStatus(SceneManageStatusEnum.WAIT.getValue());
-            tSceneManageMapper.updateByPrimaryKeySelective(sceneManage);
+            sceneManageDao.getBaseMapper().updateById(new SceneManageEntity() {{
+                setId(taskResult.getSceneId());
+                setUpdateTime(new Date());
+                setStatus(SceneManageStatusEnum.WAIT.getValue());
+            }});
         }
     }
 
