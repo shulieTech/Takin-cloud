@@ -43,9 +43,10 @@ public class CloudPluginUtils {
         if (userApi != null) {return userApi.getContext();}
         return new ContextExt() {{
             setUserId(-1L);
-            setTenantId(-1L);
-            setEnvCode("");
+            setTenantId(1L);
             setFilterSql("");
+            setEnvCode("test");
+            setTenantCode("default");
         }};
     }
 
