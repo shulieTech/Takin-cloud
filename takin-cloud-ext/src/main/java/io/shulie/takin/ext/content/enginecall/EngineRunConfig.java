@@ -74,6 +74,13 @@ public class EngineRunConfig extends AbstractEntry {
      * 业务活动配置的目标信息
      */
     private Map<String, BusinessActivityExt> businessMap;
+    /**
+     * 是否通过xpath的md5进行关联，新老板区分
+     */
+    private Boolean bindByXpathMd5;
+    /**
+     * 压测引起java虚拟机内存配置
+     */
     private String memSetting;
 
 }

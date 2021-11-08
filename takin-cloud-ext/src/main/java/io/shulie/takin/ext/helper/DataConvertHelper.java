@@ -62,6 +62,7 @@ public class DataConvertHelper {
             config.setFileSets(startRequest.getDataFile());
         }
         config.setBusinessMap(startRequest.getBusinessData());
+        config.setBindByXpathMd5(startRequest.getBindByXpathMd5());
         config.setMemSetting(request.getMemSetting());
 
         EnginePressureConfig pressureConfig = new EnginePressureConfig();
