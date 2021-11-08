@@ -41,7 +41,7 @@ public class SceneDetailResponse extends ContextExt {
 
     private BigDecimal estimateFlow;
 
-    private List<BusinessActivityDetailResponse> businessActivityConfig;
+    private List<BusinessActivityDetailResp> businessActivityConfig;
 
     private List<ScriptDetailResponse> uploadFile;
 

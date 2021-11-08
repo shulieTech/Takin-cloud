@@ -20,12 +20,19 @@ import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
 import io.shulie.takin.cloud.entrypoint.convert.SceneTaskOpenConverter;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
+import io.shulie.takin.cloud.common.enums.machine.EnumResult;
+import io.shulie.takin.cloud.entrypoint.convert.SceneSlaRefInputConverter;
+import io.shulie.takin.cloud.entrypoint.convert.SceneScriptRefInputConvert;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResp;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageDeleteReq;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageWrapperReq;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResp;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.ScriptCheckAndUpdateReq;
+import io.shulie.takin.cloud.entrypoint.convert.SceneBusinessActivityRefInputConvert;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivityDetailResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageListResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.ScriptCheckResp;
 import io.shulie.takin.cloud.sdk.model.response.strategy.StrategyResp;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.biz.cache.DictionaryCache;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageQueryInput;
@@ -44,18 +51,10 @@ import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.utils.ListHelper;
 import io.shulie.takin.cloud.entrypoint.convert.SceneBusinessActivityRefRespConvertor;
-import io.shulie.takin.cloud.entrypoint.convert.SceneManageReqConvertor;
 import io.shulie.takin.cloud.entrypoint.convert.SceneManageRespConvertor;
 import io.shulie.takin.cloud.entrypoint.convert.SceneScriptRefRespConvertor;
 import io.shulie.takin.cloud.entrypoint.convert.SceneSlaRefRespConvertor;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageDeleteRequest;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageWrapperRequest;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivityDetailResponse;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResponse;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResponse.ScriptDetailResponse;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResponse.SlaDetailResponse;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.ext.content.enginecall.StrategyOutputExt;
 import io.swagger.annotations.Api;
@@ -70,6 +69,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -91,61 +91,61 @@ public class SceneManageController {
     @Resource(type = StrategyConfigService.class)
     private StrategyConfigService strategyConfigService;
 
-    @PostMapping(value = EntrypointUrl.METHOD_SCENE_MANAGE_SAVE)
     @ApiOperation(value = "新增压测场景")
-    public ResponseResult<Long> add(@RequestBody @Valid SceneManageWrapperRequest wrapperRequest) {
-        SceneManageWrapperInput input = SceneManageReqConvertor.INSTANCE.ofSceneManageWrapperInput(wrapperRequest);
-        return ResponseResult.success(sceneManageService.addSceneManage(input));
+    @PostMapping(value = EntrypointUrl.METHOD_SCENE_MANAGE_SAVE)
+    public ResponseResult<Long> add(@RequestBody @Valid SceneManageWrapperReq wrapperReq) {
+        SceneManageWrapperInput input = new SceneManageWrapperInput();
+        dataModelConvert(wrapperReq, input);
+        Long aLong = sceneManageService.addSceneManage(input);
+        return ResponseResult.success(aLong);
+    }
+
+    public void dataModelConvert(SceneManageWrapperReq wrapperReq, SceneManageWrapperInput input) {
+        BeanUtils.copyProperties(wrapperReq, input);
+        input.setStopCondition(SceneSlaRefInputConverter.ofList(wrapperReq.getStopCondition()));
+        input.setWarningCondition(SceneSlaRefInputConverter.ofList(wrapperReq.getWarningCondition()));
+        input.setBusinessActivityConfig(
+            SceneBusinessActivityRefInputConvert.ofLists(wrapperReq.getBusinessActivityConfig()));
+        input.setUploadFile(SceneScriptRefInputConvert.ofList(wrapperReq.getUploadFile()));
+
     }
 
     @PutMapping(value = EntrypointUrl.METHOD_SCENE_MANAGE_UPDATE)
     @ApiOperation(value = "修改压测场景")
-    public ResponseResult<?> update(@RequestBody @Valid SceneManageWrapperRequest wrapperRequest) {
-        SceneManageWrapperInput input = SceneManageReqConvertor.INSTANCE.ofSceneManageWrapperInput(wrapperRequest);
+    public ResponseResult<String> update(@RequestBody @Valid SceneManageWrapperReq wrapperReq) {
+        SceneManageWrapperInput input = new SceneManageWrapperInput();
+        dataModelConvert(wrapperReq, input);
         sceneManageService.updateSceneManage(input);
         return ResponseResult.success();
-
     }
 
     @DeleteMapping(value = EntrypointUrl.METHOD_SCENE_MANAGE_DELETE)
     @ApiOperation(value = "删除压测场景")
-    public ResponseResult<?> delete(@RequestBody SceneManageDeleteRequest deleteRequest) {
-        sceneManageService.delete(deleteRequest.getId());
-        return ResponseResult.success();
+    public ResponseResult<String> delete(@RequestBody SceneManageDeleteReq deleteReq) {
+        sceneManageService.delete(deleteReq.getId());
+        return ResponseResult.success("删除成功");
     }
 
     /**
      * 供编辑使用
      */
-    @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_DETAIL)
     @ApiOperation(value = "压测场景编辑详情")
-    public ResponseResult<SceneManageWrapperResponse> getDetailForEdit(
-        @ApiParam(name = "id", value = "ID") Long id,
-        @ApiParam(name = "reportId", value = "reportId") Long reportId) {
-        if (reportId != null && reportId != 0) {
-            ReportResult reportBaseInfo = reportService.getReportBaseInfo(reportId);
-            if (reportBaseInfo != null) {
-                id = reportBaseInfo.getSceneId();
-            } else {
-                throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在:" + reportId);
-            }
-        }
+    @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_DETAIL)
+    public ResponseResult<SceneManageWrapperResp> getDetailForEdit(@ApiParam(name = "id", value = "ID") Long id) {
         SceneManageQueryOpitons options = new SceneManageQueryOpitons();
         options.setIncludeBusinessActivity(true);
         options.setIncludeScript(true);
         options.setIncludeSLA(true);
-
-        try {
-            SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(id, options);
-            assembleFeatures(sceneManage);
-            ResponseResult<SceneManageWrapperResponse> resp = wrapperSceneManage(sceneManage);
-            return resp;
-        } catch (TakinCloudException exception) {
-            return ResponseResult.fail(TakinCloudExceptionEnum.REPORT_GET_ERROR.getErrorCode(), exception.getMessage(), "");
-        }
+        SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(id, options);
+        wrapperSceneManage(sceneManage);
+        SceneManageWrapperResp sceneManageWrapperResp = new SceneManageWrapperResp();
+        BeanUtils.copyProperties(sceneManage, sceneManageWrapperResp);
+        //TODO 组装扩展字段的数据
+        assembleFeatures(sceneManageWrapperResp);
+        return ResponseResult.success(sceneManageWrapperResp);
     }
 
-    public void assembleFeatures(SceneManageWrapperOutput resp) {
+    public void assembleFeatures(SceneManageWrapperResp resp) {
         String features = resp.getFeatures();
         if (StringUtils.isBlank(features)) {
             return;
@@ -157,26 +157,21 @@ public class SceneManageController {
             resp.setConfigType(configType);
         }
         if (map.containsKey(SceneManageConstant.FEATURES_SCRIPT_ID)) {
-            Long scriptId = Long.valueOf(map.get(SceneManageConstant.FEATURES_SCRIPT_ID).toString());
+            Long scriptId = (Long)map.get(SceneManageConstant.FEATURES_SCRIPT_ID);
+            // todo 逻辑查看
             if (configType == 1) {
                 //业务活动
-                List<SceneManageWrapperOutput.SceneBusinessActivityRefOutput> businessActivityConfig = resp
-                    .getBusinessActivityConfig();
-                for (SceneManageWrapperOutput.SceneBusinessActivityRefOutput data : businessActivityConfig) {
-                    data.setScriptId(scriptId);
-                    //业务活动的脚本id也在外面放一份
-                    resp.setScriptId(scriptId);
-                }
+                List<SceneManageWrapperResp.SceneBusinessActivityRefResp> businessActivityConfig = resp.getBusinessActivityConfig();
+                businessActivityConfig.forEach(data -> data.setScriptId(scriptId));
             } else {
                 resp.setScriptId(scriptId);
             }
         }
         Object businessFlowId = map.get(SceneManageConstant.FEATURES_BUSINESS_FLOW_ID);
-        resp.setBusinessFlowId(businessFlowId == null ? null : Long.valueOf(businessFlowId.toString()));
-
+        resp.setBusinessFlowId(businessFlowId == null ? null : (String)businessFlowId);
         if (map.containsKey(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL)) {
-            Integer scheduleInterval = (Integer)map.get(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL);
-            resp.setScheduleInterval(scheduleInterval);
+            Integer schedualInterval = (Integer)map.get(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL);
+            resp.setScheduleInterval(schedualInterval);
         }
     }
 
@@ -185,21 +180,103 @@ public class SceneManageController {
      */
     @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_CONTENT)
     @ApiOperation(value = "压测场景详情")
-    public ResponseResult<SceneDetailResponse> getContent(@ApiParam(value = "id") Long id) {
-        ResponseResult<SceneManageWrapperResponse> resDTO = getDetailForEdit(id, 0L);
-        if (!resDTO.getSuccess()) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, resDTO.getError().getMsg());
+    public ResponseResult<SceneDetailResp> getContent(@ApiParam(value = "id") Long id) {
+        ResponseResult<SceneManageWrapperResp> resp = getDetailForEdit(id);
+        if (!resp.getSuccess()) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, resp.getError().getMsg());
         }
-        return ResponseResult.success(convertSceneManageWrapper2SceneDetail(resDTO.getData()));
+        return ResponseResult.success(convertSceneManageWrapperDTO2SceneDetailDTO(resp.getData()));
+    }
+
+    private SceneDetailResp convertSceneManageWrapperDTO2SceneDetailDTO(SceneManageWrapperResp wrapperResp) {
+        SceneDetailResp detailDTO = new SceneDetailResp();
+        //基本信息
+        detailDTO.setId(wrapperResp.getId());
+        detailDTO.setSceneName(wrapperResp.getPressureTestSceneName());
+
+        detailDTO.setUpdateTime(wrapperResp.getUpdateTime());
+        detailDTO.setLastPtTime(wrapperResp.getLastPtTime());
+        detailDTO.setStatus(convertEnumResult(dictionaryCache.getObjectByParam(DicKeyConstant.SCENE_MANAGE_STATUS, wrapperResp.getStatus())));
+        //业务活动
+        if (CollectionUtils.isNotEmpty(wrapperResp.getBusinessActivityConfig())) {
+            List<BusinessActivityDetailResp> activity = Lists.newArrayList();
+            wrapperResp.getBusinessActivityConfig().forEach(data -> {
+                BusinessActivityDetailResp dto = new BusinessActivityDetailResp();
+                dto.setBusinessActivityId(data.getBusinessActivityId());
+                dto.setBusinessActivityName(data.getBusinessActivityName());
+                dto.setTargetTPS(data.getTargetTPS());
+                dto.setTargetRT(data.getTargetRT());
+                dto.setTargetSuccessRate(data.getTargetSuccessRate());
+                dto.setTargetSA(data.getTargetSA());
+                activity.add(dto);
+            });
+            detailDTO.setBusinessActivityConfig(activity);
+        }
+        //施压配置
+        detailDTO.setConcurrenceNum(wrapperResp.getConcurrenceNum());
+        detailDTO.setIpNum(wrapperResp.getIpNum());
+        detailDTO.setPressureMode(
+            convertEnumResult(dictionaryCache.getObjectByParam(DicKeyConstant.PT_MODEL, wrapperResp.getPressureMode())));
+        detailDTO.setPressureTestTime(wrapperResp.getPressureTestTime());
+        detailDTO.setIncreasingTime(wrapperResp.getIncreasingTime());
+        detailDTO.setStep(wrapperResp.getStep());
+        detailDTO.setEstimateFlow(wrapperResp.getEstimateFlow());
+        //上传文件
+        if (CollectionUtils.isNotEmpty(wrapperResp.getUploadFile())) {
+            List<SceneDetailResp.ScriptDetailResp> script = Lists.newArrayList();
+            wrapperResp.getUploadFile().forEach(data -> {
+                SceneDetailResp.ScriptDetailResp dto = new SceneDetailResp.ScriptDetailResp();
+                dto.setFileName(data.getFileName());
+                dto.setUploadTime(data.getUploadTime());
+                dto.setFileType(convertEnumResult(dictionaryCache.getObjectByParam(DicKeyConstant.FILE_TYPE, data.getFileType())));
+                dto.setUploadedData(data.getUploadedData());
+                dto.setIsSplit(convertEnumResult(dictionaryCache.getObjectByParam(DicKeyConstant.IS_DELETED, data.getIsSplit())));
+                script.add(dto);
+            });
+            detailDTO.setUploadFile(script);
+        }
+
+        //SLA配置
+        if (CollectionUtils.isNotEmpty(wrapperResp.getStopCondition())) {
+            List<SceneDetailResp.SlaDetailResp> sla = Lists.newArrayList();
+            wrapperResp.getStopCondition().forEach(data -> {
+                SceneDetailResp.SlaDetailResp stop = new SceneDetailResp.SlaDetailResp();
+                stop.setRuleName(data.getRuleName());
+                stop.setBusinessActivity(
+                    convertIdsToNames(data.getBusinessActivity(), detailDTO.getBusinessActivityConfig()));
+                stop.setRule(buildRule(data));
+                stop.setStatus(convertEnumResult(dictionaryCache.getObjectByParam(DicKeyConstant.LIVE_STATUS, data.getStatus())));
+                sla.add(stop);
+            });
+            detailDTO.setStopCondition(sla);
+        }
+
+        if (CollectionUtils.isNotEmpty(wrapperResp.getWarningCondition())) {
+            List<SceneDetailResp.SlaDetailResp> sla = Lists.newArrayList();
+            wrapperResp.getWarningCondition().forEach(data -> {
+                SceneDetailResp.SlaDetailResp stop = new SceneDetailResp.SlaDetailResp();
+                stop.setRuleName(data.getRuleName());
+                stop.setBusinessActivity(
+                    convertIdsToNames(data.getBusinessActivity(), detailDTO.getBusinessActivityConfig()));
+                stop.setRule(buildRule(data));
+                stop.setStatus(convertEnumResult(dictionaryCache.getObjectByParam(DicKeyConstant.LIVE_STATUS, data.getStatus())));
+                sla.add(stop);
+            });
+            detailDTO.setWarningCondition(sla);
+        }
+
+        return detailDTO;
+    }
+
+    private io.shulie.takin.cloud.sdk.model.common.EnumResult convertEnumResult(EnumResult enumResult) {
+        return BeanUtil.copyProperties(enumResult, io.shulie.takin.cloud.sdk.model.common.EnumResult.class);
     }
 
     @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_SEARCH)
     @ApiOperation(value = "压测场景列表")
-    public ResponseResult<List<SceneManageListOutput>> getList(
-        @ApiParam(name = "current", value = "页码", required = true) Integer pageNumber,
+    public ResponseResult<List<SceneManageListResp>> getList(
+        @ApiParam(name = "current", value = "页码", required = true) Integer current,
         @ApiParam(name = "pageSize", value = "页大小", required = true) Integer pageSize,
-        @ApiParam(name = "customerName", value = "客户名称") String customerName,
-        @ApiParam(name = "tenantId", value = "客户ID") Long tenantId,
         @ApiParam(name = "sceneId", value = "压测场景ID") Long sceneId,
         @ApiParam(name = "sceneName", value = "压测场景名称") String sceneName,
         @ApiParam(name = "status", value = "压测状态") Integer status,
@@ -207,15 +284,15 @@ public class SceneManageController {
         @ApiParam(name = "lastPtStartTime", value = "压测结束时间") String lastPtStartTime,
         @ApiParam(name = "lastPtEndTime", value = "压测结束时间") String lastPtEndTime
     ) {
+
         /*
          * 1、封装参数
          * 2、调用查询服务
          * 3、返回指定格式
          */
         SceneManageQueryInput queryVO = new SceneManageQueryInput();
+        queryVO.setPageNumber(current + 1);
         queryVO.setPageSize(pageSize);
-        queryVO.setPageNumber(pageNumber);
-        queryVO.setTenantId(tenantId);
         queryVO.setSceneId(sceneId);
         queryVO.setSceneName(sceneName);
         queryVO.setStatus(status);
@@ -230,7 +307,14 @@ public class SceneManageController {
         queryVO.setLastPtStartTime(lastPtStartTime);
         queryVO.setLastPtEndTime(lastPtEndTime);
         PageInfo<SceneManageListOutput> pageInfo = sceneManageService.queryPageList(queryVO);
-        return ResponseResult.success(pageInfo.getList(), pageInfo.getTotal());
+        // 转换
+        List<SceneManageListResp> list = pageInfo.getList().stream()
+            .map(output -> {
+                SceneManageListResp resp = new SceneManageListResp();
+                BeanUtils.copyProperties(output, resp);
+                return resp;
+            }).collect(Collectors.toList());
+        return ResponseResult.success(list, pageInfo.getTotal());
     }
 
     private ResponseResult<SceneManageWrapperResponse> wrapperSceneManage(SceneManageWrapperOutput sceneManage) {
@@ -258,117 +342,29 @@ public class SceneManageController {
         return ResponseResult.success(response);
     }
 
-    private SceneDetailResponse convertSceneManageWrapper2SceneDetail(SceneManageWrapperResponse wrapperDTO) {
-        SceneDetailResponse detailDTO = new SceneDetailResponse();
-        //基本信息
-        detailDTO.setId(wrapperDTO.getId());
-        detailDTO.setSceneName(wrapperDTO.getPressureTestSceneName());
-
-        detailDTO.setUpdateTime(wrapperDTO.getUpdateTime());
-        detailDTO.setLastPtTime(wrapperDTO.getLastPtTime());
-        detailDTO.setStatus(BeanUtil.copyProperties(
-            dictionaryCache.getObjectByParam(DicKeyConstant.SCENE_MANAGE_STATUS, wrapperDTO.getStatus())
-            , io.shulie.takin.cloud.sdk.model.common.EnumResult.class));
-        //业务活动
-        if (CollectionUtils.isNotEmpty(wrapperDTO.getBusinessActivityConfig())) {
-            List<BusinessActivityDetailResponse> activity = Lists.newArrayList();
-            wrapperDTO.getBusinessActivityConfig().forEach(data -> {
-                BusinessActivityDetailResponse dto = new BusinessActivityDetailResponse();
-                dto.setBusinessActivityId(data.getBusinessActivityId());
-                dto.setBusinessActivityName(data.getBusinessActivityName());
-                dto.setTargetTPS(data.getTargetTPS());
-                dto.setTargetRT(data.getTargetRT());
-                dto.setTargetSuccessRate(data.getTargetSuccessRate());
-                dto.setTargetSA(data.getTargetSA());
-                activity.add(dto);
-            });
-            detailDTO.setBusinessActivityConfig(activity);
-        }
-        //施压配置
-        detailDTO.setConcurrenceNum(wrapperDTO.getConcurrenceNum());
-        detailDTO.setIpNum(wrapperDTO.getIpNum());
-        detailDTO.setPressureMode(BeanUtil.copyProperties(
-            dictionaryCache.getObjectByParam(DicKeyConstant.PT_MODEL, wrapperDTO.getPressureMode())
-            , io.shulie.takin.cloud.sdk.model.common.EnumResult.class));
-        detailDTO.setPressureTestTime(wrapperDTO.getPressureTestTime());
-        detailDTO.setIncreasingTime(wrapperDTO.getIncreasingTime());
-        detailDTO.setStep(wrapperDTO.getStep());
-        detailDTO.setEstimateFlow(wrapperDTO.getEstimateFlow());
-        //上传文件
-        if (CollectionUtils.isNotEmpty(wrapperDTO.getUploadFile())) {
-            List<ScriptDetailResponse> script = Lists.newArrayList();
-            wrapperDTO.getUploadFile().forEach(data -> {
-                ScriptDetailResponse dto = new ScriptDetailResponse();
-                dto.setFileName(data.getFileName());
-                dto.setUploadTime(data.getUploadTime());
-                dto.setFileType(BeanUtil.copyProperties(
-                    dictionaryCache.getObjectByParam(DicKeyConstant.FILE_TYPE, data.getFileType())
-                    , io.shulie.takin.cloud.sdk.model.common.EnumResult.class));
-                dto.setUploadedData(data.getUploadedData());
-                dto.setIsSplit(BeanUtil.copyProperties(dictionaryCache.getObjectByParam(DicKeyConstant.IS_DELETED, data.getIsSplit())
-                    , io.shulie.takin.cloud.sdk.model.common.EnumResult.class));
-                script.add(dto);
-            });
-            detailDTO.setUploadFile(script);
-        }
-
-        //SLA配置
-        if (CollectionUtils.isNotEmpty(wrapperDTO.getStopCondition())) {
-            List<SlaDetailResponse> sla = Lists.newArrayList();
-            wrapperDTO.getStopCondition().forEach(data -> {
-                SlaDetailResponse stop = new SlaDetailResponse();
-                stop.setRuleName(data.getRuleName());
-                stop.setBusinessActivity(
-                    convertIdsToNames(data.getBusinessActivity(), detailDTO.getBusinessActivityConfig()));
-                stop.setRule(buildRule(data));
-                stop.setStatus(BeanUtil.copyProperties(dictionaryCache.getObjectByParam(DicKeyConstant.LIVE_STATUS, data.getStatus())
-                    , io.shulie.takin.cloud.sdk.model.common.EnumResult.class));
-                sla.add(stop);
-            });
-            detailDTO.setStopCondition(sla);
-        }
-
-        if (CollectionUtils.isNotEmpty(wrapperDTO.getWarningCondition())) {
-            List<SlaDetailResponse> sla = Lists.newArrayList();
-            wrapperDTO.getWarningCondition().forEach(data -> {
-                SlaDetailResponse stop = new SlaDetailResponse();
-                stop.setRuleName(data.getRuleName());
-                stop.setBusinessActivity(
-                    convertIdsToNames(data.getBusinessActivity(), detailDTO.getBusinessActivityConfig()));
-                stop.setRule(buildRule(data));
-                stop.setStatus(BeanUtil.copyProperties(
-                    dictionaryCache.getObjectByParam(DicKeyConstant.LIVE_STATUS, data.getStatus())
-                    , io.shulie.takin.cloud.sdk.model.common.EnumResult.class));
-                sla.add(stop);
-            });
-            detailDTO.setWarningCondition(sla);
-        }
-
-        return detailDTO;
-    }
-
-    private String buildRule(SceneSlaRefResponse slaRefDTO) {
+    private String buildRule(SceneManageWrapperResp.SceneSlaRefResp slaRefDTO) {
         SceneSlaRefInput input = new SceneSlaRefInput();
         BeanUtils.copyProperties(slaRefDTO, input);
         Map<String, Object> dataMap = SlaUtil.matchCondition(input, new SendMetricsEvent());
-        return String.valueOf(dataMap.get("type"))
-            + dataMap.get("compare")
-            + slaRefDTO.getRule().getDuring()
-            + dataMap.get("unit")
-            + "连续出现"
-            + slaRefDTO.getRule().getTimes()
-            + "次";
+        StringBuilder sb = new StringBuilder();
+        sb.append(dataMap.get("type"));
+        sb.append(dataMap.get("compare"));
+        sb.append(slaRefDTO.getRule().getDuring());
+        sb.append(dataMap.get("unit"));
+        sb.append("连续出现");
+        sb.append(slaRefDTO.getRule().getTimes());
+        sb.append("次");
+        return sb.toString();
     }
 
-    private String convertIdsToNames(String[] ids, List<BusinessActivityDetailResponse> detailList) {
+    private String convertIdsToNames(String[] ids, List<BusinessActivityDetailResp> detailList) {
         if (ids == null || ids.length == 0 || CollectionUtils.isEmpty(detailList)) {
             return null;
         }
         Map<String, String> detailMap = ListHelper.transferToMap(detailList,
-            data -> String.valueOf(data.getBusinessActivityId()),
-            BusinessActivityDetailResponse::getBusinessActivityName);
+            data -> String.valueOf(data.getBusinessActivityId()), BusinessActivityDetailResp::getBusinessActivityName);
 
-        StringBuilder sb = new StringBuilder();
+        StringBuffer sb = new StringBuffer();
         for (String id : ids) {
             if ("-1".equals(id)) {
                 sb.append("所有");
@@ -425,7 +421,7 @@ public class SceneManageController {
      * @return -
      */
     @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_GET_IP_NUMBER)
-    @ApiOperation(value = "")
+    @ApiOperation(value = "获取机器数量范围")
     public ResponseResult<StrategyResp> getIpNum(Integer concurrenceNum, Integer tpsNum) {
         StrategyOutputExt output = strategyConfigService.getStrategy(concurrenceNum, tpsNum);
         StrategyResp resp = new StrategyResp();
@@ -440,4 +436,5 @@ public class SceneManageController {
             req.isAbsolutePath(), req.isUpdate());
         return ResponseResult.success(SceneTaskOpenConverter.INSTANCE.ofScriptVerityRespExt(scriptVerityRespExt));
     }
+
 }
