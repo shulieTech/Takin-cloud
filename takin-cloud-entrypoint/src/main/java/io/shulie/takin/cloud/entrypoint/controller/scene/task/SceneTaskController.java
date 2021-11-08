@@ -297,14 +297,6 @@ public class SceneTaskController {
 
     @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_STOP)
     @ApiOperation(value = "结束场景测试")
-    public ResponseResult<?> stop(@RequestBody SceneManageIdRequest request) {
-        sceneTaskService.stop(request.getId());
-        return ResponseResult.success();
-    }
-
-    /* 旧的接口
-    @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_STOP)
-    @ApiOperation(value = "结束场景测试")
     public ResponseResult<String> stop(@RequestBody SceneManageIdReq req) {
         //记录下sla的数据
         if (req.getReportId() != null) {
@@ -318,7 +310,6 @@ public class SceneTaskController {
         sceneTaskService.stop(req.getId());
         return ResponseResult.success("停止场景成功");
     }
-    */
 
     @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_BOLT_STOP)
     @ApiOperation(value = "直接停止场景")
