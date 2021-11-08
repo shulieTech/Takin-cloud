@@ -115,6 +115,10 @@ public class SceneRequest extends CloudUserCommonRequestExt {
     @Data
     @ApiModel(value = "监控目标")
     public static class MonitoringGoal {
+        /**
+         * 自增主键，回显使用
+         */
+        private Long id;
         @NotNull(message = "监控类型不能为空")
         @ApiModelProperty(value = "监控类型 终止/告警")
         private Integer type;

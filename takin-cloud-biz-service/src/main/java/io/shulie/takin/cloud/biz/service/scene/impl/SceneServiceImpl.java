@@ -77,13 +77,13 @@ public class SceneServiceImpl implements SceneService {
     @Override
     public Long create(SceneRequest in) {
         // 1.   创建场景
-        long sceneId = createStepScene(in.getBasicInfo(), in.getConfig(), in.getAnalysisResult(), in.getDataValidation());
+        long sceneId = createScene(in.getBasicInfo(), in.getConfig(), in.getAnalysisResult(), in.getDataValidation());
         // 2. 更新场景&业务活动关联关系
-        createStepBusinessActivity(sceneId, in.getContent(), in.getGoal());
+        buildBusinessActivity(sceneId, in.getContent(), in.getGoal());
         // 3.   处理脚本
-        createStepScript(sceneId, in.getBasicInfo().getScriptId(), in.getBasicInfo().getScriptType(), in.getFile());
+        buildScript(sceneId, in.getBasicInfo().getScriptId(), in.getBasicInfo().getScriptType(), in.getFile());
         // 4.  保存SLA信息
-        createStepSla(sceneId, in.getMonitoringGoal());
+        buildSla(sceneId, in.getMonitoringGoal());
         //      返回信息
         return sceneId;
     }
@@ -110,11 +110,11 @@ public class SceneServiceImpl implements SceneService {
         if (updateRows == 1) {
             long sceneId = in.getBasicInfo().getSceneId();
             // 2. 更新场景&业务活动关联关系
-            createStepBusinessActivity(sceneId, in.getContent(), in.getGoal());
+            buildBusinessActivity(sceneId, in.getContent(), in.getGoal());
             // 3.   处理脚本
-            createStepScript(sceneId, in.getBasicInfo().getScriptId(), in.getBasicInfo().getScriptType(), in.getFile());
+            buildScript(sceneId, in.getBasicInfo().getScriptId(), in.getBasicInfo().getScriptType(), in.getFile());
             // 4.  保存SLA信息
-            createStepSla(sceneId, in.getMonitoringGoal());
+            buildSla(sceneId, in.getMonitoringGoal());
             //      返回信息
             return true;
         } else {
@@ -317,6 +317,7 @@ public class SceneServiceImpl implements SceneService {
                 String achieveTimesString = condition.getOrDefault(SceneManageConstant.ACHIEVE_TIMES, "0");
                 String compareValueString = condition.getOrDefault(SceneManageConstant.COMPARE_VALUE, "0");
                 return new MonitoringGoal() {{
+                    setId(t.getId());
                     setType(eventString.equals(SceneManageConstant.EVENT_DESTORY) ? 0 : 1);
                     setFormulaNumber(Double.parseDouble(compareValueString));
                     setFormulaSymbol(Integer.parseInt(compareTypeString));
@@ -326,8 +327,7 @@ public class SceneServiceImpl implements SceneService {
                     setNumberOfIgnore(Integer.parseInt(achieveTimesString));
                 }};
             }).collect(Collectors.toList());
-        } catch (
-            JSONException e) {
+        } catch (JSONException e) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, sceneId + "SLA条件错误");
         }
     }
@@ -372,7 +372,7 @@ public class SceneServiceImpl implements SceneService {
      * @param dataValidation 数据验证配置
      * @return 压测场景主键
      */
-    private Long createStepScene(BasicInfo basicInfo,
+    private Long createScene(BasicInfo basicInfo,
         PtConfigExt config, List<?> analysisResult, DataValidation dataValidation) {
         Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), dataValidation);
         // 组装数据实体类
@@ -432,7 +432,8 @@ public class SceneServiceImpl implements SceneService {
      * @param content 压测内容
      * @param goalMap 压测目标
      */
-    private void createStepBusinessActivity(long sceneId, List<Content> content, Map<String, Goal> goalMap) {
+    @Override
+    public void buildBusinessActivity(long sceneId, List<Content> content, Map<String, Goal> goalMap) {
         for (Content t : content) {
             Goal goal = goalMap.get(t.getPathMd5());
             SceneBusinessActivityRefEntity activityRef = new SceneBusinessActivityRefEntity() {{
@@ -463,7 +464,7 @@ public class SceneServiceImpl implements SceneService {
      * @param scriptType 脚本类型
      * @param file       压测文件
      */
-    private void createStepScript(long sceneId, Long scriptId, Integer scriptType, List<File> file) {
+    private void buildScript(long sceneId, Long scriptId, Integer scriptType, List<File> file) {
         List<SceneScriptRefEntity> sceneScriptRefEntityList = new ArrayList<>(file.size());
         for (File t : file) {
             String fileName = t.getName();
@@ -513,7 +514,7 @@ public class SceneServiceImpl implements SceneService {
      * @param sceneId        场景主键
      * @param monitoringGoal 监控目标
      */
-    private void createStepSla(long sceneId, List<MonitoringGoal> monitoringGoal) {
+    public void buildSla(long sceneId, List<MonitoringGoal> monitoringGoal) {
         for (MonitoringGoal mGoal : monitoringGoal) {
             SceneSlaRefEntity entity = new SceneSlaRefEntity() {{
                 Map<String, Object> condition = new HashMap<String, Object>(4) {{
