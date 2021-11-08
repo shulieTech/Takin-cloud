@@ -27,11 +27,16 @@ public class EngineExtImpl implements EngineExtApi {
         List<String> errorMsgList = new ArrayList<>();
         scriptVerityRespExt.setErrorMsg(errorMsgList);
 
-        if (CollectionUtils.isEmpty(scriptVerityExt.getRequest())){
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCRIPT_VERITY_ERROR,"脚本校验业务活动不能为空");
+        if (CollectionUtils.isEmpty(scriptVerityExt.getRequest())) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCRIPT_VERITY_ERROR, "脚本校验业务活动不能为空");
         }
-
-        ScriptParseExt scriptParseExt = SaxUtil.parseJmx(scriptVerityExt.getScriptPath());
+        ScriptParseExt scriptParseExt;
+        try {
+            scriptParseExt = SaxUtil.parseJmx(scriptVerityExt.getScriptPath());
+        } catch (Exception e) {
+            errorMsgList.add("脚本解析失败:" + e.getMessage());
+            return scriptVerityRespExt;
+        }
         List<ScriptUrlExt> requestUrl = scriptParseExt.getRequestUrl();
         if (CollectionUtils.isEmpty(requestUrl)) {
             errorMsgList.add("脚本中没有获取到请求链接！");
@@ -41,7 +46,7 @@ public class EngineExtImpl implements EngineExtApi {
         Set<String> errorSet = new HashSet<>();
         int unbindCount = 0;
         Map<String, Integer> urlMap = new HashMap<>(0);
-        for (String request : scriptVerityExt.getRequest()){
+        for (String request : scriptVerityExt.getRequest()) {
             Set<String> tempErrorSet = new HashSet<>();
             for (ScriptUrlExt urlVO : requestUrl) {
                 if (UrlUtil.checkEqual(request, urlVO.getPath()) && urlVO.getEnable()) {
