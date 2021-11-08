@@ -42,6 +42,7 @@ import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginsRefOpen;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdReq;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdRequest;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneTaskStartReq;
 import io.shulie.takin.cloud.sdk.model.request.scenetask.SceneStartCheckResp;
 import io.shulie.takin.cloud.sdk.model.request.scenetask.SceneTaskUpdateTpsReq;
@@ -202,22 +203,6 @@ public class SceneTaskController {
         return ResponseResult.success();
     }
 
-    @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_STOP)
-    @ApiOperation(value = "结束场景测试")
-    public ResponseResult<String> stop(@RequestBody SceneManageIdReq req) {
-        //记录下sla的数据
-        if (req.getReportId() != null) {
-            UpdateReportSlaDataInput slaDataInput = new UpdateReportSlaDataInput();
-            slaDataInput.setReportId(req.getReportId());
-            slaDataInput.setSlaBean(BeanUtil.copyProperties(req.getSlaBean(), SlaBean.class));
-            reportService.updateReportSlaData(slaDataInput);
-        }
-        log.info("任务{}-{} ，原因：web 调 cloud 触发停止", req.getId(), req.getReportId());
-        // 与sla操作是一致的
-        sceneTaskService.stop(req.getId());
-        return ResponseResult.success("停止场景成功");
-    }
-
     @GetMapping(EntrypointUrl.METHOD_SCENE_TASK_CHECK_TASK)
     @ApiOperation(value = "检查启动状态")
     public ResponseResult<SceneActionResp> checkStartStatus(@RequestParam("id") Long id,
@@ -309,4 +294,40 @@ public class SceneTaskController {
         sceneManageDao.updateStatus(sceneId, 0);
         return ResponseResult.success("resume success");
     }
+
+    @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_STOP)
+    @ApiOperation(value = "结束场景测试")
+    public ResponseResult<?> stop(@RequestBody SceneManageIdRequest request) {
+        sceneTaskService.stop(request.getId());
+        return ResponseResult.success();
+    }
+
+    /* 旧的接口
+    @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_STOP)
+    @ApiOperation(value = "结束场景测试")
+    public ResponseResult<String> stop(@RequestBody SceneManageIdReq req) {
+        //记录下sla的数据
+        if (req.getReportId() != null) {
+            UpdateReportSlaDataInput slaDataInput = new UpdateReportSlaDataInput();
+            slaDataInput.setReportId(req.getReportId());
+            slaDataInput.setSlaBean(BeanUtil.copyProperties(req.getSlaBean(), SlaBean.class));
+            reportService.updateReportSlaData(slaDataInput);
+        }
+        log.info("任务{}-{} ，原因：web 调 cloud 触发停止", req.getId(), req.getReportId());
+        // 与sla操作是一致的
+        sceneTaskService.stop(req.getId());
+        return ResponseResult.success("停止场景成功");
+    }
+    */
+
+    @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_BOLT_STOP)
+    @ApiOperation(value = "直接停止场景")
+    public ResponseResult<Integer> boltStop(@RequestBody SceneManageIdRequest request) {
+        try {
+            return ResponseResult.success(sceneTaskService.blotStop(request.getId()));
+        } catch (Exception ex) {
+            return ResponseResult.fail(ex.getMessage(), null);
+        }
+    }
+
 }

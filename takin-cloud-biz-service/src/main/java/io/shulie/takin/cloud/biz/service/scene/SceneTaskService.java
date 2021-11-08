@@ -42,6 +42,19 @@ public interface SceneTaskService {
     void stop(Long sceneId);
 
     /**
+     * 停止场景测试
+     * <p>直接模式-手工补偿</p>
+     * <ui>
+     * <li>重置场景状态为0</li>
+     * <li>重置对应的最新的压测报告状态为2</li>
+     * </ui>
+     *
+     * @param sceneId 场景主键
+     * @return 业务码, 1 成功, 2 调用停止压测
+     */
+    int blotStop(Long sceneId);
+
+    /**
      * 检查场景压测启动状态
      *
      * @param sceneId  场景主键
@@ -143,13 +156,15 @@ public interface SceneTaskService {
 
     /**
      * 清除位点缓存
-     * @param sceneId
+     *
+     * @param sceneId 场景主键
      */
     void cleanCachedPosition(Long sceneId);
 
     /**
      * 回写流量账户
-     * @param balanceExt
+     *
+     * @param balanceExt 账户余额数据
      */
     void writeBalance(AssetBalanceExt balanceExt);
 

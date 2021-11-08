@@ -122,6 +122,7 @@ public class EntrypointUrl {
     public final static String MODULE_SCENE_TASK = MODULE_SCENE + "/task";
     public final static String METHOD_SCENE_TASK_START = "start";
     public final static String METHOD_SCENE_TASK_STOP = "stop";
+    public final static String METHOD_SCENE_TASK_BOLT_STOP = "bolt/stop";
     public final static String METHOD_SCENE_TASK_CHECK_TASK = "checkStartStatus";
     public final static String METHOD_SCENE_TASK_UPDATE_TPS = "updateSceneTaskTps";
     public final static String METHOD_SCENE_TASK_ADJUST_TPS = "queryAdjustTaskTps";

@@ -20,10 +20,10 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
 import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
 import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
@@ -79,6 +79,7 @@ import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
+import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
@@ -126,25 +127,20 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     private FileSliceService fileSliceService;
     @Resource(type = EnginePluginUtils.class)
     private EnginePluginUtils enginePluginUtils;
+    @Resource(type = SceneTaskStatusCache.class)
+    private SceneTaskStatusCache taskStatusCache;
     @Resource(type = SceneManageService.class)
     private SceneManageService sceneManageService;
-    @Resource(type = TSceneManageMapper.class)
-    private TSceneManageMapper tSceneManageMapper;
     @Resource(type = SceneTaskEventServie.class)
     private SceneTaskEventServie sceneTaskEventServie;
     @Resource(type = TReportBusinessActivityDetailMapper.class)
     private TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
-    @Resource(type = SceneTaskStatusCache.class)
-    private SceneTaskStatusCache taskStatusCache;
 
     /**
      * 初始化报告开始时间偏移时间
      */
     @Value("${init.report.startTime.Offset:10}")
     private Long offsetStartTime;
-
-
-
 
     private static final Long KB = 1024L;
     private static final Long MB = KB * 1024;
@@ -255,9 +251,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
         //设置缓存，用以检查压测场景启动状态 lxr 20210623
 
-        taskStatusCache.cacheStatus(input.getSceneId(),report.getId(),SceneRunTaskStatusEnum.STARTING);
+        taskStatusCache.cacheStatus(input.getSceneId(), report.getId(), SceneRunTaskStatusEnum.STARTING);
         //缓存pod数量，上传jmeter日志时判断是否所有文件都上传完成
-        taskStatusCache.cachePodNum(input.getSceneId(),sceneData.getIpNum());
+        taskStatusCache.cachePodNum(input.getSceneId(), sceneData.getIpNum());
         String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(), report.getId(), CloudPluginUtils.getTenantId());
         List<String> activityRefs = sceneData.getBusinessActivityConfig().stream().map(SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getBindRef)
             .collect(Collectors.toList());
@@ -286,6 +282,48 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         }
     }
 
+    /**
+     * 停止场景测试
+     * <p>直接模式-手工补偿</p>
+     * <ui>
+     * <li>重置场景状态为0</li>
+     * <li>重置对应的最新的压测报告状态为2</li>
+     * </ui>
+     *
+     * @param sceneId 场景主键
+     */
+    @Override
+    public int blotStop(Long sceneId) {
+        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+        if (sceneManage == null) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "停止压测失败，场景不存在!");
+        }
+
+        ReportResult report = reportDao.getReportBySceneId(sceneId);
+        if (report == null) {
+            return 1;
+        }
+
+        // 数据库直接修改
+        if (SceneManageStatusEnum.ifFree(sceneManage.getStatus())) {
+            int sceneUpdateResult = sceneManageDAO.getBaseMapper().update(
+                null,
+                Wrappers.lambdaUpdate(SceneManageEntity.class)
+                    .set(SceneManageEntity::getStatus, 0)
+                    .eq(SceneManageEntity::getId, sceneId));
+
+            if (sceneUpdateResult == 1) {
+                ReportUpdateParam reportUpdateParam = new ReportUpdateParam();
+                reportUpdateParam.setId(report.getId());
+                reportUpdateParam.setStatus(2);
+                reportDao.updateReport(reportUpdateParam);
+            }
+            return 1;
+        }
+
+        return 2;
+    }
+
     @Override
     public SceneActionOutput checkSceneTaskStatus(Long sceneId, Long reportId) {
         SceneActionOutput scene = new SceneActionOutput();
@@ -306,7 +344,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                     List<String> errorMsgs = Lists.newArrayList();
                     // 检查压测引擎返回内容
                     SceneRunTaskStatusOutput status = taskStatusCache.getStatus(sceneId, reportResult.getId());
-                    if (Objects.nonNull(status) && status.getTaskStatus() == SceneRunTaskStatusEnum.FAILED.getCode()){
+                    if (Objects.nonNull(status) && status.getTaskStatus() == SceneRunTaskStatusEnum.FAILED.getCode()) {
                         errorMsgs.add(SceneStopReasonEnum.ENGINE.getType() + ":" + status.getErrorMsg());
                     }
                     scene.setReportId(reportResult.getId());
@@ -399,7 +437,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_FLOW_DEBUG + input.getTenantId() + "_" + input.getScriptDeployId();
 
         //根据场景名称查询是否已经存在场景
-        SceneManageListResult sceneManageResult = sceneManageDao.queryBySceneName(pressureTestSceneName);
+        SceneManageListResult sceneManageResult = sceneManageDAO.queryBySceneName(pressureTestSceneName);
 
         //不存在，新增压测场景
         if (sceneManageResult == null) {
@@ -457,7 +495,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_INSPECT + input.getTenantId() + "_" + input.getScriptId();
 
         //根据场景名称查询是否已经存在场景
-        SceneManageListResult sceneManageResult = sceneManageDao.queryBySceneName(pressureTestSceneName);
+        SceneManageListResult sceneManageResult = sceneManageDAO.queryBySceneName(pressureTestSceneName);
 
         //不存在，新增压测场景
         if (sceneManageResult == null) {
@@ -550,7 +588,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         String pressureTestSceneName = SceneManageConstant.SCENE_MANAGER_TRY_RUN + input.getTenantId() + "_" + input
             .getScriptDeployId();
         //根据场景名称查询是否已经存在场景
-        SceneManageListResult sceneManageResult = sceneManageDao.queryBySceneName(pressureTestSceneName);
+        SceneManageListResult sceneManageResult = sceneManageDAO.queryBySceneName(pressureTestSceneName);
         SceneTryRunTaskStartOutput sceneTryRunTaskStartOutput = new SceneTryRunTaskStartOutput();
         CloudPluginUtils.fillUserData(sceneTryRunTaskStartOutput);
         //不存在，新增压测场景
@@ -840,12 +878,11 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                     taskResult.getSceneId(), taskResult.getTaskId(), recentlyReport.getId());
                 return;
             }
-
-            SceneManage sceneManage = new SceneManage();
-            sceneManage.setId(taskResult.getSceneId());
-            sceneManage.setUpdateTime(new Date());
-            sceneManage.setStatus(SceneManageStatusEnum.WAIT.getValue());
-            tSceneManageMapper.updateByPrimaryKeySelective(sceneManage);
+            sceneManageDao.getBaseMapper().updateById(new SceneManageEntity() {{
+                setId(taskResult.getSceneId());
+                setUpdateTime(new Date());
+                setStatus(SceneManageStatusEnum.WAIT.getValue());
+            }});
         }
     }
 
