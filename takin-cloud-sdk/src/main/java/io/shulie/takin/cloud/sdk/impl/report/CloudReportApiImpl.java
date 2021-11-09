@@ -160,7 +160,7 @@ public class CloudReportApiImpl implements CloudReportApi {
      */
     @Override
     public Long listRunning(ContextExt req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_LIST_RUNNING),
+        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_ONE_RUNNING),
             req, new TypeReference<ResponseResult<Long>>() {}).getData();
     }
 

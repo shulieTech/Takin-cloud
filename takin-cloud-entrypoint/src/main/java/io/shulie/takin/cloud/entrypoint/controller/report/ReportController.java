@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSON;
 
@@ -17,7 +16,6 @@ import io.shulie.takin.cloud.sdk.model.request.report.UpdateReportConclusionReq;
 import io.shulie.takin.cloud.sdk.model.request.report.WarnCreateReq;
 import io.swagger.annotations.Api;
 import com.github.pagehelper.PageInfo;
-import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
 import org.apache.commons.collections4.CollectionUtils;
@@ -39,12 +37,10 @@ import com.pamirs.takin.entity.domain.dto.report.ReportTrendDTO;
 import com.pamirs.takin.entity.domain.vo.report.ReportQueryParam;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import org.springframework.web.context.request.RequestContextHolder;
 import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
 import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import io.shulie.takin.cloud.entrypoint.convert.WarnDetailRespConvertor;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportDetailResp;
 import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
@@ -186,13 +182,13 @@ public class ReportController {
         return ResponseResult.success(reportService.getReportWarnCount(reportId));
     }
 
-    @GetMapping(EntrypointUrl.METHOD_REPORT_LIST_RUNNING)
+    @GetMapping(EntrypointUrl.METHOD_REPORT_ONE_RUNNING)
     @ApiOperation("查询正在生成的报告")
     public ResponseResult<Long> queryRunningReport(ContextExt contextExt) {
         return ResponseResult.success(reportService.queryRunningReport(contextExt));
     }
 
-    @GetMapping(EntrypointUrl.METHOD_REPORT_LIST_ID_RUNNING)
+    @GetMapping(EntrypointUrl.METHOD_REPORT_LIST_RUNNING)
     @ApiOperation("查询正在生成的报告列表")
     @Deprecated
     public ResponseResult<List<Long>> queryListRunningReport(ContextExt contextExt) {

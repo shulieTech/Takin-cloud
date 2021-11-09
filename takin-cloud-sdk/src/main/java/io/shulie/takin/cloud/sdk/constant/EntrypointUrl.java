@@ -90,8 +90,8 @@ public class EntrypointUrl {
     public final static String METHOD_REPORT_UPDATE_CONCLUSION = "updateReportConclusion";
     public final static String METHOD_REPORT_DETAIL = "getReportByReportId";
     public final static String METHOD_REPORT_DETAIL_TEMP = "tempReportDetail";
-    public final static String METHOD_REPORT_LIST_RUNNING = "running";
-    public final static String METHOD_REPORT_LIST_ID_RUNNING = "running/list";
+    public final static String METHOD_REPORT_ONE_RUNNING = "running";
+    public final static String METHOD_REPORT_LIST_RUNNING = "running/list";
     public final static String METHOD_REPORT_TREND = "queryReportTrend";
     public final static String METHOD_REPORT_TREND_TEMP = "queryTempReportTrend";
 
