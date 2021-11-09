@@ -73,7 +73,7 @@ public class CollectorApplication {
                 .filter(metric -> Constants.METRICS_TYPE_RESPONSE.equals(metric.get("type")))
                 .map(GsonUtil::gsonToString)
                 .map(s -> GsonUtil.gsonToBean(s, ResponseMetrics.class))
-                // TODO 确认方案以及发生原因
+                // 原因:引擎不匹配，以下做法可兼容
                 .filter(Objects::nonNull)
                 .peek(t -> t.setPodNo(t.getPodNo() == null ? t.getPodNum() : t.getPodNo()))
                 .collect(Collectors.toList());
@@ -95,7 +95,7 @@ public class CollectorApplication {
                 collectorService.statisticalIp(sceneId, reportId, tenantId, timestamp, IPUtils.getIP(request));
             }
             if (eventMetrics.size() > 0) {
-                log.info("Collector-metrics-event】{}-{}-{}:{}", sceneId, reportId, tenantId,
+                log.info("【收集器调度-事件】{}-{}-{}:{}", sceneId, reportId, tenantId,
                     GsonUtil.gsonToString(eventMetrics));
                 collectorService.verifyEvent(sceneId, reportId, tenantId, eventMetrics);
             }

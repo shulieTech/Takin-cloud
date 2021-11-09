@@ -66,14 +66,16 @@ public class SceneManageDAOImpl
     public List<SceneManageEntity> getPageList(SceneManageQueryBean queryBean) {
         LambdaQueryWrapper<SceneManageEntity> wrapper = Wrappers.lambdaQuery(SceneManageEntity.class)
             .eq(!Objects.isNull(queryBean.getSceneId()), SceneManageEntity::getId, queryBean.getSceneId())
-            .in(!CollectionUtils.isEmpty(queryBean.getSceneIds()), SceneManageEntity::getId, queryBean.getSceneId())
+            .in(!CollectionUtils.isEmpty(queryBean.getSceneIds()), SceneManageEntity::getId, queryBean.getSceneIds())
             .like(!StrUtil.isBlank(queryBean.getSceneName()), SceneManageEntity::getSceneName, queryBean.getSceneName())
             .eq(!Objects.isNull(queryBean.getStatus()), SceneManageEntity::getStatus, queryBean.getStatus())
             .eq(!Objects.isNull(queryBean.getType()), SceneManageEntity::getType, queryBean.getType())
             .le(!Objects.isNull(queryBean.getLastPtEndTime()), SceneManageEntity::getLastPtTime, queryBean.getLastPtEndTime())
             .ge(!Objects.isNull(queryBean.getLastPtStartTime()), SceneManageEntity::getLastPtTime, queryBean.getLastPtStartTime())
             .eq(!Objects.isNull(queryBean.getTenantId()), SceneManageEntity::getTenantId, queryBean.getTenantId())
-            .eq(!StrUtil.isBlank(queryBean.getEnvCode()), SceneManageEntity::getEnvCode, queryBean.getEnvCode());
+            .eq(!StrUtil.isBlank(queryBean.getEnvCode()), SceneManageEntity::getEnvCode, queryBean.getEnvCode())
+            .orderByDesc(SceneManageEntity::getLastPtTime)
+            .orderByDesc(SceneManageEntity::getId);
         return this.baseMapper.selectList(wrapper);
     }
 
