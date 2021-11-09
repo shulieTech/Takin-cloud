@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSON;
 
+import com.pamirs.takin.entity.domain.dto.report.ScriptNodeTree;
 import io.swagger.annotations.Api;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
@@ -217,7 +218,7 @@ public class ReportController {
 
     @GetMapping("/report/nodeTree")
     @ApiOperation("场景对应的脚本树结构")
-    public ResponseResult<String> getNodeTree(ReportTrendQueryParam queryParam){
+    public ResponseResult<List<ScriptNodeTree>> getNodeTree(ReportTrendQueryParam queryParam){
         return ResponseResult.success(reportService.getNodeTree(queryParam));
     }
 

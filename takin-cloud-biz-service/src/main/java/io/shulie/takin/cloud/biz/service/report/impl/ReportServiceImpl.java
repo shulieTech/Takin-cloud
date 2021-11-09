@@ -23,7 +23,10 @@ import com.alibaba.fastjson.JSONObject;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.pamirs.takin.entity.domain.dto.report.ScriptNodeTree;
+import io.shulie.takin.cloud.common.bean.scenemanage.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
+import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.ext.content.asset.RealAssectBillExt;
 import io.shulie.takin.ext.content.enums.AssetTypeEnum;
 import io.shulie.takin.ext.content.response.Response;
@@ -288,8 +291,8 @@ public class ReportServiceImpl implements ReportService {
         CloudPluginUtils.fillReportData(reportResult, reportDetail);
 
         List<SceneBusinessActivityRefOutput> refList = wrapper.getBusinessActivityConfig();
-        if(StringUtils.isNotBlank(reportResult.getScriptAnalysisResult())){
-            String nodeTree = toNodeTree(reportResult.getScriptAnalysisResult());
+        if(StringUtils.isNotBlank(reportResult.getScriptNodeTree())){
+            String nodeTree = reportResult.getScriptNodeTree();
             Map<String,Map<String,Object>> resultMap = new HashMap<>(refList.size());
             refList.stream()
                 .filter(Objects::nonNull)
@@ -299,39 +302,38 @@ public class ReportServiceImpl implements ReportService {
                     Map<String, Object> objectMap = fillMap(data, ref);
                     resultMap.put(ref.getBindRef(), objectMap);
                 });
-            DocumentContext context = JsonPathUtil.deleteNodes(nodeTree);
-            if (Objects.nonNull(context)){
-                context = JsonPathUtil.putNodesToJson(context, resultMap);
-                reportDetail.setFlowDetail(context.jsonString());
-            }
+            String resultTree = JsonPathUtil.putNodesToJson(nodeTree, resultMap);
+            reportDetail.setNodeDetail(JsonUtil.parseArray(resultTree,
+                ScriptNodeSummaryBean.class));
         }else {
-            JSONArray jsonArray = new JSONArray();
-            refList.stream()
+            List<ScriptNodeSummaryBean> nodeDetails = refList.stream()
                 .filter(Objects::nonNull)
-                .forEach(ref -> {
+                .map(ref -> {
                     StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
                         ref.getBindRef());
-                    JSONObject json = new JSONObject();
-                    json.put("testName",ref.getBindRef());
-                    json.put("xpathMd5",ref.getBindRef());
-                    if (data != null) {
-                        json.put("avgRT", new DataBean(data.getAvgRt(), ref.getTargetRT()));
-                        json.put("sa", new DataBean(data.getSa(), ref.getTargetSA()));
-                        json.put("tps", new DataBean(data.getTps(), ref.getTargetTPS()));
-                        json.put("successRate", new DataBean(data.getSuccessRate(), ref.getTargetSuccessRate()));
-                        json.put("avgConcurrenceNum", data.getAvgConcurrenceNum());
-                        json.put("totalRequest", data.getTotalRequest());
-                    } else {
-                        json.put("avgRT", new DataBean("0", ref.getTargetRT()));
-                        json.put("sa", new DataBean("0", ref.getTargetSA()));
-                        json.put("tps", new DataBean("0", ref.getTargetTPS()));
-                        json.put("successRate", new DataBean("0", ref.getTargetSuccessRate()));
-                        json.put("avgConcurrenceNum", new BigDecimal(0));
-                        json.put("totalRequest", 0L);
-                    }
-                    jsonArray.add(json);
-                });
-            reportDetail.setFlowDetail(jsonArray.toJSONString());
+                    return new ScriptNodeSummaryBean() {{
+                        setName(ref.getBusinessActivityName());
+                        setTestName(ref.getBindRef());
+                        setXpathMd5(ref.getBindRef());
+                        if (Objects.nonNull(data)) {
+                            setAvgRt(new DataBean(data.getAvgRt(), ref.getTargetRT()));
+                            setSa(new DataBean(data.getSa(), ref.getTargetSA()));
+                            setTps(new DataBean(data.getTps(), ref.getTargetTPS()));
+                            setSuccessRate(new DataBean(data.getSuccessRate(), ref.getTargetSuccessRate()));
+                            setAvgConcurrenceNum(data.getAvgConcurrenceNum());
+                            setTotalRequest(data.getTotalRequest());
+                        } else {
+                            setAvgRt(new DataBean("0", ref.getTargetRT()));
+                            setSa(new DataBean("0", ref.getTargetSA()));
+                            setTps(new DataBean("0", ref.getTargetTPS()));
+                            setSuccessRate(new DataBean("0", ref.getTargetSuccessRate()));
+                            setAvgConcurrenceNum(new BigDecimal(0));
+                            setTotalRequest(0L);
+                        }
+                    }};
+                }).collect(Collectors.toList());
+            reportDetail.setNodeDetail(nodeDetails);
+
         }
         //检查任务是否超时
         boolean taskIsTimeOut = checkSceneTaskIsTimeOut(reportResult, wrapper);
@@ -1240,15 +1242,6 @@ public class ReportServiceImpl implements ReportService {
             && StringUtils.isNotEmpty(jsonObject.getString(ReportConstans.SLA_ERROR_MSG));
     }
 
-    private String toNodeTree(String features){
-        if (StringUtils.isNotBlank(features)){
-            JSONObject tmpObj = JSONObject.parseObject(features);
-            if (tmpObj.containsKey("analysisResult")) {
-                return tmpObj.getString("analysisResult");
-            }
-        }
-        return null;
-    }
 
     private Map<String,Object> fillMap(StatReportDTO statReport,SceneBusinessActivityRefOutput refOutput){
         if (Objects.isNull(refOutput)) {
@@ -1274,7 +1267,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public String getNodeTree(ReportTrendQueryParam param) {
+    public List<ScriptNodeTree> getNodeTree(ReportTrendQueryParam param) {
         ReportResult reportResult;
         if (Objects.nonNull(param.getReportId())){
             reportResult = reportDao.selectById(param.getReportId());
@@ -1291,32 +1284,27 @@ public class ReportServiceImpl implements ReportService {
         if (CollectionUtils.isEmpty(reportBusinessActivityDetails)){
             return null;
         }
-        if (StringUtils.isNotBlank(reportResult.getScriptAnalysisResult())){
-            String nodeTree = reportResult.getScriptAnalysisResult();
-            //todo 查询脚本对应的businessActivityId,加入到节点树中
-            DocumentContext context = JsonPath.parse(nodeTree);
+        if (StringUtils.isNotBlank(reportResult.getScriptNodeTree())) {
+            //需要把activityId塞到节点树里
+            DocumentContext context = JsonPath.parse(reportResult.getScriptNodeTree());
             reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
-                .forEach(detail ->{
-                    Map<String, Map<String, Object>> nodeAddMap = new HashMap<>(1);
+                .forEach(detail -> {
                     Map<String, Object> tmpMap = new HashMap<>();
                     tmpMap.put("businessActivityId", detail.getBusinessActivityId());
-                    nodeAddMap.put(detail.getBindRef(), tmpMap);
-                    JsonPathUtil.putNodesToJson(context, nodeAddMap);
+                    Map<String, Map<String, Object>> resultMap = new HashMap<>();
+                    resultMap.put(detail.getBindRef(), tmpMap);
+                     JsonPathUtil.putNodesToJson(context, resultMap);
                 });
-            return context.jsonString();
+           return JSONArray.parseArray(context.jsonString(),ScriptNodeTree.class);
         }else {
-            JSONArray resultArray = new JSONArray();
-            reportBusinessActivityDetails.stream()
+            return reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
-                .forEach(detail ->{
-                    JSONObject json = new JSONObject();
-                    json.put("businessActivityId",detail.getBusinessActivityId());
-                    json.put("testName", detail.getBindRef());
-                    json.put("xpathMd5", detail.getBindRef());
-                    resultArray.add(json);
-                });
-            return resultArray.toJSONString();
+                .map(detail -> new ScriptNodeTree(){{
+                    setName(detail.getBindRef());
+                    setBusinessActivityId(detail.getBusinessActivityId());
+                    setTestName(detail.getBusinessActivityName());
+                }}).collect(Collectors.toList());
         }
     }
 }

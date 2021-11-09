@@ -45,4 +45,5 @@ public interface CloudReportApi {
      */
     ResponseResult<ReportDetailResp> tempReportDetail(ReportDetailBySceneIdReq req);
 
+
 }

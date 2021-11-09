@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.biz.collector;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -260,7 +259,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         return timeWindow;
     }
 
-    private Long reduceMetrics(Long sceneId, Long reportId, Long customerId, Integer podNum, long endTime, Long timeWindow) {
+    private Long reduceMetrics(Long sceneId, Long reportId, Long customerId, Integer podNum, long endTime, Long timeWindow,String nodeTree) {
         String logPre = String.format("reduceMetrics %s-%s-%s:%s", sceneId, reportId, customerId, DateUtil.showTime(timeWindow));
         log.info(logPre + " start!");
         //如果时间窗口为空
@@ -308,12 +307,14 @@ public class PushWindowDataScheduled extends AbstractIndicators {
 
             String measurement = InfluxDBUtil.getMeasurement(sceneId, reportId, customerId);
             long time = timeWindow;
+            //todo 需要统计没有的值的controller
             List<PressureOutput> results = transactions.stream().filter(StringUtils::isNotBlank)
                 .map(s -> this.filterByTransactionAndPodNo(metriceses, s))
                 .filter(CollectionUtils::isNotEmpty)
                 .map(l -> this.toPressureOutput(l, podNum, time))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+
             //计算all的saCount
             int allSaCount = results.stream().filter(Objects::nonNull)
                 .map(PressureOutput::getSaCount)
@@ -345,6 +346,21 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         List<String> pods = Lists.newArrayList();
         return metricses.stream().filter(Objects::nonNull)
             .filter(m -> transaction.equals(m.getTransaction()))
+            .filter(m -> !pods.contains(m.getPodNo()))
+            .peek(m -> pods.add(m.getPodNo()))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 单个时间窗口数据，根据transaction过滤，并且每个pod只取1条数据
+     */
+    private List<ResponseMetrics> summaryControllerMetrics(List<ResponseMetrics> metricses, String nodeTree) {
+        if (CollectionUtils.isEmpty(metricses) || StringUtils.isBlank(nodeTree)) {
+            return metricses;
+        }
+        List<String> pods = Lists.newArrayList();
+        return metricses.stream().filter(Objects::nonNull)
+            .filter(m -> nodeTree.equals(m.getTransaction()))
             .filter(m -> !pods.contains(m.getPodNo()))
             .peek(m -> pods.add(m.getPodNo()))
             .collect(Collectors.toList());
@@ -453,7 +469,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         return p;
     }
 
-    private void finishPushData(Long sceneId, Long reportId, Long customerId, Integer podNum, Long timeWindow, long endTime) {
+    private void finishPushData(Long sceneId, Long reportId, Long customerId, Integer podNum, Long timeWindow, long endTime,String nodeTree) {
         String taskKey = getPressureTaskKey(sceneId, reportId, customerId);
         String last = String.valueOf(redisTemplate.opsForValue().get(last(taskKey)));
         long nowTimeWindow = CollectorUtil.getTimeWindowTime(System.currentTimeMillis());
@@ -482,7 +498,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             // 如果结束时间 小于等于当前时间，数据不用补充，
             // 如果结束时间 大于 当前时间，需要补充期间每5秒的数据 延后5s
             while (isSaveLastPoint && timeWindow <= endTimeWindow && timeWindow <= nowTimeWindow) {
-                timeWindow = reduceMetrics(sceneId, reportId, customerId, podNum, eTime, timeWindow);
+                timeWindow = reduceMetrics(sceneId, reportId, customerId, podNum, eTime, timeWindow,nodeTree);
                 timeWindow = CollectorUtil.getNextTimeWindow(timeWindow);
             }
             log.info("本次压测{}-{}-{},push data 完成", sceneId, reportId, customerId);
@@ -520,6 +536,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 Long sceneId = r.getSceneId();
                 Long reportId = r.getId();
                 Long customerId = r.getCustomerId();
+                String nodeTree = r.getScriptNodeTree();
                 String lockKey = String.format("pushData:%s:%s:%s", sceneId, reportId, customerId);
                 if (!lock(lockKey, "1")) {
                     return;
@@ -552,13 +569,13 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                     Long timeWindow = null;
                     do {
                         //不用递归，而是采用do...while...的方式是防止需要处理的时间段太长引起trackoverflow错误
-                        timeWindow = reduceMetrics(sceneId, reportId, customerId, podNum, breakTime, timeWindow);
+                        timeWindow = reduceMetrics(sceneId, reportId, customerId, podNum, breakTime, timeWindow,nodeTree);
                         if (null == timeWindow) {
                             break;
                         }
                         timeWindow = CollectorUtil.getNextTimeWindow(timeWindow);
                     } while (timeWindow <= breakTime);
-                    finishPushData(sceneId, reportId, customerId, podNum, timeWindow, endTime);
+                    finishPushData(sceneId, reportId, customerId, podNum, timeWindow, endTime,nodeTree);
                 } catch (Throwable t) {
                     log.error("pushData2 error!", t);
                 } finally {

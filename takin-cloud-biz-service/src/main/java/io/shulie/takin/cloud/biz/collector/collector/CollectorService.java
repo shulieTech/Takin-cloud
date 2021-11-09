@@ -75,8 +75,6 @@ public class CollectorService extends AbstractIndicators {
 
     @Value("${script.path}")
     private String ptlDir;
-    @Value("${cloud.push.log:false}")
-    private boolean cloudPushPtlLog;
     @Autowired
     private EnginePluginUtils enginePluginUtils;
     @Autowired
@@ -197,15 +195,19 @@ public class CollectorService extends AbstractIndicators {
                             .updateEnum(SceneManageStatusEnum.ENGINE_RUNNING)
                             .build());
 
-                        cacheTryRunTaskStatus(sceneId, reportId, customerId, SceneRunTaskStatusEnum.RUNNING);
-                    }
-                    if (cloudPushPtlLog) {
-                        log.info("开始异步上传ptl日志，场景ID：{},报告ID:{}", sceneId, reportId);
-                        EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
-                        String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_JTL_FILE_NAME_SYSTEM_PROP_KEY);
-                        THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, customerId, logUploadDAO, redisClientUtils,
-                            pushLogService, sceneManageDAO, ptlDir, fileName,engineCallExtApi) {
-                        });
+                        //从压测引擎上传请求流量明细还是从cloud上传请求流量明细
+                        if (PressureLogUploadConstants.UPLOAD_BY_CLOUD.equals(appConfig.getEngineLogUploadModel())){
+                            log.info("开始异步上传ptl日志，场景ID：{},报告ID:{}", sceneId, reportId);
+                            taskStatusCache.cacheStatus(sceneId,reportId,SceneRunTaskStatusEnum.RUNNING);
+                            EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
+                            String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_JTL_FILE_NAME_SYSTEM_PROP_KEY);
+                            THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, customerId, logUploadDAO, redisClientUtils,
+                                pushLogService, sceneManageDAO, ptlDir, fileName,engineCallExtApi) {
+                            });
+                        }else {
+                            cacheTryRunTaskStatus(sceneId, reportId, customerId, SceneRunTaskStatusEnum.RUNNING);
+                        }
+
                     }
                 }
                 if (isLast) {

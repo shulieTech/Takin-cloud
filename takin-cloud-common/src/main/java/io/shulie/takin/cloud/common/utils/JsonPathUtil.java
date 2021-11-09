@@ -1,16 +1,21 @@
 package io.shulie.takin.cloud.common.utils;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import cn.hutool.json.JSONUtil;
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import io.shulie.takin.cloud.common.bean.scenemanage.DataBean;
+import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.TypeRef;
+import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
+import io.shulie.takin.cloud.common.constants.TreeNodeTypeConstants;
+import io.shulie.takin.ext.content.script.ScriptNode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -24,14 +29,27 @@ public class JsonPathUtil {
     /**
      * 默认需要删除的节点，用以处理脚本的树状结构，删除无用的节点
      */
-    public static final List<String> DEFAULT_REGEXPS = Arrays.asList("$..props",
-        "$..name",
-        "$..md5",
-        "$..type",
-        "$..xpath",
-        "$..identification");
+    public static final List<String> DEFAULT_REGEXPS = Collections.singletonList("$..props");
 
+    /**
+     * 默认匹配节点的key
+     */
     public static final String DEFAULT_KEY = "xpathMd5";
+
+    /**
+     * 默认解析配置
+     * jsonProvider 使用 {@link JacksonJsonProvider}
+     * mappingProvider 使用 {@link JacksonMappingProvider}
+     * options 默认总是返回{@link List}
+     */
+    public static final Configuration JACKSON_CONFIGURATION = Configuration.builder()
+        .jsonProvider(new JacksonJsonProvider())
+        .mappingProvider(new JacksonMappingProvider())
+        .options(Option.ALWAYS_RETURN_LIST)
+        .build();
+
+    public static final TypeRef<List<ScriptNode>> SCRIPT_NODE_TYPE_REF = new TypeRef<List<ScriptNode>>() {};
+
 
     /**
      * 删除json字符串中的节点
@@ -95,8 +113,70 @@ public class JsonPathUtil {
         return context;
     }
 
-    public static DocumentContext putNodesToJson(DocumentContext context, Map<String, Map<String, Object>> nodeMaps){
-       return putNodesToJson(context,DEFAULT_KEY,nodeMaps);
+    public static void putNodesToJson(DocumentContext context, Map<String, Map<String, Object>> nodeMaps) {
+         putNodesToJson(context, DEFAULT_KEY, nodeMaps);
+    }
+
+    public static String putNodesToJson(String targetJson,Map<String, Map<String, Object>> nodeMaps){
+        DocumentContext context = JsonPath.using(JACKSON_CONFIGURATION).parse(targetJson);
+        putNodesToJson(context, nodeMaps);
+        return context.jsonString();
+    }
+
+
+
+    /**
+     * 根据xpathMd5值获取其子节点
+     * @param nodeTree 目标json
+     * @param xpathMd5 xpathMd5值
+     * @param nodeType {@link TreeNodeTypeConstants} 节点类型
+     * @return List<ScriptNode>
+     */
+    public static List<ScriptNode> getChildrenByMd5(String nodeTree, String xpathMd5, String nodeType) {
+        if (StringUtils.isBlank(nodeTree)) {
+            return null;
+        }
+        if (StringUtils.isBlank(xpathMd5) || StringUtils.isBlank(nodeType)){
+            List<ScriptNode> read = JsonPath.using(JACKSON_CONFIGURATION)
+                .parse(nodeTree)
+                .read("$..", SCRIPT_NODE_TYPE_REF);
+            if (CollectionUtils.isNotEmpty(read)){
+                return read;
+            }
+            return null;
+        }
+        Object read1 = JsonPath.read(nodeTree, "$..[?(@.xpathMd5=='" + xpathMd5 + "')]");
+        if (Objects.isNull(read1)) {
+            return null;
+        }
+        List<ScriptNode> nodeList = JsonPath
+            .using(JACKSON_CONFIGURATION)
+            .parse(read1.toString())
+            .read("$..children[?(@.type=='" + nodeType + "')]", SCRIPT_NODE_TYPE_REF);
+        if (Objects.nonNull(nodeList)) {
+            return nodeList;
+        }
+        return null;
+    }
+
+    /**
+     * 根据xpathMd5值获取类型为控制器的子节点
+     * @param nodeTree 目标json
+     * @param xpathMd5 xpathMd5值
+     * @return List<ScriptNode>
+     */
+    public static List<ScriptNode> getChildControllers(String nodeTree,String xpathMd5){
+        return getChildrenByMd5(nodeTree,xpathMd5, TreeNodeTypeConstants.CONTROLLER);
+    }
+
+    /**
+     * 根据xpathMd5值获取类型为取样器的子节点
+     * @param nodeTree 目标json
+     * @param xpathMd5 xpathMd5值
+     * @return List<ScriptNode>
+     */
+    public static List<ScriptNode> getChildSamplers(String nodeTree,String xpathMd5){
+        return getChildrenByMd5(nodeTree,xpathMd5, TreeNodeTypeConstants.SAMPLER);
     }
 
     public static void main(String[] args) {
@@ -556,12 +636,9 @@ public class JsonPathUtil {
             + "  }\n"
             + "]";
 
-        DocumentContext context = JsonPathUtil.deleteNodes(json);
-        Map<String,Map<String,Object>> resultMap = new HashMap<>();
-        Map<String,Object> avgRtMap = new HashMap<>();
-        avgRtMap.put("avgRt", new DataBean("55","100"));
-        resultMap.put("0dc5078261a2860acc8e530a46d17f13",avgRtMap);
-        context = JsonPathUtil.putNodesToJson(context, "xpathMd5", resultMap);
-        System.out.println(context.jsonString());
+        //DocumentContext context = JsonPathUtil.deleteNodes(json);
+        List<ScriptNode> childSamplers = JsonPathUtil.getChildSamplers(json,
+            "db65854f3f8b92d60658fbdbde490d38");
+        childSamplers.forEach(System.out::println);
     }
 }

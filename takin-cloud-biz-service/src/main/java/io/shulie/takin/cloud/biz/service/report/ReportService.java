@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.github.pagehelper.PageInfo;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
+import com.pamirs.takin.entity.domain.dto.report.ScriptNodeTree;
 import io.shulie.takin.cloud.biz.output.report.ReportOutput;
 import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
@@ -211,5 +212,5 @@ public interface ReportService {
      * @param param 查询参数
      * @return 树结构json字符串
      */
-    String getNodeTree(ReportTrendQueryParam param);
+    List<ScriptNodeTree> getNodeTree(ReportTrendQueryParam param);
 }

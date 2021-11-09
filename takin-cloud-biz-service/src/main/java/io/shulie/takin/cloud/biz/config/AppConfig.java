@@ -68,6 +68,9 @@ public class AppConfig {
     @Value("${pressure.engine.backendQueueCapacity:5000}")
     private String pressureEngineBackendQueueCapacity;
 
+    @Value("${pressure.engine.logUpload:engine}")
+    private String engineLogUploadModel;
+
     public DeploymentMethodEnum getDeploymentMethod() {
         return CommonUtil.getValue(DeploymentMethodEnum.PRIVATE, this.deploymentMethod, DeploymentMethodEnum::valueBy);
     }

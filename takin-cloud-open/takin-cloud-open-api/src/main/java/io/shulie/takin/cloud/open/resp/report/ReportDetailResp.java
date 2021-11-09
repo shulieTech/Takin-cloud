@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import io.shulie.takin.cloud.common.bean.scenemanage.ScriptNodeSummaryBean;
 import lombok.EqualsAndHashCode;
 import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
@@ -101,6 +102,9 @@ public class ReportDetailResp extends CloudUserCommonRequestExt implements Seria
 
     @ApiModelProperty(value = "业务活动链路概览")
     private List<BusinessActivitySummaryBean> businessActivity;
+
+    @ApiModelProperty(value = "节点链路详情")
+    private List<ScriptNodeSummaryBean> nodeDetail;
 
     private Long scriptId;
 }
