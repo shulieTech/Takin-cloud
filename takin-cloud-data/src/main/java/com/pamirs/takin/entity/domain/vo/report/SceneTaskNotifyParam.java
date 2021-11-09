@@ -20,9 +20,13 @@ public class SceneTaskNotifyParam {
     private Long sceneId;
 
     /**
-     * 客户Id 新增
+     * 客户Id 新版
      */
     private Long tenantId;
+    /**
+     * 客户Id 旧版
+     */
+    private Long customerId;
 
     /**
      * 状态

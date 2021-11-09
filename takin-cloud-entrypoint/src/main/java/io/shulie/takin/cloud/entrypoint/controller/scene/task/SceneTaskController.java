@@ -7,8 +7,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import com.pamirs.takin.entity.domain.vo.scenemanage.FileSplitResultVO;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
@@ -88,12 +86,11 @@ public class SceneTaskController {
     SceneTaskService sceneTaskService;
     @Resource(type = FileSliceService.class)
     FileSliceService fileSliceService;
-    @Resource(type = TSceneManageMapper.class)
-    TSceneManageMapper tSceneManageMapper;
 
     @GetMapping(EntrypointUrl.METHOD_SCENE_TASK_TASK_RESULT_NOTIFY)
     @ApiOperation(value = "启动结果通知")
     public String taskResultNotify(SceneTaskNotifyParam notify) {
+        notify.setTenantId(notify.getTenantId() == null ? notify.getCustomerId() : notify.getTenantId());
         return sceneTaskService.taskResultNotify(notify);
     }
 
