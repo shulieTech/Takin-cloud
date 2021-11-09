@@ -158,10 +158,9 @@ public interface ReportService {
      *
      * @param reportId 报告主键
      * @param sceneId  场景主键
-     * @param tenantId 租户主键
      * @return -
      */
-    List<Metrices> metric(Long reportId, Long sceneId, Long tenantId);
+    List<Metrices> metric(Long reportId, Long sceneId);
 
     /**
      * 更新扩展字段

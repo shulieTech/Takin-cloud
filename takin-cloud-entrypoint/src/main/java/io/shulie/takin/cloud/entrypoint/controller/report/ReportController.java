@@ -215,8 +215,8 @@ public class ReportController {
 
     @GetMapping(EntrypointUrl.METHOD_REPORT_METRICES)
     @ApiOperation("当前压测的所有数据")
-    public ResponseResult<List<Metrices>> metrics(Long reportId, Long sceneId, Long tenantId) {
-        return ResponseResult.success(reportService.metric(reportId, sceneId, tenantId));
+    public ResponseResult<List<Metrices>> metrics(Long reportId, Long sceneId) {
+        return ResponseResult.success(reportService.metric(reportId, sceneId));
     }
 
     @PostMapping(EntrypointUrl.METHOD_REPORT_WARN_ADD)

@@ -20,6 +20,7 @@ import javax.annotation.Resource;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -770,13 +771,13 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     @Override
-    public List<Metrices> metric(Long reportId, Long sceneId, Long tenantId) {
+    public List<Metrices> metric(Long reportId, Long sceneId) {
         List<Metrices> metricList = Lists.newArrayList();
         if (StringUtils.isBlank(String.valueOf(reportId))) {
             return metricList;
         }
         try {
-            String measurement = InfluxUtil.getMeasurement(sceneId, reportId, tenantId);
+            String measurement = InfluxUtil.getMeasurement(sceneId, reportId, CloudPluginUtils.getContext().getTenantId());
             metricList = influxWriter.query(
                 "select time,avg_tps as avgTps from " + measurement + " where transaction='all'", Metrices.class);
         } catch (Throwable e) {
