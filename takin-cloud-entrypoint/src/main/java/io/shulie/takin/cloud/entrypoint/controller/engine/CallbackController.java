@@ -29,6 +29,7 @@ public class CallbackController {
     @PostMapping(EntrypointUrl.METHOD_ENGINE_CALLBACK_TASK_RESULT_NOTIFY)
     @ApiOperation(value = "引擎回调状态")
     public ResponseResult<?> taskResultNotify(@RequestBody EngineNotifyParam notify) {
+        notify.setTenantId(notify.getTenantId() == null ? notify.getCustomerId() : notify.getTenantId());
         return engineCallbackService.notifyEngineState(notify);
     }
 }
