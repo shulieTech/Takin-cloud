@@ -95,7 +95,7 @@ public class CollectorApplication {
                 collectorService.statisticalIp(sceneId, reportId, tenantId, timestamp, IPUtils.getIP(request));
             }
             if (eventMetrics.size() > 0) {
-                log.info("收集器调度-事件】{}-{}-{}:{}", sceneId, reportId, tenantId,
+                log.info("【收集器调度-事件】{}-{}-{}:{}", sceneId, reportId, tenantId,
                     GsonUtil.gsonToString(eventMetrics));
                 collectorService.verifyEvent(sceneId, reportId, tenantId, eventMetrics);
             }
