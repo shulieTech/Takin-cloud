@@ -6,6 +6,7 @@ import javax.annotation.Resource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,7 +49,7 @@ public class SceneController {
         return ResponseResult.success(sceneService.update(request));
     }
 
-    @RequestMapping("/detail")
+    @GetMapping("/detail")
     @ApiOperation(value = "获取压测场景详情")
     public ResponseResult<SceneDetailResponse> detail(@RequestParam(required = false) Long sceneId) {
         if (sceneId == null) {

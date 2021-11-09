@@ -21,6 +21,7 @@ import com.alibaba.fastjson.TypeReference;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -48,6 +49,7 @@ import io.shulie.takin.cloud.data.mapper.mysql.SceneBusinessActivityRefMapper;
  * @author 张天赐
  */
 @Slf4j
+@Service
 public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
     @Resource
     SceneService sceneService;
