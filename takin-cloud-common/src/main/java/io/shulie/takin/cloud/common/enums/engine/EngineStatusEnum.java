@@ -31,8 +31,8 @@ public enum EngineStatusEnum {
      */
     INTERRUPT_FAILED("中断失败", "interruptFail");
 
-    private String status;
     private String message;
+    private String status;
 
     public static EngineStatusEnum getEngineStatusEnum(String status) {
         for (EngineStatusEnum statusEnum : values()) {
@@ -42,5 +42,4 @@ public enum EngineStatusEnum {
         }
         return null;
     }
-
 }
