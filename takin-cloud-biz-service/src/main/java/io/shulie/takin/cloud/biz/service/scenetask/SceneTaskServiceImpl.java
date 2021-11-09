@@ -633,6 +633,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setResourceName(input.getScriptName());
         sceneTaskStartInput.setUserId(input.getUserId());
         sceneTaskStartInput.setUserName(input.getUserName());
+        sceneTaskStartInput.setTenantId(input.getTenantId());
+        sceneTaskStartInput.setEnvCode(input.getEnvCode());
         SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput, null);
         sceneTryRunTaskStartOutput.setReportId(sceneActionOutput.getData());
 
