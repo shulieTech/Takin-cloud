@@ -1,6 +1,8 @@
 package io.shulie.takin.app;
 
+import io.shulie.takin.cloud.biz.service.report.ReportService;
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -26,6 +28,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan(basePackages = {"com.pamirs.takin", "io.shulie.takin"})
 @MapperScan({"com.pamirs.takin.*.dao", "io.shulie.takin.cloud.data.mapper.mysql", "io.shulie.takin.cloud.data.dao.statistics"})
 public class Application {
+
+    @Autowired
+    private ReportService reportService;
 
     public static void main(String[] args) {
         SpringApplicationBuilder applicationBuilder = new SpringApplicationBuilder().sources(Application.class);

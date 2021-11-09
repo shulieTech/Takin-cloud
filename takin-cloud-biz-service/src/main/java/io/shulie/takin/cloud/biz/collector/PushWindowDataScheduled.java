@@ -25,7 +25,6 @@ import javax.annotation.Resource;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.shulie.takin.cloud.biz.collector.collector.AbstractIndicators;
 import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
@@ -100,6 +99,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
 
     @Value("${report.metric.isSaveLastPoint:true}")
     private boolean isSaveLastPoint;
+
 
     // todo 之后改成分布式，需要注意，redis 读写锁问题
     /**
