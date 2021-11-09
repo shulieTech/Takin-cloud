@@ -8,11 +8,11 @@ public enum SamplerTypeEnum {
     /**
      * http请求
      */
-    HTTP("HTTP"),
+    HTTP("HTTP", RpcTypeEnum.HTTP),
     /**
      * dubbo请求
      */
-    DUBBO("DUBBO"),
+    DUBBO("DUBBO", RpcTypeEnum.DUBBO),
 //    /**
 //     * ROCKETMQ请求
 //     */
@@ -21,25 +21,28 @@ public enum SamplerTypeEnum {
     /**
      * KAFKA 请求
      */
-    KAFKA("KAFKA"),
+    KAFKA("KAFKA", RpcTypeEnum.MQ),
 
     /**
      * JDBC 请求
      */
-    JDBC("JDBC"),
+    JDBC("JDBC", RpcTypeEnum.DB),
     /**
      * 未知请求类型
      */
-    UNKNOWN("UNKNOWN")
-    ;
+    UNKNOWN("UNKNOWN", RpcTypeEnum.UNKNOWN);
 
 
-    SamplerTypeEnum(String type){
+    SamplerTypeEnum(String type, RpcTypeEnum rpcTypeEnum) {
         this.type = type;
+        this.rpcTypeEnum = rpcTypeEnum;
     }
 
     @Getter
     @Setter
     private String type;
 
+    @Getter
+    @Setter
+    private RpcTypeEnum rpcTypeEnum;
 }

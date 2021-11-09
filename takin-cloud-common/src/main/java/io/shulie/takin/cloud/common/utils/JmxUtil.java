@@ -209,9 +209,9 @@ public class JmxUtil {
                     continue;
                 }
                 JSONArray arr = o.values().stream().filter(Objects::nonNull)
-                    .map(v -> (JSONArray)v)
-                    .findFirst()
-                    .orElse(null);
+                        .map(v -> (JSONArray) v)
+                        .findFirst()
+                        .orElse(null);
                 if (null == arr) {
                     continue;
                 }
@@ -256,7 +256,7 @@ public class JmxUtil {
                     } else if (i <= holdTime) {
                         nowThreadNum += threadNum;
                     } else if (i < shutDownTime) {
-                        nowThreadNum += threadNum - (((double)threadNum / shutDown) * (i - holdTime));
+                        nowThreadNum += threadNum - (((double) threadNum / shutDown) * (i - holdTime));
                     } else if (i > shutDownTime) {
                         nowThreadNum += 0;
                     }
@@ -265,7 +265,7 @@ public class JmxUtil {
                     maxThreadNum = nowThreadNum;
                 }
             }
-            p.setMaxThreadNum((int)Math.ceil(maxThreadNum));
+            p.setMaxThreadNum((int) Math.ceil(maxThreadNum));
         }
         return p;
     }
@@ -299,8 +299,9 @@ public class JmxUtil {
                     props = mergeProps(props, configProps);
                     node.setProps(props);
                     //protocol+#+path+method, 即第一个#号前是protocol，最后一个#之后是method，中间的#可能是path自带
-                    node.setIdentification(buildHttpIdentification(node));
                     node.setSamplerType(SamplerTypeEnum.HTTP);
+                    node.setIdentification(buildHttpIdentification(node));
+
                 } else if ("JavaSampler".equals(name)) {
                     Map<String, String> props = buildProps(element);
                     //找到java请求默认值
@@ -376,7 +377,7 @@ public class JmxUtil {
                 } else if ("io.github.ningyu.jmeter.plugin.dubbo.sample.DubboSample".equals(name)) {
                     node.setProps(buildProps(element));
                     //interface + # + method
-                    node.setIdentification(buildIdentification(node, "FIELD_DUBBO_INTERFACE", "FIELD_DUBBO_METHOD"));
+                    node.setIdentification(buildDubboIdentification(node));
                     node.setSamplerType(SamplerTypeEnum.DUBBO);
                 } else {
                     node.setProps(buildProps(element));
@@ -386,6 +387,42 @@ public class JmxUtil {
             default:
                 break;
         }
+    }
+
+    private static String buildDubboIdentification(ScriptNode node) {
+        if (null == node) {
+            return null;
+        }
+        Map<String, String> props = node.getProps();
+        if (null == props) {
+            return null;
+        }
+        //解析dubbo接口和版本
+        String dubboInterface = props.get("FIELD_DUBBO_INTERFACE");
+        String fieldDubboVersion = props.get("FIELD_DUBBO_VERSION");
+        String path = dubboInterface + ":" + fieldDubboVersion;
+
+        //获取方法
+        String fieldDubboMethod = props.get("FIELD_DUBBO_METHOD");
+
+        //获取参数个数
+        String fieldDubboMethodArgsSize = props.get("FIELD_DUBBO_METHOD_ARGS_SIZE");
+        Integer argsSize = NumberUtil.parseInt(fieldDubboMethodArgsSize, 0);
+        if (argsSize > 0){
+            StringBuilder method = new StringBuilder();
+            method.append(fieldDubboMethod);
+            method.append("(");
+            //拼接参数
+            for (int i = 1; i <= argsSize; i++) {
+                String param = props.get("FIELD_DUBBO_METHOD_ARGS_PARAM_TYPE" + i);
+                method.append(param).append(",");
+            }
+            //去掉最后一个逗号
+            String substring = method.substring(0, method.length() - 1);
+            return String.format("%s|%s|%s", substring + ")", path, SamplerTypeEnum.DUBBO.getRpcTypeEnum().getValue());
+        }
+        return String.format("%s|%s|%s",fieldDubboMethod, path, SamplerTypeEnum.DUBBO.getRpcTypeEnum().getValue());
+
     }
 
     private static SamplerTypeEnum getJavaSamplerType(ScriptNode node) {
@@ -459,7 +496,7 @@ public class JmxUtil {
             if (!(o instanceof Element)) {
                 continue;
             }
-            Element e = (Element)o;
+            Element e = (Element) o;
             if (isNotEnabled(e)) {
                 continue;
             }
@@ -522,7 +559,7 @@ public class JmxUtil {
     }
 
     public static Map<String, String> buildProps(Element element, List<String> propElementNames) {
-        return buildProps(element, propElementNames.toArray(new String[] {}));
+        return buildProps(element, propElementNames.toArray(new String[]{}));
     }
 
     /**
@@ -541,12 +578,12 @@ public class JmxUtil {
             return null;
         }
         return elements.stream().filter(Objects::nonNull)
-            .map(e -> JmxUtil.getKeyAndValue(e, propElementNames))
-            .filter(CollectionUtils::isNotEmpty)
-            .flatMap(Collection::stream)
-            .filter(Objects::nonNull)
-            .filter(p -> StringUtils.isNotBlank(p.getKey()) && Objects.nonNull(p.getValue()))
-            .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (o1, o2) -> o1));
+                .map(e -> JmxUtil.getKeyAndValue(e, propElementNames))
+                .filter(CollectionUtils::isNotEmpty)
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .filter(p -> StringUtils.isNotBlank(p.getKey()) && Objects.nonNull(p.getValue()))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (o1, o2) -> o1));
     }
 
     public static Pair<String, String> getBasePropElementKeyAndValue(Element e) {
@@ -587,7 +624,7 @@ public class JmxUtil {
         String name = e.getName();
         if (null != propElementNames && propElementNames.length > 0) {
             boolean contains = Arrays.stream(propElementNames).filter(Objects::nonNull)
-                .anyMatch(s -> s.equals(name));
+                    .anyMatch(s -> s.equals(name));
             if (!contains) {
                 return null;
             }
@@ -649,8 +686,8 @@ public class JmxUtil {
             return null;
         }
         return Arrays.stream(keys).filter(StringUtils::isNotBlank)
-            .map(props::get)
-            .collect(Collectors.joining("#"));
+                .map(props::get)
+                .collect(Collectors.joining("|"));
     }
 
     public static String buildJavaSamplerIdentification(ScriptNode node) {
@@ -690,21 +727,19 @@ public class JmxUtil {
         if (null == props) {
             return null;
         }
-        String protocol = props.get("HTTPSampler.protocol");
         String path = props.get("HTTPSampler.path");
         String method = props.get("HTTPSampler.method");
         int protocolCharIndex = null == path ? -1 : path.indexOf("://");
         if (protocolCharIndex != -1) {
             try {
                 URL url = new URL(path);
-                protocol = url.getProtocol();
                 path = url.getPath();
             } catch (MalformedURLException e) {
                 log.error("buildHttpIdentification MalformedURLException:path=" + path, e);
             }
         }
         path = pathGuiYi(path);
-        return String.format("%s#%s#%s", protocol, path, method);
+        return String.format("%s|%s|%s", method, path, SamplerTypeEnum.HTTP.getRpcTypeEnum().getValue());
     }
 
     /**
@@ -739,11 +774,11 @@ public class JmxUtil {
             return 0;
         }
         return json.values().stream().filter(Objects::nonNull)
-            .map(o -> (String)o)
-            .filter(StringUtils::isNotBlank)
-            .map(NumberUtil::parseInt)
-            .findFirst()
-            .orElse(0);
+                .map(o -> (String) o)
+                .filter(StringUtils::isNotBlank)
+                .map(NumberUtil::parseInt)
+                .findFirst()
+                .orElse(0);
     }
 
     /**
@@ -760,7 +795,7 @@ public class JmxUtil {
         List<Element> list = Lists.newArrayList();
         for (Object o : elements) {
             if (o instanceof Element) {
-                list.add((Element)o);
+                list.add((Element) o);
             }
         }
         return list;
