@@ -405,9 +405,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         BigDecimal podTpsNum = new BigDecimal(input.getTpsNum()).divide(new BigDecimal(totalIp.toString()), 0,
             RoundingMode.UP);
         redisTemplate.opsForHash().put(engineInstanceRedisKey,
-            PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_ALL_LIMIT, input.getTpsNum() + "");
-        redisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_LIMIT,
-            podTpsNum + "");
+            PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_ALL_LIMIT, input.getTpsNum());
+        redisTemplate.opsForHash().put(engineInstanceRedisKey,
+            PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_LIMIT, podTpsNum);
     }
 
     @Override
