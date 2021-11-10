@@ -225,7 +225,8 @@ public class ReportServiceImpl implements ReportService {
                 JSON.parseObject(report.getFeatures()).getString(ReportConstans.FEATURES_ERROR_MSG));
         }
         detail.setTestTotalTime(TestTimeUtil.format(report.getStartTime(), report.getEndTime()));
-        detail.setBusinessActivity(getBusinessActivitySummaryList(reportId));
+        //detail.setBusinessActivity(getBusinessActivitySummaryList(reportId));
+        detail.setNodeDetail(getReportNodeDetail(report.getScriptNodeTree(),reportId));
         //任务没有完成，提示用户正在生成中
         if (report.getStatus() != ReportConstans.FINISH_STATUS) {
             detail.setTaskStatus(ReportConstans.RUN_STATUS);
@@ -238,6 +239,44 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         return detail;
+    }
+
+    private List<ScriptNodeSummaryBean> getReportNodeDetail(String scriptNodeTree, Long reportId) {
+        List<ReportBusinessActivityDetail> activities = tReportBusinessActivityDetailMapper
+            .queryReportBusinessActivityDetailByReportId(reportId);
+        if (StringUtils.isNotBlank(scriptNodeTree)){
+            Map<String,Map<String,Object>> resultMap = new HashMap<>();
+            activities.stream().filter(Objects::nonNull)
+                .forEach(detail ->{
+                    Map<String, Object> objectMap = fillReportMap(detail);
+                    if (Objects.nonNull(objectMap)){
+                        resultMap.put(detail.getBindRef(),objectMap);
+                    }
+                });
+            if (resultMap.size() > 0) {
+                String nodesToJson = JsonPathUtil.putNodesToJson(scriptNodeTree, resultMap);
+                return JSONArray.parseArray(nodesToJson, ScriptNodeSummaryBean.class);
+            }
+            return Lists.newArrayList();
+        }else {
+            return activities.stream().filter(Objects::nonNull)
+            .map(detail ->{
+                ScriptNodeSummaryBean bean = new ScriptNodeSummaryBean();
+                bean.setTestName(detail.getBusinessActivityName());
+                bean.setTotalRequest(detail.getRequest());
+                bean.setBusinessActivityId(detail.getBusinessActivityId());
+                bean.setAvgConcurrenceNum(detail.getAvgConcurrenceNum());
+                bean.setSuccessRate(new DataBean(detail.getSuccessRate(),detail.getTargetSuccessRate()));
+                bean.setTps(new DataBean(detail.getTps(),detail.getTargetTps()));
+                bean.setMaxTps(detail.getMaxTps());
+                bean.setAvgRt(new DataBean(detail.getRt(),detail.getTargetRt()));
+                bean.setMaxRt(detail.getMaxRt());
+                bean.setMinRt(detail.getMinRt());
+                bean.setPassFlag((Optional.ofNullable(detail.getPassFlag()).orElse(0)));
+                bean.setDistribute(getDistributes(detail.getRtDistribute()));
+                return bean;
+            }).collect(Collectors.toList());
+        }
     }
 
     @Override
@@ -300,7 +339,7 @@ public class ReportServiceImpl implements ReportService {
                 .forEach(ref -> {
                     StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
                         ref.getBindRef());
-                    Map<String, Object> objectMap = fillMap(data, ref);
+                    Map<String, Object> objectMap = fillTempMap(data, ref);
                     resultMap.put(ref.getBindRef(), objectMap);
                 });
             String resultTree = JsonPathUtil.putNodesToJson(nodeTree, resultMap);
@@ -494,22 +533,7 @@ public class ReportServiceImpl implements ReportService {
             businessActivity.setMaxTps(reportBusinessActivityDetail.getMaxTps());
             businessActivity.setMinRt(reportBusinessActivityDetail.getMinRt());
             businessActivity.setPassFlag(Optional.ofNullable(reportBusinessActivityDetail.getPassFlag()).orElse(0));
-            if (StringUtils.isNoneBlank(reportBusinessActivityDetail.getRtDistribute())) {
-                Map<String, String> distributeMap = JsonHelper.string2Obj(
-                    reportBusinessActivityDetail.getRtDistribute(), new TypeReference<Map<String, String>>() {
-                    });
-                List<DistributeBean> distributes = Lists.newArrayList();
-                distributeMap.forEach((key, value) -> {
-                    DistributeBean distribute = new DistributeBean();
-                    distribute.setLable(key);
-                    distribute.setValue(COMPARE + value);
-                    distributes.add(distribute);
-                });
-                distributes.sort(((o1, o2) -> -o1.getLable().compareTo(o2.getLable())));
-                businessActivity.setDistribute(distributes);
-            } else {
-                businessActivity.setDistribute(Lists.newArrayList());
-            }
+            businessActivity.setDistribute(getDistributes(reportBusinessActivityDetail.getRtDistribute()));
             list.add(businessActivity);
         });
         return list;
@@ -1244,12 +1268,51 @@ public class ReportServiceImpl implements ReportService {
     }
 
 
-    private Map<String,Object> fillMap(StatReportDTO statReport,SceneBusinessActivityRefOutput refOutput){
+    private Map<String,Object> fillReportMap(ReportBusinessActivityDetail detail){
+        if (Objects.nonNull(detail)) {
+            Map<String, Object> resultMap = new HashMap<>();
+            resultMap.put("avgRt", new DataBean(detail.getRt(), detail.getTargetRt()));
+            resultMap.put("sa", new DataBean(detail.getSa(), detail.getTargetSa()));
+            resultMap.put("tps", new DataBean(detail.getTps(), detail.getTargetTps()));
+            resultMap.put("maxRt",detail.getMaxRt());
+            resultMap.put("minRt",detail.getMinRt());
+            resultMap.put("maxTps",detail.getMaxTps());
+            resultMap.put("passFlag",Optional.ofNullable(detail.getPassFlag()).orElse(0));
+            resultMap.put("totalRequest",detail.getRequest());
+            resultMap.put("successRate", new DataBean(detail.getSuccessRate(), detail.getTargetSuccessRate()));
+            resultMap.put("avgConcurrenceNum", detail.getAvgConcurrenceNum());
+            resultMap.put("distribute",getDistributes(detail.getRtDistribute()));
+            return resultMap;
+        }
+        return null;
+
+    }
+    private List<DistributeBean> getDistributes(String distributes){
+        List<DistributeBean> result;
+        if (StringUtils.isNoneBlank(distributes)) {
+            Map<String, String> distributeMap = JsonHelper.string2Obj(distributes, new TypeReference<Map<String, String>>() {});
+            List<DistributeBean> distributeBeans = Lists.newArrayList();
+            distributeMap.forEach((key, value) -> {
+                DistributeBean distribute = new DistributeBean();
+                distribute.setLable(key);
+                distribute.setValue(COMPARE + value);
+                distributeBeans.add(distribute);
+            });
+            distributeBeans.sort(((o1, o2) -> -o1.getLable().compareTo(o2.getLable())));
+            result = distributeBeans;
+        }else {
+            result = Lists.newArrayList();
+        }
+        return result;
+    }
+
+    private Map<String,Object> fillTempMap(StatReportDTO statReport,SceneBusinessActivityRefOutput refOutput){
         if (Objects.isNull(refOutput)) {
             return null;
         }
         Map<String, Object> resultMap = new HashMap<>();
         if (Objects.nonNull(statReport)) {
+            resultMap.put("businessActivityId",refOutput.getBusinessActivityId());
             resultMap.put("avgRt", new DataBean(statReport.getAvgRt(), refOutput.getTargetRT()));
             resultMap.put("sa", new DataBean(statReport.getSa(), refOutput.getTargetSA()));
             resultMap.put("tps", new DataBean(statReport.getTps(), refOutput.getTargetTPS()));
@@ -1257,6 +1320,7 @@ public class ReportServiceImpl implements ReportService {
             resultMap.put("avgConcurrenceNum", statReport.getAvgConcurrenceNum());
             resultMap.put("totalRequest", statReport.getTotalRequest());
         }else {
+            resultMap.put("businessActivityId",refOutput.getBusinessActivityId());
             resultMap.put("avgRt", new DataBean("0", refOutput.getTargetRT()));
             resultMap.put("sa", new DataBean("0", refOutput.getTargetSA()));
             resultMap.put("tps", new DataBean("0", refOutput.getTargetTPS()));
