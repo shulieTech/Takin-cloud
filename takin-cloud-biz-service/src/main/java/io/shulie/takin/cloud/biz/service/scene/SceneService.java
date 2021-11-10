@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.List;
 
 import io.shulie.takin.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
 import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Goal;
 import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Content;
@@ -101,6 +103,15 @@ public interface SceneService {
      * @return SLA列表
      */
     List<MonitoringGoal> getMonitoringGoal(long sceneId);
+
+    /**
+     * 获取场景的表信息
+     *
+     * @param sceneId 场景主键
+     * @return 场景[表信息]
+     * @throws TakinCloudException 未找到场景
+     */
+    SceneManageEntity getScene(long sceneId) throws TakinCloudException;
 
     /**
      * 创建/更新 压测场景 - 步骤2 : 关联业务活动

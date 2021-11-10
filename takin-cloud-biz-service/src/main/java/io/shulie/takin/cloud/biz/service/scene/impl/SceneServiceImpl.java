@@ -339,7 +339,8 @@ public class SceneServiceImpl implements SceneService {
      * @return 场景[表信息]
      * @throws TakinCloudException 未找到场景
      */
-    private SceneManageEntity getScene(long sceneId) throws TakinCloudException {
+    @Override
+    public SceneManageEntity getScene(long sceneId) throws TakinCloudException {
         SceneManageEntity scene = sceneManageMapper.selectById(sceneId);
         if (scene == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "未找到场景:" + sceneId);

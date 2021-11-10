@@ -87,6 +87,7 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
         long scriptId = request.getScriptId();
         // 脚本解析结果
         final List<ScriptNode> analysisResult = request.getAnalysisResult();
+        final String analysisResultString = JSONObject.toJSONString(analysisResult);
         // 脚本节点和业务活动对应关系
         final Map<String, Long> businessActivityRef = request.getBusinessActivityRef();
         // 脚本解析结果分组
@@ -122,8 +123,12 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
             AtomicInteger successNumber = new AtomicInteger();
             List<SceneManageEntity> sceneList = getSceneListByScriptId(scriptId);
             sceneList.forEach(t -> {
-                boolean itemSynchronizeResult = synchronize(t.getId(), threadGroupMd5, samplerMd5, controllerMd5, businessActivityRef);
-                if (itemSynchronizeResult) {successNumber.getAndIncrement();}
+                boolean itemSynchronizeResult = synchronize(t.getId(),
+                    threadGroupMd5, samplerMd5, controllerMd5,
+                    businessActivityRef, analysisResultString);
+                if (itemSynchronizeResult) {
+                    successNumber.getAndIncrement();
+                }
             });
             String onceTransactionIdentifier = transactionIdentifier.get();
             transactionIdentifier.remove();
@@ -133,7 +138,21 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
 
     }
 
-    private boolean synchronize(long sceneId, Set<String> threadGroupMd5, Set<String> samplerMd5, Set<String> controllerMd5, Map<String, Long> businessActivityRef) {
+    /**
+     * 同步某个场景
+     *
+     * @param sceneId              场景主键
+     * @param threadGroupMd5       线程组MD5集合
+     * @param samplerMd5           采样器MD5集合
+     * @param controllerMd5        控制器MD5集合
+     * @param businessActivityRef  业务活动关联关系
+     * @param analysisResultString 脚本解析结果
+     * @return 同步是否成功
+     * <p>失败会在拓展字段中标识场景不可压测，成功会更新场景以及关联数据</p>
+     */
+    private boolean synchronize(long sceneId,
+        Set<String> threadGroupMd5, Set<String> samplerMd5, Set<String> controllerMd5,
+        Map<String, Long> businessActivityRef, String analysisResultString) {
         // 手动事务控制
         TransactionStatus transactionStatus = platformTransactionManager.getTransaction(transactionDefinition);
         try {
@@ -141,17 +160,25 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
             if (synchronizeThreadGroupConfig(sceneId, threadGroupMd5)) {
                 // 同步场景节点
                 if (synchronizeSceneNode(sceneId, samplerMd5, businessActivityRef, controllerMd5)) {
-                    platformTransactionManager.commit(transactionStatus);
-                    return true;
+                    // 更新脚本解析结果
+                    if (synchronizeAnalysisResult(sceneId, analysisResultString)) {
+                        // 在拓展字段中标识场景不可压测
+                        setSceneDisabledInFeature(sceneId, false);
+                        platformTransactionManager.commit(transactionStatus);
+                        return true;
+                    }
                 }
             }
             // 上述模块全部同步成功后才提交数据，否则回滚数据
             platformTransactionManager.rollback(transactionStatus);
-            // TODO 标识场景为不可压测
+            // 在拓展字段中标识场景不可压测
+            setSceneDisabledInFeature(sceneId, true);
             return false;
         } catch (Exception e) {
             // 发生异常则回滚数据
             platformTransactionManager.rollback(transactionStatus);
+            // 在拓展字段中标识场景不可压测
+            setSceneDisabledInFeature(sceneId, true);
             return false;
         }
     }
@@ -255,6 +282,55 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
             }});
         });
         return true;
+    }
+
+    /**
+     * 更新脚本解析结果
+     *
+     * @param sceneId              场景主键
+     * @param analysisResultString 脚本解析结果
+     * @return 更新结果
+     */
+    private boolean synchronizeAnalysisResult(long sceneId, String analysisResultString) {
+        return sceneManageMapper.updateById(new SceneManageEntity() {{
+            setId(sceneId);
+            setScriptAnalysisResult(analysisResultString);
+        }}) == 1;
+    }
+
+    /**
+     * 在拓展字段中设置场景是否要禁止发起压测
+     *
+     * @param sceneId  场景主键
+     * @param disabled 是否禁止
+     */
+    private void setSceneDisabledInFeature(long sceneId, boolean disabled) {
+        String disabledKey = "DISABLED";
+        // 获取旧的features字段并解析为Map
+        SceneManageEntity scene = sceneService.getScene(sceneId);
+        String featureString = scene.getFeatures();
+        Map<String, Object> feature = JSONObject.parseObject(featureString, new TypeReference<Map<String, Object>>() {});
+        // 按需填充（如果需要更新数据库，则补充这个变量，会根据这个变量去判断是否更新数据库）
+        final String needUpdateFeature;
+        // 需要禁用则增加字段
+        if (disabled && !feature.containsKey(disabledKey)) {
+            feature.put(disabledKey, "");
+            needUpdateFeature = JSONObject.toJSONString(feature);
+        }
+        // 选用启用则移除字段
+        else if (!disabled && feature.containsKey(disabledKey)) {
+            feature.put(disabledKey, "");
+            needUpdateFeature = JSONObject.toJSONString(feature);
+        }
+        // 其它情况不更新
+        else {needUpdateFeature = null;}
+        // 如果需要更新数据库
+        if (StrUtil.isNotBlank(needUpdateFeature)) {
+            sceneManageMapper.updateById(new SceneManageEntity() {{
+                setId(sceneId);
+                setFeatures(needUpdateFeature);
+            }});
+        }
     }
 
     /**
