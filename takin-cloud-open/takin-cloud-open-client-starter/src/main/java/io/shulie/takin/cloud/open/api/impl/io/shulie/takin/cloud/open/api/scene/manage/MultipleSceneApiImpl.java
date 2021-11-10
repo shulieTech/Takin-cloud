@@ -14,6 +14,7 @@ import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.open.api.scene.manage.MultipleSceneApi;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneTaskStartReq;
 import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
+import io.shulie.takin.cloud.open.request.scene.manage.SynchronizeRequest;
 import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
 
 /**
@@ -76,6 +77,22 @@ public class MultipleSceneApiImpl extends CloudCommonApi implements MultipleScen
         if (takinResponseEntity.getSuccess()) {
             return takinResponseEntity.getBody();
         }
+        return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
+            takinResponseEntity.getErrorMsg(), "查看cloud日志");
+    }
+
+    /**
+     * 同步场景信息 - 新
+     *
+     * @param request 入参
+     * @return 同步事务标识
+     */
+    @Override
+    public ResponseResult<String> synchronize(SynchronizeRequest request) {
+        TakinResponseEntity<ResponseResult<String>> takinResponseEntity =
+            HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.MULTIPLE_SCENE_SYNCHRONIZE,
+                getHeaders(request), new TypeReference<ResponseResult<String>>() {}, request);
+        if (takinResponseEntity.getSuccess()) {return takinResponseEntity.getBody();}
         return ResponseResult.fail(takinResponseEntity.getHttpStatus().toString(),
             takinResponseEntity.getErrorMsg(), "查看cloud日志");
     }

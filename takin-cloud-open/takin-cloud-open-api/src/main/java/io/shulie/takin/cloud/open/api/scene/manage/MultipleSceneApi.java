@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.open.api.scene.manage;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.open.req.scenemanage.SceneTaskStartReq;
 import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
+import io.shulie.takin.cloud.open.request.scene.manage.SynchronizeRequest;
 import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
 
 /**
@@ -34,4 +35,12 @@ public interface MultipleSceneApi {
      * @return 场景详情
      */
     ResponseResult<SceneDetailResponse> detail(SceneTaskStartReq request);
+
+    /**
+     * 同步场景信息 - 新
+     *
+     * @param request 入参
+     * @return 同步事务标识
+     */
+    ResponseResult<String> synchronize(SynchronizeRequest request);
 }
