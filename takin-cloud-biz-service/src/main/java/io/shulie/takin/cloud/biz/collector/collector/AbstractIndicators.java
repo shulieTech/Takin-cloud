@@ -156,6 +156,10 @@ public abstract class AbstractIndicators {
         return getIndicatorsKey(getWindowKey(taskKey, transaction, timeWindow), "error");
     }
 
+    protected String testNameKey(String taskKey,String transaction,long timeWindow){
+        return getIndicatorsKey(getWindowKey(taskKey,transaction,timeWindow),"testName");
+    }
+
     /**
      * time 不进行转换
      *

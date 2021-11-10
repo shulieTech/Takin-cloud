@@ -12,10 +12,9 @@ import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.TypeRef;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
-import io.shulie.takin.cloud.common.constants.TreeNodeTypeConstants;
+import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.ext.content.script.ScriptNode;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -50,7 +49,6 @@ public class JsonPathUtil {
 
     public static final TypeRef<List<ScriptNode>> SCRIPT_NODE_TYPE_REF = new TypeRef<List<ScriptNode>>() {};
 
-
     /**
      * 删除json字符串中的节点
      *
@@ -81,9 +79,7 @@ public class JsonPathUtil {
         try {
             context = JsonPath.parse(jsonString);
             DocumentContext finalContext = context;
-            regexps.forEach(r -> {
-                finalContext.delete(JsonPath.compile(r));
-            });
+            regexps.forEach(r -> finalContext.delete(JsonPath.compile(r)));
             return finalContext;
         } catch (Exception e) {
             log.error("json delete regex error!json={}", jsonString);
@@ -97,12 +93,11 @@ public class JsonPathUtil {
      * @param context  json文档对象
      * @param key      需要添加节点的父节点名称
      * @param nodeMaps 需要添加的节点；外层Key为匹配父节点名称的value，内层map：key是json的key，value是json的value
-     * @return json文档对象
      */
-    public static DocumentContext putNodesToJson(DocumentContext context, String key,
+    public static void putNodesToJson(DocumentContext context, String key,
         Map<String, Map<String, Object>> nodeMaps) {
         if (Objects.isNull(context) || StringUtils.isBlank(key) || Objects.isNull(nodeMaps) || nodeMaps.size() <= 0) {
-            return null;
+            return;
         }
         for (Map.Entry<String, Map<String, Object>> md5Entry : nodeMaps.entrySet()) {
             for (Map.Entry<String, Object> entry : md5Entry.getValue().entrySet()) {
@@ -110,73 +105,76 @@ public class JsonPathUtil {
                     entry.getValue());
             }
         }
-        return context;
     }
 
     public static void putNodesToJson(DocumentContext context, Map<String, Map<String, Object>> nodeMaps) {
-         putNodesToJson(context, DEFAULT_KEY, nodeMaps);
+        putNodesToJson(context, DEFAULT_KEY, nodeMaps);
     }
 
-    public static String putNodesToJson(String targetJson,Map<String, Map<String, Object>> nodeMaps){
+    public static String putNodesToJson(String targetJson, Map<String, Map<String, Object>> nodeMaps) {
         DocumentContext context = JsonPath.using(JACKSON_CONFIGURATION).parse(targetJson);
         putNodesToJson(context, nodeMaps);
         return context.jsonString();
     }
 
-
+    public static List<ScriptNode> getCurrentNodeByMd5(String nodeTree,String xpathMd5){
+       return JsonPath.using(JACKSON_CONFIGURATION)
+            .parse(nodeTree)
+            .read("$..[?(@.xpathMd5=='" + xpathMd5 + "')]", SCRIPT_NODE_TYPE_REF);
+    }
 
     /**
      * 根据xpathMd5值获取其子节点
+     *
      * @param nodeTree 目标json
      * @param xpathMd5 xpathMd5值
-     * @param nodeType {@link TreeNodeTypeConstants} 节点类型
+     * @param nodeType {@link NodeTypeEnum} 节点类型
      * @return List<ScriptNode>
      */
     public static List<ScriptNode> getChildrenByMd5(String nodeTree, String xpathMd5, String nodeType) {
         if (StringUtils.isBlank(nodeTree)) {
             return null;
         }
-        if (StringUtils.isBlank(xpathMd5) || StringUtils.isBlank(nodeType)){
-            List<ScriptNode> read = JsonPath.using(JACKSON_CONFIGURATION)
-                .parse(nodeTree)
-                .read("$..", SCRIPT_NODE_TYPE_REF);
-            if (CollectionUtils.isNotEmpty(read)){
-                return read;
+        if (StringUtils.isBlank(xpathMd5)) {
+            if (StringUtils.isNotBlank(nodeType)) {
+                return JsonPath.using(JACKSON_CONFIGURATION)
+                    .parse(nodeTree)
+                    .read("$..children[?(@.type=='" + nodeType + "')]", SCRIPT_NODE_TYPE_REF);
             }
+            return JsonPath.using(JACKSON_CONFIGURATION)
+                .parse(nodeTree)
+                .read("$..children", SCRIPT_NODE_TYPE_REF);
+        }
+        Object read = JsonPath.read(nodeTree, "$..[?(@.xpathMd5=='" + xpathMd5 + "')]");
+        if (Objects.isNull(read)) {
             return null;
         }
-        Object read1 = JsonPath.read(nodeTree, "$..[?(@.xpathMd5=='" + xpathMd5 + "')]");
-        if (Objects.isNull(read1)) {
-            return null;
-        }
-        List<ScriptNode> nodeList = JsonPath
+        return JsonPath
             .using(JACKSON_CONFIGURATION)
-            .parse(read1.toString())
+            .parse(read.toString())
             .read("$..children[?(@.type=='" + nodeType + "')]", SCRIPT_NODE_TYPE_REF);
-        if (Objects.nonNull(nodeList)) {
-            return nodeList;
-        }
-        return null;
     }
 
     /**
      * 根据xpathMd5值获取类型为控制器的子节点
+     *
      * @param nodeTree 目标json
      * @param xpathMd5 xpathMd5值
      * @return List<ScriptNode>
      */
-    public static List<ScriptNode> getChildControllers(String nodeTree,String xpathMd5){
-        return getChildrenByMd5(nodeTree,xpathMd5, TreeNodeTypeConstants.CONTROLLER);
+    public static List<ScriptNode> getChildControllers(String nodeTree, String xpathMd5) {
+        return getChildrenByMd5(nodeTree, xpathMd5, NodeTypeEnum.CONTROLLER.name());
     }
 
     /**
      * 根据xpathMd5值获取类型为取样器的子节点
+     *
      * @param nodeTree 目标json
      * @param xpathMd5 xpathMd5值
      * @return List<ScriptNode>
      */
-    public static List<ScriptNode> getChildSamplers(String nodeTree,String xpathMd5){
-        return getChildrenByMd5(nodeTree,xpathMd5, TreeNodeTypeConstants.SAMPLER);
+    public static List<ScriptNode> getChildSamplers(String nodeTree, String xpathMd5) {
+        return getChildrenByMd5(nodeTree, xpathMd5, NodeTypeEnum.SAMPLER.name());
     }
 
     public static void main(String[] args) {
@@ -636,9 +634,10 @@ public class JsonPathUtil {
             + "  }\n"
             + "]";
 
-        //DocumentContext context = JsonPathUtil.deleteNodes(json);
-        List<ScriptNode> childSamplers = JsonPathUtil.getChildSamplers(json,
-            "db65854f3f8b92d60658fbdbde490d38");
-        childSamplers.forEach(System.out::println);
+        ////DocumentContext context = JsonPathUtil.deleteNodes(json);
+        //List<ScriptNode> childSamplers = JsonPathUtil.getChildSamplers(json,
+        //    "159036bb8a7ad4451f55b16772d16305");
+        //childSamplers.forEach(System.out::println);
+        System.out.println(NodeTypeEnum.CONTROLLER.name());
     }
 }

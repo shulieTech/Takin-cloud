@@ -1294,7 +1294,7 @@ public class ReportServiceImpl implements ReportService {
                     tmpMap.put("businessActivityId", detail.getBusinessActivityId());
                     Map<String, Map<String, Object>> resultMap = new HashMap<>();
                     resultMap.put(detail.getBindRef(), tmpMap);
-                     JsonPathUtil.putNodesToJson(context, resultMap);
+                    JsonPathUtil.putNodesToJson(context, resultMap);
                 });
            return JSONArray.parseArray(context.jsonString(),ScriptNodeTree.class);
         }else {

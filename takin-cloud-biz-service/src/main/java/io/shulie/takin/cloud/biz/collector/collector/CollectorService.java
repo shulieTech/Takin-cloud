@@ -125,6 +125,12 @@ public class CollectorService extends AbstractIndicators {
                     log.info("{}-{}-{} write redis , timestamp-{},timeWindow-{}",sceneId,reportId,customerId,
                         metric.getTimestamp(),timeWindow);
                     String transaction = metric.getTransaction();
+                    String testName = transaction;
+                    int strPosition = metric.getTransaction().lastIndexOf(PressureEngineConstants.TRANSACTION_SPLIT_STR);
+                    if (strPosition > 0){
+                        transaction = metric.getTransaction().substring(strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length());
+                        testName = metric.getTransaction().substring(strPosition);
+                    }
                     String timePod = CollectorUtil.getTimestampPodNum(metric.getTimestamp(),metric.getPodNum());
                     intSaveRedisMap(countKey(taskKey, transaction, timeWindow), timePod, metric.getCount());
                     intSaveRedisMap(failCountKey(taskKey, transaction, timeWindow), timePod, metric.getFailCount());
@@ -135,7 +141,8 @@ public class CollectorService extends AbstractIndicators {
                     setError(errorKey(taskKey, transaction, timeWindow), timePod, GsonUtil.gsonToString(metric.getErrorInfos()));
                     //1-100%每个百分点位sa数据
                     saveRedisMap(percentDataKey(taskKey, transaction, timeWindow), timePod, metric.getPercentData());
-
+                    //testName
+                    saveRedisMap(testNameKey(taskKey,transaction,timeWindow),timePod,testName);
                     /*
                      * all指标额外计算，累加所有业务活动的saCount all 为空
                      */
