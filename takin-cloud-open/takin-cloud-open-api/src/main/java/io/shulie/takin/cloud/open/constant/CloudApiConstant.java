@@ -34,6 +34,7 @@ public class CloudApiConstant {
     public static final String MULTIPLE_SCENE_CREATE = "/api/v2/scene/create";
     public static final String MULTIPLE_SCENE_UPDATE = "/api/v2/scene/update";
     public static final String MULTIPLE_SCENE_DETAIL = "/api/v2/scene/detail";
+    public static final String MULTIPLE_SCENE_SYNCHRONIZE = "/api/v2/scene/synchronize";
     //task
     public static final String SCENE_TASK_UPDATE_TPS = "/open-api/scene/task/updateSceneTaskTps";
 
