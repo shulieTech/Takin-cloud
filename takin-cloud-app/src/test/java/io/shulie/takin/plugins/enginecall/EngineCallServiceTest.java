@@ -48,7 +48,7 @@ public class EngineCallServiceTest {
 //        requestExt.setTps();
         Map<String, String> businessData = new HashMap<>();
         businessData.put("HTTP请求", "100");
-        requestExt.setBusinessData(businessData);
+        //requestExt.setBusinessData(businessData);
 //        requestExt.setBusinessTpsData();
 
 //        requestExt.setLoopsNum();

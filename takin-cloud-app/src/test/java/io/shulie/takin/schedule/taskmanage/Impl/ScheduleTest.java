@@ -67,7 +67,7 @@ public class ScheduleTest {
         scheduleStartRequest.setDataFile(list);
         Map<String, String> map = new HashMap<>();
         map.put("abc", "123456");
-        scheduleStartRequest.setBusinessData(map);
+        //scheduleStartRequest.setBusinessData(map);
         runRequest.setRequest(scheduleStartRequest);
 
         scheduleService.startSchedule(scheduleStartRequest);
