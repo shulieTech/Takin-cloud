@@ -802,6 +802,26 @@ public class JmxUtil {
     }
 
     /**
+     * 将层次结构的节点变成平铺式的集合
+     * @param nodes 有层次节点列表
+     * @return 平铺式节点列表
+     */
+    public static List<ScriptNode> toOneDepthList(List<ScriptNode> nodes) {
+        if (CollectionUtils.isEmpty(nodes)) {
+            return null;
+        }
+        List<ScriptNode> list = new ArrayList<>();
+        for (ScriptNode node : nodes) {
+            list.add(node);
+            List<ScriptNode> children = toOneDepthList(node.getChildren());
+            if (CollectionUtils.isNotEmpty(children)) {
+                list.addAll(children);
+            }
+        }
+        return list;
+    }
+
+    /**
      * 根据节点类型获取节点数量
      */
     public static int getNodeNumByType(NodeTypeEnum typeEnum, List<ScriptNode> data) {

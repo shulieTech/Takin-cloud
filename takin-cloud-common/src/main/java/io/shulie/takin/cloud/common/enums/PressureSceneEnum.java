@@ -27,8 +27,8 @@ public enum PressureSceneEnum {
     private static final Map<Integer, PressureSceneEnum> instances = new HashMap<>();
 
     static {
-        for(PressureSceneEnum enginePressureMode : PressureSceneEnum.values()) {
-            instances.put(enginePressureMode.getCode(), enginePressureMode);
+        for(PressureSceneEnum e : PressureSceneEnum.values()) {
+            instances.put(e.getCode(), e);
         }
         //为了兼容老版本数据，将1，2转化为常规模式
         instances.put(1, DEFAULT);
@@ -40,6 +40,16 @@ public enum PressureSceneEnum {
             return null;
         }
         return instances.get(code);
+    }
+    public static String toDoc() {
+        StringBuilder sb = new StringBuilder();
+        for(PressureSceneEnum e : PressureSceneEnum.values()) {
+            if (sb.length() > 0) {
+                sb.append(",");
+            }
+            sb.append(e.getCode()).append(e.getDescription());
+        }
+        return sb.toString();
     }
 
     PressureSceneEnum(Integer code, String description) {

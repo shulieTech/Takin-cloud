@@ -60,7 +60,7 @@ public class SceneRequest extends CloudUserCommonRequestExt {
         @ApiModelProperty(value = "场景名称")
         @NotBlank(message = "场景名称不能为空")
         private String name;
-        @ApiModelProperty(value = "场景类型")
+        @ApiModelProperty(value = "场景类型:0常规，3流量调试，4巡检，5试跑模式")
         @NotNull(message = "场景类型不能为空")
         private Integer type;
         @ApiModelProperty(value = "脚本实例主键")
