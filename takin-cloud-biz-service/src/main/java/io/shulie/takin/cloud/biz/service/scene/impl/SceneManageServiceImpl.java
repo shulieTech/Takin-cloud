@@ -333,17 +333,15 @@ public class SceneManageServiceImpl implements SceneManageService {
         }
         List<SceneManageListOutput> resultList = SceneManageDTOConvert.INSTANCE.ofs(queryList);
         Map<Long, Integer> threadNum = new HashMap<>(queryList.size());
-        Map<Long, Boolean> hasAnalysisResult = new HashMap<>(queryList.size());
         for (SceneManage sceneManage : queryList) {
             if (sceneManage.getPtConfig() == null) {
                 continue;
             }
             JSONObject object = JSON.parseObject(sceneManage.getPtConfig());
             // 新版本{}
-            if (object.containsKey("threadNum")) {
+            if (StrUtil.isNotBlank(sceneManage.getScriptAnalysisResult())) {
                 // TODO 新版本解析最大并发数
                 threadNum.put(sceneManage.getId(), -1);
-                hasAnalysisResult.put(sceneManage.getId(), true);
             }
             // 旧版本
             if (object.containsKey("threadNum")) {
@@ -366,7 +364,6 @@ public class SceneManageServiceImpl implements SceneManageService {
             t.setThreadNum(threadNum.get(t.getId()));
             t.setHasReport(sceneIds.contains(t.getId()));
             t.setStatus(SceneManageStatusEnum.getAdaptStatus(t.getStatus()));
-            t.setHasAnalysisResult(hasAnalysisResult.getOrDefault(t.getId(), false));
         });
 
         PageInfo<SceneManageListOutput> pageInfo = new PageInfo<>(resultList);
@@ -1069,9 +1066,9 @@ public class SceneManageServiceImpl implements SceneManageService {
                 wrapperOutput.setEstimateFlow(flow.setScale(2, RoundingMode.HALF_UP));
             } else if (MapUtils.isNotEmpty(ptConfig.getThreadGroupConfigMap())) {
                 double flow = ptConfig.getThreadGroupConfigMap().values().stream().filter(Objects::nonNull)
-                        .map(ThreadGroupConfigExt::getEstimateFlow)
-                        .mapToDouble(d -> null == d ? 0d : d)
-                        .sum();
+                    .map(ThreadGroupConfigExt::getEstimateFlow)
+                    .mapToDouble(d -> null == d ? 0d : d)
+                    .sum();
                 wrapperOutput.setEstimateFlow(new BigDecimal(flow).setScale(2, RoundingMode.HALF_UP));
             }
         } catch (Exception e) {
@@ -1114,9 +1111,9 @@ public class SceneManageServiceImpl implements SceneManageService {
             wrapperVO.setPressureType(0);
         }
         map.put(SceneManageConstant.PT_TYPE, wrapperVO.getPressureType());
-//        if (PressureSceneEnum.DEFAULT.equels(wrapperVO.getPressureType()) && wrapperVO.getConcurrenceNum() == null) {
-//            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_BUILD_PARAM_ERROR, "并发模式中，并发数不能为空");
-//        }
+        //        if (PressureSceneEnum.DEFAULT.equels(wrapperVO.getPressureType()) && wrapperVO.getConcurrenceNum() == null) {
+        //            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_BUILD_PARAM_ERROR, "并发模式中，并发数不能为空");
+        //        }
         map.put(SceneManageConstant.THREAD_NUM, wrapperVO.getConcurrenceNum());
         map.put(SceneManageConstant.HOST_NUM, wrapperVO.getIpNum());
         map.put(SceneManageConstant.PT_DURATION, wrapperVO.getPressureTestTime().getTime());

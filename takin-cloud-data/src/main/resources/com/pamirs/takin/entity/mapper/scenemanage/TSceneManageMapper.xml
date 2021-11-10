@@ -18,10 +18,11 @@
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
         <result column="update_name" property="updateName" jdbcType="VARCHAR"/>
         <result column="pt_config" property="ptConfig" jdbcType="LONGVARCHAR"/>
+        <result column="script_analysis_result" property="scriptAnalysisResult" jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="Base_Column_List">
         id, customer_id, scene_name, status, `type`,last_pt_time, script_type, is_deleted, create_time,features, create_name,
-    update_time, update_name, pt_config, dept_id, user_id
+    update_time, update_name, pt_config, dept_id, user_id, script_analysis_result
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select

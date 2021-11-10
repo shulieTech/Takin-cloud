@@ -37,6 +37,10 @@ public class SceneManage implements Serializable {
     private String updateName;
 
     private String ptConfig;
+    /**
+     * 脚本解析结果
+     */
+    private String scriptAnalysisResult;
 
     private Long deptId;
     /**
