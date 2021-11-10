@@ -100,8 +100,8 @@ public class ReportDetailResp extends CloudUserCommonRequestExt implements Seria
     @ApiModelProperty(value = "警告列表")
     private List<WarnBean> warn;
 
-    @ApiModelProperty(value = "业务活动链路概览")
-    private List<BusinessActivitySummaryBean> businessActivity;
+    //@ApiModelProperty(value = "业务活动链路概览")
+    //private List<BusinessActivitySummaryBean> businessActivity;
 
     @ApiModelProperty(value = "节点链路详情")
     private List<ScriptNodeSummaryBean> nodeDetail;

@@ -5,10 +5,14 @@ import java.util.List;
 import io.shulie.takin.cloud.open.req.report.ReportDetailByIdReq;
 import io.shulie.takin.cloud.open.req.report.ReportDetailBySceneIdReq;
 import io.shulie.takin.cloud.open.req.report.ReportQueryReq;
+import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
+import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.open.req.report.UpdateReportConclusionReq;
 import io.shulie.takin.cloud.open.req.report.WarnCreateReq;
 import io.shulie.takin.cloud.open.resp.report.ReportDetailResp;
 import io.shulie.takin.cloud.open.resp.report.ReportResp;
+import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
+import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
 
 /**
@@ -44,6 +48,27 @@ public interface CloudReportApi {
      * @return -
      */
     ResponseResult<ReportDetailResp> tempReportDetail(ReportDetailBySceneIdReq req);
+
+    /**
+     *  查询脚本节点树
+     * @param req 请求参数
+     * @return
+     */
+    ResponseResult<List<ScriptNodeTreeResp>> queryNodeTree(ScriptNodeTreeQueryReq req);
+
+    /**
+     *实况报告链路趋势
+     * @param req 请求参数
+     * @return
+     */
+    ResponseResult<ReportTrendResp> queryTempReportTrend(ReportTrendQueryReq req);
+
+    /**
+     * 报告链路趋势
+     * @param req 请求参数
+     * @return
+     */
+    ResponseResult<ReportTrendResp> queryReportTrend(ReportTrendQueryReq req);
 
 
 }

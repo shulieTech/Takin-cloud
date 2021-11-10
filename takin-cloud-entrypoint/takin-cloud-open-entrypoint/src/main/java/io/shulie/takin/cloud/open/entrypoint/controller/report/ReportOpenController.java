@@ -2,6 +2,8 @@
 
 package io.shulie.takin.cloud.open.entrypoint.controller.report;
 
+import java.util.List;
+
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
@@ -9,15 +11,18 @@ import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.common.constants.APIUrls;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
+import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.open.req.report.UpdateReportConclusionReq;
 import io.shulie.takin.cloud.open.req.report.WarnCreateReq;
 import io.shulie.takin.cloud.open.resp.report.ReportDetailResp;
+import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
 import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -88,5 +93,38 @@ public class ReportOpenController {
         BeanUtils.copyProperties(detailOutput, resp);
         return ResponseResult.success(resp);
     }
+
+
+    /**
+     * 节点树
+     */
+    @GetMapping("report/nodeTree")
+    @ApiOperation("节点树")
+    public ResponseResult<List<ScriptNodeTreeResp>> queryScriptNodeTree(ScriptNodeTreeQueryReq req){
+        List<ScriptNodeTreeResp> nodeTree = reportService.getNodeTree(req);
+        if (CollectionUtils.isEmpty(nodeTree)){
+            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在");
+        }
+        return ResponseResult.success(nodeTree);
+    }
+
+    /**
+     * 实况报告链路趋势
+     */
+    @GetMapping("report/tempReportTrend")
+    @ApiOperation("实况报告链路趋势")
+    public ResponseResult<ReportTrendResp> queryTempReportTrend(ReportTrendQueryReq req){
+        return ResponseResult.success(reportService.queryTempReportTrend(req));
+    }
+
+    /**
+     * 报告链路趋势
+     */
+    @GetMapping("report/reportTrend")
+    @ApiOperation("报告链路趋势")
+    public ResponseResult<ReportTrendResp> queryReportTrend(ReportTrendQueryReq req){
+        return ResponseResult.success(reportService.queryReportTrend(req));
+    }
+
 
 }

@@ -67,6 +67,9 @@ public class CloudApiConstant {
     public static final String REPORT_UPDATE_STATE_URL = "/open-api/report/updateReportConclusion";
     public static final String REPORT_DETAIL_GET_URL = "/open-api/report/getReportByReportId";
     public static final String REPORT_TEMP_DETAIL_GET_URL = "/open-api/report/tempReportDetail";
+    public static final String SCRIPT_NODE_TREE = "/open-api/report/nodeTree";
+    public static final String REPORT_TEMP_TREND = "/open-api/report/tempReportTrend";
+    public static final String REPORT_TREND = "/open-api/report/reportTrend";
     public static final String INSPECT_REPORT_DETAIL_GET_URL = "/open-api/report/inspect";
 
     /**

@@ -23,10 +23,13 @@ import com.alibaba.fastjson.JSONObject;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import com.pamirs.takin.entity.domain.dto.report.ScriptNodeTree;
 import io.shulie.takin.cloud.common.bean.scenemanage.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
+import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
+import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
+import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
+import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
 import io.shulie.takin.ext.content.asset.RealAssectBillExt;
 import io.shulie.takin.ext.content.enums.AssetTypeEnum;
 import io.shulie.takin.ext.content.response.Response;
@@ -77,7 +80,6 @@ import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.common.bean.scenemanage.DataBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
 import com.pamirs.takin.entity.domain.dto.report.StatReportDTO;
-import com.pamirs.takin.entity.domain.dto.report.ReportTrendDTO;
 import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,7 +101,6 @@ import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
 import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import com.pamirs.takin.entity.domain.dto.report.StatInspectReportDTO;
-import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
@@ -240,7 +241,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public ReportTrendDTO queryReportTrend(ReportTrendQueryParam reportTrendQuery) {
+    public ReportTrendResp queryReportTrend(ReportTrendQueryReq reportTrendQuery) {
         return queryReportTrend(reportTrendQuery, false);
     }
 
@@ -415,7 +416,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public ReportTrendDTO queryTempReportTrend(ReportTrendQueryParam reportTrendQuery) {
+    public ReportTrendResp queryTempReportTrend(ReportTrendQueryReq reportTrendQuery) {
         return queryReportTrend(reportTrendQuery, true);
     }
 
@@ -673,9 +674,9 @@ public class ReportServiceImpl implements ReportService {
      * @param isTempReport     是否实况报表
      * @return -
      */
-    private ReportTrendDTO queryReportTrend(ReportTrendQueryParam reportTrendQuery, boolean isTempReport) {
+    private ReportTrendResp queryReportTrend(ReportTrendQueryReq reportTrendQuery, boolean isTempReport) {
         long start = System.currentTimeMillis();
-        ReportTrendDTO reportTrend = new ReportTrendDTO();
+        ReportTrendResp reportTrend = new ReportTrendResp();
         ReportResult reportResult;
         if (isTempReport) {
             reportResult = reportDao.getTempReportBySceneId(reportTrendQuery.getSceneId());
@@ -683,7 +684,7 @@ public class ReportServiceImpl implements ReportService {
             reportResult = reportDao.selectById(reportTrendQuery.getReportId());
         }
         if (reportResult == null) {
-            return new ReportTrendDTO();
+            return new ReportTrendResp();
         }
 
         String transaction = ReportConstans.ALL_BUSINESS_ACTIVITY;
@@ -1267,12 +1268,12 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ScriptNodeTree> getNodeTree(ReportTrendQueryParam param) {
+    public List<ScriptNodeTreeResp> getNodeTree(ScriptNodeTreeQueryReq req) {
         ReportResult reportResult;
-        if (Objects.nonNull(param.getReportId())){
-            reportResult = reportDao.selectById(param.getReportId());
+        if (Objects.nonNull(req.getReportId())){
+            reportResult = reportDao.selectById(req.getReportId());
         }else {
-            reportResult = reportDao.getReportBySceneId(param.getSceneId());
+            reportResult = reportDao.getReportBySceneId(req.getSceneId());
         }
 
         if (Objects.isNull(reportResult)){
@@ -1296,11 +1297,11 @@ public class ReportServiceImpl implements ReportService {
                     resultMap.put(detail.getBindRef(), tmpMap);
                     JsonPathUtil.putNodesToJson(context, resultMap);
                 });
-           return JSONArray.parseArray(context.jsonString(),ScriptNodeTree.class);
+           return JSONArray.parseArray(context.jsonString(),ScriptNodeTreeResp.class);
         }else {
             return reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
-                .map(detail -> new ScriptNodeTree(){{
+                .map(detail -> new ScriptNodeTreeResp(){{
                     setName(detail.getBindRef());
                     setBusinessActivityId(detail.getBusinessActivityId());
                     setTestName(detail.getBusinessActivityName());

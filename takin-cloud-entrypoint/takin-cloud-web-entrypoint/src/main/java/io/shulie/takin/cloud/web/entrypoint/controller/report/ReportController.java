@@ -9,7 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSON;
 
-import com.pamirs.takin.entity.domain.dto.report.ScriptNodeTree;
+import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
+import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
+import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
+import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
 import io.swagger.annotations.Api;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
@@ -29,7 +32,6 @@ import com.pamirs.takin.entity.domain.vo.report.ReportIdParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
-import com.pamirs.takin.entity.domain.dto.report.ReportTrendDTO;
 import com.pamirs.takin.entity.domain.vo.report.ReportQueryParam;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
@@ -37,7 +39,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
 import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import io.shulie.takin.cloud.web.entrypoint.convert.WarnDetailRespConvertor;
 import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
@@ -96,12 +97,12 @@ public class ReportController {
      */
     @GetMapping("report/queryReportTrend")
     @ApiOperation("报告链路趋势")
-    public ResponseResult<ReportTrendDTO> queryReportTrend(ReportTrendQueryParam reportTrendQuery) {
+    public ResponseResult<ReportTrendResp> queryReportTrend(ReportTrendQueryReq reportTrendQuery) {
         try {
             String key = JSON.toJSONString(reportTrendQuery);
-            ReportTrendDTO data;
+            ReportTrendResp data;
             if (redisClientUtils.hasKey(key)) {
-                data = JSON.parseObject(redisClientUtils.getString(key), ReportTrendDTO.class);
+                data = JSON.parseObject(redisClientUtils.getString(key), ReportTrendResp.class);
                 if (Objects.isNull(data) ||CollectionUtils.isEmpty(data.getConcurrent()) || CollectionUtils.isEmpty(data.getSa())
                     || CollectionUtils.isEmpty(data.getRt()) || CollectionUtils.isEmpty(data.getTps())
                     || CollectionUtils.isEmpty(data.getSuccessRate())) {
@@ -114,7 +115,7 @@ public class ReportController {
             }
             return ResponseResult.success(data);
         } catch (Exception e) {
-            return ResponseResult.success(new ReportTrendDTO());
+            return ResponseResult.success(new ReportTrendResp());
         }
     }
 
@@ -136,8 +137,8 @@ public class ReportController {
 
     @GetMapping("/report/queryTempReportTrend")
     @ApiOperation("实况报告链路趋势")
-    public ResponseResult<ReportTrendDTO> queryTempReportTrend(ReportTrendQueryParam reportTrendQuery) {
-        ReportTrendDTO data = reportService.queryTempReportTrend(reportTrendQuery);
+    public ResponseResult<ReportTrendResp> queryTempReportTrend(ReportTrendQueryReq reportTrendQuery) {
+        ReportTrendResp data = reportService.queryTempReportTrend(reportTrendQuery);
         return ResponseResult.success(data);
     }
 
@@ -218,9 +219,10 @@ public class ReportController {
 
     @GetMapping("/report/nodeTree")
     @ApiOperation("场景对应的脚本树结构")
-    public ResponseResult<List<ScriptNodeTree>> getNodeTree(ReportTrendQueryParam queryParam){
-        return ResponseResult.success(reportService.getNodeTree(queryParam));
+    public ResponseResult<List<ScriptNodeTreeResp>> getNodeTree(ScriptNodeTreeQueryReq req){
+        return ResponseResult.success(reportService.getNodeTree(req));
     }
+
 
     /**
      * todo 临时方案，后面逐渐去掉这种网络请求

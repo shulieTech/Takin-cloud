@@ -5,20 +5,21 @@ import java.util.Map;
 
 import com.github.pagehelper.PageInfo;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
-import com.pamirs.takin.entity.domain.dto.report.ScriptNodeTree;
 import io.shulie.takin.cloud.biz.output.report.ReportOutput;
 import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
 import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
-import com.pamirs.takin.entity.domain.dto.report.ReportTrendDTO;
 import com.pamirs.takin.entity.domain.vo.report.ReportQueryParam;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
 import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
-import com.pamirs.takin.entity.domain.vo.report.ReportTrendQueryParam;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
+import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
+import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
+import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
+import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
 
 /**
  * @author 数列科技
@@ -47,7 +48,7 @@ public interface ReportService {
      * @param reportTrendQuery -
      * @return -
      */
-    ReportTrendDTO queryReportTrend(ReportTrendQueryParam reportTrendQuery);
+    ReportTrendResp queryReportTrend(ReportTrendQueryReq reportTrendQuery);
 
     /**
      * 实况报表
@@ -63,7 +64,7 @@ public interface ReportService {
      * @param reportTrendQuery -
      * @return -
      */
-    ReportTrendDTO queryTempReportTrend(ReportTrendQueryParam reportTrendQuery);
+    ReportTrendResp queryTempReportTrend(ReportTrendQueryReq reportTrendQuery);
 
     /**
      * 警告列表
@@ -209,8 +210,8 @@ public interface ReportService {
 
     /**
      * 查询报告对应的脚本树结构
-     * @param param 查询参数
+     * @param req 查询参数
      * @return 树结构json字符串
      */
-    List<ScriptNodeTree> getNodeTree(ReportTrendQueryParam param);
+    List<ScriptNodeTreeResp> getNodeTree(ScriptNodeTreeQueryReq req);
 }
