@@ -78,8 +78,9 @@ public class FileController {
     @PostMapping(EntrypointUrl.METHOD_FILE_UPLOAD)
     @ApiOperation(value = "文件上传")
     public ResponseResult<List<FileDTO>> upload(@RequestParam List<MultipartFile> file) {
-        String tempPath = scriptPath + SceneManageConstant.FILE_SPLIT +
-            CloudPluginUtils.getContext().getTenantCode() + SceneManageConstant.FILE_SPLIT +  CloudPluginUtils.getContext().getEnvCode();
+        String tempPath = scriptPath
+            + SceneManageConstant.FILE_SPLIT + CloudPluginUtils.getContext().getTenantCode()
+            + SceneManageConstant.FILE_SPLIT + CloudPluginUtils.getContext().getEnvCode();
         List<FileDTO> dtoList = Lists.newArrayList();
         for (MultipartFile mf : file) {
             String uploadId = UUID.randomUUID().toString();
@@ -179,41 +180,42 @@ public class FileController {
 
     @PostMapping(EntrypointUrl.METHOD_FILE_DELETE)
     @ApiOperation(value = "文件删除")
-    public Boolean deleteFile(@RequestBody FileDeleteParamRequest fileDeleteParamDTO) {
-        return FileManagerHelper.deleteFiles(fileDeleteParamDTO.getPaths());
+    public ResponseResult<Boolean> deleteFile(@RequestBody FileDeleteParamRequest fileDeleteParamDTO) {
+        return ResponseResult.success(FileManagerHelper.deleteFiles(fileDeleteParamDTO.getPaths()));
     }
 
     @PostMapping(EntrypointUrl.METHOD_FILE_COPY)
     @ApiOperation(value = "复制文件")
-    public Boolean copyFile(@RequestBody FileCopyParamRequest fileCopyParamDTO) {
+    public ResponseResult<Boolean> copyFile(@RequestBody FileCopyParamRequest fileCopyParamDTO) {
         try {
             FileManagerHelper.copyFiles(fileCopyParamDTO.getSourcePaths(), fileCopyParamDTO.getTargetPath());
         } catch (IOException e) {
             log.error("异常代码【{}】,异常内容：文件复制异常 --> 异常信息: {}",
                 TakinCloudExceptionEnum.FILE_COPY_ERROR, e);
-            return Boolean.FALSE;
+            return ResponseResult.success(Boolean.FALSE);
         }
-        return Boolean.TRUE;
+        return ResponseResult.success(Boolean.TRUE);
     }
 
     @PostMapping(EntrypointUrl.METHOD_FILE_ZIP)
     @ApiOperation(value = "打包文件")
-    public Boolean zipFile(@RequestBody FileZipParamRequest fileZipParamDTO) {
+    public ResponseResult<Boolean> zipFile(@RequestBody FileZipParamRequest fileZipParamDTO) {
         try {
             FileManagerHelper.zipFiles(fileZipParamDTO.getSourcePaths(), fileZipParamDTO.getTargetPath()
                 , fileZipParamDTO.getZipFileName(), fileZipParamDTO.getIsCovered());
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：文件打包失败 --> 异常信息: {}",
                 TakinCloudExceptionEnum.FILE_ZIP_ERROR, e);
-            return Boolean.FALSE;
+            return ResponseResult.success(Boolean.FALSE);
         }
-        return Boolean.TRUE;
+        return ResponseResult.success(Boolean.TRUE);
     }
 
     @PostMapping(EntrypointUrl.METHOD_FILE_CREATE_BY_STRING)
     @ApiOperation(value = "根据字符串创建文件")
-    public Boolean createFileByPathAndString(@RequestBody FileCreateByStringParamRequest fileContent) {
-        return FileManagerHelper.createFileByPathAndString(fileContent.getFilePath(), fileContent.getFileContent());
+    public ResponseResult<Boolean> createFileByPathAndString(@RequestBody FileCreateByStringParamRequest fileContent) {
+        return ResponseResult.success(
+            FileManagerHelper.createFileByPathAndString(fileContent.getFilePath(), fileContent.getFileContent()));
     }
 
     private void setDataCount(File file, FileDTO dto) {
