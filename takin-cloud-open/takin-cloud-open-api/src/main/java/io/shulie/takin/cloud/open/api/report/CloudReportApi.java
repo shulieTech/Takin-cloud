@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.open.api.report;
 
 import java.util.List;
 
+import io.shulie.takin.cloud.common.bean.scenemanage.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.open.req.report.ReportDetailByIdReq;
 import io.shulie.takin.cloud.open.req.report.ReportDetailBySceneIdReq;
 import io.shulie.takin.cloud.open.req.report.ReportQueryReq;
@@ -9,6 +10,7 @@ import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.open.req.report.UpdateReportConclusionReq;
 import io.shulie.takin.cloud.open.req.report.WarnCreateReq;
+import io.shulie.takin.cloud.open.resp.report.NodeTreeSummaryResp;
 import io.shulie.takin.cloud.open.resp.report.ReportDetailResp;
 import io.shulie.takin.cloud.open.resp.report.ReportResp;
 import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
@@ -70,5 +72,6 @@ public interface CloudReportApi {
      */
     ResponseResult<ReportTrendResp> queryReportTrend(ReportTrendQueryReq req);
 
+    ResponseResult<NodeTreeSummaryResp> getBusinessActivitySummaryList(ReportDetailByIdReq req);
 
 }

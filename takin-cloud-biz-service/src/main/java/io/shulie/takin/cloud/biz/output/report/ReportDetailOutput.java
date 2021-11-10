@@ -7,7 +7,6 @@ import java.util.List;
 
 import io.shulie.takin.cloud.common.bean.scenemanage.ScriptNodeSummaryBean;
 import lombok.EqualsAndHashCode;
-import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
 import io.shulie.takin.cloud.common.bean.sla.SlaBean;

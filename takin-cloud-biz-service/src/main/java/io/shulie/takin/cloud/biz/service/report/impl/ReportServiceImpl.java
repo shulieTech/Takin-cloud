@@ -28,6 +28,7 @@ import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
+import io.shulie.takin.cloud.open.resp.report.NodeTreeSummaryResp;
 import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
 import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
 import io.shulie.takin.ext.content.asset.RealAssectBillExt;
@@ -244,39 +245,7 @@ public class ReportServiceImpl implements ReportService {
     private List<ScriptNodeSummaryBean> getReportNodeDetail(String scriptNodeTree, Long reportId) {
         List<ReportBusinessActivityDetail> activities = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportId);
-        if (StringUtils.isNotBlank(scriptNodeTree)){
-            Map<String,Map<String,Object>> resultMap = new HashMap<>();
-            activities.stream().filter(Objects::nonNull)
-                .forEach(detail ->{
-                    Map<String, Object> objectMap = fillReportMap(detail);
-                    if (Objects.nonNull(objectMap)){
-                        resultMap.put(detail.getBindRef(),objectMap);
-                    }
-                });
-            if (resultMap.size() > 0) {
-                String nodesToJson = JsonPathUtil.putNodesToJson(scriptNodeTree, resultMap);
-                return JSONArray.parseArray(nodesToJson, ScriptNodeSummaryBean.class);
-            }
-            return Lists.newArrayList();
-        }else {
-            return activities.stream().filter(Objects::nonNull)
-            .map(detail ->{
-                ScriptNodeSummaryBean bean = new ScriptNodeSummaryBean();
-                bean.setTestName(detail.getBusinessActivityName());
-                bean.setTotalRequest(detail.getRequest());
-                bean.setBusinessActivityId(detail.getBusinessActivityId());
-                bean.setAvgConcurrenceNum(detail.getAvgConcurrenceNum());
-                bean.setSuccessRate(new DataBean(detail.getSuccessRate(),detail.getTargetSuccessRate()));
-                bean.setTps(new DataBean(detail.getTps(),detail.getTargetTps()));
-                bean.setMaxTps(detail.getMaxTps());
-                bean.setAvgRt(new DataBean(detail.getRt(),detail.getTargetRt()));
-                bean.setMaxRt(detail.getMaxRt());
-                bean.setMinRt(detail.getMinRt());
-                bean.setPassFlag((Optional.ofNullable(detail.getPassFlag()).orElse(0)));
-                bean.setDistribute(getDistributes(detail.getRtDistribute()));
-                return bean;
-            }).collect(Collectors.toList());
-        }
+        return getScriptNodeSummaryBeans(scriptNodeTree,activities);
     }
 
     @Override
@@ -505,38 +474,62 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     @Override
-    public List<BusinessActivitySummaryBean> getBusinessActivitySummaryList(Long reportId) {
-        List<BusinessActivitySummaryBean> list = Lists.newArrayList();
+    public NodeTreeSummaryResp getBusinessActivitySummaryList(Long reportId) {
+        //List<BusinessActivitySummaryBean> list = Lists.newArrayList();
         //查询业务活动的概况
         List<ReportBusinessActivityDetail> reportBusinessActivityDetailList = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportId);
+        NodeTreeSummaryResp resp = new NodeTreeSummaryResp();
         if (CollectionUtils.isEmpty(reportBusinessActivityDetailList)) {
-            return new ArrayList<>(0);
+            return resp;
         }
-        reportBusinessActivityDetailList.forEach(reportBusinessActivityDetail -> {
-            BusinessActivitySummaryBean businessActivity = new BusinessActivitySummaryBean();
-            businessActivity.setBusinessActivityId(reportBusinessActivityDetail.getBusinessActivityId());
-            businessActivity.setAvgConcurrenceNum(reportBusinessActivityDetail.getAvgConcurrenceNum());
-            businessActivity.setBusinessActivityName(reportBusinessActivityDetail.getBusinessActivityName());
-            businessActivity.setApplicationIds(reportBusinessActivityDetail.getApplicationIds());
-            businessActivity.setBindRef(reportBusinessActivityDetail.getBindRef());
-            businessActivity.setTotalRequest(reportBusinessActivityDetail.getRequest());
-            businessActivity.setAvgRT(new DataBean(reportBusinessActivityDetail.getRt(),
-                reportBusinessActivityDetail.getTargetRt()));
-            businessActivity.setSa(new DataBean(reportBusinessActivityDetail.getSa(),
-                reportBusinessActivityDetail.getTargetSa()));
-            businessActivity.setTps(new DataBean(reportBusinessActivityDetail.getTps(),
-                reportBusinessActivityDetail.getTargetTps()));
-            businessActivity.setSuccessRate(new DataBean(reportBusinessActivityDetail.getSuccessRate(),
-                reportBusinessActivityDetail.getTargetSuccessRate()));
-            businessActivity.setMaxRt(reportBusinessActivityDetail.getMaxRt());
-            businessActivity.setMaxTps(reportBusinessActivityDetail.getMaxTps());
-            businessActivity.setMinRt(reportBusinessActivityDetail.getMinRt());
-            businessActivity.setPassFlag(Optional.ofNullable(reportBusinessActivityDetail.getPassFlag()).orElse(0));
-            businessActivity.setDistribute(getDistributes(reportBusinessActivityDetail.getRtDistribute()));
-            list.add(businessActivity);
-        });
-        return list;
+        ReportResult reportResult = reportDao.selectById(reportId);
+        if (Objects.isNull(reportResult)){
+            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR,"未查询到报告"+reportId);
+        }
+        resp.setScriptNodeSummaryBeans(getScriptNodeSummaryBeans(reportResult.getScriptNodeTree(),
+            reportBusinessActivityDetailList));
+        return resp;
+    }
+
+    /**
+     * 处理节点链路明细
+     * @param nodeTree 节点树
+     * @param details 业务活动详情
+     * @return
+     */
+    private List<ScriptNodeSummaryBean> getScriptNodeSummaryBeans(String nodeTree, List<ReportBusinessActivityDetail> details) {
+        Map<String,Map<String,Object>> resultMap = new HashMap<>();
+        if (StringUtils.isNotBlank(nodeTree)) {
+            details.stream().filter(Objects::nonNull)
+                .forEach(detail -> {
+                    Map<String, Object> objectMap = fillReportMap(detail);
+                    if (Objects.nonNull(objectMap)) {
+                        resultMap.put(detail.getBindRef(), objectMap);
+                    }
+                });
+            if (resultMap.size() > 0) {
+                String nodesToJson = JsonPathUtil.putNodesToJson(nodeTree, resultMap);
+                return JSONArray.parseArray(nodesToJson, ScriptNodeSummaryBean.class);
+            }
+        }
+        return details.stream().filter(Objects::nonNull)
+            .map(detail ->{
+                ScriptNodeSummaryBean bean = new ScriptNodeSummaryBean();
+                bean.setTestName(detail.getBusinessActivityName());
+                bean.setTotalRequest(detail.getRequest());
+                bean.setBusinessActivityId(detail.getBusinessActivityId());
+                bean.setAvgConcurrenceNum(detail.getAvgConcurrenceNum());
+                bean.setSuccessRate(new DataBean(detail.getSuccessRate(),detail.getTargetSuccessRate()));
+                bean.setTps(new DataBean(detail.getTps(),detail.getTargetTps()));
+                bean.setMaxTps(detail.getMaxTps());
+                bean.setAvgRt(new DataBean(detail.getRt(),detail.getTargetRt()));
+                bean.setMaxRt(detail.getMaxRt());
+                bean.setMinRt(detail.getMinRt());
+                bean.setPassFlag((Optional.ofNullable(detail.getPassFlag()).orElse(0)));
+                bean.setDistribute(getDistributes(detail.getRtDistribute()));
+                return bean;
+            }).collect(Collectors.toList());
     }
 
     @Override

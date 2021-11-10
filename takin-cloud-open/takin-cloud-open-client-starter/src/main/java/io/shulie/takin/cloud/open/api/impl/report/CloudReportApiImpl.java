@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.open.api.impl.report;
 import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import io.shulie.takin.cloud.common.bean.scenemanage.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.open.api.impl.CloudCommonApi;
 import io.shulie.takin.cloud.open.api.report.CloudReportApi;
 import io.shulie.takin.cloud.open.constant.CloudApiConstant;
@@ -13,6 +14,7 @@ import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.open.req.report.UpdateReportConclusionReq;
 import io.shulie.takin.cloud.open.req.report.WarnCreateReq;
+import io.shulie.takin.cloud.open.resp.report.NodeTreeSummaryResp;
 import io.shulie.takin.cloud.open.resp.report.ReportDetailResp;
 import io.shulie.takin.cloud.open.resp.report.ReportResp;
 import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
@@ -115,6 +117,18 @@ public class CloudReportApiImpl extends CloudCommonApi implements CloudReportApi
         TakinResponseEntity<ResponseResult<ReportTrendResp>> entity =
             HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_TREND,
                 getHeaders(req), req, new TypeReference<ResponseResult<ReportTrendResp>>() {});
+        if (entity.getSuccess()){
+            return entity.getBody();
+        }
+        return ResponseResult.fail(entity.getHttpStatus().toString(),
+            entity.getErrorMsg(), "查看cloud日志");
+    }
+
+    @Override
+    public ResponseResult<NodeTreeSummaryResp> getBusinessActivitySummaryList(ReportDetailByIdReq req) {
+        TakinResponseEntity<ResponseResult<NodeTreeSummaryResp>> entity =
+            HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_BUSINESS_ACTIVITY_SUMMARY_LIST,
+                getHeaders(req), req, new TypeReference<ResponseResult<NodeTreeSummaryResp>>() {});
         if (entity.getSuccess()){
             return entity.getBody();
         }

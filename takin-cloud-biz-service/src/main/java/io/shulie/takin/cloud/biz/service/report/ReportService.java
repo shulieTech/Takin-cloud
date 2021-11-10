@@ -6,6 +6,7 @@ import java.util.Map;
 import com.github.pagehelper.PageInfo;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
 import io.shulie.takin.cloud.biz.output.report.ReportOutput;
+import io.shulie.takin.cloud.common.bean.scenemanage.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
 import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
@@ -18,6 +19,7 @@ import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
 import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
+import io.shulie.takin.cloud.open.resp.report.NodeTreeSummaryResp;
 import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
 import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
 
@@ -96,7 +98,7 @@ public interface ReportService {
      * @param reportId 报告主键
      * @return -
      */
-    List<BusinessActivitySummaryBean> getBusinessActivitySummaryList(Long reportId);
+    NodeTreeSummaryResp getBusinessActivitySummaryList(Long reportId);
 
     /**
      * 获取报告的业务活动数量和压测通过数量

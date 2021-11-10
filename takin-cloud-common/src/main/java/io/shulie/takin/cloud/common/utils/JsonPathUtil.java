@@ -634,10 +634,10 @@ public class JsonPathUtil {
             + "  }\n"
             + "]";
 
-        ////DocumentContext context = JsonPathUtil.deleteNodes(json);
+        DocumentContext context = JsonPathUtil.deleteNodes(json);
         //List<ScriptNode> childSamplers = JsonPathUtil.getChildSamplers(json,
         //    "159036bb8a7ad4451f55b16772d16305");
         //childSamplers.forEach(System.out::println);
-        System.out.println(NodeTypeEnum.CONTROLLER.name());
+        System.out.println(context.jsonString());
     }
 }

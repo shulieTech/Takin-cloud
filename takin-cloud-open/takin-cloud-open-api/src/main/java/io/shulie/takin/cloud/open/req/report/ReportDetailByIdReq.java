@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.open.req.report;
 
 import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -11,5 +12,6 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ReportDetailByIdReq extends CloudUserCommonRequestExt {
+    @ApiModelProperty(name = "reportId",value = "报告ID")
     private Long reportId;
 }

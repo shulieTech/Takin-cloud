@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSON;
 
 import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
+import io.shulie.takin.cloud.open.resp.report.NodeTreeSummaryResp;
 import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
 import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
 import io.swagger.annotations.Api;
@@ -171,7 +172,7 @@ public class ReportController {
 
     @GetMapping("/report/businessActivity/summary/list")
     @ApiOperation("压测明细")
-    public ResponseResult<List<BusinessActivitySummaryBean>> getBusinessActivitySummaryList(Long reportId) {
+    public ResponseResult<NodeTreeSummaryResp> getBusinessActivitySummaryList(Long reportId) {
         return ResponseResult.success(reportService.getBusinessActivitySummaryList(reportId));
     }
 
