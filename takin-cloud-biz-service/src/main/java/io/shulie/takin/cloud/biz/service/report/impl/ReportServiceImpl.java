@@ -226,7 +226,6 @@ public class ReportServiceImpl implements ReportService {
                 JSON.parseObject(report.getFeatures()).getString(ReportConstans.FEATURES_ERROR_MSG));
         }
         detail.setTestTotalTime(TestTimeUtil.format(report.getStartTime(), report.getEndTime()));
-        //detail.setBusinessActivity(getBusinessActivitySummaryList(reportId));
         detail.setNodeDetail(getReportNodeDetail(report.getScriptNodeTree(),reportId));
         //任务没有完成，提示用户正在生成中
         if (report.getStatus() != ReportConstans.FINISH_STATUS) {
@@ -322,7 +321,7 @@ public class ReportServiceImpl implements ReportService {
                         ref.getBindRef());
                     return new ScriptNodeSummaryBean() {{
                         setName(ref.getBusinessActivityName());
-                        setTestName(ref.getBindRef());
+                        setTestName(ref.getBusinessActivityName());
                         setXpathMd5(ref.getBindRef());
                         if (Objects.nonNull(data)) {
                             setAvgRt(new DataBean(data.getAvgRt(), ref.getTargetRT()));
@@ -516,9 +515,9 @@ public class ReportServiceImpl implements ReportService {
         return details.stream().filter(Objects::nonNull)
             .map(detail ->{
                 ScriptNodeSummaryBean bean = new ScriptNodeSummaryBean();
+                bean.setXpathMd5(detail.getBindRef());
                 bean.setTestName(detail.getBusinessActivityName());
                 bean.setTotalRequest(detail.getRequest());
-                bean.setBusinessActivityId(detail.getBusinessActivityId());
                 bean.setAvgConcurrenceNum(detail.getAvgConcurrenceNum());
                 bean.setSuccessRate(new DataBean(detail.getSuccessRate(),detail.getTargetSuccessRate()));
                 bean.setTps(new DataBean(detail.getTps(),detail.getTargetTps()));
@@ -703,20 +702,10 @@ public class ReportServiceImpl implements ReportService {
         if (reportResult == null) {
             return new ReportTrendResp();
         }
-
         String transaction = ReportConstans.ALL_BUSINESS_ACTIVITY;
-        if (reportTrendQuery.getBusinessActivityId() != null && reportTrendQuery.getBusinessActivityId() > 0) {
-            List<ReportBusinessActivityDetail> details = tReportBusinessActivityDetailMapper
-                .queryReportBusinessActivityDetailByReportId(reportResult.getId());
-            if (CollectionUtils.isEmpty(details)) {
-                transaction = null;
-            } else {
-                transaction = details.stream().filter(
-                    data -> reportTrendQuery.getBusinessActivityId().equals(data.getBusinessActivityId())).map(
-                    ReportBusinessActivityDetail::getBindRef).findFirst().orElse(null);
-            }
+        if (StringUtils.isNotBlank(reportTrendQuery.getXpathMd5())){
+            transaction = reportTrendQuery.getXpathMd5();
         }
-
         StringBuilder influxDbSql = new StringBuilder();
         influxDbSql.append("select");
         influxDbSql.append(
@@ -1182,28 +1171,6 @@ public class ReportServiceImpl implements ReportService {
         reportResult.setAvgConcurrent(statReport.getAvgConcurrenceNum());
 
         //流量结算
-
-//        AssetInvoiceExt accountTradeRequest = new AssetInvoiceExt() {{
-//            setPressureTotalTime(testRunTime > totalTestTime ? totalTestTime : testRunTime);
-////            setPressureMode(sceneManage.getPressureMode());
-////            setIncreasingTime(sceneManage.getIncreasingSecond());
-//            setPressureType(sceneManage.getPressureType());
-//            setTaskId(reportResult.getId());
-//            setSceneId(reportResult.getSceneId());
-//            setCustomerId(reportResult.getCustomerId());
-////            setStep(sceneManage.getStep());
-//            setAvgConcurrent(statReport.getAvgConcurrenceNum());
-//        }};
-//        if (statReport.getTps() == null) {
-//            accountTradeRequest.setExpectThroughput(1);
-//        } else {
-//            accountTradeRequest.setExpectThroughput((
-//                statReport.getTps()
-//                    .divide(new BigDecimal("1000"), 2, RoundingMode.FLOOR)
-//                    .multiply(statReport.getAvgRt())).intValue() + 1);
-//        }
-//        log.info("流量结算：{}", JSON.toJSONString(accountTradeRequest));
-
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (null != assetExtApi) {
             AssetInvoiceExt<RealAssectBillExt> invoice = new AssetInvoiceExt<>();
@@ -1305,7 +1272,6 @@ public class ReportServiceImpl implements ReportService {
         }
         Map<String, Object> resultMap = new HashMap<>();
         if (Objects.nonNull(statReport)) {
-            resultMap.put("businessActivityId",refOutput.getBusinessActivityId());
             resultMap.put("avgRt", new DataBean(statReport.getAvgRt(), refOutput.getTargetRT()));
             resultMap.put("sa", new DataBean(statReport.getSa(), refOutput.getTargetSA()));
             resultMap.put("tps", new DataBean(statReport.getTps(), refOutput.getTargetTPS()));
@@ -1313,7 +1279,6 @@ public class ReportServiceImpl implements ReportService {
             resultMap.put("avgConcurrenceNum", statReport.getAvgConcurrenceNum());
             resultMap.put("totalRequest", statReport.getTotalRequest());
         }else {
-            resultMap.put("businessActivityId",refOutput.getBusinessActivityId());
             resultMap.put("avgRt", new DataBean("0", refOutput.getTargetRT()));
             resultMap.put("sa", new DataBean("0", refOutput.getTargetSA()));
             resultMap.put("tps", new DataBean("0", refOutput.getTargetTPS()));

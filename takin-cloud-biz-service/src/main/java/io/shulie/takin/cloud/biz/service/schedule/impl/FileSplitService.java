@@ -88,15 +88,6 @@ public class FileSplitService {
     public void fileSplit(ScheduleRunRequest request) {
         ScheduleStartRequestExt startRequest = request.getRequest();
         try {
-            if (checkOutJmx(request.getRequest().getDataFile().stream()
-                .filter(Objects::nonNull)
-                .filter(df -> df.getFileType() == 0)
-                .filter(df -> df.getName().endsWith(SCRIPT_NAME_SUFFIX))
-                .findFirst()
-                .orElse(new DataFile()), startRequest.getSceneId())) {
-                throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR,
-                    "启动压测场景--场景ID:" + startRequest.getSceneId() + ",脚本文件校验失败！");
-            }
             List<DataFile> dataFiles = generateFileSlice(request);
             request.getRequest().setDataFile(dataFiles);
         } catch (Exception e) {
@@ -324,17 +315,19 @@ public class FileSplitService {
      */
     private boolean checkOutJmx(DataFile dataFile, Long sceneId) {
         if (Objects.nonNull(dataFile)) {
-            String fileMd5 = Md5Util.md5File(dataFile.getPath());
-            if (StringUtils.isNotBlank(dataFile.getFileMd5())) {
-                return dataFile.getFileMd5().equals(fileMd5);
-            } else {
-                //兼容老版本没有md5的情况，更新数据库的文件md5值
-                fileSliceService.updateFileMd5(new SceneBigFileSliceParam() {{
-                    setSceneId(sceneId);
-                    setFileName(dataFile.getName());
-                    setFileMd5(fileMd5);
-                }});
-                return true;
+            if (StringUtils.isNotBlank(dataFile.getPath())) {
+                String fileMd5 = Md5Util.md5File(dataFile.getPath());
+                if (StringUtils.isNotBlank(dataFile.getFileMd5())) {
+                    return dataFile.getFileMd5().equals(fileMd5);
+                } else {
+                    //兼容老版本没有md5的情况，更新数据库的文件md5值
+                    fileSliceService.updateFileMd5(new SceneBigFileSliceParam() {{
+                        setSceneId(sceneId);
+                        setFileName(dataFile.getName());
+                        setFileMd5(fileMd5);
+                    }});
+                    return true;
+                }
             }
         }
         return false;

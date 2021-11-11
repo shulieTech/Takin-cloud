@@ -42,6 +42,9 @@ public enum TakinCloudExceptionEnum implements ExceptionReadable {
 
     TOO_MUCH_FILE_ERROR("cloud-001-u0507","场景文件夹下找到多个数据文件"),
 
+    SCENE_JMX_FILE_CHECK_ERROR("cloud-001-s0508","脚本文件校验失败"),
+
+
     ENGINE_PLUGIN_PARAM_VERIFY_ERROR("cloud-001-s0600","引擎插件参数校验失败"),
     SCENE_MANAGE_ALLOCATION_ERROR("cloud-001-s0601","压测场景分配异常"),
 

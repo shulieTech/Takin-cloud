@@ -18,9 +18,6 @@ import lombok.EqualsAndHashCode;
 @ApiModel(value = "报告节点数据对象")
 public class ScriptNodeSummaryBean extends AbstractEntry {
 
-    @ApiModelProperty(value = "业务活动ID")
-    private Long businessActivityId;
-
     @ApiModelProperty(value = "节点类型名称")
     private String name;
 

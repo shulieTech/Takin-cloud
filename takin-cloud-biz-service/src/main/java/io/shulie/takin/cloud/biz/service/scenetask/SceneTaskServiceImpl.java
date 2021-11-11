@@ -78,11 +78,13 @@ import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
+import io.shulie.takin.cloud.common.utils.Md5Util;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
+import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
@@ -160,6 +162,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     private static final Long MB = KB * 1024;
     private static final Long GB = MB * 1024;
     private static final Long TB = GB * 1024;
+
+    private static final String SCRIPT_NAME_SUFFIX = "jmx";
+
 
     @Override
     @Transactional
@@ -784,6 +789,17 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         if (!SceneManageStatusEnum.ifFree(sceneData.getStatus())) {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_START_VERIFY_ERROR, "当前场景不为待启动状态！");
         }
+        //检测脚本文件是否有变更
+        SceneScriptRefOutput scriptRefOutput = sceneData.getUploadFile().stream().filter(Objects::nonNull)
+            .filter(fileRef -> fileRef.getFileType() == 0 && fileRef.getFileName().endsWith(SCRIPT_NAME_SUFFIX))
+            .findFirst()
+            .orElse(null);
+
+        boolean jmxCheckResult = checkOutJmx(scriptRefOutput, sceneData.getId());
+        if (!jmxCheckResult) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_JMX_FILE_CHECK_ERROR,
+                "启动压测场景--场景ID:" + sceneData.getId() + ",脚本文件校验失败！");
+        }
 
         // 判断场景是否有job正在执行 一个场景只能保证一个job执行
         //获取所有job
@@ -1160,5 +1176,24 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             return position / KB + "KB";
         }
         return position + "B";
+    }
+
+
+    private boolean checkOutJmx(SceneScriptRefOutput uploadFile,Long sceneId){
+        if (Objects.nonNull(uploadFile) && StringUtils.isNotBlank(uploadFile.getUploadPath())){
+            String fileMd5 = Md5Util.md5File(uploadFile.getUploadPath());
+            if (StringUtils.isNotBlank(uploadFile.getFileMd5())) {
+                return uploadFile.getFileMd5().equals(fileMd5);
+            } else {
+                //兼容老版本没有md5的情况，更新数据库的文件md5值
+                fileSliceService.updateFileMd5(new SceneBigFileSliceParam() {{
+                    setSceneId(sceneId);
+                    setFileName(uploadFile.getFileName());
+                    setFileMd5(fileMd5);
+                }});
+                return true;
+            }
+        }
+        return false;
     }
 }
