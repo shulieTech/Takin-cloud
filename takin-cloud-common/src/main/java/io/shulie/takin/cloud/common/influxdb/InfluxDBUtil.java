@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.common.influxdb;
 
 import io.shulie.takin.cloud.common.utils.CollectorUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.influxdb.BuilderException;
 import org.influxdb.annotation.Column;
 import org.influxdb.dto.Point;
@@ -13,6 +14,9 @@ import java.util.concurrent.TimeUnit;
  * @date 2020/7/20 下午4:34
  */
 public class InfluxDBUtil {
+
+    public static long MAX_ACCEPT_TIMESTAMP = 9223372036854L;
+
 
     /**
      * 实时统计数据表
@@ -35,7 +39,11 @@ public class InfluxDBUtil {
         if (customerId == null) {
             return String.format("%s_%s_%s", measurementName, sceneId, reportId);
         }
-        return String.format("%s_%s_%s_%s", measurementName, sceneId, reportId, customerId);
+        String cId = customerId.toString();
+        if (customerId < 0) {
+            cId = "f" + Math.abs(customerId);
+        }
+        return String.format("%s_%s_%s_%s", measurementName, sceneId, reportId, cId);
     }
 
     /**

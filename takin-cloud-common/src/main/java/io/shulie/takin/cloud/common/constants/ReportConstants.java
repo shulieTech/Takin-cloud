@@ -8,7 +8,7 @@ package io.shulie.takin.cloud.common.constants;
  * @author 莫问
  * @date 2020-04-24
  */
-public class ReportConstans {
+public class ReportConstants {
 
     /**
      * 就绪状态

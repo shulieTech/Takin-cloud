@@ -6,7 +6,7 @@ import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.biz.service.scene.EngineCallbackService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
-import io.shulie.takin.cloud.common.constants.ReportConstans;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
 import io.shulie.takin.cloud.common.enums.engine.EngineStatusEnum;
@@ -56,7 +56,7 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
                 String tempFailSign = ScheduleConstants.TEMP_FAIL_SIGN + engineName;
                 Long startFailCount = redisClientUtils.increment(tempFailSign, 1);
                 // 记录失败原因，成功则不记录报告中 报告直接完成
-                reportService.updateReportFeatures(notify.getResultId(), ReportConstans.FINISH_STATUS, ReportConstans.PRESSURE_MSG, notify.getMsg());
+                reportService.updateReportFeatures(notify.getResultId(), ReportConstants.FINISH_STATUS, ReportConstants.PRESSURE_MSG, notify.getMsg());
 
                 // 如果 这个失败等于 压力节点 数量 则 将本次压测至为失败
                 int podTotal = Integer.parseInt(

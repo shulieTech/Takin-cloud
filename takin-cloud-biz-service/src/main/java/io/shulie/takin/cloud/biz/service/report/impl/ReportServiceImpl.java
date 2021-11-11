@@ -74,7 +74,7 @@ import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
 import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
 import io.shulie.takin.cloud.biz.output.report.ReportOutput;
 import io.shulie.takin.cloud.biz.cloudserver.ReportConverter;
-import io.shulie.takin.cloud.common.constants.ReportConstans;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
@@ -113,7 +113,6 @@ import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
 import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
-import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneBusinessActivityRefOutput;
 
 /**
@@ -223,19 +222,19 @@ public class ReportServiceImpl implements ReportService {
         }
         if (StringUtils.isNotEmpty(report.getFeatures())) {
             detail.setConclusionRemark(
-                JSON.parseObject(report.getFeatures()).getString(ReportConstans.FEATURES_ERROR_MSG));
+                JSON.parseObject(report.getFeatures()).getString(ReportConstants.FEATURES_ERROR_MSG));
         }
         detail.setTestTotalTime(TestTimeUtil.format(report.getStartTime(), report.getEndTime()));
         detail.setNodeDetail(getReportNodeDetail(report.getScriptNodeTree(),reportId));
         //任务没有完成，提示用户正在生成中
-        if (report.getStatus() != ReportConstans.FINISH_STATUS) {
-            detail.setTaskStatus(ReportConstans.RUN_STATUS);
+        if (report.getStatus() != ReportConstants.FINISH_STATUS) {
+            detail.setTaskStatus(ReportConstants.RUN_STATUS);
         }
         // sla转换对象
         if (StringUtils.isNotBlank(report.getFeatures())) {
             JSONObject jsonObject = JSON.parseObject(report.getFeatures());
-            if (jsonObject.containsKey(ReportConstans.SLA_ERROR_MSG)) {
-                detail.setSlaMsg(JsonHelper.json2Bean(jsonObject.getString(ReportConstans.SLA_ERROR_MSG), SlaBean.class));
+            if (jsonObject.containsKey(ReportConstants.SLA_ERROR_MSG)) {
+                detail.setSlaMsg(JsonHelper.json2Bean(jsonObject.getString(ReportConstants.SLA_ERROR_MSG), SlaBean.class));
             }
         }
         return detail;
@@ -259,7 +258,7 @@ public class ReportServiceImpl implements ReportService {
 
         ReportResult reportResult = reportDao.getTempReportBySceneId(sceneId);
         if (reportResult == null) {
-            reportDetail.setTaskStatus(ReportConstans.FINISH_STATUS);
+            reportDetail.setTaskStatus(ReportConstants.FINISH_STATUS);
             return reportDetail;
         }
         SceneManageQueryOpitons options = new SceneManageQueryOpitons();
@@ -276,7 +275,7 @@ public class ReportServiceImpl implements ReportService {
         reportDetail.setSlaMsg(detailOutput.getSlaMsg());
 
         StatReportDTO statReport = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
-            ReportConstans.ALL_BUSINESS_ACTIVITY);
+            ReportConstants.ALL_BUSINESS_ACTIVITY);
         if (statReport == null) {
             log.warn("实况报表:[{}]，暂无数据", reportResult.getId());
         } else {
@@ -348,7 +347,7 @@ public class ReportServiceImpl implements ReportService {
         if (wrapper.getStatus().intValue() == SceneManageStatusEnum.PTING.getValue().intValue() && taskIsTimeOut) {
             log.info("报表[{}]超时，通知调度马上停止压测", reportResult.getId());
             //报告正在生成中
-            reportDetail.setTaskStatus(ReportConstans.RUN_STATUS);
+            reportDetail.setTaskStatus(ReportConstants.RUN_STATUS);
             //重置时间
             reportDetail.setTestTime(
                 String.format("%d'%d\"", wrapper.getTotalTestTime() / 60, wrapper.getTotalTestTime() % 60));
@@ -389,7 +388,7 @@ public class ReportServiceImpl implements ReportService {
             stopReasons.add(stopReasonBean);
             //  持久化
             ReportResult reportResult = reportDao.selectById(reportId);
-            getReportFeatures(reportResult, ReportConstans.PRESSURE_MSG, pressureNodeStartError.toString());
+            getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG, pressureNodeStartError.toString());
             ReportUpdateParam param = new ReportUpdateParam();
             param.setId(reportId);
             param.setFeatures(reportResult.getFeatures());
@@ -409,7 +408,7 @@ public class ReportServiceImpl implements ReportService {
             stopReasons.add(engineReasonBean);
             //  持久化
             ReportResult reportResult = reportDao.selectById(reportId);
-            getReportFeatures(reportResult, ReportConstans.PRESSURE_MSG, errorObj.toString());
+            getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG, errorObj.toString());
             ReportUpdateParam param = new ReportUpdateParam();
             param.setId(reportId);
             param.setFeatures(reportResult.getFeatures());
@@ -560,12 +559,12 @@ public class ReportServiceImpl implements ReportService {
         if (checkReportError(reportResult)) {
             return false;
         }
-        if (ReportConstans.LOCK_STATUS == reportResult.getLock()) {
+        if (ReportConstants.LOCK_STATUS == reportResult.getLock()) {
             log.error("异常代码【{}】,异常内容：锁定报告异常 --> 报告{}状态锁定状态，不能再次锁定",
                 TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId);
             return false;
         }
-        reportDao.updateReportLock(reportId, ReportConstans.LOCK_STATUS);
+        reportDao.updateReportLock(reportId, ReportConstants.LOCK_STATUS);
         log.info("报告{}锁定成功", reportId);
         return true;
     }
@@ -587,13 +586,13 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean unLockReport(Long reportId) {
         ReportResult reportResult = reportDao.selectById(reportId);
-        if (ReportConstans.LOCK_STATUS != reportResult.getLock()) {
+        if (ReportConstants.LOCK_STATUS != reportResult.getLock()) {
             log.error("异常代码【{}】,异常内容：解锁报告异常 --> 报告{}非锁定状态，不能解锁",
                 TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId);
             return false;
         }
         // 解锁
-        reportDao.updateReportLock(reportId, ReportConstans.RUN_STATUS);
+        reportDao.updateReportLock(reportId, ReportConstants.RUN_STATUS);
         log.info("报告{}解锁成功", reportId);
         return true;
     }
@@ -611,8 +610,8 @@ public class ReportServiceImpl implements ReportService {
         UpdateStatusBean reportStatus = new UpdateStatusBean();
         reportStatus.setResultId(reportId);
         //完成报告之后锁定报告
-        reportStatus.setPreStatus(ReportConstans.RUN_STATUS);
-        reportStatus.setAfterStatus(ReportConstans.LOCK_STATUS);
+        reportStatus.setPreStatus(ReportConstants.RUN_STATUS);
+        reportStatus.setAfterStatus(ReportConstants.LOCK_STATUS);
         tReportMapper.updateReportLock(reportStatus);
 
         // 两个地方关闭压测引擎，版本不同，关闭方式不同
@@ -637,7 +636,7 @@ public class ReportServiceImpl implements ReportService {
         // 更新场景
         ReportResult reportResult = reportDao.selectById(reportId);
         // 完成报告
-        if (reportResult.getStatus() != ReportConstans.FINISH_STATUS) {
+        if (reportResult.getStatus() != ReportConstants.FINISH_STATUS) {
             log.info("{}报告触发强制停止", reportId);
             reportDao.finishReport(reportId);
         }
@@ -702,7 +701,7 @@ public class ReportServiceImpl implements ReportService {
         if (reportResult == null) {
             return new ReportTrendResp();
         }
-        String transaction = ReportConstans.ALL_BUSINESS_ACTIVITY;
+        String transaction = ReportConstants.ALL_BUSINESS_ACTIVITY;
         if (StringUtils.isNotBlank(reportTrendQuery.getXpathMd5())){
             transaction = reportTrendQuery.getXpathMd5();
         }
@@ -830,7 +829,7 @@ public class ReportServiceImpl implements ReportService {
             });
         }
         if (StringUtils.isNotBlank(errMsg)) {
-            if (errKey.equals(ReportConstans.SLA_ERROR_MSG) && map.containsKey(ReportConstans.SLA_ERROR_MSG)) {
+            if (errKey.equals(ReportConstants.SLA_ERROR_MSG) && map.containsKey(ReportConstants.SLA_ERROR_MSG)) {
                 return;
             }
             map.compute(errKey, (k, v) -> StringUtils.isBlank(v) ? errMsg : (v + "、" + errMsg));
@@ -856,7 +855,7 @@ public class ReportServiceImpl implements ReportService {
             throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告" + input.getId() + "不存在");
         }
         if (StringUtils.isNotBlank(input.getErrorMessage())) {
-            getReportFeatures(reportResult, ReportConstans.FEATURES_ERROR_MSG, input.getErrorMessage());
+            getReportFeatures(reportResult, ReportConstants.FEATURES_ERROR_MSG, input.getErrorMessage());
         }
         ReportUpdateConclusionParam param = new ReportUpdateConclusionParam();
         BeanUtils.copyProperties(input, param);
@@ -871,7 +870,7 @@ public class ReportServiceImpl implements ReportService {
             throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告" + input.getReportId() + "不存在");
         }
         // 适配
-        getReportFeatures(reportResult, ReportConstans.SLA_ERROR_MSG, JsonHelper.bean2Json(input.getSlaBean()));
+        getReportFeatures(reportResult, ReportConstants.SLA_ERROR_MSG, JsonHelper.bean2Json(input.getSlaBean()));
         ReportUpdateParam param = new ReportUpdateParam();
         param.setId(input.getReportId());
         param.setFeatures(reportResult.getFeatures());
@@ -918,9 +917,9 @@ public class ReportServiceImpl implements ReportService {
         reportDao.updateReport(new ReportUpdateParam() {{
             setSceneId(sceneId);
             setId(reportId);
-            setStatus(ReportConstans.FINISH_STATUS);
+            setStatus(ReportConstants.FINISH_STATUS);
             JSONObject errorMsg = new JSONObject();
-            errorMsg.put(ReportConstans.FEATURES_ERROR_MSG, errMsg);
+            errorMsg.put(ReportConstants.FEATURES_ERROR_MSG, errMsg);
             setFeatures(errorMsg.toJSONString());
         }});
     }
@@ -945,8 +944,8 @@ public class ReportServiceImpl implements ReportService {
         if (updateVersion) {
             UpdateStatusBean reportStatus = new UpdateStatusBean();
             reportStatus.setResultId(reportId);
-            reportStatus.setPreStatus(ReportConstans.INIT_STATUS);
-            reportStatus.setAfterStatus(ReportConstans.RUN_STATUS);
+            reportStatus.setPreStatus(ReportConstants.INIT_STATUS);
+            reportStatus.setAfterStatus(ReportConstants.RUN_STATUS);
             int row = tReportMapper.updateReportStatus(reportStatus);
             // modify by 李鹏
             // 添加TotalRequest不为null 保证报告是有数据的  20210707
@@ -955,12 +954,12 @@ public class ReportServiceImpl implements ReportService {
                     TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId, reportResult.getStatus());
                 return;
             }
-            reportResult.setStatus(ReportConstans.RUN_STATUS);
+            reportResult.setStatus(ReportConstants.RUN_STATUS);
         }
 
         //汇总所有业务活动数据
         StatReportDTO statReport = statReport(taskResult.getSceneId(), reportId, taskResult.getCustomerId(),
-            ReportConstans.ALL_BUSINESS_ACTIVITY);
+            ReportConstants.ALL_BUSINESS_ACTIVITY);
         if (statReport == null) {
             log.warn("没有找到报表数据，报表生成失败。报告ID：{}", reportId);
             statReport = new StatReportDTO();
@@ -977,8 +976,8 @@ public class ReportServiceImpl implements ReportService {
             log.info("old version finish report ={} updateVersion={} ", reportId, updateVersion);
             UpdateStatusBean reportStatus = new UpdateStatusBean();
             reportStatus.setResultId(reportId);
-            reportStatus.setPreStatus(ReportConstans.INIT_STATUS);
-            reportStatus.setAfterStatus(ReportConstans.FINISH_STATUS);
+            reportStatus.setPreStatus(ReportConstants.INIT_STATUS);
+            reportStatus.setAfterStatus(ReportConstants.FINISH_STATUS);
             tReportMapper.updateReportStatus(reportStatus);
             //更新场景 压测引擎停止压测---> 待启动  版本不一样，关闭不一样
             sceneManageService.updateSceneLifeCycle(
@@ -1096,7 +1095,7 @@ public class ReportServiceImpl implements ReportService {
         String podTotal = redisClientUtils.getString(podTotalName);
         if (!podTotal.equals(redisClientUtils.getObject(podName))) {
             // 两者不同
-            getReportFeatures(reportResult, ReportConstans.PRESSURE_MSG,
+            getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG,
                 StrUtil.format("pod计划启动{}个，实际启动{}个", podTotal, redisClientUtils.getObject(podName)));
         }
         // 压测引擎
@@ -1104,7 +1103,7 @@ public class ReportServiceImpl implements ReportService {
             taskResult.getCustomerId());
         if (redisClientUtils.getObject(engineName) == null || !podTotal.equals(redisClientUtils.getString(engineName))) {
             // 两者不同
-            getReportFeatures(reportResult, ReportConstans.PRESSURE_MSG,
+            getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG,
                 StrUtil.format("压测引擎计划运行{}个，实际运行{}个", podTotal, redisClientUtils.getObject(engineName)));
         }
 
@@ -1135,13 +1134,13 @@ public class ReportServiceImpl implements ReportService {
         //SLA规则优先
 
         if (isSla(reportResult)) {
-            reportResult.setConclusion(ReportConstans.FAIL);
-            getReportFeatures(reportResult, ReportConstans.FEATURES_ERROR_MSG, "触发SLA终止规则");
+            reportResult.setConclusion(ReportConstants.FAIL);
+            getReportFeatures(reportResult, ReportConstants.FEATURES_ERROR_MSG, "触发SLA终止规则");
         } else if (!isConclusion) {
-            reportResult.setConclusion(ReportConstans.FAIL);
-            getReportFeatures(reportResult, ReportConstans.FEATURES_ERROR_MSG, "业务活动指标不达标");
+            reportResult.setConclusion(ReportConstants.FAIL);
+            getReportFeatures(reportResult, ReportConstants.FEATURES_ERROR_MSG, "业务活动指标不达标");
         } else {
-            reportResult.setConclusion(ReportConstans.PASS);
+            reportResult.setConclusion(ReportConstants.PASS);
         }
 
         // 这里 要判断下 压力节点 情况，并记录下来 压力节点 最后一位就是 压力节点 数量 开始时间 结束时间更新
@@ -1223,8 +1222,8 @@ public class ReportServiceImpl implements ReportService {
         }
         JSONObject jsonObject = JSON.parseObject(reportResult.getFeatures());
         // sla熔断数据
-        return jsonObject.containsKey(ReportConstans.SLA_ERROR_MSG)
-            && StringUtils.isNotEmpty(jsonObject.getString(ReportConstans.SLA_ERROR_MSG));
+        return jsonObject.containsKey(ReportConstants.SLA_ERROR_MSG)
+            && StringUtils.isNotEmpty(jsonObject.getString(ReportConstants.SLA_ERROR_MSG));
     }
 
 

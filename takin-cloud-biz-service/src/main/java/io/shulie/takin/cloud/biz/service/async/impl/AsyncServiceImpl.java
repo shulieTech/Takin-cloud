@@ -5,9 +5,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
-import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.domain.entity.report.Report;
-import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
 import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
@@ -20,7 +17,6 @@ import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.cloud.biz.service.async.AsyncService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
-import io.shulie.takin.cloud.common.constants.ReportConstans;
 import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;

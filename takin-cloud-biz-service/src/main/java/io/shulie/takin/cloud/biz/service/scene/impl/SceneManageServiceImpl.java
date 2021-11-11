@@ -60,7 +60,7 @@ import io.shulie.takin.cloud.common.bean.TimeBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.common.constants.ReportConstans;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.PressureModeEnum;
@@ -619,7 +619,7 @@ public class SceneManageServiceImpl implements SceneManageService {
      */
     private void toFailureState(Long sceneId, Long reportId, String errorMsg) {
         // 记录失败原因，成功则不记录报告中 报告直接完成
-        reportService.updateReportFeatures(reportId, ReportConstans.FINISH_STATUS, ReportConstans.PRESSURE_MSG,
+        reportService.updateReportFeatures(reportId, ReportConstants.FINISH_STATUS, ReportConstants.PRESSURE_MSG,
             errorMsg);
         ReportResult recentlyReport = reportDao.getRecentlyReport(sceneId);
         if (!reportId.equals(recentlyReport.getId())) {

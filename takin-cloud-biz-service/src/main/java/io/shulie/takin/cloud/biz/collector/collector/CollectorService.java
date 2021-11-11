@@ -106,6 +106,15 @@ public class CollectorService extends AbstractIndicators {
                     metrics.setTestName(metrics.getTestName());
                 }
             })
+            .peek(metrics ->{
+                //处理时间戳-纳秒转成毫秒，防止插入influxdb报错
+                if (Objects.nonNull(metrics.getTime()) && metrics.getTime() > InfluxDBUtil.MAX_ACCEPT_TIMESTAMP) {
+                    metrics.setTime(metrics.getTime() / 1000000);
+                }
+                if (metrics.getTimestamp() > InfluxDBUtil.MAX_ACCEPT_TIMESTAMP) {
+                    metrics.setTimestamp(metrics.getTimestamp() / 1000000);
+                }
+            })
             .map(metrics -> InfluxDBUtil.toPoint(measurement, metrics.getTimestamp(), metrics))
             .forEach(influxWriter::insert);
     }

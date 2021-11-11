@@ -58,7 +58,7 @@ import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
 import io.shulie.takin.cloud.common.constants.Constants;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
-import io.shulie.takin.cloud.common.constants.ReportConstans;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.SceneStartCheckConstants;
 import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
@@ -240,10 +240,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         SceneActionOutput sceneAction = new SceneActionOutput();
         sceneAction.setData(report.getId());
         // 报告已经完成，则退出
-        if (report.getStatus() == ReportConstans.FINISH_STATUS) {
+        if (report.getStatus() == ReportConstants.FINISH_STATUS) {
             //失败状态
             JSONObject jb = JSON.parseObject(report.getFeatures());
-            sceneAction.setMsg(Arrays.asList(jb.getString(ReportConstans.PRESSURE_MSG).split(",")));
+            sceneAction.setMsg(Arrays.asList(jb.getString(ReportConstants.PRESSURE_MSG).split(",")));
             return sceneAction;
         }
 
@@ -403,7 +403,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                     scene.setReportId(reportResult.getId());
                     if (StringUtils.isNotEmpty(reportResult.getFeatures())) {
                         JSONObject jb = JSON.parseObject(reportResult.getFeatures());
-                        errorMsgs.add(jb.getString(ReportConstans.FEATURES_ERROR_MSG));
+                        errorMsgs.add(jb.getString(ReportConstants.FEATURES_ERROR_MSG));
                     }
                     if (CollectionUtils.isNotEmpty(errorMsgs)) {
                         scene.setMsg(errorMsgs);
@@ -833,7 +833,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         Report report = new Report();
         report.setSceneId(scene.getId());
         report.setConcurrent(scene.getConcurrenceNum());
-        report.setStatus(ReportConstans.INIT_STATUS);
+        report.setStatus(ReportConstants.INIT_STATUS);
         // 初始化
         report.setCustomerId(scene.getCustomerId());
         report.setOperateId(input.getUserId());
@@ -930,7 +930,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     public void testFailed(TaskResult taskResult) {
         log.info("场景[{}]压测任务启动失败，失败原因:{}", taskResult.getSceneId(), taskResult.getMsg());
         Report report = tReportMapper.selectByPrimaryKey(taskResult.getTaskId());
-        if (report != null && report.getStatus() == ReportConstans.INIT_STATUS) {
+        if (report != null && report.getStatus() == ReportConstants.INIT_STATUS) {
             //删除报表
             report.setGmtUpdate(new Date());
             report.setIsDeleted(1);
@@ -942,7 +942,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             } else {
                 amountLockId = json.getString("lockId");
             }
-            json.put(ReportConstans.FEATURES_ERROR_MSG, taskResult.getMsg());
+            json.put(ReportConstants.FEATURES_ERROR_MSG, taskResult.getMsg());
             report.setFeatures(json.toJSONString());
             tReportMapper.updateByPrimaryKeySelective(report);
 

@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
-import io.shulie.takin.cloud.common.constants.ReportConstans;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
 import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.param.report.ReportDataQueryParam;
@@ -103,7 +103,7 @@ public class ReportDaoImpl implements ReportDao {
     public void finishReport(Long reportId) {
         ReportEntity entity = new ReportEntity();
         entity.setId(reportId);
-        entity.setStatus(ReportConstans.FINISH_STATUS);
+        entity.setStatus(ReportConstants.FINISH_STATUS);
         entity.setGmtUpdate(new Date());
         reportMapper.updateById(entity);
     }
