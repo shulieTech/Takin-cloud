@@ -842,7 +842,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         report.setPressureType(scene.getPressureType());
         report.setType(scene.getType());
         if (StringUtils.isNotBlank(scene.getScriptAnalysisResult())){
-            report.setScriptAnalysisResult(JsonPathUtil.deleteNodes(scene.getScriptAnalysisResult()).jsonString());
+            report.setScriptNodeTree(JsonPathUtil.deleteNodes(scene.getScriptAnalysisResult()).jsonString());
         }
         tReportMapper.insertSelective(report);
 

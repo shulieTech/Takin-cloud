@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.common.utils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,7 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.ext.content.script.ScriptNode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -48,6 +51,22 @@ public class JsonPathUtil {
         .build();
 
     public static final TypeRef<List<ScriptNode>> SCRIPT_NODE_TYPE_REF = new TypeRef<List<ScriptNode>>() {};
+
+    public static DocumentContext deleteByXpathMd5(String jsonString, List<String> md5Keys) {
+        if (StringUtils.isBlank(jsonString)) {
+            return null;
+        }
+        DocumentContext document = JsonPath.using(JACKSON_CONFIGURATION).parse(jsonString);
+        if (CollectionUtils.isEmpty(md5Keys)) {
+            return document;
+        }
+        md5Keys.stream()
+            .filter(StringUtils::isNotBlank)
+            .forEach(md5 -> {
+                document.delete(JsonPath.compile("$..[?(@.xpathMd5=='" + md5 + "')]"));
+            });
+        return document;
+    }
 
     /**
      * 删除json字符串中的节点
@@ -117,8 +136,8 @@ public class JsonPathUtil {
         return context.jsonString();
     }
 
-    public static List<ScriptNode> getCurrentNodeByMd5(String nodeTree,String xpathMd5){
-       return JsonPath.using(JACKSON_CONFIGURATION)
+    public static List<ScriptNode> getCurrentNodeByMd5(String nodeTree, String xpathMd5) {
+        return JsonPath.using(JACKSON_CONFIGURATION)
             .parse(nodeTree)
             .read("$..[?(@.xpathMd5=='" + xpathMd5 + "')]", SCRIPT_NODE_TYPE_REF);
     }
@@ -634,7 +653,8 @@ public class JsonPathUtil {
             + "  }\n"
             + "]";
 
-        DocumentContext context = JsonPathUtil.deleteNodes(json);
+        DocumentContext context = JsonPathUtil.deleteByXpathMd5(json, Arrays.asList("d53759e4d7aadda84e6a1b2c517eddf8","db65854f3f8b92d60658fbdbde490d38","79ed27c6b3472714af1a09a9842b9114"));
+        //DocumentContext context1 = JsonPathUtil.deleteNodes(context.jsonString());
         //List<ScriptNode> childSamplers = JsonPathUtil.getChildSamplers(json,
         //    "159036bb8a7ad4451f55b16772d16305");
         //childSamplers.forEach(System.out::println);

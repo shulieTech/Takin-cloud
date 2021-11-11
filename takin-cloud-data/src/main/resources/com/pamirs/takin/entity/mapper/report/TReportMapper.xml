@@ -144,8 +144,8 @@
             <if test="scriptId != null">
                 script_id,
             </if>
-            <if test="scriptAnalysisResult != null">
-            script_analysis_result,
+            <if test="scriptNodeTree != null">
+                script_node_tree,
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -231,7 +231,7 @@
                 #{scriptId,jdbcType=DECIMAL},
             </if>
             <if test="scriptAnalysisResult != null">
-             #{scriptAnalysisResult,jdbcType=VARCHAR},
+             #{scriptNodeTree,jdbcType=VARCHAR},
             </if>
         </trim>
     </insert>

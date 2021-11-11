@@ -11,10 +11,10 @@ BEGIN
     END IF;
 
     /* t_report 表添加 script_analysis_result 字段*/
-    IF NOT EXISTS(SELECT * FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 't_report' AND column_name = 'script_analysis_result')
+    IF NOT EXISTS(SELECT * FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 't_report' AND column_name = 'script_node_tree')
     THEN
         ALTER TABLE `t_report`
-            ADD `script_analysis_result` json COMMENT ' 脚本节点树 ' AFTER  `features`;
+            ADD `script_node_tree` json COMMENT ' 脚本节点树 ' AFTER  `features`;
     END IF;
 
     /* t_report 表添加 amount_lock_id 字段*/

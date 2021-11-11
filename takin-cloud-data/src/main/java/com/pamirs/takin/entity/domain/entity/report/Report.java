@@ -134,5 +134,5 @@ public class Report {
     /**
      * 脚本解析结果
      */
-    private String scriptAnalysisResult;
+    private String scriptNodeTree;
 }

@@ -166,6 +166,6 @@ public class ReportEntity {
     /**
      * 脚本节点树
      */
-    @TableField(value = "script_analysis_result")
-    private String scriptAnalysisResult;
+    @TableField(value = "script_node_tree")
+    private String scriptNodeTree;
 }
