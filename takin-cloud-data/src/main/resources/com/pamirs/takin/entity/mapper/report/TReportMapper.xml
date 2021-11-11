@@ -230,7 +230,7 @@
             <if test="scriptId != null">
                 #{scriptId,jdbcType=DECIMAL},
             </if>
-            <if test="scriptAnalysisResult != null">
+            <if test="scriptNodeTree != null">
              #{scriptNodeTree,jdbcType=VARCHAR},
             </if>
         </trim>
