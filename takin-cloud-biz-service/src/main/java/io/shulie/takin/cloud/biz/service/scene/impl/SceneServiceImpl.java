@@ -462,13 +462,14 @@ public class SceneServiceImpl implements SceneService {
     public void buildBusinessActivity(long sceneId, List<Content> content, Map<String, Goal> goalMap) {
         for (Content t : content) {
             Goal goal = goalMap.get(t.getPathMd5());
+            if (goal == null) {throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_ERROR, "压测目标未能匹配:" + t.getPathMd5());}
             SceneBusinessActivityRefEntity activityRef = new SceneBusinessActivityRefEntity() {{
                 setSceneId(sceneId);
                 setBindRef(t.getPathMd5());
                 setBusinessActivityName(t.getName());
                 setBusinessActivityId(t.getBusinessActivityId());
                 setApplicationIds(String.join(",", t.getApplicationId()));
-                setGoalValue(JSONObject.toJSONString((goal == null ? new Goal() : goal), SerializerFeature.PrettyFormat));
+                setGoalValue(JSONObject.toJSONString((goal), SerializerFeature.PrettyFormat));
                 // 其它字段默认值
                 LocalDateTime now = LocalDateTime.now();
                 setIsDeleted(0);
