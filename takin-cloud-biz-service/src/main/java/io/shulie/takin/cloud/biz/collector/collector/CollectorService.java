@@ -98,8 +98,9 @@ public class CollectorService extends AbstractIndicators {
                 //判断有没有MD5值
                 int strPosition = metrics.getTransaction().lastIndexOf(PressureEngineConstants.TRANSACTION_SPLIT_STR);
                 if(strPosition > 0){
-                    metrics.setTransaction(metrics.getTransaction().substring( strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length()));
-                    metrics.setTestName((metrics.getTransaction().substring(0, strPosition)));
+                    String transaction = metrics.getTransaction();
+                    metrics.setTransaction(transaction.substring( strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length()));
+                    metrics.setTestName((transaction.substring(0, strPosition)));
                 }else {
                     metrics.setTransaction(metrics.getTransaction());
                     metrics.setTestName(metrics.getTestName());
@@ -124,12 +125,13 @@ public class CollectorService extends AbstractIndicators {
                     // 写入redis
                     log.info("{}-{}-{} write redis , timestamp-{},timeWindow-{}",sceneId,reportId,customerId,
                         metric.getTimestamp(),timeWindow);
-                    String transaction = metric.getTransaction();
-                    String testName = transaction;
+                    String source = metric.getTransaction();
+                    String transaction = source;
+                    String testName = source;
                     int strPosition = metric.getTransaction().lastIndexOf(PressureEngineConstants.TRANSACTION_SPLIT_STR);
                     if (strPosition > 0){
-                        transaction = metric.getTransaction().substring(strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length());
-                        testName = metric.getTransaction().substring(strPosition);
+                        transaction = source.substring(strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length());
+                        testName = source.substring(0,strPosition);
                     }
                     String timePod = CollectorUtil.getTimestampPodNum(metric.getTimestamp(),metric.getPodNum());
                     intSaveRedisMap(countKey(taskKey, transaction, timeWindow), timePod, metric.getCount());
