@@ -24,6 +24,9 @@ import cn.hutool.core.util.StrUtil;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.ext.content.enginecall.PtConfigExt;
@@ -67,6 +70,12 @@ public class SceneServiceImpl implements SceneService {
     SceneScriptRefMapper sceneScriptRefMapper;
     @Resource
     SceneBusinessActivityRefMapper sceneBusinessActivityRefMapper;
+    // 事务控制
+
+    @Resource
+    private TransactionDefinition transactionDefinition;
+    @Resource
+    private PlatformTransactionManager platformTransactionManager;
 
     /**
      * 创建压测场景
@@ -76,16 +85,24 @@ public class SceneServiceImpl implements SceneService {
      */
     @Override
     public Long create(SceneRequest in) {
-        // 1.   创建场景
-        long sceneId = createScene(in.getBasicInfo(), in.getConfig(), in.getAnalysisResult(), in.getDataValidation());
-        // 2. 更新场景&业务活动关联关系
-        buildBusinessActivity(sceneId, in.getContent(), in.getGoal());
-        // 3.   处理脚本
-        buildScript(sceneId, in.getBasicInfo().getScriptId(), in.getBasicInfo().getScriptType(), in.getFile());
-        // 4.  保存SLA信息
-        buildSla(sceneId, in.getMonitoringGoal());
-        //      返回信息
-        return sceneId;
+        // 手动事务控制
+        TransactionStatus transactionStatus = platformTransactionManager.getTransaction(transactionDefinition);
+        try {
+            // 1.   创建场景
+            long sceneId = createScene(in.getBasicInfo(), in.getConfig(), in.getAnalysisResult(), in.getDataValidation());
+            // 2. 更新场景&业务活动关联关系
+            buildBusinessActivity(sceneId, in.getContent(), in.getGoal());
+            // 3.   处理脚本
+            buildScript(sceneId, in.getBasicInfo().getScriptId(), in.getBasicInfo().getScriptType(), in.getFile());
+            // 4.  保存SLA信息
+            buildSla(sceneId, in.getMonitoringGoal());
+            //      返回信息
+            return sceneId;
+        } catch (Exception e) {
+            // 发生异常则回滚数据
+            platformTransactionManager.rollback(transactionStatus);
+            throw e;
+        }
     }
 
     /**
@@ -96,29 +113,37 @@ public class SceneServiceImpl implements SceneService {
      */
     @Override
     public Boolean update(SceneRequest in) {
-        // 0.   清除历史项
-        {
-            Long sceneId = in.getBasicInfo().getSceneId();
-            int slaClearRows = sceneSlaRefMapper.delete(Wrappers.lambdaUpdate(SceneSlaRefEntity.class).eq(SceneSlaRefEntity::getSceneId, sceneId));
-            int fileClearRows = sceneScriptRefMapper.delete(Wrappers.lambdaUpdate(SceneScriptRefEntity.class).eq(SceneScriptRefEntity::getSceneId, sceneId));
-            int activityClearRows = sceneBusinessActivityRefMapper.delete(Wrappers.lambdaUpdate(SceneBusinessActivityRefEntity.class).eq(SceneBusinessActivityRefEntity::getSceneId, sceneId));
-            log.info("更新压测场景。\n清理sla数据:{}。\n清理文件数据:{}。\n清理业务活动数据:{}。", slaClearRows, fileClearRows, activityClearRows);
-        }
-        // 1.   创建场景
-        int updateRows = updateStepScene(in.getBasicInfo(), in.getConfig(), in.getAnalysisResult(), in.getDataValidation());
-        if (updateRows == 0) {return false;}
-        if (updateRows == 1) {
-            long sceneId = in.getBasicInfo().getSceneId();
-            // 2. 更新场景&业务活动关联关系
-            buildBusinessActivity(sceneId, in.getContent(), in.getGoal());
-            // 3.   处理脚本
-            buildScript(sceneId, in.getBasicInfo().getScriptId(), in.getBasicInfo().getScriptType(), in.getFile());
-            // 4.  保存SLA信息
-            buildSla(sceneId, in.getMonitoringGoal());
-            //      返回信息
-            return true;
-        } else {
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_ERROR, "意外的逻辑");
+        // 手动事务控制
+        TransactionStatus transactionStatus = platformTransactionManager.getTransaction(transactionDefinition);
+        try {
+            // 0.   清除历史项
+            {
+                Long sceneId = in.getBasicInfo().getSceneId();
+                int slaClearRows = sceneSlaRefMapper.delete(Wrappers.lambdaUpdate(SceneSlaRefEntity.class).eq(SceneSlaRefEntity::getSceneId, sceneId));
+                int fileClearRows = sceneScriptRefMapper.delete(Wrappers.lambdaUpdate(SceneScriptRefEntity.class).eq(SceneScriptRefEntity::getSceneId, sceneId));
+                int activityClearRows = sceneBusinessActivityRefMapper.delete(Wrappers.lambdaUpdate(SceneBusinessActivityRefEntity.class).eq(SceneBusinessActivityRefEntity::getSceneId, sceneId));
+                log.info("更新压测场景。\n清理sla数据:{}。\n清理文件数据:{}。\n清理业务活动数据:{}。", slaClearRows, fileClearRows, activityClearRows);
+            }
+            // 1.   创建场景
+            int updateRows = updateStepScene(in.getBasicInfo(), in.getConfig(), in.getAnalysisResult(), in.getDataValidation());
+            if (updateRows == 0) {return false;}
+            if (updateRows == 1) {
+                long sceneId = in.getBasicInfo().getSceneId();
+                // 2. 更新场景&业务活动关联关系
+                buildBusinessActivity(sceneId, in.getContent(), in.getGoal());
+                // 3.   处理脚本
+                buildScript(sceneId, in.getBasicInfo().getScriptId(), in.getBasicInfo().getScriptType(), in.getFile());
+                // 4.  保存SLA信息
+                buildSla(sceneId, in.getMonitoringGoal());
+                //      返回信息
+                return true;
+            } else {
+                throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_ERROR, "意外的逻辑");
+            }
+        } catch (Exception e) {
+            // 发生异常则回滚数据
+            platformTransactionManager.rollback(transactionStatus);
+            throw e;
         }
     }
 
