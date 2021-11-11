@@ -526,6 +526,7 @@ public class SceneServiceImpl implements SceneService {
                     put(SceneManageConstant.ACHIEVE_TIMES, mGoal.getNumberOfIgnore());
                 }};
                 setSceneId(sceneId);
+                setSlaName(mGoal.getName());
                 setTargetType(mGoal.getFormulaTarget());
                 setCondition(JSONObject.toJSONString(condition));
                 setBusinessActivityIds(String.join(",", mGoal.getTarget()));
