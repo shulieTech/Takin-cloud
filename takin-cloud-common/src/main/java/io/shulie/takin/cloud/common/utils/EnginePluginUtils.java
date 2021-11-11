@@ -2,6 +2,8 @@ package io.shulie.takin.cloud.common.utils;
 
 import java.util.List;
 
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.ext.api.EngineCallExtApi;
 import io.shulie.takin.ext.api.EngineExtApi;
 import io.shulie.takin.plugin.framework.core.PluginManager;
@@ -33,7 +35,7 @@ public class EnginePluginUtils {
                 return engineExtApi;
             }
         }
-        return null;
+        throw new TakinCloudException(TakinCloudExceptionEnum.PLUGIN_NOT_FIND, "引擎拓展插件未找到!");
     }
 
     public EngineCallExtApi getEngineCallExtApi() {
@@ -43,6 +45,6 @@ public class EnginePluginUtils {
                 return engineCallExtApi;
             }
         }
-        return null;
+        throw new TakinCloudException(TakinCloudExceptionEnum.PLUGIN_NOT_FIND, "引擎调用拓展插件未找到!");
     }
 }
