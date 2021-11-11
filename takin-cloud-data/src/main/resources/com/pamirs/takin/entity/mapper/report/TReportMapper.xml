@@ -48,27 +48,32 @@
     <select id="selectOneRunningReport" resultMap="BaseResultMap" parameterType="io.shulie.takin.cloud.ext.content.trace.ContextExt">
         select id
         from t_report
-        where `lock` = 1
-        and `status` = 1
-        <if test="tenantId != null">
-            and `tenant_id` = #{tenantId}
-        </if>
-        <if test="envCode != null">
-            and `env_code` = #{envCode}
-        </if>
+        <where>
+            `lock` = 1
+            and `status` = 1
+            <if test="tenantId != null">
+                and `tenant_id` = #{tenantId}
+            </if>
+            <if test="envCode != null">
+                and `env_code` = #{envCode}
+            </if>
+        </where>
         order by id
         limit 1
     </select>
     <select id="selectListRunningReport" resultMap="BaseResultMap" parameterType="io.shulie.takin.cloud.ext.content.trace.ContextExt">
         select id
         from t_report
-        where `lock` = 1 and ((start_time is not null and `status` = 0) or `status` = 1)
-        <if test="tenantId != null">
-            and `tenant_id` = #{tenantId}
-        </if>
-        <if test="envCode != null">
-            and `env_code` = #{envCode}
-        </if>
+        <where>
+            `lock` = 1
+            and ((start_time is not null and `status` = 0) or `status` = 1)
+            <if test="tenantId != null">
+                and `tenant_id` = #{tenantId}
+            </if>
+            <if test="envCode != null">
+                and `env_code` = #{envCode}
+            </if>
+        </where>
         order by id desc
         limit 10
     </select>
@@ -91,10 +96,10 @@
             </if>
             and status > 0 and is_deleted = 0
             <if test="param.tenantId != null">
-                and `tenant_id` = #{param.type}
+                and `tenant_id` = #{param.tenantId}
             </if>
             <if test="param.envCode != null">
-                and `env_code` = #{param.type}
+                and `env_code` = #{param.envCode}
             </if>
         </where>
         order by id desc

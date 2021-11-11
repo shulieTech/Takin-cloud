@@ -130,8 +130,8 @@ public class DataApartInterceptor implements Interceptor {
         int pos = lowerIndexOf(sql, " where ");
 
         String filterSql = CloudPluginUtils.getFilterSql();
-        if (StringUtils.isNoneBlank(filterSql)) {
-            filterSql = "user_id in " + filterSql;
+        if (StringUtils.isNoneBlank(filterSql) && filterSql != "null") {
+            filterSql = "user_id in (" + filterSql + ")";
         }
         if (pos > 0) {
             sb.append(sql.substring(0, pos));
