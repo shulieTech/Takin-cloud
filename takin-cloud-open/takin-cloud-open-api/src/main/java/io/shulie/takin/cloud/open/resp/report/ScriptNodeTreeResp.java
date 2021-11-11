@@ -3,17 +3,14 @@ package io.shulie.takin.cloud.open.resp.report;
 import java.io.Serializable;
 import java.util.List;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * @author moriarty
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class ScriptNodeTreeResp extends CloudUserCommonRequestExt implements Serializable {
+public class ScriptNodeTreeResp implements Serializable {
 
 
     @ApiModelProperty(value = "业务活动ID")
