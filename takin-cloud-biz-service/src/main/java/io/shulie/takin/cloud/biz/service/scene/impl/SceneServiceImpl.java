@@ -16,11 +16,13 @@ import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
+import io.shulie.takin.cloud.common.utils.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -232,12 +234,12 @@ public class SceneServiceImpl implements SceneService {
             SceneManageEntity scene = getScene(sceneId);
             String featureString = scene.getFeatures();
             // 解析拓展字段
-            Map<String, ?> feature = JSONObject.parseObject(featureString, new TypeReference<Map<String, ?>>() {});
-            Object dataValidationResult = feature.get("dataValidation");
-            if (dataValidationResult == null) {
+            JSONObject feature = JsonUtil.parse(featureString);
+            String dataValidationResult = feature.getString("dataValidation");
+            if (StringUtils.isBlank(dataValidationResult)) {
                 throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, sceneId + "的拓展字段缺失[数据验证配置]");
             }
-            return (DataValidation)dataValidationResult;
+            return JsonUtil.parseObject(dataValidationResult, DataValidation.class);
         } catch (JSONException e) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, sceneId + "的拓展字段错误");
         }
