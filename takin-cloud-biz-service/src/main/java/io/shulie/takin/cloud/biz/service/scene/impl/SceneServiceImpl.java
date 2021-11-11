@@ -235,6 +235,9 @@ public class SceneServiceImpl implements SceneService {
             String featureString = scene.getFeatures();
             // 解析拓展字段
             JSONObject feature = JsonUtil.parse(featureString);
+            if (null == feature) {
+                return null;
+            }
             String dataValidationResult = feature.getString("dataValidation");
             if (StringUtils.isBlank(dataValidationResult)) {
                 throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, sceneId + "的拓展字段缺失[数据验证配置]");
