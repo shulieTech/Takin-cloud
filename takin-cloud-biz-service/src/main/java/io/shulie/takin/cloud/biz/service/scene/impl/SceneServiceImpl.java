@@ -440,7 +440,7 @@ public class SceneServiceImpl implements SceneService {
             SceneBusinessActivityRefEntity activityRef = new SceneBusinessActivityRefEntity() {{
                 setSceneId(sceneId);
                 setBindRef(t.getPathMd5());
-                setCreateName(t.getName());
+                setBusinessActivityName(t.getName());
                 setBusinessActivityId(t.getBusinessActivityId());
                 setApplicationIds(String.join(",", t.getApplicationId()));
                 setGoalValue(JSONObject.toJSONString((goal == null ? new Goal() : goal), SerializerFeature.PrettyFormat));
@@ -482,7 +482,7 @@ public class SceneServiceImpl implements SceneService {
                     break;
             }
             if (StrUtil.isNotBlank(destPath)) {
-                String filePath = destPath + SceneManageConstant.FILE_SPLIT + fileName;
+                String filePath = destPath + fileName;
                 FileUtil.copy(t.getPath(), filePath, true);
                 sceneScriptRefEntityList.add(new SceneScriptRefEntity() {{
                     setSceneId(sceneId);
