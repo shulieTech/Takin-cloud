@@ -7,7 +7,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.entrypoint.file.CloudFileApi;
@@ -27,7 +27,7 @@ import io.shulie.takin.cloud.sdk.model.request.filemanager.FileCreateByStringPar
  * @author 张天赐
  * create: 2020-10-19
  */
-@Component
+@Service
 public class CloudFileApiImpl implements CloudFileApi {
 
     @Resource

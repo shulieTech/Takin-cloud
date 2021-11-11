@@ -7,7 +7,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
@@ -31,7 +31,7 @@ import io.shulie.takin.cloud.sdk.model.request.scenemanage.CloudUpdateSceneFileR
  * @author 何仲奇
  * @date 2020/10/21 3:03 下午
  */
-@Component
+@Service
 public class CloudSceneApiImpl implements CloudSceneApi {
 
     @Resource

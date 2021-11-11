@@ -4,7 +4,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.common.beans.response.ResponseResult;
@@ -19,7 +19,7 @@ import io.shulie.takin.cloud.sdk.model.request.common.CloudCommonInfoWrapperReq;
  * @author lipeng
  * @date 2021-06-24 4:19 下午
  */
-@Component
+@Service
 public class CommonInfoApiImpl implements CommonInfoApi {
 
     @Resource

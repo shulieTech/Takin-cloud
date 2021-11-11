@@ -7,7 +7,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.common.beans.response.ResponseResult;
@@ -25,7 +25,7 @@ import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginDetailsWrapper
  * @author 张天赐
  * @date 2021-01-20 3:33 下午
  */
-@Component
+@Service
 public class CloudEngineApiImpl implements CloudEngineApi {
 
     @Resource

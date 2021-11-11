@@ -7,7 +7,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
@@ -35,7 +35,7 @@ import io.shulie.takin.cloud.sdk.model.request.report.UpdateReportConclusionReq;
  * @author 张天赐
  * @date 2020/12/17 1:29 下午
  */
-@Component
+@Service
 public class CloudReportApiImpl implements CloudReportApi {
     @Resource
     CloudApiSenderService cloudApiSenderService;

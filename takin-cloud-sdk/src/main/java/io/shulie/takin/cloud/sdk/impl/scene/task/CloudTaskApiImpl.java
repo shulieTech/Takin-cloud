@@ -4,7 +4,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.common.beans.response.ResponseResult;
@@ -34,7 +34,7 @@ import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneTryRunTaskStatu
  * @author qianshui
  * @date 2020/11/13 上午11:06
  */
-@Component
+@Service
 public class CloudTaskApiImpl implements CloudTaskApi {
 
     @Resource
