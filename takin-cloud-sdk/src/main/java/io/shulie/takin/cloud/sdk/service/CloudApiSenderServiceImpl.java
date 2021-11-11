@@ -306,11 +306,11 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
      */
     private Map<String, String> getDataTrace(ContextExt context) {
         return new HashMap<String, String>(4) {{
+            put(ENV_CODE, context.getEnvCode());
+            put(FILTER_SQL, context.getFilterSql());
+            put(TENANT_CODE, context.getTenantCode());
             put(USER_ID, String.valueOf(context.getUserId()));
-            put(ENV_CODE, String.valueOf(context.getEnvCode()));
             put(TENANT_ID, String.valueOf(context.getTenantId()));
-            put(TENANT_CODE, String.valueOf(context.getTenantCode()));
-            put(FILTER_SQL, String.valueOf(context.getFilterSql()));
         }};
     }
 
