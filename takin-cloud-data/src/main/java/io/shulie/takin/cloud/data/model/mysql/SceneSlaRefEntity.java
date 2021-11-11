@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 @TableName(value = "t_scene_sla_ref")
 public class SceneSlaRefEntity {
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "`id`", type = IdType.AUTO)
     private Long id;
 
     /**
@@ -41,13 +41,13 @@ public class SceneSlaRefEntity {
     /**
      * 警告/终止逻辑：json格式
      */
-    @TableField(value = "condition")
+    @TableField(value = "`condition`")
     private String condition;
 
     /**
      * 状态：0-启用 1-禁用
      */
-    @TableField(value = "status")
+    @TableField(value = "`status`")
     private Integer status;
 
     @TableField(value = "is_deleted")
