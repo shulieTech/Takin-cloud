@@ -408,7 +408,7 @@ public class JmxUtil {
         //获取参数个数
         String fieldDubboMethodArgsSize = props.get("FIELD_DUBBO_METHOD_ARGS_SIZE");
         Integer argsSize = NumberUtil.parseInt(fieldDubboMethodArgsSize, 0);
-        if (argsSize > 0){
+        if (argsSize > 0) {
             StringBuilder method = new StringBuilder();
             method.append(fieldDubboMethod);
             method.append("(");
@@ -421,7 +421,7 @@ public class JmxUtil {
             String substring = method.substring(0, method.length() - 1);
             return String.format("%s|%s|%s", substring + ")", path, SamplerTypeEnum.DUBBO.getRpcTypeEnum().getValue());
         }
-        return String.format("%s|%s|%s",fieldDubboMethod, path, SamplerTypeEnum.DUBBO.getRpcTypeEnum().getValue());
+        return String.format("%s|%s|%s", fieldDubboMethod, path, SamplerTypeEnum.DUBBO.getRpcTypeEnum().getValue());
 
     }
 
@@ -713,7 +713,7 @@ public class JmxUtil {
             if (StringUtils.isBlank(topic) || topic.startsWith("$")) {
                 return null;
             }
-            return topic;
+            return String.format("%s|%s", topic, SamplerTypeEnum.KAFKA.getRpcTypeEnum().getValue());
         } else {
             return null;
         }
@@ -803,6 +803,7 @@ public class JmxUtil {
 
     /**
      * 将层次结构的节点变成平铺式的集合
+     *
      * @param nodes 有层次节点列表
      * @return 平铺式节点列表
      */
