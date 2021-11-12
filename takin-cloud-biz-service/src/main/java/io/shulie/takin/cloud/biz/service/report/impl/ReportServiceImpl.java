@@ -155,6 +155,8 @@ public class ReportServiceImpl implements ReportService {
         if (param.getType() == null) {
             param.setType(0);
         }
+        // 补充用户过滤信息信息
+        param.setFilterSql(CloudPluginUtils.getContext().getFilterSql());
         List<Report> reportList = tReportMapper.listReport(param);
         if (CollectionUtils.isEmpty(reportList)) {
             return new PageInfo<>(new ArrayList<>(0));
