@@ -318,24 +318,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 throw e;
             }
 
-//            Long finalResourceId = resourceId;
-//            //todo 流量冻结
-//            assetExtApi.lock(new AssetInvoiceExt() {{
-//                setExpectThroughput(sceneData.getConcurrenceNum());
-////                setIncreasingTime(sceneData.getIncreasingSecond());
-////                setPressureMode(sceneData.getPressureMode());
-//                setPressureTotalTime(sceneData.getTotalTestTime());
-//                setSceneId(input.getSceneId());
-//                setTaskId(report.getId());
-////                setPressureType(sceneData.getPressureType());
-//                setCustomerId(sceneData.getCustomerId());
-////                setStep(sceneData.getStep());
-//                setResourceId(finalResourceId);
-//                setResourceName(input.getResourceName());
-//                setResourceType(input.getAssetType());
-//                setCreatorId(input.getOperateId());
-//                setCreatorName(input.getOperateName());
-//            }});
         }
 
         //设置缓存，用以检查压测场景启动状态 lxr 20210623
