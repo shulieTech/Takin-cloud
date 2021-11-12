@@ -103,7 +103,7 @@ public class CollectorService extends AbstractIndicators {
                     metrics.setTestName((transaction.substring(0, strPosition)));
                 }else {
                     metrics.setTransaction(metrics.getTransaction());
-                    metrics.setTestName(metrics.getTestName());
+                    metrics.setTestName(metrics.getTransaction());
                 }
             })
             .peek(metrics ->{

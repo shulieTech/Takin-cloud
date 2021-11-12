@@ -318,6 +318,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 .collect(Collectors.toList());
 
             int allSaCount = results.stream().filter(Objects::nonNull)
+                //过滤掉all的
+                .filter(p -> !"all".equals(p.getTransaction()))
                 .map(PressureOutput::getSaCount)
                 .mapToInt(i -> Objects.isNull(i) ? 0 : i)
                 .sum();
@@ -470,29 +472,28 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             .orElse(0);
         double dataRate = NumberUtil.getPercentRate(podNos, podNum, 100d);
         int status = podNos < podNum ? 0 : 1;
-        data.add(new PressureOutput() {{
-            setTime(time);
-            setTransaction(transaction);
-            setCount(count);
-            setFailCount(failCount);
-            setSaCount(saCount);
-            setSa(sa);
-            setSuccessRate(successRate);
-            setSentBytes(sendBytes);
-            setReceivedBytes(receiveBytes);
-            setSumRt(sumRt);
-            setAvgRt(avgRt);
-            setMaxRt(maxRt);
-            setMinRt(minRt);
-            setActiveThreads(activeThreads);
-            setAvgTps(avgTps);
-            setSaPercent(percentSa);
-            setDataNum(podNos);
-            setDataRate(dataRate);
-            setStatus(status);
-            setTestName(testName);
-
-        }});
+        PressureOutput output = new PressureOutput();
+            output.setTime(time);
+            output.setTransaction(transaction);
+            output.setCount(count);
+            output.setFailCount(failCount);
+            output.setSaCount(saCount);
+            output.setSa(sa);
+            output.setSuccessRate(successRate);
+            output.setSentBytes(sendBytes);
+            output.setReceivedBytes(receiveBytes);
+            output.setSumRt(sumRt);
+            output.setAvgRt(avgRt);
+            output.setMaxRt(maxRt);
+            output.setMinRt(minRt);
+            output.setActiveThreads(activeThreads);
+            output.setAvgTps(avgTps);
+            output.setSaPercent(percentSa);
+            output.setDataNum(podNos);
+            output.setDataRate(dataRate);
+            output.setStatus(status);
+            output.setTestName(testName);
+        data.add(output);
     }
     /**
      * 实时数据统计
@@ -501,22 +502,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         if (CollectionUtils.isEmpty(metricses)) {
             return null;
         }
-        String transactionStr = metricses.get(0).getTransaction();
-        if (StringUtils.isBlank(transactionStr)) {
-            log.info("md5 is blank!metricses=" + GsonUtil.gsonToString(metricses));
-            return null;
-        }
-        int strPosition = transactionStr.lastIndexOf(PressureEngineConstants.TRANSACTION_SPLIT_STR);
-        String transaction;
-        String testName;
-        if (strPosition > 0) {
-            transaction = transactionStr.substring(
-                strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length());
-            testName = transactionStr.substring(0, strPosition);
-        } else {
-            transaction = transactionStr;
-            testName = transactionStr;
-        }
+        String transaction  = metricses.get(0).getTransaction();
+        String testName = metricses.get(0).getTestName();
 
         int count = metricses.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getCount)
