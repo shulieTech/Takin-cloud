@@ -52,7 +52,6 @@ import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.eventcenter.EventCenterTemplate;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
 import io.shulie.takin.eventcenter.entity.TaskConfig;
-import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.utils.json.JsonHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -329,7 +328,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 if (CollectionUtils.isNotEmpty(childControllers)) {
                     childControllers.stream()
                         .filter(Objects::nonNull)
-                        //过滤掉已经有数据的控制器，比如事务控制器
+                        //过滤掉已经有数据的控制器
                         .filter(controller -> this.filterScriptNodeController(transactions, controller.getXpathMd5()))
                         .forEach(controller -> this.summaryControllerMetrics(nodeTree, controller, podNum, time, results));
                 }
@@ -368,7 +367,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
      * 判断回传的transaction中是不否包含目标controller的xpathMD5值
      * @param transactions 回传的节点
      * @param transaction 要验证的controller节点
-     * @return
+     * @return 是否为控制器
      */
     private boolean filterScriptNodeController(List<String> transactions,String transaction){
         if (CollectionUtils.isEmpty(transactions)){
@@ -377,16 +376,6 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         return !transactions.contains(transaction);
     }
 
-    private boolean nodeIsController(String nodeTree,String xpathMd5){
-        if (StringUtils.isNotBlank(nodeTree)){
-            List<ScriptNode> nodeList = JsonPathUtil.getCurrentNodeByMd5(nodeTree, xpathMd5);
-            if (CollectionUtils.isNotEmpty(nodeList) && nodeList.size() == 1){
-                return NodeTypeEnum.CONTROLLER == nodeList.get(0).getType();
-            }
-            return false;
-        }
-        return false;
-    }
 
 
     /**

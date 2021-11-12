@@ -113,7 +113,6 @@ import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
 import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneBusinessActivityRefOutput;
 
 /**
  * @author 莫问
@@ -1326,6 +1325,8 @@ public class ReportServiceImpl implements ReportService {
                     setName(detail.getBindRef());
                     setBusinessActivityId(detail.getBusinessActivityId());
                     setTestName(detail.getBusinessActivityName());
+                    //兼容老版本，将后续趋势查询条件设置为bindRef
+                    setXpathMd5(detail.getBindRef());
                 }}).collect(Collectors.toList());
         }
     }
