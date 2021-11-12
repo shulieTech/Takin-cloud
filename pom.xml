@@ -18,7 +18,7 @@
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
         <!-- biz version -->
         <takin.cloud.version>takin-cloud-5.0.2-SNAPSHOT</takin.cloud.version>
-        <takin.common.version>common-1.7.4</takin.common.version>
+        <takin.common.version>common-1.7.5-SNAPSHOT</takin.common.version>
 
         <pardar.log.protocol.version>2.0.4</pardar.log.protocol.version>
         <pradar.core.version>1.0.0</pradar.core.version>
