@@ -155,6 +155,10 @@ public class ReportServiceImpl implements ReportService {
         if (param.getType() == null) {
             param.setType(0);
         }
+        // 补充用户过滤信息信息
+        if (StrUtil.isNotBlank(CloudPluginUtils.getContext().getFilterSql())) {
+            param.setFilterSql(CloudPluginUtils.getContext().getFilterSql());
+        }
         List<Report> reportList = tReportMapper.listReport(param);
         if (CollectionUtils.isEmpty(reportList)) {
             return new PageInfo<>(new ArrayList<>(0));
@@ -601,17 +605,13 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private StatReportDTO statTempReport(Long sceneId, Long reportId, Long tenantId, String transaction) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(
-            " count as totalRequest, fail_count as failRequest, avg_tps as tps , avg_rt as avgRt, sa_count as saCount,"
-                + " active_threads as avgConcurrenceNum");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, tenantId));
-        influxDbSql.append(" where ");
-        influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
-        influxDbSql.append(" order by time desc limit 1");
-        return influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        String influxDbSql = "select"
+            + " count as totalRequest, fail_count as failRequest, avg_tps as tps , avg_rt as avgRt, sa_count as saCount, active_threads as avgConcurrenceNum"
+            + " from "
+            + InfluxUtil.getMeasurement(sceneId, reportId, tenantId)
+            + " where transaction = '" + transaction + "'"
+            + " order by time desc limit 1";
+        return influxWriter.querySingle(influxDbSql, StatReportDTO.class);
     }
 
     /**
@@ -619,18 +619,14 @@ public class ReportServiceImpl implements ReportService {
      */
     private StatInspectReportDTO statInspectReport(Long sceneId, Long reportId, Long tenantId, String transaction,
         String startTime, String endTime) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(
-            " sum(count) as totalRequest,mean(avg_tps) as avgTps , sum(sum_rt)/sum(count) as avgRt , mean"
-                + "(success_rate) as avgSuccessRate");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, tenantId));
-        influxDbSql.append(" where ");
-        influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
-        influxDbSql.append(" and time >= ").append("'").append(startTime).append("'");
-        influxDbSql.append(" and time <= ").append("'").append(endTime).append("' tz('Asia/Shanghai')");
-        return influxWriter.querySingle(influxDbSql.toString(), StatInspectReportDTO.class);
+        String influxDbSql = "select"
+            + " sum(count) as totalRequest,mean(avg_tps) as avgTps , sum(sum_rt)/sum(count) as avgRt , mean(success_rate) as avgSuccessRate"
+            + " from "
+            + InfluxUtil.getMeasurement(sceneId, reportId, tenantId)
+            + " where transaction = '" + transaction + "'"
+            + " and time >= '" + startTime + "'"
+            + " and time <= '" + endTime + "' tz('Asia/Shanghai')";
+        return influxWriter.querySingle(influxDbSql, StatInspectReportDTO.class);
     }
 
     /**
@@ -975,21 +971,18 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private StatReportDTO statReport(Long sceneId, Long reportId, Long tenantId, String transaction) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(
-            " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps ,sum(sum_rt)/sum"
-                + "(count) as  "
-                + "avgRt, sum(sa_count) as saCount,  max(avg_tps) as maxTps, min(min_rt) as minRt, max(max_rt) as "
-                // add by 李鹏
-                // 20210621 active_threads有可能出现0的情况，所以这里取平均后可能不为整数，加round取整
-                + "maxRt, count(avg_rt) as recordCount ,round(mean(active_threads)) as avgConcurrenceNum");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, tenantId));
-        influxDbSql.append(" where ");
-        influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
+        // add by 李鹏
+        // 20210621 active_threads有可能出现0的情况，所以这里取平均后可能不为整数，加round取整
+        String influxDbSql = "select"
+            + " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps ,"
+            + " sum(sum_rt)/sum(count) as avgRt, sum(sa_count) as saCount,  max(avg_tps) as maxTps,"
+            + " min(min_rt) as minRt, max(max_rt) as maxRt, count(avg_rt) as recordCount,"
+            + " round(mean(active_threads)) as avgConcurrenceNum"
+            + " from "
+            + InfluxUtil.getMeasurement(sceneId, reportId, tenantId)
+            + " where transaction = '" + transaction + "'";
 
-        return influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        return influxWriter.querySingle(influxDbSql, StatReportDTO.class);
     }
 
     /**
@@ -1088,7 +1081,7 @@ public class ReportServiceImpl implements ReportService {
         }
 
         // startTime endTime 补充
-        long startTime = System.currentTimeMillis();
+        long startTime;
         if (redisClientUtils.hasKey(engineName + ScheduleConstants.FIRST_SIGN)) {
             startTime = Long.parseLong(redisClientUtils.getString(engineName + ScheduleConstants.FIRST_SIGN));
             reportResult.setStartTime(new Date(startTime));
