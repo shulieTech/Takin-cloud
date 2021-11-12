@@ -28,9 +28,9 @@ public class SynchronizeRequest extends CloudUserCommonRequestExt {
     @NotNull(message = "脚本实例主键不能为空")
     private Long scriptId;
     @ApiModelProperty(value = "脚本解析结果")
-    @NotBlank(message = "脚本解析结果不能为空")
+    @NotNull(message = "脚本解析结果不能为空")
     private List<ScriptNode> analysisResult;
     @ApiModelProperty(value = "业务活动对应关系")
-    @NotBlank(message = "业务活动对应关系不能为空")
+    @NotNull(message = "业务活动对应关系不能为空")
     private Map<String, Long> businessActivityRef;
 }
