@@ -262,7 +262,7 @@ public class ReportServiceImpl implements ReportService {
             return reportDetail;
         }
         SceneManageQueryOpitons options = new SceneManageQueryOpitons();
-        options.setIncludeBusinessActivity(true);
+        options.setIncludeBusinessActivity(false);
         SceneManageWrapperOutput wrapper = sceneManageService.getSceneManage(sceneId, options);
         reportDetail = ReportConverter.INSTANCE.ofReportDetail(reportResult);
         reportDetail.setUserId(wrapper.getUserId());
@@ -296,12 +296,12 @@ public class ReportServiceImpl implements ReportService {
 
         // 补充操作人
         CloudPluginUtils.fillReportData(reportResult, reportDetail);
-
-        List<SceneBusinessActivityRefOutput> refList = wrapper.getBusinessActivityConfig();
+        List<ReportBusinessActivityDetail> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper
+            .queryReportBusinessActivityDetailByReportId(reportResult.getId());
         if(StringUtils.isNotBlank(reportResult.getScriptNodeTree())){
             String nodeTree = reportResult.getScriptNodeTree();
-            Map<String,Map<String,Object>> resultMap = new HashMap<>(refList.size());
-            refList.stream()
+            Map<String,Map<String,Object>> resultMap = new HashMap<>(reportBusinessActivityDetails.size());
+            reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
                 .forEach(ref -> {
                     StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
@@ -313,7 +313,7 @@ public class ReportServiceImpl implements ReportService {
             reportDetail.setNodeDetail(JsonUtil.parseArray(resultTree,
                 ScriptNodeSummaryBean.class));
         }else {
-            List<ScriptNodeSummaryBean> nodeDetails = refList.stream()
+            List<ScriptNodeSummaryBean> nodeDetails = reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
                 .map(ref -> {
                     StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
@@ -323,16 +323,16 @@ public class ReportServiceImpl implements ReportService {
                         setTestName(ref.getBusinessActivityName());
                         setXpathMd5(ref.getBindRef());
                         if (Objects.nonNull(data)) {
-                            setAvgRt(new DataBean(data.getAvgRt(), ref.getTargetRT()));
-                            setSa(new DataBean(data.getSa(), ref.getTargetSA()));
-                            setTps(new DataBean(data.getTps(), ref.getTargetTPS()));
+                            setAvgRt(new DataBean(data.getAvgRt(), ref.getTargetRt()));
+                            setSa(new DataBean(data.getSa(), ref.getTargetSa()));
+                            setTps(new DataBean(data.getTps(), ref.getTargetTps()));
                             setSuccessRate(new DataBean(data.getSuccessRate(), ref.getTargetSuccessRate()));
                             setAvgConcurrenceNum(data.getAvgConcurrenceNum());
                             setTotalRequest(data.getTotalRequest());
                         } else {
-                            setAvgRt(new DataBean("0", ref.getTargetRT()));
-                            setSa(new DataBean("0", ref.getTargetSA()));
-                            setTps(new DataBean("0", ref.getTargetTPS()));
+                            setAvgRt(new DataBean("0", ref.getTargetRt()));
+                            setSa(new DataBean("0", ref.getTargetSa()));
+                            setTps(new DataBean("0", ref.getTargetTps()));
                             setSuccessRate(new DataBean("0", ref.getTargetSuccessRate()));
                             setAvgConcurrenceNum(new BigDecimal(0));
                             setTotalRequest(0L);
@@ -1265,24 +1265,24 @@ public class ReportServiceImpl implements ReportService {
         return result;
     }
 
-    private Map<String,Object> fillTempMap(StatReportDTO statReport,SceneBusinessActivityRefOutput refOutput){
-        if (Objects.isNull(refOutput)) {
+    private Map<String,Object> fillTempMap(StatReportDTO statReport,ReportBusinessActivityDetail detail){
+        if (Objects.isNull(detail)) {
             return null;
         }
         Map<String, Object> resultMap = new HashMap<>();
         if (Objects.nonNull(statReport)) {
-            resultMap.put("avgRt", new DataBean(statReport.getAvgRt(), refOutput.getTargetRT()));
-            resultMap.put("sa", new DataBean(statReport.getSa(), refOutput.getTargetSA()));
-            resultMap.put("tps", new DataBean(statReport.getTps(), refOutput.getTargetTPS()));
-            resultMap.put("successRate", new DataBean(statReport.getSuccessRate(), refOutput.getTargetSuccessRate()));
-            resultMap.put("avgConcurrenceNum", statReport.getAvgConcurrenceNum());
+            resultMap.put("avgRt", new DataBean(statReport.getAvgRt(), detail.getTargetRt()));
+            resultMap.put("sa", new DataBean(statReport.getSa(), detail.getTargetSa()));
+            resultMap.put("tps", new DataBean(statReport.getTps(), detail.getTargetTps()));
+            resultMap.put("successRate", new DataBean(statReport.getSuccessRate(), detail.getTargetSuccessRate()));
+            resultMap.put("avgConcurrenceNum", statReport.getAvgConcurrenceNum().toString());
             resultMap.put("totalRequest", statReport.getTotalRequest());
         }else {
-            resultMap.put("avgRt", new DataBean("0", refOutput.getTargetRT()));
-            resultMap.put("sa", new DataBean("0", refOutput.getTargetSA()));
-            resultMap.put("tps", new DataBean("0", refOutput.getTargetTPS()));
-            resultMap.put("successRate", new DataBean("0", refOutput.getTargetSuccessRate()));
-            resultMap.put("avgConcurrenceNum", new DataBean("0", refOutput.getTargetSuccessRate()));
+            resultMap.put("avgRt", new DataBean("0", detail.getTargetRt()));
+            resultMap.put("sa", new DataBean("0", detail.getTargetSa()));
+            resultMap.put("tps", new DataBean("0", detail.getTargetTps()));
+            resultMap.put("successRate", new DataBean("0", detail.getTargetSuccessRate()));
+            resultMap.put("avgConcurrenceNum", "0");
             resultMap.put("totalRequest", 0L);
         }
         return resultMap;
