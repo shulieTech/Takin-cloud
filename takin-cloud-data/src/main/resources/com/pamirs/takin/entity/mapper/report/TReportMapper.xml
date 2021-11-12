@@ -95,6 +95,9 @@
                 and `type` = #{param.type}
             </if>
             and status > 0 and is_deleted = 0
+            <if test="param.filterSql != null">
+                and `user_id` in (#{param.filterSql})
+            </if>
             <if test="param.tenantId != null">
                 and `tenant_id` = #{param.tenantId}
             </if>
