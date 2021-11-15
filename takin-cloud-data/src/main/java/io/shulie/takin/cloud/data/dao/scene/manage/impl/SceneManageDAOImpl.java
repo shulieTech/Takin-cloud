@@ -1,7 +1,9 @@
 package io.shulie.takin.cloud.data.dao.scene.manage.impl;
 
 import java.util.List;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.bean.BeanUtil;
@@ -11,15 +13,15 @@ import org.springframework.stereotype.Component;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import io.shulie.takin.cloud.data.util.MPUtil;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.mapper.mysql.SceneManageMapper;
 import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
 import io.shulie.takin.cloud.data.converter.senemange.SceneManageEntityConverter;
@@ -64,6 +66,19 @@ public class SceneManageDAOImpl
 
     @Override
     public List<SceneManageEntity> getPageList(SceneManageQueryBean queryBean) {
+        // 补充用户过滤信息信息
+        String userIds = "";
+        if (StrUtil.isNotBlank(CloudPluginUtils.getContext().getFilterSql())) {
+            userIds = CloudPluginUtils.getContext().getFilterSql();
+            // 去除左右的括号
+            if (userIds.lastIndexOf("(") == 0
+                && userIds.lastIndexOf(")") == userIds.length() - 1) {
+                userIds = userIds.substring(1, userIds.length() - 1);
+            }
+        }
+        List<String> userIdList = Arrays.stream(userIds.split(","))
+            .filter(StrUtil::isNotBlank).collect(Collectors.toList());
+        // 组装查询条件
         LambdaQueryWrapper<SceneManageEntity> wrapper = Wrappers.lambdaQuery(SceneManageEntity.class)
             .eq(!Objects.isNull(queryBean.getSceneId()), SceneManageEntity::getId, queryBean.getSceneId())
             .in(!CollectionUtils.isEmpty(queryBean.getSceneIds()), SceneManageEntity::getId, queryBean.getSceneIds())
@@ -74,6 +89,7 @@ public class SceneManageDAOImpl
             .ge(!Objects.isNull(queryBean.getLastPtStartTime()), SceneManageEntity::getLastPtTime, queryBean.getLastPtStartTime())
             .eq(!Objects.isNull(queryBean.getTenantId()), SceneManageEntity::getTenantId, queryBean.getTenantId())
             .eq(!StrUtil.isBlank(queryBean.getEnvCode()), SceneManageEntity::getEnvCode, queryBean.getEnvCode())
+            .in(userIdList.size() > 0, SceneManageEntity::getUserId, userIdList)
             .orderByDesc(SceneManageEntity::getLastPtTime)
             .orderByDesc(SceneManageEntity::getId);
         return this.baseMapper.selectList(wrapper);
