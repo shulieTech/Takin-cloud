@@ -247,7 +247,7 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
             long startTime = System.currentTimeMillis();
             responseBody = request.execute().body();
             long endTime = System.currentTimeMillis();
-            log.info("请求Cloud接口耗时:{}\n请求路径:{}\n请求参数:{}\n请求结果:{}",
+            log.debug("请求Cloud接口耗时:{}\n请求路径:{}\n请求参数:{}\n请求结果:{}",
                 (endTime - startTime), url, StrUtil.format("{}个文件", fileList.length), responseBody);
             // 返回接口响应
             T apiResponse = JSON.parseObject(responseBody, responseClass);
