@@ -1,8 +1,8 @@
 package io.shulie.takin.cloud.open.api.impl;
 
+import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import io.shulie.takin.cloud.common.utils.AppBusinessUtil;
@@ -22,7 +22,7 @@ public class CloudCommonApi {
      * @return -
      */
     protected Map<String, String> getHeaders(CloudUserCommonRequestExt ext) {
-        Map<String, String> map = Maps.newHashMap();
+        Map<String, String> map = new HashMap();
         map.put(CloudApiConstant.LICENSE_REQUIRED, "true");
         map.put(CloudApiConstant.LICENSE_KEY, this.getDevLicense(ext.getLicense()));
         if (StringUtils.isNotBlank(ext.getFilterSql())) {
