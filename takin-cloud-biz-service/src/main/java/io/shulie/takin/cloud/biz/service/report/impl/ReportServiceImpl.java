@@ -158,6 +158,11 @@ public class ReportServiceImpl implements ReportService {
         // 补充用户过滤信息信息
         if (StrUtil.isNotBlank(CloudPluginUtils.getContext().getFilterSql())) {
             param.setFilterSql(CloudPluginUtils.getContext().getFilterSql());
+            // 去除左右的括号
+            if (param.getFilterSql().lastIndexOf("(") == 0
+                && param.getFilterSql().lastIndexOf(")") == param.getFilterSql().length() - 1) {
+                param.setFilterSql(param.getFilterSql().substring(1, param.getFilterSql().length() - 1));
+            }
         }
         List<Report> reportList = tReportMapper.listReport(param);
         if (CollectionUtils.isEmpty(reportList)) {
