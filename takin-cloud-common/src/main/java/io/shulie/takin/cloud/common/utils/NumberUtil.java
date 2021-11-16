@@ -79,7 +79,7 @@ public class NumberUtil {
      * @param defValue  默认值
      * @param scale     小数点后精度, null表示不做精度取舍
      * @param roundMode 取整模式，默认四舍五入
-     * @return
+     * @return a在b中的比例
      */
     public static Double getRate(Number a, Number b, boolean percent, Double defValue, Integer scale, Integer roundMode) {
         try {
@@ -89,8 +89,8 @@ public class NumberUtil {
             if (null == a) {
                 return defValue;
             }
-            BigDecimal aa = new BigDecimal(a.doubleValue());
-            BigDecimal bb = new BigDecimal(b.doubleValue());
+            BigDecimal aa = BigDecimal.valueOf(a.doubleValue());
+            BigDecimal bb = BigDecimal.valueOf(b.doubleValue());
             if (percent) {
                 aa = aa.multiply(new BigDecimal(100));
             }

@@ -74,7 +74,7 @@ public class ReportOpenController {
     public ResponseResult<ReportDetailResp> getReportByReportId(Long reportId) {
         ReportDetailOutput detailOutput = reportService.getReportByReportId(reportId);
         if (detailOutput == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在");
+            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在Id:"+reportId);
         }
         ReportDetailResp resp = new ReportDetailResp();
         BeanUtils.copyProperties(detailOutput, resp);
