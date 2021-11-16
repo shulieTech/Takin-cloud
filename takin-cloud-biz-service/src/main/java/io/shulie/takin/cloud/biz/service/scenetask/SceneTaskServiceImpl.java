@@ -521,6 +521,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setResourceName(activityRefInput.getBusinessActivityName());
         sceneTaskStartInput.setOperateId(operateId);
         sceneTaskStartInput.setOperateName(operateName);
+        CloudPluginUtils.fillUserData(sceneTaskStartInput);
         SceneActionOutput sceneActionDTO = startTask(sceneTaskStartInput, null);
         //返回报告id
         return sceneActionDTO.getData();
@@ -586,6 +587,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         SceneInspectInput inspectInput = new SceneInspectInput().setFixedTimer(fixTimer).setLoopsNum(loopsNum);
         sceneTaskStartInput.setSceneInspectInput(inspectInput);
         sceneTaskStartInput.setContinueRead(false);
+        CloudPluginUtils.fillUserData(sceneTaskStartInput);
         SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput, null);
         startOutput.setSceneId(sceneManageId);
         startOutput.setReportId(sceneActionOutput.getData());
@@ -676,6 +678,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setResourceName(input.getScriptName());
         sceneTaskStartInput.setOperateId(input.getOperateId());
         sceneTaskStartInput.setOperateName(input.getOperateName());
+        CloudPluginUtils.fillUserData(sceneTaskStartInput);
         SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput, null);
         sceneTryRunTaskStartOutput.setReportId(sceneActionOutput.getData());
 
@@ -899,7 +902,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             // 启动只更新一次
             sceneManageService.updateSceneLifeCycle(
                 UpdateStatusBean.build(taskResult.getSceneId(), taskResult.getTaskId(), taskResult.getCustomerId())
-                    .checkEnum(SceneManageStatusEnum.JOB_CREATEING)
+                    .checkEnum(SceneManageStatusEnum.JOB_CREATING)
                     .updateEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING).build());
         }
 
