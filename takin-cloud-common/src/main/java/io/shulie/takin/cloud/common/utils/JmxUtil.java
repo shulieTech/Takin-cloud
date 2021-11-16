@@ -859,6 +859,8 @@ public class JmxUtil {
                     if (CollectionUtils.isNotEmpty(scriptNodeByType)){
                         result.addAll(scriptNodeByType);
                     }
+                }else {
+                    scriptNode.setChildren(null);
                 }
             }
         }
