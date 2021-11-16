@@ -173,7 +173,7 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     public ResponseResult<List<ScriptNode>> scriptAnalyze(ScriptAnalyzeRequest request) {
         String url = troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_SCRIPT_FILE_ANALYZE_URL;
         TakinResponseEntity<ResponseResult<List<ScriptNode>>> res =
-                HttpHelper.doPost(url, null, new TypeReference<ResponseResult<List<ScriptNode>>>() {}, request);
+                HttpHelper.doPost(url, getHeaders(request), new TypeReference<ResponseResult<List<ScriptNode>>>() {}, request);
         if (res.getSuccess()) {
             return res.getBody();
         }

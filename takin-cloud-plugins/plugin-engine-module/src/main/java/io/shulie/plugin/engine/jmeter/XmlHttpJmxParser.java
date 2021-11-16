@@ -1,9 +1,10 @@
 package io.shulie.plugin.engine.jmeter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
+
 import io.shulie.takin.constants.TakinRequestConstant;
 import io.shulie.takin.ext.content.script.ScriptParseExt;
 import io.shulie.takin.ext.content.script.ScriptUrlExt;
@@ -36,7 +37,7 @@ public class XmlHttpJmxParser extends JmxParser {
     @Override
     public List<ScriptUrlExt> getEntryContent(Document document, String content, ScriptParseExt scriptParseExt) {
 
-        List<ScriptUrlExt> voList = Lists.newArrayList();
+        List<ScriptUrlExt> voList = new ArrayList<>();
 
         StringBuffer http = new StringBuffer().append("/").append("/").append("HTTPSamplerProxy");
 

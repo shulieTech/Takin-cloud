@@ -12,6 +12,7 @@ import javax.validation.Valid;
 
 import com.alibaba.fastjson.JSON;
 
+import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.biz.cache.DictionaryCache;
@@ -243,6 +244,7 @@ public class SceneManageOpenController {
             .map(output -> {
                 SceneManageListResp resp = new SceneManageListResp();
                 BeanUtils.copyProperties(output, resp);
+                resp.setHasAnalysisResult(StrUtil.isNotBlank(output.getScriptAnalysisResult()));
                 return resp;
             }).collect(Collectors.toList());
         return ResponseResult.success(list, pageInfo.getTotal());
