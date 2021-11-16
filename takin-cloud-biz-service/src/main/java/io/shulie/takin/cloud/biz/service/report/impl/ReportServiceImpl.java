@@ -962,7 +962,6 @@ public class ReportServiceImpl implements ReportService {
             ReportConstants.ALL_BUSINESS_ACTIVITY);
         if (statReport == null) {
             log.warn("没有找到报表数据，报表生成失败。报告ID：{}", reportId);
-            statReport = new StatReportDTO();
         }
 
         //更新报表业务活动 isConclusion 指标是否通过
@@ -1157,17 +1156,19 @@ public class ReportServiceImpl implements ReportService {
             curDate = DateUtil.offset(reportResult.getStartTime(), DateField.SECOND, totalTestTime.intValue());
         }
 
-        //保存报表数据
-        reportResult.setTotalRequest(statReport.getTotalRequest());
-        // 保留
-        reportResult.setAvgRt(statReport.getAvgRt());
-        reportResult.setAvgTps(statReport.getTps());
-        reportResult.setSuccessRate(statReport.getSuccessRate());
-        reportResult.setSa(statReport.getSa());
-        reportResult.setId(reportResult.getId());
-        reportResult.setEndTime(curDate);
+        if (null != statReport) {
+            //保存报表数据
+            reportResult.setTotalRequest(statReport.getTotalRequest());
+            // 保留
+            reportResult.setAvgRt(statReport.getAvgRt());
+            reportResult.setAvgTps(statReport.getTps());
+            reportResult.setSuccessRate(statReport.getSuccessRate());
+            reportResult.setSa(statReport.getSa());
+            reportResult.setId(reportResult.getId());
+            reportResult.setEndTime(curDate);
+            reportResult.setAvgConcurrent(statReport.getAvgConcurrenceNum());
+        }
         reportResult.setGmtUpdate(new Date());
-        reportResult.setAvgConcurrent(statReport.getAvgConcurrenceNum());
 
         //流量结算
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
