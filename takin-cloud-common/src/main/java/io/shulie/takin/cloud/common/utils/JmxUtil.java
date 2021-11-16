@@ -856,7 +856,9 @@ public class JmxUtil {
                 }
                 if (CollectionUtils.isNotEmpty(scriptNode.getChildren())) {
                     List<ScriptNode> scriptNodeByType = getScriptNodeByType(typeEnum, scriptNode.getChildren());
-                    result.addAll(scriptNodeByType);
+                    if (CollectionUtils.isNotEmpty(scriptNodeByType)){
+                        result.addAll(scriptNodeByType);
+                    }
                 }
             }
         }
