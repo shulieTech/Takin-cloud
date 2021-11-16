@@ -170,7 +170,11 @@ public class SceneServiceImpl implements SceneService {
         response.setBasicInfo(getBasicInfo(sceneId));
         response.setAnalysisResult(getAnalysisResult(sceneId));
         response.setDataValidation(getDataValidation(sceneId));
-        response.setMonitoringGoal(getMonitoringGoal(sceneId));
+        List<MonitoringGoal> monitoringGoal = getMonitoringGoal(sceneId);
+        response.setDestroyMonitoringGoal(
+            monitoringGoal.stream().filter(t -> Integer.valueOf(0).equals(t.getType())).collect(Collectors.toList()));
+        response.setWarnMonitoringGoal(
+            monitoringGoal.stream().filter(t -> !Integer.valueOf(0).equals(t.getType())).collect(Collectors.toList()));
         return response;
     }
 
