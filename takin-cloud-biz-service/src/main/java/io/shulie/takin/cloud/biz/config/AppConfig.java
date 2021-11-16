@@ -42,7 +42,7 @@ public class AppConfig {
     /**
      * 数据收集模式:redis，influxdb
      */
-    @Value("${report.data.collector:redis}")
+    @Value("${report.data.collector:influxdb}")
     private String collector;
 
     @Value("${spring.redis.host}")
