@@ -75,7 +75,6 @@ public class FileSplitService {
 
     private static final String CSV_SUFFIX = "csv";
 
-    private static final String SCRIPT_NAME_SUFFIX = "jmx";
 
     @IntrestFor(event = ScheduleEventConstant.INIT_SCHEDULE_EVENT)
     public void initSchedule(Event event) {
@@ -306,30 +305,4 @@ public class FileSplitService {
         return null;
     }
 
-    /**
-     * 校验脚本文件的MD5值
-     *
-     * @param dataFile
-     * @param sceneId
-     * @return
-     */
-    private boolean checkOutJmx(DataFile dataFile, Long sceneId) {
-        if (Objects.nonNull(dataFile)) {
-            if (StringUtils.isNotBlank(dataFile.getPath())) {
-                String fileMd5 = Md5Util.md5File(dataFile.getPath());
-                if (StringUtils.isNotBlank(dataFile.getFileMd5())) {
-                    return dataFile.getFileMd5().equals(fileMd5);
-                } else {
-                    //兼容老版本没有md5的情况，更新数据库的文件md5值
-                    fileSliceService.updateFileMd5(new SceneBigFileSliceParam() {{
-                        setSceneId(sceneId);
-                        setFileName(dataFile.getName());
-                        setFileMd5(fileMd5);
-                    }});
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 }
