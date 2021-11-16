@@ -13,11 +13,11 @@ public enum SceneManageStatusEnum {
      * 待启动
      */
     WAIT(0, "待启动"),
-    JOB_CREATEING(3, "job创建中"),
-    PRESSURE_NODE_RUNNING(4, "压力节点工作中"),
-    ENGINE_RUNNING(5, "压测引擎已启动"),
     STARTING(1, "启动中"),
     PTING(2, "压测中"),
+    JOB_CREATING(3, "job创建中"),
+    PRESSURE_NODE_RUNNING(4, "压力节点工作中"),
+    ENGINE_RUNNING(5, "压测引擎已启动"),
     STOP(6, "压测引擎停止压测"),
     //特殊情况
     FILESPLIT_RUNNING(7, "文件拆分中"),
@@ -56,7 +56,7 @@ public enum SceneManageStatusEnum {
     public static List<SceneManageStatusEnum> getStarting() {
         List<SceneManageStatusEnum> starting = Lists.newArrayList();
         starting.add(STARTING);
-        starting.add(JOB_CREATEING);
+        starting.add(JOB_CREATING);
         starting.add(PRESSURE_NODE_RUNNING);
         starting.add(FILESPLIT_RUNNING);
         starting.add(FILESPLIT_END);

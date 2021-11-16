@@ -31,7 +31,9 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.ext.content.user.CloudUserExt;
 import io.shulie.takin.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.biz.service.scene.SceneService;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneSlaRefEntity;
@@ -407,8 +409,11 @@ public class SceneServiceImpl implements SceneService {
         PtConfigExt config, List<?> analysisResult, DataValidation dataValidation) {
         Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), dataValidation);
         // 组装数据实体类
+        CloudUserExt user = CloudPluginUtils.getUser();
         SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),
             basicInfo.getScriptType(), config, feature, analysisResult);
+        // 设置创建者信息
+        sceneEntity.setCreateName(user == null ? "" : user.getName());
         // 执行数据库操作
         sceneManageMapper.insert(sceneEntity);
         // 回填自增主键
@@ -446,10 +451,11 @@ public class SceneServiceImpl implements SceneService {
         PtConfigExt config, List<?> analysisResult, DataValidation dataValidation) {
         Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), dataValidation);
         // 组装数据实体类
+        CloudUserExt user = CloudPluginUtils.getUser();
         SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),
             basicInfo.getScriptType(), config, feature, analysisResult);
-        // 设置更新时间
-        sceneEntity.setUpdateTime(new Date());
+        // 设置更新者信息
+        sceneEntity.setUpdateName(user == null ? "" : user.getName());
         // 执行数据库操作
         int updateRows = sceneManageMapper.updateById(sceneEntity);
         log.info("更新了业务活动「{}」。自增主键：{}。操作行数：{}。", basicInfo.getName(), sceneEntity.getId(), updateRows);
@@ -604,25 +610,25 @@ public class SceneServiceImpl implements SceneService {
      * @return 场景实体类
      */
     private SceneManageEntity assembleSceneEntity(Long sceneId, int type, String name, int scriptType, PtConfigExt config, Object feature, Object analysisResult) {
+        CloudUserExt user = CloudPluginUtils.getUser();
         return new SceneManageEntity() {{
+            setType(type);
             setId(sceneId);
             setSceneName(name);
+            setScriptType(scriptType);
             setPtConfig(JSONObject.toJSONString(config));
             setFeatures(JSONObject.toJSONString(feature));
             setScriptAnalysisResult(JSONObject.toJSONString(analysisResult));
+            setUserId(user == null ? -1 : user.getId());
+            setCustomerId(user == null ? 0 : user.getId());
+            // 默认值
             setStatus(0);
-            setType(type);
-            setUserId(-1L);
             setDeptId(null);
-            setCustomerId(null);
-            setLastPtTime(null);
-            setScriptType(scriptType);
             setIsDeleted(0);
+            setLastPtTime(null);
             Date now = new Date();
             setCreateTime(now);
             setUpdateTime(now);
-            setCreateName(null);
-            setUpdateName(null);
         }};
     }
 }

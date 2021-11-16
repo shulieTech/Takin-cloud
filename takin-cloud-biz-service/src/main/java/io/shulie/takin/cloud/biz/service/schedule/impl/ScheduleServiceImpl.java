@@ -206,7 +206,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         sceneManageService.updateSceneLifeCycle(
             UpdateStatusBean.build(sceneId, taskId, customerId)
                 .checkEnum(SceneManageStatusEnum.STARTING, SceneManageStatusEnum.FILESPLIT_END)
-                .updateEnum(SceneManageStatusEnum.JOB_CREATEING)
+                .updateEnum(SceneManageStatusEnum.JOB_CREATING)
                 .build());
         EngineCallExtApi engineCallExtApi = pluginUtils.getEngineCallExtApi();
         String msg = engineCallExtApi.buildJob(request);
