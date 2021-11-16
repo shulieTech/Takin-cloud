@@ -100,6 +100,8 @@ public class SceneServiceImpl implements SceneService {
             buildScript(sceneId, in.getBasicInfo().getScriptId(), in.getBasicInfo().getScriptType(), in.getFile());
             // 4.  保存SLA信息
             buildSla(sceneId, in.getMonitoringGoal());
+            // 提交数据库事务
+            platformTransactionManager.commit(transactionStatus);
             //      返回信息
             return sceneId;
         } catch (Exception e) {
@@ -139,6 +141,8 @@ public class SceneServiceImpl implements SceneService {
                 buildScript(sceneId, in.getBasicInfo().getScriptId(), in.getBasicInfo().getScriptType(), in.getFile());
                 // 4.  保存SLA信息
                 buildSla(sceneId, in.getMonitoringGoal());
+                // 提交数据库事务
+                platformTransactionManager.commit(transactionStatus);
                 //      返回信息
                 return true;
             } else {
