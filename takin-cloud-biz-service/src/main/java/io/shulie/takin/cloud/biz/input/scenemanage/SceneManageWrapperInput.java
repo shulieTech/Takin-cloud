@@ -94,4 +94,7 @@ public class SceneManageWrapperInput extends CloudUserCommonRequestExt implement
 
     private String scriptName;
 
+    @ApiModelProperty(name = "scriptAnalysisResult", value = "脚本节点信息")
+    private String scriptAnalysisResult;
+
 }
