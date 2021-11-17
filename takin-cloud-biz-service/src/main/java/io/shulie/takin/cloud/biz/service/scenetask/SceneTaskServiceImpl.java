@@ -788,8 +788,12 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             reportBusinessActivityDetail.setBusinessActivityName(activity.getBusinessActivityName());
             reportBusinessActivityDetail.setApplicationIds(activity.getApplicationIds());
             reportBusinessActivityDetail.setBindRef(activity.getBindRef());
-            reportBusinessActivityDetail.setTargetTps(new BigDecimal(activity.getTargetTPS()));
-            reportBusinessActivityDetail.setTargetRt(new BigDecimal(activity.getTargetRT()));
+            if (null != activity.getTargetRT()) {
+                reportBusinessActivityDetail.setTargetTps(new BigDecimal(activity.getTargetTPS()));
+            }
+            if (null != activity.getTargetRT()) {
+                reportBusinessActivityDetail.setTargetRt(new BigDecimal(activity.getTargetRT()));
+            }
             reportBusinessActivityDetail.setTargetSuccessRate(activity.getTargetSuccessRate());
             reportBusinessActivityDetail.setTargetSa(activity.getTargetSA());
             tReportBusinessActivityDetailMapper.insertSelective(reportBusinessActivityDetail);
