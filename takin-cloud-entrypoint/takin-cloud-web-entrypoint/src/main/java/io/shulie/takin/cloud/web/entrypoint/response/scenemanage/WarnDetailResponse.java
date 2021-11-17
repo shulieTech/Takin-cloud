@@ -28,6 +28,9 @@ public class WarnDetailResponse {
     @ApiModelProperty(value = "规则明细")
     private String content;
 
+    @ApiModelProperty(value = "节点xpathMD5值")
+    private String bindRef;
+
     @ApiModelProperty(value = "警告时间")
     private String warnTime;
 }

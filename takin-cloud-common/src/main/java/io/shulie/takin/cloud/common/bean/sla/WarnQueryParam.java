@@ -21,4 +21,7 @@ public class WarnQueryParam extends PagingDevice {
 
     @ApiModelProperty(value = "业务活动ID")
     private Long businessActivityId;
+
+    @ApiModelProperty(value = "节点的xpathMD5值")
+    private String bindRef;
 }

@@ -18,6 +18,8 @@ public class WarnDetail implements Serializable {
 
     private String slaName;
 
+    private String bindRef;
+
     private Long businessActivityId;
 
     private String businessActivityName;

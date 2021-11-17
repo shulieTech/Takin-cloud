@@ -93,7 +93,7 @@ import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventServie;
+import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventService;
 import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.DistributeBean;
 import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
@@ -142,7 +142,7 @@ public class ReportServiceImpl implements ReportService {
     @Resource
     SceneManageService sceneManageService;
     @Resource
-    SceneTaskEventServie sceneTaskEventServie;
+    SceneTaskEventService sceneTaskEventService;
     @Resource
     TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
 
@@ -352,7 +352,7 @@ public class ReportServiceImpl implements ReportService {
                 String.format("%d'%d\"", wrapper.getTotalTestTime() / 60, wrapper.getTotalTestTime() % 60));
 
             //主动通知暂停事件，注意有可能会被多次触发
-            sceneTaskEventServie.callStopEvent(reportResult);
+            sceneTaskEventService.callStopEvent(reportResult);
         }
         log.info("实时监测metric数据：tempReportDetail-运行时间：{}", System.currentTimeMillis() - start);
         return reportDetail;

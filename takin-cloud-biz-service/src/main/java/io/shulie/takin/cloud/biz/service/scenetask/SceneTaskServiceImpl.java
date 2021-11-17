@@ -47,7 +47,7 @@ import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput.File
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStartOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStatusOutput;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventServie;
+import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventService;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
 import io.shulie.takin.cloud.biz.utils.DataUtils;
@@ -124,7 +124,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     private SceneManageService sceneManageService;
 
     @Resource
-    private SceneTaskEventServie sceneTaskEventServie;
+    private SceneTaskEventService sceneTaskEventService;
 
     @Resource
     private TReportMapper tReportMapper;
@@ -263,7 +263,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         redisClientUtils.hmset(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REFS
             , JsonHelper.bean2Json(activityRefs));
         //广播事件
-        sceneTaskEventServie.callStartEvent(sceneData, report.getId());
+        sceneTaskEventService.callStartEvent(sceneData, report.getId());
 
         return sceneAction;
     }
@@ -280,7 +280,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         ReportResult reportResult = reportDao.getReportBySceneId(sceneId);
 
         if (reportResult != null) {
-            sceneTaskEventServie.callStopEvent(reportResult);
+            sceneTaskEventService.callStopEvent(reportResult);
         }
     }
 
@@ -349,7 +349,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     @Override
     public String taskResultNotify(SceneTaskNotifyParam param) {
-        return sceneTaskEventServie.callStartResultEvent(param);
+        return sceneTaskEventService.callStartResultEvent(param);
     }
 
     @Override

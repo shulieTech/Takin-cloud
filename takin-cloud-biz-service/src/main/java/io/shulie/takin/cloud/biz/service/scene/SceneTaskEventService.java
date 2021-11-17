@@ -40,7 +40,7 @@ import javax.annotation.Resource;
  */
 @Component
 @Slf4j
-public class SceneTaskEventServie {
+public class SceneTaskEventService {
 
     @Autowired
     private SceneTaskService sceneTaskService;

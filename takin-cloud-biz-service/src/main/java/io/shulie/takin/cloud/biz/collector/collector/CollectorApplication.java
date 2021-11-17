@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.biz.collector.collector;
 import io.shulie.takin.cloud.common.bean.collector.Constants;
 import io.shulie.takin.cloud.common.bean.collector.EventMetrics;
 import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
+import io.shulie.takin.cloud.common.constants.PressureEngineConstants;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
@@ -108,18 +109,24 @@ public class CollectorApplication {
                 JsonHelper.json2Map(activityRefMapObj.toString(), String.class, String.class);
             int oldSize = activityRefMap.size();
 
-            responseMetrics.forEach(responseMetric -> {
-                //特殊业务类型，不做处理
-                if ("all".equals(responseMetric.getTransaction())) {
+            responseMetrics.stream().filter(Objects::nonNull)
+                .forEach(responseMetric -> {
+                    int md5Position = responseMetric.getTransaction().indexOf(PressureEngineConstants.TRANSACTION_SPLIT_STR);
+                    String transaction = responseMetric.getTransaction();
+                    if (md5Position > 0) {
+                        transaction = responseMetric.getTransaction().substring(md5Position + PressureEngineConstants.TRANSACTION_SPLIT_STR.length());
+                    }
+                    //特殊业务类型，不做处理
+                if ("all".equals(transaction)) {
                     return;
                 }
-                if (activityRefMap.containsKey(responseMetric.getTransaction())) {
-                    responseMetric.setTransaction(activityRefMap.get(responseMetric.getTransaction()));
+                if (activityRefMap.containsKey(transaction)) {
+                    responseMetric.setTransaction(activityRefMap.get(transaction));
                     return;
                 }
-                String activityRef = getActivityRef(engineInstanceRedisKey, responseMetric.getTransaction());
+                String activityRef = getActivityRef(engineInstanceRedisKey, transaction);
                 if (activityRef != null) {
-                    activityRefMap.put(responseMetric.getTransaction(), activityRef);
+                    activityRefMap.put(transaction, activityRef);
                 }
             });
 
