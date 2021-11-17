@@ -2,8 +2,11 @@ package io.shulie.takin.cloud.open.request.scene.manage;
 
 import java.math.BigDecimal;
 
-import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Goal;
 import lombok.Data;
+
+import com.alibaba.fastjson.annotation.JSONField;
+
+import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Goal;
 
 /**
  * 旧的压测目标模型
@@ -11,24 +14,27 @@ import lombok.Data;
  * @author 张天赐
  */
 @Data
-@SuppressWarnings("AlibabaLowerCamelCaseVariableNaming")
 public class OldGoalModel {
     /**
      * 成功率
      */
-    private BigDecimal successRate;
+    @JSONField(name = "successRate")
+    private BigDecimal targetSuccessRate;
     /**
      * 响应时间
      */
-    private Integer RT;
+    @JSONField(name = "RT")
+    private Integer targetRt;
     /**
      * 达标率
      */
-    private BigDecimal SA;
+    @JSONField(name = "SA")
+    private BigDecimal targetSa;
     /**
      * TPS
      */
-    private Integer TPS;
+    @JSONField(name = "TPS")
+    private Integer targetTps;
 
     /**
      * 从{@link Goal}转换
@@ -36,12 +42,12 @@ public class OldGoalModel {
      * @param goal 新的目标实体
      * @return 旧的目标实体
      */
-    public static OldGoalModel from(SceneRequest.Goal goal) {
+    public static OldGoalModel convert(SceneRequest.Goal goal) {
         return new OldGoalModel() {{
-            setSA(BigDecimal.valueOf(goal.getSa()));
-            setRT(goal.getRt());
-            setSuccessRate(BigDecimal.valueOf(goal.getSr()));
-            setTPS(goal.getTps());
+            setTargetRt(goal.getRt());
+            setTargetTps(goal.getTps());
+            setTargetSa(BigDecimal.valueOf(goal.getSa()));
+            setTargetSuccessRate(BigDecimal.valueOf(goal.getSr()));
         }};
     }
 
@@ -50,12 +56,12 @@ public class OldGoalModel {
      *
      * @return 新的目标实体
      */
-    public SceneRequest.Goal to() {
+    public SceneRequest.Goal convert() {
         return new SceneRequest.Goal() {{
-            setRt(getRT());
-            setTps(getTPS());
-            setSa(getSA().doubleValue());
-            setSr(getSuccessRate().doubleValue());
+            setRt(getTargetRt());
+            setTps(getTargetTps());
+            setSa(getTargetSa().doubleValue());
+            setSr(getTargetSuccessRate().doubleValue());
         }};
     }
 }
