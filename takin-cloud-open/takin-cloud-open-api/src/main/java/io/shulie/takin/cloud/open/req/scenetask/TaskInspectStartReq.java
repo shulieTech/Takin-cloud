@@ -61,4 +61,7 @@ public class TaskInspectStartReq extends CloudUserCommonRequestExt implements Se
     private Integer loopsNum;
 
     private Long scriptDeployId;
+
+    @ApiModelProperty(value = "脚本节点信息")
+    private String scriptAnalysisResult;
 }

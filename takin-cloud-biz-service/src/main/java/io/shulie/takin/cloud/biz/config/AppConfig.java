@@ -36,7 +36,7 @@ public class AppConfig {
     @Value("${info.app.version}")
     private String cloudVersion;
 
-    @Value("${k8s.jvm.settings:-Xmx4096m -Xms4096m -Xss256K -XX:MaxMetaspaceSize=256m}")
+    @Value("${k8s.jvm.settings:-XX:MaxRAMPercentage=90.0 -XX:InitialRAMPercentage=90.0 -XX:MinRAMPercentage=90.0}")
     private String k8sJvmSettings;
 
     /**

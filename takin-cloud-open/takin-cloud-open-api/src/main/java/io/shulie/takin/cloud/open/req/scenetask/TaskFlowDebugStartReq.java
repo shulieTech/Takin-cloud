@@ -48,4 +48,7 @@ public class TaskFlowDebugStartReq extends CloudUserCommonRequestExt implements 
     private Long scriptId;
 
     private Long scriptDeployId;
+
+    @ApiModelProperty(value = "脚本节点信息")
+    private String scriptAnalysisResult;
 }
