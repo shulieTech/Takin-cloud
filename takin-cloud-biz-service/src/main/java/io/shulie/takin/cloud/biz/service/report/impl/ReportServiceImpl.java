@@ -164,6 +164,8 @@ public class ReportServiceImpl implements ReportService {
                 param.setFilterSql(param.getFilterSql().substring(1, param.getFilterSql().length() - 1));
             }
         }
+        param.setEnvCode(CloudPluginUtils.getContext().getEnvCode());
+        param.setTenantId(CloudPluginUtils.getContext().getTenantId());
         List<Report> reportList = tReportMapper.listReport(param);
         if (CollectionUtils.isEmpty(reportList)) {
             return new PageInfo<>(new ArrayList<>(0));
@@ -503,7 +505,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<Long> queryListRunningReport( ) {
+    public List<Long> queryListRunningReport() {
         List<Report> report = tReportMapper.selectListRunningReport(CloudPluginUtils.getContext());
         return CollectionUtils.isEmpty(report) ? null : report.stream().map(Report::getId).collect(Collectors.toList());
     }

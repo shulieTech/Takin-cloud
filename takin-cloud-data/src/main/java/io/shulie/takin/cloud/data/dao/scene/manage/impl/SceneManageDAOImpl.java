@@ -87,8 +87,8 @@ public class SceneManageDAOImpl
             .eq(!Objects.isNull(queryBean.getType()), SceneManageEntity::getType, queryBean.getType())
             .le(!Objects.isNull(queryBean.getLastPtEndTime()), SceneManageEntity::getLastPtTime, queryBean.getLastPtEndTime())
             .ge(!Objects.isNull(queryBean.getLastPtStartTime()), SceneManageEntity::getLastPtTime, queryBean.getLastPtStartTime())
-            .eq(!Objects.isNull(queryBean.getTenantId()), SceneManageEntity::getTenantId, queryBean.getTenantId())
-            .eq(!StrUtil.isBlank(queryBean.getEnvCode()), SceneManageEntity::getEnvCode, queryBean.getEnvCode())
+            .eq(SceneManageEntity::getTenantId, CloudPluginUtils.getContext().getTenantId())
+            .eq(SceneManageEntity::getEnvCode, CloudPluginUtils.getContext().getEnvCode())
             .in(userIdList.size() > 0, SceneManageEntity::getUserId, userIdList)
             .orderByDesc(SceneManageEntity::getLastPtTime)
             .orderByDesc(SceneManageEntity::getId);
