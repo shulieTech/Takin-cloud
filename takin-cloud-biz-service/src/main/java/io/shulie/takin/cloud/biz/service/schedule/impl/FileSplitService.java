@@ -12,8 +12,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
-import io.shulie.takin.cloud.common.utils.Md5Util;
-import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import io.shulie.takin.ext.content.enginecall.ScheduleRunRequest;
 import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt.DataFile;

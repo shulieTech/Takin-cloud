@@ -71,6 +71,16 @@ public class AppConfig {
     @Value("${pressure.engine.logUpload:engine}")
     private String engineLogUploadModel;
 
+    @Value("${script.path}")
+    private String nfsDir;
+
+    public String getNfsDir() {
+        if (!nfsDir.endsWith("/")) {
+            nfsDir = nfsDir + "/";
+        }
+        return nfsDir;
+    }
+
     public DeploymentMethodEnum getDeploymentMethod() {
         return CommonUtil.getValue(DeploymentMethodEnum.PRIVATE, this.deploymentMethod, DeploymentMethodEnum::valueBy);
     }
