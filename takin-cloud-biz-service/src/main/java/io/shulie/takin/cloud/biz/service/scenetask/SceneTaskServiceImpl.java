@@ -74,12 +74,8 @@ import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
+import io.shulie.takin.cloud.common.utils.*;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
-import io.shulie.takin.cloud.common.utils.JsonPathUtil;
-import io.shulie.takin.cloud.common.utils.JsonUtil;
-import io.shulie.takin.cloud.common.utils.Md5Util;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
@@ -99,6 +95,7 @@ import io.shulie.takin.ext.content.enums.AssetTypeEnum;
 import io.shulie.takin.ext.content.response.Response;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.utils.json.JsonHelper;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -752,16 +749,15 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         report.setUserId(input.getUserId());
         report.setSceneName(scene.getPressureTestSceneName());
 
-        if (scene.getFeatures() != null) {
-            Map<String, String> map = JsonHelper.string2Obj(scene.getFeatures(),
-                new TypeReference<Map<String, String>>() {
-                });
-            if (map != null && map.get(SceneManageConstant.FEATURES_SCRIPT_ID) != null) {
-                report.setScriptId(Long.valueOf(map.get(SceneManageConstant.FEATURES_SCRIPT_ID)));
+        if (StringUtils.isNotBlank(scene.getFeatures())) {
+            JSONObject features = JsonUtil.parse(scene.getFeatures());
+            if (null != features && features.containsKey(SceneManageConstant.FEATURES_SCRIPT_ID)) {
+                report.setScriptId(features.getLong(SceneManageConstant.FEATURES_SCRIPT_ID));
             }
         }
-        int sumTps = scene.getBusinessActivityConfig().stream().mapToInt(SceneBusinessActivityRefBean::getTargetTPS)
-            .sum();
+        Integer sumTps = CommonUtil.sum(scene.getBusinessActivityConfig(), SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getTargetTPS);
+//        int sumTps = scene.getBusinessActivityConfig().stream().mapToInt(SceneBusinessActivityRefBean::getTargetTPS)
+//            .sum();
         report.setTps(sumTps);
         report.setPressureType(scene.getPressureType());
         report.setType(scene.getType());
