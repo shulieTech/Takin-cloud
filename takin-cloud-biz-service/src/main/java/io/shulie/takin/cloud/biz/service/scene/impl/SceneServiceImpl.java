@@ -358,12 +358,12 @@ public class SceneServiceImpl implements SceneService {
                 String compareValueString = condition.getOrDefault(SceneManageConstant.COMPARE_VALUE, "0");
                 return new MonitoringGoal() {{
                     setId(t.getId());
-                    setType(eventString.equals(SceneManageConstant.EVENT_DESTORY) ? 0 : 1);
-                    setFormulaNumber(Double.parseDouble(compareValueString));
-                    setFormulaSymbol(Integer.parseInt(compareTypeString));
                     setName(t.getSlaName());
-                    setFormulaSymbol(t.getTargetType());
+                    setType(eventString.equals(SceneManageConstant.EVENT_DESTORY) ? 0 : 1);
                     setTarget(Arrays.asList(t.getBusinessActivityIds().split(",")));
+                    setFormulaTarget(t.getTargetType());
+                    setFormulaSymbol(Integer.parseInt(compareTypeString));
+                    setFormulaNumber(Double.parseDouble(compareValueString));
                     setNumberOfIgnore(Integer.parseInt(achieveTimesString));
                 }};
             }).collect(Collectors.toList());
