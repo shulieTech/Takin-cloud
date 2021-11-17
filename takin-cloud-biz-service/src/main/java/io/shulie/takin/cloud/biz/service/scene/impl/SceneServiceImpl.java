@@ -16,7 +16,6 @@ import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
-import io.shulie.takin.cloud.common.utils.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import cn.hutool.core.io.FileUtil;
@@ -30,6 +29,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.ext.content.user.CloudUserExt;
 import io.shulie.takin.ext.content.enginecall.PtConfigExt;
@@ -43,6 +43,7 @@ import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
+import io.shulie.takin.cloud.open.request.scene.manage.OldGoalModel;
 import io.shulie.takin.cloud.data.mapper.mysql.SceneScriptRefMapper;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
@@ -312,7 +313,7 @@ public class SceneServiceImpl implements SceneService {
                 .collect(Collectors.toMap(SceneBusinessActivityRefEntity::getBindRef, SceneBusinessActivityRefEntity::getGoalValue));
             Map<String, Goal> result = new HashMap<>(stringResult.size());
             // 填充结果
-            stringResult.forEach((key, value) -> result.put(key, JSONObject.parseObject(value, Goal.class)));
+            stringResult.forEach((key, value) -> result.put(key, JSONObject.parseObject(value, OldGoalModel.class).to()));
             return result;
         } catch (
             JSONException e) {
@@ -488,7 +489,7 @@ public class SceneServiceImpl implements SceneService {
                 setBusinessActivityName(t.getName());
                 setBusinessActivityId(t.getBusinessActivityId());
                 setApplicationIds(String.join(",", t.getApplicationId()));
-                setGoalValue(JSONObject.toJSONString((goal), SerializerFeature.PrettyFormat));
+                setGoalValue(JSONObject.toJSONString(OldGoalModel.from(goal), SerializerFeature.PrettyFormat));
                 // 其它字段默认值
                 LocalDateTime now = LocalDateTime.now();
                 setIsDeleted(0);
