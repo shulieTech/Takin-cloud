@@ -26,7 +26,7 @@
 
     <sql id="Base_Column_List">
         id, pt_id, sla_id, sla_name, business_activity_id, business_activity_name, warn_content,
-    real_value, warn_time, create_time
+    real_value, warn_time,bind_ref create_time
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -69,6 +69,9 @@
             <if test="warnTime != null">
                 warn_time,
             </if>
+            <if test="bindRef != null">
+                bind_ref,
+            </if>
             <if test="createTime != null">
                 create_time,
             </if>
@@ -100,6 +103,9 @@
             </if>
             <if test="warnTime != null">
                 #{warnTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="bindRef != null">
+                #{bindRef,jdbcType=VARCHAR},
             </if>
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},
@@ -168,6 +174,9 @@
             </if>
             <if test="businessActivityId != null">
                 and business_activity_id = #{businessActivityId,jdbcType=BIGINT}
+            </if>
+            <if test="bindRef != null">
+                and bind_ref = #{bindRef,jdbcType=VARCHAR}
             </if>
         </where>
     </select>

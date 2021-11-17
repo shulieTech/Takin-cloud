@@ -315,7 +315,22 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 .map(l -> this.toPressureOutput(l, podNum, time))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-
+                try{
+                    List<SendMetricsEvent> sendMetricsEventList = getSendMetricsEventList(sceneId, reportId, customerId,
+                        timeWindow, results);
+                    //未finish，发事件
+                    String existKey = String.format(CollectorConstants.REDIS_PRESSURE_TASK_KEY,
+                        getTaskKey(sceneId, reportId, customerId));
+                    if (redisTemplate.hasKey(existKey)) {
+                        sendMetricsEventList.stream().filter(Objects::nonNull)
+                            .forEach(this::sendMetrics);
+                    }
+                }catch (Exception e){
+                    log.error(
+                        "【collector metric】【error-sendMetricsEvents】 write influxDB time : {} sceneId : {}, reportId : {},customerId : {}, "
+                            + "error:{}",
+                        timeWindow, sceneId, reportId, customerId, e.getMessage());
+                }
             int allSaCount = results.stream().filter(Objects::nonNull)
                 //过滤掉all的
                 .filter(p -> !"all".equals(p.getTransaction()))
@@ -1014,6 +1029,27 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         fields.put("active_threads", activeThreads);
         fields.put("write_time", System.currentTimeMillis());
         return fields;
+    }
+
+    private List<SendMetricsEvent> getSendMetricsEventList(Long sceneId, Long reportId, Long customerId, long timeWindow,List<PressureOutput> pressureOutputs){
+        return pressureOutputs.stream().filter(Objects::nonNull)
+            .map(output->{
+                SendMetricsEvent metrics = new SendMetricsEvent();
+                metrics.setTransaction(output.getTransaction());
+                metrics.setCount(output.getCount());
+                metrics.setFailCount(output.getFailCount());
+                metrics.setAvgTps(output.getAvgTps());
+                metrics.setAvgRt(output.getAvgRt());
+                metrics.setSa(output.getSa());
+                metrics.setMaxRt(output.getMaxRt());
+                metrics.setMinRt(output.getMinRt());
+                metrics.setSuccessRate(output.getSuccessRate());
+                metrics.setTimestamp(timeWindow);
+                metrics.setReportId(reportId);
+                metrics.setSceneId(sceneId);
+                metrics.setCustomerId(customerId);
+                return metrics;
+            }).collect(Collectors.toList());
     }
 
     private SendMetricsEvent getSendMetricsEvent(Long sceneId, Long reportId, Long customerId, long timeWindow, String transaction,

@@ -48,11 +48,11 @@ import io.shulie.takin.cloud.data.result.scenemanage.SceneManageWrapperResult;
 @Slf4j
 public class SlaServiceImpl implements SlaService {
 
-    public static final String SLA_SCENE_KEY = "TRO:SLA:SCENE:KEY";
-    public static final String SLA_DESTROY_KEY = "TRO:SLA:DESTROY:KEY";
-    public static final String SLA_WARN_KEY = "TRO:SLA:WARN:KEY";
+    public static final String SLA_SCENE_KEY = "TAKIN:SLA:SCENE:KEY";
+    public static final String SLA_DESTROY_KEY = "TAKIN:SLA:DESTROY:KEY";
+    public static final String SLA_WARN_KEY = "TAKIN:SLA:WARN:KEY";
     public static final Long EXPIRE_TIME = 24 * 3600L;
-    public static final String PREFIX_TASK = "TRO:SLA:TASK:";
+    public static final String PREFIX_TASK = "TAKIN:SLA:TASK:";
     @Resource
     private SlaPublish slaPublish;
     @Resource
@@ -92,12 +92,19 @@ public class SlaServiceImpl implements SlaService {
                 TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvent));
             return false;
         }
+        if (StringUtils.isBlank(dto.getScriptAnalysisResult())){
+            Long businessActivityId = businessActivity.getBusinessActivityId();
 
-        Long businessActivityId = businessActivity.getBusinessActivityId();
+            doDestroy(dto.getId(), metricsEvent, filterSlaListByActivityId(businessActivityId, dto.getStopCondition()), businessActivity);
 
-        doDestroy(dto.getId(), metricsEvent, filterSlaList(businessActivityId, dto.getStopCondition()), businessActivity);
+            doWarn(businessActivity, metricsEvent, filterSlaListByActivityId(businessActivityId, dto.getWarningCondition()));
+        }else {
+            String bindRef = businessActivity.getBindRef();
+            doDestroy(dto.getId(), metricsEvent, filterSlaListByMd5(bindRef, dto.getStopCondition()), businessActivity);
 
-        doWarn(businessActivity, metricsEvent, filterSlaList(businessActivityId, dto.getWarningCondition()));
+            doWarn(businessActivity, metricsEvent, filterSlaListByMd5(bindRef, dto.getWarningCondition()));
+
+        }
 
         return true;
     }
@@ -167,6 +174,7 @@ public class SlaServiceImpl implements SlaService {
                         SlaBean slaBean = new SlaBean();
                         slaBean.setRuleName(dto.getRuleName());
                         slaBean.setBusinessActivity(businessActivityDTO.getBusinessActivityName());
+                        slaBean.setBindRef(businessActivityDTO.getBindRef());
                         slaBean.setRule(warnDetail.getWarnContent());
                         slaDataInput.setReportId(scheduleStopRequest.getTaskId());
                         slaDataInput.setSlaBean(slaBean);
@@ -239,6 +247,7 @@ public class SlaServiceImpl implements SlaService {
         warnDetail.setPtId(metricsEvent.getReportId());
         warnDetail.setSlaId(salDTO.getId());
         warnDetail.setSlaName(salDTO.getRuleName());
+        warnDetail.setBindRef(businessActivityDTO.getBindRef());
         warnDetail.setBusinessActivityId(businessActivityDTO.getBusinessActivityId());
         warnDetail.setBusinessActivityName(businessActivityDTO.getBusinessActivityName());
         StringBuilder sb = new StringBuilder();
@@ -255,15 +264,35 @@ public class SlaServiceImpl implements SlaService {
         return warnDetail;
     }
 
-    private List<SceneManageWrapperOutput.SceneSlaRefOutput> filterSlaList(Long businessActivityId, List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
+    private List<SceneManageWrapperOutput.SceneSlaRefOutput> filterSlaListByMd5(String bindRef, List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
         if (CollectionUtils.isEmpty(slaList)) {
             return new ArrayList<>(0);
         }
-        return slaList.stream().filter(data -> checkContain(data.getBusinessActivity(), businessActivityId))
+        return slaList.stream().filter(data -> checkContainByMd5(data.getBusinessActivity(), bindRef))
             .collect(Collectors.toList());
     }
 
-    private Boolean checkContain(String[] businessActivity, Long businessActivityId) {
+    private Boolean checkContainByMd5(String[] md5s, String bindRef) {
+        if (md5s == null || md5s.length == 0) {
+            return false;
+        }
+        for (String data : md5s) {
+            if ("-1".equals(data) || String.valueOf(bindRef).equals(data)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<SceneManageWrapperOutput.SceneSlaRefOutput> filterSlaListByActivityId(Long businessActivityId, List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
+        if (CollectionUtils.isEmpty(slaList)) {
+            return new ArrayList<>(0);
+        }
+        return slaList.stream().filter(data -> checkContainByActivityId(data.getBusinessActivity(), businessActivityId))
+            .collect(Collectors.toList());
+    }
+
+    private Boolean checkContainByActivityId(String[] businessActivity, Long businessActivityId) {
         if (businessActivity == null || businessActivity.length == 0) {
             return false;
         }

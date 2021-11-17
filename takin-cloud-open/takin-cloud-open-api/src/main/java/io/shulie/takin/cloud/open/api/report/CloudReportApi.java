@@ -2,7 +2,6 @@ package io.shulie.takin.cloud.open.api.report;
 
 import java.util.List;
 
-import io.shulie.takin.cloud.common.bean.scenemanage.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.open.req.report.ReportDetailByIdReq;
 import io.shulie.takin.cloud.open.req.report.ReportDetailBySceneIdReq;
 import io.shulie.takin.cloud.open.req.report.ReportQueryReq;

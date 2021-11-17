@@ -25,5 +25,7 @@ public class WarnCreateInput {
 
     private Double realValue;
 
+    private String bindRef;
+
     private String warnTime;
 }

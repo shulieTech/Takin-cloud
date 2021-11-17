@@ -13,32 +13,32 @@ import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
  */
 public class SlaUtil {
 
-    public static Map<String, Object> matchCondition(SceneSlaRefInput dto, SendMetricsEvent metricsEvnet) {
+    public static Map<String, Object> matchCondition(SceneSlaRefInput dto, SendMetricsEvent metricsEvent) {
         Map<String, Object> resultMap = Maps.newHashMap();
         Integer targetType = dto.getRule().getIndexInfo();
         switch (targetType) {
             case 0:
                 resultMap.put("type", "RT");
                 resultMap.put("unit", "ms");
-                matchCompare(resultMap, metricsEvnet.getAvgRt(), dto.getRule().getDuring(),
+                matchCompare(resultMap, metricsEvent.getAvgRt(), dto.getRule().getDuring(),
                     dto.getRule().getCondition());
                 break;
             case 1:
                 resultMap.put("type", "TPS");
                 resultMap.put("unit", "");
-                matchCompare(resultMap, metricsEvnet.getAvgTps(), dto.getRule().getDuring(),
+                matchCompare(resultMap, metricsEvent.getAvgTps(), dto.getRule().getDuring(),
                     dto.getRule().getCondition());
                 break;
             case 2:
                 resultMap.put("type", "成功率");
                 resultMap.put("unit", "%");
-                matchCompare(resultMap, metricsEvnet.getSuccessRate(), dto.getRule().getDuring(),
+                matchCompare(resultMap, metricsEvent.getSuccessRate(), dto.getRule().getDuring(),
                     dto.getRule().getCondition());
                 break;
             case 3:
                 resultMap.put("type", "SA");
                 resultMap.put("unit", "%");
-                matchCompare(resultMap, metricsEvnet.getSa(), dto.getRule().getDuring(), dto.getRule().getCondition());
+                matchCompare(resultMap, metricsEvent.getSa(), dto.getRule().getDuring(), dto.getRule().getCondition());
                 break;
             default:
                 resultMap.put("result", false);
