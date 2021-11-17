@@ -36,41 +36,42 @@ public class EngineExtImpl implements EngineExtApi {
             return scriptVerityRespExt;
         }
 
-        Set<String> errorSet = new HashSet<>();
-        int unbindCount = 0;
-        Map<String, Integer> urlMap = new HashMap<>();
-        for (String request : scriptVerityExt.getRequest()){
-            Set<String> tempErrorSet = new HashSet<>();
-            for (ScriptUrlExt urlVO : requestUrl) {
-                if (UrlUtil.checkEqual(request, urlVO.getPath()) && urlVO.getEnable()) {
-                    unbindCount = unbindCount + 1;
-                    tempErrorSet.clear();
-                    if (!urlMap.containsKey(urlVO.getName())) {
-                        urlMap.put(urlVO.getName(), 1);
-                    } else {
-                        urlMap.put(urlVO.getName(), urlMap.get(urlVO.getName()) + 1);
-                    }
-                    break;
-                } else {
-                    tempErrorSet.add(request);
-                }
-            }
-            errorSet.addAll(tempErrorSet);
-        }
-
-        Set<String> urlErrorSet = new HashSet<>();
-        urlMap.forEach((k, v) -> {
-            if (v > 1) {
-                urlErrorSet.add("脚本中[" + k + "]重复" + v + "次");
-            }
-        });
-        if (urlErrorSet.size() > 0) {
-            errorMsgList.add("脚本文件配置不正确:" + urlErrorSet.toString());
-        }
-        //存在业务活动都关联不上脚本中的请求连接
-        if (scriptVerityExt.getRequest().size() > unbindCount) {
-            errorMsgList.add("业务活动与脚本文件不匹配:" + errorSet.toString());
-        }
+        //新版不用校验这个
+//        Set<String> errorSet = new HashSet<>();
+//        int unbindCount = 0;
+//        Map<String, Integer> urlMap = new HashMap<>();
+//        for (String request : scriptVerityExt.getRequest()){
+//            Set<String> tempErrorSet = new HashSet<>();
+//            for (ScriptUrlExt urlVO : requestUrl) {
+//                if (UrlUtil.checkEqual(request, urlVO.getPath()) && urlVO.getEnable()) {
+//                    unbindCount = unbindCount + 1;
+//                    tempErrorSet.clear();
+//                    if (!urlMap.containsKey(urlVO.getName())) {
+//                        urlMap.put(urlVO.getName(), 1);
+//                    } else {
+//                        urlMap.put(urlVO.getName(), urlMap.get(urlVO.getName()) + 1);
+//                    }
+//                    break;
+//                } else {
+//                    tempErrorSet.add(request);
+//                }
+//            }
+//            errorSet.addAll(tempErrorSet);
+//        }
+//
+//        Set<String> urlErrorSet = new HashSet<>();
+//        urlMap.forEach((k, v) -> {
+//            if (v > 1) {
+//                urlErrorSet.add("脚本中[" + k + "]重复" + v + "次");
+//            }
+//        });
+//        if (urlErrorSet.size() > 0) {
+//            errorMsgList.add("脚本文件配置不正确:" + urlErrorSet.toString());
+//        }
+//        //存在业务活动都关联不上脚本中的请求连接
+//        if (scriptVerityExt.getRequest().size() > unbindCount) {
+//            errorMsgList.add("业务活动与脚本文件不匹配:" + errorSet.toString());
+//        }
         return scriptVerityRespExt;
     }
 

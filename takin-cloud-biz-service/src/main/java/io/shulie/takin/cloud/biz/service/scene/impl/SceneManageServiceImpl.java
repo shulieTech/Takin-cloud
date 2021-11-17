@@ -923,6 +923,11 @@ public class SceneManageServiceImpl implements SceneManageService {
         String path;
         if (!isAbsolutePath) {
             path = scriptPath + SceneManageConstant.FILE_SPLIT + uploadPath;
+            //兼容性处理
+            File file = new File(path);
+            if (!file.exists() && uploadPath.startsWith(scriptPath+SceneManageConstant.FILE_SPLIT)) {
+                path = uploadPath;
+            }
         } else {
             path = uploadPath;
         }
