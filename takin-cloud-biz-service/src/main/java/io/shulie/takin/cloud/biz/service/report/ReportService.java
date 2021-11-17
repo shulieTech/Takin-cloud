@@ -117,10 +117,9 @@ public interface ReportService {
     /**
      * 根据租户 获取运行中的报告列表
      *
-     * @param contextExt 数据溯源上下文
      * @return 报告主键列表
      */
-    List<Long> queryListRunningReport(ContextExt contextExt);
+    List<Long> queryListRunningReport();
 
     /**
      * 锁定报告
@@ -211,9 +210,10 @@ public interface ReportService {
 
     /**
      * 更新场景启动失败的报告的状态
-     * @param sceneId 场景ID
+     *
+     * @param sceneId  场景ID
      * @param reportId 报告ID
      * @param errorMsg 异常信息
      */
-    void updateReportOnSceneStartFailed(Long sceneId,Long reportId,String errorMsg);
+    void updateReportOnSceneStartFailed(Long sceneId, Long reportId, String errorMsg);
 }

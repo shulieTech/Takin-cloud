@@ -503,8 +503,8 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<Long> queryListRunningReport(ContextExt contextExt) {
-        List<Report> report = tReportMapper.selectListRunningReport(contextExt);
+    public List<Long> queryListRunningReport( ) {
+        List<Report> report = tReportMapper.selectListRunningReport(CloudPluginUtils.getContext());
         return CollectionUtils.isEmpty(report) ? null : report.stream().map(Report::getId).collect(Collectors.toList());
     }
 
