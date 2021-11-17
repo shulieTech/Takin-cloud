@@ -42,9 +42,10 @@ public class SceneDetailResponse {
     @ApiModelProperty(value = "压测目标")
     @NotNull(message = "业压测目标不能为空")
     private Map<String, Goal> goal;
-    @ApiModelProperty(value = "SLA配置")
-    @NotNull(message = "SLA配置不能为空")
-    private List<MonitoringGoal> monitoringGoal;
+    @ApiModelProperty(value = "SLA配置-销毁")
+    private List<MonitoringGoal> destroyMonitoringGoal;
+    @ApiModelProperty(value = "SLA配置-警告")
+    private List<MonitoringGoal> warnMonitoringGoal;
     @ApiModelProperty(value = "数据验证配置")
     @NotNull(message = "数据验证配置不能为空")
     private DataValidation dataValidation;

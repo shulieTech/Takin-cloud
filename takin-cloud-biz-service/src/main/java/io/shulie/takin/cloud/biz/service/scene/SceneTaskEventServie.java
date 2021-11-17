@@ -8,13 +8,9 @@ import com.google.common.collect.Maps;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import io.shulie.takin.cloud.biz.cloudserver.SceneManageDTOConvert;
 import io.shulie.takin.cloud.biz.config.AppConfig;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneScriptRefOutput;
-import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
 import io.shulie.takin.cloud.biz.utils.DataUtils;
 import io.shulie.takin.cloud.common.utils.CommonUtil;
-import io.shulie.takin.cloud.common.utils.Md5Util;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
-import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import io.shulie.takin.ext.content.enginecall.BusinessActivityExt;
 import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.ext.content.enginecall.ScheduleStopRequestExt;
@@ -104,42 +100,9 @@ public class SceneTaskEventServie {
         scheduleStartRequest.setCallbackUrl(callbackUrl);
 
         scheduleStartRequest.setPressureScene(scene.getPressureType());
-//        String pressureMode = scene.getPressureMode() == 1 ? "fixed"
-//            : scene.getPressureMode() == 2 ? "linear" : "stair";
-//        scheduleStartRequest.setPressureMode(pressureMode);
-//        scheduleStartRequest.setPressureType(scene.getPressureType());
-//        scheduleStartRequest.setRampUp(scene.getIncreasingSecond());
-//        scheduleStartRequest.setSteps(scene.getStep());
         scheduleStartRequest.setTotalIp(scene.getIpNum());
         scheduleStartRequest.setExpectThroughput(scene.getConcurrenceNum());
         scheduleStartRequest.setThreadGroupConfigMap(scene.getThreadGroupConfigMap());
-
-//        Map<String, String> businessRtData = Maps.newHashMap();
-//        Map<String, Integer> businessTpsData = Maps.newHashMap();
-//        Map<String, String> businessNameData = Maps.newHashMap();
-//        int tps = 0;
-//        for (SceneManageWrapperOutput.SceneBusinessActivityRefOutput config : scene.getBusinessActivityConfig()) {
-//            if (null != config.getTargetRT()) {
-//                businessRtData.put(config.getBindRef(), config.getTargetRT().toString());
-//            }
-//            businessTpsData.put(config.getBindRef(), config.getTargetTPS());
-//            if (null != config.getTargetTPS()) {
-//                tps += config.getTargetTPS();
-//            }
-//            businessNameData.put(config.getBindRef(), config.getBusinessActivityName());
-//        }
-//        scheduleStartRequest.setTotalTps(tps);
-//        scheduleStartRequest.setTps(NumberUtil.getRate(tps, scene.getIpNum()));
-//        scheduleStartRequest.setBusinessData(businessRtData);
-//        scheduleStartRequest.setBusinessTpsData(businessTpsData);
-//        List<Map<String, String>> businessActivities = new ArrayList<>();
-//        for (Map.Entry<String, Integer> entry : businessTpsData.entrySet()) {
-//            Map<String, String> businessActivity = new HashMap<>();
-//            businessActivity.put("elementTestName", entry.getKey());
-//            businessActivity.put("throughputPercent", String.valueOf(NumberUtil.getPercentRate(entry.getValue(), tps)));
-//            businessActivities.add(businessActivity);
-//        }
-//        scheduleStartRequest.setBusinessActivities(businessActivities);
 
         Map<String, BusinessActivityExt> businessData = Maps.newHashMap();
         Integer tps = CommonUtil.sum(scene.getBusinessActivityConfig(), SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getTargetTPS);

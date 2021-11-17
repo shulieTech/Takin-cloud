@@ -100,6 +100,8 @@ public class SceneServiceImpl implements SceneService {
             buildScript(sceneId, in.getBasicInfo().getScriptId(), in.getBasicInfo().getScriptType(), in.getFile());
             // 4.  保存SLA信息
             buildSla(sceneId, in.getMonitoringGoal());
+            // 提交数据库事务
+            platformTransactionManager.commit(transactionStatus);
             //      返回信息
             return sceneId;
         } catch (Exception e) {
@@ -139,6 +141,8 @@ public class SceneServiceImpl implements SceneService {
                 buildScript(sceneId, in.getBasicInfo().getScriptId(), in.getBasicInfo().getScriptType(), in.getFile());
                 // 4.  保存SLA信息
                 buildSla(sceneId, in.getMonitoringGoal());
+                // 提交数据库事务
+                platformTransactionManager.commit(transactionStatus);
                 //      返回信息
                 return true;
             } else {
@@ -166,7 +170,11 @@ public class SceneServiceImpl implements SceneService {
         response.setBasicInfo(getBasicInfo(sceneId));
         response.setAnalysisResult(getAnalysisResult(sceneId));
         response.setDataValidation(getDataValidation(sceneId));
-        response.setMonitoringGoal(getMonitoringGoal(sceneId));
+        List<MonitoringGoal> monitoringGoal = getMonitoringGoal(sceneId);
+        response.setDestroyMonitoringGoal(
+            monitoringGoal.stream().filter(t -> Integer.valueOf(0).equals(t.getType())).collect(Collectors.toList()));
+        response.setWarnMonitoringGoal(
+            monitoringGoal.stream().filter(t -> !Integer.valueOf(0).equals(t.getType())).collect(Collectors.toList()));
         return response;
     }
 
@@ -350,12 +358,12 @@ public class SceneServiceImpl implements SceneService {
                 String compareValueString = condition.getOrDefault(SceneManageConstant.COMPARE_VALUE, "0");
                 return new MonitoringGoal() {{
                     setId(t.getId());
-                    setType(eventString.equals(SceneManageConstant.EVENT_DESTORY) ? 0 : 1);
-                    setFormulaNumber(Double.parseDouble(compareValueString));
-                    setFormulaSymbol(Integer.parseInt(compareTypeString));
                     setName(t.getSlaName());
-                    setFormulaSymbol(t.getTargetType());
+                    setType(eventString.equals(SceneManageConstant.EVENT_DESTORY) ? 0 : 1);
                     setTarget(Arrays.asList(t.getBusinessActivityIds().split(",")));
+                    setFormulaTarget(t.getTargetType());
+                    setFormulaSymbol(Integer.parseInt(compareTypeString));
+                    setFormulaNumber(Double.parseDouble(compareValueString));
                     setNumberOfIgnore(Integer.parseInt(achieveTimesString));
                 }};
             }).collect(Collectors.toList());
