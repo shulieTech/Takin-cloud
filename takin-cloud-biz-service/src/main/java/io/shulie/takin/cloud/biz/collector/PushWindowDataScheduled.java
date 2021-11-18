@@ -360,6 +360,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 .peek(o -> {
                     if ("all".equalsIgnoreCase(o.getTransaction())) {
                         o.setSaCount(allSaCount);
+                        //all 映射成TestPlan的xpathMd5
                         if (CollectionUtils.isNotEmpty(nodes)) {
                             String testPlanTransaction = nodes.stream().filter(Objects::nonNull)
                                     .filter(n -> null != n.getType())
