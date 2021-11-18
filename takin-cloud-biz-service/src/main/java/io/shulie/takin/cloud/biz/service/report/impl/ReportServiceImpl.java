@@ -33,7 +33,9 @@ import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
 import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
 import io.shulie.takin.ext.content.asset.RealAssectBillExt;
 import io.shulie.takin.ext.content.enums.AssetTypeEnum;
+import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.ext.content.response.Response;
+import io.shulie.takin.ext.content.script.ScriptNode;
 import lombok.extern.slf4j.Slf4j;
 import org.influxdb.impl.TimeUtil;
 import cn.hutool.core.util.StrUtil;
@@ -272,9 +274,9 @@ public class ReportServiceImpl implements ReportService {
         // 查询sla熔断数据
         ReportDetailOutput detailOutput = this.getReportByReportId(reportResult.getId());
         reportDetail.setSlaMsg(detailOutput.getSlaMsg());
-
+        String testPlanXpathMD5 = getTestPlanXpathMD5(reportResult.getScriptNodeTree());
         StatReportDTO statReport = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
-            ReportConstants.ALL_BUSINESS_ACTIVITY);
+            StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY : testPlanXpathMD5);
         if (statReport == null) {
             log.warn("实况报表:[{}]，暂无数据", reportResult.getId());
         } else {
@@ -356,6 +358,18 @@ public class ReportServiceImpl implements ReportService {
         }
         log.info("实时监测metric数据：tempReportDetail-运行时间：{}", System.currentTimeMillis() - start);
         return reportDetail;
+    }
+
+    private String getTestPlanXpathMD5(String scriptNodeTree) {
+        if (StringUtils.isBlank(scriptNodeTree)){
+            return null;
+        }
+        List<ScriptNode> currentNodeByType = JsonPathUtil.getCurrentNodeByType(scriptNodeTree,
+            NodeTypeEnum.TEST_PLAN.name());
+        if (CollectionUtils.isNotEmpty(currentNodeByType) && currentNodeByType.size() ==0){
+            return currentNodeByType.get(0).getXpathMd5();
+        }
+        return null;
     }
 
     /**
@@ -700,7 +714,9 @@ public class ReportServiceImpl implements ReportService {
         if (reportResult == null) {
             return new ReportTrendResp();
         }
-        String transaction = ReportConstants.ALL_BUSINESS_ACTIVITY;
+        String testPlanXpathMD5 = getTestPlanXpathMD5(reportResult.getScriptNodeTree());
+        String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
+            : testPlanXpathMD5;
         if (StringUtils.isNotBlank(reportTrendQuery.getXpathMd5())){
             transaction = reportTrendQuery.getXpathMd5();
         }
@@ -956,9 +972,11 @@ public class ReportServiceImpl implements ReportService {
             reportResult.setStatus(ReportConstants.RUN_STATUS);
         }
 
+        String testPlanXpathMD5 = getTestPlanXpathMD5(reportResult.getScriptNodeTree());
+        String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
+            : testPlanXpathMD5;
         //汇总所有业务活动数据
-        StatReportDTO statReport = statReport(taskResult.getSceneId(), reportId, taskResult.getCustomerId(),
-            ReportConstants.ALL_BUSINESS_ACTIVITY);
+        StatReportDTO statReport = statReport(taskResult.getSceneId(), reportId, taskResult.getCustomerId(), transaction);
         if (statReport == null) {
             log.warn("没有找到报表数据，报表生成失败。报告ID：{}", reportId);
         }
