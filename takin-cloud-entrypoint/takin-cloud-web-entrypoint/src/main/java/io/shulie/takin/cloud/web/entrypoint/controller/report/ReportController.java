@@ -170,11 +170,11 @@ public class ReportController {
         return ResponseResult.success(data);
     }
 
-    @GetMapping("/report/businessActivity/summary/list")
-    @ApiOperation("压测明细")
-    public ResponseResult<NodeTreeSummaryResp> getBusinessActivitySummaryList(Long reportId) {
-        return ResponseResult.success(reportService.getBusinessActivitySummaryList(reportId));
-    }
+    //@GetMapping("/report/businessActivity/summary/list")
+    //@ApiOperation("压测明细")
+    //public ResponseResult<NodeTreeSummaryResp> getBusinessActivitySummaryList(Long reportId) {
+    //    return ResponseResult.success(reportService.getBusinessActivitySummaryList(reportId));
+    //}
 
     @GetMapping("/report/count")
     @ApiOperation("报告汇总")

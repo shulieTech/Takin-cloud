@@ -71,6 +71,11 @@ public interface CloudReportApi {
      */
     ResponseResult<ReportTrendResp> queryReportTrend(ReportTrendQueryReq req);
 
-    ResponseResult<NodeTreeSummaryResp> getBusinessActivitySummaryList(ReportDetailByIdReq req);
+    /**
+     * 压测明细
+     * @param req 请求参数
+     * @return
+     */
+    ResponseResult<NodeTreeSummaryResp> getSummaryList(ReportDetailByIdReq req);
 
 }
