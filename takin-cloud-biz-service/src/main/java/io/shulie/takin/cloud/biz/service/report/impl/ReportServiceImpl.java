@@ -366,7 +366,7 @@ public class ReportServiceImpl implements ReportService {
         }
         List<ScriptNode> currentNodeByType = JsonPathUtil.getCurrentNodeByType(scriptNodeTree,
             NodeTypeEnum.TEST_PLAN.name());
-        if (CollectionUtils.isNotEmpty(currentNodeByType) && currentNodeByType.size() ==0){
+        if (CollectionUtils.isNotEmpty(currentNodeByType) && currentNodeByType.size() == 1){
             return currentNodeByType.get(0).getXpathMd5();
         }
         return null;
