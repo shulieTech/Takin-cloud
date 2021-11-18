@@ -367,7 +367,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                                     .filter(n -> NodeTypeEnum.TEST_PLAN == n.getType())
                                     .map(ScriptNode::getXpathMd5)
                                     .filter(StringUtils::isNotBlank)
-                                    .findAny()
+                                    .findFirst()
                                     .orElse("all");
                             o.setTransaction(testPlanTransaction);
                         }
@@ -988,7 +988,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                             String testPlanTransaction = testPlans.stream().filter(Objects::nonNull)
                                     .map(ScriptNode::getXpathMd5)
                                     .filter(StringUtils::isNotBlank)
-                                    .findAny()
+                                    .findFirst()
                                     .orElse("all");
                             o.setTransaction(testPlanTransaction);
                         }
