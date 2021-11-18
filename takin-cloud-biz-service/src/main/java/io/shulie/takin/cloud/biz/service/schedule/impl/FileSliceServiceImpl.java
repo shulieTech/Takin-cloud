@@ -54,7 +54,7 @@ public class FileSliceServiceImpl implements FileSliceService {
 
     private static final String DEFAULT_PATH_SEPARATOR = "/";
 
-    private static final String DEFAULT_FILE_COLUMN_SEPARATOR = "@@@";
+    private static final String DEFAULT_FILE_COLUMN_SEPARATOR = ",";
 
     @Override
     public boolean fileSlice(FileSliceRequest request) throws TakinCloudException {

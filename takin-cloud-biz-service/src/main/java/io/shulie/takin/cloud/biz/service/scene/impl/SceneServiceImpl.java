@@ -313,7 +313,7 @@ public class SceneServiceImpl implements SceneService {
                 .collect(Collectors.toMap(SceneBusinessActivityRefEntity::getBindRef, SceneBusinessActivityRefEntity::getGoalValue));
             Map<String, Goal> result = new HashMap<>(stringResult.size());
             // 填充结果
-            stringResult.forEach((key, value) -> result.put(key, JSONObject.parseObject(value, OldGoalModel.class).to()));
+            stringResult.forEach((key, value) -> result.put(key, JSONObject.parseObject(value, OldGoalModel.class).convert()));
             return result;
         } catch (
             JSONException e) {
@@ -489,7 +489,7 @@ public class SceneServiceImpl implements SceneService {
                 setBusinessActivityName(t.getName());
                 setBusinessActivityId(t.getBusinessActivityId());
                 setApplicationIds(String.join(",", t.getApplicationId()));
-                setGoalValue(JSONObject.toJSONString(OldGoalModel.from(goal), SerializerFeature.PrettyFormat));
+                setGoalValue(JSONObject.toJSONString(OldGoalModel.convert(goal), SerializerFeature.PrettyFormat));
                 // 其它字段默认值
                 LocalDateTime now = LocalDateTime.now();
                 setIsDeleted(0);

@@ -3,7 +3,6 @@ package io.shulie.takin.cloud.open.api.impl.report;
 import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import io.shulie.takin.cloud.common.bean.scenemanage.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.open.api.impl.CloudCommonApi;
 import io.shulie.takin.cloud.open.api.report.CloudReportApi;
 import io.shulie.takin.cloud.open.constant.CloudApiConstant;
@@ -125,9 +124,9 @@ public class CloudReportApiImpl extends CloudCommonApi implements CloudReportApi
     }
 
     @Override
-    public ResponseResult<NodeTreeSummaryResp> getBusinessActivitySummaryList(ReportDetailByIdReq req) {
+    public ResponseResult<NodeTreeSummaryResp> getSummaryList(ReportDetailByIdReq req) {
         TakinResponseEntity<ResponseResult<NodeTreeSummaryResp>> entity =
-            HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_BUSINESS_ACTIVITY_SUMMARY_LIST,
+            HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_SUMMARY_LIST,
                 getHeaders(req), req, new TypeReference<ResponseResult<NodeTreeSummaryResp>>() {});
         if (entity.getSuccess()){
             return entity.getBody();
