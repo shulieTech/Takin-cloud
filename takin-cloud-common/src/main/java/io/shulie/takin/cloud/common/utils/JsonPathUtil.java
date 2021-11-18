@@ -150,15 +150,15 @@ public class JsonPathUtil {
      * @param nodeType {@link NodeTypeEnum} 节点类型
      * @return List<ScriptNode>
      */
-    public static List<ScriptNode> getChildrenByMd5(String nodeTree, String xpathMd5, String nodeType) {
+    public static List<ScriptNode> getChildrenByMd5(String nodeTree, String xpathMd5, NodeTypeEnum nodeType) {
         if (StringUtils.isBlank(nodeTree)) {
             return null;
         }
         if (StringUtils.isBlank(xpathMd5)) {
-            if (StringUtils.isNotBlank(nodeType)) {
+            if (null != nodeType) {
                 return JsonPath.using(JACKSON_CONFIGURATION)
                     .parse(nodeTree)
-                    .read("$..children[?(@.type=='" + nodeType + "')]", SCRIPT_NODE_TYPE_REF);
+                    .read("$..children[?(@.type=='" + nodeType.name() + "')]", SCRIPT_NODE_TYPE_REF);
             }
             return JsonPath.using(JACKSON_CONFIGURATION)
                 .parse(nodeTree)
@@ -182,7 +182,7 @@ public class JsonPathUtil {
      * @return List<ScriptNode>
      */
     public static List<ScriptNode> getChildControllers(String nodeTree, String xpathMd5) {
-        return getChildrenByMd5(nodeTree, xpathMd5, NodeTypeEnum.CONTROLLER.name());
+        return getChildrenByMd5(nodeTree, xpathMd5, NodeTypeEnum.CONTROLLER);
     }
 
     /**
@@ -193,7 +193,7 @@ public class JsonPathUtil {
      * @return List<ScriptNode>
      */
     public static List<ScriptNode> getChildSamplers(String nodeTree, String xpathMd5) {
-        return getChildrenByMd5(nodeTree, xpathMd5, NodeTypeEnum.SAMPLER.name());
+        return getChildrenByMd5(nodeTree, xpathMd5, NodeTypeEnum.SAMPLER);
     }
 
     public static void main(String[] args) {
