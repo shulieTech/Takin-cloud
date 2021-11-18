@@ -300,7 +300,7 @@ public class JmxUtil {
                     node.setProps(props);
                     //protocol+#+path+method, 即第一个#号前是protocol，最后一个#之后是method，中间的#可能是path自带
                     node.setSamplerType(SamplerTypeEnum.HTTP);
-                    node.setIdentification(buildHttpIdentification(node));
+                    setHttpIdentification(node);
 
                 } else if ("JavaSampler".equals(name)) {
                     Map<String, String> props = buildProps(element);
@@ -310,7 +310,7 @@ public class JmxUtil {
                     props = mergeProps(props, configProps);
                     node.setProps(props);
                     //kafka:topic, 其他：返回null
-                    node.setIdentification(buildJavaSamplerIdentification(node));
+                    setJavaSamplerIdentification(node);
                     node.setSamplerType(getJavaSamplerType(node));
                 } else if ("FTPSampler".equals(name)) {
                     Map<String, String> props = buildProps(element);
@@ -319,12 +319,12 @@ public class JmxUtil {
                     props = mergeProps(props, configProps);
                     node.setProps(props);
                     //server host
-                    node.setIdentification(buildIdentification(node, "FTPSampler.server", "FTPSampler.port"));
+                    setIdentification(node, "FTPSampler.server", "FTPSampler.port");
                     node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 } else if ("AccessLogSampler".equals(name)) {
                     node.setProps(buildProps(element, BASE_PROP_ELEMENTS));
                     //domain+#+port
-                    node.setIdentification(buildIdentification(node, "domain", "portString"));
+                    setIdentification(node, "domain", "portString");
                     node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 } else if ("LDAPSampler".equals(name)) {
                     Map<String, String> props = buildProps(element, BASE_PROP_ELEMENTS);
@@ -333,7 +333,7 @@ public class JmxUtil {
                     props = mergeProps(props, configProps);
                     node.setProps(props);
                     //domain+#+port
-                    node.setIdentification(buildIdentification(node, "servername", "port"));
+                    setIdentification(node, "servername", "port");
                     node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 } else if ("JDBCSampler".equals(name)) {
                     node.setProps(buildProps(element));
@@ -353,12 +353,12 @@ public class JmxUtil {
                         }
                     }
                     //dbUrl
-                    node.setIdentification(buildIdentification(node, "dbUrl"));
+                    setIdentification(node, "dbUrl");
                     node.setSamplerType(SamplerTypeEnum.JDBC);
                 } else if ("SmtpSampler".equals(name)) {
                     node.setProps(buildProps(element));
                     //domain+#+port
-                    node.setIdentification(buildIdentification(node, "SMTPSampler.server", "SMTPSampler.serverPort"));
+                    setIdentification(node, "SMTPSampler.server", "SMTPSampler.serverPort");
                     node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 } else if ("TCPSampler".equals(name)) {
                     Map<String, String> props = buildProps(element);
@@ -367,17 +367,17 @@ public class JmxUtil {
                     props = mergeProps(props, configProps);
                     node.setProps(props);
                     //domain+#+port
-                    node.setIdentification(buildIdentification(node, "TCPSampler.server", "TCPSampler.port"));
+                    setIdentification(node, "TCPSampler.server", "TCPSampler.port");
                     node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 } else if ("kg.apc.jmeter.samplers.DummySampler".equals(name)) {
                     node.setProps(buildProps(element));
                     //url
-                    node.setIdentification(buildIdentification(node, "URL"));
+                    setIdentification(node, "URL");
                     node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 } else if ("io.github.ningyu.jmeter.plugin.dubbo.sample.DubboSample".equals(name)) {
                     node.setProps(buildProps(element));
                     //interface + # + method
-                    node.setIdentification(buildDubboIdentification(node));
+                    setDubboIdentification(node);
                     node.setSamplerType(SamplerTypeEnum.DUBBO);
                 } else {
                     node.setProps(buildProps(element));
@@ -389,13 +389,13 @@ public class JmxUtil {
         }
     }
 
-    private static String buildDubboIdentification(ScriptNode node) {
+    private static void setDubboIdentification(ScriptNode node) {
         if (null == node) {
-            return null;
+            return;
         }
         Map<String, String> props = node.getProps();
         if (null == props) {
-            return null;
+            return;
         }
         //解析dubbo接口和版本
         String dubboInterface = props.get("FIELD_DUBBO_INTERFACE");
@@ -419,9 +419,13 @@ public class JmxUtil {
             }
             //去掉最后一个逗号
             String substring = method.substring(0, method.length() - 1);
-            return String.format("%s|%s|%s", substring + ")", path, SamplerTypeEnum.DUBBO.getRpcTypeEnum().getValue());
+            String format = String.format("%s|%s|%s", substring + ")", path, SamplerTypeEnum.DUBBO.getRpcTypeEnum().getValue());
+            node.setIdentification(format);
+            node.setRequestPath(String.format("%s|%s", substring + ")", path));
         }
-        return String.format("%s|%s|%s", fieldDubboMethod, path, SamplerTypeEnum.DUBBO.getRpcTypeEnum().getValue());
+        String format = String.format("%s|%s|%s", fieldDubboMethod, path, SamplerTypeEnum.DUBBO.getRpcTypeEnum().getValue());
+        node.setIdentification(format);
+        node.setRequestPath(String.format("%s|%s", fieldDubboMethod, path));
 
     }
 
@@ -677,55 +681,60 @@ public class JmxUtil {
         return result;
     }
 
-    public static String buildIdentification(ScriptNode node, String... keys) {
+    public static void setIdentification(ScriptNode node, String... keys) {
         if (null == node || null == keys || keys.length <= 0) {
-            return null;
+            return;
         }
         Map<String, String> props = node.getProps();
         if (null == props) {
-            return null;
+            return;
         }
-        return Arrays.stream(keys).filter(StringUtils::isNotBlank)
+        String collect = Arrays.stream(keys).filter(StringUtils::isNotBlank)
                 .map(props::get)
                 .collect(Collectors.joining("|"));
+        node.setIdentification(collect);
+        node.setRequestPath(collect);
     }
 
-    public static String buildJavaSamplerIdentification(ScriptNode node) {
+    public static void setJavaSamplerIdentification(ScriptNode node) {
         if (null == node) {
-            return null;
+            return;
         }
         Map<String, String> props = node.getProps();
         if (null == props) {
-            return null;
+            return;
         }
         String javaClass = props.get("classname");
         if (StringUtils.isBlank(javaClass)) {
-            return null;
+            return;
         }
         if ("co.signal.kafkameter.KafkaProducerSampler".equals(javaClass)) {
             String topic = props.get("kafka_topic");
             if (StringUtils.isBlank(topic) || topic.startsWith("$")) {
-                return null;
+                return;
             }
-            return topic;
+            node.setRequestPath(topic);
+            node.setIdentification(String.format("%s|%s", topic, SamplerTypeEnum.KAFKA.getRpcTypeEnum().getValue()));
         } else if ("com.gslab.pepper.sampler.PepperBoxKafkaSampler".equals(javaClass)) {
             String topic = props.get("kafka.topic.name");
             if (StringUtils.isBlank(topic) || topic.startsWith("$")) {
-                return null;
+                return;
             }
-            return String.format("%s|%s", topic, SamplerTypeEnum.KAFKA.getRpcTypeEnum().getValue());
+            node.setRequestPath(topic);
+            node.setIdentification(String.format("%s|%s", topic, SamplerTypeEnum.KAFKA.getRpcTypeEnum().getValue()));
+            return;
         } else {
-            return null;
+            return;
         }
     }
 
-    public static String buildHttpIdentification(ScriptNode node) {
+    public static void setHttpIdentification(ScriptNode node) {
         if (null == node) {
-            return null;
+            return;
         }
         Map<String, String> props = node.getProps();
         if (null == props) {
-            return null;
+            return;
         }
         String path = props.get("HTTPSampler.path");
         String method = props.get("HTTPSampler.method");
@@ -739,7 +748,9 @@ public class JmxUtil {
             }
         }
         path = pathGuiYi(path);
-        return String.format("%s|%s|%s", method, path, SamplerTypeEnum.HTTP.getRpcTypeEnum().getValue());
+        String identification = String.format("%s|%s|%s", method, path, SamplerTypeEnum.HTTP.getRpcTypeEnum().getValue());
+        node.setIdentification(identification);
+        node.setRequestPath(String.format("%s|%s", method, path));
     }
 
     /**

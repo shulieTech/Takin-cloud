@@ -56,6 +56,10 @@ public class ScriptNode extends AbstractEntry {
      */
     private String identification;
     /**
+     * 请求路径
+     */
+    private String requestPath;
+    /**
      * 子节点
      */
     private List<ScriptNode> children;
