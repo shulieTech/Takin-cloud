@@ -533,7 +533,7 @@ public class SceneServiceImpl implements SceneService {
                 sceneScriptRefEntityList.add(new SceneScriptRefEntity() {{
                     setSceneId(sceneId);
                     setFileName(fileName);
-                    setUploadPath(filePath);
+                    setUploadPath(sceneId + "/" + fileName);
                     setFileType(t.getType());
                     setScriptType(scriptType);
                     setFileExtend(JSONObject.toJSONString(t.getExtend()));
