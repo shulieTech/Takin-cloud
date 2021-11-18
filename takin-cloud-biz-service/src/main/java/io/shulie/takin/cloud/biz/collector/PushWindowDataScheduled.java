@@ -18,7 +18,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.shulie.takin.cloud.biz.collector.collector.AbstractIndicators;
@@ -34,7 +33,6 @@ import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
 import io.shulie.takin.cloud.common.constants.CollectorConstants;
-import io.shulie.takin.cloud.common.constants.PressureEngineConstants;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.influxdb.InfluxDBUtil;
@@ -52,6 +50,7 @@ import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.eventcenter.EventCenterTemplate;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
 import io.shulie.takin.eventcenter.entity.TaskConfig;
+import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.utils.json.JsonHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -260,7 +259,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         return timeWindow;
     }
 
-    private Long reduceMetrics(Long sceneId, Long reportId, Long customerId, Integer podNum, long endTime, Long timeWindow,String nodeTree) {
+    private Long reduceMetrics(Long sceneId, Long reportId, Long customerId, Integer podNum, long endTime, Long timeWindow, List<ScriptNode> nodes) {
         String logPre = String.format("reduceMetrics %s-%s-%s:%s", sceneId, reportId, customerId, DateUtil.showTime(timeWindow));
         log.info(logPre + " start!");
         //如果时间窗口为空
@@ -315,22 +314,22 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 .map(l -> this.toPressureOutput(l, podNum, time))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-                try{
-                    List<SendMetricsEvent> sendMetricsEventList = getSendMetricsEventList(sceneId, reportId, customerId,
+            //sla处理
+            try{
+                List<SendMetricsEvent> sendMetricsEventList = getSendMetricsEventList(sceneId, reportId, customerId,
                         timeWindow, results);
-                    //未finish，发事件
-                    String existKey = String.format(CollectorConstants.REDIS_PRESSURE_TASK_KEY,
+                //未finish，发事件
+                String existKey = String.format(CollectorConstants.REDIS_PRESSURE_TASK_KEY,
                         getTaskKey(sceneId, reportId, customerId));
-                    if (redisTemplate.hasKey(existKey)) {
-                        sendMetricsEventList.stream().filter(Objects::nonNull)
+                if (Boolean.TRUE.equals(redisTemplate.hasKey(existKey))) {
+                    sendMetricsEventList.stream().filter(Objects::nonNull)
                             .forEach(this::sendMetrics);
-                    }
-                }catch (Exception e){
-                    log.error(
-                        "【collector metric】【error-sendMetricsEvents】 write influxDB time : {} sceneId : {}, reportId : {},customerId : {}, "
-                            + "error:{}",
-                        timeWindow, sceneId, reportId, customerId, e.getMessage());
                 }
+            }catch (Exception e){
+                log.error(
+                        "【collector metric】【error-sendMetricsEvents】 write influxDB time : {} sceneId : {}, reportId : {},customerId : {}, error:{}",
+                        timeWindow, sceneId, reportId, customerId, e.getMessage());
+            }
             int allSaCount = results.stream().filter(Objects::nonNull)
                 //过滤掉all的
                 .filter(p -> !"all".equals(p.getTransaction()))
@@ -338,24 +337,45 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 .mapToInt(i -> Objects.isNull(i) ? 0 : i)
                 .sum();
             //统计没有的值的控制器
-            if (StringUtils.isNotBlank(nodeTree)) {
-                List<ScriptNode> childControllers = JsonPathUtil.getChildControllers(nodeTree, null);
-                if (CollectionUtils.isNotEmpty(childControllers)) {
-                    childControllers.stream()
-                        .filter(Objects::nonNull)
+            if (CollectionUtils.isNotEmpty(nodes)) {
+                //控制器统计
+                List<ScriptNode> controllerNodes = JmxUtil.getScriptNodeByType(NodeTypeEnum.CONTROLLER, nodes);
+//                List<ScriptNode> childControllers = JsonPathUtil.getChildControllers(nodeTree, null);
+                if (CollectionUtils.isNotEmpty(controllerNodes)) {
+                    controllerNodes.stream().filter(Objects::nonNull)
                         //过滤掉已经有数据的控制器
-                        .filter(controller -> this.filterScriptNodeController(transactions, controller.getXpathMd5()))
-                        .forEach(controller -> this.summaryControllerMetrics(nodeTree, controller, podNum, time, results));
+                        .filter(c -> !transactions.contains(c.getXpathMd5()))
+                        .forEach(c -> this.summaryControllerMetrics(c, podNum, time, results));
+                }
+                //线程组统计
+                List<ScriptNode> threadGroupNodes = JmxUtil.getScriptNodeByType(NodeTypeEnum.THREAD_GROUP, nodes);
+                if (CollectionUtils.isNotEmpty(threadGroupNodes)) {
+                    threadGroupNodes.stream().filter(Objects::nonNull)
+                        //过滤掉已经有数据的控制器
+                        .filter(n -> !transactions.contains(n.getXpathMd5()))
+                        .forEach(n -> this.summaryControllerMetrics(n, podNum, time, results));
                 }
             }
             results.stream().filter(Objects::nonNull)
                 .peek(o -> {
                     if ("all".equalsIgnoreCase(o.getTransaction())) {
                         o.setSaCount(allSaCount);
+                        //all 映射成TestPlan的xpathMd5
+                        if (CollectionUtils.isNotEmpty(nodes)) {
+                            String testPlanTransaction = nodes.stream().filter(Objects::nonNull)
+                                    .filter(n -> null != n.getType())
+                                    .filter(n -> NodeTypeEnum.TEST_PLAN == n.getType())
+                                    .map(ScriptNode::getXpathMd5)
+                                    .filter(StringUtils::isNotBlank)
+                                    .findFirst()
+                                    .orElse("all");
+                            o.setTransaction(testPlanTransaction);
+                        }
                     }
                 })
                 .map(p -> InfluxDBUtil.toPoint(measurement, time, p))
                 .forEach(influxWriter::insert);
+
         } else {
             log.info(logPre + ", timeWindow=" + DateUtil.showTime(timeWindow) + "， metrics is empty!");
         }
@@ -391,21 +411,18 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         return !transactions.contains(transaction);
     }
 
-
-
     /**
      * 统计节点中控制器的请求信息
-     * @param nodeTree 节点树结构
      * @param controllerNode 控制器节点
      * @param podNum podNum
      * @param time 时间窗口
      * @param data 经过统计计算的metrics数据
      */
-    private void summaryControllerMetrics(String nodeTree, ScriptNode controllerNode,
-        int podNum, Long time, List<PressureOutput> data) {
+    private void summaryControllerMetrics(ScriptNode controllerNode, int podNum, Long time, List<PressureOutput> data) {
         String transaction = controllerNode.getXpathMd5();
         String testName = controllerNode.getTestName();
-        List<ScriptNode> childSamplers = JsonPathUtil.getChildSamplers(nodeTree, transaction);
+        List<ScriptNode> childSamplers = JmxUtil.getScriptNodeByType(NodeTypeEnum.SAMPLER, controllerNode.getChildren());
+//        List<ScriptNode> childSamplers = JsonPathUtil.getChildSamplers(nodeTree, transaction);
         Map<String, List<PressureOutput>> dataMap = data.stream().collect(
             Collectors.groupingBy(PressureOutput::getTransaction));
         List<PressureOutput> tmpData = new ArrayList<>();
@@ -588,7 +605,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         return p;
     }
 
-    private void finishPushData(Long sceneId, Long reportId, Long customerId, Integer podNum, Long timeWindow, long endTime,String nodeTree) {
+    private void finishPushData(Long sceneId, Long reportId, Long customerId, Integer podNum, Long timeWindow, long endTime, List<ScriptNode> nodes) {
         String taskKey = getPressureTaskKey(sceneId, reportId, customerId);
         String last = String.valueOf(redisTemplate.opsForValue().get(last(taskKey)));
         long nowTimeWindow = CollectorUtil.getTimeWindowTime(System.currentTimeMillis());
@@ -617,7 +634,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             // 如果结束时间 小于等于当前时间，数据不用补充，
             // 如果结束时间 大于 当前时间，需要补充期间每5秒的数据 延后5s
             while (isSaveLastPoint && timeWindow <= endTimeWindow && timeWindow <= nowTimeWindow) {
-                timeWindow = reduceMetrics(sceneId, reportId, customerId, podNum, eTime, timeWindow,nodeTree);
+                timeWindow = reduceMetrics(sceneId, reportId, customerId, podNum, eTime, timeWindow, nodes);
                 timeWindow = CollectorUtil.getNextTimeWindow(timeWindow);
             }
             log.info("本次压测{}-{}-{},push data 完成", sceneId, reportId, customerId);
@@ -655,12 +672,12 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 Long sceneId = r.getSceneId();
                 Long reportId = r.getId();
                 Long customerId = r.getCustomerId();
-                String nodeTree = r.getScriptNodeTree();
                 String lockKey = String.format("pushData:%s:%s:%s", sceneId, reportId, customerId);
                 if (!lock(lockKey, "1")) {
                     return;
                 }
                 try {
+                    List<ScriptNode> nodes = JsonUtil.parseArray(r.getScriptNodeTree(), ScriptNode.class);
                     SceneManageWrapperOutput scene = sceneManageService.getSceneManage(sceneId, null);
                     if (null == scene) {
                         log.info("no such scene manager!sceneId=" + sceneId);
@@ -688,14 +705,14 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                     Long timeWindow = null;
                     do {
                         //不用递归，而是采用do...while...的方式是防止需要处理的时间段太长引起trackoverflow错误
-                        timeWindow = reduceMetrics(sceneId, reportId, customerId, podNum, breakTime, timeWindow,nodeTree);
+                        timeWindow = reduceMetrics(sceneId, reportId, customerId, podNum, breakTime, timeWindow, nodes);
                         if (null == timeWindow) {
                             timeWindow = nowTimeWindow;
                             break;
                         }
                         timeWindow = CollectorUtil.getNextTimeWindow(timeWindow);
                     } while (timeWindow <= breakTime);
-                    finishPushData(sceneId, reportId, customerId, podNum, timeWindow, endTime,nodeTree);
+                    finishPushData(sceneId, reportId, customerId, podNum, timeWindow, endTime, nodes);
                 } catch (Throwable t) {
                     log.error("pushData2 error!", t);
                 } finally {
@@ -863,7 +880,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     }
 
     private void writeInfluxDB(List<String> transactions, String taskKey, long timeWindow, Long sceneId, Long reportId,
-        Long customerId,String nodeTree) {
+        Long customerId, String nodeTree) {
         long start = System.currentTimeMillis();
         List<PressureOutput> resultList = new ArrayList<>();
         for (String transaction : transactions) {
@@ -951,13 +968,30 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 .sum();
             List<ScriptNode> childControllers = JsonPathUtil.getChildControllers(nodeTree, null);
             childControllers.stream().filter(Objects::nonNull)
-                .filter(controller -> this.filterScriptNodeController(transactions, controller.getXpathMd5()))
-                .forEach(controller -> this.summaryControllerMetrics(nodeTree,controller,0,timeWindow,resultList));
+                .filter(c -> !transactions.contains(c.getXpathMd5()))
+                .forEach(c -> this.summaryControllerMetrics(c,0, timeWindow, resultList));
+
+            List<ScriptNode> threadGroupNodes = JsonPathUtil.getChildrenByMd5(nodeTree, null, NodeTypeEnum.THREAD_GROUP);
+            if (CollectionUtils.isNotEmpty(threadGroupNodes)) {
+                threadGroupNodes.stream().filter(Objects::nonNull)
+                        .filter(c -> !transactions.contains(c.getXpathMd5()))
+                        .forEach(c -> this.summaryControllerMetrics(c,0, timeWindow, resultList));
+            }
+
             String measurement = InfluxDBUtil.getMeasurement(sceneId, reportId, customerId);
             resultList.stream().filter(Objects::nonNull)
                 .peek(o -> {
                     if ("all".equalsIgnoreCase(o.getTransaction())) {
                         o.setSaCount(allSaCount);
+                        List<ScriptNode> testPlans = JsonPathUtil.getChildrenByMd5(nodeTree, null, NodeTypeEnum.TEST_PLAN);
+                        if (CollectionUtils.isNotEmpty(testPlans)) {
+                            String testPlanTransaction = testPlans.stream().filter(Objects::nonNull)
+                                    .map(ScriptNode::getXpathMd5)
+                                    .filter(StringUtils::isNotBlank)
+                                    .findFirst()
+                                    .orElse("all");
+                            o.setTransaction(testPlanTransaction);
+                        }
                     }
                 })
                 .map(p -> InfluxDBUtil.toPoint(measurement, timeWindow, p))
