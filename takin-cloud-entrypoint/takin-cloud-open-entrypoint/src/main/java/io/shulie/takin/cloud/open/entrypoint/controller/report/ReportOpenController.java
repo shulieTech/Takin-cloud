@@ -134,7 +134,7 @@ public class ReportOpenController {
     @GetMapping("report/summary/list")
     @ApiOperation("压测明细")
     public ResponseResult<NodeTreeSummaryResp> queryActivitiesSummaryList(ReportDetailByIdReq req){
-        return ResponseResult.success(reportService.getBusinessActivitySummaryList(req.getReportId()));
+        return ResponseResult.success(reportService.getNodeSummaryList(req.getReportId()));
     }
 
 

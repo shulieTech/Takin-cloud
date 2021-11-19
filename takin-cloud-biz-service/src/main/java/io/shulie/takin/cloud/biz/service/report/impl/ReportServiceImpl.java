@@ -485,7 +485,7 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     @Override
-    public NodeTreeSummaryResp getBusinessActivitySummaryList(Long reportId) {
+    public NodeTreeSummaryResp getNodeSummaryList(Long reportId) {
         //List<BusinessActivitySummaryBean> list = Lists.newArrayList();
         //查询业务活动的概况
         List<ReportBusinessActivityDetail> reportBusinessActivityDetailList = tReportBusinessActivityDetailMapper
@@ -539,6 +539,7 @@ public class ReportServiceImpl implements ReportService {
                 bean.setMinRt(detail.getMinRt());
                 bean.setPassFlag((Optional.ofNullable(detail.getPassFlag()).orElse(0)));
                 bean.setDistribute(getDistributes(detail.getRtDistribute()));
+                bean.setApplicationIds(detail.getApplicationIds());
                 return bean;
             }).collect(Collectors.toList());
     }
@@ -1018,9 +1019,7 @@ public class ReportServiceImpl implements ReportService {
         influxDbSql.append(
             " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps ,sum(sum_rt)/sum(count) as  "
                 + "avgRt, sum(sa_count) as saCount,  max(avg_tps) as maxTps, min(min_rt) as minRt, max(max_rt) as "
-                // add by 李鹏
-                // 20210621 active_threads有可能出现0的情况，所以这里取平均后可能不为整数，加round取整
-                + "maxRt, count(avg_rt) as recordCount ,round(mean(active_threads)) as avgConcurrenceNum");
+                + "maxRt, count(avg_rt) as recordCount ,max(active_threads) as maxConcurrenceNum,round(mean(active_threads)) as avgConcurrenceNum");
         influxDbSql.append(" from ");
         influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, customerId));
         influxDbSql.append(" where ");
@@ -1184,6 +1183,7 @@ public class ReportServiceImpl implements ReportService {
             reportResult.setId(reportResult.getId());
             reportResult.setEndTime(curDate);
             reportResult.setAvgConcurrent(statReport.getAvgConcurrenceNum());
+            reportResult.setConcurrent(statReport.getMaxConcurrenceNum());
         }
         reportResult.setGmtUpdate(new Date());
 
@@ -1259,6 +1259,9 @@ public class ReportServiceImpl implements ReportService {
             resultMap.put("successRate", new DataBean(detail.getSuccessRate(), detail.getTargetSuccessRate()));
             resultMap.put("avgConcurrenceNum", detail.getAvgConcurrenceNum());
             resultMap.put("distribute",getDistributes(detail.getRtDistribute()));
+            if (detail.getBusinessActivityId() > -1 && StringUtils.isNotBlank(detail.getApplicationIds())) {
+                resultMap.put("applicationIds", detail.getApplicationIds());
+            }
             return resultMap;
         }
         return null;
