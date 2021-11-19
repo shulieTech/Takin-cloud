@@ -46,8 +46,8 @@ import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt.Star
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 
 /**
- * @Author 莫问
- * @Date 2020-08-07
+ * @author 莫问
+ * @date 2020-08-07
  */
 
 @Service
@@ -211,8 +211,7 @@ public class FileSplitService {
                     sliceResult.set(false);
                 }
             } catch (TakinCloudException e) {
-                log.error("【文件分片】--场景ID【{}】,文件名【{}】,拆分异常【{}】", startRequest.getSceneId(), dataFile.getName(),
-                    e.getMessage());
+                log.error("【文件分片】--场景ID【{}】,文件名【{}】,拆分异常", startRequest.getSceneId(), dataFile.getName(), e);
                 sliceResult.set(false);
             }
         }).collect(Collectors.toList()));
