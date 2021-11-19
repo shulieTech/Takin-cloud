@@ -2,9 +2,11 @@
 
 package io.shulie.takin.cloud.open.entrypoint.controller.report;
 
+import java.util.Set;
 import java.util.List;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.util.StrUtil;
@@ -88,9 +90,11 @@ public class ReportOpenController {
         {
             List<String> applicationIdStringList = new LinkedList<>();
             fillApplicationIds(detailOutput.getNodeDetail(), applicationIdStringList);
-            List<Long> applicationIdList = new LinkedList<>();
+            Set<Long> applicationIdList = new LinkedHashSet<>();
             // 双循环转化id为一维数据
-            applicationIdStringList.forEach(t -> Arrays.stream(t.split(",")).filter(StrUtil::isNotBlank).map(Long::parseLong).forEach(applicationIdList::add));
+            applicationIdStringList.stream().filter(StrUtil::isNotBlank)
+                .forEach(t -> Arrays.stream(t.split(",")).filter(StrUtil::isNotBlank)
+                    .map(Long::parseLong).forEach(applicationIdList::add));
             // 填充响应对象的值
             resp.setBusinessActivity(new LinkedList<BusinessActivitySummaryBean>() {{
                 add(new BusinessActivitySummaryBean() {{
@@ -169,10 +173,8 @@ public class ReportOpenController {
      */
     @GetMapping("report/summary/list")
     @ApiOperation("压测明细")
-    public ResponseResult<NodeTreeSummaryResp> queryActivitiesSummaryList(ReportDetailByIdReq req){
+    public ResponseResult<NodeTreeSummaryResp> queryActivitiesSummaryList(ReportDetailByIdReq req) {
         return ResponseResult.success(reportService.getNodeSummaryList(req.getReportId()));
     }
-
-
 
 }
