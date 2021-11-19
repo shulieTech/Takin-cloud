@@ -144,9 +144,6 @@ public class ReportOpenController {
     @ApiOperation("节点树")
     public ResponseResult<List<ScriptNodeTreeResp>> queryScriptNodeTree(ScriptNodeTreeQueryReq req) {
         List<ScriptNodeTreeResp> nodeTree = reportService.getNodeTree(req);
-        if (CollectionUtils.isEmpty(nodeTree)) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在");
-        }
         return ResponseResult.success(nodeTree);
     }
 

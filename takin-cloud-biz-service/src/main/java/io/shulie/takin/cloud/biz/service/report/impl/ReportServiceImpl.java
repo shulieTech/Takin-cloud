@@ -41,7 +41,6 @@ import org.influxdb.impl.TimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.date.DateField;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Lists;
@@ -1352,7 +1351,9 @@ public class ReportServiceImpl implements ReportService {
         }
 
         if (Objects.isNull(reportResult)){
-            //todo 返回未找到
+            if (Objects.isNull(req.getReportId())) {
+                log.warn("查询报告节点树--未查询到正在运行的报告，场景ID:{}", req.getSceneId());
+            }
             return null;
         }
         List<ReportBusinessActivityDetail> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper
