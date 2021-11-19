@@ -275,8 +275,8 @@ public class ReportServiceImpl implements ReportService {
         ReportDetailOutput detailOutput = this.getReportByReportId(reportResult.getId());
         reportDetail.setSlaMsg(detailOutput.getSlaMsg());
         String testPlanXpathMD5 = getTestPlanXpathMD5(reportResult.getScriptNodeTree());
-        StatReportDTO statReport = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
-            StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY : testPlanXpathMD5);
+        String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY : testPlanXpathMD5;
+        StatReportDTO statReport = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(), transaction);
         if (statReport == null) {
             log.warn("实况报表:[{}]，暂无数据", reportResult.getId());
         } else {
@@ -288,7 +288,13 @@ public class ReportServiceImpl implements ReportService {
             reportDetail.setAvgConcurrent(statReport.getAvgConcurrenceNum());
         }
         reportDetail.setSceneName(wrapper.getPressureTestSceneName());
-        reportDetail.setConcurrent(wrapper.getConcurrenceNum());
+        //最大并发
+        Integer maxConcurrence = getMaxConcurrence(sceneId, reportResult.getId(), reportResult.getCustomerId(),
+            transaction);
+        if (Objects.nonNull(statReport) && statReport.getMaxConcurrenceNum() > 0) {
+            maxConcurrence = Math.max(maxConcurrence,statReport.getAvgConcurrenceNum().intValue());
+        }
+        reportDetail.setConcurrent(maxConcurrence);
         reportDetail.setTotalWarn(tWarnDetailMapper.countReportTotalWarn(reportResult.getId()));
         reportDetail.setTaskStatus(reportResult.getStatus());
         reportDetail.setTestTime(getTaskTime(reportResult.getStartTime(), new Date(), wrapper.getTotalTestTime()));
@@ -677,6 +683,30 @@ public class ReportServiceImpl implements ReportService {
         influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
         influxDbSql.append(" order by time desc limit 1");
         return influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+    }
+
+    /**
+     * 获取最大并发数
+     * @param sceneId 场景ID
+     * @param reportId 报告ID
+     * @param customerId 租户ID
+     * @param transaction 节点
+     * @return
+     */
+    private Integer getMaxConcurrence(Long sceneId,Long reportId,Long customerId,String transaction){
+        StringBuilder influxDbSql = new StringBuilder();
+        influxDbSql.append("select");
+        influxDbSql.append("max(active_threads) as maxConcurrenceNum");
+        influxDbSql.append(" from ");
+        influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, customerId));
+        influxDbSql.append(" where ");
+        influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
+        influxDbSql.append(" order by time desc limit 1");
+        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        if (Objects.nonNull(statReportDTO)){
+            return statReportDTO.getMaxConcurrenceNum();
+        }
+        return 0;
     }
 
     /**
