@@ -6,6 +6,7 @@
         <result column="pt_id" property="ptId" jdbcType="BIGINT"/>
         <result column="sla_id" property="slaId" jdbcType="BIGINT"/>
         <result column="sla_name" property="slaName" jdbcType="VARCHAR"/>
+        <result column="bind_ref" property="bindRef" jdbcType="VARCHAR"/>
         <result column="business_activity_id" property="businessActivityId" jdbcType="BIGINT"/>
         <result column="business_activity_name" property="businessActivityName" jdbcType="VARCHAR"/>
         <result column="warn_content" property="warnContent" jdbcType="VARCHAR"/>
@@ -26,7 +27,7 @@
 
     <sql id="Base_Column_List">
         id, pt_id, sla_id, sla_name, business_activity_id, business_activity_name, warn_content,
-    real_value, warn_time,bind_ref create_time
+    real_value, warn_time,bind_ref,create_time
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
