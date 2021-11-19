@@ -726,6 +726,15 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                         }
                         timeWindow = CollectorUtil.getNextTimeWindow(timeWindow);
                     } while (timeWindow <= breakTime);
+
+                    if (r.getEndTime() != null){
+                        // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
+                        sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
+                                .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
+                                .updateEnum(SceneManageStatusEnum.STOP)
+                                .build());
+                    }
+
                     finishPushData(sceneId, reportId, customerId, podNum, timeWindow, endTime, nodes);
                 } catch (Throwable t) {
                     log.error("pushData2 error!", t);
@@ -843,6 +852,14 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                                 // 删除 timeWindowMap 的key
                                 String tempTimestamp = ScheduleConstants.TEMP_TIMESTAMP_SIGN + engineName;
                                 timeWindowMap.remove(tempTimestamp);
+                            }
+
+                            if (reportResult.getEndTime() != null){
+                                // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
+                                sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
+                                        .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
+                                        .updateEnum(SceneManageStatusEnum.STOP)
+                                        .build());
                             }
                             // 超时自动检修，强行触发关闭
                             forceClose(taskKey, timeWindow, sceneId, reportId, customerId);

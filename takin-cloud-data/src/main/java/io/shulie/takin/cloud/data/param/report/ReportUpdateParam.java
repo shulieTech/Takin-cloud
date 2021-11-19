@@ -36,10 +36,6 @@ public class ReportUpdateParam extends CloudUserCommonRequestExt {
      */
     private Date startTime;
 
-    /**
-     * 结束时间
-     */
-    private Date endTime;
 
     /**
      * 报表生成状态:0/就绪状态，1/生成中,2/完成生成

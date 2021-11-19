@@ -1165,12 +1165,16 @@ public class ReportServiceImpl implements ReportService {
         SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(reportResult.getSceneId(),
             new SceneManageQueryOpitons());
         Long totalTestTime = sceneManage.getTotalTestTime();
-        Date curDate = new Date();
-        long testRunTime = DateUtil.between(reportResult.getStartTime(), curDate, DateUnit.SECOND);
-        if (testRunTime > totalTestTime) {
-            //强制修改结束时间
-            curDate = DateUtil.offset(reportResult.getStartTime(), DateField.SECOND, totalTestTime.intValue());
+
+        String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId());
+        Long eTime = (Long)redisClientUtils.getObject(engineName + ScheduleConstants.LAST_SIGN);
+        Date curDate;
+        if (eTime != null){
+            curDate = new Date(eTime);
+        }else {
+            curDate = new Date();
         }
+        long testRunTime = DateUtil.between(reportResult.getStartTime(), curDate, DateUnit.SECOND);
 
         if (null != statReport) {
             //保存报表数据
@@ -1181,7 +1185,6 @@ public class ReportServiceImpl implements ReportService {
             reportResult.setSuccessRate(statReport.getSuccessRate());
             reportResult.setSa(statReport.getSa());
             reportResult.setId(reportResult.getId());
-            reportResult.setEndTime(curDate);
             reportResult.setAvgConcurrent(statReport.getAvgConcurrenceNum());
             reportResult.setConcurrent(statReport.getMaxConcurrenceNum());
         }
