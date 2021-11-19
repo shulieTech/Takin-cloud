@@ -291,7 +291,7 @@ public class ReportServiceImpl implements ReportService {
         //最大并发
         Integer maxConcurrence = getMaxConcurrence(sceneId, reportResult.getId(), reportResult.getCustomerId(),
             transaction);
-        if (Objects.nonNull(statReport) && Objects.nonNull(statReport.getMaxConcurrenceNum())) {
+        if (Objects.nonNull(statReport) && Objects.nonNull(statReport.getAvgConcurrenceNum())) {
             maxConcurrence = Math.max(maxConcurrence,statReport.getAvgConcurrenceNum().intValue());
         }
         reportDetail.setConcurrent(maxConcurrence);
