@@ -696,7 +696,7 @@ public class ReportServiceImpl implements ReportService {
     private Integer getMaxConcurrence(Long sceneId,Long reportId,Long customerId,String transaction){
         StringBuilder influxDbSql = new StringBuilder();
         influxDbSql.append("select");
-        influxDbSql.append("max(active_threads) as maxConcurrenceNum");
+        influxDbSql.append(" max(active_threads) as maxConcurrenceNum");
         influxDbSql.append(" from ");
         influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, customerId));
         influxDbSql.append(" where ");
