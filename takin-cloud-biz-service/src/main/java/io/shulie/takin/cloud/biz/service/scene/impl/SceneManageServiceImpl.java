@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -338,15 +339,22 @@ public class SceneManageServiceImpl implements SceneManageService {
                 continue;
             }
             JSONObject object = JSON.parseObject(sceneManage.getPtConfig());
-            // 新版本{}
+            Integer maxThreadNumber = -1;
+            // 新版本
             if (StrUtil.isNotBlank(sceneManage.getScriptAnalysisResult())) {
-                // TODO 新版本解析最大并发数
-                threadNum.put(sceneManage.getId(), -1);
+                PtConfigExt ptConfigExt = JSON.parseObject(sceneManage.getPtConfig(), PtConfigExt.class);
+                for (Entry<String, ThreadGroupConfigExt> entry : ptConfigExt.getThreadGroupConfigMap().entrySet()) {
+                    ThreadGroupConfigExt v = entry.getValue();
+                    if (v.getThreadNum() != null && v.getThreadNum() > maxThreadNumber) {
+                        maxThreadNumber = v.getThreadNum();
+                    }
+                }
             }
             // 旧版本
             if (object.containsKey("threadNum")) {
-                threadNum.put(sceneManage.getId(), object.getIntValue("threadNum"));
+                maxThreadNumber = object.getIntValue("threadNum");
             }
+            threadNum.put(sceneManage.getId(), maxThreadNumber);
         }
 
         List<Long> sceneIds = tReportMapper.listReportSceneIds(
@@ -925,7 +933,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             path = scriptPath + SceneManageConstant.FILE_SPLIT + uploadPath;
             //兼容性处理
             File file = new File(path);
-            if (!file.exists() && uploadPath.startsWith(scriptPath+SceneManageConstant.FILE_SPLIT)) {
+            if (!file.exists() && uploadPath.startsWith(scriptPath + SceneManageConstant.FILE_SPLIT)) {
                 path = uploadPath;
             }
         } else {
