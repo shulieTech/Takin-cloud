@@ -307,6 +307,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             List<String> transactions = metriceses.stream().filter(Objects::nonNull)
                 .map(ResponseMetrics::getTransaction)
                 .filter(StringUtils::isNotBlank)
+                //过滤掉控制器
+                .filter(t -> !this.isController(t, nodes))
                 .distinct()
                 .collect(Collectors.toList());
             if (CollectionUtils.isEmpty(transactions)) {
@@ -388,6 +390,19 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             .showTime(endTime));
         return timeWindow;
     }
+
+    private boolean isController(String transaction, List<ScriptNode> nodes){
+        List<ScriptNode> nodeList = JmxUtil.getScriptNodeByType(NodeTypeEnum.CONTROLLER, nodes);
+        if (CollectionUtils.isNotEmpty(nodeList)){
+            List<String> controllerTransactions = nodeList.stream().filter(Objects::nonNull)
+                .map(ScriptNode::getXpathMd5)
+                .collect(Collectors.toList());
+            return controllerTransactions.contains(transaction);
+        }else{
+            return false;
+        }
+    }
+
 
     private PressureOutput createPressureOutput(List<PressureOutput> results,long time,int podNum,String transaction,String testName){
         int count = results.stream().filter(Objects::nonNull)
