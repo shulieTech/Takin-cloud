@@ -34,6 +34,7 @@ import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
 import io.shulie.takin.cloud.common.constants.CollectorConstants;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.influxdb.InfluxDBUtil;
@@ -367,20 +368,14 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             }
             //如果是老版本的，统计ALL
             else {
-                int allSaCount = results.stream().filter(Objects::nonNull)
-                    //过滤掉all的
-                    .filter(p -> !"all".equals(p.getTransaction()))
-                    .map(PressureOutput::getSaCount)
-                    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-                    .sum();
-                //todo 排除事务控制器的数据
+                //todo 排除事务控制器的数据，如何判断是否为事务控制器
+                //int allSaCount = results.stream().filter(Objects::nonNull)
+                //    .filter(p -> !ReportConstants.ALL_BUSINESS_ACTIVITY.equals(p.getTransaction()))
+                //    .map(PressureOutput::getSaCount)
+                //    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+                //    .sum();
+                results.add(createPressureOutput(results,time,podNum,ReportConstants.ALL_BUSINESS_ACTIVITY,ReportConstants.ALL_BUSINESS_ACTIVITY));
 
-                results.stream().filter(Objects::nonNull)
-                    .forEach(o -> {
-                        if ("all".equalsIgnoreCase(o.getTransaction())) {
-                            o.setSaCount(allSaCount);
-                        }
-                    });
             }
             results.stream().filter(Objects::nonNull)
                 .map(p -> InfluxDBUtil.toPoint(measurement, time, p))
@@ -392,6 +387,90 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         log.info(logPre + " finished!timeWindow=" + DateUtil.showTime(timeWindow) + ", endTime=" + DateUtil
             .showTime(endTime));
         return timeWindow;
+    }
+
+    private PressureOutput createPressureOutput(List<PressureOutput> results,long time,int podNum,String transaction,String testName){
+        int count = results.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getCount)
+            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+            .sum();
+        int failCount = results.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getFailCount)
+            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+            .sum();
+        int saCount = results.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getSaCount)
+            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+            .sum();
+        double sa = NumberUtil.getPercentRate(saCount, count);
+        double successRate = NumberUtil.getPercentRate(count - failCount, count);
+        long sendBytes = results.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getSentBytes)
+            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
+            .sum();
+        long receiveBytes = results.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getReceivedBytes)
+            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
+            .sum();
+
+        long sumRt = results.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getSumRt)
+            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
+            .sum();
+
+        double avgRt = NumberUtil.getRate(sumRt, count);
+
+        double maxRt = results.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getMaxRt)
+            .mapToDouble(d -> Objects.isNull(d) ? 0 : d)
+            .max()
+            .orElse(0);
+
+        double minRt = results.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getMinRt)
+            .mapToDouble(d -> Objects.isNull(d) ? 0 : d)
+            .min()
+            .orElse(0);
+
+        int activeThreads = results.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getActiveThreads)
+            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+            .sum();
+        double avgTps = NumberUtil.getRate(count, CollectorConstants.SEND_TIME);
+        List<String> percentData = results.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getSaPercent)
+            .filter(StringUtils::isNotBlank)
+            .collect(Collectors.toList());
+        String percentSa = calculateSaPercent(percentData);
+        int podNos = results.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getDataNum)
+            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+            .findFirst()
+            .orElse(0);
+        double dataRate = NumberUtil.getPercentRate(podNos, podNum, 100d);
+        int status = podNos < podNum ? 0 : 1;
+        PressureOutput output = new PressureOutput();
+        output.setTime(time);
+        output.setCount(count);
+        output.setTransaction(transaction);
+        output.setFailCount(failCount);
+        output.setSaCount(saCount);
+        output.setSa(sa);
+        output.setSuccessRate(successRate);
+        output.setSentBytes(sendBytes);
+        output.setReceivedBytes(receiveBytes);
+        output.setSumRt(sumRt);
+        output.setAvgRt(avgRt);
+        output.setMaxRt(maxRt);
+        output.setMinRt(minRt);
+        output.setActiveThreads(activeThreads);
+        output.setAvgTps(avgTps);
+        output.setSaPercent(percentSa);
+        output.setDataNum(podNos);
+        output.setDataRate(dataRate);
+        output.setStatus(status);
+        output.setTestName(testName);
+        return output;
     }
 
     /**
@@ -435,7 +514,6 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         String transaction = targetNode.getXpathMd5();
         String testName = targetNode.getTestName();
         List<ScriptNode> childSamplers = JmxUtil.getScriptNodeByType(NodeTypeEnum.SAMPLER, targetNode.getChildren());
-        //        List<ScriptNode> childSamplers = JsonPathUtil.getChildSamplers(nodeTree, transaction);
         Map<String, List<PressureOutput>> dataMap = data.stream().collect(
             Collectors.groupingBy(PressureOutput::getTransaction));
         List<PressureOutput> tmpData = new ArrayList<>();
@@ -447,87 +525,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 tmpData.addAll(entry.getValue());
             }
         }
-        int count = tmpData.stream().filter(Objects::nonNull)
-            .map(PressureOutput::getCount)
-            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-            .sum();
-        int failCount = tmpData.stream().filter(Objects::nonNull)
-            .map(PressureOutput::getFailCount)
-            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-            .sum();
-        int saCount = tmpData.stream().filter(Objects::nonNull)
-            .map(PressureOutput::getSaCount)
-            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-            .sum();
-        double sa = NumberUtil.getPercentRate(saCount, count);
-        double successRate = NumberUtil.getPercentRate(count - failCount, count);
-        long sendBytes = tmpData.stream().filter(Objects::nonNull)
-            .map(PressureOutput::getSentBytes)
-            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
-            .sum();
-        long receiveBytes = tmpData.stream().filter(Objects::nonNull)
-            .map(PressureOutput::getReceivedBytes)
-            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
-            .sum();
-
-        long sumRt = tmpData.stream().filter(Objects::nonNull)
-            .map(PressureOutput::getSumRt)
-            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
-            .sum();
-
-        double avgRt = NumberUtil.getRate(sumRt, count);
-
-        double maxRt = tmpData.stream().filter(Objects::nonNull)
-            .map(PressureOutput::getMaxRt)
-            .mapToDouble(d -> Objects.isNull(d) ? 0 : d)
-            .max()
-            .orElse(0);
-
-        double minRt = tmpData.stream().filter(Objects::nonNull)
-            .map(PressureOutput::getMinRt)
-            .mapToDouble(d -> Objects.isNull(d) ? 0 : d)
-            .max()
-            .orElse(0);
-
-        int activeThreads = tmpData.stream().filter(Objects::nonNull)
-            .map(PressureOutput::getActiveThreads)
-            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-            .sum();
-        double avgTps = NumberUtil.getRate(count, CollectorConstants.SEND_TIME);
-        List<String> percentData = tmpData.stream().filter(Objects::nonNull)
-            .map(PressureOutput::getSaPercent)
-            .filter(StringUtils::isNotBlank)
-            .collect(Collectors.toList());
-        String percentSa = calculateSaPercent(percentData);
-        int podNos = tmpData.stream().filter(Objects::nonNull)
-            .map(PressureOutput::getDataNum)
-            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-            .findFirst()
-            .orElse(0);
-        double dataRate = NumberUtil.getPercentRate(podNos, podNum, 100d);
-        int status = podNos < podNum ? 0 : 1;
-        PressureOutput output = new PressureOutput();
-        output.setTime(time);
-        output.setTransaction(transaction);
-        output.setCount(count);
-        output.setFailCount(failCount);
-        output.setSaCount(saCount);
-        output.setSa(sa);
-        output.setSuccessRate(successRate);
-        output.setSentBytes(sendBytes);
-        output.setReceivedBytes(receiveBytes);
-        output.setSumRt(sumRt);
-        output.setAvgRt(avgRt);
-        output.setMaxRt(maxRt);
-        output.setMinRt(minRt);
-        output.setActiveThreads(activeThreads);
-        output.setAvgTps(avgTps);
-        output.setSaPercent(percentSa);
-        output.setDataNum(podNos);
-        output.setDataRate(dataRate);
-        output.setStatus(status);
-        output.setTestName(testName);
-        data.add(output);
+        data.add(createPressureOutput(tmpData,time,podNum,transaction,testName));
     }
 
     /**
