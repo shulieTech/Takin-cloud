@@ -20,6 +20,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
@@ -694,16 +695,20 @@ public class SceneManageServiceImpl implements SceneManageService {
             }
 
             // 根据 oldScriptId 过滤
-            SceneMangeFeaturesVO featuresVO = JSONUtil.toBean(features, SceneMangeFeaturesVO.class);
-            if (featuresVO == null || !Objects.equals(featuresVO.getScriptId(), request.getOldScriptId())) {
+            //  张天赐 - 兼容新老版本
+            //SceneMangeFeaturesVO featuresVO = JSONUtil.toBean(features, SceneMangeFeaturesVO.class);
+            Map<String, Object> feature = JSONObject.parseObject(features, new TypeReference<Map<String, Object>>() {});
+            if (feature == null
+                || !feature.containsKey("scriptId") || feature.get("scriptId") == null
+                || !Objects.equals(Long.parseLong(feature.get("scriptId").toString()), request.getOldScriptId())) {
                 return null;
             }
             // 赋值新的 scriptId
-            featuresVO.setScriptId(request.getNewScriptId());
+            feature.put("scriptId", request.getNewScriptId());
 
             SceneManageEntity newSceneManageEntity = new SceneManageEntity();
             newSceneManageEntity.setId(sceneManage.getId());
-            newSceneManageEntity.setFeatures(JSONUtil.toJsonStr(featuresVO));
+            newSceneManageEntity.setFeatures(JSONUtil.toJsonStr(feature));
             return newSceneManageEntity;
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
