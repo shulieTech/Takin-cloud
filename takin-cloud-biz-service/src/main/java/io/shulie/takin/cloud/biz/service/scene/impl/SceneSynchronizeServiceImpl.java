@@ -227,8 +227,8 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
         }
         // 开始同步
         //  1. 删除本次未匹配上的
-        allNodeMd5.forEach(t -> {
-            if (!sceneGoal.containsKey(t)) {
+        sceneGoal.keySet().forEach(t -> {
+            if (!allNodeMd5.contains(t)) {
                 sceneGoal.remove(t);
                 sceneContent.remove(t);
             }
