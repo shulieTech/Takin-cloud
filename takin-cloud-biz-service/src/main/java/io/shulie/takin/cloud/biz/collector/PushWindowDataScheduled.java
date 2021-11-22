@@ -447,10 +447,12 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             .min()
             .orElse(0);
 
+        //fixme 目前压测采样器回传的活跃线程数就是整个线程组的活跃线程数,暂时先取一个最大值，理论上同一个时间窗口回传的活跃线程数都是相同的
         int activeThreads = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getActiveThreads)
             .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-            .sum();
+            .max()
+            .orElse(0);
         double avgTps = NumberUtil.getRate(count, CollectorConstants.SEND_TIME);
         List<String> percentData = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getSaPercent)
