@@ -412,8 +412,8 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
             if (StrUtil.isBlank(featureString)) {return false;}
             try {
                 Map<String, Object> features = JSONObject.parseObject(featureString, new TypeReference<Map<String, Object>>() {});
-                if (features.containsKey("scriptId")) {
-                    return String.valueOf(scriptId).equals(features.get("scriptId"));
+                if (features.containsKey("scriptId") && features.get("scriptId") != null) {
+                    return String.valueOf(scriptId).equals(features.get("scriptId").toString());
                 } else {return false;}
             } catch (Exception e) {
                 return false;
