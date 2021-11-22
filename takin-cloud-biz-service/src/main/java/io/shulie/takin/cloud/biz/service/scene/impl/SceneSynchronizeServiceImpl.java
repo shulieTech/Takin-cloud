@@ -189,11 +189,15 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
      * @return 匹配结果
      */
     private boolean synchronizeSceneNode(long sceneId, Set<String> samplerNode, Map<String, Long> businessActivityRef) {
-        // 组装全部节点
-        Set<String> allNodeMd5 = new HashSet<>(samplerNode);
-        // 同步(场景节点、压测目标、SLA)
-        return synchronizeGoal(sceneId, new HashSet<>(allNodeMd5), businessActivityRef)
-            && synchronizeMonitoringGoal(sceneId, new HashSet<>(allNodeMd5));
+        // 同步场景节点、压测目标
+        boolean goalSynchronizeResult = synchronizeGoal(sceneId, new HashSet<>(samplerNode), businessActivityRef);
+        log.info("同步节点、压测目标.事务{}.场景主键:{}.{}.", transactionIdentifier.get(), sceneId, goalSynchronizeResult);
+        if (!goalSynchronizeResult) {return false;}
+        // 同步SLA
+        boolean monitoringGoalSynchronizeResult = synchronizeMonitoringGoal(sceneId, new HashSet<>(samplerNode));
+        log.info("同步SLA.事务{}.场景主键:{}.{}.", transactionIdentifier.get(), sceneId, monitoringGoalSynchronizeResult);
+        // 返回结果
+        return monitoringGoalSynchronizeResult;
     }
 
     /**
@@ -350,7 +354,7 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
             //      新配置少于或等于旧配置数量，就可以同步
             threadGroupConfigMap.keySet().forEach(threadGroupMd5Copy::remove);
             if (threadGroupMd5Copy.size() > 0) {
-                log.info("事务:{}.场景{}同步失败.线程组施压配置匹配失败", transactionIdentifier.get(), sceneId);
+                log.info("同步线程组.事务:{}.场景主键:{}.同步失败.线程组施压配置匹配失败", transactionIdentifier.get(), sceneId);
                 return false;
             }
             // 开始同步
@@ -363,9 +367,10 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
                 setId(sceneId);
                 setPtConfig(JSONObject.toJSONString(ptConfig));
             }});
+            log.info("同步线程组.事务{}.场景主键:{}.成功.", transactionIdentifier.get(), sceneId);
             return true;
         } catch (Exception e) {
-            log.error("同步场景.事务{}.场景主键:{}.同步线程组施压配置失败.", transactionIdentifier.get(), sceneId, e);
+            log.error("同步线程组.事务{}.场景主键:{}.同步线程组施压配置失败.", transactionIdentifier.get(), sceneId, e);
             return false;
         }
     }
