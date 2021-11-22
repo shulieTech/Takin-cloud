@@ -211,7 +211,7 @@ public class ReportServiceImpl implements ReportService {
         ReportDetailOutput detail = ReportConverter.INSTANCE.ofReportDetail(report);
 
         //补充操作用户 && 客户id
-        CloudPluginUtils.fillReportData(report, detail);
+        //CloudPluginUtils.fillReportData(report, detail);
 
         //警告列表
         List<WarnBean> warnList = listWarn(reportId);
@@ -1015,6 +1015,9 @@ public class ReportServiceImpl implements ReportService {
         boolean isConclusion = updateReportBusinessActivity(taskResult.getSceneId(), taskResult.getTaskId(),
             taskResult.getCustomerId());
 
+        if (Objects.isNull(reportResult.getEndTime())){
+            reportResult.setEndTime(getFinalDateTime(taskResult.getSceneId(),reportId,taskResult.getCustomerId()));
+        }
         //保存报表结果
         saveReportResult(reportResult, taskResult, statReport, isConclusion);
 
@@ -1031,6 +1034,28 @@ public class ReportServiceImpl implements ReportService {
                     SceneManageStatusEnum.STOP).updateEnum(SceneManageStatusEnum.WAIT).build());
         }
 
+    }
+
+    private Date getFinalDateTime(Long sceneId, Long reportId, Long customerId) {
+        StringBuilder influxDbSql = new StringBuilder();
+        influxDbSql.append("select");
+        influxDbSql.append(
+            " max(create_time) as time");
+        influxDbSql.append(" from ");
+        influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, customerId));
+        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        Date date;
+        if (Objects.nonNull(statReportDTO) && StringUtils.isNotBlank(statReportDTO.getTime())){
+            try{
+                date = new Date(NumberUtil.parseLong(statReportDTO.getTime()));
+            }catch (Exception e){
+                log.error("时间转换异常");
+                date = new Date(System.currentTimeMillis());
+            }
+        }else {
+            date = new Date(System.currentTimeMillis());
+        }
+        return date;
     }
 
     /**

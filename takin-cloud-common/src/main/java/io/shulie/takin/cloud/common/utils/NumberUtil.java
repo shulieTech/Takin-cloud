@@ -49,6 +49,24 @@ public class NumberUtil {
         }
     }
 
+    public static long parseLong(String s){
+        return parseLong(s,0L);
+    }
+    public static Long parseLong(String s,Long defValue){
+        if (StringUtils.isBlank(s) || !StringUtils.isNumeric(s)){
+            return defValue;
+        }
+        if (null != defValue){
+            return NumberUtils.toLong(s,defValue);
+        }else {
+            long a = NumberUtils.toLong(s,Long.MAX_VALUE);
+            if (a == Long.MAX_VALUE){
+                return defValue;
+            }
+        }
+        return 0L;
+    }
+
     /**
      * 计算a在b中的比例
      */
