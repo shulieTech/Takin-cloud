@@ -152,4 +152,25 @@ public class ReportDaoImpl implements ReportDao {
         }
         return null;
     }
+
+
+    @Override
+    public void updateReportEndTime(Long resultId, Date endTime) {
+        ReportEntity entity = new ReportEntity();
+        entity.setId(resultId);
+        entity.setEndTime(endTime);
+        entity.setGmtUpdate(new Date());
+        reportMapper.updateById(entity);
+    }
+
+    @Override
+    public ReportResult getById(Long resultId) {
+        if (resultId == null){
+            return null;
+        }
+        ReportEntity reportEntity = reportMapper.selectById(resultId);
+        ReportResult reportResult = new ReportResult();
+        BeanUtils.copyProperties(reportEntity, reportResult);
+        return reportResult;
+    }
 }

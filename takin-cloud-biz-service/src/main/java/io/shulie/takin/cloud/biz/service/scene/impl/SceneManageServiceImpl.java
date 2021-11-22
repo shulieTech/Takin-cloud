@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
@@ -76,6 +78,7 @@ import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
 import io.shulie.takin.cloud.common.utils.*;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
+import io.shulie.takin.cloud.data.mapper.mysql.SceneManageMapper;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
@@ -125,6 +128,8 @@ public class SceneManageServiceImpl implements SceneManageService {
     @Resource
     private EnginePluginUtils enginePluginUtils;
     @Resource
+    private SceneManageMapper sceneManageMapper;
+    @Resource
     private TSceneManageMapper tSceneManageMapper;
     @Resource
     private TSceneSlaRefMapper tSceneSlaRefMapper;
@@ -170,7 +175,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (isScriptManage) {
             matchScriptBusinessActivity(businessActivityRefs, sceneScriptRefList);
         }
-        Long sceneId = saveToDB((SceneManageCreateOrUpdateParam)maps.get(SCENE_MANAGE),
+        Long sceneId = saveToDatabase((SceneManageCreateOrUpdateParam)maps.get(SCENE_MANAGE),
             businessActivityRefs, sceneScriptRefList, sceneSlaRefs, isScriptManage);
 
         //使用了脚本，需要转移文件
@@ -244,7 +249,8 @@ public class SceneManageServiceImpl implements SceneManageService {
 
         File file = new File(dest.substring(0, dest.lastIndexOf("/")));
         if (!file.exists()) {
-            file.mkdirs();
+            boolean mkdirs = file.mkdirs();
+            log.debug("io.shulie.takin.cloud.biz.service.scene.impl.SceneManageServiceImpl#copyFile:mkdirs:{}", mkdirs);
         }
         new Thread(() -> {
             try {
@@ -280,7 +286,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         }
     }
 
-    private Long saveToDB(SceneManageCreateOrUpdateParam createParam, List<SceneBusinessActivityRef> businessActivityList,
+    private Long saveToDatabase(SceneManageCreateOrUpdateParam createParam, List<SceneBusinessActivityRef> businessActivityList,
         List<SceneScriptRef> scriptList, List<SceneSlaRef> slaList, boolean isScriptManage) {
         //负责人默认创建人
         Long sceneId = sceneManageDAO.insert(createParam);
@@ -338,15 +344,22 @@ public class SceneManageServiceImpl implements SceneManageService {
                 continue;
             }
             JSONObject object = JSON.parseObject(sceneManage.getPtConfig());
-            // 新版本{}
+            Integer maxThreadNumber = 0;
+            // 新版本
             if (StrUtil.isNotBlank(sceneManage.getScriptAnalysisResult())) {
-                // TODO 新版本解析最大并发数
-                threadNum.put(sceneManage.getId(), -1);
+                PtConfigExt ptConfigExt = JSON.parseObject(sceneManage.getPtConfig(), PtConfigExt.class);
+                for (Entry<String, ThreadGroupConfigExt> entry : ptConfigExt.getThreadGroupConfigMap().entrySet()) {
+                    ThreadGroupConfigExt v = entry.getValue();
+                    if (v.getThreadNum() != null) {
+                        maxThreadNumber += v.getThreadNum();
+                    }
+                }
             }
             // 旧版本
             if (object.containsKey("threadNum")) {
-                threadNum.put(sceneManage.getId(), object.getIntValue("threadNum"));
+                maxThreadNumber = object.getIntValue("threadNum");
             }
+            threadNum.put(sceneManage.getId(), maxThreadNumber);
         }
 
         List<Long> sceneIds = tReportMapper.listReportSceneIds(
@@ -417,7 +430,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (isScriptManage) {
             matchScriptBusinessActivity(businessActivityRefs, sceneScriptRefList);
         }
-        updateToDB(manageCreateOrUpdateParam, businessActivityRefs, sceneScriptRefList, sceneSlaRefs, isScriptManage);
+        updateToDatabase(manageCreateOrUpdateParam, businessActivityRefs, sceneScriptRefList, sceneSlaRefs, isScriptManage);
         //删除脚本文件、从新从文件库重新copy
         Long sceneId = wrapperRequest.getId();
         if (isScriptManage && fileNeedChange && StringUtils.isNotBlank(scriptPath) && sceneId != null) {
@@ -425,7 +438,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         }
     }
 
-    private void updateToDB(SceneManageCreateOrUpdateParam updateParam, List<SceneBusinessActivityRef> businessActivityList,
+    private void updateToDatabase(SceneManageCreateOrUpdateParam updateParam, List<SceneBusinessActivityRef> businessActivityList,
         List<SceneScriptRef> scriptList, List<SceneSlaRef> slaList, boolean isScriptManage) {
         sceneManageDAO.update(updateParam);
         Long sceneId = updateParam.getId();
@@ -628,13 +641,13 @@ public class SceneManageServiceImpl implements SceneManageService {
             return;
         }
         // 状态 更新 失败状态
-        SceneManage sceneManage = new SceneManage();
-        sceneManage.setLastPtTime(new Date());
-        sceneManage.setId(sceneId);
-        sceneManage.setUpdateTime(new Date());
-        // --->update 失败状态
-        sceneManage.setStatus(SceneManageStatusEnum.FAILED.getValue());
-        tSceneManageMapper.updateByPrimaryKeySelective(sceneManage);
+        SceneManageEntity sceneManage = new SceneManageEntity() {{
+            setId(sceneId);
+            setLastPtTime(new Date());
+            setUpdateTime(new Date());
+            setStatus(SceneManageStatusEnum.FAILED.getValue());
+        }};
+        sceneManageMapper.updateById(sceneManage);
 
     }
 
@@ -682,16 +695,20 @@ public class SceneManageServiceImpl implements SceneManageService {
             }
 
             // 根据 oldScriptId 过滤
-            SceneMangeFeaturesVO featuresVO = JSONUtil.toBean(features, SceneMangeFeaturesVO.class);
-            if (featuresVO == null || !Objects.equals(featuresVO.getScriptId(), request.getOldScriptId())) {
+            //  张天赐 - 兼容新老版本
+            //SceneMangeFeaturesVO featuresVO = JSONUtil.toBean(features, SceneMangeFeaturesVO.class);
+            Map<String, Object> feature = JSONObject.parseObject(features, new TypeReference<Map<String, Object>>() {});
+            if (feature == null
+                || !feature.containsKey("scriptId") || feature.get("scriptId") == null
+                || !Objects.equals(Long.parseLong(feature.get("scriptId").toString()), request.getOldScriptId())) {
                 return null;
             }
             // 赋值新的 scriptId
-            featuresVO.setScriptId(request.getNewScriptId());
+            feature.put("scriptId", request.getNewScriptId());
 
             SceneManageEntity newSceneManageEntity = new SceneManageEntity();
             newSceneManageEntity.setId(sceneManage.getId());
-            newSceneManageEntity.setFeatures(JSONUtil.toJsonStr(featuresVO));
+            newSceneManageEntity.setFeatures(JSONUtil.toJsonStr(feature));
             return newSceneManageEntity;
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
@@ -844,7 +861,8 @@ public class SceneManageServiceImpl implements SceneManageService {
             if (null != listFiles) {
                 for (File file : listFiles) {
                     if (!file.getName().equals(bigFileName)) {
-                        file.delete();
+                        boolean delete = file.delete();
+                        log.debug("io.shulie.takin.cloud.biz.service.scene.impl.SceneManageServiceImpl#delFilesByDirExceptBigFile:delete:{}.", delete);
                     }
                 }
             }
@@ -925,7 +943,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             path = scriptPath + SceneManageConstant.FILE_SPLIT + uploadPath;
             //兼容性处理
             File file = new File(path);
-            if (!file.exists() && uploadPath.startsWith(scriptPath+SceneManageConstant.FILE_SPLIT)) {
+            if (!file.exists() && uploadPath.startsWith(scriptPath + SceneManageConstant.FILE_SPLIT)) {
                 path = uploadPath;
             }
         } else {
@@ -1032,7 +1050,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             tgConfig.setSteps(json.getInteger(SceneManageConstant.STEP));
             tgConfig.setEstimateFlow(json.getDouble(SceneManageConstant.ESTIMATE_FLOW));
 
-            Map<String, ThreadGroupConfigExt> map = new HashMap<>();
+            Map<String, ThreadGroupConfigExt> map = new HashMap<>(1);
             map.put("all", tgConfig);
 
             wrapperOutput.setIpNum(json.getInteger(SceneManageConstant.HOST_NUM));
@@ -1052,7 +1070,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     }
 
     /**
-     * 新版本ptconfig数据
+     * 新版本ptConfig数据
      */
     private void fillPtConfig(SceneManageWrapperOutput wrapperOutput, String config) {
         try {
@@ -1116,7 +1134,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             wrapperVO.setPressureType(0);
         }
         map.put(SceneManageConstant.PT_TYPE, wrapperVO.getPressureType());
-        //        if (PressureSceneEnum.DEFAULT.equels(wrapperVO.getPressureType()) && wrapperVO.getConcurrenceNum() == null) {
+        //        if (PressureSceneEnum.DEFAULT.equals(wrapperVO.getPressureType()) && wrapperVO.getConcurrenceNum() == null) {
         //            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_BUILD_PARAM_ERROR, "并发模式中，并发数不能为空");
         //        }
         map.put(SceneManageConstant.THREAD_NUM, wrapperVO.getConcurrenceNum());
@@ -1243,7 +1261,8 @@ public class SceneManageServiceImpl implements SceneManageService {
         String dirPath = scriptPath + SceneManageConstant.FILE_SPLIT + sceneId;
         File dir = new File(dirPath);
         if (!dir.exists()) {
-            dir.mkdir();
+            boolean mkdir = dir.mkdir();
+            log.debug("io.shulie.takin.cloud.biz.service.scene.impl.SceneManageServiceImpl#moveTempFile:mkdir:{}.", mkdir);
         }
         scriptList.stream().filter(data -> data.getUploadId() != null).forEach(data -> {
             String tempPath = scriptTempPath

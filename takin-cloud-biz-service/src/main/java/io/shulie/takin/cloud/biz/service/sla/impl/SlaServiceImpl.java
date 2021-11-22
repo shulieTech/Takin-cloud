@@ -12,6 +12,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
+import io.shulie.takin.cloud.common.constants.ReportConstants;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.date.DateUtil;
 import com.google.common.collect.Maps;
@@ -277,7 +278,7 @@ public class SlaServiceImpl implements SlaService {
             return false;
         }
         for (String data : md5s) {
-            if ("-1".equals(data) || String.valueOf(bindRef).equals(data)) {
+            if ("-1".equals(data) || ReportConstants.ALL_BUSINESS_ACTIVITY.equals(data) || String.valueOf(bindRef).equals(data)) {
                 return true;
             }
         }

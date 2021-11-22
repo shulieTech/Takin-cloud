@@ -94,7 +94,7 @@ public class SceneServiceImpl implements SceneService {
         TransactionStatus transactionStatus = platformTransactionManager.getTransaction(transactionDefinition);
         try {
             // 1.   创建场景
-            long sceneId = createScene(in.getBasicInfo(), in.getConfig(), in.getAnalysisResult(), in.getDataValidation());
+            long sceneId = createScene(in.getBasicInfo(), in.getConfig(), in.getAnalysisResult(), in.getDataValidation(), in.getUserId());
             // 2. 更新场景&业务活动关联关系
             buildBusinessActivity(sceneId, in.getContent(), in.getGoal());
             // 3.   处理脚本
@@ -415,14 +415,14 @@ public class SceneServiceImpl implements SceneService {
      * @return 压测场景主键
      */
     private Long createScene(BasicInfo basicInfo,
-        PtConfigExt config, List<?> analysisResult, DataValidation dataValidation) {
+        PtConfigExt config, List<?> analysisResult, DataValidation dataValidation, Long userId) {
         Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), dataValidation);
         // 组装数据实体类
-        CloudUserExt user = CloudPluginUtils.getUser();
         SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),
             basicInfo.getScriptType(), config, feature, analysisResult);
         // 设置创建者信息
-        sceneEntity.setCreateName(user == null ? "" : user.getName());
+        sceneEntity.setUserId(userId);
+        sceneEntity.setCustomerId(CloudPluginUtils.getCustomerId());
         // 执行数据库操作
         sceneManageMapper.insert(sceneEntity);
         // 回填自增主键
@@ -460,11 +460,8 @@ public class SceneServiceImpl implements SceneService {
         PtConfigExt config, List<?> analysisResult, DataValidation dataValidation) {
         Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), dataValidation);
         // 组装数据实体类
-        CloudUserExt user = CloudPluginUtils.getUser();
         SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),
             basicInfo.getScriptType(), config, feature, analysisResult);
-        // 设置更新者信息
-        sceneEntity.setUpdateName(user == null ? "" : user.getName());
         // 执行数据库操作
         int updateRows = sceneManageMapper.updateById(sceneEntity);
         log.info("更新了业务活动「{}」。自增主键：{}。操作行数：{}。", basicInfo.getName(), sceneEntity.getId(), updateRows);
@@ -619,7 +616,6 @@ public class SceneServiceImpl implements SceneService {
      * @return 场景实体类
      */
     private SceneManageEntity assembleSceneEntity(Long sceneId, int type, String name, int scriptType, PtConfigExt config, Object feature, Object analysisResult) {
-        CloudUserExt user = CloudPluginUtils.getUser();
         return new SceneManageEntity() {{
             setType(type);
             setId(sceneId);
@@ -628,8 +624,6 @@ public class SceneServiceImpl implements SceneService {
             setPtConfig(JSONObject.toJSONString(config));
             setFeatures(JSONObject.toJSONString(feature));
             setScriptAnalysisResult(JSONObject.toJSONString(analysisResult));
-            setUserId(user == null ? -1 : user.getId());
-            setCustomerId(user == null ? 0 : user.getId());
             // 默认值
             setStatus(0);
             setDeptId(null);

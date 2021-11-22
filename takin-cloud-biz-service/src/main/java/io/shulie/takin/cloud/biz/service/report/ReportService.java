@@ -96,7 +96,7 @@ public interface ReportService {
      * @param reportId 报告主键
      * @return -
      */
-    NodeTreeSummaryResp getBusinessActivitySummaryList(Long reportId);
+    NodeTreeSummaryResp getNodeSummaryList(Long reportId);
 
     /**
      * 获取报告的业务活动数量和压测通过数量

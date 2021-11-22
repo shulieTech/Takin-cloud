@@ -34,6 +34,11 @@ public class StatReportDTO {
     private BigDecimal avgConcurrenceNum;
 
     /**
+     * 最大并发数
+     */
+    private Integer maxConcurrenceNum;
+
+    /**
      * tps
      */
     private BigDecimal tps;

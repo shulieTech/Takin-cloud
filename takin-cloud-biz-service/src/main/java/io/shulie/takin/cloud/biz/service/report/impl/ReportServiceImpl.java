@@ -41,7 +41,6 @@ import org.influxdb.impl.TimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.date.DateField;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Lists;
@@ -212,7 +211,7 @@ public class ReportServiceImpl implements ReportService {
         ReportDetailOutput detail = ReportConverter.INSTANCE.ofReportDetail(report);
 
         //补充操作用户 && 客户id
-        CloudPluginUtils.fillReportData(report, detail);
+        //CloudPluginUtils.fillReportData(report, detail);
 
         //警告列表
         List<WarnBean> warnList = listWarn(reportId);
@@ -275,8 +274,8 @@ public class ReportServiceImpl implements ReportService {
         ReportDetailOutput detailOutput = this.getReportByReportId(reportResult.getId());
         reportDetail.setSlaMsg(detailOutput.getSlaMsg());
         String testPlanXpathMD5 = getTestPlanXpathMD5(reportResult.getScriptNodeTree());
-        StatReportDTO statReport = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
-            StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY : testPlanXpathMD5);
+        String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY : testPlanXpathMD5;
+        StatReportDTO statReport = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(), transaction);
         if (statReport == null) {
             log.warn("实况报表:[{}]，暂无数据", reportResult.getId());
         } else {
@@ -288,7 +287,13 @@ public class ReportServiceImpl implements ReportService {
             reportDetail.setAvgConcurrent(statReport.getAvgConcurrenceNum());
         }
         reportDetail.setSceneName(wrapper.getPressureTestSceneName());
-        reportDetail.setConcurrent(wrapper.getConcurrenceNum());
+        //最大并发
+        Integer maxConcurrence = getMaxConcurrence(sceneId, reportResult.getId(), reportResult.getCustomerId(),
+            transaction);
+        if (Objects.nonNull(statReport) && Objects.nonNull(statReport.getAvgConcurrenceNum())) {
+            maxConcurrence = Math.max(maxConcurrence,statReport.getAvgConcurrenceNum().intValue());
+        }
+        reportDetail.setConcurrent(maxConcurrence);
         reportDetail.setTotalWarn(tWarnDetailMapper.countReportTotalWarn(reportResult.getId()));
         reportDetail.setTaskStatus(reportResult.getStatus());
         reportDetail.setTestTime(getTaskTime(reportResult.getStartTime(), new Date(), wrapper.getTotalTestTime()));
@@ -485,7 +490,7 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     @Override
-    public NodeTreeSummaryResp getBusinessActivitySummaryList(Long reportId) {
+    public NodeTreeSummaryResp getNodeSummaryList(Long reportId) {
         //List<BusinessActivitySummaryBean> list = Lists.newArrayList();
         //查询业务活动的概况
         List<ReportBusinessActivityDetail> reportBusinessActivityDetailList = tReportBusinessActivityDetailMapper
@@ -539,6 +544,7 @@ public class ReportServiceImpl implements ReportService {
                 bean.setMinRt(detail.getMinRt());
                 bean.setPassFlag((Optional.ofNullable(detail.getPassFlag()).orElse(0)));
                 bean.setDistribute(getDistributes(detail.getRtDistribute()));
+                bean.setApplicationIds(detail.getApplicationIds());
                 return bean;
             }).collect(Collectors.toList());
     }
@@ -676,6 +682,30 @@ public class ReportServiceImpl implements ReportService {
         influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
         influxDbSql.append(" order by time desc limit 1");
         return influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+    }
+
+    /**
+     * 获取最大并发数
+     * @param sceneId 场景ID
+     * @param reportId 报告ID
+     * @param customerId 租户ID
+     * @param transaction 节点
+     * @return
+     */
+    private Integer getMaxConcurrence(Long sceneId,Long reportId,Long customerId,String transaction){
+        StringBuilder influxDbSql = new StringBuilder();
+        influxDbSql.append("select");
+        influxDbSql.append(" max(active_threads) as maxConcurrenceNum");
+        influxDbSql.append(" from ");
+        influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, customerId));
+        influxDbSql.append(" where ");
+        influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
+        influxDbSql.append(" order by time desc limit 1");
+        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        if (Objects.nonNull(statReportDTO)){
+            return statReportDTO.getMaxConcurrenceNum();
+        }
+        return 0;
     }
 
     /**
@@ -985,6 +1015,9 @@ public class ReportServiceImpl implements ReportService {
         boolean isConclusion = updateReportBusinessActivity(taskResult.getSceneId(), taskResult.getTaskId(),
             taskResult.getCustomerId());
 
+        if (Objects.isNull(reportResult.getEndTime())){
+            reportResult.setEndTime(getFinalDateTime(taskResult.getSceneId(),reportId,taskResult.getCustomerId()));
+        }
         //保存报表结果
         saveReportResult(reportResult, taskResult, statReport, isConclusion);
 
@@ -1003,6 +1036,28 @@ public class ReportServiceImpl implements ReportService {
 
     }
 
+    private Date getFinalDateTime(Long sceneId, Long reportId, Long customerId) {
+        StringBuilder influxDbSql = new StringBuilder();
+        influxDbSql.append("select");
+        influxDbSql.append(
+            " max(create_time) as time");
+        influxDbSql.append(" from ");
+        influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, customerId));
+        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        Date date;
+        if (Objects.nonNull(statReportDTO) && StringUtils.isNotBlank(statReportDTO.getTime())){
+            try{
+                date = new Date(NumberUtil.parseLong(statReportDTO.getTime()));
+            }catch (Exception e){
+                log.error("时间转换异常");
+                date = new Date(System.currentTimeMillis());
+            }
+        }else {
+            date = new Date(System.currentTimeMillis());
+        }
+        return date;
+    }
+
     /**
      * 报表数据统计
      *
@@ -1018,9 +1073,7 @@ public class ReportServiceImpl implements ReportService {
         influxDbSql.append(
             " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps ,sum(sum_rt)/sum(count) as  "
                 + "avgRt, sum(sa_count) as saCount,  max(avg_tps) as maxTps, min(min_rt) as minRt, max(max_rt) as "
-                // add by 李鹏
-                // 20210621 active_threads有可能出现0的情况，所以这里取平均后可能不为整数，加round取整
-                + "maxRt, count(avg_rt) as recordCount ,round(mean(active_threads)) as avgConcurrenceNum");
+                + "maxRt, count(avg_rt) as recordCount ,max(active_threads) as maxConcurrenceNum,round(mean(active_threads)) as avgConcurrenceNum");
         influxDbSql.append(" from ");
         influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, customerId));
         influxDbSql.append(" where ");
@@ -1166,12 +1219,16 @@ public class ReportServiceImpl implements ReportService {
         SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(reportResult.getSceneId(),
             new SceneManageQueryOpitons());
         Long totalTestTime = sceneManage.getTotalTestTime();
-        Date curDate = new Date();
-        long testRunTime = DateUtil.between(reportResult.getStartTime(), curDate, DateUnit.SECOND);
-        if (testRunTime > totalTestTime) {
-            //强制修改结束时间
-            curDate = DateUtil.offset(reportResult.getStartTime(), DateField.SECOND, totalTestTime.intValue());
+
+        String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId());
+        Long eTime = (Long)redisClientUtils.getObject(engineName + ScheduleConstants.LAST_SIGN);
+        Date curDate;
+        if (eTime != null){
+            curDate = new Date(eTime);
+        }else {
+            curDate = new Date();
         }
+        long testRunTime = DateUtil.between(reportResult.getStartTime(), curDate, DateUnit.SECOND);
 
         if (null != statReport) {
             //保存报表数据
@@ -1182,8 +1239,8 @@ public class ReportServiceImpl implements ReportService {
             reportResult.setSuccessRate(statReport.getSuccessRate());
             reportResult.setSa(statReport.getSa());
             reportResult.setId(reportResult.getId());
-            reportResult.setEndTime(curDate);
             reportResult.setAvgConcurrent(statReport.getAvgConcurrenceNum());
+            reportResult.setConcurrent(statReport.getMaxConcurrenceNum());
         }
         reportResult.setGmtUpdate(new Date());
 
@@ -1259,6 +1316,9 @@ public class ReportServiceImpl implements ReportService {
             resultMap.put("successRate", new DataBean(detail.getSuccessRate(), detail.getTargetSuccessRate()));
             resultMap.put("avgConcurrenceNum", detail.getAvgConcurrenceNum());
             resultMap.put("distribute",getDistributes(detail.getRtDistribute()));
+            if (detail.getBusinessActivityId() > -1 && StringUtils.isNotBlank(detail.getApplicationIds())) {
+                resultMap.put("applicationIds", detail.getApplicationIds());
+            }
             return resultMap;
         }
         return null;
@@ -1316,7 +1376,9 @@ public class ReportServiceImpl implements ReportService {
         }
 
         if (Objects.isNull(reportResult)){
-            //todo 返回未找到
+            if (Objects.isNull(req.getReportId())) {
+                log.warn("查询报告节点树--未查询到正在运行的报告，场景ID:{}", req.getSceneId());
+            }
             return null;
         }
         List<ReportBusinessActivityDetail> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper

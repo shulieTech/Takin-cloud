@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.data.dao.report;
 
+import java.util.Date;
 import java.util.List;
 
 import io.shulie.takin.cloud.data.model.mysql.BusinessActivitiesEntity;
@@ -81,4 +82,19 @@ public interface ReportDao {
      * @return -
      */
     ReportResult getReportBySceneId(Long sceneId);
+
+
+    /**
+     * 更新报告结束时间
+     * @param resultId
+     * @param endTime
+     */
+    void updateReportEndTime(Long resultId, Date endTime);
+
+    /**
+     * 根据id查询报告
+     * @param resultId
+     * @return
+     */
+    ReportResult getById(Long resultId);
 }

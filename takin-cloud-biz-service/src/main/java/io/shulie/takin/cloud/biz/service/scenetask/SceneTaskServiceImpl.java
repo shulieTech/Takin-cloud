@@ -168,7 +168,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     @Override
     @Transactional
     public SceneActionOutput start(SceneTaskStartInput input) {
-        CloudPluginUtils.fillUserData(input);
         input.setAssetType(AssetTypeEnum.PRESS_REPORT.getCode());
         input.setResourceId(null);
         return startTask(input, null);
@@ -741,7 +740,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         report.setStatus(ReportConstants.INIT_STATUS);
         // 初始化
         report.setCustomerId(scene.getCustomerId());
-        report.setOperateId(input.getUserId());
+        report.setOperateId(input.getOperateId());
         report.setDeptId(input.getDeptId());
         // 解决开始时间 偏移10s
         report.setStartTime(new Date(System.currentTimeMillis() + offsetStartTime * 1000));

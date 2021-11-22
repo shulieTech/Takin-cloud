@@ -69,6 +69,9 @@ public class ScriptNodeSummaryBean extends AbstractEntry {
     @ApiModelProperty(value = "通过标识")
     private Integer passFlag;
 
+    @ApiModelProperty(value = "关联应用的ID")
+    private String applicationIds;
+
 
     private List<ScriptNodeSummaryBean> children;
 

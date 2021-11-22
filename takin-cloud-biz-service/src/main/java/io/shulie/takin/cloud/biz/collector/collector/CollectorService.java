@@ -1,10 +1,6 @@
 package io.shulie.takin.cloud.biz.collector.collector;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.*;
 
 import javax.annotation.Resource;
@@ -34,6 +30,7 @@ import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CollectorUtil;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
+import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.data.dao.sceneTask.SceneTaskPressureTestLogUploadDAO;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
 import io.shulie.takin.ext.api.EngineCallExtApi;
@@ -70,6 +67,8 @@ public class CollectorService extends AbstractIndicators {
     private PushLogService pushLogService;
     @Autowired
     private SceneManageDAO sceneManageDAO;
+    @Autowired
+    private ReportDao reportDao;
     @Autowired
     private SceneTaskStatusCache taskStatusCache;
 
@@ -230,13 +229,13 @@ public class CollectorService extends AbstractIndicators {
                 }
                 if (isLast) {
                     // 取max flag 是否更新过
-                    setMax(engineName + ScheduleConstants.LAST_SIGN, metric.getTimestamp());
                     Long engineNameNum = Optional.ofNullable(redisTemplate.opsForValue().get(engineName)).map(String::valueOf).map(Long::valueOf).orElse(0L);
                     if (engineNameNum.equals(1L)) {
                         // 压测引擎只有一个运行 压测停止
                         log.info("本次压测{}-{}-{}:打入结束标识", sceneId, reportId, customerId);
                         setLast(last(taskKey), ScheduleConstants.LAST_SIGN);
-                        notifyEnd(sceneId, reportId, customerId);
+                        setMax(engineName + ScheduleConstants.LAST_SIGN, metric.getTimestamp());
+                        notifyEnd(sceneId, reportId,metric.getTimestamp());
                         return;
                     }
                     // 计数 回传标识数量
@@ -246,10 +245,11 @@ public class CollectorService extends AbstractIndicators {
                         // 标识结束标识
                         log.info("本次压测{}-{}-{}:打入结束标识", sceneId, reportId, customerId);
                         setLast(last(taskKey), ScheduleConstants.LAST_SIGN);
+                        setMax(engineName + ScheduleConstants.LAST_SIGN, metric.getTimestamp());
                         // 删除临时标识
                         redisClientUtils.del(ScheduleConstants.TEMP_LAST_SIGN + engineName);
                         // 压测停止
-                        notifyEnd(sceneId, reportId, customerId);
+                        notifyEnd(sceneId, reportId,metric.getTimestamp());
                     }
                 }
             } catch (Exception e) {
@@ -270,13 +270,9 @@ public class CollectorService extends AbstractIndicators {
         }
     }
 
-    private void notifyEnd(Long sceneId, Long reportId, Long customerId) {
-        log.info("场景[{}]压测任务已完成,将要开始更新报告{}", sceneId, reportId);
-        // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
-        sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
-            .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
-            .updateEnum(SceneManageStatusEnum.STOP)
-            .build());
+    private void notifyEnd(Long sceneId, Long reportId,long endTime) {
+        log.info("场景[{}]压测任务已完成,更新结束时间{}", sceneId, reportId);
+        reportDao.updateReportEndTime(reportId ,new Date(endTime));
     }
 
     private boolean isLastSign(Long lastSignCount, String engineName) {
