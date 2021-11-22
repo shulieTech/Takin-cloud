@@ -319,7 +319,7 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
         }
         // 选用启用则移除字段
         else if (!disabled && feature.containsKey(disabledKey)) {
-            feature.put(disabledKey, "");
+            feature.remove(disabledKey);
             needUpdateFeature = JSONObject.toJSONString(feature);
         }
         // 其它情况不更新
