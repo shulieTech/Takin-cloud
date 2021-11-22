@@ -543,6 +543,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         SceneInspectInput inspectInput = new SceneInspectInput().setFixedTimer(fixTimer).setLoopsNum(loopsNum);
         sceneTaskStartInput.setSceneInspectInput(inspectInput);
         sceneTaskStartInput.setContinueRead(false);
+        sceneTaskStartInput.setTenantId(input.getTenantId());
+        sceneTaskStartInput.setEnvCode(input.getEnvCode());
         SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput, null);
         startOutput.setSceneId(sceneManageId);
         startOutput.setReportId(sceneActionOutput.getData());
