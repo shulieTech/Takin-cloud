@@ -18,6 +18,7 @@ import javax.annotation.Resource;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 
 import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
@@ -725,6 +726,16 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                         + "存在未删除的job,请等待删除或者人为判断是否可以手工删除~");
             }
 
+        }
+        // 校验是否与场景同步了
+        {
+            String disabledKey = "DISABLED";
+            String featureString = sceneData.getFeatures();
+            Map<String, Object> feature = JSONObject.parseObject(featureString, new TypeReference<Map<String, Object>>() {});
+            if (feature.containsKey(disabledKey)) {
+                throw new TakinCloudException(TakinCloudExceptionEnum.TASK_START_VERIFY_ERROR,
+                    "场景【" + sceneData.getId() + "】对应的业务流程发生变更，未能自动匹配，请手动编辑后启动压测");
+            }
         }
     }
 
