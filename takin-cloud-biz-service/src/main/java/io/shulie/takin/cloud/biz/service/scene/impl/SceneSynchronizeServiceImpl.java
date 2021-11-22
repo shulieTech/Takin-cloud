@@ -98,9 +98,6 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
             // 采样器节点MD5
             final Set<String> samplerMd5 = analysisGroupResult.get(NodeTypeEnum.SAMPLER).stream()
                 .map(ScriptNode::getXpathMd5).collect(Collectors.toSet());
-            // 控制器节点MD5
-            final Set<String> controllerMd5 = analysisGroupResult.get(NodeTypeEnum.CONTROLLER).stream()
-                .map(ScriptNode::getXpathMd5).collect(Collectors.toSet());
             // 线程组节点MD5
             final Set<String> threadGroupMd5 = analysisGroupResult.get(NodeTypeEnum.THREAD_GROUP).stream()
                 .map(ScriptNode::getXpathMd5).collect(Collectors.toSet());
@@ -124,8 +121,8 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
             List<SceneManageEntity> sceneList = getSceneListByScriptId(scriptId);
             sceneList.forEach(t -> {
                 boolean itemSynchronizeResult = synchronize(t.getId(),
-                    threadGroupMd5, samplerMd5, controllerMd5,
-                    businessActivityRef, analysisResultString);
+                    threadGroupMd5, samplerMd5, businessActivityRef,
+                    analysisResultString);
                 if (itemSynchronizeResult) {
                     successNumber.getAndIncrement();
                 }
@@ -144,22 +141,22 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
      * @param sceneId              场景主键
      * @param threadGroupMd5       线程组MD5集合
      * @param samplerMd5           采样器MD5集合
-     * @param controllerMd5        控制器MD5集合
      * @param businessActivityRef  业务活动关联关系
      * @param analysisResultString 脚本解析结果
      * @return 同步是否成功
      * <p>失败会在拓展字段中标识场景不可压测，成功会更新场景以及关联数据</p>
      */
     private boolean synchronize(long sceneId,
-        Set<String> threadGroupMd5, Set<String> samplerMd5, Set<String> controllerMd5,
-        Map<String, Long> businessActivityRef, String analysisResultString) {
+        Set<String> threadGroupMd5, Set<String> samplerMd5,
+        Map<String, Long> businessActivityRef,
+        String analysisResultString) {
         // 手动事务控制
         TransactionStatus transactionStatus = platformTransactionManager.getTransaction(transactionDefinition);
         try {
             // 同步线程组配置
             if (synchronizeThreadGroupConfig(sceneId, threadGroupMd5)) {
                 // 同步场景节点
-                if (synchronizeSceneNode(sceneId, samplerMd5, businessActivityRef, controllerMd5)) {
+                if (synchronizeSceneNode(sceneId, samplerMd5, businessActivityRef)) {
                     // 更新脚本解析结果
                     if (synchronizeAnalysisResult(sceneId, analysisResultString)) {
                         // 在拓展字段中标识场景不可压测
@@ -189,13 +186,11 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
      * @param sceneId             场景主键
      * @param samplerNode         采样器节点
      * @param businessActivityRef 业务活动关联关系
-     * @param controllerNode      控制器节点
      * @return 匹配结果
      */
-    private boolean synchronizeSceneNode(long sceneId, Set<String> samplerNode, Map<String, Long> businessActivityRef, Set<String> controllerNode) {
+    private boolean synchronizeSceneNode(long sceneId, Set<String> samplerNode, Map<String, Long> businessActivityRef) {
         // 组装全部节点
         Set<String> allNodeMd5 = new HashSet<>(samplerNode);
-        allNodeMd5.addAll(controllerNode);
         // 同步(场景节点、压测目标、SLA)
         return synchronizeGoal(sceneId, new HashSet<>(allNodeMd5), businessActivityRef)
             && synchronizeMonitoringGoal(sceneId, new HashSet<>(allNodeMd5));
