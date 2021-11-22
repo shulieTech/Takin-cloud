@@ -16,6 +16,8 @@ import lombok.EqualsAndHashCode;
 @ApiModel
 @EqualsAndHashCode(callSuper = true)
 public class ReportQueryParam extends CloudUserCommonRequestExt implements Serializable {
+    @ApiModelProperty(name = "sceneId", value = "场景ID")
+    private Long sceneId;
 
     /**
      * 场景名称

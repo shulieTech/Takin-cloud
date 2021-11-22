@@ -241,6 +241,9 @@
         select id, scene_id,scene_name,start_time,end_time,`status`,`type`,conclusion,concurrent,amount,customer_id,features,dept_id,user_id
         from t_report
         <where>
+            <if test="param.sceneId != null">
+                and `scene_id` = #{param.sceneId}
+            </if>
             <if test="param.sceneName != null">
                 and scene_name like concat('%',#{param.sceneName,jdbcType=VARCHAR},'%')
             </if>
