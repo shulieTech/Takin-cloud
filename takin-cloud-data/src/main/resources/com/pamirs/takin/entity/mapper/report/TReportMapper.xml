@@ -54,7 +54,7 @@
     <select id="selectListRunningReport" resultMap="BaseResultMap">
         select id
         from t_report
-        when status=1 and is_delete=0 and type=0
+        where status=1 and is_delete=0 and type=0
 --         where `lock` = 1 and ((start_time is not null and `status` = 0) or `status` = 1)
         order by id desc
         limit 10
