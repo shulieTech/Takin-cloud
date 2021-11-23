@@ -632,15 +632,10 @@ public class ReportServiceImpl implements ReportService {
         if (checkReportError(reportResult)) {
             return false;
         }
-        reportDao.finishReport(reportId);
-        log.info("报告{} finish done", reportId);
-
-        UpdateStatusBean reportStatus = new UpdateStatusBean();
-        reportStatus.setResultId(reportId);
-        //完成报告之后锁定报告
-        reportStatus.setPreStatus(ReportConstants.RUN_STATUS);
-        reportStatus.setAfterStatus(ReportConstants.LOCK_STATUS);
-        tReportMapper.updateReportLock(reportStatus);
+        if (ReportConstants.RUN_STATUS != reportResult.getStatus()) {
+            log.info("报告状态不正确：reportId="+reportId+", status="+reportResult.getStatus());
+            return false;
+        }
 
         // 两个地方关闭压测引擎，版本不同，关闭方式不同
         //更新场景 压测引擎停止 ---> 待启动
@@ -655,6 +650,16 @@ public class ReportServiceImpl implements ReportService {
                 UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId()).checkEnum(
                     SceneManageStatusEnum.STOP).updateEnum(SceneManageStatusEnum.WAIT).build());
         }
+        //报告结束应该放在场景之后
+        reportDao.finishReport(reportId);
+        log.info("报告{} finish done", reportId);
+
+        UpdateStatusBean reportStatus = new UpdateStatusBean();
+        reportStatus.setResultId(reportId);
+        //完成报告之后锁定报告
+        reportStatus.setPreStatus(ReportConstants.RUN_STATUS);
+        reportStatus.setAfterStatus(ReportConstants.LOCK_STATUS);
+        tReportMapper.updateReportLock(reportStatus);
 
         return true;
     }
