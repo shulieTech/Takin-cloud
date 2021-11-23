@@ -485,7 +485,10 @@ public class SceneServiceImpl implements SceneService {
                 setBindRef(t.getPathMd5());
                 setBusinessActivityName(t.getName());
                 setBusinessActivityId(t.getBusinessActivityId());
-                setApplicationIds(String.join(",", t.getApplicationId()));
+                // 处理应用主键集合 - 兼容空值
+                if (t.getApplicationId() == null) {t.setApplicationId(new ArrayList<>(0));}
+                List<String> applicationIdList = t.getApplicationId().stream().filter(StrUtil::isNotBlank).collect(Collectors.toList());
+                setApplicationIds(String.join(",", applicationIdList));
                 setGoalValue(JSONObject.toJSONString(OldGoalModel.convert(goal), SerializerFeature.PrettyFormat));
                 // 其它字段默认值
                 LocalDateTime now = LocalDateTime.now();

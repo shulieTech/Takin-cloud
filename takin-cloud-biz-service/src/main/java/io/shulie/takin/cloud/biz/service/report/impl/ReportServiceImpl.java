@@ -1216,9 +1216,9 @@ public class ReportServiceImpl implements ReportService {
         getRedisInfo(reportResult, taskResult);
 
         //链路通知存在一定耗时，如果大于预设值，则置为预设值
-        SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(reportResult.getSceneId(),
-            new SceneManageQueryOpitons());
-        Long totalTestTime = sceneManage.getTotalTestTime();
+        //SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(reportResult.getSceneId(),
+        //    new SceneManageQueryOpitons());
+        //Long totalTestTime = sceneManage.getTotalTestTime();
 
         String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId());
         Long eTime = (Long)redisClientUtils.getObject(engineName + ScheduleConstants.LAST_SIGN);

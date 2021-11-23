@@ -88,8 +88,14 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
         // 脚本解析结果
         final List<ScriptNode> analysisResult = request.getAnalysisResult();
         final String analysisResultString = JSONObject.toJSONString(analysisResult);
-        // 脚本节点和业务活动对应关系
-        final Map<String, Long> businessActivityRef = request.getBusinessActivityRef();
+        // 业务活动所有节点
+        Set<String> businessKey = request.getBusinessActivityInfo().keySet();
+        // 业务活动信息 - MD5&业务活动主键 对应关系
+        final Map<String, Long> businessActivityRef = businessKey.stream()
+            .collect(Collectors.toMap(t -> t, t -> request.getBusinessActivityInfo().get(t).getId()));
+        // 业务活动信息 - MD5&业务活动关联应用主键 对应关系
+        final Map<String, List<String>> businessActivityApplicationRef = businessKey.stream()
+            .collect(Collectors.toMap(t -> t, t -> request.getBusinessActivityInfo().get(t).getApplicationIdList()));
         // 脚本解析结果分组
         final Map<NodeTypeEnum, List<ScriptNode>> analysisGroupResult = new HashMap<>(4);
         groupByAnalysisResult(analysisResult, analysisGroupResult);
@@ -104,14 +110,14 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
             // 校验参数是否合法
             {
                 // 关联关系的所有Key       - Copy
-                Set<String> businessActivityKey = new HashSet<>(businessActivityRef.keySet());
+                Set<String> businessInfoKey = new HashSet<>(request.getBusinessActivityInfo().keySet());
                 // 采样器的所有xPath MD5  - Copy
                 Set<String> tempSamplerMd5 = new HashSet<>(samplerMd5);
                 // 合并
-                tempSamplerMd5.addAll(businessActivityKey);
+                tempSamplerMd5.addAll(businessInfoKey);
                 // 移除
-                tempSamplerMd5.removeAll(businessActivityKey);
-                // 如果还有值，则代表未传入全部的参数
+                tempSamplerMd5.removeAll(businessInfoKey);
+                // 如果还有值，则代表未传入全部的参数(采样器数量>传入业务信息数量)
                 if (tempSamplerMd5.size() != 0) {
                     throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_ERROR, "采样器与业务活动关联关系不匹配");
                 }
@@ -121,7 +127,7 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
             List<SceneManageEntity> sceneList = getSceneListByScriptId(scriptId);
             sceneList.forEach(t -> {
                 boolean itemSynchronizeResult = synchronize(t.getId(),
-                    threadGroupMd5, samplerMd5, businessActivityRef,
+                    threadGroupMd5, samplerMd5, businessActivityRef, businessActivityApplicationRef,
                     analysisResultString);
                 if (itemSynchronizeResult) {
                     successNumber.getAndIncrement();
@@ -138,17 +144,18 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
     /**
      * 同步某个场景
      *
-     * @param sceneId              场景主键
-     * @param threadGroupMd5       线程组MD5集合
-     * @param samplerMd5           采样器MD5集合
-     * @param businessActivityRef  业务活动关联关系
-     * @param analysisResultString 脚本解析结果
+     * @param sceneId                        场景主键
+     * @param threadGroupMd5                 线程组MD5集合
+     * @param samplerMd5                     采样器MD5集合
+     * @param businessActivityRef            业务活动信息 - MD5&业务活动主键 对应关系
+     * @param businessActivityApplicationRef 业务活动信息 - MD5&业务活动关联应用主键 对应关系
+     * @param analysisResultString           脚本解析结果
      * @return 同步是否成功
      * <p>失败会在拓展字段中标识场景不可压测，成功会更新场景以及关联数据</p>
      */
     private boolean synchronize(long sceneId,
         Set<String> threadGroupMd5, Set<String> samplerMd5,
-        Map<String, Long> businessActivityRef,
+        Map<String, Long> businessActivityRef, Map<String, List<String>> businessActivityApplicationRef,
         String analysisResultString) {
         // 手动事务控制
         TransactionStatus transactionStatus = platformTransactionManager.getTransaction(transactionDefinition);
@@ -156,7 +163,7 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
             // 同步线程组配置
             if (synchronizeThreadGroupConfig(sceneId, threadGroupMd5)) {
                 // 同步场景节点
-                if (synchronizeSceneNode(sceneId, samplerMd5, businessActivityRef)) {
+                if (synchronizeSceneNode(sceneId, samplerMd5, businessActivityRef, businessActivityApplicationRef)) {
                     // 更新脚本解析结果
                     if (synchronizeAnalysisResult(sceneId, analysisResultString)) {
                         // 在拓展字段中标识场景不可压测
@@ -183,14 +190,16 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
     /**
      * 同步压测场景节点
      *
-     * @param sceneId             场景主键
-     * @param samplerNode         采样器节点
-     * @param businessActivityRef 业务活动关联关系
+     * @param sceneId                        场景主键
+     * @param samplerNode                    采样器节点
+     * @param businessActivityRef            业务活动信息 - MD5&业务活动主键 对应关系
+     * @param businessActivityApplicationRef 业务活动信息 - MD5&业务活动关联应用主键 对应关系
      * @return 匹配结果
      */
-    private boolean synchronizeSceneNode(long sceneId, Set<String> samplerNode, Map<String, Long> businessActivityRef) {
+    private boolean synchronizeSceneNode(long sceneId, Set<String> samplerNode,
+        Map<String, Long> businessActivityRef, Map<String, List<String>> businessActivityApplicationRef) {
         // 同步场景节点、压测目标
-        boolean goalSynchronizeResult = synchronizeGoal(sceneId, new HashSet<>(samplerNode), businessActivityRef);
+        boolean goalSynchronizeResult = synchronizeGoal(sceneId, new HashSet<>(samplerNode), businessActivityRef, businessActivityApplicationRef);
         log.info("同步节点、压测目标.事务{}.场景主键:{}.{}.", transactionIdentifier.get(), sceneId, goalSynchronizeResult);
         if (!goalSynchronizeResult) {return false;}
         // 同步SLA
@@ -203,12 +212,14 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
     /**
      * 匹配压测目标及场景节点
      *
-     * @param sceneId             场景主键
-     * @param allNodeMd5          全部节点的MD5值
-     * @param businessActivityRef 业务活动关联关系
+     * @param sceneId                        场景主键
+     * @param allNodeMd5                     全部节点的MD5值
+     * @param businessActivityRef            业务活动信息 - MD5&业务活动主键 对应关系
+     * @param businessActivityApplicationRef 业务活动信息 - MD5&业务活动关联应用主键 对应关系
      * @return 匹配结果
      */
-    private boolean synchronizeGoal(long sceneId, Set<String> allNodeMd5, Map<String, Long> businessActivityRef) {
+    private boolean synchronizeGoal(long sceneId, Set<String> allNodeMd5,
+        Map<String, Long> businessActivityRef, Map<String, List<String>> businessActivityApplicationRef) {
         // 开始匹配
         //  1. 获取历史数据
         Map<String, SceneRequest.Goal> sceneGoal = sceneService.getGoal(sceneId);
@@ -227,14 +238,17 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
         }
         // 开始同步
         //  1. 删除本次未匹配上的
-        allNodeMd5.forEach(t -> {
-            if (!sceneGoal.containsKey(t)) {
+        new HashSet<>(sceneGoal.keySet()).forEach(t -> {
+            if (!allNodeMd5.contains(t)) {
                 sceneGoal.remove(t);
                 sceneContent.remove(t);
             }
         });
         //  2. 更新节点匹配的应用信息
-        sceneContent.forEach((k, v) -> v.setBusinessActivityId(businessActivityRef.get(k)));
+        sceneContent.forEach((k, v) -> {
+            v.setBusinessActivityId(businessActivityRef.get(k));
+            v.setApplicationId(businessActivityApplicationRef.get(k));
+        });
         //  3. 更新配置信息
         List<SceneRequest.Content> contentList = new ArrayList<>(sceneContent.size());
         sceneContent.forEach((k, v) -> {
