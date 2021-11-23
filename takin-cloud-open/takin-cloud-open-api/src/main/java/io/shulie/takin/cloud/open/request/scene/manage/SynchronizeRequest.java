@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.NotBlank;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -30,7 +29,24 @@ public class SynchronizeRequest extends CloudUserCommonRequestExt {
     @ApiModelProperty(value = "脚本解析结果")
     @NotNull(message = "脚本解析结果不能为空")
     private List<ScriptNode> analysisResult;
-    @ApiModelProperty(value = "业务活动对应关系")
-    @NotNull(message = "业务活动对应关系不能为空")
-    private Map<String, Long> businessActivityRef;
+    @ApiModelProperty(value = "业务活动信息")
+    @NotNull(message = "业务活动信息不能为空")
+    private Map<String, BusinessActivityInfoData> businessActivityInfo;
+
+    /**
+     * 业务活动信息
+     */
+    @Data
+    public static class BusinessActivityInfoData {
+        /**
+         * 业务活动主键
+         */
+        @NotNull(message = "业务活动主键不能为空")
+        Long id;
+        /**
+         * 业务活动关联应用主键集合
+         */
+        @NotNull(message = "业务活动关联应用主键集合不能为空")
+        List<String> applicationIdList;
+    }
 }
