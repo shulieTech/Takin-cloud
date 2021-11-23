@@ -225,7 +225,7 @@ public class ReportServiceImpl implements ReportService {
                 JSON.parseObject(report.getFeatures()).getString(ReportConstants.FEATURES_ERROR_MSG));
         }
         detail.setTestTotalTime(TestTimeUtil.format(report.getStartTime(), report.getEndTime()));
-        detail.setNodeDetail(getReportNodeDetail(report.getScriptNodeTree(),reportId));
+        detail.setNodeDetail(getReportNodeDetail(report.getScriptNodeTree(), reportId));
         //任务没有完成，提示用户正在生成中
         if (report.getStatus() != ReportConstants.FINISH_STATUS) {
             detail.setTaskStatus(ReportConstants.RUN_STATUS);
@@ -243,7 +243,7 @@ public class ReportServiceImpl implements ReportService {
     private List<ScriptNodeSummaryBean> getReportNodeDetail(String scriptNodeTree, Long reportId) {
         List<ReportBusinessActivityDetail> activities = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportId);
-        return getScriptNodeSummaryBeans(scriptNodeTree,activities);
+        return getScriptNodeSummaryBeans(scriptNodeTree, activities);
     }
 
     @Override
@@ -291,7 +291,7 @@ public class ReportServiceImpl implements ReportService {
         Integer maxConcurrence = getMaxConcurrence(sceneId, reportResult.getId(), reportResult.getCustomerId(),
             transaction);
         if (Objects.nonNull(statReport) && Objects.nonNull(statReport.getAvgConcurrenceNum())) {
-            maxConcurrence = Math.max(maxConcurrence,statReport.getAvgConcurrenceNum().intValue());
+            maxConcurrence = Math.max(maxConcurrence, statReport.getAvgConcurrenceNum().intValue());
         }
         reportDetail.setConcurrent(maxConcurrence);
         reportDetail.setTotalWarn(tWarnDetailMapper.countReportTotalWarn(reportResult.getId()));
@@ -304,9 +304,9 @@ public class ReportServiceImpl implements ReportService {
         CloudPluginUtils.fillReportData(reportResult, reportDetail);
         List<ReportBusinessActivityDetail> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportResult.getId());
-        if(StringUtils.isNotBlank(reportResult.getScriptNodeTree())){
+        if (StringUtils.isNotBlank(reportResult.getScriptNodeTree())) {
             String nodeTree = reportResult.getScriptNodeTree();
-            Map<String,Map<String,Object>> resultMap = new HashMap<>(reportBusinessActivityDetails.size());
+            Map<String, Map<String, Object>> resultMap = new HashMap<>(reportBusinessActivityDetails.size());
             reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
                 .forEach(ref -> {
@@ -318,7 +318,7 @@ public class ReportServiceImpl implements ReportService {
             String resultTree = JsonPathUtil.putNodesToJson(nodeTree, resultMap);
             reportDetail.setNodeDetail(JsonUtil.parseArray(resultTree,
                 ScriptNodeSummaryBean.class));
-        }else {
+        } else {
             List<ScriptNodeSummaryBean> nodeDetails = reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
                 .map(ref -> {
@@ -366,12 +366,12 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private String getTestPlanXpathMD5(String scriptNodeTree) {
-        if (StringUtils.isBlank(scriptNodeTree)){
+        if (StringUtils.isBlank(scriptNodeTree)) {
             return null;
         }
         List<ScriptNode> currentNodeByType = JsonPathUtil.getCurrentNodeByType(scriptNodeTree,
             NodeTypeEnum.TEST_PLAN.name());
-        if (CollectionUtils.isNotEmpty(currentNodeByType) && currentNodeByType.size() == 1){
+        if (CollectionUtils.isNotEmpty(currentNodeByType) && currentNodeByType.size() == 1) {
             return currentNodeByType.get(0).getXpathMd5();
         }
         return null;
@@ -500,8 +500,8 @@ public class ReportServiceImpl implements ReportService {
             return resp;
         }
         ReportResult reportResult = reportDao.selectById(reportId);
-        if (Objects.isNull(reportResult)){
-            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR,"未查询到报告"+reportId);
+        if (Objects.isNull(reportResult)) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "未查询到报告" + reportId);
         }
         resp.setScriptNodeSummaryBeans(getScriptNodeSummaryBeans(reportResult.getScriptNodeTree(),
             reportBusinessActivityDetailList));
@@ -510,12 +510,13 @@ public class ReportServiceImpl implements ReportService {
 
     /**
      * 处理节点链路明细
+     *
      * @param nodeTree 节点树
-     * @param details 业务活动详情
-     * @return
+     * @param details  业务活动详情
+     * @return -
      */
     private List<ScriptNodeSummaryBean> getScriptNodeSummaryBeans(String nodeTree, List<ReportBusinessActivityDetail> details) {
-        Map<String,Map<String,Object>> resultMap = new HashMap<>();
+        Map<String, Map<String, Object>> resultMap = new HashMap<>();
         if (StringUtils.isNotBlank(nodeTree)) {
             details.stream().filter(Objects::nonNull)
                 .forEach(detail -> {
@@ -530,16 +531,16 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         return details.stream().filter(Objects::nonNull)
-            .map(detail ->{
+            .map(detail -> {
                 ScriptNodeSummaryBean bean = new ScriptNodeSummaryBean();
                 bean.setXpathMd5(detail.getBindRef());
                 bean.setTestName(detail.getBusinessActivityName());
                 bean.setTotalRequest(detail.getRequest());
                 bean.setAvgConcurrenceNum(detail.getAvgConcurrenceNum());
-                bean.setSuccessRate(new DataBean(detail.getSuccessRate(),detail.getTargetSuccessRate()));
-                bean.setTps(new DataBean(detail.getTps(),detail.getTargetTps()));
+                bean.setSuccessRate(new DataBean(detail.getSuccessRate(), detail.getTargetSuccessRate()));
+                bean.setTps(new DataBean(detail.getTps(), detail.getTargetTps()));
                 bean.setMaxTps(detail.getMaxTps());
-                bean.setAvgRt(new DataBean(detail.getRt(),detail.getTargetRt()));
+                bean.setAvgRt(new DataBean(detail.getRt(), detail.getTargetRt()));
                 bean.setMaxRt(detail.getMaxRt());
                 bean.setMinRt(detail.getMinRt());
                 bean.setPassFlag((Optional.ofNullable(detail.getPassFlag()).orElse(0)));
@@ -572,6 +573,12 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public List<Long> queryListPressuringReport() {
+        List<Report> report = tReportMapper.selectListPressuringReport();
+        return CollectionUtils.isEmpty(report) ? null : report.stream().map(Report::getId).collect(Collectors.toList());
+    }
+
+    @Override
     public Boolean lockReport(Long reportId) {
         log.info("web -> cloud lock reportId【{}】,starting", reportId);
         ReportResult reportResult = reportDao.selectById(reportId);
@@ -586,7 +593,7 @@ public class ReportServiceImpl implements ReportService {
             lastUpdate = reportResult.getGmtUpdate().getTime();
         }
         //+10分钟,如果锁了10分钟了，则认为锁失效,可以重新锁
-        lastUpdate += 10*60*1000;
+        lastUpdate += 10 * 60 * 1000;
         if (ReportConstants.LOCK_STATUS == reportResult.getLock() && lastUpdate > System.currentTimeMillis()) {
             log.error("异常代码【{}】,异常内容：锁定报告异常 --> 报告{}状态锁定状态，不能再次锁定",
                 TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId);
@@ -633,7 +640,7 @@ public class ReportServiceImpl implements ReportService {
             return false;
         }
         if (ReportConstants.RUN_STATUS != reportResult.getStatus()) {
-            log.info("报告状态不正确：reportId="+reportId+", status="+reportResult.getStatus());
+            log.info("报告状态不正确：reportId=" + reportId + ", status=" + reportResult.getStatus());
             return false;
         }
 
@@ -655,12 +662,12 @@ public class ReportServiceImpl implements ReportService {
         log.info("报告{} finish done", reportId);
 
         //解锁逻辑应该合锁逻辑成对出现，转移到web
-//        UpdateStatusBean reportStatus = new UpdateStatusBean();
-//        reportStatus.setResultId(reportId);
-//        //完成报告之后锁定报告
-//        reportStatus.setPreStatus(ReportConstants.RUN_STATUS);
-//        reportStatus.setAfterStatus(ReportConstants.LOCK_STATUS);
-//        tReportMapper.updateReportLock(reportStatus);
+        //        UpdateStatusBean reportStatus = new UpdateStatusBean();
+        //        reportStatus.setResultId(reportId);
+        //        //完成报告之后锁定报告
+        //        reportStatus.setPreStatus(ReportConstants.RUN_STATUS);
+        //        reportStatus.setAfterStatus(ReportConstants.LOCK_STATUS);
+        //        tReportMapper.updateReportLock(reportStatus);
 
         return true;
     }
@@ -701,13 +708,14 @@ public class ReportServiceImpl implements ReportService {
 
     /**
      * 获取最大并发数
-     * @param sceneId 场景ID
-     * @param reportId 报告ID
-     * @param customerId 租户ID
+     *
+     * @param sceneId     场景ID
+     * @param reportId    报告ID
+     * @param customerId  租户ID
      * @param transaction 节点
-     * @return
+     * @return -
      */
-    private Integer getMaxConcurrence(Long sceneId,Long reportId,Long customerId,String transaction){
+    private Integer getMaxConcurrence(Long sceneId, Long reportId, Long customerId, String transaction) {
         StringBuilder influxDbSql = new StringBuilder();
         influxDbSql.append("select");
         influxDbSql.append(" max(active_threads) as maxConcurrenceNum");
@@ -717,7 +725,7 @@ public class ReportServiceImpl implements ReportService {
         influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
         influxDbSql.append(" order by time desc limit 1");
         StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
-        if (Objects.nonNull(statReportDTO)){
+        if (Objects.nonNull(statReportDTO)) {
             return statReportDTO.getMaxConcurrenceNum();
         }
         return 0;
@@ -762,7 +770,7 @@ public class ReportServiceImpl implements ReportService {
         String testPlanXpathMD5 = getTestPlanXpathMD5(reportResult.getScriptNodeTree());
         String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
             : testPlanXpathMD5;
-        if (StringUtils.isNotBlank(reportTrendQuery.getXpathMd5())){
+        if (StringUtils.isNotBlank(reportTrendQuery.getXpathMd5())) {
             transaction = reportTrendQuery.getXpathMd5();
         }
         StringBuilder influxDbSql = new StringBuilder();
@@ -1030,8 +1038,8 @@ public class ReportServiceImpl implements ReportService {
         boolean isConclusion = updateReportBusinessActivity(taskResult.getSceneId(), taskResult.getTaskId(),
             taskResult.getCustomerId());
 
-        if (Objects.isNull(reportResult.getEndTime())){
-            reportResult.setEndTime(getFinalDateTime(taskResult.getSceneId(),reportId,taskResult.getCustomerId()));
+        if (Objects.isNull(reportResult.getEndTime())) {
+            reportResult.setEndTime(getFinalDateTime(taskResult.getSceneId(), reportId, taskResult.getCustomerId()));
         }
         //保存报表结果
         saveReportResult(reportResult, taskResult, statReport, isConclusion);
@@ -1060,14 +1068,14 @@ public class ReportServiceImpl implements ReportService {
         influxDbSql.append(InfluxDBUtil.getMeasurement(sceneId, reportId, customerId));
         StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
         Date date;
-        if (Objects.nonNull(statReportDTO) && StringUtils.isNotBlank(statReportDTO.getTime())){
-            try{
+        if (Objects.nonNull(statReportDTO) && StringUtils.isNotBlank(statReportDTO.getTime())) {
+            try {
                 date = new Date(NumberUtil.parseLong(statReportDTO.getTime()));
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.error("时间转换异常");
                 date = new Date(System.currentTimeMillis());
             }
-        }else {
+        } else {
             date = new Date(System.currentTimeMillis());
         }
         return date;
@@ -1238,9 +1246,9 @@ public class ReportServiceImpl implements ReportService {
         String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId());
         Long eTime = (Long)redisClientUtils.getObject(engineName + ScheduleConstants.LAST_SIGN);
         Date curDate;
-        if (eTime != null){
+        if (eTime != null) {
             curDate = new Date(eTime);
-        }else {
+        } else {
             curDate = new Date();
         }
         long testRunTime = DateUtil.between(reportResult.getStartTime(), curDate, DateUnit.SECOND);
@@ -1279,7 +1287,7 @@ public class ReportServiceImpl implements ReportService {
             //如果有平均rt和平均tps，则:threadNum=tps*rt/1000,否则取报告中的平均线程数
             if (null != reportResult.getAvgTps() && null != reportResult.getAvgRt()) {
                 avgThreadNum = reportResult.getAvgTps().multiply(reportResult.getAvgRt())
-                        .divide(new BigDecimal(1000), 10, RoundingMode.HALF_UP);
+                    .divide(new BigDecimal(1000), 10, RoundingMode.HALF_UP);
             } else {
                 avgThreadNum = reportResult.getAvgConcurrent();
             }
@@ -1316,21 +1324,20 @@ public class ReportServiceImpl implements ReportService {
             && StringUtils.isNotEmpty(jsonObject.getString(ReportConstants.SLA_ERROR_MSG));
     }
 
-
-    private Map<String,Object> fillReportMap(ReportBusinessActivityDetail detail){
+    private Map<String, Object> fillReportMap(ReportBusinessActivityDetail detail) {
         if (Objects.nonNull(detail)) {
             Map<String, Object> resultMap = new HashMap<>();
             resultMap.put("avgRt", new DataBean(detail.getRt(), detail.getTargetRt()));
             resultMap.put("sa", new DataBean(detail.getSa(), detail.getTargetSa()));
             resultMap.put("tps", new DataBean(detail.getTps(), detail.getTargetTps()));
-            resultMap.put("maxRt",detail.getMaxRt());
-            resultMap.put("minRt",detail.getMinRt());
-            resultMap.put("maxTps",detail.getMaxTps());
-            resultMap.put("passFlag",Optional.ofNullable(detail.getPassFlag()).orElse(0));
-            resultMap.put("totalRequest",detail.getRequest());
+            resultMap.put("maxRt", detail.getMaxRt());
+            resultMap.put("minRt", detail.getMinRt());
+            resultMap.put("maxTps", detail.getMaxTps());
+            resultMap.put("passFlag", Optional.ofNullable(detail.getPassFlag()).orElse(0));
+            resultMap.put("totalRequest", detail.getRequest());
             resultMap.put("successRate", new DataBean(detail.getSuccessRate(), detail.getTargetSuccessRate()));
             resultMap.put("avgConcurrenceNum", detail.getAvgConcurrenceNum());
-            resultMap.put("distribute",getDistributes(detail.getRtDistribute()));
+            resultMap.put("distribute", getDistributes(detail.getRtDistribute()));
             if (detail.getBusinessActivityId() > -1 && StringUtils.isNotBlank(detail.getApplicationIds())) {
                 resultMap.put("applicationIds", detail.getApplicationIds());
             }
@@ -1339,7 +1346,8 @@ public class ReportServiceImpl implements ReportService {
         return null;
 
     }
-    private List<DistributeBean> getDistributes(String distributes){
+
+    private List<DistributeBean> getDistributes(String distributes) {
         List<DistributeBean> result;
         if (StringUtils.isNoneBlank(distributes)) {
             Map<String, String> distributeMap = JsonHelper.string2Obj(distributes, new TypeReference<Map<String, String>>() {});
@@ -1352,13 +1360,13 @@ public class ReportServiceImpl implements ReportService {
             });
             distributeBeans.sort(((o1, o2) -> -o1.getLable().compareTo(o2.getLable())));
             result = distributeBeans;
-        }else {
+        } else {
             result = Lists.newArrayList();
         }
         return result;
     }
 
-    private Map<String,Object> fillTempMap(StatReportDTO statReport,ReportBusinessActivityDetail detail){
+    private Map<String, Object> fillTempMap(StatReportDTO statReport, ReportBusinessActivityDetail detail) {
         if (Objects.isNull(detail)) {
             return null;
         }
@@ -1370,7 +1378,7 @@ public class ReportServiceImpl implements ReportService {
             resultMap.put("successRate", new DataBean(statReport.getSuccessRate(), detail.getTargetSuccessRate()));
             resultMap.put("avgConcurrenceNum", statReport.getAvgConcurrenceNum().toString());
             resultMap.put("totalRequest", statReport.getTotalRequest());
-        }else {
+        } else {
             resultMap.put("avgRt", new DataBean("0", detail.getTargetRt()));
             resultMap.put("sa", new DataBean("0", detail.getTargetSa()));
             resultMap.put("tps", new DataBean("0", detail.getTargetTps()));
@@ -1384,13 +1392,13 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<ScriptNodeTreeResp> getNodeTree(ScriptNodeTreeQueryReq req) {
         ReportResult reportResult;
-        if (Objects.nonNull(req.getReportId())){
+        if (Objects.nonNull(req.getReportId())) {
             reportResult = reportDao.selectById(req.getReportId());
-        }else {
+        } else {
             reportResult = reportDao.getReportBySceneId(req.getSceneId());
         }
 
-        if (Objects.isNull(reportResult)){
+        if (Objects.isNull(reportResult)) {
             if (Objects.isNull(req.getReportId())) {
                 log.warn("查询报告节点树--未查询到正在运行的报告，场景ID:{}", req.getSceneId());
             }
@@ -1398,7 +1406,7 @@ public class ReportServiceImpl implements ReportService {
         }
         List<ReportBusinessActivityDetail> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportResult.getId());
-        if (CollectionUtils.isEmpty(reportBusinessActivityDetails)){
+        if (CollectionUtils.isEmpty(reportBusinessActivityDetails)) {
             return null;
         }
         if (StringUtils.isNotBlank(reportResult.getScriptNodeTree())) {
@@ -1413,11 +1421,11 @@ public class ReportServiceImpl implements ReportService {
                     resultMap.put(detail.getBindRef(), tmpMap);
                     JsonPathUtil.putNodesToJson(context, resultMap);
                 });
-           return JSONArray.parseArray(context.jsonString(),ScriptNodeTreeResp.class);
-        }else {
+            return JSONArray.parseArray(context.jsonString(), ScriptNodeTreeResp.class);
+        } else {
             return reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
-                .map(detail -> new ScriptNodeTreeResp(){{
+                .map(detail -> new ScriptNodeTreeResp() {{
                     setName(detail.getBindRef());
                     setBusinessActivityId(detail.getBusinessActivityId());
                     setTestName(detail.getBusinessActivityName());

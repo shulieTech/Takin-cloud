@@ -59,6 +59,13 @@
         order by id desc
         limit 10
     </select>
+    <select id="selectListPressuringReport" resultMap="BaseResultMap">
+        select id
+        from t_report
+        where status=0 and is_deleted=0 and type=0
+        order by id desc
+        limit 100
+    </select>
     <insert id="insertSelective" parameterType="com.pamirs.takin.entity.domain.entity.report.Report" keyProperty="id"
             useGeneratedKeys="true">
         <!--@mbg.generated-->

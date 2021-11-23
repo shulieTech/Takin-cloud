@@ -121,6 +121,13 @@ public interface ReportService {
     List<Long> queryListRunningReport();
 
     /**
+     * 获取压测中的报告主键列表
+     *
+     * @return -
+     */
+    List<Long> queryListPressuringReport();
+
+    /**
      * 锁定报告
      *
      * @param reportId 报告主键
@@ -202,14 +209,16 @@ public interface ReportService {
 
     /**
      * 更新场景启动失败的报告的状态
-     * @param sceneId 场景ID
+     *
+     * @param sceneId  场景ID
      * @param reportId 报告ID
      * @param errorMsg 异常信息
      */
-    void updateReportOnSceneStartFailed(Long sceneId,Long reportId,String errorMsg);
+    void updateReportOnSceneStartFailed(Long sceneId, Long reportId, String errorMsg);
 
     /**
      * 查询报告对应的脚本树结构
+     *
      * @param req 查询参数
      * @return 树结构json字符串
      */

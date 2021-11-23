@@ -104,7 +104,7 @@ public class ReportController {
             ReportTrendResp data;
             if (redisClientUtils.hasKey(key)) {
                 data = JSON.parseObject(redisClientUtils.getString(key), ReportTrendResp.class);
-                if (Objects.isNull(data) ||CollectionUtils.isEmpty(data.getConcurrent()) || CollectionUtils.isEmpty(data.getSa())
+                if (Objects.isNull(data) || CollectionUtils.isEmpty(data.getConcurrent()) || CollectionUtils.isEmpty(data.getSa())
                     || CollectionUtils.isEmpty(data.getRt()) || CollectionUtils.isEmpty(data.getTps())
                     || CollectionUtils.isEmpty(data.getSuccessRate())) {
                     data = reportService.queryReportTrend(reportTrendQuery);
@@ -194,6 +194,12 @@ public class ReportController {
         return ResponseResult.success(reportService.queryListRunningReport());
     }
 
+    @GetMapping("/report/pressuring/list")
+    @ApiOperation("查询正在压测的报告列表")
+    public ResponseResult<List<Long>> queryListPressuringReport() {
+        return ResponseResult.success(reportService.queryListPressuringReport());
+    }
+
     @PutMapping("/report/lock")
     @ApiOperation("锁定报告")
     public ResponseResult<Boolean> lockReport(@RequestBody ReportIdParam param) {
@@ -220,10 +226,9 @@ public class ReportController {
 
     @GetMapping("/report/nodeTree")
     @ApiOperation("场景对应的脚本树结构")
-    public ResponseResult<List<ScriptNodeTreeResp>> getNodeTree(ScriptNodeTreeQueryReq req){
+    public ResponseResult<List<ScriptNodeTreeResp>> getNodeTree(ScriptNodeTreeQueryReq req) {
         return ResponseResult.success(reportService.getNodeTree(req));
     }
-
 
     /**
      * todo 临时方案，后面逐渐去掉这种网络请求
