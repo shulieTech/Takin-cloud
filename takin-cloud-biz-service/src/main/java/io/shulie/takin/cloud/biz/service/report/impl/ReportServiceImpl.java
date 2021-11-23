@@ -1203,20 +1203,20 @@ public class ReportServiceImpl implements ReportService {
                 StrUtil.format("压测引擎计划运行{}个，实际运行{}个", podTotal, redisClientUtils.getObject(engineName)));
         }
 
-        // startTime endTime 补充
-        long startTime = System.currentTimeMillis();
-        if (redisClientUtils.hasKey(engineName + ScheduleConstants.FIRST_SIGN)) {
-            startTime = Long.parseLong(redisClientUtils.getString(engineName + ScheduleConstants.FIRST_SIGN));
-            reportResult.setStartTime(new Date(startTime));
-        }
-
-        //Long.valueOf(redisClientUtils.getString(engineName + ScheduleConstants.FIRST_SIGN));
-        long endTime = System.currentTimeMillis();
-        if (redisClientUtils.hasKey(engineName + ScheduleConstants.LAST_SIGN)) {
-            endTime = Long.parseLong(redisClientUtils.getString(engineName + ScheduleConstants.LAST_SIGN));
-        }
-        // metric 数据是从事件中获取
-        reportResult.setEndTime(new Date(endTime));
+//        // startTime endTime 补充
+//        long startTime = System.currentTimeMillis();
+//        if (redisClientUtils.hasKey(engineName + ScheduleConstants.FIRST_SIGN)) {
+//            startTime = Long.parseLong(redisClientUtils.getString(engineName + ScheduleConstants.FIRST_SIGN));
+//            reportResult.setStartTime(new Date(startTime));
+//        }
+//
+//        //Long.valueOf(redisClientUtils.getString(engineName + ScheduleConstants.FIRST_SIGN));
+//        long endTime = System.currentTimeMillis();
+//        if (redisClientUtils.hasKey(engineName + ScheduleConstants.LAST_SIGN)) {
+//            endTime = Long.parseLong(redisClientUtils.getString(engineName + ScheduleConstants.LAST_SIGN));
+//        }
+//        // metric 数据是从事件中获取
+//        reportResult.setEndTime(new Date(endTime));
         // 删除缓存
         redisClientUtils.del(podName, podTotalName, ScheduleConstants.TEMP_FAIL_SIGN + engineName,
             engineName + ScheduleConstants.FIRST_SIGN, engineName + ScheduleConstants.LAST_SIGN, engineName);
