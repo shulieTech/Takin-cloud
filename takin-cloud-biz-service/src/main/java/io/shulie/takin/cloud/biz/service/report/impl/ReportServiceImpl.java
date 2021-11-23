@@ -654,12 +654,13 @@ public class ReportServiceImpl implements ReportService {
         reportDao.finishReport(reportId);
         log.info("报告{} finish done", reportId);
 
-        UpdateStatusBean reportStatus = new UpdateStatusBean();
-        reportStatus.setResultId(reportId);
-        //完成报告之后锁定报告
-        reportStatus.setPreStatus(ReportConstants.RUN_STATUS);
-        reportStatus.setAfterStatus(ReportConstants.LOCK_STATUS);
-        tReportMapper.updateReportLock(reportStatus);
+        //解锁逻辑应该合锁逻辑成对出现，转移到web
+//        UpdateStatusBean reportStatus = new UpdateStatusBean();
+//        reportStatus.setResultId(reportId);
+//        //完成报告之后锁定报告
+//        reportStatus.setPreStatus(ReportConstants.RUN_STATUS);
+//        reportStatus.setAfterStatus(ReportConstants.LOCK_STATUS);
+//        tReportMapper.updateReportLock(reportStatus);
 
         return true;
     }
