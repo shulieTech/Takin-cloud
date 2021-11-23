@@ -12,6 +12,19 @@ import java.util.List;
  */
 public class Constants {
 
+    /**
+     * 最大分页数，因为性能问题分页最好不要超过这个数
+     */
+    public static final int MAX_PAGE = 1000;
+    /**
+     * 默认每页返回记录数
+     */
+    public static final int DEFAULT_PAGE_SIZE = 50;
+    /**
+     * 任务每页返回记录数
+     */
+    public static final int JOB_DEFAULT_PAGE_SIZE = 200;
+
     //报告状态：正在测试
     public static final String REPORT_STATUS_TESTING = "1";
 
