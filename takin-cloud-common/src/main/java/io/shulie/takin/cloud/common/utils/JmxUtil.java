@@ -443,9 +443,11 @@ public class JmxUtil {
         }
         if ("co.signal.kafkameter.KafkaProducerSampler".equals(javaClass)) {
             return SamplerTypeEnum.KAFKA;
-        } else {
-            return SamplerTypeEnum.UNKNOWN;
         }
+        if ("com.gslab.pepper.sampler.PepperBoxKafkaSampler".equals(javaClass)) {
+            return SamplerTypeEnum.KAFKA;
+        }
+        return SamplerTypeEnum.UNKNOWN;
     }
 
     public static JSONObject buildJSON(Element element) {
