@@ -1038,6 +1038,9 @@ public class ReportServiceImpl implements ReportService {
         boolean isConclusion = updateReportBusinessActivity(taskResult.getSceneId(), taskResult.getTaskId(),
             taskResult.getCustomerId());
 
+        if (Objects.isNull(reportResult.getStartTime())) {
+            reportResult.setStartTime(reportResult.getGmtCreate());
+        }
         if (Objects.isNull(reportResult.getEndTime())) {
             reportResult.setEndTime(getFinalDateTime(taskResult.getSceneId(), reportId, taskResult.getCustomerId()));
         }
@@ -1185,6 +1188,7 @@ public class ReportServiceImpl implements ReportService {
         String podTotalName = ScheduleConstants.getPressureNodeTotalKey(taskResult.getSceneId(), taskResult.getTaskId(),
             taskResult.getCustomerId());
         String podTotal = redisClientUtils.getString(podTotalName);
+        podTotal = null == podTotal ? "" : podTotal;
         if (!podTotal.equals(redisClientUtils.getObject(podName))) {
             // 两者不同
             getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG,
