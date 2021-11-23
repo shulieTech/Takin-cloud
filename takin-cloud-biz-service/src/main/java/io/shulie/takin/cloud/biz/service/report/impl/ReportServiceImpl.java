@@ -578,7 +578,16 @@ public class ReportServiceImpl implements ReportService {
         if (checkReportError(reportResult)) {
             return false;
         }
-        if (ReportConstants.LOCK_STATUS == reportResult.getLock()) {
+        if (ReportConstants.RUN_STATUS != reportResult.getStatus()) {
+            return false;
+        }
+        long lastUpdate = 0;
+        if (null != reportResult.getGmtUpdate()) {
+            lastUpdate = reportResult.getGmtUpdate().getTime();
+        }
+        //+10分钟,如果锁了10分钟了，则认为锁失效,可以重新锁
+        lastUpdate += 10*60*1000;
+        if (ReportConstants.LOCK_STATUS == reportResult.getLock() && lastUpdate > System.currentTimeMillis()) {
             log.error("异常代码【{}】,异常内容：锁定报告异常 --> 报告{}状态锁定状态，不能再次锁定",
                 TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId);
             return false;
