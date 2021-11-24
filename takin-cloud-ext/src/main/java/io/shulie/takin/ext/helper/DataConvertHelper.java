@@ -39,23 +39,25 @@ public class DataConvertHelper {
         config.setScriptFileDir(CommonHelper.mergeDirPath(scriptFileDir, File.separator));
         config.setPressureScene(startRequest.getPressureScene());
         config.setContinuedTime(startRequest.getContinuedTime());
+
         if (null != startRequest.getExpectThroughput()) {
             config.setExpectThroughput(startRequest.getExpectThroughput() / startRequest.getTotalIp());
         }
         if (CollectionUtils.isNotEmpty(startRequest.getDataFile())) {
-            List<String> jarFiles = startRequest.getDataFile().stream().filter(Objects::nonNull)
+            startRequest.getDataFile().stream().filter(Objects::nonNull)
                     .filter(o -> StringUtils.isNotBlank(o.getName()))
                     .filter(o -> o.getName().endsWith(".jar"))
                     .map(ScheduleStartRequestExt.DataFile::getPath)
                     .filter(StringUtils::isNotBlank)
                     .map(s -> CommonHelper.mergeDirPath(scriptFileDir, s))
-                    .collect(Collectors.toList());
-            config.setEnginePluginsFiles(jarFiles);
+                    .forEach(startRequest::addEnginePluginsFilePath);
+
             startRequest.getDataFile().forEach(
                     dataFile -> dataFile.setPath(CommonHelper.mergeDirPath(scriptFileDir, dataFile.getPath()))
             );
             config.setFileSets(startRequest.getDataFile());
         }
+        config.setEnginePluginsFiles(startRequest.getEnginePluginsFilePath());
         config.setBusinessMap(startRequest.getBusinessData());
         config.setBindByXpathMd5(startRequest.getBindByXpathMd5());
         config.setMemSetting(request.getMemSetting());
