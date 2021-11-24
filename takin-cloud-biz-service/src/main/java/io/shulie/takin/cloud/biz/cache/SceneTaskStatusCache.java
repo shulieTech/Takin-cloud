@@ -22,7 +22,7 @@ public class SceneTaskStatusCache {
     @Autowired
     private RedisClientUtils redisClientUtils;
 
-    private static final long EXPIRE_TIME = 60 * 60 * 24;
+    private static final long EXPIRE_TIME = 60 * 60;
 
     public void cacheStatus(long sceneId, long reportId, SceneRunTaskStatusEnum statusEnum){
         cacheStatus(sceneId,reportId,statusEnum,null);

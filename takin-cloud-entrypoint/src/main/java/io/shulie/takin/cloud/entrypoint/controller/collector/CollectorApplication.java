@@ -28,12 +28,14 @@ import io.shulie.takin.cloud.common.utils.UrlUtil;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
 import io.shulie.takin.cloud.common.bean.collector.Constants;
 import io.shulie.takin.cloud.common.bean.collector.EventMetrics;
 import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
 
 /**
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
@@ -49,6 +51,8 @@ public class CollectorApplication {
     private CollectorService collectorService;
     @Resource
     private RedisClientUtils redisClientUtils;
+    @Resource
+    private SceneTaskStatusCache sceneTaskStatusCache;
 
     @Value("${script.pre.match:true}")
     private boolean scriptPreMatch;
@@ -90,7 +94,8 @@ public class CollectorApplication {
                 log.debug("【收集器调度-debug】{}-{}-{}:接受到的数据:{}", sceneId, reportId, tenantId, GsonUtil.gsonToString(responseMetrics));
                 log.info("【收集器调度-metrics】{}-{}-{}: 接收到的数据:{}条,时间范围:{},已耗时:{}",
                     sceneId, reportId, tenantId, responseMetrics.size(), timestamp, (System.currentTimeMillis() - time));
-
+                // 刷新任务状态的Redis缓存
+                sceneTaskStatusCache.cacheStatus(sceneId, reportId, SceneRunTaskStatusEnum.RUNNING);
                 collectorService.collector(sceneId, reportId, tenantId, responseMetrics);
                 collectorService.statisticalIp(sceneId, reportId, tenantId, timestamp, IPUtils.getIP(request));
             }
