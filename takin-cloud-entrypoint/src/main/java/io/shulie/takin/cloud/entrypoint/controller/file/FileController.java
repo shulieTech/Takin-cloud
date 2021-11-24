@@ -69,6 +69,9 @@ import io.shulie.takin.cloud.sdk.model.request.filemanage.FileCreateByStringPara
 @RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_FILE)
 public class FileController {
 
+    @Value("${script.temp.path}")
+    private String tempPath;
+
     @Value("${script.path}")
     private String scriptPath;
 
@@ -78,9 +81,6 @@ public class FileController {
     @PostMapping(EntrypointUrl.METHOD_FILE_UPLOAD)
     @ApiOperation(value = "文件上传")
     public ResponseResult<List<FileDTO>> upload(@RequestParam List<MultipartFile> file) {
-        String tempPath = scriptPath
-            + SceneManageConstant.FILE_SPLIT + CloudPluginUtils.getContext().getTenantCode()
-            + SceneManageConstant.FILE_SPLIT + CloudPluginUtils.getContext().getEnvCode();
         List<FileDTO> dtoList = Lists.newArrayList();
         for (MultipartFile mf : file) {
             String uploadId = UUID.randomUUID().toString();
@@ -89,7 +89,8 @@ public class FileController {
                 boolean mkdirs = targetDir.mkdirs();
                 log.debug("mkdirs result : {}.", mkdirs);
             }
-            File targetFile = new File(targetDir + SceneManageConstant.FILE_SPLIT + mf.getOriginalFilename());
+            File targetFile = new File(tempPath + SceneManageConstant.FILE_SPLIT
+                + uploadId + SceneManageConstant.FILE_SPLIT + mf.getOriginalFilename());
             FileDTO dto = new FileDTO();
             try {
                 if (StrUtil.isBlank(mf.getOriginalFilename())) {
@@ -119,7 +120,7 @@ public class FileController {
     @DeleteMapping(EntrypointUrl.METHOD_FILE_DELETE_TEMP)
     @ApiOperation(value = "临时文件删除")
     public ResponseResult<?> delete(@RequestBody FileDeleteVO vo) {
-        String tempPath = scriptPath + SceneManageConstant.FILE_SPLIT + CloudPluginUtils.getContext().getTenantCode();
+        String tempPath = scriptPath;
         if (vo.getUploadId() != null) {
             String targetDir = tempPath + SceneManageConstant.FILE_SPLIT + vo.getUploadId();
             LinuxUtil.executeLinuxCmd("rm -rf " + targetDir);
@@ -141,8 +142,7 @@ public class FileController {
                 response.setContentType("application/octet-stream");
                 String saveName = StringUtils.substring(fileName, StringUtils.indexOf(fileName, "/") + "/".length());
                 response.setHeader("Content-Disposition",
-                    "attachment;filename=" + new String(saveName.getBytes(StandardCharsets.UTF_8),
-                        StandardCharsets.ISO_8859_1));
+                    "attachment;filename=" + new String(saveName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1));
             }
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：文件命令执行异常 --> 脚本文件下载异常，异常信息: {}",
