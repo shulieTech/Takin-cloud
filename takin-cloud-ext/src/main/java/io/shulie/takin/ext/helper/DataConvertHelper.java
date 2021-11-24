@@ -45,7 +45,7 @@ public class DataConvertHelper {
         if (CollectionUtils.isNotEmpty(startRequest.getDataFile())) {
             List<String> jarFiles = startRequest.getDataFile().stream().filter(Objects::nonNull)
                     .filter(o -> StringUtils.isNotBlank(o.getName()))
-                    .filter(o -> o.getName().startsWith(".jar"))
+                    .filter(o -> o.getName().endsWith(".jar"))
                     .map(ScheduleStartRequestExt.DataFile::getPath)
                     .filter(StringUtils::isNotBlank)
                     .map(s -> CommonHelper.mergeDirPath(scriptFileDir, s))
