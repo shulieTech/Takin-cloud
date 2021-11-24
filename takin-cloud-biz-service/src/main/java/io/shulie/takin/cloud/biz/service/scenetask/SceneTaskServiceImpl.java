@@ -1223,7 +1223,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             invoice.setResourceName(input.getResourceName());
             invoice.setOperateId(input.getOperateId());
             invoice.setOperateName(input.getOperateName());
-            invoice.setCustomerId(input.getCustomerId());
+            invoice.setCustomerId(report.getCustomerId());
             AssetBillExt.TimeBean pressureTestTime = new AssetBillExt.TimeBean(sceneData.getTotalTestTime(),
                 TimeUnitEnum.SECOND.getValue());
             String testTimeCost = DataUtils.formatTime(sceneData.getTotalTestTime());
