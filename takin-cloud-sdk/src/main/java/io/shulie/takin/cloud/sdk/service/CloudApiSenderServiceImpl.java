@@ -293,11 +293,11 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
     }
 
     // 填充请求头
-    private static final String USER_ID = "user_id";
-    private static final String ENV_CODE = "env_code";
-    private static final String TENANT_ID = "tenant_id";
+    private static final String USER_ID = "user-id";
+    private static final String ENV_CODE = "env-code";
+    private static final String TENANT_ID = "tenant-id";
     private static final String FILTER_SQL = "filterSql";
-    private static final String TENANT_CODE = "tenant_code";
+    private static final String TENANT_CODE = "tenant-code";
 
     /**
      * 获取请求头信息
