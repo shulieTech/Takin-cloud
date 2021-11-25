@@ -240,6 +240,8 @@ public class CollectorService extends AbstractIndicators {
 
     private void notifyEnd(Long sceneId, Long reportId, Long tenantId) {
         log.info("场景[{}]压测任务已完成,将要开始更新报告{}", sceneId, reportId);
+        // 刷新任务状态的Redis缓存
+        taskStatusCache.cacheStatus(sceneId, reportId, SceneRunTaskStatusEnum.ENDED);
         // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
         sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, tenantId)
             .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
