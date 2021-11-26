@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.data.dao.report;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Calendar;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -97,6 +98,9 @@ public class ReportDaoImpl implements ReportDao {
     public void updateReport(ReportUpdateParam param) {
         ReportEntity entity = new ReportEntity();
         BeanUtils.copyProperties(param, entity);
+        if (null == param.getGmtUpdate()) {
+            entity.setGmtUpdate(Calendar.getInstance().getTime());
+        }
         reportMapper.updateById(entity);
     }
 

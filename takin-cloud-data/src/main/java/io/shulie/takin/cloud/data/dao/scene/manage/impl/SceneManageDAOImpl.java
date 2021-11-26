@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.data.dao.scene.manage.impl;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Calendar;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.util.StrUtil;
@@ -51,6 +52,9 @@ public class SceneManageDAOImpl
     public void update(SceneManageCreateOrUpdateParam updateParam) {
         SceneManageEntity entity = new SceneManageEntity();
         BeanUtils.copyProperties(updateParam, entity);
+        if (null == updateParam.getUpdateTime()) {
+            updateParam.setUpdateTime(Calendar.getInstance().getTime());
+        }
         entity.setUserId(null);
         entity.setTenantId(null);
         entity.setEnvCode(null);

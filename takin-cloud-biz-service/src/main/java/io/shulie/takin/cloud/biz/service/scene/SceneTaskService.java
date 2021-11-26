@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import io.shulie.takin.cloud.biz.input.scenemanage.EnginePluginInput;
+import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStopOutput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskQueryTpsInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput;
@@ -128,6 +129,11 @@ public interface SceneTaskService {
      * @return -
      */
     SceneInspectTaskStopOutput stopInspectTask(Long sceneId);
+
+    /**
+     * 强制停止任务，不考虑数据的安全性，数据会丢失
+     */
+    SceneTaskStopOutput forceStopTask(Long reportId, boolean isNeedFinishReport);
 
     /**
      * 查询流量试跑状态

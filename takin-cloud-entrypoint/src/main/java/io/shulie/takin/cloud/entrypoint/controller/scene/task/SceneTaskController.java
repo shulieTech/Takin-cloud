@@ -8,12 +8,15 @@ import javax.annotation.Resource;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
+import io.shulie.takin.cloud.sdk.model.request.scenetask.TaskStopReq;
+import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStopOutput;
 import com.pamirs.takin.entity.domain.vo.scenemanage.FileSplitResultVO;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.EnginePluginInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskQueryTpsInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput;
+import io.shulie.takin.cloud.sdk.model.response.scenetask.SceneTaskStopResp;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskUpdateTpsInput;
 import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStartOutput;
 import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStopOutput;
@@ -161,6 +164,15 @@ public class SceneTaskController {
         SceneInspectTaskStartResp startResp = new SceneInspectTaskStartResp();
         BeanUtils.copyProperties(output, startResp);
         return ResponseResult.success(startResp);
+    }
+
+    @PostMapping("/forceStopTask")
+    @ApiOperation(value = "强制停止任务，提示：可能会造成压测数据丢失")
+    ResponseResult<SceneTaskStopResp> forceStopTask(@RequestBody TaskStopReq req) {
+        SceneTaskStopOutput output = sceneTaskService.forceStopTask(req.getReportId(), req.isFinishReport());
+        SceneTaskStopResp stopResp = new SceneTaskStopResp();
+        BeanUtils.copyProperties(output, stopResp);
+        return ResponseResult.success(stopResp);
     }
 
     @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_STOP_INSPECT)

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -31,6 +32,9 @@ import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
+import io.shulie.takin.cloud.biz.service.engine.EngineService;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
+import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStopOutput;
 import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
 import io.shulie.takin.cloud.biz.input.scenemanage.*;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput.FileInfo;
@@ -115,6 +119,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     private PluginManager pluginManager;
     @Resource(type = ReportMapper.class)
     private ReportMapper reportMapper;
+    @Resource(type = EngineService.class)
+    private EngineService engineService;
+    @Resource(type = ReportService.class)
+    private ReportService reportService;
     @Resource(type = TReportMapper.class)
     private TReportMapper tReportMapper;
     @Resource(type = SceneManageDAO.class)
@@ -556,6 +564,39 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         return startOutput;
     }
 
+    @Override
+    public SceneTaskStopOutput forceStopTask(Long reportId, boolean isNeedFinishReport) {
+        SceneTaskStopOutput r = new SceneTaskStopOutput();
+        r.setReportId(reportId);
+        try {
+            ReportResult report = reportDao.selectById(reportId);
+            if (null == report) {
+                r.addMsg("任务不存在");
+                return r;
+            }
+
+            String jobName = ScheduleConstants.getScheduleName(report.getSceneId(), reportId, report.getCustomerId());
+            String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(report.getSceneId(), reportId, report.getCustomerId());
+            engineService.deleteJob(jobName, engineInstanceRedisKey);
+
+            // 触发强制停止
+            if (isNeedFinishReport && report.getStatus() == ReportConstans.INIT_STATUS && null != report.getStartTime()) {
+                ReportUpdateParam param = new ReportUpdateParam();
+                param.setId(reportId);
+                param.setStatus(ReportConstans.RUN_STATUS);
+                if (null == report.getEndTime()) {
+                    param.setEndTime(Calendar.getInstance().getTime());
+                }
+                reportDao.updateReport(param);
+            } else if (report.getStatus() != ReportConstans.FINISH_STATUS) {
+                reportService.forceFinishReport(reportId);
+            }
+        } catch (Throwable t) {
+            r.addMsg("程序抛异常了");
+            log.error("forceStopTask failed！", t);
+        }
+        return r;
+    }
     @Override
     public SceneInspectTaskStopOutput stopInspectTask(Long sceneId) {
         SceneInspectTaskStopOutput output = new SceneInspectTaskStopOutput();
