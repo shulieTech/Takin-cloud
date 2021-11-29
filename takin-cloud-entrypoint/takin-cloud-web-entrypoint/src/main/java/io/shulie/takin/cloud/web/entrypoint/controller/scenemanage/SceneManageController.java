@@ -12,8 +12,9 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
-import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
@@ -167,9 +168,20 @@ public class SceneManageController {
         Object businessFlowId = map.get(SceneManageConstant.FEATURES_BUSINESS_FLOW_ID);
         resp.setBusinessFlowId(businessFlowId == null ? null : Long.valueOf(businessFlowId.toString()));
 
-        if (map.containsKey(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL)) {
-            Integer schedualInterval = (Integer)map.get(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL);
-            resp.setScheduleInterval(schedualInterval);
+        // 新版本
+        if (StrUtil.isNotBlank(resp.getScriptAnalysisResult())) {
+            if (map.containsKey("dataValidation")) {
+                JSONObject dataValidation = (JSONObject)map.get("dataValidation");
+                Integer scheduleInterval = (Integer)dataValidation.get("timeInterval");
+                resp.setScheduleInterval(scheduleInterval);
+            }
+        }
+        //旧版本
+        else {
+            if (map.containsKey(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL)) {
+                Integer schedualInterval = (Integer)map.get(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL);
+                resp.setScheduleInterval(schedualInterval);
+            }
         }
     }
 
