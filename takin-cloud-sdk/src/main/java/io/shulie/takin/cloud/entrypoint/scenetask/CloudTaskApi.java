@@ -1,9 +1,11 @@
 package io.shulie.takin.cloud.entrypoint.scenetask;
 
+import io.shulie.takin.cloud.sdk.model.request.scenetask.TaskStopReq;
 import io.shulie.takin.cloud.sdk.model.response.scenetask.SceneActionResp;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdReq;
 import io.shulie.takin.cloud.sdk.model.response.scenetask.SceneJobStateResp;
 import io.shulie.takin.cloud.sdk.model.request.scenetask.TaskInspectStopReq;
+import io.shulie.takin.cloud.sdk.model.response.scenetask.SceneTaskStopResp;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneTaskStartReq;
 import io.shulie.takin.cloud.sdk.model.request.scenetask.SceneStartCheckResp;
 import io.shulie.takin.cloud.sdk.model.request.scenetask.TaskInspectStartReq;
@@ -19,7 +21,6 @@ import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneInspectTaskStop
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneTryRunTaskStartResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneInspectTaskStartResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneTryRunTaskStatusResp;
-import io.shulie.takin.common.beans.response.ResponseResult;
 
 /**
  * 压测任务
@@ -94,6 +95,15 @@ public interface CloudTaskApi {
     SceneInspectTaskStopResp stopInspectTask(TaskInspectStopReq taskInspectStopReq);
 
     /**
+     * 强制停止任务
+     * <p>可能会造成压测数据丢失</p>
+     *
+     * @param taskStopReq -
+     * @return -
+     */
+    SceneTaskStopResp forceStopInspectTask(TaskStopReq taskStopReq);
+
+    /**
      * 启动试跑任务
      *
      * @param sceneTryRunTaskStartReq -
@@ -132,6 +142,5 @@ public interface CloudTaskApi {
      * @return 操作结果
      */
     Boolean callBackToWriteBalance(ScriptAssetBalanceReq req);
-
 
 }

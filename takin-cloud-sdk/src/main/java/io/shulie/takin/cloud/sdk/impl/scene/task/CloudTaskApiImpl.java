@@ -10,8 +10,10 @@ import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.entrypoint.scenetask.CloudTaskApi;
 import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
+import io.shulie.takin.cloud.sdk.model.request.scenetask.TaskStopReq;
 import io.shulie.takin.cloud.sdk.model.response.scenetask.SceneActionResp;
 import io.shulie.takin.cloud.sdk.model.request.scenetask.TaskInspectStopReq;
+import io.shulie.takin.cloud.sdk.model.response.scenetask.SceneTaskStopResp;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdReq;
 import io.shulie.takin.cloud.sdk.model.response.scenetask.SceneJobStateResp;
 import io.shulie.takin.cloud.sdk.model.request.scenetask.SceneStartCheckResp;
@@ -87,6 +89,12 @@ public class CloudTaskApiImpl implements CloudTaskApi {
     public SceneInspectTaskStopResp stopInspectTask(TaskInspectStopReq req) {
         return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_STOP_INSPECT),
             req, new TypeReference<ResponseResult<SceneInspectTaskStopResp>>() {}).getData();
+    }
+
+    @Override
+    public SceneTaskStopResp forceStopInspectTask(TaskStopReq req) {
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_FORCE_STOP_INSPECT),
+            req, new TypeReference<ResponseResult<SceneTaskStopResp>>() {}).getData();
     }
 
     @Override

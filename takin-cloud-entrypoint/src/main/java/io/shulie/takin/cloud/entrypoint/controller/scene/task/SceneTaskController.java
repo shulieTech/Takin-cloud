@@ -166,7 +166,7 @@ public class SceneTaskController {
         return ResponseResult.success(startResp);
     }
 
-    @PostMapping("/forceStopTask")
+    @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_FORCE_STOP_INSPECT)
     @ApiOperation(value = "强制停止任务，提示：可能会造成压测数据丢失")
     ResponseResult<SceneTaskStopResp> forceStopTask(@RequestBody TaskStopReq req) {
         SceneTaskStopOutput output = sceneTaskService.forceStopTask(req.getReportId(), req.isFinishReport());

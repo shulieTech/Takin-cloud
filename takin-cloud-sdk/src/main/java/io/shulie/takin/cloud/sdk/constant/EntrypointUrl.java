@@ -130,6 +130,7 @@ public class EntrypointUrl {
     public final static String METHOD_SCENE_TASK_START_FLOW_DEBUG = "startFlowDebugTask";
     public final static String METHOD_SCENE_TASK_START_INSPECT = "startInspectTask";
     public final static String METHOD_SCENE_TASK_STOP_INSPECT = "stopInspectTask";
+    public final static String METHOD_SCENE_TASK_FORCE_STOP_INSPECT = "forceStopTask";
     public final static String METHOD_SCENE_TASK_START_TRY_RUN = "startTryRunTask";
     public final static String METHOD_SCENE_TASK_CHECK_STATUS = "checkTaskStatus";
     public final static String METHOD_SCENE_TASK_CHECK_JOB_STATUS = "checkJobStatus";
