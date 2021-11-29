@@ -714,10 +714,6 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                         log.info("no such scene manager!sceneId=" + sceneId);
                         return;
                     }
-//                    if (SceneManageStatusEnum.ifFree(scene.getStatus())) {
-//                        delTask(sceneId, reportId, customerId);
-//                        return;
-//                    }
                     //结束时间取开始压测时间+总测试时间+3分钟， 3分钟富裕时间，给与pod启动和压测引擎启动延时时间
                     long endTime = TimeUnit.MINUTES.toMillis(3L);
                     if (null != r.getStartTime()) {
