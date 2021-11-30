@@ -3,11 +3,12 @@ package io.shulie.takin.cloud.data.dao.report;
 import java.util.Date;
 import java.util.List;
 
-import io.shulie.takin.cloud.data.model.mysql.BusinessActivitiesEntity;
+import io.shulie.takin.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import io.shulie.takin.cloud.data.param.report.ReportDataQueryParam;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
-import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
 
 /**
  * @author 无涯
@@ -97,4 +98,12 @@ public interface ReportDao {
      * @return
      */
     ReportResult getById(Long resultId);
+
+    /**
+     * 查询报告关联的节点信息
+     * @param reportId 报告ID
+     * @param nodeType 节点类型
+     * @return
+     */
+    List<ReportBusinessActivityDetailEntity> getReportBusinessActivityDetailsByReportId(Long reportId, NodeTypeEnum nodeType);
 }

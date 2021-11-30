@@ -210,6 +210,9 @@ public class FileSplitService {
             } catch (TakinCloudException e) {
                 log.error("【文件分片】--场景ID【{}】,文件名【{}】,拆分异常【{}】", startRequest.getSceneId(), dataFile.getName(),
                     e.getMessage());
+                taskStatusCache.cacheStatus(startRequest.getSceneId(), startRequest.getTaskId(),
+                    SceneRunTaskStatusEnum.FAILED,
+                    String.format("启动场景失败:场景ID:%s,文件拆分异常%s", startRequest.getSceneId(), e.getMessage()));
                 sliceResult.set(false);
             }
         }).collect(Collectors.toList()));

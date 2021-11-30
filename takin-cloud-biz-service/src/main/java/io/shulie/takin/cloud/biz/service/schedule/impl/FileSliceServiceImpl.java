@@ -51,7 +51,6 @@ public class FileSliceServiceImpl implements FileSliceService {
     @Autowired
     private SceneTaskService sceneTaskService;
 
-
     private static final String DEFAULT_PATH_SEPARATOR = "/";
 
     private static final String DEFAULT_FILE_COLUMN_SEPARATOR = ",";
@@ -91,7 +90,7 @@ public class FileSliceServiceImpl implements FileSliceService {
         }
     }
 
-    private boolean slice(FileSliceRequest request, SceneBigFileSliceParam param) {
+    private boolean slice(FileSliceRequest request, SceneBigFileSliceParam param) throws TakinCloudException {
         if (request.getSplit() && request.getOrderSplit() != null && request.getOrderSplit()) {
             sliceFileByOrder(request, param);
         } else {
@@ -178,7 +177,7 @@ public class FileSliceServiceImpl implements FileSliceService {
             setSceneId(param.getSceneId());
             setFileName(param.getFileName());
         }});
-        if (Objects.nonNull(sceneScriptRefEntity)){
+        if (Objects.nonNull(sceneScriptRefEntity)) {
             sceneScriptRefEntity.setFileMd5(param.getFileMd5());
             fileSliceDAO.updateRef(sceneScriptRefEntity);
         }
@@ -229,8 +228,8 @@ public class FileSliceServiceImpl implements FileSliceService {
             } else {
                 param.setFileName(targetFile.getName());
                 ContactFileInfo contactFileInfo = new ContactFileInfo();
-                boolean b = contactFileAndScene(targetFile, param,contactFileInfo);
-                if (b){
+                boolean b = contactFileAndScene(targetFile, param, contactFileInfo);
+                if (b) {
                     contactFileInfo.setSize(targetFile.length());
                     contactFileInfo.setFileName(targetFile.getName());
                     contactFileInfo.setFilePath(targetFile.getAbsolutePath());
@@ -250,7 +249,7 @@ public class FileSliceServiceImpl implements FileSliceService {
      * @param request
      * @param param
      */
-    private void sliceFileByOrder(FileSliceRequest request, SceneBigFileSliceParam param) {
+    private void sliceFileByOrder(FileSliceRequest request, SceneBigFileSliceParam param) throws TakinCloudException {
         try {
             log.info("【文件分片】--场景ID：【{}】，文件名：【{}】 文件【顺序分片】任务执开始.", request.getSceneId(), request.getFileName());
             List<FileSplitInfo> fileSplitInfos = FileSplitUtil.splitFileByPartition(
@@ -267,7 +266,7 @@ public class FileSliceServiceImpl implements FileSliceService {
         } catch (Exception e) {
             log.error("【文件分片】--场景ID：【{}】，文件名：【{}】 文件【顺序分片】任务异常,异常信息：【{}】", request.getSceneId(), request.getFileName(),
                 e.getMessage());
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR, e);
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR, e.getMessage());
         }
     }
 
@@ -301,8 +300,7 @@ public class FileSliceServiceImpl implements FileSliceService {
         }
     }
 
-
-    private boolean contactFileAndScene(File file, SceneBigFileSliceParam param,ContactFileInfo info) {
+    private boolean contactFileAndScene(File file, SceneBigFileSliceParam param, ContactFileInfo info) {
         Date currentDate = new Date();
         SceneScriptRefEntity entity = fileSliceDAO.selectRef(param);
         if (Objects.isNull(entity)) {

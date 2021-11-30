@@ -2,21 +2,30 @@ package io.shulie.takin.cloud.data.dao.report;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+
+import javax.annotation.Resource;
+
 import java.util.stream.Collectors;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
-import io.shulie.takin.cloud.common.constants.ReportConstants;
-import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
-import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
-import io.shulie.takin.cloud.data.param.report.ReportDataQueryParam;
-import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
-import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.ext.content.enums.NodeTypeEnum;
+import org.apache.commons.collections4.CollectionUtils;
+import io.shulie.takin.cloud.common.utils.JsonPathUtil;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
+import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
+import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
+import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
+import io.shulie.takin.cloud.data.param.report.ReportDataQueryParam;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
+import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
+import io.shulie.takin.cloud.data.mapper.mysql.ReportBusinessActivityDetailMapper;
 
 /**
  * @author 无涯
@@ -25,8 +34,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReportDaoImpl implements ReportDao {
 
-    @Autowired
+    @Resource
     private ReportMapper reportMapper;
+
+    @Resource
+    private ReportBusinessActivityDetailMapper detailMapper;
 
     @Override
     public List<ReportResult> getList(ReportDataQueryParam param) {
@@ -67,7 +79,6 @@ public class ReportDaoImpl implements ReportDao {
      * 获取最新一条报告id
      *
      * @param sceneId
-     *
      * @return -
      */
     @Override
@@ -117,8 +128,6 @@ public class ReportDaoImpl implements ReportDao {
         reportMapper.updateById(entity);
     }
 
-
-
     @Override
     public ReportResult getTempReportBySceneId(Long sceneId) {
         LambdaQueryWrapper<ReportEntity> wrapper = new LambdaQueryWrapper<>();
@@ -153,7 +162,6 @@ public class ReportDaoImpl implements ReportDao {
         return null;
     }
 
-
     @Override
     public void updateReportEndTime(Long resultId, Date endTime) {
         ReportEntity entity = new ReportEntity();
@@ -165,12 +173,37 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public ReportResult getById(Long resultId) {
-        if (resultId == null){
+        if (resultId == null) {
             return null;
         }
         ReportEntity reportEntity = reportMapper.selectById(resultId);
         ReportResult reportResult = new ReportResult();
         BeanUtils.copyProperties(reportEntity, reportResult);
         return reportResult;
+    }
+
+    @Override
+    public List<ReportBusinessActivityDetailEntity> getReportBusinessActivityDetailsByReportId(Long reportId,
+        NodeTypeEnum nodeType) {
+        LambdaQueryWrapper<ReportBusinessActivityDetailEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ReportBusinessActivityDetailEntity::getReportId, reportId);
+        queryWrapper.eq(ReportBusinessActivityDetailEntity::getIsDeleted, 0);
+        List<ReportBusinessActivityDetailEntity> entities = detailMapper.selectList(
+            queryWrapper);
+        if (Objects.isNull(nodeType)) {
+            return entities;
+        }
+        ReportEntity reportEntity = reportMapper.selectById(reportId);
+        if (Objects.nonNull(reportEntity) && StringUtils.isNotBlank(reportEntity.getScriptNodeTree())) {
+            List<ScriptNode> nodeList = JsonPathUtil.getChildrenByMd5(reportEntity.getScriptNodeTree(), null, nodeType);
+            if (CollectionUtils.isNotEmpty(nodeList)) {
+                List<String> xpathMd5List = nodeList.stream().filter(Objects::nonNull)
+                    .map(ScriptNode::getXpathMd5).collect(Collectors.toList());
+                return entities.stream().filter(Objects::nonNull)
+                    .filter(entity -> xpathMd5List.contains(entity.getBindRef()))
+                    .collect(Collectors.toList());
+            }
+        }
+        return null;
     }
 }
