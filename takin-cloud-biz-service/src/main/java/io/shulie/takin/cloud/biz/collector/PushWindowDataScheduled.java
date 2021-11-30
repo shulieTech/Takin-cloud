@@ -335,24 +335,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 .map(l -> this.toPressureOutput(l, podNum, time))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-            //sla处理
-            try {
-                List<SendMetricsEvent> sendMetricsEventList = getSendMetricsEventList(sceneId, reportId, customerId,
-                    timeWindow, results);
-                //未finish，发事件
-                String existKey = String.format(CollectorConstants.REDIS_PRESSURE_TASK_KEY,
-                    getTaskKey(sceneId, reportId, customerId));
-                if (Boolean.TRUE.equals(redisTemplate.hasKey(existKey))) {
-                    sendMetricsEventList.stream().filter(Objects::nonNull)
-                        .forEach(this::sendMetrics);
-                }
-            } catch (Exception e) {
-                log.error(
-                    "【collector metric】【error-sendMetricsEvents】 write influxDB time : {} sceneId : {}, reportId : "
-                        + "{},customerId : {}, error:{}",
-                    timeWindow, sceneId, reportId, customerId, e.getMessage());
-            }
 
+            List<PressureOutput> slaList = new ArrayList<>(results);
             //统计没有回传的节点数据
             if (CollectionUtils.isNotEmpty(nodes)) {
                 //控制器统计
@@ -361,21 +345,21 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                     controllerNodes.stream().filter(Objects::nonNull)
                         //过滤掉已经有数据的控制器
                         .filter(c -> !transactions.contains(c.getXpathMd5()))
-                        .forEach(c -> this.summaryNodeMetrics(c, podNum, time, results));
+                        .forEach(c -> this.summaryNodeMetrics(c, podNum, time, results, slaList));
                 }
                 //线程组统计
                 List<ScriptNode> threadGroupNodes = JmxUtil.getScriptNodeByType(NodeTypeEnum.THREAD_GROUP, nodes);
                 if (CollectionUtils.isNotEmpty(threadGroupNodes)) {
                     threadGroupNodes.stream().filter(Objects::nonNull)
                         .filter(n -> !transactions.contains(n.getXpathMd5()))
-                        .forEach(n -> this.summaryNodeMetrics(n, podNum, time, results));
+                        .forEach(n -> this.summaryNodeMetrics(n, podNum, time, results, slaList));
                 }
                 //测试计划统计
                 List<ScriptNode> testPlanNodes = JmxUtil.getScriptNodeByType(NodeTypeEnum.TEST_PLAN, nodes);
                 if (CollectionUtils.isNotEmpty(testPlanNodes)) {
                     testPlanNodes.stream().filter(Objects::nonNull)
                         .filter(t -> !transactions.contains(t.getXpathMd5()))
-                        .forEach(t -> this.summaryNodeMetrics(t, podNum, time, results));
+                        .forEach(t -> this.summaryNodeMetrics(t, podNum, time, results, slaList));
                 }
             }
             //如果是老版本的，统计ALL
@@ -388,6 +372,24 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 //    .sum();
                 results.add(createPressureOutput(results, time, podNum, ReportConstants.ALL_BUSINESS_ACTIVITY, ReportConstants.ALL_BUSINESS_ACTIVITY));
 
+            }
+            //sla处理
+            try {
+                List<SendMetricsEvent> sendMetricsEventList = getSendMetricsEventList(sceneId, reportId, customerId,
+                    timeWindow, slaList);
+                //未finish，发事件
+                String existKey = String.format(CollectorConstants.REDIS_PRESSURE_TASK_KEY,
+                    getTaskKey(sceneId, reportId, customerId));
+                if (Boolean.TRUE.equals(redisTemplate.hasKey(existKey))) {
+                    //排除控制器和理线程组，只处理采样器和测试计划
+                    sendMetricsEventList.stream().filter(Objects::nonNull)
+                        .forEach(this::sendMetrics);
+                }
+            } catch (Exception e) {
+                log.error(
+                    "【collector metric】【error-sendMetricsEvents】 write influxDB time : {} sceneId : {}, reportId : "
+                        + "{},customerId : {}, error:{}",
+                    timeWindow, sceneId, reportId, customerId, e.getMessage());
             }
             results.stream().filter(Objects::nonNull)
                 .map(p -> InfluxUtil.toPoint(measurement, time, p))
@@ -536,7 +538,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
      * @param time       时间窗口
      * @param data       经过统计计算的metrics数据
      */
-    private void summaryNodeMetrics(ScriptNode targetNode, int podNum, Long time, List<PressureOutput> data) {
+    private void summaryNodeMetrics(ScriptNode targetNode, int podNum, Long time, List<PressureOutput> data, List<PressureOutput> slaList) {
         String transaction = targetNode.getXpathMd5();
         String testName = targetNode.getTestName();
         List<ScriptNode> childSamplers = JmxUtil.getScriptNodeByType(NodeTypeEnum.SAMPLER, targetNode.getChildren());
@@ -551,7 +553,11 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 tmpData.addAll(entry.getValue());
             }
         }
-        data.add(createPressureOutput(tmpData, time, podNum, transaction, testName));
+        PressureOutput pressureOutput = createPressureOutput(tmpData, time, podNum, transaction, testName);
+        data.add(pressureOutput);
+        if (CollectionUtils.isNotEmpty(slaList) && targetNode.getType() == NodeTypeEnum.TEST_PLAN) {
+            slaList.add(pressureOutput);
+        }
     }
 
     /**
@@ -723,10 +729,6 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                         log.info("no such scene manager!sceneId=" + sceneId);
                         return;
                     }
-                    //                    if (SceneManageStatusEnum.ifFree(scene.getStatus())) {
-                    //                        delTask(sceneId, reportId, customerId);
-                    //                        return;
-                    //                    }
                     //结束时间取开始压测时间+总测试时间+3分钟， 3分钟富裕时间，给与pod启动和压测引擎启动延时时间
                     long endTime = TimeUnit.MINUTES.toMillis(3L);
                     if (null != r.getStartTime()) {
@@ -836,13 +838,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                                     log.warn("当前push Data延迟时间为{}", timeWindow);
                                     final Long customerIdTmp = customerId;
                                     final long delayTmp = timeWindow;
-                                    Executors.execute(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            writeInfluxDB(transactions, taskKey, delayTmp, sceneId, reportId,
-                                                customerIdTmp, reportResult.getScriptNodeTree());
-                                        }
-                                    });
+                                    Executors.execute(() -> writeInfluxDB(transactions, taskKey, delayTmp, sceneId, reportId,
+                                        customerIdTmp, reportResult.getScriptNodeTree()));
                                     timeWindow = refreshTimeWindow(engineName);
                                 }
                             }
@@ -1032,14 +1029,14 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             List<ScriptNode> childControllers = JsonPathUtil.getChildControllers(nodeTree, null);
             childControllers.stream().filter(Objects::nonNull)
                 .filter(c -> !transactions.contains(c.getXpathMd5()))
-                .forEach(c -> this.summaryNodeMetrics(c, 0, timeWindow, resultList));
+                .forEach(c -> this.summaryNodeMetrics(c, 0, timeWindow, resultList, null));
 
             List<ScriptNode> threadGroupNodes = JsonPathUtil.getChildrenByMd5(nodeTree, null,
                 NodeTypeEnum.THREAD_GROUP);
             if (CollectionUtils.isNotEmpty(threadGroupNodes)) {
                 threadGroupNodes.stream().filter(Objects::nonNull)
                     .filter(c -> !transactions.contains(c.getXpathMd5()))
-                    .forEach(c -> this.summaryNodeMetrics(c, 0, timeWindow, resultList));
+                    .forEach(c -> this.summaryNodeMetrics(c, 0, timeWindow, resultList, null));
             }
 
             String measurement = InfluxUtil.getMeasurement(sceneId, reportId, tenantId);

@@ -1,12 +1,13 @@
 package io.shulie.plugin.engine.util;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.FileInputStream;
 import java.security.MessageDigest;
 
 import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -19,7 +20,7 @@ public class Md5Util {
     /**
      * 区分大文件和一般文件界线:500M
      */
-    public static final long BIG_File_SIZE = 1024 * 1024 * 500L;
+    public static final long BIG_FILE_SIZE = 1024 * 1024 * 500L;
     /**
      * 大文件采样分片数:100个片段
      */
@@ -61,7 +62,7 @@ public class Md5Util {
             return null;
         }
         long fileSize = file.length();
-        if (fileSize >= BIG_File_SIZE) {
+        if (fileSize >= BIG_FILE_SIZE) {
             return md5BigFile(file);
         } else {
             FileInputStream in = null;

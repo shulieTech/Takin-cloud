@@ -1,10 +1,12 @@
 package com.pamirs.takin.entity.domain.vo.report;
 
-import io.shulie.takin.cloud.ext.content.trace.PagingContextExt;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+import io.shulie.takin.cloud.ext.content.trace.PagingContextExt;
 
 /**
  * @author 莫问
@@ -14,8 +16,16 @@ import lombok.EqualsAndHashCode;
 @ApiModel
 @EqualsAndHashCode(callSuper = true)
 public class ReportQueryParam extends PagingContextExt {
+    /**
+     * 场景主键
+     */
     @ApiModelProperty(name = "sceneId", value = "场景ID")
     private Long sceneId;
+    /**
+     * 报告主键
+     */
+    @ApiModelProperty(name = "reportId", value = "报告ID")
+    private Long reportId;
     /**
      * 场景名称
      */
@@ -34,4 +44,8 @@ public class ReportQueryParam extends PagingContextExt {
     @ApiModelProperty(value = "压测结束时间")
     private String endTime;
 
+    /**
+     * 报告类型；0普通场景，1流量调试
+     */
+    private Integer type;
 }
