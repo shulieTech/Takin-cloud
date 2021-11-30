@@ -1,17 +1,15 @@
 package io.shulie.takin.cloud.biz.service.scene.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.List;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.stream.Collectors;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import lombok.extern.slf4j.Slf4j;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -20,28 +18,27 @@ import com.alibaba.fastjson.TypeReference;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.PlatformTransactionManager;
-
-import io.shulie.takin.ext.content.script.ScriptNode;
-import io.shulie.takin.ext.content.enums.NodeTypeEnum;
-import io.shulie.takin.ext.content.enginecall.PtConfigExt;
 import io.shulie.takin.cloud.biz.service.scene.SceneService;
-import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.data.model.mysql.SceneSlaRefEntity;
+import io.shulie.takin.cloud.biz.service.scene.SceneSynchronizeService;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.data.mapper.mysql.SceneBusinessActivityRefMapper;
 import io.shulie.takin.cloud.data.mapper.mysql.SceneManageMapper;
 import io.shulie.takin.cloud.data.mapper.mysql.SceneSlaRefMapper;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.ext.content.enginecall.ThreadGroupConfigExt;
-import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.biz.service.scene.SceneSynchronizeService;
-import io.shulie.takin.cloud.open.request.scene.manage.SynchronizeRequest;
 import io.shulie.takin.cloud.data.model.mysql.SceneBusinessActivityRefEntity;
-import io.shulie.takin.cloud.data.mapper.mysql.SceneBusinessActivityRefMapper;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
+import io.shulie.takin.cloud.data.model.mysql.SceneSlaRefEntity;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SynchronizeRequest;
+import io.shulie.takin.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.ext.content.enginecall.ThreadGroupConfigExt;
+import io.shulie.takin.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.ext.content.script.ScriptNode;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 
 /**
  * 场景同步服务 - 新 - 实现

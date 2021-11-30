@@ -1,7 +1,6 @@
 package io.shulie.takin.cloud.common.utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +11,6 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.poi.ss.formula.functions.T;
-import org.springframework.beans.BeanUtils;
 
 /**
  * 工具类

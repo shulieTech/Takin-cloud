@@ -1,38 +1,14 @@
 package io.shulie.takin.eventcenter;
 
-
-import java.io.Serializable;
+import lombok.Data;
 
 /**
  * 事件
+ *
+ * @author -
  */
-public class Event implements Serializable {
-
-    private String eventName;
-
+@Data
+public class Event {
     private Object ext;
-
-    public String getEventName() {
-        return eventName;
-    }
-
-    public void setEventName(String eventName) {
-        this.eventName = eventName;
-    }
-
-    public Object getExt() {
-        return ext;
-    }
-
-    public void setExt(Object ext) {
-        this.ext = ext;
-    }
-
-    @Override
-    public String toString() {
-        return "Event{" +
-                "eventName='" + eventName + '\'' +
-                ", ext=" + ext +
-                '}';
-    }
+    private String eventName;
 }

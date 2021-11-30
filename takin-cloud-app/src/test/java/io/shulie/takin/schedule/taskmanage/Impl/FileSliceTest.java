@@ -3,7 +3,6 @@ package io.shulie.takin.schedule.taskmanage.Impl;
 import java.util.ArrayList;
 import java.util.Map;
 
-import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import io.shulie.takin.app.Application;
 import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
 import io.shulie.takin.cloud.common.utils.FileSliceByLine;
@@ -11,7 +10,7 @@ import io.shulie.takin.cloud.common.utils.FileSliceByLine.FileSliceInfo;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.Builder;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneBigFileSliceDAO;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneBigFileSliceDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import org.junit.Test;

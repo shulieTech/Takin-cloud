@@ -15,18 +15,17 @@
 
 package io.shulie.takin.cloud.common.utils;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 /**
- * @Author: liyuanba
- * @Date: 2021/9/24 4:31 下午
+ * @author liyuanba
+ * @date 2021/9/24 4:31 下午
  */
 @Slf4j
 public class NumberUtil {
@@ -49,18 +48,19 @@ public class NumberUtil {
         }
     }
 
-    public static long parseLong(String s){
-        return parseLong(s,0L);
+    public static long parseLong(String s) {
+        return parseLong(s, 0L);
     }
-    public static Long parseLong(String s,Long defValue){
-        if (StringUtils.isBlank(s) || !StringUtils.isNumeric(s)){
+
+    public static Long parseLong(String s, Long defValue) {
+        if (StringUtils.isBlank(s) || !StringUtils.isNumeric(s)) {
             return defValue;
         }
-        if (null != defValue){
-            return NumberUtils.toLong(s,defValue);
-        }else {
-            long a = NumberUtils.toLong(s,Long.MAX_VALUE);
-            if (a == Long.MAX_VALUE){
+        if (null != defValue) {
+            return NumberUtils.toLong(s, defValue);
+        } else {
+            long a = NumberUtils.toLong(s, Long.MAX_VALUE);
+            if (a == Long.MAX_VALUE) {
                 return defValue;
             }
         }
@@ -91,6 +91,7 @@ public class NumberUtil {
 
     /**
      * 计算a在b中的比例
+     *
      * @param a         被除数
      * @param b         除数
      * @param percent   是否是百分比
@@ -120,10 +121,11 @@ public class NumberUtil {
             }
             return aa.divide(bb, scale, roundMode).doubleValue();
         } catch (Exception e) {
-            log.error("getRate error!a="+a+", b="+b, e);
+            log.error("getRate error!a=" + a + ", b=" + b, e);
         }
         return defValue;
     }
+
     public static boolean isZero(Number a) {
         return isZero(a.doubleValue());
     }
@@ -134,18 +136,19 @@ public class NumberUtil {
         return aa.compareTo(zero) == 0;
     }
 
-    public static String decimalToString(BigDecimal decimal,int scale, RoundingMode roundingMode){
-        if (Objects.isNull(decimal)){
+    public static String decimalToString(BigDecimal decimal, int scale, RoundingMode roundingMode) {
+        if (Objects.isNull(decimal)) {
             return "";
         }
-        return decimal.setScale(scale,roundingMode).toString();
+        return decimal.setScale(scale, roundingMode).toString();
     }
-    public static String decimalToString(BigDecimal decimal){
-        return decimalToString(decimal,2,RoundingMode.HALF_DOWN);
+
+    public static String decimalToString(BigDecimal decimal) {
+        return decimalToString(decimal, 2, RoundingMode.HALF_DOWN);
     }
 
     public static void main(String[] args) {
-        System.out.println("isZero="+decimalToString(null));
-        System.out.println("getRate="+getRate(1, 0.00000d));
+        System.out.println("isZero=" + decimalToString(null));
+        System.out.println("getRate=" + getRate(1, 0.00000d));
     }
 }

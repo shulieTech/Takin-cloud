@@ -78,7 +78,7 @@ spring:
     proxy-target-class: true
 
   influxdb:
-    url:  http://${resource.influxdb.host:127.0.0.1}:${resource.influxdb.port:8086}
+    url: http://${resource.influxdb.host:127.0.0.1}:${resource.influxdb.port:8086}
     user: pradar
     password: pamirs@db2020
     database: jmeter

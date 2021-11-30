@@ -4,16 +4,43 @@ import java.util.List;
 
 import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
 import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
-import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
+import io.shulie.takin.cloud.sdk.model.request.WarnQueryParam;
 
+/**
+ * @author -
+ */
 public interface TWarnDetailMapper {
 
+    /**
+     * 依据主键删除
+     *
+     * @param id 数据主键
+     * @return -
+     */
     int deleteByPrimaryKey(Long id);
 
+    /**
+     * 插入
+     *
+     * @param record 入参
+     * @return -
+     */
     int insertSelective(WarnDetail record);
 
+    /**
+     * 依据主键查询
+     *
+     * @param id 数据主键
+     * @return 数据内容
+     */
     WarnDetail selectByPrimaryKey(Long id);
 
+    /**
+     * 依据主键更新
+     *
+     * @param record 数据内容(包括主键)
+     * @return -
+     */
     int updateByPrimaryKeySelective(WarnDetail record);
 
     /**

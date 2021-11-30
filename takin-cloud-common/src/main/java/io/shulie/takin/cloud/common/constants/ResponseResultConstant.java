@@ -8,6 +8,8 @@ package io.shulie.takin.cloud.common.constants;
  */
 public class ResponseResultConstant {
 
-    /** 错误状态码 */
+    /**
+     * 错误状态码
+     */
     public static final String RESPONSE_RESULT_CODE_ERROR = "0";
 }

@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.biz.convertor;
 
-import io.shulie.takin.ext.content.enginecall.StrategyConfigExt;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -13,7 +13,8 @@ public interface ScheduleConvertor {
 
     /**
      * 参数转换
-     * @param config
+     *
+     * @param config -
      * @return -
      */
     StrategyConfigExt ofStrategyConfig(StrategyConfigExt config);

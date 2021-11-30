@@ -1,7 +1,5 @@
 package com.pamirs.takin.entity.domain.vo.strategy;
 
-import java.io.Serializable;
-
 import javax.validation.constraints.NotNull;
 
 import io.swagger.annotations.ApiModel;
@@ -14,9 +12,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel(description = "配置策略信息")
-public class StrategyConfigAddVO implements Serializable {
-
-    private static final long serialVersionUID = -7643529208229180591L;
+public class StrategyConfigAddVO {
 
     @NotNull
     @ApiModelProperty(value = "调度策略名称")

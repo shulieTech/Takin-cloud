@@ -1,5 +1,11 @@
 package io.shulie.takin.cloud.biz.service.strategy.impl;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Objects;
+
+import javax.annotation.Resource;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
@@ -19,19 +25,13 @@ import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 import io.shulie.takin.cloud.common.enums.deployment.DeploymentMethodEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
-import io.shulie.takin.ext.api.EngineCallExtApi;
-import io.shulie.takin.ext.content.enginecall.StrategyConfigExt;
-import io.shulie.takin.ext.content.enginecall.StrategyOutputExt;
+import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyOutputExt;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * @author qianshui
@@ -109,9 +109,9 @@ public class StrategyConfigServiceImpl implements StrategyConfigService {
         PageInfo<StrategyConfigExt> pageInfo = queryPageList(new StrategyConfigQueryVO());
         if (null != pageInfo && CollectionUtils.isNotEmpty(pageInfo.getList())) {
             strategyConfig = pageInfo.getList().stream().filter(Objects::nonNull)
-                    .filter(config -> appConfig.getDeploymentMethod().equals(config.getDeploymentMethod()))
-                    .findFirst()
-                    .orElse(pageInfo.getList().get(0));
+                .filter(config -> appConfig.getDeploymentMethod().equals(config.getDeploymentMethod()))
+                .findFirst()
+                .orElse(pageInfo.getList().get(0));
         }
         return strategyConfig;
     }

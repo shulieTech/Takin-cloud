@@ -2,9 +2,8 @@ package io.shulie.takin.cloud.common.test.utils;
 
 import com.alibaba.fastjson.JSONObject;
 
-import lombok.extern.slf4j.Slf4j;
-
 import io.shulie.takin.cloud.common.utils.JmxUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * {@link JmxUtil}测试类

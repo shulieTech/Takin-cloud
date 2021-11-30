@@ -24,7 +24,7 @@ import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneBigFileSliceDAO;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneBigFileSliceDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
@@ -51,10 +51,9 @@ public class FileSliceServiceImpl implements FileSliceService {
     @Autowired
     private SceneTaskService sceneTaskService;
 
-
     private static final String DEFAULT_PATH_SEPARATOR = "/";
 
-    private static final String DEFAULT_FILE_COLUMN_SEPARATOR = ",";
+    private static final String DEFAULT_FILE_COLUMN_SEPARATOR = "@@@";
 
     @Override
     public boolean fileSlice(FileSliceRequest request) throws TakinCloudException {
@@ -178,7 +177,7 @@ public class FileSliceServiceImpl implements FileSliceService {
             setSceneId(param.getSceneId());
             setFileName(param.getFileName());
         }});
-        if (Objects.nonNull(sceneScriptRefEntity)){
+        if (Objects.nonNull(sceneScriptRefEntity)) {
             sceneScriptRefEntity.setFileMd5(param.getFileMd5());
             fileSliceDAO.updateRef(sceneScriptRefEntity);
         }
@@ -229,8 +228,8 @@ public class FileSliceServiceImpl implements FileSliceService {
             } else {
                 param.setFileName(targetFile.getName());
                 ContactFileInfo contactFileInfo = new ContactFileInfo();
-                boolean b = contactFileAndScene(targetFile, param,contactFileInfo);
-                if (b){
+                boolean b = contactFileAndScene(targetFile, param, contactFileInfo);
+                if (b) {
                     contactFileInfo.setSize(targetFile.length());
                     contactFileInfo.setFileName(targetFile.getName());
                     contactFileInfo.setFilePath(targetFile.getAbsolutePath());
@@ -301,8 +300,7 @@ public class FileSliceServiceImpl implements FileSliceService {
         }
     }
 
-
-    private boolean contactFileAndScene(File file, SceneBigFileSliceParam param,ContactFileInfo info) {
+    private boolean contactFileAndScene(File file, SceneBigFileSliceParam param, ContactFileInfo info) {
         Date currentDate = new Date();
         SceneScriptRefEntity entity = fileSliceDAO.selectRef(param);
         if (Objects.isNull(entity)) {

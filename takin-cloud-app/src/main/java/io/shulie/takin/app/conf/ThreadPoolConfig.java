@@ -31,12 +31,13 @@ public class ThreadPoolConfig {
     /**
      * 大文件上传线程池
      * 任务有异常会导致文件不完整 直接抛出异常
+     *
      * @return
      */
     @Bean(name = "bigFileThreadPool")
     public ThreadPoolExecutor bigFileThreadPool() {
         ThreadFactory nameThreadFactory = new ThreadFactoryBuilder().setNameFormat("big-file-thread-%d").build();
         return new ThreadPoolExecutor(10, 20, 60L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(5000), nameThreadFactory,
-                new ThreadPoolExecutor.AbortPolicy());
+            new ThreadPoolExecutor.AbortPolicy());
     }
 }

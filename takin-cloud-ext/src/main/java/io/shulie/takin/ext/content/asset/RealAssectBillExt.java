@@ -1,15 +1,16 @@
 package io.shulie.takin.ext.content.asset;
 
+import java.math.BigDecimal;
+
 import io.shulie.takin.ext.content.AbstractEntry;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.math.BigDecimal;
-
 /**
  * 真实压测流量计算请求对象
- * @Author: liyuanba
- * @Date: 2021/11/5 11:49 上午
+ *
+ * @author liyuanba
+ * @date 2021/11/5 11:49 上午
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

@@ -1,7 +1,5 @@
 package io.shulie.takin.cloud.common.utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -142,14 +140,14 @@ public class JsonPathUtil {
             .read("$..[?(@.xpathMd5=='" + xpathMd5 + "')]", SCRIPT_NODE_TYPE_REF);
     }
 
-    public static List<ScriptNode> getCurrentNodeByType(String nodeTree,String type){
+    public static List<ScriptNode> getCurrentNodeByType(String nodeTree, String type) {
         return JsonPath.using(JACKSON_CONFIGURATION)
             .parse(nodeTree)
             .read("$..[?(@.type=='" + type + "')]", SCRIPT_NODE_TYPE_REF);
     }
 
-    public static List<ScriptNode> removeSamplers(String nodeTree,List<String> xpathMd5List){
-        if (StringUtils.isBlank(nodeTree)){
+    public static List<ScriptNode> removeSamplers(String nodeTree, List<String> xpathMd5List) {
+        if (StringUtils.isBlank(nodeTree)) {
             return null;
         }
         try {
@@ -158,9 +156,9 @@ public class JsonPathUtil {
                 .forEach(md5 -> {
                     finalContext.delete(JsonPath.compile("$..[?(@.xpathMd5=='" + md5 + "')]"));
                 });
-           return JsonPath.using(JACKSON_CONFIGURATION)
+            return JsonPath.using(JACKSON_CONFIGURATION)
                 .parse(finalContext.jsonString())
-                .read("$..[?(@.type=='TEST_PLAN')]",SCRIPT_NODE_TYPE_REF);
+                .read("$..[?(@.type=='TEST_PLAN')]", SCRIPT_NODE_TYPE_REF);
         } catch (Exception e) {
             log.error("json delete regex error!json={}", nodeTree);
         }
@@ -268,7 +266,7 @@ public class JsonPathUtil {
         //    "159036bb8a7ad4451f55b16772d16305");
         //childSamplers.forEach(System.out::println);
         List<ScriptNode> nodeList = JsonPathUtil.getCurrentNodeByType(json, NodeTypeEnum.THREAD_GROUP.name());
-        nodeList.forEach(node ->{
+        nodeList.forEach(node -> {
             System.out.println(node.getXpathMd5());
         });
     }

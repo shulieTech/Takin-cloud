@@ -15,15 +15,15 @@
 
 package io.shulie.plugin.engine.util;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+
 /**
- * @Author: liyuanba
- * @Date: 2021/9/24 4:31 下午
+ * @author liyuanba
+ * @date 2021/9/24 4:31 下午
  */
 public class NumberUtil {
     public static int parseInt(String s) {
@@ -69,6 +69,7 @@ public class NumberUtil {
 
     /**
      * 计算a在b中的比例
+     *
      * @param a         被除数
      * @param b         除数
      * @param percent   是否是百分比

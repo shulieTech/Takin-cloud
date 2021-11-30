@@ -11,17 +11,17 @@
     </resultMap>
 
     <resultMap id="EnginePluginSimpleInfoResult" type="io.shulie.takin.cloud.data.result.engine.EnginePluginSimpleInfoResult">
-        <result column="id" property="pluginId" jdbcType="BIGINT" />
-        <result column="plugin_name" property="pluginName" jdbcType="VARCHAR" />
-        <result column="plugin_type" property="pluginType" jdbcType="VARCHAR" />
-        <result column="gmt_update" property="gmtUpdate" jdbcType="VARCHAR" />
+        <result column="id" property="pluginId" jdbcType="BIGINT"/>
+        <result column="plugin_name" property="pluginName" jdbcType="VARCHAR"/>
+        <result column="plugin_type" property="pluginType" jdbcType="VARCHAR"/>
+        <result column="gmt_update" property="gmtUpdate" jdbcType="VARCHAR"/>
     </resultMap>
 
     <select id="selectAvailablePluginsByType" resultMap="EnginePluginSimpleInfoResult" parameterType="java.util.List">
         select
-            id, plugin_name,
-            plugin_type,
-            date_format(gmt_update, '%Y-%m-%d %H:%i:%s') as gmt_update
+        id, plugin_name,
+        plugin_type,
+        date_format(gmt_update, '%Y-%m-%d %H:%i:%s') as gmt_update
         from t_engine_plugin_info
         where status = 1 and plugin_type in
         <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
@@ -30,8 +30,7 @@
     </select>
 
     <select id="selectEnginePluginSupportedVersions" parameterType="java.lang.Long" resultType="java.util.HashMap">
-        select
-            supported_version as supportedVersion
+        select supported_version as supportedVersion
         from t_engine_plugin_supported_versions
         where plugin_id = #{pluginId, jdbcType=BIGINT}
     </select>

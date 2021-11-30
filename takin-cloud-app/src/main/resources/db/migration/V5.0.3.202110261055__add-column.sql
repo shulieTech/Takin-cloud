@@ -14,20 +14,20 @@ BEGIN
     IF NOT EXISTS(SELECT * FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 't_report' AND column_name = 'script_node_tree')
     THEN
         ALTER TABLE `t_report`
-            ADD `script_node_tree` json COMMENT ' 脚本节点树 ' AFTER  `features`;
+            ADD `script_node_tree` json COMMENT ' 脚本节点树 ' AFTER `features`;
     END IF;
 
     /* t_report 表添加 amount_lock_id 字段*/
     IF NOT EXISTS(SELECT * FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 't_report' AND column_name = 'amount_lock_id')
     THEN
         ALTER TABLE `t_report`
-            ADD `amount_lock_id` VARCHAR(100) COMMENT ' 流量计算关联ID ' AFTER  `features`;
+            ADD `amount_lock_id` VARCHAR(100) COMMENT ' 流量计算关联ID ' AFTER `features`;
     END IF;
 
     IF NOT EXISTS(SELECT * FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 't_warn_detail' AND column_name = 'bind_ref')
     THEN
         ALTER TABLE `t_warn_detail`
-            ADD `bind_ref` VARCHAR(100) COMMENT ' 流量计算关联ID ' AFTER  `business_activity_name`;
+            ADD `bind_ref` VARCHAR(100) COMMENT ' 流量计算关联ID ' AFTER `business_activity_name`;
     END IF;
 
     /* t_scene_manage 表添加 script_analysis_result 字段*/

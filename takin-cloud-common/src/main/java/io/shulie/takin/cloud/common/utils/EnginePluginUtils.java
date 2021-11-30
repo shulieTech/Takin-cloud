@@ -2,13 +2,14 @@ package io.shulie.takin.cloud.common.utils;
 
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.ext.api.EngineCallExtApi;
-import io.shulie.takin.ext.api.EngineExtApi;
+import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
+import io.shulie.takin.cloud.ext.api.EngineExtApi;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +26,7 @@ public class EnginePluginUtils {
     @Value("${plugin.engine.ext.type:jmeter_engine}")
     private String engineExtType;
 
-    @Autowired
+    @Resource
     private PluginManager pluginManager;
 
     public EngineExtApi getEngineExtApi() {

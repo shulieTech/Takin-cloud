@@ -2,7 +2,6 @@ package io.shulie.takin.cloud.common.constants;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
-
 /**
  * @author zhaoyong
  * 没有长度的队列，判断的时候永远返回false

@@ -1,9 +1,5 @@
 package io.shulie.takin.cloud.common.utils;
 
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,6 +8,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 根据线程数量，分批读取文件
@@ -26,14 +26,14 @@ public class FileSliceByPodNum {
     private Set<StartEndPair> startEndPairs;
     private String fileEncode;
 
-    private FileSliceByPodNum(File file, int partSize,String encode) {
+    private FileSliceByPodNum(File file, int partSize, String encode) {
         this.fileLength = file.length();
         this.partSize = partSize;
         try {
             this.rAccessFile = new RandomAccessFile(file, "r");
         } catch (FileNotFoundException e) {
             log.error("异常代码【{}】,异常内容：文件读取异常 --> BigFileReaderUtil方法执行异常，异常信息: {}",
-                    TakinCloudExceptionEnum.FILE_READ_ERROR,e);
+                TakinCloudExceptionEnum.FILE_READ_ERROR, e);
         }
         this.fileEncode = encode;
         this.startEndPairs = new HashSet<>();
@@ -44,7 +44,7 @@ public class FileSliceByPodNum {
         try {
             calculateStartEnd(0, everySize);
         } catch (IOException e) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,e);
+            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR, e);
         }
         ArrayList<StartEndPair> pairList = new ArrayList<>(this.startEndPairs);
         pairList.sort(Comparator.comparing(StartEndPair::getStart));
@@ -94,7 +94,7 @@ public class FileSliceByPodNum {
             this.rAccessFile.close();
         } catch (IOException e) {
             log.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
-                    TakinCloudExceptionEnum.FILE_CLOSE_ERROR,e);
+                TakinCloudExceptionEnum.FILE_CLOSE_ERROR, e);
         }
     }
 
@@ -106,7 +106,7 @@ public class FileSliceByPodNum {
         public Builder(String filepath) {
             this.file = new File(filepath);
             if (!this.file.exists()) {
-                throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR,"文件不存在！filepath:[" + filepath + "]");
+                throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR, "文件不存在！filepath:[" + filepath + "]");
             }
         }
 
@@ -115,14 +115,13 @@ public class FileSliceByPodNum {
             return this;
         }
 
-        public Builder withEncode(String encode){
+        public Builder withEncode(String encode) {
             this.fileEncode = encode;
             return this;
         }
 
-
         public FileSliceByPodNum build() {
-            return new FileSliceByPodNum(this.file, this.partSize,this.fileEncode);
+            return new FileSliceByPodNum(this.file, this.partSize, this.fileEncode);
         }
     }
 

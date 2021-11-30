@@ -8,10 +8,14 @@ package io.shulie.takin.cloud.common.constants;
  */
 public abstract class EnginePluginConstants {
 
-    /** 引擎插件状态启用 */
+    /**
+     * 引擎插件状态启用
+     */
     public final static Integer ENGINE_PLUGIN_STATUS_ENABLED = 1;
 
-    /** 引擎插件状态禁用 */
+    /**
+     * 引擎插件状态禁用
+     */
     public final static Integer ENGINE_PLUGIN_STATUS_DISABLED = 0;
 
 }

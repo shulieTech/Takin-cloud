@@ -1,14 +1,13 @@
 package io.shulie.takin.cloud.biz.collector;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import java.util.concurrent.Executor;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.context.annotation.Configuration;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 

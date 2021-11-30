@@ -1,9 +1,9 @@
 package io.shulie.takin.eventcenter.entity;
 
+import java.util.List;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.util.List;
 
 /**
  * @author fanxx

@@ -64,7 +64,7 @@ public class RemotingClientConfig {
     }
 
     @Bean
-    public ProtocolFactorySelector getSelector(){
+    public ProtocolFactorySelector getSelector() {
         return selector;
     }
 

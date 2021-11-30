@@ -1,7 +1,5 @@
 package com.pamirs.takin.entity.domain.query;
 
-import java.io.Serializable;
-
 import io.shulie.takin.common.beans.page.PagingDevice;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -13,8 +11,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PressureMachineQueryParam extends PagingDevice implements Serializable {
-    private static final long serialVersionUID = 4896574213234382011L;
+public class PressureMachineQueryParam extends PagingDevice {
 
     @ApiModelProperty(value = "平台ID")
     private Long platformId;

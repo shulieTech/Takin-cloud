@@ -1,10 +1,10 @@
 package io.shulie.takin.cloud.biz.convertor.scenemanage;
 
+import java.util.List;
+
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneBusinessActivityRefInput;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
-
-import java.util.List;
 
 /**
  * @author zhaoyong
@@ -16,6 +16,7 @@ public interface SceneManageInputConvertor {
 
     /**
      * 入参转换
+     *
      * @param businessActivityConfig
      * @return -
      */

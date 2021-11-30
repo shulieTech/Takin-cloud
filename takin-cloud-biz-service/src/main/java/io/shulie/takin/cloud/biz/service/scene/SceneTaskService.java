@@ -15,10 +15,11 @@ import io.shulie.takin.cloud.biz.output.scenetask.SceneActionOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneJobStateOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskQueryTpsOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput;
+import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStopOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStartOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStatusOutput;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
-import io.shulie.takin.ext.content.asset.AssetBalanceExt;
+import io.shulie.takin.cloud.ext.content.asset.AssetBalanceExt;
 
 /**
  * @author 莫问
@@ -42,6 +43,19 @@ public interface SceneTaskService {
     void stop(Long sceneId);
 
     /**
+     * 停止场景测试
+     * <p>直接模式-手工补偿</p>
+     * <ui>
+     * <li>重置场景状态为0</li>
+     * <li>重置对应的最新的压测报告状态为2</li>
+     * </ui>
+     *
+     * @param sceneId 场景主键
+     * @return 业务码, 1 成功, 2 调用停止压测
+     */
+    int blotStop(Long sceneId);
+
+    /**
      * 检查场景压测启动状态
      *
      * @param sceneId  场景主键
@@ -61,15 +75,16 @@ public interface SceneTaskService {
      * 结束标识，之后并不是pod生命周期结束，而是metric数据传输完毕，将状态回置成压测停止
      *
      * @param param 入参
+     * @return -
      * @see io.shulie.takin.cloud.biz.collector.collector.CollectorService
      */
-
     String taskResultNotify(SceneTaskNotifyParam param);
 
     /**
      * 开始任务试跑
      *
-     * @param input 入参
+     * @param input         入参
+     * @param enginePlugins 压测引擎列表
      * @return -
      */
     SceneTryRunTaskStartOutput startTryRun(SceneManageWrapperInput input, List<EnginePluginInput> enginePlugins);
@@ -92,7 +107,8 @@ public interface SceneTaskService {
     /**
      * 启动流量调试，返回报告id
      *
-     * @param input 入参
+     * @param input         入参
+     * @param enginePlugins 压测引擎列表
      * @return -
      */
     Long startFlowDebugTask(SceneManageWrapperInput input, List<EnginePluginInput> enginePlugins);
@@ -100,7 +116,8 @@ public interface SceneTaskService {
     /**
      * 启动巡检场景
      *
-     * @param input 入参
+     * @param input         入参
+     * @param enginePlugins 压测引擎列表
      * @return -
      */
     SceneInspectTaskStartOutput startInspectTask(SceneManageWrapperInput input, List<EnginePluginInput> enginePlugins);
@@ -114,6 +131,11 @@ public interface SceneTaskService {
     SceneInspectTaskStopOutput stopInspectTask(Long sceneId);
 
     /**
+     * 强制停止任务，不考虑数据的安全性，数据会丢失
+     */
+    SceneTaskStopOutput forceStopTask(Long reportId, boolean isNeedFinishReport);
+
+    /**
      * 查询流量试跑状态
      *
      * @param sceneId  场景主键
@@ -121,7 +143,6 @@ public interface SceneTaskService {
      * @return -
      */
     SceneTryRunTaskStatusOutput checkTaskStatus(Long sceneId, Long reportId);
-
 
     /**
      * 检查巡检任务状态：压测引擎
@@ -133,20 +154,24 @@ public interface SceneTaskService {
 
     /**
      * 开始压测前检查文件位点
-     * @param input
-     * @return
+     *
+     * @param input -
+     * @return -
      */
     SceneTaskStartCheckOutput sceneStartCsvPositionCheck(SceneTaskStartCheckInput input);
 
     /**
      * 清除位点缓存
-     * @param sceneId
+     *
+     * @param sceneId 场景主键
      */
     void cleanCachedPosition(Long sceneId);
 
     /**
      * 回写流量账户
-     * @param balanceExt
+     *
+     * @param balanceExt 账户余额数据
      */
     void writeBalance(AssetBalanceExt balanceExt);
+
 }

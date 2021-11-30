@@ -1,9 +1,9 @@
 package io.shulie.takin.cloud.common.enums;
 
-import lombok.Getter;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import lombok.Getter;
 
 /**
  * @author shiyajian
@@ -49,6 +49,7 @@ public enum PressureModeEnum {
     }
 
     private static final Map<Integer, PressureModeEnum> pool = new HashMap<>();
+
     static {
         for (PressureModeEnum e : PressureModeEnum.values()) {
             pool.put(e.getCode(), e);

@@ -15,14 +15,22 @@
 
 package io.shulie.takin.cloud.biz.utils;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.*;
-
 /**
- * @Author: liyuanba
- * @Date: 2021/10/8 1:59 下午
+ * @author liyuanba
+ * @date 2021/10/8 1:59 下午
  */
 @Slf4j
 public class Executors {
@@ -45,7 +53,7 @@ public class Executors {
             }
         };
         threadPool = new ThreadPoolExecutor(300, 400, 10L, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(5000), factory, handler);
+            new LinkedBlockingQueue<Runnable>(5000), factory, handler);
 
         ThreadFactory scheduleFactory = new ThreadFactoryBuilder().setNameFormat("cloud-schedule-thread-%d").build();
         scheduledExecutorService = java.util.concurrent.Executors.newScheduledThreadPool(3, scheduleFactory);
@@ -65,8 +73,9 @@ public class Executors {
 
     /**
      * 延时执行
+     *
      * @param runnable
-     * @param delay 延时时间，单位毫秒
+     * @param delay    延时时间，单位毫秒
      */
     public static ScheduledFuture<?> schedule(Runnable runnable, long delay) {
         return scheduledExecutorService.schedule(runnable, delay, TimeUnit.MILLISECONDS);
@@ -74,8 +83,9 @@ public class Executors {
 
     /**
      * 延时执行
+     *
      * @param callable
-     * @param delay 延时时间，单位毫秒
+     * @param delay    延时时间，单位毫秒
      */
     public static <T> ScheduledFuture<T> schedule(Callable<T> callable, long delay) {
         return scheduledExecutorService.schedule(callable, delay, TimeUnit.MILLISECONDS);
@@ -83,9 +93,10 @@ public class Executors {
 
     /**
      * 固定延时时间执行，前一个结束之后开始计算延时，受上一个执行时间影响，固定延时时间
-     * @param runnable          任务
-     * @param initialDelay      第一次执行延时时间
-     * @param delay             每次间隔延时时间，以上一次结束之后开始算
+     *
+     * @param runnable     任务
+     * @param initialDelay 第一次执行延时时间
+     * @param delay        每次间隔延时时间，以上一次结束之后开始算
      */
     public static ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable, long initialDelay, long delay) {
         return scheduledExecutorService.scheduleWithFixedDelay(runnable, initialDelay, delay, TimeUnit.MILLISECONDS);
@@ -93,9 +104,10 @@ public class Executors {
 
     /**
      * 延时固定频率执行，前一个任务开始时间开始计算延时，不受上一个执行时间影响，固定频率执行
-     * @param runnable          任务
-     * @param initialDelay      第一次执行延时时间
-     * @param period            每次间隔时间，从上一次开始时间开始算
+     *
+     * @param runnable     任务
+     * @param initialDelay 第一次执行延时时间
+     * @param period       每次间隔时间，从上一次开始时间开始算
      */
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable, long initialDelay, long period) {
         return scheduledExecutorService.scheduleAtFixedRate(runnable, initialDelay, period, TimeUnit.MILLISECONDS);

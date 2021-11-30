@@ -1,23 +1,23 @@
 package io.shulie.takin.cloud.common.utils;
 
-import java.io.File;
-import java.io.RandomAccessFile;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.TreeMap;
-import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 import com.alibaba.fastjson.JSONObject;
 
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 
 /**
  * 大文件分片
@@ -132,7 +132,7 @@ public class FileSliceByLine {
             }
         } catch (IOException e) {
             logger.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
-                    TakinCloudExceptionEnum.FILE_READ_ERROR, e);
+                TakinCloudExceptionEnum.FILE_READ_ERROR, e);
         } finally {
             try {
                 if (rAccessFile != null) {
@@ -143,7 +143,7 @@ public class FileSliceByLine {
                 }
             } catch (IOException ex) {
                 logger.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
-                        TakinCloudExceptionEnum.FILE_CLOSE_ERROR, ex);
+                    TakinCloudExceptionEnum.FILE_CLOSE_ERROR, ex);
             }
         }
         return 1;

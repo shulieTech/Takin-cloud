@@ -1,23 +1,28 @@
 package io.shulie.takin.cloud.common.utils;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.time.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * 基于JDK 1.8 日期API
  *
- * @Author: xingchen
+ * @author xingchen
  * @ClassName: DateUtils
  * @Package: cn.net.yto.bnet.screen.util
- * @Date: 2019/03/10下午2:21
+ * @date 2019/03/10下午2:21
  * @Description:
  */
 public class DateUtil {
@@ -31,10 +36,10 @@ public class DateUtil {
         if (null == timestamp) {
             return "";
         }
-        long d1 = timestamp/86400000;
-        long d2 = System.currentTimeMillis()/86400000;
+        long d1 = timestamp / 86400000;
+        long d2 = System.currentTimeMillis() / 86400000;
         String format = d1 == d2 ? HHMMSS : YYYYMMDDHHMMSS;
-        return timestamp+"("+formatTime(timestamp, format)+")";
+        return timestamp + "(" + formatTime(timestamp, format) + ")";
     }
 
     public static String formatTime(Long timestamp) {
@@ -511,19 +516,20 @@ public class DateUtil {
 
     /**
      * 压测时长：
-     *  无启动时间，返回null
-     *  无停止时间，返回null
-     *  停止时间-启动时间
+     * 无启动时间，返回null
+     * 无停止时间，返回null
+     * 停止时间-启动时间
+     *
      * @param startTime
      * @param endTime
      * @return
      */
-    public static String formatTestTime(Date startTime, Date endTime){
-        if(startTime == null || endTime == null) {
+    public static String formatTestTime(Date startTime, Date endTime) {
+        if (startTime == null || endTime == null) {
             return null;
         }
-        LocalDateTime start = startTime.toInstant().atZone( ZoneId.systemDefault()).toLocalDateTime();
-        LocalDateTime end = endTime.toInstant().atZone( ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime start = startTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime end = endTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         long seconds = Duration.between(start, end).getSeconds();
         long hour = seconds / 3600;
         long minutes = seconds / 60;

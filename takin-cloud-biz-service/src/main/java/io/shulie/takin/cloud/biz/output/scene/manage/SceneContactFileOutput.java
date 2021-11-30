@@ -15,7 +15,7 @@ public class SceneContactFileOutput implements Serializable {
     private List<ContactFileInfo> files;
 
     @Data
-   public static class ContactFileInfo {
+    public static class ContactFileInfo {
         private String fileName;
         private String filePath;
         private Long size;

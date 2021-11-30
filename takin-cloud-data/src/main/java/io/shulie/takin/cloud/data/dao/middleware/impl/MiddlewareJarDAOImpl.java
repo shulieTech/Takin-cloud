@@ -28,7 +28,6 @@ public class MiddlewareJarDAOImpl implements MiddlewareJarDAO, MPUtil<Middleware
     @Autowired
     private MiddlewareJarMapper middlewareJarMapper;
 
-
     @Override
     public boolean saveBatch(List<CreateMiddleWareJarParam> createParams) {
         if (CollectionUtil.isEmpty(createParams)) {

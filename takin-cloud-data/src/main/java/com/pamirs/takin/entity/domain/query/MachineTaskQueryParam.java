@@ -1,7 +1,5 @@
 package com.pamirs.takin.entity.domain.query;
 
-import java.io.Serializable;
-
 import io.shulie.takin.common.beans.page.PagingDevice;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,8 +10,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class MachineTaskQueryParam extends PagingDevice implements Serializable {
-    private static final long serialVersionUID = -5236680598754497031L;
+public class MachineTaskQueryParam extends PagingDevice {
     private Integer taskType;
     private Integer taskStatus;
     private String startTime;

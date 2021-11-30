@@ -1,7 +1,6 @@
 package io.shulie.takin.cloud.common.constants;
 
 /**
- *
  * 压测请求流量明细上传方式
  *
  * @author xr.l

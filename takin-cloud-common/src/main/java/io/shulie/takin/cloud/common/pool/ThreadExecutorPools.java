@@ -15,12 +15,12 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
  */
 public class ThreadExecutorPools {
 
-    public static final ExecutorService COMMON_EXECUTOR ;
+    public static final ExecutorService COMMON_EXECUTOR;
 
     static {
-        COMMON_EXECUTOR = new ThreadPoolExecutor(50,100,60L,
-            TimeUnit.SECONDS,new LinkedBlockingDeque<>(),
-            new ThreadFactoryBuilder().setNameFormat("Common_Thread_%s").build(),new AbortPolicy());
+        COMMON_EXECUTOR = new ThreadPoolExecutor(50, 100, 60L,
+            TimeUnit.SECONDS, new LinkedBlockingDeque<>(),
+            new ThreadFactoryBuilder().setNameFormat("Common_Thread_%s").build(), new AbortPolicy());
     }
 
 }

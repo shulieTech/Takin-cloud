@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.shulie.takin</groupId>
         <artifactId>takin-cloud</artifactId>
-        <version>takin-cloud-5.0.2-SNAPSHOT</version>
+        <version>takin-cloud-5.2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -12,12 +12,16 @@
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.xiaoymin</groupId>
-            <artifactId>swagger-bootstrap-ui</artifactId>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
         </dependency>
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
@@ -25,11 +29,8 @@
         </dependency>
         <dependency>
             <groupId>io.shulie.takin</groupId>
-            <artifactId>takin-cloud-open-entrypoint</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.shulie.takin</groupId>
-            <artifactId>takin-cloud-web-entrypoint</artifactId>
+            <artifactId>takin-cloud-entrypoint</artifactId>
+            <version>${takin.cloud.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>guava</artifactId>

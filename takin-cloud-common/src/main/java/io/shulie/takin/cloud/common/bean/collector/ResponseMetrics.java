@@ -17,13 +17,14 @@
 
 package io.shulie.takin.cloud.common.bean.collector;
 
-import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Data;
-import org.influxdb.annotation.Column;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import com.alibaba.fastjson.annotation.JSONField;
+
+import lombok.Data;
+import org.influxdb.annotation.Column;
 
 /**
  * 成功的响应
@@ -70,7 +71,6 @@ public class ResponseMetrics extends AbstractMetrics {
     @Column(name = "percent_data")
     private String percentData;
 
-
     public ResponseMetrics() {
         super(Constants.METRICS_TYPE_RESPONSE);
     }
@@ -82,6 +82,7 @@ public class ResponseMetrics extends AbstractMetrics {
         // 与压测引擎统一
         return tags.get(CollectorConstant.POD_NUM);
     }
+
     @Data
     class ErrorInfo {
         private String responseMessage;

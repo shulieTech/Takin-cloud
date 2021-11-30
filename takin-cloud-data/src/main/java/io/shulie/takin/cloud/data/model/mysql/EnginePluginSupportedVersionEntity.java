@@ -16,19 +16,27 @@ import lombok.Data;
 @TableName(value = "t_engine_plugin_supported_versions")
 public class EnginePluginSupportedVersionEntity {
 
-    /** 主键 */
+    /**
+     * 主键
+     */
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /** 插件ID */
+    /**
+     * 插件ID
+     */
     @TableField(value = "plugin_id")
     private Long pluginId;
 
-    /** 支持的版本号 */
+    /**
+     * 支持的版本号
+     */
     @TableField(value = "supported_version")
     private String supportedVersion;
 
-    /** 对应的refId*/
+    /**
+     * 对应的refId
+     */
     @TableField(value = "file_ref_id")
     private Long fileRefId;
 

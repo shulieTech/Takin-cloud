@@ -29,7 +29,7 @@ public class EventCenterTemplate {
      * @param event
      */
     public void doEvents(Event event) {
-        Map<String,ListenerContainer.Listener> map = listenerContainer.getListeners().get(event.getEventName());
+        Map<String, ListenerContainer.Listener> map = listenerContainer.getListeners().get(event.getEventName());
         List<ListenerContainer.Listener> list = new ArrayList(map.values());
         Collections.sort(list, new Comparator<ListenerContainer.Listener>() {
             @Override
@@ -46,21 +46,22 @@ public class EventCenterTemplate {
             try {
                 entry.getMethod().invoke(entry.getObject(), event);
             } catch (IllegalAccessException e) {
-                log.warn("doEvents Listener 执行异常",e);
+                log.warn("doEvents Listener 执行异常", e);
             } catch (InvocationTargetException e) {
-                log.warn("doEvents Listener 执行异常",e);
+                log.warn("doEvents Listener 执行异常", e);
             }
         }
     }
 
     /**
      * 获得监听容器的数量
+     *
      * @param eventName
      * @return -
      */
     public int getListenerContainerNum(String eventName) {
-        Map<String,ListenerContainer.Listener> total = listenerContainer.getListeners().get(eventName);
-        if(total != null){
+        Map<String, ListenerContainer.Listener> total = listenerContainer.getListeners().get(eventName);
+        if (total != null) {
             return total.size();
         }
         return 0;

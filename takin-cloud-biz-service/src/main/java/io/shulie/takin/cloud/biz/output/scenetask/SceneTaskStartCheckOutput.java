@@ -13,7 +13,7 @@ public class SceneTaskStartCheckOutput {
     private List<FileReadInfo> fileReadInfos;
 
     @Data
-    public static class FileReadInfo{
+    public static class FileReadInfo {
         private String fileName;
         private String fileSize;
         private String readSize;

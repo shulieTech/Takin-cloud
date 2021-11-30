@@ -43,7 +43,6 @@ public class ScheduleConstants {
      */
     public static final String ENGINE_CONFIG_FILE_PATH = "/etc/engine/config";
 
-
     /**
      * 引擎时区配置名称
      */
@@ -87,37 +86,36 @@ public class ScheduleConstants {
      * 文件分割调度名称
      */
 
-    public static String getFileSplitScheduleName(Long sceneId, Long reportId, Long customerId) {
+    public static String getFileSplitScheduleName(Long sceneId, Long reportId, Long tenantId) {
         // 兼容原始redis key
-        if (null == customerId) {
+        if (null == tenantId) {
             return String.format("file-split-%s-%s", sceneId, reportId);
         }
-        return String.format("file-split-%s-%s-%s", sceneId, reportId, customerId);
+        return String.format("file-split-%s-%s-%s", sceneId, reportId, tenantId);
     }
 
     /**
      * 文件分割存储的队列
      */
-    public static String getFileSplitQueue(Long scenId, Long reportId, Long customerId) {
+    public static String getFileSplitQueue(Long scenId, Long reportId, Long tenantId) {
         // 兼容原始redis key
-        if (null == customerId) {
+        if (null == tenantId) {
             return String.format("file-split-queue-%s-%s", scenId, reportId);
         }
-        return String.format("file-split-queue-%s-%s-%s", scenId, reportId, customerId);
+        return String.format("file-split-queue-%s-%s-%s", scenId, reportId, tenantId);
     }
-
 
     /**
      * 调度名称
      *
      * @return -
      */
-    public static String getScheduleName(Long sceneId, Long taskId, Long customerId) {
+    public static String getScheduleName(Long sceneId, Long taskId, Long tenantId) {
         // 兼容原始redis key
-        if (null == customerId) {
+        if (null == tenantId) {
             return String.format(SCENE_TASK + "%s-%s", sceneId, taskId);
         }
-        return String.format(SCENE_TASK + "%s-%s-%s", sceneId, taskId, customerId);
+        return String.format(SCENE_TASK + "%s-%s-%s", sceneId, taskId, tenantId);
     }
 
     /**
@@ -125,12 +123,12 @@ public class ScheduleConstants {
      *
      * @return -
      */
-    public static String getConfigMapName(Long sceneId, Long taskId, Long customerId) {
+    public static String getConfigMapName(Long sceneId, Long taskId, Long tenantId) {
         // 兼容原始redis key
-        if (null == customerId) {
+        if (null == tenantId) {
             return String.format("engine-config-%s-%s.json", sceneId, taskId);
         }
-        return String.format("engine-config-%s-%s-%s.json", sceneId, taskId, customerId);
+        return String.format("engine-config-%s-%s-%s.json", sceneId, taskId, tenantId);
     }
 
     /**
@@ -138,13 +136,13 @@ public class ScheduleConstants {
      *
      * @return -
      */
-    public static String getConsoleUrl(Long sceneId, Long taskId, Long customerId) {
+    public static String getConsoleUrl(Long sceneId, Long taskId, Long tenantId) {
         // 兼容原始redis key
-        if (null == customerId) {
+        if (null == tenantId) {
             return String.format("/api/collector/receive?sceneId=%s&reportId=%s", sceneId, taskId);
         }
-        return String.format("/api/collector/receive?sceneId=%s&reportId=%s&customerId=%s", sceneId, taskId,
-            customerId);
+        return String.format("/api/collector/receive?sceneId=%s&reportId=%s&tenantId=%s", sceneId, taskId,
+            tenantId);
     }
 
     /**
@@ -152,16 +150,17 @@ public class ScheduleConstants {
      *
      * @return -
      */
-    public static String getEngineName(Long sceneId, Long reportId, Long customerId) {
+    public static String getEngineName(Long sceneId, Long reportId, Long tenantId) {
         // 兼容原始redis key
-        if (null == customerId) {
+        if (null == tenantId) {
             return String.format("pressure-node-engine-%s-%s", sceneId, reportId);
         }
-        return String.format("pressure-node-engine-%s-%s-%s", sceneId, reportId, customerId);
+        return String.format("pressure-node-engine-%s-%s-%s", sceneId, reportId, tenantId);
     }
 
     /**
      * pod启动结束事件去重key
+     *
      * @param sceneId
      * @param reportId
      * @param customerId
@@ -177,18 +176,17 @@ public class ScheduleConstants {
         return String.format("pod-engine-%s-%s-%s-%s-%s", sceneId, reportId, customerId, podNo, eventName);
     }
 
-
     /**
      * 压力节点名总数名称
      *
      * @return -
      */
-    public static String getPressureNodeTotalKey(Long sceneId, Long reportId, Long customerId) {
+    public static String getPressureNodeTotalKey(Long sceneId, Long reportId, Long tenantId) {
         // 兼容原始redis key
-        if (null == customerId) {
+        if (null == tenantId) {
             return String.format("pressure-node-total-%s-%s", sceneId, reportId);
         }
-        return String.format("pressure-node-total-%s-%s-%s", sceneId, reportId, customerId);
+        return String.format("pressure-node-total-%s-%s-%s", sceneId, reportId, tenantId);
     }
 
     /**
@@ -196,12 +194,12 @@ public class ScheduleConstants {
      *
      * @return -
      */
-    public static String getPressureNodeName(Long sceneId, Long reportId, Long customerId) {
+    public static String getPressureNodeName(Long sceneId, Long reportId, Long tenantId) {
         // 兼容原始redis key
-        if (null == customerId) {
+        if (null == tenantId) {
             return String.format("pressure-node-%s-%s", sceneId, reportId);
         }
-        return String.format("pressure-node-%s-%s-%s", sceneId, reportId, customerId);
+        return String.format("pressure-node-%s-%s-%s", sceneId, reportId, tenantId);
     }
 
 }

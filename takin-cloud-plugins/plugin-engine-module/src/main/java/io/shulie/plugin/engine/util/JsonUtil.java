@@ -1,17 +1,18 @@
 package io.shulie.plugin.engine.util;
 
+import java.util.List;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
-
 /**
- * @Author: liyuanba
- * @Date: 2021/10/18 4:41 下午
+ * @author liyuanba
+ * @date 2021/10/18 4:41 下午
  */
 @Slf4j
 public class JsonUtil {
@@ -22,7 +23,7 @@ public class JsonUtil {
         try {
             return JSON.toJSONString(o);
         } catch (Exception e) {
-            log.error("toJson failed!o="+o);
+            log.error("toJson failed!o=" + o);
         }
         return null;
     }
@@ -35,7 +36,7 @@ public class JsonUtil {
         try {
             json = JSON.parseObject(text);
         } catch (Exception e) {
-            log.error("parse json failed!text="+text);
+            log.error("parse json failed!text=" + text);
         }
         return json;
     }
@@ -48,7 +49,7 @@ public class JsonUtil {
         try {
             result = JSON.parseObject(text, clazz);
         } catch (Exception e) {
-            log.error("parse json to object class failed!text="+text);
+            log.error("parse json to object class failed!text=" + text);
         }
         return result;
     }
@@ -61,7 +62,7 @@ public class JsonUtil {
         try {
             result = JSON.parseObject(text, type);
         } catch (Exception e) {
-            log.error("parse json to object type failed!text="+text);
+            log.error("parse json to object type failed!text=" + text);
         }
         return result;
     }
@@ -74,7 +75,7 @@ public class JsonUtil {
         try {
             result = JSON.parseArray(text);
         } catch (Exception e) {
-            log.error("json parseArray failed!text="+text);
+            log.error("json parseArray failed!text=" + text);
         }
         return result;
     }
@@ -87,10 +88,9 @@ public class JsonUtil {
         try {
             result = JSON.parseArray(text, clazz);
         } catch (Exception e) {
-            log.error("json parseArray failed!text="+text);
+            log.error("json parseArray failed!text=" + text);
         }
         return result;
     }
-
 
 }

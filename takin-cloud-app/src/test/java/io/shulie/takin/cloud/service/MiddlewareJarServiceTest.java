@@ -1,5 +1,9 @@
 package io.shulie.takin.cloud.service;
 
+import java.util.Arrays;
+
+import javax.annotation.Resource;
+
 import io.shulie.takin.app.Application;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.data.mapper.mysql.MiddlewareJarMapper;
@@ -7,14 +11,8 @@ import io.shulie.takin.cloud.data.param.middleware.CreateMiddleWareJarParam;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Arrays;
-
-import javax.annotation.Resource;
 
 /**
  * @author liuchuan
@@ -24,15 +22,10 @@ import javax.annotation.Resource;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class MiddlewareJarServiceTest {
-
-    @Resource
-    private MiddlewareJarMapper middlewareJarMapper;
-
-    @Autowired
+    @Resource(type = RedisClientUtils.class)
     private RedisClientUtils redisClientUtils;
-
-    @Autowired
-    protected RedisTemplate redisTemplate;
+    @Resource(type = MiddlewareJarMapper.class)
+    private MiddlewareJarMapper middlewareJarMapper;
 
     @Test
     public void testRedis() {
@@ -51,7 +44,7 @@ public class MiddlewareJarServiceTest {
 
     @Test
     public void testByDeleteByAvgListBatch() {
-        log.info("test"+middlewareJarMapper.deleteByAgvList(
+        log.info("test" + middlewareJarMapper.deleteByAgvList(
             Arrays.asList("druid_com.alibaba_1.0.6", "druid_com.alibaba_1.0.7", "druid_com.alibaba_")));
     }
 
@@ -72,7 +65,7 @@ public class MiddlewareJarServiceTest {
         param2.setGroupId("com.alibaba");
         param2.setArtifactId("druid");
         param2.setVersion("1.0.7");
-        log.info("test"+middlewareJarMapper.insertBatch(Arrays.asList(param, param2)));
+        log.info("test" + middlewareJarMapper.insertBatch(Arrays.asList(param, param2)));
     }
 
 }

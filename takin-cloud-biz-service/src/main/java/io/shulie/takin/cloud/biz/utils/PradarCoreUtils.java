@@ -1,8 +1,5 @@
 package io.shulie.takin.cloud.biz.utils;
 
-
-import org.apache.commons.lang.StringUtils;
-
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.nio.charset.Charset;
@@ -11,6 +8,13 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.CRC32;
 
+import org.apache.commons.lang.StringUtils;
+
+/**
+ * -
+ *
+ * @author -
+ */
 public class PradarCoreUtils {
     public static final String EMPTY_STRING = "";
     public static String DEFAULT_STRING = "default";
@@ -21,10 +25,8 @@ public class PradarCoreUtils {
     private static final String LOCAL_HOST_NAME = getLocalHostName();
     public static final Charset DEFAULT_CHARSET = getDefaultOutputCharset();
 
-
     public PradarCoreUtils() {
     }
-
 
     public static String makeLogSafe(String value) {
         value = StringUtils.replace(value, "\r\n", "\t");
@@ -36,7 +38,7 @@ public class PradarCoreUtils {
     public static boolean isBlank(String str) {
         int strLen;
         if (str != null && (strLen = str.length()) != 0) {
-            for(int i = 0; i < strLen; ++i) {
+            for (int i = 0; i < strLen; ++i) {
                 if (!Character.isWhitespace(str.charAt(i))) {
                     return false;
                 }
@@ -88,14 +90,15 @@ public class PradarCoreUtils {
             if (len == 0) {
                 return EMPTY_STRING_ARRAY;
             } else {
-                List<String> list = new ArrayList();
+                List<String> list = new ArrayList<>();
                 int i = 0;
                 int start = 0;
                 boolean match = false;
                 boolean lastMatch = false;
 
-                while(true) {
-                    while(i < len) {
+                // TODO 这个地方有问题，总是会直接返回
+                while (true) {
+                    while (i < len) {
                         if (str.charAt(i) == separatorChar) {
                             if (match || preserveAllTokens) {
                                 list.add(str.substring(start, i));
@@ -112,11 +115,10 @@ public class PradarCoreUtils {
                         }
                     }
 
-                    if (match || preserveAllTokens && lastMatch) {
+                    if (match || preserveAllTokens) {
                         list.add(str.substring(start, i));
                     }
-
-                    return (String[])((String[])list.toArray(new String[list.size()]));
+                    return list.toArray(new String[0]);
                 }
             }
         }
@@ -147,7 +149,7 @@ public class PradarCoreUtils {
             int len = str.length();
             appender.ensureCapacity(appender.length() + len);
 
-            for(int i = 0; i < len; ++i) {
+            for (int i = 0; i < len; ++i) {
                 char c = str.charAt(i);
                 if (c == '\n' || c == '\r' || c == delimiter) {
                     c = ' ';
@@ -207,7 +209,6 @@ public class PradarCoreUtils {
         return cs;
     }
 
-
     private static long getLocalInetAddressNumber() {
         String ip = getLocalInetAddress();
         StringBuilder builder = new StringBuilder();
@@ -215,10 +216,10 @@ public class PradarCoreUtils {
         String[] var3 = arr;
         int var4 = arr.length;
 
-        for(int var5 = 0; var5 < var4; ++var5) {
+        for (int var5 = 0; var5 < var4; ++var5) {
             String str = var3[var5];
 
-            for(int i = str.length(); i < 3; ++i) {
+            for (int i = str.length(); i < 3; ++i) {
                 builder.append('0');
             }
 
@@ -244,11 +245,11 @@ public class PradarCoreUtils {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             InetAddress address = null;
 
-            while(interfaces.hasMoreElements()) {
+            while (interfaces.hasMoreElements()) {
                 NetworkInterface ni = (NetworkInterface)interfaces.nextElement();
                 Enumeration addresses = ni.getInetAddresses();
 
-                while(addresses.hasMoreElements()) {
+                while (addresses.hasMoreElements()) {
                     address = (InetAddress)addresses.nextElement();
                     if (!address.isLoopbackAddress() && address.getHostAddress().indexOf(":") == -1) {
                         return address.getHostAddress();
@@ -266,11 +267,11 @@ public class PradarCoreUtils {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             InetAddress address = null;
 
-            while(interfaces.hasMoreElements()) {
+            while (interfaces.hasMoreElements()) {
                 NetworkInterface ni = (NetworkInterface)interfaces.nextElement();
                 Enumeration addresses = ni.getInetAddresses();
 
-                while(addresses.hasMoreElements()) {
+                while (addresses.hasMoreElements()) {
                     address = (InetAddress)addresses.nextElement();
                     if (!address.isLoopbackAddress() && address.getHostAddress().indexOf(":") == -1) {
                         return address.getHostName();

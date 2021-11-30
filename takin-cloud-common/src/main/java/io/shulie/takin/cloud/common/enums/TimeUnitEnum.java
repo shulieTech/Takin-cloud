@@ -1,23 +1,33 @@
 package io.shulie.takin.cloud.common.enums;
 
-import lombok.Data;
-import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author qianshui
  * @date 2020/5/11 下午7:58
  */
 public enum TimeUnitEnum {
-
+    /**
+     * 天
+     */
     DAY(TimeUnit.DAYS, "d", "天"),
+    /**
+     * 时
+     */
     HOUR(TimeUnit.HOURS, "h", "时"),
-    MINUTE(TimeUnit.MINUTES,"m", "分"),
-    SECOND(TimeUnit.SECONDS,"s", "秒");
+    /**
+     * 分
+     */
+    MINUTE(TimeUnit.MINUTES, "m", "分"),
+    /**
+     * 秒
+     */
+    SECOND(TimeUnit.SECONDS, "s", "秒");
 
     @Getter
     private TimeUnit unit;
@@ -33,6 +43,7 @@ public enum TimeUnitEnum {
     }
 
     private static final Map<String, TimeUnitEnum> pool = new HashMap<>();
+
     static {
         for (TimeUnitEnum e : TimeUnitEnum.values()) {
             pool.put(e.value.toLowerCase(), e);

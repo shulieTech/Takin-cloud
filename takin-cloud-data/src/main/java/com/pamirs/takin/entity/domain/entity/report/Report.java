@@ -8,6 +8,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.shulie.takin.cloud.common.serialize.BigDecimalSerialize;
 import lombok.Data;
 
+/**
+ * 报告
+ *
+ * @author -
+ */
 @Data
 public class Report {
 
@@ -21,7 +26,7 @@ public class Report {
     /**
      * 客户ID
      */
-    private Long customerId;
+    private Long tenantId;
 
     /**
      * 流量
@@ -62,7 +67,6 @@ public class Report {
      * 请求总数
      */
     private Long totalRequest;
-
 
     /**
      * 施压类型,0:并发,1:tps,2:自定义;不填默认为0

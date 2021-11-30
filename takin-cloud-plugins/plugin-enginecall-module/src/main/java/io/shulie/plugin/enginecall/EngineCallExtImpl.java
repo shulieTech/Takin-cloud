@@ -1,34 +1,33 @@
 package io.shulie.plugin.enginecall;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Resource;
 
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
-import io.shulie.takin.ext.content.enginecall.EnginePressureConfig;
-import io.shulie.takin.ext.content.enginecall.EngineRunConfig;
 import io.shulie.plugin.enginecall.service.EngineCallService;
 import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
-import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
-import io.shulie.takin.cloud.common.utils.NumberUtil;
-import io.shulie.takin.ext.api.EngineCallExtApi;
-import io.shulie.takin.ext.content.enginecall.*;
+import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyOutputExt;
+import io.shulie.takin.ext.content.enginecall.EngineRunConfig;
 import io.shulie.takin.ext.helper.DataConvertHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
-
-import javax.annotation.Resource;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @author zhaoyong
@@ -91,7 +90,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         notifyTaskResult(request);
         // 启动压测
         return engineCallService.createJob(request.getRequest().getSceneId(), request.getRequest().getTaskId(),
-                request.getRequest().getCustomerId());
+            request.getRequest().getTenantId());
 
     }
 
@@ -140,7 +139,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         ScheduleStartRequestExt startRequest = request.getRequest();
         Long sceneId = startRequest.getSceneId();
         Long taskId = startRequest.getTaskId();
-        Long customerId = startRequest.getCustomerId();
+        Long customerId = startRequest.getTenantId();
 
         Map<String, Object> configMap = new HashMap<>();
         configMap.put("name", ScheduleConstants.getConfigMapName(sceneId, taskId, customerId));
@@ -166,7 +165,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         SceneTaskNotifyParam notify = new SceneTaskNotifyParam();
         notify.setSceneId(request.getRequest().getSceneId());
         notify.setTaskId(request.getRequest().getTaskId());
-        notify.setCustomerId(request.getRequest().getCustomerId());
+        notify.setTenantId(request.getRequest().getTenantId());
         notify.setStatus("started");
         sceneTaskService.taskResultNotify(notify);
     }

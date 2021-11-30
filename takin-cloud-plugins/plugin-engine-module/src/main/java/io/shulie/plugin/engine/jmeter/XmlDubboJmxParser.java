@@ -3,9 +3,9 @@ package io.shulie.plugin.engine.jmeter;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.shulie.takin.ext.content.script.ScriptParseExt;
-import io.shulie.takin.ext.content.script.ScriptUrlExt;
 import io.shulie.plugin.engine.util.SaxUtil;
+import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptUrlExt;
 import io.shulie.takin.constants.TakinRequestConstant;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;

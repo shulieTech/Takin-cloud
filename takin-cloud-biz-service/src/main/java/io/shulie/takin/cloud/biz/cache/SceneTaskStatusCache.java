@@ -22,10 +22,10 @@ public class SceneTaskStatusCache {
     @Autowired
     private RedisClientUtils redisClientUtils;
 
-    private static final long EXPIRE_TIME = 60 * 60 * 24;
+    private static final long EXPIRE_TIME = 60 * 60;
 
-    public void cacheStatus(long sceneId, long reportId, SceneRunTaskStatusEnum statusEnum){
-        cacheStatus(sceneId,reportId,statusEnum,null);
+    public void cacheStatus(long sceneId, long reportId, SceneRunTaskStatusEnum statusEnum) {
+        cacheStatus(sceneId, reportId, statusEnum, null);
     }
 
     public void cacheStatus(long sceneId, long reportId, SceneRunTaskStatusEnum statusEnum, String msg) {
@@ -55,7 +55,7 @@ public class SceneTaskStatusCache {
         return output;
     }
 
-    public void cachePodNum(long sceneId,int podNum){
+    public void cachePodNum(long sceneId, int podNum) {
         redisClientUtils.hmset(ScheduleConstants.SCHEDULE_POD_NUM, String.valueOf(sceneId), podNum);
     }
 }

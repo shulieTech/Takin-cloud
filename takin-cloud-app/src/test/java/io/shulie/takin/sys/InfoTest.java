@@ -1,4 +1,4 @@
-package io.shulie.tro.sys;
+package io.shulie.takin.sys;
 
 import io.shulie.takin.app.Application;
 import org.junit.Test;
@@ -13,8 +13,9 @@ public class InfoTest {
 
     @Value("${info.app.version}")
     private String version;
+
     @Test
-    public void test(){
+    public void test() {
         System.out.println(version);
     }
 }

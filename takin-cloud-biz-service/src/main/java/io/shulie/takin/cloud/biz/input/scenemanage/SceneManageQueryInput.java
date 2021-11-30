@@ -1,9 +1,8 @@
 package io.shulie.takin.cloud.biz.input.scenemanage;
 
-import java.io.Serializable;
 import java.util.List;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.PagingContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,7 +14,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SceneManageQueryInput extends CloudUserCommonRequestExt implements Serializable {
+public class SceneManageQueryInput extends PagingContextExt {
 
     private Long sceneId;
 

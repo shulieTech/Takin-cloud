@@ -19,8 +19,8 @@ import lombok.Data;
 import org.influxdb.annotation.Column;
 
 /**
- * @Author: liyuanba
- * @Date: 2021/9/23 9:20 下午
+ * @author liyuanba
+ * @date 2021/9/23 9:20 下午
  */
 @Data
 public class PressureOutput {

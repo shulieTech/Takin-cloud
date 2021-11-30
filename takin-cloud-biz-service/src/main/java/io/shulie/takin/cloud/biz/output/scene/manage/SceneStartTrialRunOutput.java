@@ -1,8 +1,8 @@
 package io.shulie.takin.cloud.biz.output.scene.manage;
 
-import lombok.Data;
-
 import java.util.List;
+
+import lombok.Data;
 
 /**
  * @author zhaoyong

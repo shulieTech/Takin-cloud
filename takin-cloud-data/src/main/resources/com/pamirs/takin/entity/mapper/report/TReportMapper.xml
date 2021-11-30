@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--suppress ALL -->
 <mapper namespace="com.pamirs.takin.entity.dao.report.TReportMapper">
     <resultMap id="BaseResultMap" type="com.pamirs.takin.entity.domain.entity.report.Report">
         <!--@mbg.generated-->
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="scene_id" jdbcType="BIGINT" property="sceneId"/>
-        <result column="customer_id" property="customerId" jdbcType="BIGINT"/>
+        <result column="customer_id" property="tenantId" jdbcType="BIGINT"/>
         <result column="amount" jdbcType="DECIMAL" property="amount"/>
         <result column="scene_name" jdbcType="VARCHAR" property="sceneName"/>
         <result column="start_time" jdbcType="TIMESTAMP" property="startTime"/>
@@ -44,206 +45,53 @@
         from t_report
         where id = #{id,jdbcType=BIGINT}
     </select>
-    <select id="selectOneRunningReport" resultMap="BaseResultMap">
+    <select id="selectOneRunningReport" resultMap="BaseResultMap" parameterType="io.shulie.takin.cloud.ext.content.trace.ContextExt">
         select id
         from t_report
-        where `lock` = 1 and `status` = 1
+        <where>
+            `lock` = 1
+            and `status` = 1
+            <if test="tenantId != null">
+                and `tenant_id` = #{tenantId}
+            </if>
+            <if test="envCode != null">
+                and `env_code` = #{envCode}
+            </if>
+        </where>
         order by id
         limit 1
     </select>
-    <select id="selectListRunningReport" resultMap="BaseResultMap">
+    <select id="selectListRunningReport" resultMap="BaseResultMap" parameterType="io.shulie.takin.cloud.ext.content.trace.ContextExt">
         select id
         from t_report
-        where status=1 and is_deleted=0
---         where `lock` = 1 and ((start_time is not null and `status` = 0) or `status` = 1)
+        <where>
+            `status`=1 and is_deleted=0
+            -- where `lock` = 1 and ((start_time is not null and `status` = 0) or `status` = 1)
+            <if test="tenantId != null">
+                and `tenant_id` = #{tenantId}
+            </if>
+            <if test="envCode != null">
+                and `env_code` = #{envCode}
+            </if>
+        </where>
         order by id desc
         limit 10
     </select>
     <select id="selectListPressuringReport" resultMap="BaseResultMap">
         select id
         from t_report
-        where status=0 and is_deleted=0 and type=0
+        <where>
+            `status` = 0 and is_deleted = 0 and type = 0
+            <if test="tenantId != null">
+                and `tenant_id` = #{tenantId}
+            </if>
+            <if test="envCode != null">
+                and `env_code` = #{envCode}
+            </if>
+        </where>
         order by id desc
         limit 100
     </select>
-    <insert id="insertSelective" parameterType="com.pamirs.takin.entity.domain.entity.report.Report" keyProperty="id"
-            useGeneratedKeys="true">
-        <!--@mbg.generated-->
-        insert into t_report
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                id,
-            </if>
-            <if test="sceneId != null">
-                scene_id,
-            </if>
-            <if test="customerId != null">
-                customer_id,
-            </if>
-            <if test="deptId != null">
-                dept_id,
-            </if>
-            <if test="userId != null">
-                user_id,
-            </if>
-            <if test="sceneName != null">
-                scene_name,
-            </if>
-            <if test="startTime != null">
-                start_time,
-            </if>
-            <if test="endTime != null">
-                end_time,
-            </if>
-            <if test="status != null">
-                `status`,
-            </if>
-            <if test="type != null">
-                `type`,
-            </if>
-            <if test="conclusion != null">
-                conclusion,
-            </if>
-            <if test="totalRequest != null">
-                total_request,
-            </if>
-            <if test="pressureType != null">
-                pressure_type,
-            </if>
-            <if test="avgConcurrent != null">
-                avg_concurrent,
-            </if>
-            <if test="tps != null">
-                tps,
-            </if>
-            <if test="avgTps != null">
-                avg_tps,
-            </if>
-            <if test="avgRt != null">
-                avg_rt,
-            </if>
-            <if test="concurrent != null">
-                concurrent,
-            </if>
-            <if test="successRate != null">
-                success_rate,
-            </if>
-            <if test="sa != null">
-                sa,
-            </if>
-            <if test="operateId != null">
-                operate_id,
-            </if>
-            <if test="features != null">
-                features,
-            </if>
-            <if test="isDeleted != null">
-                is_deleted,
-            </if>
-            <if test="gmtCreate != null">
-                gmt_create,
-            </if>
-            <if test="gmtUpdate != null">
-                gmt_update,
-            </if>
-            <if test="amount != null">
-                amount,
-            </if>
-            <if test="scriptId != null">
-                script_id,
-            </if>
-            <if test="scriptNodeTree != null">
-                script_node_tree,
-            </if>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                #{id,jdbcType=BIGINT},
-            </if>
-            <if test="sceneId != null">
-                #{sceneId,jdbcType=BIGINT},
-            </if>
-            <if test="customerId != null">
-                #{customerId,jdbcType=BIGINT},
-            </if>
-            <if test="deptId != null">
-                #{deptId,jdbcType=BIGINT},
-            </if>
-            <if test="userId != null">
-                #{userId,jdbcType=BIGINT},
-            </if>
-            <if test="sceneName != null">
-                #{sceneName,jdbcType=VARCHAR},
-            </if>
-            <if test="startTime != null">
-                #{startTime,jdbcType=TIMESTAMP},
-            </if>
-            <if test="endTime != null">
-                #{endTime,jdbcType=TIMESTAMP},
-            </if>
-            <if test="status != null">
-                #{status,jdbcType=INTEGER},
-            </if>
-            <if test="type != null">
-                #{type,jdbcType=INTEGER},
-            </if>
-            <if test="conclusion != null">
-                #{conclusion,jdbcType=INTEGER},
-            </if>
-            <if test="totalRequest != null">
-                #{totalRequest,jdbcType=BIGINT},
-            </if>
-            <if test="pressureType != null">
-                #{pressureType,jdbcType=INTEGER},
-            </if>
-            <if test="avgConcurrent != null">
-                #{avgConcurrent,jdbcType=DECIMAL},
-            </if>
-            <if test="tps != null">
-                #{tps,jdbcType=INTEGER},
-            </if>
-            <if test="avgTps != null">
-                #{avgTps,jdbcType=DECIMAL},
-            </if>
-            <if test="avgRt != null">
-                #{avgRt,jdbcType=DECIMAL},
-            </if>
-            <if test="concurrent != null">
-                #{concurrent,jdbcType=INTEGER},
-            </if>
-            <if test="successRate != null">
-                #{successRate,jdbcType=DECIMAL},
-            </if>
-            <if test="sa != null">
-                #{sa,jdbcType=DECIMAL},
-            </if>
-            <if test="operateId != null">
-                #{operateId,jdbcType=BIGINT},
-            </if>
-            <if test="features != null">
-                #{features,jdbcType=VARCHAR},
-            </if>
-            <if test="isDeleted != null">
-                #{isDeleted,jdbcType=INTEGER},
-            </if>
-            <if test="gmtCreate != null">
-                #{gmtCreate,jdbcType=TIMESTAMP},
-            </if>
-            <if test="gmtUpdate != null">
-                #{gmtUpdate,jdbcType=TIMESTAMP},
-            </if>
-            <if test="amount != null">
-                #{amount,jdbcType=DECIMAL},
-            </if>
-            <if test="scriptId != null">
-                #{scriptId,jdbcType=DECIMAL},
-            </if>
-            <if test="scriptNodeTree != null">
-             #{scriptNodeTree,jdbcType=VARCHAR},
-            </if>
-        </trim>
-    </insert>
-
     <select id="listReport" resultMap="BaseResultMap"
             parameterType="com.pamirs.takin.entity.domain.vo.report.ReportQueryParam">
         select id, scene_id,scene_name,start_time,end_time,`status`,`type`,conclusion,concurrent,amount,customer_id,features,dept_id,user_id
@@ -261,16 +109,19 @@
             <if test="param.endTime != null">
                 and start_time  <![CDATA[ <= ]]> #{param.endTime}
             </if>
-            <if test="param.userIds != null and param.userIds.size() != 0">
-                 and user_id in
-                  <foreach collection="param.userIds" open="(" close=")" separator="," item="userId">
-                    #{userId}
-                </foreach>
-            </if>
             <if test="param.type != null">
                 and `type` = #{param.type}
             </if>
             and status > 0 and is_deleted = 0
+            <if test="param.filterSql != null">
+                and `user_id` in (${param.filterSql})
+            </if>
+            <if test="param.tenantId != null">
+                and `tenant_id` = #{param.tenantId}
+            </if>
+            <if test="param.envCode != null">
+                and `env_code` = #{param.envCode}
+            </if>
         </where>
         order by id desc
     </select>

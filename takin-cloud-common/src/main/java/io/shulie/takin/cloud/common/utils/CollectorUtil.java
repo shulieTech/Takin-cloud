@@ -64,6 +64,7 @@ public class CollectorUtil {
         }
         return instance;
     }
+
     public static long getTimeWindowTime(long timestamp) {
         return getTimeWindow(timestamp).getTimeInMillis();
     }

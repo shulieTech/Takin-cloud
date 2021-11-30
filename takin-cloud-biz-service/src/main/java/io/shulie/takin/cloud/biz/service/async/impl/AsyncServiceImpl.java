@@ -7,21 +7,21 @@ import javax.annotation.Resource;
 
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
 import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
-import io.shulie.takin.cloud.common.constants.SceneManageConstant;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
-import io.shulie.takin.ext.api.EngineCallExtApi;
-import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.cloud.biz.service.async.AsyncService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
+import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.eventcenter.EventCenterTemplate;
 import lombok.extern.slf4j.Slf4j;
@@ -71,8 +71,8 @@ public class AsyncServiceImpl implements AsyncService {
         int currentTime = 0;
         boolean checkPass = false;
 
-        String pressureNodeTotalName = ScheduleConstants.getPressureNodeTotalKey(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getCustomerId());
-        String pressureNodeName = ScheduleConstants.getPressureNodeName(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getCustomerId());
+        String pressureNodeTotalName = ScheduleConstants.getPressureNodeTotalKey(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getTenantId());
+        String pressureNodeName = ScheduleConstants.getPressureNodeName(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getTenantId());
         String pressureNodeTotal = redisClientUtils.getString(pressureNodeTotalName);
         while (currentTime <= pressureNodeStartExpireTime) {
             String pressureNodeNum = redisClientUtils.getString(pressureNodeName);
@@ -99,13 +99,13 @@ public class AsyncServiceImpl implements AsyncService {
         //压力节点 没有在设定时间内启动完毕，停止压测
         if (!checkPass) {
             log.info("调度任务{}-{}-{},压力节点 没有在设定时间{}s内启动，停止压测,", startRequest.getSceneId(), startRequest.getTaskId(),
-                startRequest.getCustomerId(), CHECK_INTERVAL_TIME);
+                startRequest.getTenantId(), CHECK_INTERVAL_TIME);
 
             if (pressureNodeTotal != null) {
                 int podTotalNum = Integer.parseInt(pressureNodeTotal);
                 for (int i = 1; i <= podTotalNum; i++) {
                     String enginePodNoStartKey = ScheduleConstants.getEnginePodNoStartKey(startRequest.getSceneId(), startRequest.getTaskId(),
-                            startRequest.getCustomerId(), i + "", CollectorService.METRICS_EVENTS_STARTED);
+                        startRequest.getTenantId(), i + "", CollectorService.METRICS_EVENTS_STARTED);
                     if (!redisClientUtils.hasKey(enginePodNoStartKey)) {
                         log.warn("调度任务 pod " + i + "没有在设定时间启动，redisKey为" + enginePodNoStartKey);
                     }
@@ -124,10 +124,10 @@ public class AsyncServiceImpl implements AsyncService {
 
     @Async("updateStatusPool")
     @Override
-    public void updateSceneRunningStatus(Long sceneId, Long reportId,Long customerId) {
+    public void updateSceneRunningStatus(Long sceneId, Long reportId, Long customerId) {
         while (true) {
             boolean isSceneFinished = isSceneFinished(reportId);
-            boolean jobFinished = isJobFinished(sceneId,reportId,customerId);
+            boolean jobFinished = isJobFinished(sceneId, reportId, customerId);
             if (jobFinished || isSceneFinished) {
                 String statusKey = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneId,
                     reportId);
@@ -150,7 +150,7 @@ public class AsyncServiceImpl implements AsyncService {
 
     private boolean isSceneFinished(Long sceneId) {
         SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
-        if (Objects.isNull(sceneManage) || Objects.isNull(sceneManage.getStatus())){
+        if (Objects.isNull(sceneManage) || Objects.isNull(sceneManage.getStatus())) {
             return true;
         }
         return SceneManageStatusEnum.ifFinished(sceneManage.getStatus());
@@ -159,18 +159,18 @@ public class AsyncServiceImpl implements AsyncService {
     private boolean isJobFinished(Long sceneId, Long reportId, Long customerId) {
         String jobName = ScheduleConstants.getScheduleName(sceneId, reportId, customerId);
         EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
-        return !SceneManageConstant.SCENETASK_JOB_STATUS_RUNNING.equals(engineCallExtApi.getJobStatus(jobName));
+        return !SceneManageConstant.SCENE_TASK_JOB_STATUS_RUNNING.equals(engineCallExtApi.getJobStatus(jobName));
     }
 
     private void callStop(ScheduleStartRequestExt startRequest) {
         // 汇报失败
         sceneManageService.reportRecord(SceneManageStartRecordVO.build(startRequest.getSceneId(),
             startRequest.getTaskId(),
-            startRequest.getCustomerId()).success(false).errorMsg("").build());
+            startRequest.getTenantId()).success(false).errorMsg("").build());
         // 清除 SLA配置 清除PushWindowDataScheduled 删除pod job configMap  生成报告拦截 状态拦截
         Event event = new Event();
         event.setEventName("finished");
-        event.setExt(new TaskResult(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getCustomerId()));
+        event.setExt(new TaskResult(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getTenantId()));
         eventCenterTemplate.doEvents(event);
     }
 }

@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.biz.service.record.impl;
 
+import java.util.List;
+
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.biz.service.record.ScheduleRecordEnginePluginService;
@@ -7,8 +9,6 @@ import io.shulie.takin.cloud.data.mapper.mysql.ScheduleRecordEnginePluginMapper;
 import io.shulie.takin.cloud.data.model.mysql.ScheduleRecordEnginePluginRefEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * 调度记录引擎插件实现
@@ -27,13 +27,13 @@ public class ScheduleRecordEnginePluginServiceImpl extends ServiceImpl<ScheduleR
      */
     @Override
     public void saveScheduleRecordEnginePlugins(Long recordId, List<String> enginePluginFilePath) {
-        if(recordId == null) {
+        if (recordId == null) {
             log.warn("recordId不能为空。");
             return;
         }
 
         //没有额外引擎插件加载
-        if(enginePluginFilePath == null || enginePluginFilePath.size() == 0) {
+        if (enginePluginFilePath == null || enginePluginFilePath.size() == 0) {
             return;
         }
 

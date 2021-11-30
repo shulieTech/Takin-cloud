@@ -1,17 +1,13 @@
 package com.pamirs.takin.entity.domain.vo;
 
-import java.io.Serializable;
-
 /**
  * 报告应用ip详情
  *
  * @author shulie
  * @version v1.0
- * @2018年5月17日
+ * @date 2018年5月17日
  */
-public class TReportAppIpDetail implements Serializable {
-
-    private static final long serialVersionUID = 1334397427959885883L;
+public class TReportAppIpDetail {
 
     /**
      * id

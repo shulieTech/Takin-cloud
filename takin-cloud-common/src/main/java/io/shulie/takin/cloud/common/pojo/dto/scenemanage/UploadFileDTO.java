@@ -54,7 +54,7 @@ public class UploadFileDTO {
      * 文件扩展
      */
     @ApiModelProperty(hidden = true)
-    private String fileExtend ;
+    private String fileExtend;
 
     /**
      * 文件大小

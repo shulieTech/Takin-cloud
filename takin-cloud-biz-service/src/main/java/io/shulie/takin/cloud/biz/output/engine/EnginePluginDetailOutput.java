@@ -1,12 +1,11 @@
 package io.shulie.takin.cloud.biz.output.engine;
 
+import java.util.List;
+
 import io.shulie.takin.cloud.data.model.mysql.EnginePluginEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * 引擎插件详情
@@ -16,7 +15,7 @@ import java.util.List;
  */
 @Data
 @ApiModel("引擎插件详情出参")
-public class EnginePluginDetailOutput implements Serializable {
+public class EnginePluginDetailOutput {
 
     @ApiModelProperty("插件ID")
     private Long pluginId;

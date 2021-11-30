@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.biz.service.scene;
 
-import io.shulie.takin.cloud.open.request.scene.manage.SynchronizeRequest;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SynchronizeRequest;
 
 /**
  * 场景同步服务 - 新

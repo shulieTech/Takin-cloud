@@ -10,9 +10,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -57,8 +56,6 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.Sc
 import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.utils.FileTypeBusinessUtil;
-import io.shulie.takin.cloud.common.bean.RuleBean;
-import io.shulie.takin.cloud.common.bean.TimeBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
@@ -73,26 +70,30 @@ import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.pojo.dto.scenemanage.UploadFileDTO;
-import io.shulie.takin.cloud.common.pojo.vo.scenemanage.SceneMangeFeaturesVO;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
-import io.shulie.takin.cloud.common.utils.*;
+import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
+import io.shulie.takin.cloud.common.utils.JsonUtil;
+import io.shulie.takin.cloud.common.utils.LinuxUtil;
+import io.shulie.takin.cloud.common.utils.UrlUtil;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
-import io.shulie.takin.cloud.data.mapper.mysql.SceneManageMapper;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
-import io.shulie.takin.ext.api.AssetExtApi;
-import io.shulie.takin.ext.api.EngineExtApi;
-import io.shulie.takin.ext.content.asset.AssetBillExt;
+import io.shulie.takin.cloud.ext.api.AssetExtApi;
+import io.shulie.takin.cloud.ext.api.EngineExtApi;
+import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptVerityExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
+import io.shulie.takin.cloud.sdk.model.common.RuleBean;
+import io.shulie.takin.cloud.sdk.model.common.TimeBean;
 import io.shulie.takin.ext.content.enginecall.PtConfigExt;
 import io.shulie.takin.ext.content.enginecall.ThreadGroupConfigExt;
-import io.shulie.takin.ext.content.response.Response;
-import io.shulie.takin.ext.content.script.ScriptParseExt;
-import io.shulie.takin.ext.content.script.ScriptVerityExt;
-import io.shulie.takin.ext.content.script.ScriptVerityRespExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.utils.file.FileManagerHelper;
 import io.shulie.takin.utils.json.JsonHelper;
@@ -118,6 +119,8 @@ public class SceneManageServiceImpl implements SceneManageService {
     @Resource
     private TReportMapper tReportMapper;
     @Resource
+    private ReportMapper reportMapper;
+    @Resource
     private PluginManager pluginManager;
     @Resource
     private ReportService reportService;
@@ -127,8 +130,6 @@ public class SceneManageServiceImpl implements SceneManageService {
     private RedisClientUtils redisClientUtils;
     @Resource
     private EnginePluginUtils enginePluginUtils;
-    @Resource
-    private SceneManageMapper sceneManageMapper;
     @Resource
     private TSceneManageMapper tSceneManageMapper;
     @Resource
@@ -326,20 +327,34 @@ public class SceneManageServiceImpl implements SceneManageService {
     @Override
     public PageInfo<SceneManageListOutput> queryPageList(SceneManageQueryInput queryVO) {
 
-        Page<SceneManageListOutput> page = PageHelper.startPage(queryVO.getCurrentPage() + 1, queryVO.getPageSize());
+        Page<SceneManageListOutput> page = PageHelper.startPage(queryVO.getPageNumber(), queryVO.getPageSize());
         SceneManageQueryBean sceneManageQueryBean = new SceneManageQueryBean();
         BeanUtils.copyProperties(queryVO, sceneManageQueryBean);
         //默认查询普通类型场景，场景类型目前不透出去
         if (sceneManageQueryBean.getType() == null) {
             sceneManageQueryBean.setType(0);
         }
-        List<SceneManage> queryList = tSceneManageMapper.getPageList(sceneManageQueryBean);
+        List<SceneManageEntity> queryList = sceneManageDAO.getPageList(sceneManageQueryBean);
         if (CollectionUtils.isEmpty(queryList)) {
             return new PageInfo<>(Lists.newArrayList());
         }
-        List<SceneManageListOutput> resultList = SceneManageDTOConvert.INSTANCE.ofs(queryList);
-        Map<Long, Integer> threadNum = new HashMap<>(queryList.size());
-        for (SceneManage sceneManage : queryList) {
+        List<SceneManageListOutput> resultList = queryList.stream().map(t -> new SceneManageListOutput() {{
+            setStatus(t.getStatus());
+            setFeatures(t.getFeatures());
+            setId(t.getId());
+            setLastPtTime(DateUtil.formatDateTime(t.getLastPtTime()));
+            setSceneName(t.getSceneName());
+            setEstimateFlow(null);
+            setHasReport(false);
+            setThreadNum(null);
+            setType(t.getType());
+            setEnvCode(t.getEnvCode());
+            setTenantId(t.getTenantId());
+            setUserId(t.getUserId());
+            setUserName(null);
+        }}).collect(Collectors.toList());
+        Map<Long, Integer> threadNum = new HashMap<>(1);
+        for (SceneManageEntity sceneManage : queryList) {
             if (sceneManage.getPtConfig() == null) {
                 continue;
             }
@@ -365,13 +380,6 @@ public class SceneManageServiceImpl implements SceneManageService {
         List<Long> sceneIds = tReportMapper.listReportSceneIds(
                 resultList.stream().map(SceneManageListOutput::getId).collect(Collectors.toList()))
             .stream().map(Report::getSceneId).distinct().collect(Collectors.toList());
-
-        List<Long> customerIds = resultList.stream().map(SceneManageListOutput::getCustomerId).distinct()
-            .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(customerIds)) {
-            Map<Long, String> userMap = CloudPluginUtils.getUserNameMap(customerIds);
-            resultList.forEach(data -> CloudPluginUtils.fillCustomerName(data, userMap));
-        }
 
         resultList.forEach(t -> {
             t.setThreadNum(threadNum.get(t.getId()));
@@ -550,7 +558,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     @Override
     public void updateSceneManageStatus(UpdateStatusBean statusVO) {
-        tSceneManageMapper.updateStatus(statusVO);
+        sceneManageDAO.updateStatus(statusVO.getSceneId(), statusVO.getAfterStatus(), statusVO.getPreStatus());
     }
 
     @Override
@@ -581,7 +589,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (!Arrays.asList(statusVO.getCheckEnum()).contains(statusEnum)) {
             log.error("异常代码【{}】,异常内容：更新生命周期失败 --> check状态错误,本次压测 {}-{}-{} 状态更新失败，更新生命周期：{} -> {},check:{}",
                 TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId(), statusVO.getResultId(),
-                statusVO.getCustomerId(), statusMsg, updateStatus, checkStatus);
+                statusVO.getTenantId(), statusMsg, updateStatus, checkStatus);
             toFailureState(statusVO.getSceneId(), statusVO.getResultId(),
                 SceneManageErrorEnum.SCENEMANAGE_UPDATE_LIFECYCLE_CHECK_FAILED.getErrorMessage());
             return false;
@@ -597,11 +605,21 @@ public class SceneManageServiceImpl implements SceneManageService {
             // 压测引擎启动状态是 更新下 再次更新报告开始时间
             if (statusVO.getUpdateEnum().equals(SceneManageStatusEnum.ENGINE_RUNNING)) {
                 String engineName = ScheduleConstants.getEngineName(statusVO.getSceneId(), statusVO.getResultId(),
-                    statusVO.getCustomerId());
-                String startTime = engineName + ScheduleConstants.FIRST_SIGN;
-                tReportMapper.updateStartTime(statusVO.getResultId(), new Date(Long.parseLong(
-                    Optional.ofNullable(redisClientUtils.getString(startTime))
-                        .orElse(String.valueOf(System.currentTimeMillis())))));
+                    statusVO.getTenantId());
+                final Date startTime;
+                // 设定开始时间
+                {
+                    // 1.从REDIS中取
+                    String redisKey = engineName + ScheduleConstants.FIRST_SIGN;
+                    String dateTimeString = redisClientUtils.getString(redisKey);
+                    if (StrUtil.isNotBlank(dateTimeString)) {startTime = new Date(Long.parseLong(dateTimeString));}
+                    // 2.设定为当前时间
+                    else {startTime = new Date();}
+                }
+                reportMapper.updateById(new ReportEntity() {{
+                    setId(statusVO.getResultId());
+                    setStartTime(startTime);
+                }});
             }
 
             ReportResult recentlyReport = reportDao.getRecentlyReport(statusVO.getSceneId());
@@ -615,11 +633,11 @@ public class SceneManageServiceImpl implements SceneManageService {
             //        report.setStartTime(new Date());
             sceneManageDAO.update(updateParam);
             log.info("本次压测{}-{}-{} 状态更新成功，更新生命周期：{} -> {},check:{}", statusVO.getSceneId(), statusVO.getResultId(),
-                statusVO.getCustomerId(), statusMsg, updateStatus, checkStatus);
+                statusVO.getTenantId(), statusMsg, updateStatus, checkStatus);
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：更新生命周期失败 --> 本次压测{}-{}-{} 状态更新失败，更新生命周期：{} -> {},check:{},异常信息:{}",
                 TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId(), statusVO.getResultId(),
-                statusVO.getCustomerId(), statusMsg, updateStatus, checkStatus, e);
+                statusVO.getTenantId(), statusMsg, updateStatus, checkStatus, e);
             toFailureState(statusVO.getSceneId(), statusVO.getResultId(), "状态更新失败" + e.getLocalizedMessage());
             return false;
 
@@ -647,7 +665,9 @@ public class SceneManageServiceImpl implements SceneManageService {
             setUpdateTime(new Date());
             setStatus(SceneManageStatusEnum.FAILED.getValue());
         }};
-        sceneManageMapper.updateById(sceneManage);
+        // --->update 失败状态
+        sceneManage.setStatus(SceneManageStatusEnum.FAILED.getValue());
+        sceneManageDAO.getBaseMapper().updateById(sceneManage);
 
     }
 
@@ -814,8 +834,8 @@ public class SceneManageServiceImpl implements SceneManageService {
     /**
      * 文件迁移
      *
-     * @param inputList -
-     * @param destPath  -
+     * @param inputList 文件列表
+     * @param destPath  目标路径
      */
     private void transferTo(List<SceneScriptRefInput> inputList, String destPath) {
         // 数据文件、脚本文件
@@ -991,11 +1011,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         // 尝试调用插件
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
-            Response<BigDecimal> res = assetExtApi.calcEstimateAmount(bills);
-            if (null != res && res.isSuccess()) {
-                return res.getData();
-            }
-            return BigDecimal.ZERO;
+            return assetExtApi.calcEstimateAmount(bills);
         }
         // 返回0
         else {
@@ -1012,7 +1028,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
         // 状态适配
         wrapperOutput.setStatus(SceneManageStatusEnum.getAdaptStatus(sceneManageResult.getStatus()));
-        wrapperOutput.setCustomerId(sceneManageResult.getCustomerId());
+        wrapperOutput.setTenantId(sceneManageResult.getTenantId());
         wrapperOutput.setUpdateTime(DateUtil.formatDateTime(sceneManageResult.getUpdateTime()));
         wrapperOutput.setLastPtTime(DateUtil.formatDateTime(sceneManageResult.getLastPtTime()));
         wrapperOutput.setLastPtDateTime(sceneManageResult.getLastPtTime());
@@ -1124,6 +1140,9 @@ public class SceneManageServiceImpl implements SceneManageService {
         param.setStatus(SceneManageStatusEnum.WAIT.getValue());
         param.setType(wrapperVO.getType() == null ? 0 : wrapperVO.getType());
         param.setFeatures(wrapperVO.getFeatures());
+        param.setUserId(wrapperVO.getUserId());
+        param.setTenantId(wrapperVO.getTenantId());
+        param.setEnvCode(wrapperVO.getEnvCode());
         return param;
     }
 
@@ -1150,10 +1169,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         BigDecimal value = new BigDecimal(0);
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
-            Response<BigDecimal> res = assetExtApi.calcEstimateAmount(BeanUtil.copyProperties(wrapperVO, AssetBillExt.class, ""));
-            if (null != res && res.isSuccess() && null != res.getData()) {
-                value = res.getData();
-            }
+            value = assetExtApi.calcEstimateAmount(BeanUtil.copyProperties(wrapperVO, AssetBillExt.class, ""));
         }
         map.put(SceneManageConstant.ESTIMATE_FLOW, value);
         return JSON.toJSONString(map);

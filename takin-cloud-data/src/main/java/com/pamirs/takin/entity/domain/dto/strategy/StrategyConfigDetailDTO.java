@@ -1,7 +1,5 @@
 package com.pamirs.takin.entity.domain.dto.strategy;
 
-import java.io.Serializable;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -12,9 +10,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel("分配策略详情")
-public class StrategyConfigDetailDTO implements Serializable {
-
-    private static final long serialVersionUID = 6612363903300276594L;
+public class StrategyConfigDetailDTO {
 
     @ApiModelProperty(value = "策略名称")
     private String strategyName;

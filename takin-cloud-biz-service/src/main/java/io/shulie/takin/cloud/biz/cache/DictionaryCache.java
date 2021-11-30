@@ -10,8 +10,8 @@ import javax.annotation.Resource;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.pamirs.takin.entity.dao.dict.TDictionaryDataMapper;
-import io.shulie.takin.cloud.common.enums.machine.EnumResult;
 import com.pamirs.takin.entity.domain.vo.TDictionaryVo;
+import io.shulie.takin.cloud.common.enums.machine.EnumResult;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -40,10 +40,10 @@ public class DictionaryCache {
         //dicMap.put("domain", LinkDomainEnumMapping.neededEnumResults());
         //dicMap.put("changeType", LinkChangeTypeEnumMapping.neededEnumResults());
         //数据字段
-        fillDictFromDB();
+        fillDictFromDataBase();
     }
 
-    private void fillDictFromDB() {
+    private void fillDictFromDataBase() {
         Map<String, Object> paramMap = Maps.newHashMap();
         paramMap.put("valueActive", "Y");
         List<TDictionaryVo> voList = tDictionaryDataMapper.queryDictionaryList(paramMap);

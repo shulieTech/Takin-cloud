@@ -8,10 +8,9 @@ import java.util.List;
  *
  * @author shulie
  * @version v1.0
- * @2018年5月21日
+ * @date 2018年5月21日
  */
 public class Constants {
-
     /**
      * 最大分页数，因为性能问题分页最好不要超过这个数
      */
@@ -25,82 +24,132 @@ public class Constants {
      */
     public static final int JOB_DEFAULT_PAGE_SIZE = 200;
 
-    //报告状态：正在测试
+    /**
+     * 报告状态：正在测试
+     */
     public static final String REPORT_STATUS_TESTING = "1";
 
-    // 报告状态：测试完成
+    /**
+     * 报告状态：测试完成
+     */
     public static final String REPORT_STATUS_DONE = "0";
 
-    //二级链路状态：正在测试
+    /**
+     * 二级链路状态：正在测试
+     */
     public static final String SECOND_LINK_STATUS_TESTING = REPORT_STATUS_TESTING;
 
-    //二级链路状态：测试完成
+    /**
+     * 二级链路状态：测试完成
+     */
     public static final String SECOND_LINK_STATUS_NOT_TESTING = REPORT_STATUS_DONE;
 
-    //暂停
+    /**
+     * 暂停
+     */
     public static final String SECOND_LINK_STATUS_SUSPEND = "2";
 
-    //停止
+    /**
+     * 停止
+     */
     public static final String SECOND_LINK_STATUS_STOP = "3";
 
     public static final String BASE_LINK_STOP = "0";
-    //基础链路正在压测
+    /**
+     * 基础链路正在压测
+     */
     public static final String BASE_LINK_TESTING = "1";
 
-    //是否计算tps：计算
+    /**
+     * 是否计算tps：计算
+     */
     public static final String IS_TPS_COUNT = "1";
 
-    //是否计算tps：不计算
+    /**
+     * 是否计算tps：不计算
+     */
     public static final String IS_NOT_TPS_COUNT = "0";
 
-    //未开始检查
+    /**
+     * 未开始检查
+     */
     public static final String DETECTION_NOT_START = "0";
 
-    //正在检查
+    /**
+     * 正在检查
+     */
     public static final String DETECTION_STARTING = "1";
 
-    //检查成功
+    /**
+     * 检查成功
+     */
     public static final String DETECTION_SUCCESS = "2";
 
-    //检查失败
+    /**
+     * 检查失败
+     */
     public static final String DETECTION_FAIL = "3";
 
-    //正在消费
+    /**
+     * 正在消费
+     */
     public static final String CONSUMING = "1";
 
-    //消费成功
+    /**
+     * 消费成功
+     */
     public static final String CONSUME_SUCCESS = "2";
 
-    //消费失败
+    /**
+     * 消费失败
+     */
     public static final String CONSUME_FAILED = "3";
 
-    // 开启抽取数据
+    /**
+     * 开启抽取数据
+     */
     public static final String LOAD_START = "start";
     public static final int LOAD_START_INT = 1;
 
-    // 停止抽取数据
+    /**
+     * 停止抽取数据
+     */
     public static final String LOAD_STOP = "stop";
     public static final int LOAD_STOP_INT = 2;
 
-    // 数据库禁用标志
+    /**
+     * 数据库禁用标志
+     */
     public static final String DISABLE = "disable";
 
-    // 数据库启用标志
+    /**
+     * 数据库启用标志
+     */
     public static final String ENABLE = "enable";
 
-    // 正在生产消息
+    /**
+     * 正在生产消息
+     */
     public static final String PRODUCING = "1";
 
-    // 生产完成
+    /**
+     * 生产完成
+     */
     public static final String PRODUCE_FINISH = "2";
 
-    //消费失败
+    /**
+     * 消费失败
+     */
     public static final String PRODUCE_FAILED = "3";
 
-    // 阿斯旺id
+    /**
+     * 阿斯旺id
+     */
     public static final String ASWAN_ID = "ASWAN_ID";
 
-    // 基础链路名称
+    /**
+     * 基础链路名称
+     */
     public static final String BASIC_LINK_NAME = "LINK_NAME";
 
     /**
@@ -186,9 +235,13 @@ public class Constants {
     public static final int APPLICATION_INFO_TYPE_TRACE = 1;
     public static final int APPLICATION_INFO_TYPE_SQL_ERROR = 2;
 
-    //链路探活运行中
+    /**
+     * 链路探活运行中
+     */
     public static final String LINK_RESEARCH_LIVE_RUNNING = "1";
-    //链路探活未开启
+    /**
+     * 链路探活未开启
+     */
     public static final String LINK_RESEARCH_LIVE_STOP = "0";
 
     /**

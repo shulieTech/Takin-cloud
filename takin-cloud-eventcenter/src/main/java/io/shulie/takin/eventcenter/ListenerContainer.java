@@ -15,41 +15,40 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ListenerContainer {
-    private HashMap<String, Map<String,Listener>> LISTENERS = new HashMap<>();
-
+    private final HashMap<String, Map<String, Listener>> LISTENERS = new HashMap<>();
 
     /**
      * 获取监听器列表
      *
      * @return -
      */
-    HashMap<String, Map<String,Listener>> getListeners() {
+    HashMap<String, Map<String, Listener>> getListeners() {
         return LISTENERS;
     }
 
     /**
-     * @param event
-     * @param method
+     * @param event  -
+     * @param method -
      */
     protected void addListener(IntrestFor event, Object obj, Method method) {
 
         if (!LISTENERS.containsKey(event.event())) {
-            Map<String,Listener> map = Maps.newHashMap();
+            Map<String, Listener> map = Maps.newHashMap();
             LISTENERS.put(event.event(), map);
         }
-        Map<String,Listener> map = LISTENERS.get(event.event());
-        Class[] parameters = method.getParameterTypes();
-        String parameter = Arrays.asList(parameters).stream().map(Class::getName).collect(Collectors.joining(","));
-        map.put(method.getClass() + "-" + method.getName() + "-" + parameter,new Listener(event, obj, method));
+        Map<String, Listener> map = LISTENERS.get(event.event());
+        Class<?>[] parameters = method.getParameterTypes();
+        String parameter = Arrays.stream(parameters).map(Class::getName).collect(Collectors.joining(","));
+        map.put(method.getClass() + "-" + method.getName() + "-" + parameter, new Listener(event, obj, method));
     }
 
     /**
      *
      */
     protected static class Listener {
-        private IntrestFor intrestFor;
-        private Object object;
-        private Method method;
+        private final IntrestFor intrestFor;
+        private final Object object;
+        private final Method method;
 
         public Listener(IntrestFor intrestFor, Object object, Method method) {
             this.intrestFor = intrestFor;
@@ -68,8 +67,5 @@ public class ListenerContainer {
         public Object getObject() {
             return object;
         }
-
-
-
     }
 }

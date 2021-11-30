@@ -32,10 +32,10 @@ public class RedissonConfig {
         Sentinel sentinel = redisProperties.getSentinel();
         if (sentinel != null && !CollectionUtils.isEmpty(sentinel.getNodes())) {
             SentinelServersConfig sentinelServersConfig = config.useSentinelServers()
-                    .setTimeout(10000)
-                    .setDatabase(redisProperties.getDatabase())
-                    .setMasterName(redisProperties.getSentinel().getMaster());
-            if (StringUtils.isNotBlank(redisProperties.getPassword())){
+                .setTimeout(10000)
+                .setDatabase(redisProperties.getDatabase())
+                .setMasterName(redisProperties.getSentinel().getMaster());
+            if (StringUtils.isNotBlank(redisProperties.getPassword())) {
                 sentinelServersConfig.setPassword(redisProperties.getPassword());
             }
             for (String node : sentinel.getNodes()) {
@@ -48,8 +48,8 @@ public class RedissonConfig {
 
         SingleServerConfig singleServerConfig = config.useSingleServer();
         singleServerConfig.setAddress(String.format("redis://%s:%s", redisProperties.getHost(), redisProperties.getPort()))
-                .setDatabase(redisProperties.getDatabase());
-        if (StringUtils.isNotBlank(redisProperties.getPassword())){
+            .setDatabase(redisProperties.getDatabase());
+        if (StringUtils.isNotBlank(redisProperties.getPassword())) {
             singleServerConfig.setPassword(redisProperties.getPassword());
         }
         return Redisson.create(config);

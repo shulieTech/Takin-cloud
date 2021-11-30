@@ -20,8 +20,9 @@ import lombok.Data;
 
 /**
  * 文件分割信息
- * @Author: liyuanba
- * @Date: 2021/10/12 5:28 下午
+ *
+ * @author liyuanba
+ * @date 2021/10/12 5:28 下午
  */
 @Data
 public class FileSplitInfo extends AbstractEntry {

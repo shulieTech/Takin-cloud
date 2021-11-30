@@ -25,11 +25,13 @@ import io.shulie.takin.cloud.biz.output.statistics.RtDataOutput;
 import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * 压测数据处理工具
+ *
+ * @author -
+ */
 public class DataUtils {
-    private final static Logger logger = LoggerFactory.getLogger(DataUtils.class);
 
     /**
      * 将时间转化成时分秒
@@ -37,6 +39,7 @@ public class DataUtils {
     public static String formatTime(long time) {
         return formatTime(time, "%dh%d'%d\"");
     }
+
     /**
      * 将时间转化成时分秒
      */
@@ -44,7 +47,7 @@ public class DataUtils {
         long h = TimeUnit.HOURS.convert(time, TimeUnit.SECONDS);
         long m = (time % 3600) / 60;
         long s = time % 60;
-        return String.format(format, h, m , s);
+        return String.format(format, h, m, s);
     }
 
     /**
@@ -63,14 +66,13 @@ public class DataUtils {
 
     public static String mergePath(String path1, String path2, String split) {
         if (path1.endsWith(split)) {
-            path1 = path1.substring(0, path1.length() -1);
+            path1 = path1.substring(0, path1.length() - 1);
         }
         if (!path2.startsWith(split)) {
-            path2 = split+path2;
+            path2 = split + path2;
         }
-        return path1+path2;
+        return path1 + path2;
     }
-
 
     /**
      * 最大rt和百分比中最大rt比较，取最大的
@@ -87,10 +89,10 @@ public class DataUtils {
         int percentMaxRt = 0;
         if (null != percentMap) {
             percentMaxRt = percentMap.values().stream().filter(Objects::nonNull)
-                    .mapToInt(RtDataOutput::getTime)
-                    .filter(Objects::nonNull)
-                    .max()
-                    .orElse(0);
+                .mapToInt(RtDataOutput::getTime)
+                .filter(Objects::nonNull)
+                .max()
+                .orElse(0);
 
         }
         return Math.max(percentMaxRt, maxRt);
@@ -100,12 +102,12 @@ public class DataUtils {
      * 1-100%的sa数据 各个百分点位的hits数据去掉前面百分比的部分
      */
     public static void percentMapRemoveDuplicateHits(Map<Integer, RtDataOutput> map) {
-        for(int i=100; i>1; i--) {
+        for (int i = 100; i > 1; i--) {
             RtDataOutput d = map.get(i);
             RtDataOutput next = null;
             int j = 1;
-            while (null == next && j<i) {
-                next = map.get(i-j++);
+            while (null == next && j < i) {
+                next = map.get(i - j++);
             }
             if (null != next) {
                 d.setHits(d.getHits() - next.getHits());
@@ -120,14 +122,14 @@ public class DataUtils {
         if (StringUtils.isBlank(text)) {
             return null;
         }
-        Map<Integer, RtDataOutput> percentMap = new HashMap<>();
+        Map<Integer, RtDataOutput> percentMap = new HashMap<>(0);
         String[] percentDatas = text.split("\\|");
         for (String s : percentDatas) {
             if (StringUtils.isBlank(s) || !s.contains(",")) {
                 continue;
             }
             String[] ss = s.split(",");
-            if (ss.length<3) {
+            if (ss.length < 3) {
                 continue;
             }
             Integer percent = NumberUtils.toInt(ss[0]);

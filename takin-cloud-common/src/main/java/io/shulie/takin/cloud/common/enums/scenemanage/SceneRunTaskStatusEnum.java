@@ -6,7 +6,7 @@ import lombok.Getter;
 
 /**
  * @author xr.l
- * @date  2021-05-10
+ * @date 2021-05-10
  */
 
 public enum SceneRunTaskStatusEnum {
@@ -29,7 +29,7 @@ public enum SceneRunTaskStatusEnum {
     /**
      * 运行中
      */
-    RUNNING(5,"running");
+    RUNNING(5, "running");
 
     @Getter
     private final int code;
@@ -42,16 +42,17 @@ public enum SceneRunTaskStatusEnum {
         this.text = text;
     }
 
-    public static SceneRunTaskStatusEnum getTryRunTaskStatusEnumByCode(int code){
+    public static SceneRunTaskStatusEnum getTryRunTaskStatusEnumByCode(int code) {
         return Arrays.stream(values())
-            .filter(statusEnum ->statusEnum.getCode()==code)
+            .filter(statusEnum -> statusEnum.getCode() == code)
             .findFirst()
             .orElse(null);
     }
+
     public static SceneRunTaskStatusEnum getTryRunTaskStatusEnumByText(String status) {
-       return Arrays.stream(values())
-           .filter(statusEnum -> statusEnum.getText().equals(status))
-           .findFirst()
-           .orElse(null);
+        return Arrays.stream(values())
+            .filter(statusEnum -> statusEnum.getText().equals(status))
+            .findFirst()
+            .orElse(null);
     }
 }

@@ -3,27 +3,24 @@ package io.shulie.takin.app.conf;
 import java.time.LocalDate;
 import java.util.function.Predicate;
 
+import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import io.swagger.annotations.Api;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-
-import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
-
+import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
 import springfox.documentation.PathProvider;
+import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.paths.Paths;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spring.web.paths.DefaultPathProvider;
+import springfox.documentation.spring.web.paths.Paths;
+import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
-import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
 
 /**
  * The type Swagger config.

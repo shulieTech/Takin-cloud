@@ -216,7 +216,9 @@
     </select>
 
     <delete id="deleteBySceneId">
-        delete from t_scene_script_ref where scene_id = #{id,jdbcType=BIGINT}
+        delete
+        from t_scene_script_ref
+        where scene_id = #{id,jdbcType=BIGINT}
 
     </delete>
 </mapper>

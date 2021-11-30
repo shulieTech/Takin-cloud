@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.biz.input.scenemanage;
 
-import io.shulie.takin.cloud.common.bean.RuleBean;
+import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -11,7 +11,6 @@ import lombok.Data;
 
 @Data
 public class SceneSlaRefInput {
-    private static final long serialVersionUID = 4747478435828708203L;
 
     @ApiModelProperty(value = "规则名称")
     private String ruleName;

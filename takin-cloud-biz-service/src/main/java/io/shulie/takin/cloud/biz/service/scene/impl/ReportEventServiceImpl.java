@@ -7,14 +7,13 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 import io.shulie.takin.cloud.biz.output.statistics.RtDataOutput;
+import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
 import io.shulie.takin.cloud.biz.utils.DataUtils;
 import io.shulie.takin.cloud.common.bean.collector.Metrics;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
 
 /**
  * @author qianshui
@@ -24,7 +23,7 @@ import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
 @Slf4j
 public class ReportEventServiceImpl implements ReportEventService {
 
-    private static final List<Integer> indexs = Arrays.asList(99, 95, 90, 75, 50);
+    private static final List<Integer> INDEXS = Arrays.asList(99, 95, 90, 75, 50);
     private static final String PERCENTAGE = "%";
     private static final String MS = "ms";
     @Autowired
@@ -43,11 +42,11 @@ public class ReportEventServiceImpl implements ReportEventService {
         if (null == metrics) {
             return null;
         }
-        log.debug("报告生成，saPercent：{}",metrics.getPercentData());
+        log.debug("报告生成，saPercent：{}", metrics.getPercentData());
         Map<Integer, RtDataOutput> percentMap = DataUtils.parseToPercentMap(metrics.getPercentData());
 
         Map<String, String> resultMap = Maps.newLinkedHashMap();
-        indexs.forEach(percent -> {
+        INDEXS.forEach(percent -> {
             resultMap.put(percent + PERCENTAGE, percentMap.get(percent).getTime() + MS);
         });
         return resultMap;

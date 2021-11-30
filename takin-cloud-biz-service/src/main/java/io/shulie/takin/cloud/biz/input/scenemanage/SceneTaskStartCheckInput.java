@@ -15,7 +15,7 @@ public class SceneTaskStartCheckInput {
     private List<FileInfo> fileInfoList;
 
     @Data
-    public static class FileInfo{
+    public static class FileInfo {
         private String fileName;
         private boolean isSplit;
     }

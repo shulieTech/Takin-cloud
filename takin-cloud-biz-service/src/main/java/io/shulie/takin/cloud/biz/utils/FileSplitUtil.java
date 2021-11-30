@@ -30,8 +30,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 /**
- * @Author: liyuanba
- * @Date: 2021/10/12 5:23 下午
+ * @author liyuanba
+ * @date 2021/10/12 5:23 下午
  */
 @Slf4j
 public class FileSplitUtil {
@@ -141,7 +141,7 @@ public class FileSplitUtil {
                 do {
                     nextText = readNextLine(reader, line.getEndPos());
                     if (StringUtils.isBlank(nextText)) {
-                        line.setEndPos(line.getEndPos()+1);
+                        line.setEndPos(line.getEndPos() + 1);
                     }
                 } while (StringUtils.isBlank(nextText) && line.getEndPos() < end);
                 int np = getPartition(nextText, partitionSplit);

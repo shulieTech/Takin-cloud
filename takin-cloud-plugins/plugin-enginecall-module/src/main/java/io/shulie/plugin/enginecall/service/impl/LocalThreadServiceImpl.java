@@ -1,34 +1,34 @@
 package io.shulie.plugin.enginecall.service.impl;
 
 import java.io.File;
-import java.util.Map;
-import java.util.List;
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.ExecutorService;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import io.shulie.takin.utils.json.JsonHelper;
-import org.springframework.stereotype.Service;
-import io.shulie.takin.utils.linux.LinuxHelper;
-import io.shulie.takin.cloud.common.utils.FileUtils;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.plugin.enginecall.service.EngineCallService;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.plugin.enginecall.service.EngineCallService;
 import io.shulie.takin.cloud.common.constants.NoLengthBlockingQueue;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
+import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.takin.cloud.common.utils.FileUtils;
+import io.shulie.takin.utils.json.JsonHelper;
+import io.shulie.takin.utils.linux.LinuxHelper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 /**
  * @author zhaoyong
@@ -59,9 +59,9 @@ public class LocalThreadServiceImpl implements EngineCallService {
     private String taskDir;
 
     @Override
-    public String createJob(Long sceneId, Long taskId, Long customerId) {
-        String jobName = ScheduleConstants.getScheduleName(sceneId, taskId, customerId);
-        String configMapName = ScheduleConstants.getConfigMapName(sceneId, taskId, customerId);
+    public String createJob(Long sceneId, Long taskId, Long tenantId) {
+        String jobName = ScheduleConstants.getScheduleName(sceneId, taskId, tenantId);
+        String configMapName = ScheduleConstants.getConfigMapName(sceneId, taskId, tenantId);
         if (!new File(installDir).exists()) {
             return "未找到引擎包";
         }
@@ -147,9 +147,9 @@ public class LocalThreadServiceImpl implements EngineCallService {
     @Override
     public String getJobStatus(String jobName) {
         if (shellProcess.get(jobName) == null || !shellProcess.get(jobName).isAlive()) {
-            return SceneManageConstant.SCENETASK_JOB_STATUS_NONE;
+            return SceneManageConstant.SCENE_TASK_JOB_STATUS_NONE;
         }
-        return SceneManageConstant.SCENETASK_JOB_STATUS_RUNNING;
+        return SceneManageConstant.SCENE_TASK_JOB_STATUS_RUNNING;
     }
 
     private String getEnginePackBin(String enginePackDir) {

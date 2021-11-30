@@ -12,7 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat;
  *
  * @author shulie
  * @version 1.0
- * @create 2018/11/1 0001 17:32
+ * @date 2018/11/01 17:32
  */
 public class TDictionaryVo {
     /**

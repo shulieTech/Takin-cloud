@@ -2,10 +2,9 @@ package io.shulie.takin.ext.content.enginecall;
 
 import java.util.Map;
 
+import io.shulie.takin.ext.content.AbstractEntry;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import io.shulie.takin.ext.content.AbstractEntry;
 
 /**
  * 施压配置

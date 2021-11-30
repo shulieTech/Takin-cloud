@@ -1,11 +1,11 @@
 package io.shulie.takin.cloud.biz.event;
 
+import io.shulie.takin.cloud.biz.service.sla.SlaService;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
-import io.shulie.takin.cloud.biz.service.sla.SlaService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ public class SlaListener {
      * @param event -
      */
     @IntrestFor(event = "started")
-    public void doStartSLAEvent(Event event) {
+    public void doStartSlaEvent(Event event) {
         log.info("SLA配置，从调度中心收到压测任务启动成功事件");
         Object object = event.getExt();
         TaskResult taskBean = (TaskResult)object;
@@ -40,7 +40,7 @@ public class SlaListener {
      * @param event -
      */
     @IntrestFor(event = "finished")
-    public void doStopSLAEvent(Event event) {
+    public void doStopSlaEvent(Event event) {
         log.info("通知SLA配置模块，从调度中心收到压测任务结束事件");
         try {
             Object object = event.getExt();
@@ -48,7 +48,7 @@ public class SlaListener {
             slaService.removeMap(taskResult.getSceneId());
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：结束任务sla错误 --> 【SLA】处理finished事件异常: {}",
-                    TakinCloudExceptionEnum.TASK_STOP_SAL_FINISH_ERROR,e);
+                TakinCloudExceptionEnum.TASK_STOP_SAL_FINISH_ERROR, e);
         }
     }
 
@@ -61,7 +61,7 @@ public class SlaListener {
             slaService.buildWarn(metricsEvnet);
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：运行中任务sla采集数据错误 --> 【SLA】metricsData事件异常: {}",
-                    TakinCloudExceptionEnum.TASK_STOP_SAL_FINISH_ERROR,e);
+                TakinCloudExceptionEnum.TASK_STOP_SAL_FINISH_ERROR, e);
         }
     }
 }

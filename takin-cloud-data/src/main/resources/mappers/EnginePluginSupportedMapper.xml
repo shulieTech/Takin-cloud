@@ -3,7 +3,9 @@
 <mapper namespace="io.shulie.takin.cloud.data.mapper.mysql.EnginePluginSupportedMapper">
 
     <delete id="deleteSupportedVersionsByPluginId" parameterType="java.lang.Long">
-        delete from t_engine_plugin_supported_versions where plugin_id = #{pluginId, jdbcType=BIGINT}
+        delete
+        from t_engine_plugin_supported_versions
+        where plugin_id = #{pluginId, jdbcType=BIGINT}
     </delete>
 
 </mapper>

@@ -6,7 +6,6 @@ package io.shulie.takin.cloud.common.constants;
  */
 public class ScheduleEventConstant {
 
-
     /**
      * 启动
      */
@@ -26,6 +25,5 @@ public class ScheduleEventConstant {
      * 初始化
      */
     public static final String INIT_SCHEDULE_EVENT = "initSchedule";
-
 
 }

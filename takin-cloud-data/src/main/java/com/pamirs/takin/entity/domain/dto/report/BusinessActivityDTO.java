@@ -1,8 +1,8 @@
 package com.pamirs.takin.entity.domain.dto.report;
 
-import lombok.Data;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 /**
  * @author 莫问

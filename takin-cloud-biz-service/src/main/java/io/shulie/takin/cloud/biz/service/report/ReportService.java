@@ -4,22 +4,24 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.pagehelper.PageInfo;
-import com.pamirs.takin.entity.domain.dto.report.Metrices;
-import io.shulie.takin.cloud.biz.output.report.ReportOutput;
-import io.shulie.takin.cloud.common.bean.sla.WarnQueryParam;
-import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
-import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
-import com.pamirs.takin.entity.domain.vo.report.ReportQueryParam;
-import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
-import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
 import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
-import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
+import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
+import com.pamirs.takin.entity.domain.dto.report.Metrices;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
-import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
-import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
-import io.shulie.takin.cloud.open.resp.report.NodeTreeSummaryResp;
-import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
-import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
+import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
+import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
+import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
+import io.shulie.takin.cloud.biz.output.report.ReportOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
+import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.sdk.model.request.WarnQueryParam;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
+import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
+import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
+import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
 
 /**
  * @author 数列科技
@@ -32,7 +34,7 @@ public interface ReportService {
      * @param param -
      * @return -
      */
-    PageInfo<CloudReportDTO> listReport(ReportQueryParam param);
+    PageInfo<CloudReportDTO> listReport(ReportQueryReq param);
 
     /**
      * 报告详情
@@ -104,19 +106,19 @@ public interface ReportService {
      * @param reportId 报告主键
      * @return -
      */
-    Map<String, Object> getReportCount(Long reportId);
+    Map<String, Object> getReportWarnCount(Long reportId);
 
     /**
      * 查询正在生成的报告
      *
      * @return -
      */
-    Long queryRunningReport();
+    Long queryRunningReport(ContextExt contextExt);
 
     /**
-     * 获取运行中的报告列表
+     * 根据租户 获取运行中的报告列表
      *
-     * @return -
+     * @return 报告主键列表
      */
     List<Long> queryListRunningReport();
 
@@ -159,14 +161,13 @@ public interface ReportService {
     void forceFinishReport(Long reportId);
 
     /**
-     * 新增 customerId
+     * 新增 tenantId
      *
-     * @param reportId   报告主键
-     * @param sceneId    场景主键
-     * @param customerId 租户主键
+     * @param reportId 报告主键
+     * @param sceneId  场景主键
      * @return -
      */
-    List<Metrices> metric(Long reportId, Long sceneId, Long customerId);
+    List<Metrices> metric(Long reportId, Long sceneId);
 
     /**
      * 更新扩展字段
@@ -223,4 +224,12 @@ public interface ReportService {
      * @return 树结构json字符串
      */
     List<ScriptNodeTreeResp> getNodeTree(ScriptNodeTreeQueryReq req);
+
+    /**
+     * 获取报告的基础数据(基础表数据)
+     *
+     * @param reportId 报告主键
+     * @return 基础表数据
+     */
+    ReportResult getReportBaseInfo(Long reportId);
 }

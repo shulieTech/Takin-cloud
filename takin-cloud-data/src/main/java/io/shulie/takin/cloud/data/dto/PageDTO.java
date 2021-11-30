@@ -54,14 +54,14 @@ public class PageDTO {
 
     public Integer getPage() {
         return null == page || page < ZERO
-                ? INIT_PAGE
-                : page;
+            ? INIT_PAGE
+            : page;
     }
 
     public Integer getSize() {
         return null == size || size < ZERO
-                ? INIT_SIZE
-                : Math.min(size, SIZE_LIMIT);
+            ? INIT_SIZE
+            : Math.min(size, SIZE_LIMIT);
     }
 
     /**

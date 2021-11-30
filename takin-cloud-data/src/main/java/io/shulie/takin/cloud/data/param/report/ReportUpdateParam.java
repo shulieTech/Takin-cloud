@@ -3,9 +3,9 @@ package io.shulie.takin.cloud.data.param.report;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
 
 /**
  * @author 无涯
@@ -13,7 +13,7 @@ import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ReportUpdateParam extends CloudUserCommonRequestExt {
+public class ReportUpdateParam extends ContextExt {
     private Long id;
 
     /**
@@ -39,7 +39,6 @@ public class ReportUpdateParam extends CloudUserCommonRequestExt {
      * 结束时间
      */
     private Date endTime;
-
 
     /**
      * 报表生成状态:0/就绪状态，1/生成中,2/完成生成
@@ -70,7 +69,6 @@ public class ReportUpdateParam extends CloudUserCommonRequestExt {
      * 目标TPS
      */
     private Integer tps;
-
 
     /**
      * 平均tps

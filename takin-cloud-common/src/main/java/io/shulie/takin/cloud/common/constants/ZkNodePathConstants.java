@@ -38,7 +38,7 @@ public interface ZkNodePathConstants {
     String PTL_LOG_CUTOFF_PATH = "/pradar/config/ptl/cutoff";
 
     /**
-     *上传日志到大数据节点列表
+     * 上传日志到大数据节点列表
      */
     String AMDB_LOG_UPLOAD_NODE_LIST_PATH = "/config/log/pradar/server";
 
@@ -49,7 +49,6 @@ public interface ZkNodePathConstants {
 
     /**
      * 本地挂载的场景ID
-     *
      */
     String LOCAL_MOUNT_SCENE_IDS_PATH = "/config/engine/local/mount/sceneIds";
 }

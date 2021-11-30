@@ -1,8 +1,6 @@
 package io.shulie.takin.cloud.data.result.scenemanage;
 
-import java.io.Serializable;
-
-import io.shulie.takin.cloud.common.bean.RuleBean;
+import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -11,9 +9,7 @@ import lombok.Data;
  * @date 2020/4/18 上午10:59
  */
 @Data
-public class SceneSlaRefResult implements Serializable {
-
-    private static final long serialVersionUID = 5117439939447730586L;
+public class SceneSlaRefResult {
 
     @ApiModelProperty(value = "ID")
     private Long id;

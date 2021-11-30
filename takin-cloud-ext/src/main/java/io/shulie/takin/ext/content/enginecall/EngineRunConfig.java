@@ -1,16 +1,19 @@
 package io.shulie.takin.ext.content.enginecall;
 
-import io.shulie.takin.ext.content.AbstractEntry;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
 import java.util.List;
 import java.util.Map;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import io.shulie.takin.ext.content.AbstractEntry;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
+
 /**
  * 压测引擎启动配置
- * @Author: liyuanba
- * @Date: 2021/10/29 2:47 下午
+ *
+ * @author liyuanba
+ * @date 2021/10/29 2:47 下午
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

@@ -3,8 +3,8 @@ package io.shulie.takin.cloud.common.pojo;
 import lombok.Data;
 
 /**
- * @Author: liyuanba
- * @Date: 2021/10/14 10:06 上午
+ * @author liyuanba
+ * @date 2021/10/14 10:06 上午
  */
 @Data
 public class Pair<K, V> extends AbstractEntry {

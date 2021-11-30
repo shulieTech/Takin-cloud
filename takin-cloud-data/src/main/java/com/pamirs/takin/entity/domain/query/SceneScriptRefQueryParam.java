@@ -1,7 +1,5 @@
 package com.pamirs.takin.entity.domain.query;
 
-import java.io.Serializable;
-
 import lombok.Data;
 
 /**
@@ -10,8 +8,7 @@ import lombok.Data;
  */
 
 @Data
-public class SceneScriptRefQueryParam implements Serializable {
-    private static final long serialVersionUID = -4923279781262825503L;
+public class SceneScriptRefQueryParam {
 
     private Long sceneId;
 

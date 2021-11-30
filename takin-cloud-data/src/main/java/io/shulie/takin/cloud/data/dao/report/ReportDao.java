@@ -3,7 +3,6 @@ package io.shulie.takin.cloud.data.dao.report;
 import java.util.Date;
 import java.util.List;
 
-import io.shulie.takin.cloud.data.model.mysql.BusinessActivitiesEntity;
 import io.shulie.takin.cloud.data.param.report.ReportDataQueryParam;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
@@ -83,9 +82,18 @@ public interface ReportDao {
      */
     ReportResult getReportBySceneId(Long sceneId);
 
+    /**
+     * 根据场景主键设置压测报告状态
+     *
+     * @param sceneId 场景主键
+     * @param status  状态值
+     * @return 操作影响行数
+     */
+    int updateStatus(Long sceneId, Integer status);
 
     /**
      * 更新报告结束时间
+     *
      * @param resultId
      * @param endTime
      */
@@ -93,6 +101,7 @@ public interface ReportDao {
 
     /**
      * 根据id查询报告
+     *
      * @param resultId
      * @return
      */

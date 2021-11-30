@@ -147,7 +147,7 @@
                 #{request,jdbcType=BIGINT},
             </if>
             <if test="avgConcurrenceNum != null">
-                 #{avgConcurrenceNum,jdbcType=DECIMAL},
+                #{avgConcurrenceNum,jdbcType=DECIMAL},
             </if>
             <if test="tps != null">
                 #{tps,jdbcType=DECIMAL},

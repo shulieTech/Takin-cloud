@@ -1,9 +1,9 @@
 package io.shulie.plugin.engine.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
@@ -12,14 +12,16 @@ import io.shulie.plugin.engine.jmeter.XmlDubboJmxParser;
 import io.shulie.plugin.engine.jmeter.XmlHttpJmxParser;
 import io.shulie.plugin.engine.jmeter.XmlJdbcJmxParser;
 import io.shulie.plugin.engine.jmeter.XmlKafkaJmxParser;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.ext.content.script.ScriptParseExt;
-import io.shulie.takin.ext.content.script.ScriptUrlExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptUrlExt;
 import io.shulie.takin.utils.file.FileManagerHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
@@ -58,9 +60,14 @@ public class SaxUtil {
             cleanAllDisableElement(document);
             List<ScriptUrlExt> scriptUrls = getScriptUrlFromJmx(scriptParseExt, content, document);
             scriptParseExt.setRequestUrl(scriptUrls);
+        } catch (DocumentException e) {
+            log.error("异常代码【{}】,异常内容：DocumentException", TakinCloudExceptionEnum.XML_PARSE_ERROR, e);
+        } catch (IOException e) {
+            log.error("异常代码【{}】,异常内容：IOException", TakinCloudExceptionEnum.XML_PARSE_ERROR, e);
+            throw new TakinCloudException(TakinCloudExceptionEnum.XML_PARSE_ERROR, "IOException", e);
         } catch (Exception e) {
-            log.error("异常代码【{}】,异常内容：Parse Jmeter Script Error --> 异常信息: {}",
-                TakinCloudExceptionEnum.XML_PARSE_ERROR, e);
+            log.error("异常代码【{}】,异常内容：解析JMeter脚本错误。", TakinCloudExceptionEnum.XML_PARSE_ERROR, e);
+            throw new TakinCloudException(TakinCloudExceptionEnum.XML_PARSE_ERROR, "Exception", e);
         }
         return scriptParseExt;
     }
@@ -216,7 +223,7 @@ public class SaxUtil {
      * 将dubbo压测标的值从true修改为false
      * 将http的压测标从PerfomanceTest 修改为flowDebug
      *
-     * @param path
+     * @param path 路径
      */
     public static void updatePressTestTags(String path) {
         SAXReader saxReader = new SAXReader();

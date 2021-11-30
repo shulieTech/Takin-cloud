@@ -9,18 +9,21 @@ public interface EngineConfigService {
 
     /**
      * 获取引擎日志配置
+     *
      * @return -
      */
     EngineLogPtlConfigOutput getEnginePtlConfig();
 
     /**
      * 获取日志采样率
+     *
      * @return -
      */
     Integer getLogSimpling();
 
     /**
      * 获取日志推送服务
+     *
      * @param failServer
      * @return -
      */

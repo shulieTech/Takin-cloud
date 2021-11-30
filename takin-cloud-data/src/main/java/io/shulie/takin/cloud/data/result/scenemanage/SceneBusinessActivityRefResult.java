@@ -1,9 +1,9 @@
 package io.shulie.takin.cloud.data.result.scenemanage;
 
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneBusinessActivityRefBean;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import io.swagger.annotations.ApiModelProperty;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneBusinessActivityRefBean;
 
 /**
  * @author qianshui
@@ -12,8 +12,6 @@ import io.shulie.takin.cloud.common.bean.scenemanage.SceneBusinessActivityRefBea
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class SceneBusinessActivityRefResult extends SceneBusinessActivityRefBean {
-
-    private static final long serialVersionUID = -6384484202725660595L;
 
     @ApiModelProperty(value = "ID")
     private Long id;

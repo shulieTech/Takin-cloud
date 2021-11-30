@@ -3,7 +3,6 @@ package io.shulie.takin.ext.content.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-
 @AllArgsConstructor
 @Getter
 public enum RpcTypeEnum {

@@ -1,13 +1,15 @@
 package io.shulie.takin.cloud.biz.input.scenemanage;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author zhaoyong
  */
 @Data
-public class SceneStartTrialRunInput extends CloudUserCommonRequestExt {
+@EqualsAndHashCode(callSuper = true)
+public class SceneStartTrialRunInput extends ContextExt {
 
     private Long sceneId;
 

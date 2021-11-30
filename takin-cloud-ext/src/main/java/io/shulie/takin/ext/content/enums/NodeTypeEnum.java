@@ -1,14 +1,14 @@
 package io.shulie.takin.ext.content.enums;
 
-import lombok.Getter;
-import org.apache.commons.lang.StringUtils;
-
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.Getter;
+import org.apache.commons.lang.StringUtils;
+
 /**
- * @Author: liyuanba
- * @Date: 2021/10/13 3:11 下午
+ * @author liyuanba
+ * @date 2021/10/13 3:11 下午
  */
 public enum NodeTypeEnum {
     /**
@@ -32,11 +32,12 @@ public enum NodeTypeEnum {
     @Getter
     private String[] suffixes;
 
-    NodeTypeEnum(String... suffixes){
+    NodeTypeEnum(String... suffixes) {
         this.suffixes = suffixes;
     }
 
     public static Map<String, NodeTypeEnum> pool = new HashMap<>();
+
     static {
         for (NodeTypeEnum e : NodeTypeEnum.values()) {
             for (String suffix : e.getSuffixes()) {

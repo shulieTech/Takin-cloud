@@ -1,9 +1,9 @@
 package io.shulie.takin.cloud.common.enums;
 
-import lombok.Getter;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import lombok.Getter;
 
 /**
  * @author zhaoyong
@@ -11,12 +11,11 @@ import java.util.Map;
 public enum PressureSceneEnum {
     DEFAULT(0, "常规模式"),
 
-    FLOW_DEBUG(3,"流量调试"),
+    FLOW_DEBUG(3, "流量调试"),
 
-    INSPECTION_MODE(4,"巡检模式"),
+    INSPECTION_MODE(4, "巡检模式"),
 
-    TRY_RUN(5, "试跑模式")
-    ;
+    TRY_RUN(5, "试跑模式");
 
     @Getter
     private int code;
@@ -27,7 +26,7 @@ public enum PressureSceneEnum {
     private static final Map<Integer, PressureSceneEnum> instances = new HashMap<>();
 
     static {
-        for(PressureSceneEnum e : PressureSceneEnum.values()) {
+        for (PressureSceneEnum e : PressureSceneEnum.values()) {
             instances.put(e.getCode(), e);
         }
         //为了兼容老版本数据，将1，2转化为常规模式
@@ -41,9 +40,10 @@ public enum PressureSceneEnum {
         }
         return instances.get(code);
     }
+
     public static String toDoc() {
         StringBuilder sb = new StringBuilder();
-        for(PressureSceneEnum e : PressureSceneEnum.values()) {
+        for (PressureSceneEnum e : PressureSceneEnum.values()) {
             if (sb.length() > 0) {
                 sb.append(",");
             }

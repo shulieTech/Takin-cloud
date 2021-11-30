@@ -54,7 +54,7 @@ public interface MPUtil<T> {
     /**
      * 设置分页参数, 根据入参, 返回是否需要总数的返回
      *
-     * @param pageDTO 分页参数类
+     * @param pageDTO       分页参数类
      * @param isSearchCount 是否需要总数
      * @return mybatis plus page 类
      */
@@ -77,7 +77,7 @@ public interface MPUtil<T> {
      * @return query 普通包装类
      */
     default QueryWrapper<T> getTenantQW() {
-        return this.getQW().eq("customer_id", CloudPluginUtils.getCustomerId())
+        return this.getQW().eq("customer_id", CloudPluginUtils.getTenantId())
             .in(StringUtils.isNotBlank(CloudPluginUtils.getFilterSql()), "user_id", CloudPluginUtils.getFilterSql());
     }
 
@@ -148,7 +148,6 @@ public interface MPUtil<T> {
     static <T> UpdateWrapper<T> getUWStatic() {
         return new UpdateWrapper<>();
     }
-
 
     /**
      * 静态方法 获得 update lambda 包装类

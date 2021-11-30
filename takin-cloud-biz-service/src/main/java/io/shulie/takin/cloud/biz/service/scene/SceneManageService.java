@@ -13,8 +13,8 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.Sc
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
-import io.shulie.takin.ext.content.asset.AssetBillExt;
-import io.shulie.takin.ext.content.script.ScriptVerityRespExt;
+import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
 
 /**
  * @author qianshui
@@ -30,14 +30,42 @@ public interface SceneManageService {
      */
     Long addSceneManage(SceneManageWrapperInput wrapperVO);
 
+    /**
+     * 分页查询列表
+     *
+     * @param queryVO 查询条件
+     * @return 查询结果
+     */
     PageInfo<SceneManageListOutput> queryPageList(SceneManageQueryInput queryVO);
 
+    /**
+     * 更新场景
+     *
+     * @param wrapperVO 入参
+     */
     void updateSceneManage(SceneManageWrapperInput wrapperVO);
 
+    /**
+     * 更新场景状态
+     *
+     * @param statusVO 入参
+     */
     void updateSceneManageStatus(UpdateStatusBean statusVO);
 
+    /**
+     * 删除
+     *
+     * @param id 场景主键
+     */
     void delete(Long id);
 
+    /**
+     * 获取场景
+     *
+     * @param id      主键
+     * @param options 查询选项
+     * @return 场景信息
+     */
     SceneManageWrapperOutput getSceneManage(Long id, SceneManageQueryOpitons options);
 
     /**
@@ -65,6 +93,7 @@ public interface SceneManageService {
      * 严格更新 压测场景生命周期
      *
      * @param statusVO 状态参数
+     * @return 操作结果
      */
     Boolean updateSceneLifeCycle(UpdateStatusBean statusVO);
 
@@ -89,9 +118,30 @@ public interface SceneManageService {
      */
     void updateFileByScriptId(UpdateSceneFileRequest request);
 
+    /**
+     * 根据主键批量获取
+     *
+     * @param sceneIds 主键
+     * @return 批量信息
+     */
     List<SceneManageWrapperOutput> getByIds(List<Long> sceneIds);
 
+    /**
+     * 设置未上报日志信息
+     */
     void saveUnUploadLogInfo();
 
+    /**
+     * 检查并更新
+     * <p>
+     *     TODO
+     * </p>
+     *
+     * @param request        请求
+     * @param uploadPath     上传地址
+     * @param isAbsolutePath 是否绝对路径
+     * @param update         是否更新
+     * @return 操作结果
+     */
     ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update);
 }

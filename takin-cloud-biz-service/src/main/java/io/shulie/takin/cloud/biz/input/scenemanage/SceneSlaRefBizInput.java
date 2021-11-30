@@ -1,10 +1,8 @@
 package io.shulie.takin.cloud.biz.input.scenemanage;
 
-import io.shulie.takin.cloud.common.bean.RuleBean;
+import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
-import java.io.Serializable;
 
 /**
  * @author mubai
@@ -12,9 +10,7 @@ import java.io.Serializable;
  */
 
 @Data
-public class SceneSlaRefBizInput implements Serializable {
-
-    private static final long serialVersionUID = -3696634099481309635L;
+public class SceneSlaRefBizInput {
     @ApiModelProperty(value = "规则名称")
     private String ruleName;
 

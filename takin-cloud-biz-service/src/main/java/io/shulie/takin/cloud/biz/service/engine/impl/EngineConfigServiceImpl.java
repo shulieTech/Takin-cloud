@@ -30,7 +30,6 @@ public class EngineConfigServiceImpl implements EngineConfigService {
     @Value("${surge.deploy.enableStart}")
     private boolean enableStartSurge;
 
-
     @Override
     public EngineLogPtlConfigOutput getEnginePtlConfig() {
 
@@ -49,13 +48,13 @@ public class EngineConfigServiceImpl implements EngineConfigService {
             if ("true".equals(enableString)) {
                 output.setPtlFileEnable(true);
                 if (!zkClient.exists(ZkNodePathConstants.PTL_ERROR_ONLY_PATH)
-                        || "true".equals(new String(zkClient.getData(ZkNodePathConstants.PTL_ERROR_ONLY_PATH)))) {
+                    || "true".equals(new String(zkClient.getData(ZkNodePathConstants.PTL_ERROR_ONLY_PATH)))) {
                     output.setPtlFileErrorOnly(true);
                 } else {
                     output.setPtlFileErrorOnly(false);
                 }
                 if (!zkClient.exists(ZkNodePathConstants.PTL_TIMEOUT_ONLY_PATH)
-                        || "true".equals(new String(zkClient.getData(ZkNodePathConstants.PTL_TIMEOUT_ONLY_PATH)))) {
+                    || "true".equals(new String(zkClient.getData(ZkNodePathConstants.PTL_TIMEOUT_ONLY_PATH)))) {
                     output.setPtlFileTimeoutOnly(true);
                     if (!zkClient.exists(ZkNodePathConstants.PTL_TIMEOUT_THRESHOLD_PATH)) {
                         output.setTimeoutThreshold(ZkNodePathConstants.DEFAULT_TIMEOUT_THRESHOLD);
@@ -66,18 +65,18 @@ public class EngineConfigServiceImpl implements EngineConfigService {
                 } else {
                     output.setPtlFileTimeoutOnly(false);
                 }
-            }else {
+            } else {
                 output.setPtlFileEnable(false);
             }
             if (!zkClient.exists(ZkNodePathConstants.PTL_LOG_CUTOFF_PATH)
-                    || "false".equals(new String(zkClient.getData(ZkNodePathConstants.PTL_LOG_CUTOFF_PATH)))) {
+                || "false".equals(new String(zkClient.getData(ZkNodePathConstants.PTL_LOG_CUTOFF_PATH)))) {
                 output.setLogCutOff(false);
             } else {
                 output.setLogCutOff(true);
             }
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：日志推送处理异常 --> 获取压测引擎日志配置参数异常: {}",
-                    TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR,e);
+                TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, e);
         }
 
         return output;
@@ -112,7 +111,7 @@ public class EngineConfigServiceImpl implements EngineConfigService {
             }
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：推送日志，获取服务和端口异常 --> 异常信息: {}",
-                    TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR,e);
+                TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, e);
         }
         return serverAndPort;
     }
@@ -127,14 +126,14 @@ public class EngineConfigServiceImpl implements EngineConfigService {
         String result = "";
         try {
             byte[] data = zkClient.getData(ZkNodePathConstants.LOCAL_MOUNT_SCENE_IDS_PATH);
-            if(Objects.nonNull(data) && data.length > 0) {
+            if (Objects.nonNull(data) && data.length > 0) {
                 result = new String(data);
             }
         } catch (Exception e) {
-            return new String[]{};
+            return new String[] {};
         }
-        if(StringUtils.isBlank(result)) {
-            return new String[]{};
+        if (StringUtils.isBlank(result)) {
+            return new String[] {};
         }
         return result.trim().split(",");
     }

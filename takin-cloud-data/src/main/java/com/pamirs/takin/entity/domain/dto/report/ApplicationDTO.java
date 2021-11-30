@@ -1,7 +1,5 @@
 package com.pamirs.takin.entity.domain.dto.report;
 
-import java.io.Serializable;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -15,9 +13,7 @@ import lombok.Data;
 
 @ApiModel
 @Data
-public class ApplicationDTO implements Serializable {
-
-    private static final long serialVersionUID = 2965776774948266201L;
+public class ApplicationDTO {
 
     @ApiModelProperty(value = "应用")
     private String applicationName;

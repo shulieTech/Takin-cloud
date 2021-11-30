@@ -3,7 +3,7 @@ package io.shulie.takin.cloud.biz.output.report;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ReportOutput extends CloudUserCommonRequestExt {
+public class ReportOutput extends ContextExt {
     private Long id;
 
     /**

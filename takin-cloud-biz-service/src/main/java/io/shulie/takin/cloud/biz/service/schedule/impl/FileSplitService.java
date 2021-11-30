@@ -1,78 +1,76 @@
 package io.shulie.takin.cloud.biz.service.schedule.impl;
 
-import java.util.Map;
-import java.util.List;
-import java.util.Objects;
-import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSONObject;
 
 import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
-import io.shulie.takin.ext.content.enginecall.ScheduleRunRequest;
-import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
-import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt.DataFile;
-import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt.StartEndPosition;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
-import io.shulie.takin.eventcenter.Event;
-import io.shulie.takin.eventcenter.annotation.IntrestFor;
-import io.shulie.takin.cloud.common.constants.FileSplitConstants;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.biz.service.schedule.ScheduleService;
+import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
 import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
+import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
+import io.shulie.takin.cloud.biz.service.schedule.ScheduleService;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+import io.shulie.takin.cloud.common.constants.FileSplitConstants;
 import io.shulie.takin.cloud.common.constants.SceneStartCheckConstants;
 import io.shulie.takin.cloud.common.constants.ScheduleEventConstant;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.common.utils.FileSliceByLine.FileSliceInfo;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
+import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt.DataFile;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt.StartEndPosition;
+import io.shulie.takin.eventcenter.Event;
+import io.shulie.takin.eventcenter.annotation.IntrestFor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
 
 /**
- * @Author 莫问
- * @Date 2020-08-07
+ * @author 莫问
+ * @date 2020-08-07
  */
 
 @Service
 @Slf4j
 public class FileSplitService {
-
-    @Autowired
+    @Resource
+    private ReportService reportService;
+    @Resource
     private ScheduleService scheduleService;
-
-    @Autowired
+    @Resource
     private FileSliceService fileSliceService;
-
-    @Autowired
+    @Resource
     private SceneManageService sceneManageService;
-
-    @Autowired
+    @Resource
     private EngineConfigService engineConfigService;
-
-    @Autowired
+    @Resource
     private SceneTaskStatusCache taskStatusCache;
-
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
     private static final String CSV_SUFFIX = "csv";
-
 
     @IntrestFor(event = ScheduleEventConstant.INIT_SCHEDULE_EVENT)
     public void initSchedule(Event event) {
@@ -88,21 +86,21 @@ public class FileSplitService {
             List<DataFile> dataFiles = generateFileSlice(request);
             request.getRequest().setDataFile(dataFiles);
         } catch (Exception e) {
-            log.error("【文件分片】--场景ID【{}】场景启动失败，文件拆分异常【{}】", request.getRequest().getSceneId(), e.getMessage());
             //更新场景状态：启动中--待启动
             sceneManageService.updateSceneLifeCycle(
                 UpdateStatusBean.build(startRequest.getSceneId(),
-                    startRequest.getTaskId(),
-                    startRequest.getCustomerId()).checkEnum(
-                    SceneManageStatusEnum.STARTING)
+                        startRequest.getTaskId(),
+                        startRequest.getTenantId()).checkEnum(
+                        SceneManageStatusEnum.STARTING)
                     .updateEnum(SceneManageStatusEnum.WAIT)
                     .build());
-            log.error(e.getMessage());
+
+            reportService.updateReportOnSceneStartFailed(startRequest.getSceneId(), startRequest.getTaskId(),
+                "场景启动失败，文件拆分异常");
 
             //设置运行状态为启动失败
             taskStatusCache.cacheStatus(startRequest.getSceneId(), startRequest.getTaskId(),
-                SceneRunTaskStatusEnum.FAILED,
-                String.format("启动场景失败:场景ID:%s,文件拆分异常%s", startRequest.getSceneId(), e.getMessage()));
+                SceneRunTaskStatusEnum.FAILED, String.format("启动场景失败:场景ID:%s,文件拆分异常", startRequest.getSceneId()));
             return;
         }
         scheduleService.runSchedule(request);
@@ -208,8 +206,7 @@ public class FileSplitService {
                     sliceResult.set(false);
                 }
             } catch (TakinCloudException e) {
-                log.error("【文件分片】--场景ID【{}】,文件名【{}】,拆分异常【{}】", startRequest.getSceneId(), dataFile.getName(),
-                    e.getMessage());
+                log.error("【文件分片】--场景ID【{}】,文件名【{}】,拆分异常", startRequest.getSceneId(), dataFile.getName(), e);
                 sliceResult.set(false);
             }
         }).collect(Collectors.toList()));
@@ -302,5 +299,4 @@ public class FileSplitService {
         }
         return null;
     }
-
 }

@@ -1,9 +1,8 @@
 package io.shulie.takin.ext.content.enginecall;
 
+import io.shulie.takin.ext.content.AbstractEntry;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import io.shulie.takin.ext.content.AbstractEntry;
 
 /**
  * @author liyuanba

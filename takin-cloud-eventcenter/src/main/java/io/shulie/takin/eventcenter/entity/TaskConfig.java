@@ -4,14 +4,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author fanxx
  * @date 2020/4/20 下午4:14
  */
 @Data
-public class TaskConfig {
+@EqualsAndHashCode(callSuper = true)
+public class TaskConfig extends ContextExt {
     /**
      * 场景ID
      */
@@ -24,10 +27,6 @@ public class TaskConfig {
      * 任务ID
      */
     private Long taskId;
-    /**
-     * 客户 id
-     */
-    private Long customerId;
 
     /**
      * 引擎类型

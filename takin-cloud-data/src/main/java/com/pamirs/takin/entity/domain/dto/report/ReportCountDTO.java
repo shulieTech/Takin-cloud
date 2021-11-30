@@ -1,7 +1,5 @@
 package com.pamirs.takin.entity.domain.dto.report;
 
-import java.io.Serializable;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -14,9 +12,7 @@ import lombok.Data;
  */
 @ApiModel
 @Data
-public class ReportCountDTO implements Serializable {
-
-    private static final long serialVersionUID = 8928035842416997931L;
+public class ReportCountDTO {
 
     /**
      * 瓶颈接口数

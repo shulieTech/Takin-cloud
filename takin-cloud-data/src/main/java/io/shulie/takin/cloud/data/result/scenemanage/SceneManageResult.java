@@ -2,8 +2,8 @@ package io.shulie.takin.cloud.data.result.scenemanage;
 
 import java.util.Date;
 
-import lombok.Data;
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import lombok.Data;
 
 /**
  * @author hezhongqi
@@ -17,7 +17,7 @@ public class SceneManageResult {
     /**
      * 客户id
      */
-    private Long customerId;
+    private Long tenantId;
 
     /**
      * 部门id

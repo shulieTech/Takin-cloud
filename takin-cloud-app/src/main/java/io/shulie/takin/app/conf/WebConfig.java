@@ -1,16 +1,11 @@
 package io.shulie.takin.app.conf;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +19,17 @@ import org.springframework.validation.Validator;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.config.annotation.*;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * 项目配置类
@@ -47,32 +52,6 @@ public class WebConfig implements WebMvcConfigurer, EnvironmentAware {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        String[] excludeSource = "dev".equals(environment.getProperty("env")) ? new String[] {"/**/*"} : new String[] {
-            "/**/order/*",
-            "/**/api/confcenter/wbmnt/query/bwlist",
-            "/**/api/confcenter/wbmnt/query/bwlistmetric",
-            "/**/api/loaddata/test",
-            "/**/api/confcenter/interface/query/needUpload",
-            "/**/api/confcenter/interface/add/interfaceData",
-            "/**/api/confcenter/shadowTableConfig/queryAppShadowTableConfig",
-            "/**/api/pressureready/builddata/update/scriptstatus",
-            "/**/api/confcenter/applicationmnt/update/applicationAgent",
-            "/**/api/preventcheat/applicationInfo/uploadInfo",
-            "/**/api/preventcheat/applicationConfig/queryConfig",
-            "/**/api/confcenter/pressureTime/**",
-            "/**/api/confcenter/linkmnt/query/linkHead",
-            "/**/api/confcenter/linkmnt/query/secondLinkByModule",
-            "/**/api/isolation/query/rockemtMqIsoQuery",
-            "/**/api/shadow/**",
-            "/**/fonts/*",
-            "/**/*.css",
-            "/**/*.js",
-            "/**/*.png",
-            "/**/*.gif",
-            "/**/*.jpg",
-            "/**/*.jpeg",
-            "/**/*.html"
-        };
     }
 
     /**
@@ -117,23 +96,24 @@ public class WebConfig implements WebMvcConfigurer, EnvironmentAware {
 
     /**
      * 配置静态资源拦截器
+     * <p>此方法用来专门注册一个Handler，来处理静态资源的，例如：图片，js，css等<br/>
+     * 当请求http://{domain}/resource/1.png时，会把/WEB-INF/resources/1.png返回
+     * </p>
      *
      * @param registry 注册器
      * @author shulie
      * @date 2018/9/15 9:57
      */
-    //此方法用来专门注册一个Handler，来处理静态资源的，例如：图片，js，css等
-    //当请求http://{domain}/resource/1.png时，会把/WEB-INF/resources/1.png返回
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/resources/**").addResourceLocations("classpath:/META-INF/resources/");
 
         registry.addResourceHandler("/**").addResourceLocations(
-                "classpath:/static/");
+            "classpath:/static/");
         registry.addResourceHandler("doc.html").addResourceLocations(
-                "classpath:/META-INF/resources/");
+            "classpath:/META-INF/resources/");
         registry.addResourceHandler("/webjars/**").addResourceLocations(
-                "classpath:/META-INF/resources/webjars/");
+            "classpath:/META-INF/resources/webjars/");
     }
 
     @Override
@@ -143,12 +123,14 @@ public class WebConfig implements WebMvcConfigurer, EnvironmentAware {
 
     /**
      * 配置视图转发
+     * <p>
+     * 这是访问${domain}/login时，会直接返回index页面
+     * </p>
      *
      * @param registry 注册器
      * @author shulie
      * @date 2018/9/15 9:58
      */
-    //这是访问${domain}/login时，会直接返回index页面
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/login").setViewName("forward:/index.html");

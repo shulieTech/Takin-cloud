@@ -1,13 +1,13 @@
 package io.shulie.takin.cloud.common.pojo;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.io.Serializable;
-
 /**
- * @Author: liyuanba
- * @Date: 2021/10/26 10:54 上午
+ * @author liyuanba
+ * @date 2021/10/26 10:54 上午
  */
 public class AbstractEntry implements Serializable {
     @Override

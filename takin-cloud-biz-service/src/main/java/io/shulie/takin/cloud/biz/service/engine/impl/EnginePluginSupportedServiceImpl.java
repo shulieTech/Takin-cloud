@@ -1,5 +1,11 @@
 package io.shulie.takin.cloud.biz.service.engine.impl;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
@@ -10,11 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 引擎插件支持接口实现
@@ -49,11 +50,11 @@ public class EnginePluginSupportedServiceImpl extends ServiceImpl<EnginePluginSu
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void batchSaveSupportedVersions(List<String> supportedVersions, Long pluginId) {
-        if(Objects.isNull(pluginId)) {
+        if (Objects.isNull(pluginId)) {
             log.warn("pluginId is null");
             return;
         }
-        if(CollectionUtils.isNotEmpty(supportedVersions)) {
+        if (CollectionUtils.isNotEmpty(supportedVersions)) {
             List<EnginePluginSupportedVersionEntity> supportedInfos = Lists.newArrayList();
             supportedVersions.forEach(item -> {
                 EnginePluginSupportedVersionEntity info = new EnginePluginSupportedVersionEntity();
@@ -73,7 +74,7 @@ public class EnginePluginSupportedServiceImpl extends ServiceImpl<EnginePluginSu
      */
     @Override
     public List<String> findSupportedVersionsByPluginId(Long pluginId) {
-        if(Objects.isNull(pluginId)) {
+        if (Objects.isNull(pluginId)) {
             log.warn("pluginId is empty");
             return Lists.newArrayList();
         }
@@ -81,8 +82,8 @@ public class EnginePluginSupportedServiceImpl extends ServiceImpl<EnginePluginSu
         queryWrapper.eq("plugin_id", pluginId);
         List<EnginePluginSupportedVersionEntity> infos = enginePluginSupportedMapper.selectList(queryWrapper);
         return infos.size() > 0 ? infos.stream()
-                .map(EnginePluginSupportedVersionEntity::getSupportedVersion)
-                .collect(Collectors.toList()) : Lists.newArrayList();
+            .map(EnginePluginSupportedVersionEntity::getSupportedVersion)
+            .collect(Collectors.toList()) : Lists.newArrayList();
     }
 
 }

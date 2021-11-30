@@ -1,13 +1,16 @@
 package io.shulie.takin.ext.content.enginecall;
 
-import io.shulie.takin.ext.content.AbstractEntry;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import io.shulie.takin.ext.content.AbstractEntry;
 
 /**
- * @Author: liyuanba
- * @Date: 2021/11/3 9:50 上午
+ * @author liyuanba
+ * @date 2021/11/3 9:50 上午
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class PtlLogConfigExt extends AbstractEntry {
     /**
      * 是否输出ptl日志文件

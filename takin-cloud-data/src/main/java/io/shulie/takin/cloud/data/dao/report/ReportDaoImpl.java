@@ -1,10 +1,14 @@
 package io.shulie.takin.cloud.data.dao.report;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
@@ -15,7 +19,6 @@ import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,7 +28,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReportDaoImpl implements ReportDao {
 
-    @Autowired
+    @Resource
     private ReportMapper reportMapper;
 
     @Override
@@ -67,7 +70,6 @@ public class ReportDaoImpl implements ReportDao {
      * 获取最新一条报告id
      *
      * @param sceneId
-     *
      * @return -
      */
     @Override
@@ -96,6 +98,9 @@ public class ReportDaoImpl implements ReportDao {
     public void updateReport(ReportUpdateParam param) {
         ReportEntity entity = new ReportEntity();
         BeanUtils.copyProperties(param, entity);
+        if (null == param.getGmtUpdate()) {
+            entity.setGmtUpdate(Calendar.getInstance().getTime());
+        }
         reportMapper.updateById(entity);
     }
 
@@ -116,8 +121,6 @@ public class ReportDaoImpl implements ReportDao {
         entity.setGmtUpdate(new Date());
         reportMapper.updateById(entity);
     }
-
-
 
     @Override
     public ReportResult getTempReportBySceneId(Long sceneId) {
@@ -153,6 +156,19 @@ public class ReportDaoImpl implements ReportDao {
         return null;
     }
 
+    /**
+     * 根据场景主键设置压测报告状态
+     *
+     * @param sceneId 场景主键
+     * @param status  状态值
+     * @return 操作影响行数
+     */
+    @Override
+    public int updateStatus(Long sceneId, Integer status) {
+        return reportMapper.update(
+            new ReportEntity() {{setStatus(status);}},
+            Wrappers.lambdaQuery(ReportEntity.class).eq(ReportEntity::getSceneId, sceneId));
+    }
 
     @Override
     public void updateReportEndTime(Long resultId, Date endTime) {
@@ -165,7 +181,7 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public ReportResult getById(Long resultId) {
-        if (resultId == null){
+        if (resultId == null) {
             return null;
         }
         ReportEntity reportEntity = reportMapper.selectById(resultId);

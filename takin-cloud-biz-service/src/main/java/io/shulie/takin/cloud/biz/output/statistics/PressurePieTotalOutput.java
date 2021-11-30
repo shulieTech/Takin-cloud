@@ -12,6 +12,7 @@ import lombok.Data;
 public class PressurePieTotalOutput {
     private List<PressurePieTotal> data;
     private Integer total;
+
     @Data
     public static class PressurePieTotal {
         private String type;

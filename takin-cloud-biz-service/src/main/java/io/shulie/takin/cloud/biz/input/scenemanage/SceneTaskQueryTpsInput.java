@@ -1,20 +1,18 @@
 package io.shulie.takin.cloud.biz.input.scenemanage;
 
-import java.io.Serializable;
-
 import javax.validation.constraints.NotNull;
 
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author zhaoyong
  */
 @Data
-public class SceneTaskQueryTpsInput extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = -7484554295475311339L;
+@EqualsAndHashCode(callSuper = true)
+public class SceneTaskQueryTpsInput extends ContextExt {
 
     @NotNull
     @ApiModelProperty(value = "sceneId")

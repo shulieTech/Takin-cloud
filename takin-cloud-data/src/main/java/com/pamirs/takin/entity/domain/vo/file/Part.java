@@ -1,8 +1,5 @@
 package com.pamirs.takin.entity.domain.vo.file;
 
-import java.io.Serializable;
-import java.util.List;
-
 import lombok.Data;
 
 /**
@@ -10,8 +7,7 @@ import lombok.Data;
  * @date 2020-05-12 14:43
  */
 @Data
-public class Part implements Serializable {
-    private static final long serialVersionUID = 3132972991439604004L;
+public class Part {
 
     private String uuid;
     /**

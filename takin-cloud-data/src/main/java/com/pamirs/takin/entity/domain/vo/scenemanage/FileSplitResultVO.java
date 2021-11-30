@@ -1,14 +1,12 @@
 package com.pamirs.takin.entity.domain.vo.scenemanage;
 
-import java.io.Serializable;
-
 import lombok.Data;
 
 /**
  * @author moriarty
  */
 @Data
-public class FileSplitResultVO implements Serializable {
+public class FileSplitResultVO {
     private Long sceneId;
     private String fileName;
     private String sliceInfo;

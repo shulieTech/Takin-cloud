@@ -5,20 +5,23 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import cn.hutool.core.date.DateUtil;
 import org.mapstruct.factory.Mappers;
-import io.shulie.takin.cloud.common.utils.TestTimeUtil;
+
+import cn.hutool.core.date.DateUtil;
+
 import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
+import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
+import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
+import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
+import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
+
+import io.shulie.takin.cloud.common.utils.TestTimeUtil;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
-import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
-import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
-import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
 import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
 import io.shulie.takin.cloud.data.result.scenemanage.WarnDetailResult;
-import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
 
 /**
  * @author 莫问

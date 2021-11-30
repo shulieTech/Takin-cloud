@@ -27,7 +27,7 @@ public class RedissonDistributedLock implements DistributedLock {
         try {
             return lock.tryLock(waitTime, leaseTime, timeUnit);
         } catch (InterruptedException e) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.MIDDLEWARE_JAR_GET_LOCK_ERROR,"尝试获得锁失败!",e);
+            throw new TakinCloudException(TakinCloudExceptionEnum.MIDDLEWARE_JAR_GET_LOCK_ERROR, "尝试获得锁失败!", e);
         }
     }
 

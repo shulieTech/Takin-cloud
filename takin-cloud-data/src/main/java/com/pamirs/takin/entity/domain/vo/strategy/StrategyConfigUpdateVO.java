@@ -1,7 +1,5 @@
 package com.pamirs.takin.entity.domain.vo.strategy;
 
-import java.io.Serializable;
-
 import javax.validation.constraints.NotNull;
 
 import io.swagger.annotations.ApiModel;
@@ -14,7 +12,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel(description = "配置策略信息")
-public class StrategyConfigUpdateVO implements Serializable {
+public class StrategyConfigUpdateVO {
 
     @NotNull
     @ApiModelProperty(value = "ID")

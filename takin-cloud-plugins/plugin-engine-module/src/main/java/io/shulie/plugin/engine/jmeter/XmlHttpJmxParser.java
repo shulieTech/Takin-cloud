@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
-import io.shulie.takin.constants.TakinRequestConstant;
-import io.shulie.takin.ext.content.script.ScriptParseExt;
-import io.shulie.takin.ext.content.script.ScriptUrlExt;
 import io.shulie.takin.cloud.common.utils.ParseXmlUtil;
+import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptUrlExt;
+import io.shulie.takin.constants.TakinRequestConstant;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.dom4j.Attribute;
@@ -100,7 +99,7 @@ public class XmlHttpJmxParser extends JmxParser {
     /**
      * 获取第httpIndex对应的headerManager
      *
-     * @param -
+     * @param httpIndex -
      * @return -
      */
     private static String getHeaderXml(String xml, int httpIndex) {

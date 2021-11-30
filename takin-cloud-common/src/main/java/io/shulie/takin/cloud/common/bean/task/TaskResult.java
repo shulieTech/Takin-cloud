@@ -3,14 +3,17 @@ package io.shulie.takin.cloud.common.bean.task;
 import java.util.Map;
 
 import io.shulie.takin.cloud.common.enums.scenemanage.TaskStatusEnum;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author fanxx
  * @date 2020/4/20 下午2:41
  */
 @Data
-public class TaskResult {
+@EqualsAndHashCode(callSuper = true)
+public class TaskResult extends ContextExt {
     /**
      * 场景ID
      */
@@ -19,10 +22,6 @@ public class TaskResult {
      * 任务ID
      */
     private Long taskId;
-    /**
-     * 客户 ID 新增
-     */
-    private Long customerId;
     /**
      * 压力节点 调度 任务状态
      */
@@ -44,10 +43,10 @@ public class TaskResult {
      */
     private Map<String, Object> extendMap;
 
-    public TaskResult(Long sceneId, Long taskId, Long customerId) {
+    public TaskResult(Long sceneId, Long taskId, Long tenantId) {
         this.sceneId = sceneId;
         this.taskId = taskId;
-        this.customerId = customerId;
+        this.setTenantId(tenantId);
     }
 
     public TaskResult() {

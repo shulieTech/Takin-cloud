@@ -21,6 +21,10 @@ public class EngineNotifyParam {
     /**
      * 客户Id 新增
      */
+    private Long tenantId;
+    /**
+     * 客户Id 旧版
+     */
     private Long customerId;
 
     /**

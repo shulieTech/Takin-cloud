@@ -1,14 +1,13 @@
 package io.shulie.takin.ext.content.enginecall;
 
+import java.util.Map;
+
 import io.shulie.takin.ext.content.AbstractEntry;
 import lombok.Data;
 
-import java.util.List;
-import java.util.Map;
-
 /**
- * @Author: liyuanba
- * @Date: 2021/10/29 3:11 下午
+ * @author liyuanba
+ * @date 2021/10/29 3:11 下午
  */
 @Data
 public class EnginePressureConfig extends AbstractEntry {

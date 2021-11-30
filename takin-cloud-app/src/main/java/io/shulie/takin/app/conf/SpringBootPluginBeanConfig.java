@@ -1,29 +1,29 @@
 package io.shulie.takin.app.conf;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.List;
 
-import org.pf4j.RuntimeMode;
-import org.springframework.stereotype.Component;
-import org.springframework.core.annotation.Order;
-import org.springframework.context.annotation.Bean;
-import org.springframework.beans.factory.annotation.Value;
 import io.shulie.takin.plugin.framework.core.PluginManager;
-import org.springframework.beans.factory.annotation.Autowired;
-import io.shulie.takin.plugin.framework.extension.spring.SwaggerExtension;
 import io.shulie.takin.plugin.framework.core.configuration.IConfiguration;
-import io.shulie.takin.plugin.framework.extension.spring.AutoPluginManager;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import io.shulie.takin.plugin.framework.extension.spring.SpringBaseExtension;
-import io.shulie.takin.plugin.framework.extension.spring.SpringInitExtension;
-import io.shulie.takin.plugin.framework.extension.springmvc.SpringMvcExtension;
-import io.shulie.takin.plugin.framework.extension.spring.SpringLogbackExtension;
-import io.shulie.takin.plugin.framework.extension.spring.SpringBasicBeanExtension;
-import io.shulie.takin.plugin.framework.extension.spring.SpringMybatisPlusExtension;
-import io.shulie.takin.plugin.framework.extension.springboot.SpringBootInitExtension;
 import io.shulie.takin.plugin.framework.core.configuration.impl.DefaultConfiguration;
+import io.shulie.takin.plugin.framework.extension.spring.AutoPluginManager;
+import io.shulie.takin.plugin.framework.extension.spring.SpringBaseExtension;
+import io.shulie.takin.plugin.framework.extension.spring.SpringBasicBeanExtension;
+import io.shulie.takin.plugin.framework.extension.spring.SpringInitExtension;
+import io.shulie.takin.plugin.framework.extension.spring.SpringLogbackExtension;
+import io.shulie.takin.plugin.framework.extension.spring.SpringMybatisPlusExtension;
+import io.shulie.takin.plugin.framework.extension.spring.SwaggerExtension;
 import io.shulie.takin.plugin.framework.extension.springboot.SpringAutoConfigExtension;
+import io.shulie.takin.plugin.framework.extension.springboot.SpringBootInitExtension;
+import io.shulie.takin.plugin.framework.extension.springmvc.SpringMvcExtension;
+import org.pf4j.RuntimeMode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 /**
  * @author xiaobin.zfb|xiaobin@shulie.io

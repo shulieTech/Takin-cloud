@@ -15,10 +15,6 @@
 
 package io.shulie.takin.cloud.common.utils;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +22,15 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * 公用但不好归属的静态方法
- * @Author: liyuanba
- * @Date: 2021/9/27 9:12 下午
+ *
+ * @author liyuanba
+ * @date 2021/9/27 9:12 下午
  */
 public class CommonUtil {
 
@@ -41,11 +42,12 @@ public class CommonUtil {
             return null;
         }
         return list.stream().filter(Objects::nonNull)
-                .map(func)
-                .filter(Objects::nonNull)
-                .mapToInt(d -> d)
-                .sum();
+            .map(func)
+            .filter(Objects::nonNull)
+            .mapToInt(d -> d)
+            .sum();
     }
+
     /**
      * 从list中取出对象某个字段的值
      */
@@ -54,18 +56,19 @@ public class CommonUtil {
             return null;
         }
         return list.stream().filter(Objects::nonNull)
-                .map(func)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+            .map(func)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 
     /**
      * 取值选择器
-     * @param defValue  默认值
-     * @param t         取值对象
-     * @param func      取值方法，从对象中取值的方法
-     * @param <T>       取值对象类型
-     * @param <R>       返回值对象类型
+     *
+     * @param defValue 默认值
+     * @param t        取值对象
+     * @param func     取值方法，从对象中取值的方法
+     * @param <T>      取值对象类型
+     * @param <R>      返回值对象类型
      */
     public static <T, R> R getValue(R defValue, T t, Function<T, R> func) {
         R result = defValue;
@@ -73,15 +76,15 @@ public class CommonUtil {
             R r = func.apply(t);
             if (null != r) {
                 if (r instanceof String) {
-                    if (StringUtils.isNotBlank((String) r)) {
+                    if (StringUtils.isNotBlank((String)r)) {
                         result = r;
                     }
                 } else if (r instanceof List) {
-                    if (CollectionUtils.isNotEmpty((List<?>) r)) {
+                    if (CollectionUtils.isNotEmpty((List<?>)r)) {
                         result = r;
                     }
                 } else if (r instanceof Map) {
-                    if (MapUtils.isNotEmpty((Map<?, ?>) r)) {
+                    if (MapUtils.isNotEmpty((Map<?, ?>)r)) {
                         result = r;
                     }
                 } else {

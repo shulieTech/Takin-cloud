@@ -1,61 +1,56 @@
 package io.shulie.takin.cloud.biz.service.scene.impl;
 
-import java.util.Map;
-import java.util.Date;
-import java.util.List;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.ArrayList;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-
-import lombok.extern.slf4j.Slf4j;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
+import io.shulie.takin.cloud.biz.service.scene.SceneService;
+import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
+import io.shulie.takin.cloud.common.utils.JsonUtil;
+import io.shulie.takin.cloud.data.mapper.mysql.SceneBusinessActivityRefMapper;
+import io.shulie.takin.cloud.data.mapper.mysql.SceneManageMapper;
+import io.shulie.takin.cloud.data.mapper.mysql.SceneScriptRefMapper;
+import io.shulie.takin.cloud.data.mapper.mysql.SceneSlaRefMapper;
+import io.shulie.takin.cloud.data.model.mysql.SceneBusinessActivityRefEntity;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
+import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
+import io.shulie.takin.cloud.data.model.mysql.SceneSlaRefEntity;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.OldGoalModel;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailV2Response;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest.BasicInfo;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest.Content;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest.DataValidation;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest.File;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest.Goal;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest.MonitoringGoal;
+import io.shulie.takin.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.ext.content.script.ScriptNode;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.PlatformTransactionManager;
-
-import io.shulie.takin.cloud.common.utils.JsonUtil;
-import io.shulie.takin.ext.content.script.ScriptNode;
-import io.shulie.takin.ext.content.user.CloudUserExt;
-import io.shulie.takin.ext.content.enginecall.PtConfigExt;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.cloud.biz.service.scene.SceneService;
-import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.data.model.mysql.SceneSlaRefEntity;
-import io.shulie.takin.cloud.data.mapper.mysql.SceneSlaRefMapper;
-import io.shulie.takin.cloud.data.mapper.mysql.SceneManageMapper;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.constants.SceneManageConstant;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
-import io.shulie.takin.cloud.open.request.scene.manage.OldGoalModel;
-import io.shulie.takin.cloud.data.mapper.mysql.SceneScriptRefMapper;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
-import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Goal;
-import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.File;
-import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
-import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Content;
-import io.shulie.takin.cloud.data.model.mysql.SceneBusinessActivityRefEntity;
-import io.shulie.takin.cloud.data.mapper.mysql.SceneBusinessActivityRefMapper;
-import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.BasicInfo;
-import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.MonitoringGoal;
-import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.DataValidation;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 
 /**
  * 场景 - 服务实现
@@ -163,8 +158,8 @@ public class SceneServiceImpl implements SceneService {
      * @return 场景详情
      */
     @Override
-    public SceneDetailResponse detail(long sceneId) {
-        SceneDetailResponse response = new SceneDetailResponse();
+    public SceneDetailV2Response detail(long sceneId) {
+        SceneDetailV2Response response = new SceneDetailV2Response();
         response.setGoal(getGoal(sceneId));
         response.setConfig(getConfig(sceneId));
         response.setContent(getContent(sceneId));
@@ -422,7 +417,7 @@ public class SceneServiceImpl implements SceneService {
             basicInfo.getScriptType(), config, feature, analysisResult);
         // 设置创建者信息
         sceneEntity.setUserId(userId);
-        sceneEntity.setCustomerId(CloudPluginUtils.getCustomerId());
+        sceneEntity.setTenantId(CloudPluginUtils.getTenantId());
         // 执行数据库操作
         sceneManageMapper.insert(sceneEntity);
         // 回填自增主键
@@ -629,7 +624,6 @@ public class SceneServiceImpl implements SceneService {
             setScriptAnalysisResult(JSONObject.toJSONString(analysisResult));
             // 默认值
             setStatus(0);
-            setDeptId(null);
             setIsDeleted(0);
             setLastPtTime(null);
             Date now = new Date();

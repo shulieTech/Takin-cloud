@@ -1,7 +1,5 @@
 package com.pamirs.takin.entity.domain.dto.report;
 
-import java.io.Serializable;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -14,9 +12,7 @@ import lombok.Data;
  */
 @ApiModel
 @Data
-public class RiskMacheineDTO implements Serializable {
-
-    private static final long serialVersionUID = -821315409231651171L;
+public class RiskMacheineDTO {
 
     @ApiModelProperty(value = "机器")
     private String machineIp;

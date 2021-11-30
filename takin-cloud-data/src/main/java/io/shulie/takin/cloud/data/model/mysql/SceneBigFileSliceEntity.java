@@ -1,14 +1,17 @@
 package io.shulie.takin.cloud.data.model.mysql;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-
-import java.time.LocalDateTime;
 import lombok.Data;
-import java.util.Date;
 
+/**
+ * @author -
+ */
 @Data
 @TableName(value = "t_scene_big_file_slice")
 public class SceneBigFileSliceEntity {

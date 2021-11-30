@@ -5,10 +5,9 @@ import io.shulie.takin.cloud.biz.output.common.CommonInfosOutput;
 import io.shulie.takin.cloud.biz.service.common.CommonInfoService;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 import io.shulie.takin.cloud.common.utils.CommonUtil;
-import io.shulie.takin.ext.content.enginecall.StrategyConfigExt;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -29,7 +28,7 @@ public class CommonInfoServiceImpl implements CommonInfoService {
     /**
      * 获取公共配置信息
      *
-     * @return
+     * @return -
      */
     @Override
     public CommonInfosOutput getCommonConfigurationInfos() {

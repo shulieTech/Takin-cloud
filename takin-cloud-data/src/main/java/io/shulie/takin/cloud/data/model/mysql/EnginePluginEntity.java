@@ -1,12 +1,12 @@
 package io.shulie.takin.cloud.data.model.mysql;
 
+import java.time.LocalDateTime;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 /**
  * 引擎插件实体
@@ -18,27 +18,39 @@ import java.time.LocalDateTime;
 @TableName(value = "t_engine_plugin_info")
 public class EnginePluginEntity {
 
-    /** 主键 */
+    /**
+     * 主键
+     */
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /** 插件名称 */
+    /**
+     * 插件名称
+     */
     @TableField(value = "plugin_name")
     private String pluginName;
 
-    /** 插件类型 */
+    /**
+     * 插件类型
+     */
     @TableField(value = "plugin_type")
     private String pluginType;
 
-    /** 创建时间 */
+    /**
+     * 创建时间
+     */
     @TableField(value = "gmt_create")
     private LocalDateTime gmtCreate;
 
-    /** 修改时间 */
+    /**
+     * 修改时间
+     */
     @TableField(value = "gmt_update")
     private LocalDateTime gmtUpdate;
 
-    /** 状态  1 启用  0 禁用 */
+    /**
+     * 状态  1 启用  0 禁用
+     */
     @TableField
     private Integer status;
 

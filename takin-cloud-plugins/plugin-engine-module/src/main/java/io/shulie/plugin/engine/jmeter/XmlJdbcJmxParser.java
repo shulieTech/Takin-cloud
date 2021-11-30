@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import io.shulie.takin.ext.content.script.ScriptParseExt;
-import io.shulie.takin.ext.content.script.ScriptUrlExt;
 import io.shulie.plugin.engine.util.SaxUtil;
+import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptUrlExt;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.Element;

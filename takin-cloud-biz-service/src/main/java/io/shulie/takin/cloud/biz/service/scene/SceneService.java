@@ -1,17 +1,17 @@
 package io.shulie.takin.cloud.biz.service.scene;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
-import io.shulie.takin.ext.content.enginecall.PtConfigExt;
-import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest;
-import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Goal;
-import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.Content;
-import io.shulie.takin.cloud.open.response.scene.manage.SceneDetailResponse;
-import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.MonitoringGoal;
-import io.shulie.takin.cloud.open.request.scene.manage.SceneRequest.DataValidation;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailV2Response;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest.Content;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest.DataValidation;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest.Goal;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest.MonitoringGoal;
+import io.shulie.takin.ext.content.enginecall.PtConfigExt;
 
 /**
  * 场景 - 服务
@@ -46,7 +46,7 @@ public interface SceneService {
      * @param sceneId 场景主键
      * @return 场景详情
      */
-    SceneDetailResponse detail(long sceneId);
+    SceneDetailV2Response detail(long sceneId);
 
     /**
      * 获取场景的基础信息

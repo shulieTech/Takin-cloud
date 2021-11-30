@@ -1,5 +1,13 @@
 package io.shulie.takin.cloud.biz.service.engine.impl;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Maps;
 import io.shulie.takin.cloud.biz.cloudserver.EnginePluginSimpleResultConvert;
@@ -21,13 +29,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 引擎接口实现
@@ -52,7 +53,6 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
      * 查询引擎支持的插件信息
      *
      * @param pluginTypes 插件类型
-     *
      * @return -
      */
     @Override
@@ -60,9 +60,9 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
         Map<String, List<EnginePluginSimpleInfoOutput>> result = Maps.newHashMap();
         List<EnginePluginSimpleInfoResult> infos = enginePluginMapper.selectAvailablePluginsByType(pluginTypes);
         List<EnginePluginSimpleInfoOutput> outputInfos = EnginePluginSimpleResultConvert.INSTANCE.ofs(infos);
-        if(CollectionUtils.isNotEmpty(outputInfos)) {
+        if (CollectionUtils.isNotEmpty(outputInfos)) {
             result = outputInfos.stream().filter(r -> r.getPluginType() != null)
-                    .collect(Collectors.groupingBy(EnginePluginSimpleInfoOutput::getPluginType));
+                .collect(Collectors.groupingBy(EnginePluginSimpleInfoOutput::getPluginType));
         }
         return result;
     }
@@ -77,7 +77,7 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
     public ResponseResult<EnginePluginDetailOutput> findEnginePluginDetails(Long pluginId) {
         //获取插件信息
         EnginePluginEntity enginePluginInfo = enginePluginMapper.selectById(pluginId);
-        if(enginePluginInfo == null) {
+        if (enginePluginInfo == null) {
             return ResponseResult.fail(ResponseResultConstant.RESPONSE_RESULT_CODE_ERROR, "引擎插件信息不存在，请核实");
         }
         //获取支持的版本信息
@@ -101,15 +101,15 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
         boolean isEdit = (pluginId != null && pluginId != 0);
         //创建引擎插件实体
         EnginePluginEntity pressureEnginePluginEntity = isEdit
-                ? enginePluginMapper.selectById(pluginId) : new EnginePluginEntity();
+            ? enginePluginMapper.selectById(pluginId) : new EnginePluginEntity();
 
         BeanUtils.copyProperties(input, pressureEnginePluginEntity);
         LocalDateTime now = LocalDateTime.now();
         //保存引擎插件信息
-        if(isEdit) {
+        if (isEdit) {
             pressureEnginePluginEntity.setGmtUpdate(now);
             enginePluginMapper.updateById(pressureEnginePluginEntity);
-        } else{
+        } else {
             //添加创建时间
             pressureEnginePluginEntity.setGmtCreate(now);
             pressureEnginePluginEntity.setGmtUpdate(now);
@@ -140,7 +140,7 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
     @Transactional(rollbackFor = Exception.class)
     public void changeEnginePluginStatus(Long pluginId, Integer status) {
         EnginePluginEntity enginePlugin = enginePluginMapper.selectById(pluginId);
-        if(Objects.isNull(enginePlugin)) {
+        if (Objects.isNull(enginePlugin)) {
             log.warn("引擎插件信息不存在");
             return;
         }

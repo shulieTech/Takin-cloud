@@ -1,5 +1,3 @@
-
-
 package io.shulie.takin.cloud.common.bean.sla;
 
 import lombok.Data;

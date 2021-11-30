@@ -19,7 +19,6 @@ public class AutowireStaticSmartInitializingSingleton implements SmartInitializi
      * 当所有的单例Bena初始化完成后，对static静态成员进行赋值
      * 手动管理这种case的依赖注入，更可控。而非交给Spring容器去自动处理
      * 工具类本身并不需要加入到Spring容器内，这对于有大量这种case的话，是可以节约开销的
-     *
      */
     @Override
     public void afterSingletonsInstantiated() {

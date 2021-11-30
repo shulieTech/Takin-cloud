@@ -1,12 +1,12 @@
 package io.shulie.takin.cloud.data.model.mysql;
 
+import java.time.LocalDateTime;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 /**
  * 引擎插件文件信息

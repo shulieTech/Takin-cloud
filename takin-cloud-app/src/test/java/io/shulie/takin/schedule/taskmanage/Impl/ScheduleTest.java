@@ -5,16 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.shulie.takin.ext.content.enginecall.ScheduleRunRequest;
-import io.shulie.takin.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.app.Application;
+import io.shulie.takin.cloud.biz.service.schedule.ScheduleService;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt.DataFile;
 import org.apache.commons.lang.math.RandomUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import io.shulie.takin.cloud.biz.service.schedule.ScheduleService;
 
 /**
  * @author 莫问
@@ -44,7 +45,7 @@ public class ScheduleTest {
         //scheduleStartRequest.setRampUp(2L);
         //scheduleStartRequest.setSteps(3);
 
-        List<ScheduleStartRequestExt.DataFile> list = new ArrayList<>();
+        List<DataFile> list = new ArrayList<>();
 
         ScheduleStartRequestExt.DataFile dataFile = new ScheduleStartRequestExt.DataFile();
         dataFile.setName("abc.csv");

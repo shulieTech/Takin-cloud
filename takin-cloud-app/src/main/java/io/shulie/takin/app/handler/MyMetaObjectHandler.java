@@ -1,10 +1,8 @@
 package io.shulie.takin.app.handler;
 
-import java.util.Objects;
-
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
@@ -19,14 +17,10 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 
     @Override
     public void insertFill(MetaObject metaObject) {
-        CloudUserCommonRequestExt userCommonExt = new CloudUserCommonRequestExt();
-        CloudPluginUtils.fillUserData(userCommonExt);
-        if (Objects.nonNull(userCommonExt.getCustomerId())) {
-            this.strictInsertFill(metaObject, "customerId", Long.class, userCommonExt.getCustomerId());
-        }
-        if (Objects.nonNull(userCommonExt.getUserId())) {
-            this.strictInsertFill(metaObject, "userId", Long.class, userCommonExt.getUserId());
-        }
+        ContextExt traceContext = CloudPluginUtils.getContext();
+        this.strictInsertFill(metaObject, "user_id", Long.class, traceContext.getUserId());
+        this.strictInsertFill(metaObject, "tenant_id", Long.class, traceContext.getTenantId());
+        this.strictInsertFill(metaObject, "env_code", String.class, traceContext.getEnvCode());
     }
 
     @Override

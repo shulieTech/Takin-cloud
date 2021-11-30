@@ -1,7 +1,5 @@
 package com.pamirs.takin.entity.domain.vo.report;
 
-import java.io.Serializable;
-
 import lombok.Data;
 
 /**
@@ -9,7 +7,7 @@ import lombok.Data;
  * @date 2020-04-21
  */
 @Data
-public class SceneActionParam implements Serializable {
+public class SceneActionParam {
 
     private Long sceneId;
 }

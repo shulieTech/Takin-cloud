@@ -1,15 +1,14 @@
 package io.shulie.takin.cloud.common.utils;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
-
-import java.io.File;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.FileInputStream;
-import java.security.MessageDigest;
 
 /**
  * @author liyuanba
@@ -89,7 +88,7 @@ public class Md5Util {
             byte[] buffer = new byte[PART_SIZE];
             for (int i = 1; i <= BIG_FILE_PART; i++) {
                 if (i > 1) {
-                    long start = i == BIG_FILE_PART ? (fileSize - per*i)+per : per;
+                    long start = i == BIG_FILE_PART ? (fileSize - per * i) + per : per;
                     long skip = fileInputStream.skip(start - PART_SIZE);
                     log.debug("io.shulie.takin.cloud.common.utils.Md5Util#md5BigFile(skip:{})", skip);
                 }

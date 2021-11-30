@@ -2,14 +2,12 @@ package io.shulie.takin.cloud.data.model.mysql;
 
 import java.util.Date;
 
-import lombok.Data;
-
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
 /**
  * 压测场景 - 实体类
@@ -25,16 +23,6 @@ public class SceneManageEntity {
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-    /**
-     * 客户id
-     */
-    @TableField(value = "customer_id", fill = FieldFill.INSERT)
-    private Long customerId;
-    /**
-     * 部门id
-     */
-    @TableField(value = "dept_id", fill = FieldFill.INSERT)
-    private Long deptId;
     /**
      * 场景名称
      */
@@ -102,10 +90,20 @@ public class SceneManageEntity {
     @TableField(value = "update_name")
     private String updateName;
     /**
-     * 用户id
+     * 用户主键
      */
-    @TableField(value = "user_id", fill = FieldFill.INSERT)
+    @TableField(value = "user_id")
     private Long userId;
+    /**
+     * 租户主键
+     */
+    @TableField(value = "tenant_id")
+    private Long tenantId;
+    /**
+     * 环境编码
+     */
+    @TableField(value = "env_code")
+    private String envCode;
 }
 
 

@@ -13,11 +13,11 @@ public enum SamplerTypeEnum {
      * dubbo请求
      */
     DUBBO("DUBBO", RpcTypeEnum.DUBBO),
-//    /**
-//     * ROCKETMQ请求
-//     */
-//    ROCKETMQ("ROCKETMQ"),
-//    RABBITMQ("RABBITMQ"),
+    //    /**
+    //     * ROCKETMQ请求
+    //     */
+    //    ROCKETMQ("ROCKETMQ"),
+    //    RABBITMQ("RABBITMQ"),
     /**
      * KAFKA 请求
      */
@@ -31,7 +31,6 @@ public enum SamplerTypeEnum {
      * 未知请求类型
      */
     UNKNOWN("UNKNOWN", RpcTypeEnum.UNKNOWN);
-
 
     SamplerTypeEnum(String type, RpcTypeEnum rpcTypeEnum) {
         this.type = type;

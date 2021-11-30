@@ -10,6 +10,11 @@ import java.nio.channels.FileChannel;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
+/**
+ * -
+ *
+ * @author -
+ */
 public class FileFetcher {
 
     private final static int BUFFER_SIZE = 256;
@@ -134,13 +139,13 @@ public class FileFetcher {
         if (data.length == 0) {
             return data;
         }
-        if (data[data.length - 1] == (byte) separator) {
+        if (data[data.length - 1] == (byte)separator) {
             return data;
         }
 
         int lastIndex = -1;
         for (int i = data.length - 1; i >= 0; i--) {
-            if (data[i] ==(byte)separator) {
+            if (data[i] == (byte)separator) {
                 lastIndex = i;
                 break;
             }

@@ -2,7 +2,6 @@ package com.pamirs.takin.entity.domain.dto.report;
 
 import java.math.BigDecimal;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**

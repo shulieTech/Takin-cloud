@@ -1,11 +1,11 @@
 package io.shulie.takin.cloud.data.mapper.mysql;
 
+import java.util.List;
+import java.util.Map;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.shulie.takin.cloud.data.model.mysql.EnginePluginEntity;
 import io.shulie.takin.cloud.data.result.engine.EnginePluginSimpleInfoResult;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * 引擎Mapper
@@ -19,7 +19,6 @@ public interface EnginePluginMapper extends BaseMapper<EnginePluginEntity> {
      * 获取可用的插件列表
      *
      * @param pluginTypes 插件类型
-     *
      * @return -
      */
     List<EnginePluginSimpleInfoResult> selectAvailablePluginsByType(List<String> pluginTypes);

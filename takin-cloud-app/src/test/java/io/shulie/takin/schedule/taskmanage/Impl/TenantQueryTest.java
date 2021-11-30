@@ -14,7 +14,6 @@ import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -32,7 +31,7 @@ public class TenantQueryTest {
     ReportMapper reportMapper;
 
     @Test
-    public void querySceneManage (){
+    public void querySceneManage() {
         Map<String, Object> columnMap = Maps.newHashMap();
         columnMap.put("scene_name", "Test_scene_name");
         List<SceneManageEntity> entities = sceneManageMapper.selectByMap(columnMap);
@@ -40,7 +39,7 @@ public class TenantQueryTest {
     }
 
     @Test
-    public void queryReport (){
+    public void queryReport() {
         Map<String, Object> columnMap = Maps.newHashMap();
         columnMap.put("scene_name", "Test_scene_name");
         List<ReportEntity> entities = reportMapper.selectByMap(columnMap);

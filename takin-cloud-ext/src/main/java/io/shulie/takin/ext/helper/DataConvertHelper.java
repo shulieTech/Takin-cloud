@@ -1,22 +1,27 @@
 package io.shulie.takin.ext.helper;
 
-import io.shulie.takin.ext.content.enginecall.*;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-
 import java.io.File;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Objects;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
+
+import io.shulie.takin.ext.content.enginecall.EngineRunConfig;
+import io.shulie.takin.ext.content.enginecall.EnginePressureConfig;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
 
 /**
- * @Author: liyuanba
- * @Date: 2021/11/3 9:37 上午
+ * @author liyuanba
+ * @date 2021/11/3 9:37 上午
  */
 public class DataConvertHelper {
     /**
      * 构建压测引擎的配置参数
-     * @param request               启动参数
-     * @param scriptFileDir         当前文档目录
+     *
+     * @param request       启动参数
+     * @param scriptFileDir 当前文档目录
      * @return 返回压测引擎的配置参数
      */
     public static EngineRunConfig buildEngineRunConfig(final ScheduleRunRequest request, final String scriptFileDir) {
@@ -24,8 +29,7 @@ public class DataConvertHelper {
         StrategyConfigExt strategyConfig = request.getStrategyConfig();
         Long sceneId = startRequest.getSceneId();
         Long taskId = startRequest.getTaskId();
-        Long customerId = startRequest.getCustomerId();
-
+        Long customerId = startRequest.getTenantId();
 
         EngineRunConfig config = new EngineRunConfig();
         config.setSceneId(sceneId);
@@ -45,15 +49,15 @@ public class DataConvertHelper {
         }
         if (CollectionUtils.isNotEmpty(startRequest.getDataFile())) {
             startRequest.getDataFile().stream().filter(Objects::nonNull)
-                    .filter(o -> StringUtils.isNotBlank(o.getName()))
-                    .filter(o -> o.getName().endsWith(".jar"))
-                    .map(ScheduleStartRequestExt.DataFile::getPath)
-                    .filter(StringUtils::isNotBlank)
-                    .map(s -> CommonHelper.mergeDirPath(scriptFileDir, s))
-                    .forEach(startRequest::addEnginePluginsFilePath);
+                .filter(o -> StringUtils.isNotBlank(o.getName()))
+                .filter(o -> o.getName().endsWith(".jar"))
+                .map(ScheduleStartRequestExt.DataFile::getPath)
+                .filter(StringUtils::isNotBlank)
+                .map(s -> CommonHelper.mergeDirPath(scriptFileDir, s))
+                .forEach(startRequest::addEnginePluginsFilePath);
 
             startRequest.getDataFile().forEach(
-                    dataFile -> dataFile.setPath(CommonHelper.mergeDirPath(scriptFileDir, dataFile.getPath()))
+                dataFile -> dataFile.setPath(CommonHelper.mergeDirPath(scriptFileDir, dataFile.getPath()))
             );
             config.setFileSets(startRequest.getDataFile());
         }

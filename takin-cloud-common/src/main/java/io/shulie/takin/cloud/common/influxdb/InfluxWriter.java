@@ -10,15 +10,15 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -26,45 +26,47 @@ import org.springframework.stereotype.Component;
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
  * @date 2020-04-20 14:25
  */
+@Slf4j
 @Component
 public class InfluxWriter {
-    private static Logger logger = LoggerFactory.getLogger(InfluxWriter.class);
 
     /**
      * 连接地址
      */
-    @Value("${spring.influxdb.url}")
+    @Value("${spring.influxdb.url:}")
     private String influxdbUrl;
 
     /**
      * 用户名
      */
-    @Value("${spring.influxdb.user}")
+    @Value("${spring.influxdb.user:}")
     private String userName;
 
     /**
      * 密码
      */
-    @Value("${spring.influxdb.password}")
+    @Value("${spring.influxdb.password:}")
     private String password;
 
     /**
      * 数据库库名
      */
-    @Value("${spring.influxdb.database}")
+    @Value("${spring.influxdb.database:}")
     private String database;
 
-    private InfluxDB influxDB;
+    private InfluxDB influx;
 
     public static BatchPoints batchPoints(String sdatabase) {
-        return BatchPoints.database(sdatabase)
-            .build();
+        return BatchPoints.database(sdatabase).build();
     }
 
     @PostConstruct
     public void init() {
-        influxDB = InfluxDBFactory.connect(influxdbUrl, userName, password);
-        influxDB.enableBatch(1000, 40, TimeUnit.MILLISECONDS);
+        if (StringUtils.isBlank(influxdbUrl)) {
+            return;
+        }
+        influx = InfluxDBFactory.connect(influxdbUrl, userName, password);
+        influx.enableBatch(1000, 40, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -73,7 +75,7 @@ public class InfluxWriter {
      * @param batchPoints 批量数据点
      */
     public void writeBatchPoint(BatchPoints batchPoints) {
-        influxDB.write(batchPoints);
+        influx.write(batchPoints);
     }
 
     /**
@@ -100,9 +102,10 @@ public class InfluxWriter {
      */
     public boolean insert(Point point) {
         try {
-            influxDB.write(database, "", point);
+            influx.write(database, "", point);
         } catch (Exception ex) {
-            logger.error(ex.toString());
+            log.error("异常代码【{}】,异常内容：influxdb写数据异常 --> 异常信息: {}",
+                TakinCloudExceptionEnum.TASK_RUNNING_RECEIVE_PT_DATA_ERROR, ex);
             return false;
         }
         return true;
@@ -114,7 +117,7 @@ public class InfluxWriter {
      * @return -
      */
     public List<QueryResult.Result> select(String command) {
-        QueryResult queryResult = influxDB.query(new Query(command, database));
+        QueryResult queryResult = influx.query(new Query(command, database));
         return queryResult.getResults();
     }
 
@@ -123,8 +126,8 @@ public class InfluxWriter {
      *
      * @param dbName 数据库名称
      */
-    public void createDB(String dbName) {
-        influxDB.setDatabase(dbName);
+    public void createDatabase(String dbName) {
+        influx.setDatabase(dbName);
     }
 
     /**
@@ -181,7 +184,7 @@ public class InfluxWriter {
     public void createRetentionPolicy() {
         String command = String.format("CREATE RETENTION POLICY \"%s\" ON \"%s\" DURATION %s REPLICATION %s DEFAULT",
             "defalut", database, "30d", 1);
-        influxDB.query(new Query(command, database));
+        influx.query(new Query(command, database));
     }
 
     public String getInfluxdbUrl() {

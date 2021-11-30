@@ -13,10 +13,10 @@ public interface DistributedLock {
     /**
      * 尝试获得锁
      *
-     * @param lockKey 锁住的 key
-     * @param waitTime 等待锁释放的时间
+     * @param lockKey   锁住的 key
+     * @param waitTime  等待锁释放的时间
      * @param leaseTime 释放锁的时间
-     * @param timeUnit 时间单位
+     * @param timeUnit  时间单位
      * @return 是否获得到了锁, true 是, false 否
      */
     boolean tryLock(String lockKey, Long waitTime, Long leaseTime, TimeUnit timeUnit);

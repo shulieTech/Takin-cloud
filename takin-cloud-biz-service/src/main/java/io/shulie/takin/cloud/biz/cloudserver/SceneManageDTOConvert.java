@@ -13,10 +13,8 @@ import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneSlaRef;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.common.bean.RuleBean;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
-import io.shulie.takin.cloud.common.utils.CommonUtil;
-import io.shulie.takin.cloud.common.utils.NumberUtil;
+import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.shulie.takin.ext.content.enginecall.BusinessActivityExt;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.AfterMapping;
@@ -35,17 +33,35 @@ public interface SceneManageDTOConvert {
 
     SceneManageDTOConvert INSTANCE = Mappers.getMapper(SceneManageDTOConvert.class);
 
+    /**
+     * 类型装换
+     *
+     * @param source 原数据
+     * @return 转换后数据
+     */
     @Mappings({
         @Mapping(source = "id", target = "id"),
-        @Mapping(source = "customerId", target = "customerId"),
+        @Mapping(source = "tenantId", target = "tenantId"),
         @Mapping(source = "sceneName", target = "sceneName"),
         @Mapping(source = "lastPtTime", target = "lastPtTime", dateFormat = "yyyy-MM-dd HH:mm:ss"),
         @Mapping(source = "status", target = "status")
     })
     SceneManageListOutput of(SceneManage source);
 
+    /**
+     * 批量类型装换
+     *
+     * @param sources 原数据(批量)
+     * @return 转换后数据(批量)
+     */
     List<SceneManageListOutput> ofs(List<SceneManage> sources);
 
+    /**
+     * 填充场景列表
+     *
+     * @param source 元数据
+     * @param dto    场景列表数据
+     */
     @AfterMapping
     default void fillSceneManageListDTO(SceneManage source, @MappingTarget SceneManageListOutput dto) {
         String ptConfig = source.getPtConfig();
@@ -57,6 +73,12 @@ public interface SceneManageDTOConvert {
         dto.setEstimateFlow(flow != null ? flow.setScale(2, RoundingMode.HALF_UP) : null);
     }
 
+    /**
+     * 数据转换
+     *
+     * @param source 原数据
+     * @return 转换后数据
+     */
     @Mappings({
         @Mapping(source = "id", target = "id"),
         @Mapping(source = "bindRef", target = "bindRef"),
@@ -65,6 +87,12 @@ public interface SceneManageDTOConvert {
     })
     SceneManageWrapperOutput.SceneBusinessActivityRefOutput of(SceneBusinessActivityRef source);
 
+    /**
+     * 填充目标数据
+     *
+     * @param source 原数据
+     * @param dto    目标数据
+     */
     @AfterMapping
     default void fillGoalValue(SceneBusinessActivityRef source, @MappingTarget SceneManageWrapperOutput.SceneBusinessActivityRefOutput dto) {
         String goalValue = source.getGoalValue();
@@ -78,9 +106,20 @@ public interface SceneManageDTOConvert {
         dto.setTargetSA(jsonObject.getBigDecimal(SceneManageConstant.SA));
     }
 
+    /**
+     * 数据转换
+     *
+     * @param sources 原数据
+     * @return 转换后数据
+     */
     List<SceneManageWrapperOutput.SceneBusinessActivityRefOutput> ofBusinessActivityList(List<SceneBusinessActivityRef> sources);
 
-
+    /**
+     * 数据转换
+     *
+     * @param source 原数据
+     * @return 转换后数据
+     */
     @Mappings({
         @Mapping(source = "id", target = "id"),
         @Mapping(source = "fileName", target = "fileName"),
@@ -93,8 +132,20 @@ public interface SceneManageDTOConvert {
     })
     SceneManageWrapperOutput.SceneScriptRefOutput of(SceneScriptRef source);
 
+    /**
+     * 数据转换
+     *
+     * @param sources 原数据
+     * @return 转换后数据
+     */
     List<SceneManageWrapperOutput.SceneScriptRefOutput> ofScriptList(List<SceneScriptRef> sources);
 
+    /**
+     * 填充脚本信息
+     *
+     * @param source 原数据
+     * @param dto    脚本信息
+     */
     @AfterMapping
     default void fillScript(SceneScriptRef source, @MappingTarget SceneManageWrapperOutput.SceneScriptRefOutput dto) {
         if (StringUtils.isBlank(source.getFileExtend())) {
@@ -108,6 +159,12 @@ public interface SceneManageDTOConvert {
         dto.setIsBigFile(jsonObject.getInteger(SceneManageConstant.IS_BIG_FILE));
     }
 
+    /**
+     * 数据转换
+     *
+     * @param source 原数据
+     * @return 转换后数据
+     */
     @Mappings({
         @Mapping(source = "id", target = "id"),
         @Mapping(source = "slaName", target = "ruleName"),
@@ -116,6 +173,12 @@ public interface SceneManageDTOConvert {
     })
     SceneManageWrapperOutput.SceneSlaRefOutput of(SceneSlaRef source);
 
+    /**
+     * 填充Sla规则数据
+     *
+     * @param source 原数据
+     * @param dto    Sla规则
+     */
     @AfterMapping
     default void fillSlaRule(SceneSlaRef source, @MappingTarget SceneManageWrapperOutput.SceneSlaRefOutput dto) {
         String condition = source.getCondition();
@@ -134,13 +197,19 @@ public interface SceneManageDTOConvert {
         dto.setBusinessActivity(StringUtils.split(source.getBusinessActivityIds(), ","));
     }
 
+    /**
+     * 数据转换
+     *
+     * @param sources 原数据
+     * @return 转换后数据
+     */
     List<SceneManageWrapperOutput.SceneSlaRefOutput> ofSlaList(List<SceneSlaRef> sources);
 
     @Mappings({
-            @Mapping(source = "bindRef", target = "bindRef"),
-            @Mapping(source = "businessActivityName", target = "activityName"),
-            @Mapping(source = "targetRT", target = "rt"),
-            @Mapping(source = "targetTPS", target = "tps"),
+        @Mapping(source = "bindRef", target = "bindRef"),
+        @Mapping(source = "businessActivityName", target = "activityName"),
+        @Mapping(source = "targetRT", target = "rt"),
+        @Mapping(source = "targetTPS", target = "tps"),
     })
     BusinessActivityExt of(SceneManageWrapperOutput.SceneBusinessActivityRefOutput source);
 }

@@ -51,16 +51,18 @@ public interface FileSliceService {
      * @param param
      * @return -
      */
-    Boolean updateFileRefExtend(FileSliceRequest request,SceneBigFileSliceParam param);
+    Boolean updateFileRefExtend(FileSliceRequest request, SceneBigFileSliceParam param);
 
     /**
      * 更新 {@link SceneScriptRefEntity} 对应文件的md5值
+     *
      * @param param
      */
     void updateFileMd5(SceneBigFileSliceParam param);
 
     /**
      * 关联文件与脚本、场景，并对顺序分片的文件进行预分片
+     *
      * @param param
      * @return
      * @throws TakinCloudException

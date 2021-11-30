@@ -1,14 +1,13 @@
 package io.shulie.takin.cloud.common.pojo.jmeter;
 
-import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
 import io.shulie.takin.cloud.common.pojo.AbstractEntry;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * @Author: liyuanba
- * @Date: 2021/10/15 10:10 上午
+ * @author liyuanba
+ * @date 2021/10/15 10:10 上午
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

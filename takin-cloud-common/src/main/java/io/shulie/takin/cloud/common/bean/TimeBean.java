@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.common.bean;
 
-import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 import io.shulie.takin.cloud.common.enums.TimeUnitEnum;
@@ -12,9 +11,7 @@ import lombok.Data;
  * @date 2020/4/17 下午9:51
  */
 @Data
-public class TimeBean implements Serializable {
-
-    private static final long serialVersionUID = -4490980949244068326L;
+public class TimeBean {
 
     private Long time;
 
@@ -34,7 +31,8 @@ public class TimeBean implements Serializable {
      */
     public long getSecondTime() {
         TimeUnitEnum e = TimeUnitEnum.value(unit);
-        long t = CommonUtil.getValue(0L, this, TimeBean::getTime);;
+        long t = CommonUtil.getValue(0L, this, TimeBean::getTime);
+        ;
         if (null != e) {
             t = TimeUnit.SECONDS.convert(t, e.getUnit());
         }

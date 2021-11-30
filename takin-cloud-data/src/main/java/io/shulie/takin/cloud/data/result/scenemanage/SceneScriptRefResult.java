@@ -1,7 +1,5 @@
 package io.shulie.takin.cloud.data.result.scenemanage;
 
-import java.io.Serializable;
-
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -10,9 +8,7 @@ import lombok.Data;
  * @date 2020/4/18 上午11:07
  */
 @Data
-public class SceneScriptRefResult implements Serializable {
-
-    private static final long serialVersionUID = -1038145286303661484L;
+public class SceneScriptRefResult {
 
     @ApiModelProperty(value = "ID")
     private Long id;

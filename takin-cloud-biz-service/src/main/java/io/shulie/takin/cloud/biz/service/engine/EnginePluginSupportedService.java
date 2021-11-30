@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.biz.service.engine;
 
-
 import java.util.List;
 
 /**
@@ -22,7 +21,7 @@ public interface EnginePluginSupportedService {
      * 批量保存支持的插件版本
      *
      * @param supportedVersions 支持的插件版本信息
-     * @param pluginId 插件id
+     * @param pluginId          插件id
      */
     void batchSaveSupportedVersions(List<String> supportedVersions, Long pluginId);
 

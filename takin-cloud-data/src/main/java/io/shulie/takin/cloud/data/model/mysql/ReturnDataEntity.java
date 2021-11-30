@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * 数据回传JAR配置
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_return_data")

@@ -1,28 +1,25 @@
 package io.shulie.takin.cloud.biz.output.report;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-import io.shulie.takin.cloud.common.bean.scenemanage.ScriptNodeSummaryBean;
-import lombok.EqualsAndHashCode;
 import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
 import io.shulie.takin.cloud.common.bean.sla.SlaBean;
-import io.shulie.takin.ext.content.user.CloudUserCommonRequestExt;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
-* @author 无涯
-* @date 2021/2/3 11:46 上午
-*/
+ * @author 无涯
+ * @date 2021/2/3 11:46 上午
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ReportDetailOutput extends CloudUserCommonRequestExt implements Serializable {
-
-    private static final long serialVersionUID = 6093881590337487184L;
+public class ReportDetailOutput extends ContextExt {
 
     @ApiModelProperty(value = "报告状态：0/就绪状态，1/生成中, 2/完成生成")
     private Integer taskStatus;
@@ -39,7 +36,6 @@ public class ReportDetailOutput extends CloudUserCommonRequestExt implements Ser
     @ApiModelProperty(value = "消耗流量")
     private BigDecimal amount;
 
-
     @ApiModelProperty(value = "场景名称")
     private Long sceneId;
 
@@ -51,8 +47,6 @@ public class ReportDetailOutput extends CloudUserCommonRequestExt implements Ser
 
     @ApiModelProperty(value = "结束时间")
     private Date endTime;
-
-
 
     @ApiModelProperty(value = "压测结论: 0/不通过，1/通过")
     private Integer conclusion;

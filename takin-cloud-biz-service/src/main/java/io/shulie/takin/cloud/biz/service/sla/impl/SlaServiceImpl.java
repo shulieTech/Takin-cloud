@@ -1,45 +1,43 @@
-
-
 package io.shulie.takin.cloud.biz.service.sla.impl;
 
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
-import io.shulie.takin.cloud.common.constants.ReportConstants;
-import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.google.common.collect.Maps;
+import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
+import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
+import io.shulie.takin.cloud.biz.event.SlaPublish;
+import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
+import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
+import io.shulie.takin.cloud.biz.service.sla.SlaService;
+import io.shulie.takin.cloud.biz.utils.SlaUtil;
+import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
+import io.shulie.takin.cloud.common.bean.sla.AchieveModel;
+import io.shulie.takin.cloud.common.bean.sla.SlaBean;
+import io.shulie.takin.cloud.common.constants.Constants;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageWrapperResult;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneSlaRefResult;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import io.shulie.takin.cloud.biz.utils.SlaUtil;
-import io.shulie.takin.cloud.biz.event.SlaPublish;
-import io.shulie.takin.cloud.common.bean.sla.SlaBean;
-import org.apache.commons.collections4.CollectionUtils;
-import io.shulie.takin.cloud.biz.service.sla.SlaService;
-import io.shulie.takin.cloud.common.constants.Constants;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import io.shulie.takin.cloud.common.bean.sla.AchieveModel;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.biz.service.report.ReportService;
-import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
-import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
-import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
-import io.shulie.takin.ext.content.enginecall.ScheduleStopRequestExt;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneSlaRefResult;
-import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageWrapperResult;
 
 /**
  * @author qianshui
@@ -61,7 +59,7 @@ public class SlaServiceImpl implements SlaService {
     @Resource
     private RedisClientUtils redisClientUtils;
     @Resource
-    private TWarnDetailMapper TWarnDetailMapper;
+    private TWarnDetailMapper tWarnDetailMapper;
     @Resource
     private SceneManageService sceneManageService;
 
@@ -93,13 +91,13 @@ public class SlaServiceImpl implements SlaService {
                 TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvent));
             return false;
         }
-        if (StringUtils.isBlank(dto.getScriptAnalysisResult())){
+        if (StringUtils.isBlank(dto.getScriptAnalysisResult())) {
             Long businessActivityId = businessActivity.getBusinessActivityId();
 
             doDestroy(dto.getId(), metricsEvent, filterSlaListByActivityId(businessActivityId, dto.getStopCondition()), businessActivity);
 
             doWarn(businessActivity, metricsEvent, filterSlaListByActivityId(businessActivityId, dto.getWarningCondition()));
-        }else {
+        } else {
             String bindRef = businessActivity.getBindRef();
             doDestroy(dto.getId(), metricsEvent, filterSlaListByMd5(bindRef, dto.getStopCondition()), businessActivity);
 
@@ -161,7 +159,7 @@ public class SlaServiceImpl implements SlaService {
                     scheduleStopRequest.setTaskId(metricsEvent.getReportId());
                     scheduleStopRequest.setSceneId(sceneId);
                     // 增加顾客id
-                    scheduleStopRequest.setCustomerId(metricsEvent.getCustomerId());
+                    scheduleStopRequest.setTenantId(metricsEvent.getTenantId());
                     Map<String, Object> extendMap = Maps.newHashMap();
                     extendMap.put(Constants.SLA_DESTORY_EXTEND, "SLA发送压测任务终止事件");
                     scheduleStopRequest.setExtend(extendMap);
@@ -169,7 +167,7 @@ public class SlaServiceImpl implements SlaService {
                     if (redisClientUtils.hasKey(PREFIX_TASK + metricsEvent.getSceneId())) {
                         // 熔断数据也记录到告警明细中
                         WarnDetail warnDetail = buildWarnDetail(conditionMap, businessActivityDTO, metricsEvent, dto);
-                        TWarnDetailMapper.insertSelective(warnDetail);
+                        tWarnDetailMapper.insertSelective(warnDetail);
                         // 记录sla熔断数据
                         UpdateReportSlaDataInput slaDataInput = new UpdateReportSlaDataInput();
                         SlaBean slaBean = new SlaBean();
@@ -222,7 +220,7 @@ public class SlaServiceImpl implements SlaService {
                 WarnDetail warnDetail = buildWarnDetail(conditionMap, businessActivityDTO, metricsEvent, dto);
                 //报告未结束，才insert
                 if (redisClientUtils.hasKey(PREFIX_TASK + metricsEvent.getSceneId())) {
-                    TWarnDetailMapper.insertSelective(warnDetail);
+                    tWarnDetailMapper.insertSelective(warnDetail);
                 }
             } else {
                 redisClientUtils.hmset(SLA_WARN_KEY, String.valueOf(dto.getId()), JSON.toJSONString(model));

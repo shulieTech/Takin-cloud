@@ -1,10 +1,8 @@
 package com.pamirs.takin.entity.domain.query;
 
-import java.io.Serializable;
-
+import io.shulie.takin.common.beans.page.PagingDevice;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import io.shulie.takin.common.beans.page.PagingDevice;
 
 /**
  * @author mubai
@@ -13,8 +11,7 @@ import io.shulie.takin.common.beans.page.PagingDevice;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CloudAccountQueryParam extends PagingDevice implements Serializable {
-    private static final long serialVersionUID = 7433678857499987225L;
+public class CloudAccountQueryParam extends PagingDevice {
 
     /**
      * 平台id

@@ -10,6 +10,8 @@ import lombok.Data;
 
 /**
  * 压测引擎配置
+ *
+ * @author -
  */
 @Data
 @TableName(value = "t_pressure_test_engine_config")

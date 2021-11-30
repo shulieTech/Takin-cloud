@@ -15,7 +15,6 @@ public class ReportUpdateConclusionParam {
      */
     private Integer conclusion;
 
-
     /**
      * 扩展字段，JSON数据格式
      */
