@@ -297,6 +297,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                     reportResult = reportDao.selectById(reportId);
                 }
                 if (reportResult != null) {
+                    //不能只校验场景状态，如果报告状态是已结束，查询结果为已结束
+                    if (reportResult.getStatus() != null && reportResult.getStatus() > 0){
+                        scene.setData(0L);
+                    }
                     // 记录错误信息
                     List<String> errorMsgs = Lists.newArrayList();
                     // 检查压测引擎返回内容
