@@ -1,16 +1,16 @@
 package io.shulie.takin.cloud.open.entrypoint.controller.scenemanage;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
 import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageInfo;
@@ -89,9 +89,6 @@ public class SceneManageOpenController {
 
     @Autowired
     private DictionaryCache dictionaryCache;
-
-    @Autowired
-    private EnginePluginUtils pluginUtils;
 
     @ApiOperation(value = "|_ 更改脚本对应的压测场景的文件")
     @PutMapping("/updateFile")
@@ -185,9 +182,21 @@ public class SceneManageOpenController {
         }
         Object businessFlowId = map.get(SceneManageConstant.FEATURES_BUSINESS_FLOW_ID);
         resp.setBusinessFlowId(businessFlowId == null ? null : (String)businessFlowId);
-        if (map.containsKey(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL)) {
-            Integer schedualInterval = (Integer)map.get(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL);
-            resp.setScheduleInterval(schedualInterval);
+
+        // 新版本
+        if (StrUtil.isNotBlank(resp.getScriptAnalysisResult())) {
+            if (map.containsKey("dataValidation")) {
+                JSONObject dataValidation = (JSONObject)map.get("dataValidation");
+                Integer scheduleInterval = (Integer)dataValidation.get("timeInterval");
+                resp.setScheduleInterval(scheduleInterval);
+            }
+        }
+        //旧版本
+        else {
+            if (map.containsKey(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL)) {
+                Integer schedualInterval = (Integer)map.get(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL);
+                resp.setScheduleInterval(schedualInterval);
+            }
         }
     }
 
@@ -399,15 +408,13 @@ public class SceneManageOpenController {
         SceneSlaRefInput input = new SceneSlaRefInput();
         BeanUtils.copyProperties(slaRefDTO, input);
         Map<String, Object> dataMap = SlaUtil.matchCondition(input, new SendMetricsEvent());
-        StringBuilder sb = new StringBuilder();
-        sb.append(dataMap.get("type"));
-        sb.append(dataMap.get("compare"));
-        sb.append(slaRefDTO.getRule().getDuring());
-        sb.append(dataMap.get("unit"));
-        sb.append("连续出现");
-        sb.append(slaRefDTO.getRule().getTimes());
-        sb.append("次");
-        return sb.toString();
+        return String.valueOf(dataMap.get("type"))
+            + dataMap.get("compare")
+            + slaRefDTO.getRule().getDuring()
+            + dataMap.get("unit")
+            + "连续出现"
+            + slaRefDTO.getRule().getTimes()
+            + "次";
     }
 
     private String convertIdsToNames(String[] ids, List<BusinessActivityDetailResp> detailList) {
@@ -417,7 +424,7 @@ public class SceneManageOpenController {
         Map<String, String> detailMap = ListHelper.transferToMap(detailList,
             data -> String.valueOf(data.getBusinessActivityId()), BusinessActivityDetailResp::getBusinessActivityName);
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (String id : ids) {
             if ("-1".equals(id)) {
                 sb.append("所有");

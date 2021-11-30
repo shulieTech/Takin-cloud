@@ -90,6 +90,8 @@ public class SceneManageWrapperResp extends CloudUserCommonRequestExt implements
 
     private String features;
 
+    private String scriptAnalysisResult;
+
     private Integer configType;
 
     private Long scriptId;
