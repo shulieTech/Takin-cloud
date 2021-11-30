@@ -32,7 +32,7 @@ public class Md5Util {
     public static void main(String[] args) {
 //        String  file = "/Users/liyuanba/Downloads/data 2.csv";
         String  file = "/Users/liyuanba/Downloads/data.csv";
-        System.out.println("fileSize="+new File(file).length());
+        System.out.println("fileSize=" + new File(file).length());
         System.out.println("md5="+md5(file));
         long t = System.currentTimeMillis();
         System.out.println("file md5="+md5File(file));
