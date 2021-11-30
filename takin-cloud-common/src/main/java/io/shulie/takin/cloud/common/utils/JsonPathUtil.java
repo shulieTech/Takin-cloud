@@ -200,6 +200,13 @@ public class JsonPathUtil {
             .read("$..children[?(@.type=='" + nodeType + "')]", SCRIPT_NODE_TYPE_REF);
     }
 
+    public static List<ScriptNode> getNodeListByType(String nodeTree,NodeTypeEnum nodeType){
+        return JsonPath
+            .using(JACKSON_CONFIGURATION)
+            .parse(nodeTree)
+            .read("$..[?(@.type=='" + nodeType + "')]", SCRIPT_NODE_TYPE_REF);
+    }
+
     /**
      * 根据xpathMd5值获取类型为控制器的子节点
      *
@@ -268,6 +275,7 @@ public class JsonPathUtil {
         //    "159036bb8a7ad4451f55b16772d16305");
         //childSamplers.forEach(System.out::println);
         List<ScriptNode> nodeList = JsonPathUtil.getCurrentNodeByType(json, NodeTypeEnum.THREAD_GROUP.name());
+        nodeList = JsonPathUtil.getNodeListByType(json,NodeTypeEnum.TEST_PLAN);
         nodeList.forEach(node ->{
             System.out.println(node.getXpathMd5());
         });

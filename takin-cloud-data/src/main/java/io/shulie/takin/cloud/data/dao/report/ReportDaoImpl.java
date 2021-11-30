@@ -188,14 +188,13 @@ public class ReportDaoImpl implements ReportDao {
         LambdaQueryWrapper<ReportBusinessActivityDetailEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ReportBusinessActivityDetailEntity::getReportId, reportId);
         queryWrapper.eq(ReportBusinessActivityDetailEntity::getIsDeleted, 0);
-        List<ReportBusinessActivityDetailEntity> entities = detailMapper.selectList(
-            queryWrapper);
+        List<ReportBusinessActivityDetailEntity> entities = detailMapper.selectList(queryWrapper);
         if (Objects.isNull(nodeType)) {
             return entities;
         }
         ReportEntity reportEntity = reportMapper.selectById(reportId);
         if (Objects.nonNull(reportEntity) && StringUtils.isNotBlank(reportEntity.getScriptNodeTree())) {
-            List<ScriptNode> nodeList = JsonPathUtil.getChildrenByMd5(reportEntity.getScriptNodeTree(), null, nodeType);
+            List<ScriptNode> nodeList = JsonPathUtil.getNodeListByType(reportEntity.getScriptNodeTree(), nodeType);
             if (CollectionUtils.isNotEmpty(nodeList)) {
                 List<String> xpathMd5List = nodeList.stream().filter(Objects::nonNull)
                     .map(ScriptNode::getXpathMd5).collect(Collectors.toList());
