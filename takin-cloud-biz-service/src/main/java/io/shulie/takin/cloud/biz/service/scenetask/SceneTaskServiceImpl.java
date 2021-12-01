@@ -283,44 +283,47 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     @Override
     public SceneActionOutput checkSceneTaskStatus(Long sceneId, Long reportId) {
+        //为如果传入报告id，以报告id为准
         SceneActionOutput scene = new SceneActionOutput();
-        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
-        if (sceneManage != null) {
-            // 监测启动状态
-            scene.setData(SceneManageStatusEnum.getAdaptStatus(sceneManage.getStatus()).longValue());
-            if (sceneManage.getStatus() >= 0) {
-                ReportResult reportResult;
-                if (reportId == null) {
-                    //report = TReportMapper.getReportBySceneId(sceneId);
+        ReportResult reportResult = null;
+        if (reportId != null){
+            reportResult = reportDao.selectById(reportId);
+            //如果报告状态是已结束，查询结果为已结束
+            if (reportResult.getStatus() != null && reportResult.getStatus() > 0) {
+                scene.setData(0L);
+            } else {
+                scene.setData(SceneManageStatusEnum.PTING.getValue().longValue());
+            }
+        } else {
+            SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+            if (sceneManage != null) {
+                // 监测启动状态
+                scene.setData(SceneManageStatusEnum.getAdaptStatus(sceneManage.getStatus()).longValue());
+                if (sceneManage.getStatus() >= 0) {
                     reportResult = reportDao.getReportBySceneId(sceneId);
-                } else {
-                    reportResult = reportDao.selectById(reportId);
                 }
-                if (reportResult != null) {
-                    //不能只校验场景状态，如果报告状态是已结束，查询结果为已结束
-                    if (reportResult.getStatus() != null && reportResult.getStatus() > 0){
-                        scene.setData(0L);
-                    }
-                    // 记录错误信息
-                    List<String> errorMsgs = Lists.newArrayList();
-                    // 检查压测引擎返回内容
-                    String key = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneId,
-                        reportResult.getId());
-                    Object errorObj = redisClientUtils.hmget(key, SceneTaskRedisConstants.SCENE_RUN_TASK_ERROR);
-                    if (Objects.nonNull(errorObj) && !Constants.NULL_SIGN.equals(errorObj)) {
-                        errorMsgs.add(SceneStopReasonEnum.ENGINE.getType() + ":" + errorObj);
-                    }
-                    scene.setReportId(reportResult.getId());
-                    if (StringUtils.isNotEmpty(reportResult.getFeatures())) {
-                        JSONObject jb = JSON.parseObject(reportResult.getFeatures());
-                        errorMsgs.add(jb.getString(ReportConstants.FEATURES_ERROR_MSG));
-                    }
-                    if (CollectionUtils.isNotEmpty(errorMsgs)) {
-                        scene.setMsg(errorMsgs);
-                        //  前端只有等于0,才会显示错误
-                        scene.setData(0L);
-                    }
-                }
+            }
+        }
+        if (reportResult != null) {
+
+            // 记录错误信息
+            List<String> errorMsgs = Lists.newArrayList();
+            // 检查压测引擎返回内容
+            String key = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneId,
+                    reportResult.getId());
+            Object errorObj = redisClientUtils.hmget(key, SceneTaskRedisConstants.SCENE_RUN_TASK_ERROR);
+            if (Objects.nonNull(errorObj) && !Constants.NULL_SIGN.equals(errorObj)) {
+                errorMsgs.add(SceneStopReasonEnum.ENGINE.getType() + ":" + errorObj);
+            }
+            scene.setReportId(reportResult.getId());
+            if (StringUtils.isNotEmpty(reportResult.getFeatures())) {
+                JSONObject jb = JSON.parseObject(reportResult.getFeatures());
+                errorMsgs.add(jb.getString(ReportConstants.FEATURES_ERROR_MSG));
+            }
+            if (CollectionUtils.isNotEmpty(errorMsgs)) {
+                scene.setMsg(errorMsgs);
+                //  前端只有等于0,才会显示错误
+                scene.setData(0L);
             }
         }
         return scene;
