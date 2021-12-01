@@ -829,6 +829,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         if (StringUtils.isBlank(scriptNodeTree) || CollectionUtils.isEmpty(businessActivityConfig)) {
             return;
         }
+        List<String> bindRefList = businessActivityConfig.stream().filter(Objects::nonNull)
+            .map(SceneBusinessActivityRefOutput::getBindRef)
+            .collect(Collectors.toList());
         List<ReportBusinessActivityDetail> resultList = new ArrayList<>();
         List<ScriptNode> testPlanNodeList = JsonPathUtil.getCurrentNodeByType(scriptNodeTree,
             NodeTypeEnum.TEST_PLAN.name());
@@ -848,6 +851,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             NodeTypeEnum.CONTROLLER.name());
         if (CollectionUtils.isNotEmpty(controllerNodes)) {
             controllerNodes.stream().filter(Objects::nonNull)
+                .filter(node -> !bindRefList.contains(node.getXpathMd5()))
                 .forEach(node -> calculateTarget(sceneId, reportId, scriptNodeTree, node, businessActivityConfig,
                     resultList));
         }
