@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.ScriptNodeSummaryBean;
 import lombok.EqualsAndHashCode;
 import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
@@ -99,8 +100,8 @@ public class ReportDetailOutput extends CloudUserCommonRequestExt implements Ser
     @ApiModelProperty(value = "警告列表")
     private List<WarnBean> warn;
 
-    //@ApiModelProperty(value = "业务活动链路概览")
-    //private List<BusinessActivitySummaryBean> businessActivity;
+    @ApiModelProperty(value = "业务活动链路概览")
+    private List<BusinessActivitySummaryBean> businessActivity;
 
     private Long scriptId;
 

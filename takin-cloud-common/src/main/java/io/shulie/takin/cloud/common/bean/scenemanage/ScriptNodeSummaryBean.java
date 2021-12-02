@@ -27,6 +27,9 @@ public class ScriptNodeSummaryBean extends AbstractEntry {
     @ApiModelProperty(value = "元素节点的md5值")
     private String md5;
 
+    @ApiModelProperty(value = "业务活动ID")
+    private Long activityId;
+
     @ApiModelProperty(value = "节点类型")
     private String type;
 
