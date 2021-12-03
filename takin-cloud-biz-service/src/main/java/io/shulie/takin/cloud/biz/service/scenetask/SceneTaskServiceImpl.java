@@ -352,7 +352,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                     List<String> errorMsgs = Lists.newArrayList();
                     // 检查压测引擎返回内容
                     SceneRunTaskStatusOutput status = taskStatusCache.getStatus(sceneId, reportResult.getId());
-                    if (Objects.nonNull(status) && status.getTaskStatus() == SceneRunTaskStatusEnum.FAILED.getCode()) {
+                    if (Objects.nonNull(status) && Objects.nonNull(status.getTaskStatus())
+                        && status.getTaskStatus() == SceneRunTaskStatusEnum.FAILED.getCode()) {
                         errorMsgs.add(SceneStopReasonEnum.ENGINE.getType() + ":" + status.getErrorMsg());
                     }
                     scene.setReportId(reportResult.getId());
@@ -597,6 +598,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         }
         return r;
     }
+
     @Override
     public SceneInspectTaskStopOutput stopInspectTask(Long sceneId) {
         SceneInspectTaskStopOutput output = new SceneInspectTaskStopOutput();
