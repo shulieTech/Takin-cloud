@@ -738,7 +738,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                     long breakTime = Math.min(endTime, nowTimeWindow);
                     Long timeWindow = null;
                     do {
-                        //不用递归，而是采用do...while...的方式是防止需要处理的时间段太长引起trackoverflow错误
+                        //不用递归，而是采用do...while...的方式是防止需要处理的时间段太长引起stackOverFlow错误
                         timeWindow = reduceMetrics(sceneId, reportId, customerId, podNum, breakTime, timeWindow, nodes);
                         if (null == timeWindow) {
                             timeWindow = nowTimeWindow;

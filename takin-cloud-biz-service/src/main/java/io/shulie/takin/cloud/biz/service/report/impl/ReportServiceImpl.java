@@ -1065,6 +1065,7 @@ public class ReportServiceImpl implements ReportService {
                     TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId, reportResult.getStatus());
                 return;
             }
+            reportResult.setStatus(ReportConstants.RUN_STATUS);
         }
 
         String testPlanXpathMD5 = getTestPlanXpathMD5(reportResult.getScriptNodeTree());
