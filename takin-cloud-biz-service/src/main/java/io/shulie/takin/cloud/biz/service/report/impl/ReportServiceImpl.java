@@ -705,14 +705,6 @@ public class ReportServiceImpl implements ReportService {
         reportDao.finishReport(reportId);
         log.info("报告{} finish done", reportId);
 
-        //解锁逻辑应该合锁逻辑成对出现，转移到web
-        //        UpdateStatusBean reportStatus = new UpdateStatusBean();
-        //        reportStatus.setResultId(reportId);
-        //        //完成报告之后锁定报告
-        //        reportStatus.setPreStatus(ReportConstants.RUN_STATUS);
-        //        reportStatus.setAfterStatus(ReportConstants.LOCK_STATUS);
-        //        tReportMapper.updateReportLock(reportStatus);
-
         return true;
     }
 
@@ -1073,7 +1065,6 @@ public class ReportServiceImpl implements ReportService {
                     TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId, reportResult.getStatus());
                 return;
             }
-            reportResult.setStatus(ReportConstants.RUN_STATUS);
         }
 
         String testPlanXpathMD5 = getTestPlanXpathMD5(reportResult.getScriptNodeTree());

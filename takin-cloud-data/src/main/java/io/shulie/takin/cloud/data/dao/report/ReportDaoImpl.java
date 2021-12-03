@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
+import io.shulie.takin.cloud.data.param.report.ReportInsertParam;
 import org.springframework.beans.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
-import io.shulie.takin.cloud.data.param.report.ReportDataQueryParam;
+import io.shulie.takin.cloud.data.param.report.ReportQueryParam;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
 import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
@@ -41,7 +42,21 @@ public class ReportDaoImpl implements ReportDao {
     private ReportBusinessActivityDetailMapper detailMapper;
 
     @Override
-    public List<ReportResult> getList(ReportDataQueryParam param) {
+    public int insert(ReportInsertParam param) {
+        if (Objects.nonNull(param)){
+            ReportEntity entity = new ReportEntity();
+            BeanUtils.copyProperties(param,entity);
+            Date insertDate = new Date();
+            entity.setGmtCreate(insertDate);
+            entity.setGmtUpdate(insertDate);
+            entity.setStartTime(insertDate);
+            return reportMapper.insert(entity);
+        }
+        return 0;
+    }
+
+    @Override
+    public List<ReportResult> queryReportList(ReportQueryParam param) {
         LambdaQueryWrapper<ReportEntity> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(param.getEndTime())) {
             wrapper.le(ReportEntity::getGmtCreate, param.getEndTime());
@@ -171,16 +186,6 @@ public class ReportDaoImpl implements ReportDao {
         reportMapper.updateById(entity);
     }
 
-    @Override
-    public ReportResult getById(Long resultId) {
-        if (resultId == null) {
-            return null;
-        }
-        ReportEntity reportEntity = reportMapper.selectById(resultId);
-        ReportResult reportResult = new ReportResult();
-        BeanUtils.copyProperties(reportEntity, reportResult);
-        return reportResult;
-    }
 
     @Override
     public List<ReportBusinessActivityDetailEntity> getReportBusinessActivityDetailsByReportId(Long reportId,

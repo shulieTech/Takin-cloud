@@ -45,7 +45,7 @@ import io.shulie.takin.cloud.common.utils.*;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.data.param.report.ReportDataQueryParam;
+import io.shulie.takin.cloud.data.param.report.ReportQueryParam;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.eventcenter.Event;
@@ -695,10 +695,10 @@ public class PushWindowDataScheduled extends AbstractIndicators {
      * 实时数据统计
      */
     public void pushData2() {
-        ReportDataQueryParam param = new ReportDataQueryParam();
+        ReportQueryParam param = new ReportQueryParam();
         param.setStatus(0);
         param.setIsDel(0);
-        List<ReportResult> results = reportDao.getList(param);
+        List<ReportResult> results = reportDao.queryReportList(param);
         if (CollectionUtils.isEmpty(results)) {
             log.info("没有需要统计的报告！");
             return;

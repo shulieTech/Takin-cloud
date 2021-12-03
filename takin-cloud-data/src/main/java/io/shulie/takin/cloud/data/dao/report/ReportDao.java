@@ -3,10 +3,11 @@ package io.shulie.takin.cloud.data.dao.report;
 import java.util.Date;
 import java.util.List;
 
+import io.shulie.takin.cloud.data.param.report.ReportInsertParam;
 import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
-import io.shulie.takin.cloud.data.param.report.ReportDataQueryParam;
+import io.shulie.takin.cloud.data.param.report.ReportQueryParam;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
 import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
 
@@ -15,13 +16,16 @@ import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity
  * @date 2020/12/17 3:30 下午
  */
 public interface ReportDao {
+
+    int insert(ReportInsertParam param);
+
     /**
      * 获取列表
      *
      * @param param -
      * @return -
      */
-    List<ReportResult> getList(ReportDataQueryParam param);
+    List<ReportResult> queryReportList(ReportQueryParam param);
 
     /**
      * 获取报告
@@ -92,12 +96,6 @@ public interface ReportDao {
      */
     void updateReportEndTime(Long resultId, Date endTime);
 
-    /**
-     * 根据id查询报告
-     * @param resultId
-     * @return
-     */
-    ReportResult getById(Long resultId);
 
     /**
      * 查询报告关联的节点信息
