@@ -320,7 +320,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     @Override
     public PageInfo<SceneManageListOutput> queryPageList(SceneManageQueryInput queryVO) {
 
-        Page<SceneManageListOutput> page = PageHelper.startPage(queryVO.getPageNumber() , queryVO.getPageSize());
+        Page<SceneManageListOutput> page = PageHelper.startPage(queryVO.getPageNumber(), queryVO.getPageSize());
         SceneManageQueryBean sceneManageQueryBean = new SceneManageQueryBean();
         BeanUtils.copyProperties(queryVO, sceneManageQueryBean);
         //默认查询普通类型场景，场景类型目前不透出去
@@ -966,7 +966,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         }
         SceneManageResult result = sceneManageDAO.getSceneById(id);
         if (result == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "场景记录不存在");
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "场景记录不存在" + id);
         }
         return result;
     }
