@@ -1,7 +1,7 @@
 package io.shulie.takin.cloud.data.model.mysql;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -50,6 +50,12 @@ public class ReportBusinessActivityDetailEntity {
      */
     @TableField(value = "bind_ref")
     private String bindRef;
+
+    /**
+     * 平均并发数
+     */
+    @TableField(value = "avg_concurrence_num")
+    private BigDecimal avgConcurrenceNum;
 
     /**
      * 请求数
@@ -142,8 +148,8 @@ public class ReportBusinessActivityDetailEntity {
     private Integer isDeleted;
 
     @TableField(value = "gmt_create")
-    private LocalDateTime gmtCreate;
+    private Date gmtCreate;
 
     @TableField(value = "gmt_update")
-    private LocalDateTime gmtUpdate;
+    private Date gmtUpdate;
 }
