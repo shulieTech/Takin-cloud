@@ -60,7 +60,7 @@ public class FileSliceByPodNum {
         pair.setStart(start);
         long endPosition = start + size - 1;
         if (endPosition >= fileLength - 1) {
-            pair.setEnd(fileLength - 1);
+            pair.setEnd(fileLength);
             startEndPairs.add(pair);
             return;
         }
@@ -70,7 +70,7 @@ public class FileSliceByPodNum {
         while (tmp != '\n' && tmp != '\r') {
             endPosition++;
             if (endPosition >= fileLength - 1) {
-                endPosition = fileLength - 1;
+                endPosition = fileLength;
                 break;
             }
             rAccessFile.seek(endPosition);
