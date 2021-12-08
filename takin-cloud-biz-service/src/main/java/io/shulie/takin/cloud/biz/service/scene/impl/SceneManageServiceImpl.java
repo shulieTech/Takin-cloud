@@ -995,7 +995,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         }
         SceneManageResult result = sceneManageDAO.getSceneById(id);
         if (result == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "场景记录不存在");
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "场景记录不存在" + id);
         }
         return result;
     }

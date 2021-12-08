@@ -170,4 +170,10 @@ public class EntrypointUrl {
     public final static String MODULE_COLLECTOR = "collector";
     public final static String METHOD_COLLECTOR_RECEIVE = "receive";
 
+    /**
+     * 健康检测
+     */
+    public final static String MODULE_HEALTH = "health";
+    public final static String METHOD_HEALTH_CHECK = "";
+
 }
