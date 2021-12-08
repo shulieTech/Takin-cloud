@@ -101,22 +101,6 @@ public class ReportController {
         }
         ReportDetailResp resp = new ReportDetailResp();
         BeanUtils.copyProperties(detailOutput, resp);
-        // 处理关联的应用主键，兼容web端定时任务
-        {
-            List<String> applicationIdStringList = new LinkedList<>();
-            fillApplicationIds(detailOutput.getNodeDetail(), applicationIdStringList);
-            Set<Long> applicationIdList = new LinkedHashSet<>();
-            // 双循环转化id为一维数据
-            applicationIdStringList.stream().filter(StrUtil::isNotBlank)
-                .forEach(t -> Arrays.stream(t.split(",")).filter(StrUtil::isNotBlank)
-                    .map(Long::parseLong).forEach(applicationIdList::add));
-            // 填充响应对象的值
-            resp.setBusinessActivity(new LinkedList<BusinessActivitySummaryBean>() {{
-                add(new BusinessActivitySummaryBean() {{
-                    setApplicationIds(applicationIdList.stream().map(String::valueOf).collect(Collectors.joining(",")));
-                }});
-            }});
-        }
         return ResponseResult.success(resp);
     }
 

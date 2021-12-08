@@ -1,22 +1,23 @@
 package io.shulie.takin.cloud.common.utils;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 import java.util.Objects;
+import java.util.Collections;
 
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
+import lombok.extern.slf4j.Slf4j;
+
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.TypeRef;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
+import org.apache.commons.lang3.StringUtils;
+import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.ext.content.enums.NodeTypeEnum;
+import org.apache.commons.collections4.CollectionUtils;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
-import io.shulie.takin.ext.content.enums.NodeTypeEnum;
-import io.shulie.takin.ext.content.script.ScriptNode;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author moriarty
@@ -60,9 +61,7 @@ public class JsonPathUtil {
         }
         md5Keys.stream()
             .filter(StringUtils::isNotBlank)
-            .forEach(md5 -> {
-                document.delete(JsonPath.compile("$..[?(@.xpathMd5=='" + md5 + "')]"));
-            });
+            .forEach(md5 -> document.delete(JsonPath.compile("$..[?(@.xpathMd5=='" + md5 + "')]")));
         return document;
     }
 
@@ -153,9 +152,7 @@ public class JsonPathUtil {
         try {
             DocumentContext finalContext = JsonPath.parse(nodeTree);
             xpathMd5List.stream().filter(StringUtils::isNotBlank)
-                .forEach(md5 -> {
-                    finalContext.delete(JsonPath.compile("$..[?(@.xpathMd5=='" + md5 + "')]"));
-                });
+                .forEach(md5 -> finalContext.delete(JsonPath.compile("$..[?(@.xpathMd5=='" + md5 + "')]")));
             return JsonPath.using(JACKSON_CONFIGURATION)
                 .parse(finalContext.jsonString())
                 .read("$..[?(@.type=='TEST_PLAN')]", SCRIPT_NODE_TYPE_REF);
@@ -196,6 +193,13 @@ public class JsonPathUtil {
             .using(JACKSON_CONFIGURATION)
             .parse(read.toString())
             .read("$..children[?(@.type=='" + nodeType + "')]", SCRIPT_NODE_TYPE_REF);
+    }
+
+    public static List<ScriptNode> getNodeListByType(String nodeTree, NodeTypeEnum nodeType) {
+        return JsonPath
+            .using(JACKSON_CONFIGURATION)
+            .parse(nodeTree)
+            .read("$..[?(@.type=='" + nodeType + "')]", SCRIPT_NODE_TYPE_REF);
     }
 
     /**
@@ -266,8 +270,7 @@ public class JsonPathUtil {
         //    "159036bb8a7ad4451f55b16772d16305");
         //childSamplers.forEach(System.out::println);
         List<ScriptNode> nodeList = JsonPathUtil.getCurrentNodeByType(json, NodeTypeEnum.THREAD_GROUP.name());
-        nodeList.forEach(node -> {
-            System.out.println(node.getXpathMd5());
-        });
+        nodeList = JsonPathUtil.getNodeListByType(json, NodeTypeEnum.TEST_PLAN);
+        nodeList.forEach(node -> System.out.println(node.getXpathMd5()));
     }
 }
