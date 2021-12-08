@@ -756,7 +756,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                     if (r.getEndTime() != null){
                         // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
                         sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
-                                .checkEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING,SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
+                                .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
                                 .updateEnum(SceneManageStatusEnum.STOP)
                                 .build());
                     }
@@ -962,7 +962,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
             if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {
                 sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
-                    .checkEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING,SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
+                    .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
                     .updateEnum(SceneManageStatusEnum.STOP)
                     .build());
             }
