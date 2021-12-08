@@ -1,17 +1,20 @@
 package io.shulie.takin.cloud.biz.output.report;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.math.BigDecimal;
 
-import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import io.swagger.annotations.ApiModelProperty;
+
 import io.shulie.takin.cloud.common.bean.sla.SlaBean;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
+import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
+import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
 
 /**
  * @author 无涯
@@ -93,8 +96,8 @@ public class ReportDetailOutput extends ContextExt {
     @ApiModelProperty(value = "警告列表")
     private List<WarnBean> warn;
 
-    //@ApiModelProperty(value = "业务活动链路概览")
-    //private List<BusinessActivitySummaryBean> businessActivity;
+    @ApiModelProperty(value = "业务活动链路概览")
+    private List<BusinessActivitySummaryBean> businessActivity;
 
     private Long scriptId;
 

@@ -7,7 +7,7 @@ import lombok.Data;
  * @date 2020/12/17 3:34 下午
  */
 @Data
-public class ReportDataQueryParam {
+public class ReportQueryParam {
     private String endTime;
     /**
      * 状态:0就绪，1生成中，2已完成

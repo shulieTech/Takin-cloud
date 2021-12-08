@@ -1,77 +1,79 @@
 package io.shulie.takin.cloud.biz.collector;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
+import java.util.Map;
+import java.util.Set;
+import java.util.List;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Comparator;
+import java.math.RoundingMode;
 import java.util.stream.Collectors;
+import java.util.function.Consumer;
+import java.util.concurrent.TimeUnit;
+import java.nio.charset.StandardCharsets;
 
 import javax.annotation.Resource;
 
-import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
+
 import com.google.common.collect.Maps;
-import io.shulie.takin.cloud.biz.collector.collector.AbstractIndicators;
-import io.shulie.takin.cloud.biz.config.AppConfig;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.biz.output.statistics.PressureOutput;
-import io.shulie.takin.cloud.biz.output.statistics.RtDataOutput;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+import org.apache.commons.collections4.MapUtils;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.data.redis.core.ScanOptions;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.data.redis.connection.RedisConnection;
+
+import io.shulie.takin.eventcenter.Event;
+import io.shulie.takin.utils.json.JsonHelper;
 import io.shulie.takin.cloud.biz.utils.DataUtils;
 import io.shulie.takin.cloud.biz.utils.Executors;
-import io.shulie.takin.cloud.common.bean.collector.Metrics;
-import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
-import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
-import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.common.bean.task.TaskResult;
-import io.shulie.takin.cloud.common.constants.CollectorConstants;
-import io.shulie.takin.cloud.common.constants.ReportConstants;
-import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.influxdb.InfluxUtil;
-import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
-import io.shulie.takin.cloud.common.utils.CollectorUtil;
-import io.shulie.takin.cloud.common.utils.CommonUtil;
-import io.shulie.takin.cloud.common.utils.DateUtil;
+import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.common.utils.JmxUtil;
-import io.shulie.takin.cloud.common.utils.JsonPathUtil;
+import io.shulie.takin.cloud.common.utils.DateUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
+import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
-import io.shulie.takin.cloud.data.dao.report.ReportDao;
-import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
-import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.data.param.report.ReportDataQueryParam;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
-import io.shulie.takin.eventcenter.Event;
-import io.shulie.takin.eventcenter.EventCenterTemplate;
-import io.shulie.takin.eventcenter.annotation.IntrestFor;
+import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.eventcenter.entity.TaskConfig;
 import io.shulie.takin.ext.content.enums.NodeTypeEnum;
-import io.shulie.takin.ext.content.script.ScriptNode;
-import io.shulie.takin.utils.json.JsonHelper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.ScanOptions;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import io.shulie.takin.eventcenter.EventCenterTemplate;
+import io.shulie.takin.cloud.data.dao.report.ReportDao;
+import io.shulie.takin.cloud.common.utils.JsonPathUtil;
+import io.shulie.takin.cloud.common.influxdb.InfluxUtil;
+import io.shulie.takin.cloud.common.utils.CollectorUtil;
+import io.shulie.takin.eventcenter.annotation.IntrestFor;
+import io.shulie.takin.cloud.common.bean.task.TaskResult;
+import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
+import io.shulie.takin.cloud.common.bean.collector.Metrics;
+import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.biz.output.statistics.RtDataOutput;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
+import io.shulie.takin.cloud.data.param.report.ReportQueryParam;
+import io.shulie.takin.cloud.common.constants.CollectorConstants;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.biz.output.statistics.PressureOutput;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
+import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import io.shulie.takin.cloud.biz.collector.collector.AbstractIndicators;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 
 /**
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
@@ -703,10 +705,10 @@ public class PushWindowDataScheduled extends AbstractIndicators {
      * 实时数据统计
      */
     public void pushData2() {
-        ReportDataQueryParam param = new ReportDataQueryParam();
+        ReportQueryParam param = new ReportQueryParam();
         param.setStatus(0);
         param.setIsDel(0);
-        List<ReportResult> results = reportDao.getList(param);
+        List<ReportResult> results = reportDao.queryReportList(param);
         if (CollectionUtils.isEmpty(results)) {
             log.info("没有需要统计的报告！");
             return;
@@ -746,7 +748,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                     long breakTime = Math.min(endTime, nowTimeWindow);
                     Long timeWindow = null;
                     do {
-                        //不用递归，而是采用do...while...的方式是防止需要处理的时间段太长引起trackoverflow错误
+                        //不用递归，而是采用do...while...的方式是防止需要处理的时间段太长引起stackOverFlow错误
                         timeWindow = reduceMetrics(sceneId, reportId, customerId, podNum, breakTime, timeWindow, nodes);
                         if (null == timeWindow) {
                             timeWindow = nowTimeWindow;

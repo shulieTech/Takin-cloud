@@ -1,119 +1,123 @@
 package io.shulie.takin.cloud.biz.service.report.impl;
 
+import java.util.Map;
+import java.util.Date;
+import java.util.List;
+import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.Calendar;
+import java.time.Duration;
+import java.util.Optional;
+import java.util.ArrayList;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import cn.hutool.core.date.DateUnit;
-import cn.hutool.core.date.DateUtil;
+import org.influxdb.impl.TimeUtil;
 import cn.hutool.core.util.StrUtil;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.jayway.jsonpath.DocumentContext;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.DateUnit;
 import com.jayway.jsonpath.JsonPath;
-import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
+import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
+import com.github.pagehelper.PageHelper;
+import org.springframework.beans.BeanUtils;
+import com.jayway.jsonpath.DocumentContext;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+import org.apache.commons.collections4.MapUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
-import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
-import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
-import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
-import com.pamirs.takin.entity.domain.dto.report.StatInspectReportDTO;
-import com.pamirs.takin.entity.domain.dto.report.StatReportDTO;
 import com.pamirs.takin.entity.domain.entity.report.Report;
-import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
+import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
+import com.pamirs.takin.entity.domain.dto.report.StatReportDTO;
+import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
+import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
+import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
 import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
-import io.shulie.takin.cloud.biz.cloudserver.ReportConverter;
-import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
-import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
-import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
-import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
-import io.shulie.takin.cloud.biz.output.report.ReportOutput;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
-import io.shulie.takin.cloud.biz.service.report.ReportService;
-import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventService;
-import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
-import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
+import com.pamirs.takin.entity.domain.dto.report.StatInspectReportDTO;
+import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
+import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
+
+import io.shulie.takin.eventcenter.Event;
+import io.shulie.takin.utils.json.JsonHelper;
+import io.shulie.takin.cloud.ext.api.AssetExtApi;
+import io.shulie.takin.cloud.common.utils.GsonUtil;
+import io.shulie.takin.cloud.common.utils.JsonUtil;
+import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.common.bean.sla.SlaBean;
-import io.shulie.takin.cloud.common.bean.task.TaskResult;
-import io.shulie.takin.cloud.common.constants.ReportConstants;
-import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
-import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.utils.NumberUtil;
+import io.shulie.takin.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.cloud.common.utils.TestTimeUtil;
+import io.shulie.takin.cloud.common.utils.JsonPathUtil;
+import io.shulie.takin.cloud.data.dao.report.ReportDao;
+import io.shulie.takin.cloud.sdk.model.common.DataBean;
 import io.shulie.takin.cloud.common.influxdb.InfluxUtil;
+import io.shulie.takin.cloud.common.bean.task.TaskResult;
+import io.shulie.takin.eventcenter.annotation.IntrestFor;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.cloud.common.utils.GsonUtil;
-import io.shulie.takin.cloud.common.utils.JsonPathUtil;
-import io.shulie.takin.cloud.common.utils.JsonUtil;
-import io.shulie.takin.cloud.common.utils.NumberUtil;
-import io.shulie.takin.cloud.common.utils.TestTimeUtil;
-import io.shulie.takin.cloud.data.dao.report.ReportDao;
-import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
-import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
-import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
-import io.shulie.takin.cloud.ext.api.AssetExtApi;
-import io.shulie.takin.cloud.ext.content.asset.AssetInvoiceExt;
-import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
-import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
-import io.shulie.takin.cloud.sdk.model.common.DataBean;
-import io.shulie.takin.cloud.sdk.model.common.DistributeBean;
-import io.shulie.takin.cloud.sdk.model.request.WarnQueryParam;
-import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
-import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
-import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
-import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
-import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
-import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
-import io.shulie.takin.eventcenter.Event;
-import io.shulie.takin.eventcenter.annotation.IntrestFor;
 import io.shulie.takin.ext.content.asset.RealAssectBillExt;
-import io.shulie.takin.ext.content.enums.NodeTypeEnum;
-import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.plugin.framework.core.PluginManager;
-import io.shulie.takin.utils.json.JsonHelper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.influxdb.impl.TimeUtil;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import io.shulie.takin.cloud.biz.output.report.ReportOutput;
+import io.shulie.takin.cloud.sdk.model.common.DistributeBean;
+import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
+import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.biz.cloudserver.ReportConverter;
+import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
+import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
+import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
+import io.shulie.takin.cloud.sdk.model.request.WarnQueryParam;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
+import io.shulie.takin.cloud.ext.content.asset.AssetInvoiceExt;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
+import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
+import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
+import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
+import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
+import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventService;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
+import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
+import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
+import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
+import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
+import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
+import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
 
 /**
  * @author 莫问
@@ -224,7 +228,12 @@ public class ReportServiceImpl implements ReportService {
                 JSON.parseObject(report.getFeatures()).getString(ReportConstants.FEATURES_ERROR_MSG));
         }
         detail.setTestTotalTime(TestTimeUtil.format(report.getStartTime(), report.getEndTime()));
-        detail.setNodeDetail(getReportNodeDetail(report.getScriptNodeTree(), reportId));
+        List<ScriptNodeSummaryBean> reportNodeDetail = getReportNodeDetail(report.getScriptNodeTree(), reportId);
+        detail.setNodeDetail(reportNodeDetail);
+
+        List<BusinessActivitySummaryBean> businessActivities = new ArrayList<>();
+        buildFailActivitiesByNodeDetails(reportNodeDetail, businessActivities);
+        detail.setBusinessActivity(businessActivities);
         //任务没有完成，提示用户正在生成中
         if (report.getStatus() != ReportConstants.FINISH_STATUS) {
             detail.setTaskStatus(ReportConstants.RUN_STATUS);
@@ -233,10 +242,42 @@ public class ReportServiceImpl implements ReportService {
         if (StringUtils.isNotBlank(report.getFeatures())) {
             JSONObject jsonObject = JSON.parseObject(report.getFeatures());
             if (jsonObject.containsKey(ReportConstants.SLA_ERROR_MSG)) {
-                detail.setSlaMsg(JsonHelper.json2Bean(jsonObject.getString(ReportConstants.SLA_ERROR_MSG), SlaBean.class));
+                detail.setSlaMsg(
+                    JsonHelper.json2Bean(jsonObject.getString(ReportConstants.SLA_ERROR_MSG), SlaBean.class));
             }
         }
         return detail;
+    }
+
+    private void buildFailActivitiesByNodeDetails(List<ScriptNodeSummaryBean> reportNodeDetail,
+        List<BusinessActivitySummaryBean> result) {
+        if (CollectionUtils.isEmpty(reportNodeDetail)) {
+            return;
+        }
+        for (ScriptNodeSummaryBean bean : reportNodeDetail) {
+            if (bean.getActivityId() > -1) {
+                BusinessActivitySummaryBean summaryBean = new BusinessActivitySummaryBean();
+                summaryBean.setBusinessActivityId(bean.getActivityId());
+                summaryBean.setBusinessActivityName(bean.getTestName());
+                summaryBean.setBindRef(bean.getXpathMd5());
+                summaryBean.setApplicationIds(bean.getApplicationIds());
+                summaryBean.setAvgRT(bean.getAvgRt());
+                summaryBean.setMinRt(bean.getMinRt());
+                summaryBean.setMaxRt(bean.getMaxRt());
+                summaryBean.setMaxTps(bean.getMaxTps());
+                summaryBean.setPassFlag(bean.getPassFlag());
+                summaryBean.setSa(bean.getSa());
+                summaryBean.setSuccessRate(bean.getSuccessRate());
+                summaryBean.setTotalRequest(bean.getTotalRequest());
+                summaryBean.setTps(bean.getTps());
+                result.add(summaryBean);
+                if (CollectionUtils.isNotEmpty(bean.getChildren())) {
+                    buildFailActivitiesByNodeDetails(bean.getChildren(), result);
+                }
+            } else if (CollectionUtils.isNotEmpty(bean.getChildren())) {
+                buildFailActivitiesByNodeDetails(bean.getChildren(), result);
+            }
+        }
     }
 
     private List<ScriptNodeSummaryBean> getReportNodeDetail(String scriptNodeTree, Long reportId) {
@@ -272,9 +313,11 @@ public class ReportServiceImpl implements ReportService {
         // 查询sla熔断数据
         ReportDetailOutput detailOutput = this.getReportByReportId(reportResult.getId());
         reportDetail.setSlaMsg(detailOutput.getSlaMsg());
-        String testPlanXpathMD5 = getTestPlanXpathMD5(reportResult.getScriptNodeTree());
-        String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY : testPlanXpathMD5;
-        StatReportDTO statReport = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(), transaction);
+        String testPlanXpathMd5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
+        String transaction = StringUtils.isBlank(testPlanXpathMd5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
+            : testPlanXpathMd5;
+        StatReportDTO statReport = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
+            transaction);
         if (statReport == null) {
             log.warn("实况报表:[{}]，暂无数据", reportResult.getId());
         } else {
@@ -363,7 +406,7 @@ public class ReportServiceImpl implements ReportService {
         return reportDetail;
     }
 
-    private String getTestPlanXpathMD5(String scriptNodeTree) {
+    private String getTestPlanXpathMd5(String scriptNodeTree) {
         if (StringUtils.isBlank(scriptNodeTree)) {
             return null;
         }
@@ -515,7 +558,8 @@ public class ReportServiceImpl implements ReportService {
      * @param details  业务活动详情
      * @return -
      */
-    private List<ScriptNodeSummaryBean> getScriptNodeSummaryBeans(String nodeTree, List<ReportBusinessActivityDetail> details) {
+    private List<ScriptNodeSummaryBean> getScriptNodeSummaryBeans(String nodeTree,
+        List<ReportBusinessActivityDetail> details) {
         Map<String, Map<String, Object>> resultMap = new HashMap<>();
         if (StringUtils.isNotBlank(nodeTree)) {
             details.stream().filter(Objects::nonNull)
@@ -662,14 +706,6 @@ public class ReportServiceImpl implements ReportService {
         reportDao.finishReport(reportId);
         log.info("报告{} finish done", reportId);
 
-        //解锁逻辑应该合锁逻辑成对出现，转移到web
-        //        UpdateStatusBean reportStatus = new UpdateStatusBean();
-        //        reportStatus.setResultId(reportId);
-        //        //完成报告之后锁定报告
-        //        reportStatus.setPreStatus(ReportConstants.RUN_STATUS);
-        //        reportStatus.setAfterStatus(ReportConstants.LOCK_STATUS);
-        //        tReportMapper.updateReportLock(reportStatus);
-
         return true;
     }
 
@@ -763,7 +799,7 @@ public class ReportServiceImpl implements ReportService {
         if (reportResult == null) {
             return new ReportTrendResp();
         }
-        String testPlanXpathMD5 = getTestPlanXpathMD5(reportResult.getScriptNodeTree());
+        String testPlanXpathMD5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
         String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
             : testPlanXpathMD5;
         if (StringUtils.isNotBlank(reportTrendQuery.getXpathMd5())) {
@@ -1037,7 +1073,7 @@ public class ReportServiceImpl implements ReportService {
             reportResult.setStatus(ReportConstants.RUN_STATUS);
         }
 
-        String testPlanXpathMD5 = getTestPlanXpathMD5(reportResult.getScriptNodeTree());
+        String testPlanXpathMD5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
         String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
             : testPlanXpathMD5;
         //汇总所有业务活动数据
@@ -1110,9 +1146,11 @@ public class ReportServiceImpl implements ReportService {
         StringBuilder influxDbSql = new StringBuilder();
         influxDbSql.append("select");
         influxDbSql.append(
-            " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps ,sum(sum_rt)/sum(count) as  "
+            " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps ,sum(sum_rt)/sum"
+                + "(count) as  "
                 + "avgRt, sum(sa_count) as saCount,  max(avg_tps) as maxTps, min(min_rt) as minRt, max(max_rt) as "
-                + "maxRt, count(avg_rt) as recordCount ,max(active_threads) as maxConcurrenceNum,round(mean(active_threads)) as avgConcurrenceNum");
+                + "maxRt, count(avg_rt) as recordCount ,max(active_threads) as maxConcurrenceNum,round(mean"
+                + "(active_threads)) as avgConcurrenceNum");
         influxDbSql.append(" from ");
         influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, customerId));
         influxDbSql.append(" where ");
@@ -1262,7 +1300,8 @@ public class ReportServiceImpl implements ReportService {
         //    new SceneManageQueryOpitons());
         //Long totalTestTime = sceneManage.getTotalTestTime();
 
-        String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId());
+        String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(),
+            reportResult.getCustomerId());
         Long eTime = (Long)redisClientUtils.getObject(engineName + ScheduleConstants.LAST_SIGN);
         Date curDate;
         if (eTime != null) {
@@ -1350,7 +1389,13 @@ public class ReportServiceImpl implements ReportService {
             resultMap.put("maxRt", detail.getMaxRt());
             resultMap.put("minRt", detail.getMinRt());
             resultMap.put("maxTps", detail.getMaxTps());
-            resultMap.put("passFlag", Optional.ofNullable(detail.getPassFlag()).orElse(0));
+            resultMap.put("activityId", detail.getBusinessActivityId());
+            //采样器和设置过目标的控制器视作业务活动，才会对是否达标进行判断，否则按照达标判断
+            if (detail.getBusinessActivityId() > -1) {
+                resultMap.put("passFlag", Optional.ofNullable(detail.getPassFlag()).orElse(0));
+            } else {
+                resultMap.put("passFlag", 1);
+            }
             resultMap.put("totalRequest", detail.getRequest());
             resultMap.put("successRate", new DataBean(detail.getSuccessRate(), detail.getTargetSuccessRate()));
             resultMap.put("avgConcurrenceNum", detail.getAvgConcurrenceNum());
@@ -1367,7 +1412,8 @@ public class ReportServiceImpl implements ReportService {
     private List<DistributeBean> getDistributes(String distributes) {
         List<DistributeBean> result;
         if (StringUtils.isNoneBlank(distributes)) {
-            Map<String, String> distributeMap = JsonHelper.string2Obj(distributes, new TypeReference<Map<String, String>>() {});
+            Map<String, String> distributeMap = JsonHelper.string2Obj(distributes,
+                new TypeReference<Map<String, String>>() {});
             List<DistributeBean> distributeBeans = Lists.newArrayList();
             distributeMap.forEach((key, value) -> {
                 DistributeBean distribute = new DistributeBean();

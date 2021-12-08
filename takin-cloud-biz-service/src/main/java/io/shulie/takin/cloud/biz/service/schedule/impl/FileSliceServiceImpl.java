@@ -1,39 +1,43 @@
 package io.shulie.takin.cloud.biz.service.schedule.impl;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSONObject;
 
 import com.google.common.collect.Lists;
-import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
+
+import io.shulie.takin.cloud.biz.pojo.FileSplitInfo;
+import io.shulie.takin.cloud.biz.utils.FileSplitUtil;
+import io.shulie.takin.cloud.common.utils.FileSliceByPodNum;
+import io.shulie.takin.cloud.common.enums.FileSliceStatusEnum;
+import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
+import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneBigFileSliceDAO;
+import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
+import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneContactFileOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneContactFileOutput.ContactFileInfo;
-import io.shulie.takin.cloud.biz.pojo.FileSplitInfo;
-import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
-import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
-import io.shulie.takin.cloud.biz.utils.FileSplitUtil;
-import io.shulie.takin.cloud.common.enums.FileSliceStatusEnum;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.utils.FileSliceByPodNum;
-import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
-import io.shulie.takin.cloud.data.dao.scene.manage.SceneBigFileSliceDAO;
-import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
-import io.shulie.takin.cloud.data.model.mysql.SceneScriptRefEntity;
-import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 /**
  * @author xr.l
@@ -42,17 +46,14 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class FileSliceServiceImpl implements FileSliceService {
 
-    @Autowired
+    @Resource
     SceneBigFileSliceDAO fileSliceDAO;
+    @Resource
+    private SceneTaskService sceneTaskService;
 
     @Value("${script.path}")
     private String nfsDir;
-
-    @Autowired
-    private SceneTaskService sceneTaskService;
-
     private static final String DEFAULT_PATH_SEPARATOR = "/";
-
     private static final String DEFAULT_FILE_COLUMN_SEPARATOR = "@@@";
 
     @Override
@@ -90,7 +91,7 @@ public class FileSliceServiceImpl implements FileSliceService {
         }
     }
 
-    private boolean slice(FileSliceRequest request, SceneBigFileSliceParam param) {
+    private boolean slice(FileSliceRequest request, SceneBigFileSliceParam param) throws TakinCloudException {
         if (request.getSplit() && request.getOrderSplit() != null && request.getOrderSplit()) {
             sliceFileByOrder(request, param);
         } else {
@@ -246,10 +247,10 @@ public class FileSliceServiceImpl implements FileSliceService {
     /**
      * 文件顺序拆分，包含排序字段，排序列号如果没有传，默认按最后一列
      *
-     * @param request
-     * @param param
+     * @param request 文件拆分参数
+     * @param param   大文件拆分参数
      */
-    private void sliceFileByOrder(FileSliceRequest request, SceneBigFileSliceParam param) {
+    private void sliceFileByOrder(FileSliceRequest request, SceneBigFileSliceParam param) throws TakinCloudException {
         try {
             log.info("【文件分片】--场景ID：【{}】，文件名：【{}】 文件【顺序分片】任务执开始.", request.getSceneId(), request.getFileName());
             List<FileSplitInfo> fileSplitInfos = FileSplitUtil.splitFileByPartition(
@@ -266,15 +267,15 @@ public class FileSliceServiceImpl implements FileSliceService {
         } catch (Exception e) {
             log.error("【文件分片】--场景ID：【{}】，文件名：【{}】 文件【顺序分片】任务异常,异常信息：【{}】", request.getSceneId(), request.getFileName(),
                 e.getMessage());
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR, e);
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR, e.getMessage());
         }
     }
 
     /**
      * 根据pod数量拆分文件
      *
-     * @param request
-     * @param param
+     * @param request 文件拆分参数
+     * @param param   大文件拆分参数
      */
     private void sliceFileWithoutOrder(FileSliceRequest request, SceneBigFileSliceParam param) {
         try {

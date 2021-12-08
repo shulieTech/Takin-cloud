@@ -1,17 +1,17 @@
 package io.shulie.takin.cloud.biz.service.scenetask;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Map;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Calendar;
+import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.math.RoundingMode;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -21,110 +21,113 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
+import lombok.extern.slf4j.Slf4j;
+
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Lists;
-import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+import org.apache.commons.collections.MapUtils;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.entity.report.Report;
-import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
-import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
-import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
-import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
-import io.shulie.takin.cloud.biz.input.scenemanage.EnginePluginInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneBusinessActivityRefInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneInspectInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneStartTrialRunInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskQueryTpsInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput.FileInfo;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskUpdateTpsInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneTryRunInput;
-import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStartOutput;
-import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStopOutput;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneBusinessActivityRefOutput;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneScriptRefOutput;
-import io.shulie.takin.cloud.biz.output.scenetask.SceneActionOutput;
-import io.shulie.takin.cloud.biz.output.scenetask.SceneJobStateOutput;
-import io.shulie.takin.cloud.biz.output.scenetask.SceneRunTaskStatusOutput;
-import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskQueryTpsOutput;
-import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput;
-import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput.FileReadInfo;
-import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStopOutput;
-import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStartOutput;
-import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStatusOutput;
-import io.shulie.takin.cloud.biz.service.engine.EngineService;
-import io.shulie.takin.cloud.biz.service.report.ReportService;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventService;
-import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
-import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
-import io.shulie.takin.cloud.biz.utils.DataUtils;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
-import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.common.bean.task.TaskResult;
-import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
-import io.shulie.takin.cloud.common.constants.ReportConstans;
-import io.shulie.takin.cloud.common.constants.ReportConstants;
-import io.shulie.takin.cloud.common.constants.SceneManageConstant;
-import io.shulie.takin.cloud.common.constants.SceneStartCheckConstants;
-import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
-import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.enums.PressureModeEnum;
-import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
-import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
-import io.shulie.takin.cloud.common.enums.TimeUnitEnum;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.cloud.common.utils.CommonUtil;
-import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
-import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
-import io.shulie.takin.cloud.common.utils.JsonPathUtil;
-import io.shulie.takin.cloud.common.utils.JsonUtil;
-import io.shulie.takin.cloud.common.utils.Md5Util;
-import io.shulie.takin.cloud.data.dao.report.ReportDao;
-import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
-import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
-import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
-import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
-import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
-import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
+import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
+
+import io.shulie.takin.utils.json.JsonHelper;
 import io.shulie.takin.cloud.ext.api.AssetExtApi;
+import io.shulie.takin.cloud.biz.utils.DataUtils;
+import io.shulie.takin.cloud.common.utils.Md5Util;
+import io.shulie.takin.cloud.common.utils.JsonUtil;
+import io.shulie.takin.cloud.common.utils.CommonUtil;
+import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
-import io.shulie.takin.cloud.ext.content.asset.AccountInfoExt;
-import io.shulie.takin.cloud.ext.content.asset.AssetBalanceExt;
-import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
-import io.shulie.takin.cloud.ext.content.asset.AssetInvoiceExt;
-import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
+import io.shulie.takin.cloud.common.utils.JsonPathUtil;
+import io.shulie.takin.cloud.data.dao.report.ReportDao;
+import io.shulie.takin.cloud.common.enums.TimeUnitEnum;
 import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.shulie.takin.cloud.sdk.model.common.TimeBean;
-import io.shulie.takin.ext.content.enums.NodeTypeEnum;
-import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.common.bean.task.TaskResult;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
+import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.takin.cloud.common.enums.PressureModeEnum;
 import io.shulie.takin.plugin.framework.core.PluginManager;
-import io.shulie.takin.utils.json.JsonHelper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
+import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
+import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
+import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
+import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
+import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
+import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.common.constants.ReportConstans;
+import io.shulie.takin.cloud.ext.content.asset.AccountInfoExt;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
+import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
+import io.shulie.takin.cloud.biz.service.engine.EngineService;
+import io.shulie.takin.cloud.ext.content.asset.AssetBalanceExt;
+import io.shulie.takin.cloud.ext.content.asset.AssetInvoiceExt;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
+import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
+import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
+import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
+import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
+import io.shulie.takin.cloud.biz.output.scenetask.SceneActionOutput;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneTryRunInput;
+import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventService;
+import io.shulie.takin.cloud.biz.input.scenemanage.EnginePluginInput;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneInspectInput;
+import io.shulie.takin.cloud.biz.output.scenetask.SceneJobStateOutput;
+import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStopOutput;
+import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
+import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartInput;
+import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
+import io.shulie.takin.cloud.common.constants.SceneStartCheckConstants;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
+import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStopOutput;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskQueryTpsInput;
+import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskQueryTpsOutput;
+import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
+import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStartOutput;
+import io.shulie.takin.cloud.biz.output.scenetask.SceneRunTaskStatusOutput;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskUpdateTpsInput;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneStartTrialRunInput;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput;
+import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
+import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStartOutput;
+import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStatusOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneBusinessActivityRefInput;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput.FileInfo;
+import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput.FileReadInfo;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneScriptRefOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneBusinessActivityRefOutput;
 
 /**
  * @author 莫问
@@ -338,39 +341,46 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     @Override
     public SceneActionOutput checkSceneTaskStatus(Long sceneId, Long reportId) {
+        //为如果传入报告id，以报告id为准
         SceneActionOutput scene = new SceneActionOutput();
-        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
-        if (sceneManage != null) {
-            // 监测启动状态
-            scene.setData(SceneManageStatusEnum.getAdaptStatus(sceneManage.getStatus()).longValue());
-            if (sceneManage.getStatus() >= 0) {
-                ReportResult reportResult;
-                if (reportId == null) {
-                    //report = TReportMapper.getReportBySceneId(sceneId);
+        ReportResult reportResult = null;
+        if (reportId != null) {
+            reportResult = reportDao.selectById(reportId);
+            //如果报告状态是已结束，查询结果为已结束
+            if (reportResult.getStatus() != null && reportResult.getStatus() > 0) {
+                scene.setData(0L);
+            } else {
+                scene.setData(SceneManageStatusEnum.PTING.getValue().longValue());
+            }
+        } else {
+            SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+            if (sceneManage != null) {
+                // 监测启动状态
+                scene.setData(SceneManageStatusEnum.getAdaptStatus(sceneManage.getStatus()).longValue());
+                if (sceneManage.getStatus() >= 0) {
                     reportResult = reportDao.getReportBySceneId(sceneId);
-                } else {
-                    reportResult = reportDao.selectById(reportId);
                 }
-                if (reportResult != null) {
-                    // 记录错误信息
-                    List<String> errorMsgs = Lists.newArrayList();
-                    // 检查压测引擎返回内容
-                    SceneRunTaskStatusOutput status = taskStatusCache.getStatus(sceneId, reportResult.getId());
-                    if (Objects.nonNull(status) && Objects.nonNull(status.getTaskStatus())
-                        && status.getTaskStatus() == SceneRunTaskStatusEnum.FAILED.getCode()) {
-                        errorMsgs.add(SceneStopReasonEnum.ENGINE.getType() + ":" + status.getErrorMsg());
-                    }
-                    scene.setReportId(reportResult.getId());
-                    if (StringUtils.isNotEmpty(reportResult.getFeatures())) {
-                        JSONObject jb = JSON.parseObject(reportResult.getFeatures());
-                        errorMsgs.add(jb.getString(ReportConstants.FEATURES_ERROR_MSG));
-                    }
-                    if (CollectionUtils.isNotEmpty(errorMsgs)) {
-                        scene.setMsg(errorMsgs);
-                        //  前端只有等于0,才会显示错误
-                        scene.setData(0L);
-                    }
-                }
+            }
+        }
+        if (reportResult != null) {
+
+            // 记录错误信息
+            List<String> errorMsgs = Lists.newArrayList();
+            // 检查压测引擎返回内容
+            SceneRunTaskStatusOutput status = taskStatusCache.getStatus(sceneId, reportResult.getId());
+            if (Objects.nonNull(status) && Objects.nonNull(status.getTaskStatus())
+                && status.getTaskStatus() == SceneRunTaskStatusEnum.FAILED.getCode()) {
+                errorMsgs.add(SceneStopReasonEnum.ENGINE.getType() + ":" + status.getErrorMsg());
+            }
+            scene.setReportId(reportResult.getId());
+            if (StringUtils.isNotEmpty(reportResult.getFeatures())) {
+                JSONObject jb = JSON.parseObject(reportResult.getFeatures());
+                errorMsgs.add(jb.getString(ReportConstants.FEATURES_ERROR_MSG));
+            }
+            if (CollectionUtils.isNotEmpty(errorMsgs)) {
+                scene.setMsg(errorMsgs);
+                //  前端只有等于0,才会显示错误
+                scene.setData(0L);
             }
         }
         return scene;
@@ -908,6 +918,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         if (StringUtils.isBlank(scriptNodeTree) || CollectionUtils.isEmpty(businessActivityConfig)) {
             return;
         }
+        List<String> bindRefList = businessActivityConfig.stream().filter(Objects::nonNull)
+            .map(SceneBusinessActivityRefOutput::getBindRef)
+            .collect(Collectors.toList());
         List<ReportBusinessActivityDetail> resultList = new ArrayList<>();
         List<ScriptNode> testPlanNodeList = JsonPathUtil.getCurrentNodeByType(scriptNodeTree,
             NodeTypeEnum.TEST_PLAN.name());
@@ -925,6 +938,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             NodeTypeEnum.CONTROLLER.name());
         if (CollectionUtils.isNotEmpty(controllerNodes)) {
             controllerNodes.stream().filter(Objects::nonNull)
+                .filter(node -> !bindRefList.contains(node.getXpathMd5()))
                 .forEach(node -> calculateTarget(sceneId, reportId, scriptNodeTree, node, businessActivityConfig,
                     resultList));
         }

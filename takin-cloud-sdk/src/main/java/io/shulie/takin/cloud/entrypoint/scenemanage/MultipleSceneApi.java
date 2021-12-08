@@ -1,10 +1,10 @@
 package io.shulie.takin.cloud.entrypoint.scenemanage;
 
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneTaskStartReq;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResponse;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.SynchronizeRequest;
 import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneTaskStartReq;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SynchronizeRequest;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailV2Response;
 
 /**
  * 混合压测场景SDK接口
@@ -34,7 +34,7 @@ public interface MultipleSceneApi {
      * @param request 入参
      * @return 场景详情
      */
-    ResponseResult<SceneDetailResponse> detail(SceneTaskStartReq request);
+    ResponseResult<SceneDetailV2Response> detail(SceneTaskStartReq request);
 
     /**
      * 同步场景信息 - 新

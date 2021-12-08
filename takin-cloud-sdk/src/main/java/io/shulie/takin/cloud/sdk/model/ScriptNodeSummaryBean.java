@@ -1,13 +1,15 @@
 package io.shulie.takin.cloud.sdk.model;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.math.BigDecimal;
+
+import lombok.Data;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import io.shulie.takin.cloud.sdk.model.common.DataBean;
 import io.shulie.takin.cloud.sdk.model.common.DistributeBean;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
 
 /**
  * @author moriarty
@@ -24,6 +26,9 @@ public class ScriptNodeSummaryBean {
 
     @ApiModelProperty(value = "元素节点的md5值")
     private String md5;
+
+    @ApiModelProperty(value = "业务活动ID")
+    private Long activityId;
 
     @ApiModelProperty(value = "节点类型")
     private String type;

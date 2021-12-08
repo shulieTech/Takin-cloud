@@ -1,17 +1,18 @@
 package io.shulie.takin.cloud.common.utils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.util.Set;
+import java.util.HashSet;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
+import java.io.RandomAccessFile;
+import java.io.FileNotFoundException;
+
+import lombok.extern.slf4j.Slf4j;
 
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 根据线程数量，分批读取文件
@@ -20,11 +21,11 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class FileSliceByPodNum {
-    private int partSize;
-    private long fileLength;
+    private final int partSize;
+    private final long fileLength;
     private RandomAccessFile rAccessFile;
-    private Set<StartEndPair> startEndPairs;
-    private String fileEncode;
+    private final Set<StartEndPair> startEndPairs;
+    private final String fileEncode;
 
     private FileSliceByPodNum(File file, int partSize, String encode) {
         this.fileLength = file.length();
@@ -60,7 +61,7 @@ public class FileSliceByPodNum {
         pair.setStart(start);
         long endPosition = start + size - 1;
         if (endPosition >= fileLength - 1) {
-            pair.setEnd(fileLength - 1);
+            pair.setEnd(fileLength);
             startEndPairs.add(pair);
             return;
         }
@@ -70,7 +71,7 @@ public class FileSliceByPodNum {
         while (tmp != '\n' && tmp != '\r') {
             endPosition++;
             if (endPosition >= fileLength - 1) {
-                endPosition = fileLength - 1;
+                endPosition = fileLength;
                 break;
             }
             rAccessFile.seek(endPosition);
@@ -100,7 +101,7 @@ public class FileSliceByPodNum {
 
     public static class Builder {
         private int partSize = 1;
-        private File file;
+        private final File file;
         private String fileEncode;
 
         public Builder(String filepath) {

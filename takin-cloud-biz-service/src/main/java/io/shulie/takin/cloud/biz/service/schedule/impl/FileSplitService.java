@@ -12,46 +12,48 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSONObject;
 
+import lombok.extern.slf4j.Slf4j;
+
 import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
-import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
-import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
-import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
-import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
-import io.shulie.takin.cloud.biz.service.report.ReportService;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
-import io.shulie.takin.cloud.biz.service.schedule.ScheduleService;
-import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.common.constants.FileSplitConstants;
-import io.shulie.takin.cloud.common.constants.SceneStartCheckConstants;
-import io.shulie.takin.cloud.common.constants.ScheduleEventConstant;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.utils.FileSliceByLine.FileSliceInfo;
-import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
-import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt.DataFile;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt.StartEndPosition;
-import io.shulie.takin.eventcenter.Event;
-import io.shulie.takin.eventcenter.annotation.IntrestFor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
+
+import io.shulie.takin.eventcenter.Event;
+import io.shulie.takin.eventcenter.annotation.IntrestFor;
+import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
+import io.shulie.takin.cloud.common.constants.FileSplitConstants;
+import io.shulie.takin.cloud.biz.service.schedule.ScheduleService;
+import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
+import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
+import io.shulie.takin.cloud.common.constants.ScheduleEventConstant;
+import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
+import io.shulie.takin.cloud.common.constants.SceneStartCheckConstants;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
+import io.shulie.takin.cloud.common.utils.FileSliceByLine.FileSliceInfo;
+import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt.DataFile;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt.StartEndPosition;
 
 /**
  * @author 莫问
  * @date 2020-08-07
  */
-
 @Service
 @Slf4j
 public class FileSplitService {
@@ -207,6 +209,9 @@ public class FileSplitService {
                 }
             } catch (TakinCloudException e) {
                 log.error("【文件分片】--场景ID【{}】,文件名【{}】,拆分异常", startRequest.getSceneId(), dataFile.getName(), e);
+                taskStatusCache.cacheStatus(startRequest.getSceneId(), startRequest.getTaskId(),
+                    SceneRunTaskStatusEnum.FAILED,
+                    String.format("启动场景失败:场景ID:%s,文件拆分异常%s", startRequest.getSceneId(), e.getMessage()));
                 sliceResult.set(false);
             }
         }).collect(Collectors.toList()));

@@ -3,23 +3,29 @@ package io.shulie.takin.cloud.data.dao.report;
 import java.util.Date;
 import java.util.List;
 
-import io.shulie.takin.cloud.data.param.report.ReportDataQueryParam;
-import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
-import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
+import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.data.param.report.ReportQueryParam;
+import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
+import io.shulie.takin.cloud.data.param.report.ReportInsertParam;
+import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
+import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
 
 /**
  * @author 无涯
  * @date 2020/12/17 3:30 下午
  */
 public interface ReportDao {
+
+    int insert(ReportInsertParam param);
+
     /**
      * 获取列表
      *
      * @param param -
      * @return -
      */
-    List<ReportResult> getList(ReportDataQueryParam param);
+    List<ReportResult> queryReportList(ReportQueryParam param);
 
     /**
      * 获取报告
@@ -94,16 +100,25 @@ public interface ReportDao {
     /**
      * 更新报告结束时间
      *
-     * @param resultId
-     * @param endTime
+     * @param resultId 报告主键
+     * @param endTime  结束时间
      */
     void updateReportEndTime(Long resultId, Date endTime);
 
     /**
      * 根据id查询报告
      *
-     * @param resultId
-     * @return
+     * @param resultId 报告主键
+     * @return 报告详情
      */
     ReportResult getById(Long resultId);
+
+    /**
+     * 查询报告关联的节点信息
+     *
+     * @param reportId 报告ID
+     * @param nodeType 节点类型
+     * @return 节点信息集合
+     */
+    List<ReportBusinessActivityDetailEntity> getReportBusinessActivityDetailsByReportId(Long reportId, NodeTypeEnum nodeType);
 }

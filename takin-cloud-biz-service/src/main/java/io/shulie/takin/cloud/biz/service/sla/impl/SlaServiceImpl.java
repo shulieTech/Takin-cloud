@@ -1,43 +1,49 @@
 package io.shulie.takin.cloud.biz.service.sla.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
-import cn.hutool.core.date.DateUtil;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.google.common.collect.Maps;
-import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
-import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
-import io.shulie.takin.cloud.biz.event.SlaPublish;
-import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.biz.service.report.ReportService;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.biz.service.sla.SlaService;
-import io.shulie.takin.cloud.biz.utils.SlaUtil;
-import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
-import io.shulie.takin.cloud.common.bean.sla.AchieveModel;
-import io.shulie.takin.cloud.common.bean.sla.SlaBean;
-import io.shulie.takin.cloud.common.constants.Constants;
-import io.shulie.takin.cloud.common.constants.ReportConstants;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageWrapperResult;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneSlaRefResult;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+import cn.hutool.core.date.DateUtil;
+import com.google.common.collect.Maps;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.apache.commons.collections4.CollectionUtils;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+
+import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
+import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
+
+import io.shulie.takin.cloud.biz.utils.SlaUtil;
+import io.shulie.takin.cloud.biz.event.SlaPublish;
+import io.shulie.takin.cloud.common.bean.sla.SlaBean;
+import io.shulie.takin.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.cloud.data.dao.report.ReportDao;
+import io.shulie.takin.cloud.biz.service.sla.SlaService;
+import io.shulie.takin.cloud.common.constants.Constants;
+import io.shulie.takin.cloud.common.bean.sla.AchieveModel;
+import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
+import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
+import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneSlaRefResult;
+import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageWrapperResult;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneBusinessActivityRefOutput;
 
 /**
  * @author qianshui
@@ -47,11 +53,14 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class SlaServiceImpl implements SlaService {
 
+    public static final String PREFIX_TASK = "TAKIN:SLA:TASK:";
+    public static final String SLA_WARN_KEY = "TAKIN:SLA:WARN:KEY";
     public static final String SLA_SCENE_KEY = "TAKIN:SLA:SCENE:KEY";
     public static final String SLA_DESTROY_KEY = "TAKIN:SLA:DESTROY:KEY";
-    public static final String SLA_WARN_KEY = "TAKIN:SLA:WARN:KEY";
     public static final Long EXPIRE_TIME = 24 * 3600L;
-    public static final String PREFIX_TASK = "TAKIN:SLA:TASK:";
+
+    @Resource
+    private ReportDao reportDao;
     @Resource
     private SlaPublish slaPublish;
     @Resource
@@ -72,7 +81,7 @@ public class SlaServiceImpl implements SlaService {
         Long sceneId = metricsEvent.getSceneId();
         SceneManageWrapperOutput dto;
         try {
-            dto = getSceneManageWrapperDTO(sceneId);
+            dto = getSceneManageWrapperDTO(sceneId, metricsEvent.getReportId());
             if (dto == null) {
                 log.error("异常代码【{}】,异常内容：构建sla异常 --> 未找到压测场景， SendMetricsEvent={}",
                     TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvent));
@@ -83,8 +92,9 @@ public class SlaServiceImpl implements SlaService {
                 TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvent), e);
             return false;
         }
-        SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivity = dto.getBusinessActivityConfig().stream().filter(
-            data -> metricsEvent.getTransaction().equals(data.getBindRef())).findFirst().orElse(null);
+        SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivity = dto.getBusinessActivityConfig()
+            .stream().filter(
+                data -> metricsEvent.getTransaction().equals(data.getBindRef())).findFirst().orElse(null);
 
         if (businessActivity == null) {
             log.error("异常代码【{}】,异常内容：构建sla异常 --> 未找到业务活动， SendMetricsEvent={}",
@@ -94,9 +104,11 @@ public class SlaServiceImpl implements SlaService {
         if (StringUtils.isBlank(dto.getScriptAnalysisResult())) {
             Long businessActivityId = businessActivity.getBusinessActivityId();
 
-            doDestroy(dto.getId(), metricsEvent, filterSlaListByActivityId(businessActivityId, dto.getStopCondition()), businessActivity);
+            doDestroy(dto.getId(), metricsEvent, filterSlaListByActivityId(businessActivityId, dto.getStopCondition()),
+                businessActivity);
 
-            doWarn(businessActivity, metricsEvent, filterSlaListByActivityId(businessActivityId, dto.getWarningCondition()));
+            doWarn(businessActivity, metricsEvent,
+                filterSlaListByActivityId(businessActivityId, dto.getWarningCondition()));
         } else {
             String bindRef = businessActivity.getBindRef();
             doDestroy(dto.getId(), metricsEvent, filterSlaListByMd5(bindRef, dto.getStopCondition()), businessActivity);
@@ -130,7 +142,9 @@ public class SlaServiceImpl implements SlaService {
         redisClientUtils.setString(PREFIX_TASK + sceneId, "on", 7, TimeUnit.DAYS);
     }
 
-    private void doDestroy(Long sceneId, SendMetricsEvent metricsEvent, List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList, SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivityDTO) {
+    private void doDestroy(Long sceneId, SendMetricsEvent metricsEvent,
+        List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList,
+        SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivityDTO) {
         if (CollectionUtils.isEmpty(slaList)) {
             return;
         }
@@ -238,24 +252,33 @@ public class SlaServiceImpl implements SlaService {
         return true;
     }
 
+    /**
+     * 创建告警明细
+     *
+     * @param conditionMap        条件Map
+     * @param businessActivityDTO 关联的业务活动（脚本节点）
+     * @param metricsEvent        数据
+     * @param slaDto              sla内容
+     * @return 告警条件
+     */
     private WarnDetail buildWarnDetail(Map<String, Object> conditionMap,
         SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivityDTO,
         SendMetricsEvent metricsEvent,
-        SceneManageWrapperOutput.SceneSlaRefOutput salDTO) {
+        SceneManageWrapperOutput.SceneSlaRefOutput slaDto) {
         WarnDetail warnDetail = new WarnDetail();
         warnDetail.setPtId(metricsEvent.getReportId());
-        warnDetail.setSlaId(salDTO.getId());
-        warnDetail.setSlaName(salDTO.getRuleName());
+        warnDetail.setSlaId(slaDto.getId());
+        warnDetail.setSlaName(slaDto.getRuleName());
         warnDetail.setBindRef(businessActivityDTO.getBindRef());
         warnDetail.setBusinessActivityId(businessActivityDTO.getBusinessActivityId());
         warnDetail.setBusinessActivityName(businessActivityDTO.getBusinessActivityName());
         StringBuilder sb = new StringBuilder();
         sb.append(conditionMap.get("type"));
         sb.append(conditionMap.get("compare"));
-        sb.append(salDTO.getRule().getDuring());
+        sb.append(slaDto.getRule().getDuring());
         sb.append(conditionMap.get("unit"));
         sb.append(", 连续");
-        sb.append(salDTO.getRule().getTimes());
+        sb.append(slaDto.getRule().getTimes());
         sb.append("次");
         warnDetail.setWarnContent(sb.toString());
         warnDetail.setWarnTime(DateUtil.date(metricsEvent.getTimestamp()));
@@ -263,7 +286,8 @@ public class SlaServiceImpl implements SlaService {
         return warnDetail;
     }
 
-    private List<SceneManageWrapperOutput.SceneSlaRefOutput> filterSlaListByMd5(String bindRef, List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
+    private List<SceneManageWrapperOutput.SceneSlaRefOutput> filterSlaListByMd5(String bindRef,
+        List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
         if (CollectionUtils.isEmpty(slaList)) {
             return new ArrayList<>(0);
         }
@@ -276,14 +300,16 @@ public class SlaServiceImpl implements SlaService {
             return false;
         }
         for (String data : md5s) {
-            if ("-1".equals(data) || ReportConstants.ALL_BUSINESS_ACTIVITY.equals(data) || String.valueOf(bindRef).equals(data)) {
+            if ("-1".equals(data) || ReportConstants.ALL_BUSINESS_ACTIVITY.equals(data) || String.valueOf(bindRef)
+                .equals(data)) {
                 return true;
             }
         }
         return false;
     }
 
-    private List<SceneManageWrapperOutput.SceneSlaRefOutput> filterSlaListByActivityId(Long businessActivityId, List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
+    private List<SceneManageWrapperOutput.SceneSlaRefOutput> filterSlaListByActivityId(Long businessActivityId,
+        List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
         if (CollectionUtils.isEmpty(slaList)) {
             return new ArrayList<>(0);
         }
@@ -303,7 +329,14 @@ public class SlaServiceImpl implements SlaService {
         return false;
     }
 
-    private SceneManageWrapperOutput getSceneManageWrapperDTO(Long sceneId) {
+    /**
+     * 获取场景信息，并将脚本中测试计划填充到场景关联的节点中作为"全部"来进行sla计算
+     *
+     * @param sceneId  场景ID
+     * @param reportId 报告ID
+     * @return 场景信息
+     */
+    private SceneManageWrapperOutput getSceneManageWrapperDTO(Long sceneId, Long reportId) {
         String object = (String)redisClientUtils.hmget(SLA_SCENE_KEY, String.valueOf(sceneId));
         if (object != null) {
             return JSON.parseObject(object, SceneManageWrapperOutput.class);
@@ -312,6 +345,21 @@ public class SlaServiceImpl implements SlaService {
         options.setIncludeBusinessActivity(true);
         options.setIncludeSLA(true);
         SceneManageWrapperOutput dto = sceneManageService.getSceneManage(sceneId, options);
+        List<ReportBusinessActivityDetailEntity> testPlan = reportDao
+            .getReportBusinessActivityDetailsByReportId(reportId, NodeTypeEnum.TEST_PLAN);
+        if (CollectionUtils.isNotEmpty(testPlan) && testPlan.size() == 1) {
+            ReportBusinessActivityDetailEntity detailEntity = testPlan.get(0);
+            SceneBusinessActivityRefOutput refOutput = new SceneBusinessActivityRefOutput();
+            refOutput.setApplicationIds(detailEntity.getApplicationIds());
+            refOutput.setBindRef(detailEntity.getBindRef());
+            refOutput.setBusinessActivityId(detailEntity.getBusinessActivityId());
+            refOutput.setBusinessActivityName(detailEntity.getBusinessActivityName());
+            refOutput.setTargetRT(detailEntity.getTargetRt().intValue());
+            refOutput.setTargetSA(detailEntity.getTargetSa());
+            refOutput.setTargetSuccessRate(detailEntity.getTargetSuccessRate());
+            refOutput.setTargetTPS(detailEntity.getTargetTps().intValue());
+            dto.getBusinessActivityConfig().add(refOutput);
+        }
         Map<String, Object> dataMap = Maps.newHashMap();
         dataMap.put(String.valueOf(sceneId), JSON.toJSONString(dto));
         redisClientUtils.hmset(SLA_SCENE_KEY, dataMap, EXPIRE_TIME);

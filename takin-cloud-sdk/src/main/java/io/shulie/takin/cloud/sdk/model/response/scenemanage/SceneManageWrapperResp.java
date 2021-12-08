@@ -1,18 +1,20 @@
 package io.shulie.takin.cloud.sdk.model.response.scenemanage;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.math.BigDecimal;
 
 import javax.validation.constraints.NotNull;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.shulie.takin.cloud.sdk.model.common.SceneBusinessActivityRefBean;
 import io.shulie.takin.cloud.sdk.model.common.TimeBean;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * @author qianshui
@@ -86,6 +88,8 @@ public class SceneManageWrapperResp extends ContextExt {
     private transient String lastPtTime;
 
     private String features;
+
+    private String scriptAnalysisResult;
 
     private Integer configType;
 
