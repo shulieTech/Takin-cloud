@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -738,6 +739,11 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                     long breakTime = Math.min(endTime, nowTimeWindow);
                     Long timeWindow = null;
                     do {
+                        //获取最后一条数据的时间，如果最后一条回传数据的时间比当前时间少3分钟以上，则认为引擎不会继续回传数据了，结束掉,设置endTime为最后一条数据的时间
+                        //if(ifReportOutOfTime(sceneId, reportId, customerId,r)){
+                        //    log.error("3分钟未收到压测引擎回传数据或上条数据已超过三分钟，停止数据收集，场景ID:{},报告ID:{}",sceneId,reportId);
+                        //    break;
+                        //}
                         //不用递归，而是采用do...while...的方式是防止需要处理的时间段太长引起stackOverFlow错误
                         timeWindow = reduceMetrics(sceneId, reportId, customerId, podNum, breakTime, timeWindow, nodes);
                         if (null == timeWindow) {
@@ -750,7 +756,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                     if (r.getEndTime() != null){
                         // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
                         sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
-                                .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
+                                .checkEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING,SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
                                 .updateEnum(SceneManageStatusEnum.STOP)
                                 .build());
                     }
@@ -763,6 +769,43 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 }
             })
             .forEach(Executors::execute);
+    }
+
+    /**
+     * 暂时先不用
+     * @param sceneId
+     * @param reportId
+     * @param customerId
+     * @param report
+     * @return
+     */
+    private boolean ifReportOutOfTime(Long sceneId, Long reportId, Long customerId, ReportResult report) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("select * from ")
+            .append(InfluxDBUtil.getMetricsMeasurement(sceneId, reportId, customerId))
+            .append(" order by create_time desc limit 1");
+        try {
+            PressureOutput pressure = influxWriter.querySingle(sql.toString(), PressureOutput.class);
+            if (Objects.nonNull(pressure)) {
+                long lastMetricsTime = pressure.getTime();
+                if (lastMetricsTime > 0) {
+                    long s = (System.currentTimeMillis() - lastMetricsTime) / (1000 * 60);
+                    if (s > 3) {
+                        report.setEndTime(new Date(lastMetricsTime));
+                        return true;
+                    }
+                }
+            } else {
+                long s = (System.currentTimeMillis() - report.getStartTime().getTime()) / (1000 * 60);
+                if (s > 3) {
+                    report.setEndTime(new Date());
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            log.error("查询metrics数据异常:{}", e.toString());
+        }
+        return false;
     }
 
     /**
@@ -919,7 +962,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
             if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {
                 sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
-                    .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
+                    .checkEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING,SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
                     .updateEnum(SceneManageStatusEnum.STOP)
                     .build());
             }

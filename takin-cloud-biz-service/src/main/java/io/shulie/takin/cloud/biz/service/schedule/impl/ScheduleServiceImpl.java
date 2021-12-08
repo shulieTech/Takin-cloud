@@ -163,6 +163,8 @@ public class ScheduleServiceImpl implements ScheduleService {
         EngineLogPtlConfigOutput engineLogPtlConfigOutput = engineConfigService.getEnginePtlConfig();
         PtlLogConfigExt ptlLogConfig = new PtlLogConfigExt();
         BeanUtils.copyProperties(engineLogPtlConfigOutput, ptlLogConfig);
+        //增加ptl日志上传位置参数
+        ptlLogConfig.setPtlUploadFrom(appConfig.getEngineLogUploadModel());
         eventRequest.setPtlLogConfig(ptlLogConfig);
 
         //把数据放入缓存，初始化回调调度需要
