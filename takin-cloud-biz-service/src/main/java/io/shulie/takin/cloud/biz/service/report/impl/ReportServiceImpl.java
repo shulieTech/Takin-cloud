@@ -682,6 +682,15 @@ public class ReportServiceImpl implements ReportService {
         if (checkReportError(reportResult)) {
             return false;
         }
+        //判断报告是否已经汇总，如果没有汇总，先汇总报告，然后在更新报告状态
+        if (Objects.isNull(reportResult.getEndTime())
+            || (Objects.isNull(reportResult.getTotalRequest()) && Objects.isNull(reportResult.getAvgTps()))){
+            TaskResult taskResult = new TaskResult();
+            taskResult.setSceneId(reportResult.getSceneId());
+            taskResult.setTaskId(reportResult.getId());
+            taskResult.setCustomerId(reportResult.getCustomerId());
+            modifyReport(taskResult);
+        }
         if (ReportConstants.RUN_STATUS != reportResult.getStatus()) {
             log.info("报告状态不正确：reportId=" + reportId + ", status=" + reportResult.getStatus());
             return false;
@@ -698,7 +707,7 @@ public class ReportServiceImpl implements ReportService {
         if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {
             sceneManageService.updateSceneLifeCycle(
                 UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId())
-                    .checkEnum(
+                    .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING,
                         SceneManageStatusEnum.STOP).updateEnum(SceneManageStatusEnum.WAIT).build());
         }
         //报告结束应该放在场景之后
@@ -1052,21 +1061,6 @@ public class ReportServiceImpl implements ReportService {
         }
         Boolean updateVersion = CloudPluginUtils.checkVersion(reportResult);
         log.info("ReportId={}, customerId={}, CompareResult={}", reportId, reportResult.getCustomerId(), updateVersion);
-        if (updateVersion) {
-            UpdateStatusBean reportStatus = new UpdateStatusBean();
-            reportStatus.setResultId(reportId);
-            reportStatus.setPreStatus(ReportConstants.INIT_STATUS);
-            reportStatus.setAfterStatus(ReportConstants.RUN_STATUS);
-            int row = tReportMapper.updateReportStatus(reportStatus);
-            // modify by 李鹏
-            // 添加TotalRequest不为null 保证报告是有数据的  20210707
-            if (row != 1 && reportResult.getTotalRequest() != null) {
-                log.error("异常代码【{}】,异常内容：更新报告到生成中状态异常 --> 报告{}状态非0,状态为:{}",
-                    TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId, reportResult.getStatus());
-                return;
-            }
-            reportResult.setStatus(ReportConstants.RUN_STATUS);
-        }
 
         String testPlanXpathMD5 = getTestPlanXpathMD5(reportResult.getScriptNodeTree());
         String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
@@ -1082,14 +1076,24 @@ public class ReportServiceImpl implements ReportService {
         boolean isConclusion = updateReportBusinessActivity(taskResult.getSceneId(), taskResult.getTaskId(),
             taskResult.getCustomerId());
 
-        if (Objects.isNull(reportResult.getStartTime())) {
-            reportResult.setStartTime(reportResult.getGmtCreate());
-        }
-        if (Objects.isNull(reportResult.getEndTime())) {
-            reportResult.setEndTime(getFinalDateTime(taskResult.getSceneId(), reportId, taskResult.getCustomerId()));
-        }
         //保存报表结果
         saveReportResult(reportResult, taskResult, statReport, isConclusion);
+
+        //先保存报告内容，再更新报告状态，防止报告内容没有填充，就触发finishReport操作
+        if (updateVersion) {
+            UpdateStatusBean reportStatus = new UpdateStatusBean();
+            reportStatus.setResultId(reportId);
+            reportStatus.setPreStatus(ReportConstants.INIT_STATUS);
+            reportStatus.setAfterStatus(ReportConstants.RUN_STATUS);
+            int row = tReportMapper.updateReportStatus(reportStatus);
+            // modify by 李鹏
+            // 添加TotalRequest不为null 保证报告是有数据的  20210707
+            if (row != 1 && reportResult.getTotalRequest() != null) {
+                log.error("异常代码【{}】,异常内容：更新报告到生成中状态异常 --> 报告{}状态非0,状态为:{}",
+                    TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId, reportResult.getStatus());
+                return;
+            }
+        }
 
         if (!updateVersion) {
             log.info("old version finish report ={} updateVersion={} ", reportId, updateVersion);
@@ -1352,7 +1356,12 @@ public class ReportServiceImpl implements ReportService {
                 reportResult.setAmount(paymentRes.getData());
             }
         }
-
+        if (Objects.isNull(reportResult.getStartTime())) {
+            reportResult.setStartTime(reportResult.getGmtCreate());
+        }
+        if (Objects.isNull(reportResult.getEndTime())) {
+            reportResult.setEndTime(getFinalDateTime(taskResult.getSceneId(), reportResult.getId(), taskResult.getCustomerId()));
+        }
         // 更新
         ReportUpdateParam param = new ReportUpdateParam();
         BeanUtils.copyProperties(reportResult, param);
