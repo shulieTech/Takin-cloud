@@ -36,6 +36,6 @@ public class SceneTaskRedisConstants {
 
     public static final Long DEFAULT_EXPIRE_TIME = 10L;
 
-    public static final String CURRENT_JTL_FILE_NAME_SYSTEM_PROP_KEY = "__CURRENT_JTL_FILE_NAME__";
+    public static final String CURRENT_JTL_FILE_NAME_SYSTEM_PROP_KEY = "__CURRENT_PTL_FILE_NAME__";
 
 }
