@@ -25,6 +25,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.ScriptNodeSummaryBean;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
@@ -589,6 +590,7 @@ public class ReportServiceImpl implements ReportService {
                 bean.setPassFlag((Optional.ofNullable(detail.getPassFlag()).orElse(0)));
                 bean.setDistribute(getDistributes(detail.getRtDistribute()));
                 bean.setApplicationIds(detail.getApplicationIds());
+                bean.setActivityId(detail.getBusinessActivityId());
                 return bean;
             }).collect(Collectors.toList());
     }
@@ -664,7 +666,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean unLockReport(Long reportId) {
         ReportResult reportResult = reportDao.selectById(reportId);
-        if (ReportConstants.LOCK_STATUS != reportResult.getLock()) {
+        if (reportResult.getType() != PressureSceneEnum.DEFAULT.getCode() && ReportConstants.LOCK_STATUS != reportResult.getLock()) {
             log.error("异常代码【{}】,异常内容：解锁报告异常 --> 报告{}非锁定状态，不能解锁",
                 TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId);
             return false;
@@ -679,6 +681,11 @@ public class ReportServiceImpl implements ReportService {
     public Boolean finishReport(Long reportId) {
         log.info("web -> cloud finish reportId【{}】,starting", reportId);
         ReportResult reportResult = reportDao.selectById(reportId);
+        //只有常规模式需要生成报告内容
+        if (reportResult.getType() != PressureSceneEnum.DEFAULT.getCode()){
+            reportDao.finishReport(reportId);
+            return true;
+        }
         if (checkReportError(reportResult)) {
             return false;
         }
