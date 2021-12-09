@@ -684,6 +684,10 @@ public class ReportServiceImpl implements ReportService {
         //只有常规模式需要生成报告内容
         if (reportResult.getType() != PressureSceneEnum.DEFAULT.getCode()){
             reportDao.finishReport(reportId);
+            sceneManageService.updateSceneLifeCycle(
+                UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId())
+                    .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING,
+                        SceneManageStatusEnum.STOP).updateEnum(SceneManageStatusEnum.WAIT).build());
             return true;
         }
         if (checkReportError(reportResult)) {
