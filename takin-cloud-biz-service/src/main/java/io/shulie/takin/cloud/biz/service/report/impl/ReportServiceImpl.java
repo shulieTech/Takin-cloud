@@ -701,6 +701,7 @@ public class ReportServiceImpl implements ReportService {
             taskResult.setTaskId(reportResult.getId());
             taskResult.setCustomerId(reportResult.getCustomerId());
             modifyReport(taskResult);
+            reportResult = reportDao.selectById(reportId);
         }
         if (ReportConstants.RUN_STATUS != reportResult.getStatus()) {
             log.info("报告状态不正确：reportId=" + reportId + ", status=" + reportResult.getStatus());

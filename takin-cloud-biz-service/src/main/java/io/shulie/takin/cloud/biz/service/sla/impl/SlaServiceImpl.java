@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.biz.service.sla.impl;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit;
 
@@ -10,6 +11,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.date.DateUtil;
 import com.google.common.collect.Maps;
@@ -83,6 +85,10 @@ public class SlaServiceImpl implements SlaService {
             if (dto == null) {
                 log.error("异常代码【{}】,异常内容：构建sla异常 --> 未找到压测场景， SendMetricsEvent={}",
                     TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvent));
+                return false;
+            }
+            if (Objects.isNull(dto.getPressureType()) || dto.getPressureType() == PressureSceneEnum.TRY_RUN.getCode()){
+                log.info("脚本调试不进行SLA校验");
                 return false;
             }
         } catch (Exception e) {
