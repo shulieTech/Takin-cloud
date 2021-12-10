@@ -180,6 +180,7 @@
                 and bind_ref = #{bindRef,jdbcType=VARCHAR}
             </if>
         </where>
+        ORDER BY id DESC
     </select>
 
     <select id="countReportTotalWarn" resultType="java.lang.Long">

@@ -265,7 +265,7 @@
                 and start_time  <![CDATA[ <= ]]> #{param.endTime}
             </if>
             <if test="param.userIds != null and param.userIds.size() != 0">
-                 and user_id in
+                 and operate_id in
                   <foreach collection="param.userIds" open="(" close=")" separator="," item="userId">
                     #{userId}
                 </foreach>
