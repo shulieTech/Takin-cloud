@@ -1049,6 +1049,9 @@ public class SceneManageServiceImpl implements SceneManageService {
             tgConfig.setRampUpUnit(json.getString(SceneManageConstant.STEP_DURATION_UNIT));
             tgConfig.setSteps(json.getInteger(SceneManageConstant.STEP));
             tgConfig.setEstimateFlow(json.getDouble(SceneManageConstant.ESTIMATE_FLOW));
+            // 递增时长
+            tgConfig.setRampUp(convertTime(Long.valueOf(tgConfig.getRampUp()), tgConfig.getRampUpUnit()).intValue());
+            tgConfig.setRampUpUnit(TimeUnitEnum.SECOND.getValue());
 
             Map<String, ThreadGroupConfigExt> map = new HashMap<>(1);
             map.put("all", tgConfig);
@@ -1083,6 +1086,12 @@ public class SceneManageServiceImpl implements SceneManageService {
             wrapperOutput.setPressureTestTime(new TimeBean(ptConfig.getDuration(), ptConfig.getUnit()));
             wrapperOutput.setPressureTestSecond(convertTime(ptConfig.getDuration(), ptConfig.getUnit()));
             wrapperOutput.setThreadGroupConfigMap(ptConfig.getThreadGroupConfigMap());
+            // 递增时长
+            wrapperOutput.getThreadGroupConfigMap().forEach((k, v) -> {
+                String rampUpUnit = v.getRampUpUnit() == null ? "m" : v.getRampUpUnit();
+                v.setRampUp(convertTime(Long.valueOf(v.getRampUp()), rampUpUnit).intValue());
+                v.setRampUpUnit(TimeUnitEnum.SECOND.getValue());
+            });
             //预计消耗流量
             if (null != ptConfig.getEstimateFlow()) {
                 BigDecimal flow = BigDecimal.valueOf(ptConfig.getEstimateFlow());
