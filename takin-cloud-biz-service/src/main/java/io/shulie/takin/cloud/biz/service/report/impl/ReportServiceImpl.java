@@ -1085,7 +1085,7 @@ public class ReportServiceImpl implements ReportService {
         }
 
         //更新报表业务活动 isConclusion 指标是否通过
-        boolean isConclusion = updateReportBusinessActivity(taskResult.getSceneId(), taskResult.getTaskId(),
+          boolean isConclusion = updateReportBusinessActivity(taskResult.getSceneId(), taskResult.getTaskId(),
             taskResult.getCustomerId());
 
         //保存报表结果
@@ -1372,7 +1372,12 @@ public class ReportServiceImpl implements ReportService {
             reportResult.setStartTime(reportResult.getGmtCreate());
         }
         if (Objects.isNull(reportResult.getEndTime())) {
-            reportResult.setEndTime(getFinalDateTime(taskResult.getSceneId(), reportResult.getId(), taskResult.getCustomerId()));
+            Date finalDateTime = getFinalDateTime(taskResult.getSceneId(), reportResult.getId(),
+                taskResult.getCustomerId());
+            if (Objects.isNull(finalDateTime) || finalDateTime.getTime()< reportResult.getStartTime().getTime()) {
+                finalDateTime = new Date();
+            }
+            reportResult.setEndTime(finalDateTime);
         }
         // 更新
         ReportUpdateParam param = new ReportUpdateParam();
