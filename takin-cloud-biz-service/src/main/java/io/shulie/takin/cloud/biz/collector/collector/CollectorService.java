@@ -82,7 +82,7 @@ public class CollectorService extends AbstractIndicators {
     private AppConfig appConfig;
 
 
-    private final static ExecutorService THREAD_POOL = new ThreadPoolExecutor(5, 200,
+    private final static ExecutorService THREAD_POOL = new ThreadPoolExecutor(100, 200,
         300L, TimeUnit.SECONDS,
         new NoLengthBlockingQueue<>(), new ThreadFactoryBuilder()
         .setNameFormat("ptl-log-push-%d").build(), new ThreadPoolExecutor.AbortPolicy());
@@ -211,20 +211,16 @@ public class CollectorService extends AbstractIndicators {
                             .checkEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING)
                             .updateEnum(SceneManageStatusEnum.ENGINE_RUNNING)
                             .build());
-
-                        //从压测引擎上传请求流量明细还是从cloud上传请求流量明细
-                        if (PressureLogUploadConstants.UPLOAD_BY_CLOUD.equals(appConfig.getEngineLogUploadModel())){
-                            log.info("开始异步上传ptl日志，场景ID：{},报告ID:{}", sceneId, reportId);
-                            taskStatusCache.cacheStatus(sceneId,reportId,SceneRunTaskStatusEnum.RUNNING);
-                            EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
-                            String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_JTL_FILE_NAME_SYSTEM_PROP_KEY);
-                            THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, customerId, logUploadDAO, redisClientUtils,
-                                pushLogService, sceneManageDAO, ptlDir, fileName,engineCallExtApi) {
-                            });
-                        }else {
-                            cacheTryRunTaskStatus(sceneId, reportId, customerId, SceneRunTaskStatusEnum.RUNNING);
-                        }
-
+                        cacheTryRunTaskStatus(sceneId, reportId, customerId, SceneRunTaskStatusEnum.RUNNING);
+                    }
+                    //如果从cloud上传请求流量明细，则需要启动异步线程去读取ptl文件上传
+                    if (PressureLogUploadConstants.UPLOAD_BY_CLOUD.equals(appConfig.getEngineLogUploadModel())){
+                        log.info("开始异步上传ptl日志，场景ID：{},报告ID:{},PodNum:{}", sceneId, reportId,metric.getPodNo());
+                        EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
+                        String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_JTL_FILE_NAME_SYSTEM_PROP_KEY);
+                        THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, customerId, logUploadDAO, redisClientUtils,
+                            pushLogService, sceneManageDAO, ptlDir, fileName,engineCallExtApi) {
+                        });
                     }
                 }
                 if (isLast) {

@@ -25,6 +25,7 @@ import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.eventcenter.EventCenterTemplate;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -115,9 +116,11 @@ public class AsyncServiceImpl implements AsyncService {
             // 补充停止原因
             //设置缓存，用以检查压测场景启动状态 lxr 20210623
             String k8sPodKey = String.format(SceneTaskRedisConstants.PRESSURE_NODE_ERROR_KEY + "%s_%s", startRequest.getSceneId(), startRequest.getTaskId());
+            String startedPodNum = redisClientUtils.getString(pressureNodeName);
             redisClientUtils.hmset(k8sPodKey, SceneTaskRedisConstants.PRESSURE_NODE_START_ERROR,
                 String.format("节点没有在设定时间【%s】s内启动，计划启动节点个数【%s】,实际启动节点个数【%s】,"
-                    + "，导致压测停止", pressureNodeStartExpireTime, redisClientUtils.getString(pressureNodeTotalName), redisClientUtils.getString(pressureNodeName)));
+                    + "，导致压测停止", pressureNodeStartExpireTime, redisClientUtils.getString(pressureNodeTotalName),
+                    StringUtils.isBlank(startedPodNum)? 0: startedPodNum));
             callStop(startRequest);
         }
     }

@@ -1193,6 +1193,8 @@ public class ReportServiceImpl implements ReportService {
             StatReportDTO data = statReport(sceneId, reportId, customerId,
                 reportBusinessActivityDetail.getBindRef());
             if (data == null) {
+                //如果有一个业务活动没有找到对应的数据，则认为压测不通过
+                totalPassFlag = false;
                 log.warn("没有找到匹配的压测数据：场景ID[{}],报告ID:[{}],业务活动:[{}]", sceneId, reportId,
                     reportBusinessActivityDetail.getBindRef());
                 continue;
