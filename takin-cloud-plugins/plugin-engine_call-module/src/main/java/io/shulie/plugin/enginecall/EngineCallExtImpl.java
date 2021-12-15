@@ -141,7 +141,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         Long taskId = startRequest.getTaskId();
         Long customerId = startRequest.getTenantId();
 
-        Map<String, Object> configMap = new HashMap<>();
+        Map<String, Object> configMap = new HashMap<>(0);
         configMap.put("name", ScheduleConstants.getConfigMapName(sceneId, taskId, customerId));
 
         EngineRunConfig config = DataConvertHelper.buildEngineRunConfig(request, scriptPath);

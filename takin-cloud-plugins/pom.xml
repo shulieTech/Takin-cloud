@@ -13,7 +13,7 @@
 
     <modules>
         <module>plugin-engine-module</module>
-        <module>plugin-enginecall-module</module>
+        <module>plugin-engine_call-module</module>
     </modules>
 
     <dependencies>
