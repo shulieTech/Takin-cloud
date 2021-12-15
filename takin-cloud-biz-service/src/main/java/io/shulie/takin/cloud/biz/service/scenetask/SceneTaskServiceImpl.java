@@ -38,7 +38,6 @@ import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
-import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
 import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
 
@@ -118,6 +117,7 @@ import io.shulie.takin.cloud.biz.input.scenemanage.SceneStartTrialRunInput;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput;
+import io.shulie.takin.cloud.data.dao.report.ReportBusinessActivityDetailDao;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStartOutput;
@@ -166,8 +166,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     private SceneTaskStatusCache taskStatusCache;
     @Resource(type = SceneManageService.class)
     private SceneManageService sceneManageService;
-    @Resource(type = TReportBusinessActivityDetailMapper.class)
-    private TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
+    @Resource(type = ReportBusinessActivityDetailDao.class)
+    private ReportBusinessActivityDetailDao reportBusinessActivityDetailDao;
 
     /**
      * 初始化报告开始时间偏移时间
@@ -857,8 +857,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             }
         }
         Integer sumTps = CommonUtil.sum(scene.getBusinessActivityConfig(), SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getTargetTPS);
-        //        int sumTps = scene.getBusinessActivityConfig().stream().mapToInt(SceneBusinessActivityRefBean::getTargetTPS)
-        //            .sum();
+
         report.setTps(sumTps);
         report.setPressureType(scene.getPressureType());
         report.setType(scene.getType());
@@ -898,7 +897,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             }
             reportBusinessActivityDetail.setTargetSuccessRate(activity.getTargetSuccessRate());
             reportBusinessActivityDetail.setTargetSa(activity.getTargetSA());
-            tReportBusinessActivityDetailMapper.insertSelective(reportBusinessActivityDetail);
+            reportBusinessActivityDetailDao.insert(reportBusinessActivityDetail);
         });
         calculateNodesTarget(scene.getId(), reportId, report.getScriptNodeTree(), scene.getBusinessActivityConfig());
         log.info("启动[{}]场景测试，初始化报表数据,报表ID: {}", scene.getId(), report.getId());
@@ -944,7 +943,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         }
         if (CollectionUtils.isNotEmpty(resultList)) {
             resultList.stream().filter(Objects::nonNull)
-                .forEach(detail -> tReportBusinessActivityDetailMapper.insertSelective(detail));
+                .forEach(detail -> reportBusinessActivityDetailDao.insert(detail));
         }
 
     }
