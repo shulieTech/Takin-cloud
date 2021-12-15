@@ -1,35 +1,37 @@
 package io.shulie.takin.cloud.sdk.impl.report;
 
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 
 import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
-import io.shulie.takin.cloud.entrypoint.report.CloudReportApi;
-import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import org.springframework.stereotype.Service;
+
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
-import io.shulie.takin.cloud.sdk.model.request.common.CloudCommonInfoWrapperReq;
-import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailByIdReq;
-import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailBySceneIdReq;
-import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
-import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.entrypoint.report.CloudReportApi;
+import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportResp;
 import io.shulie.takin.cloud.sdk.model.request.report.TrendRequest;
-import io.shulie.takin.cloud.sdk.model.request.report.UpdateReportConclusionReq;
-import io.shulie.takin.cloud.sdk.model.request.report.WarnCreateReq;
 import io.shulie.takin.cloud.sdk.model.request.report.WarnQueryReq;
+import io.shulie.takin.cloud.sdk.model.request.report.WarnCreateReq;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ActivityResponse;
 import io.shulie.takin.cloud.sdk.model.response.report.MetricesResponse;
-import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportDetailResp;
-import io.shulie.takin.cloud.sdk.model.response.report.ReportResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
-import io.shulie.takin.cloud.sdk.model.response.report.TrendResponse;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailByIdReq;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
+import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
+import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailBySceneIdReq;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.WarnDetailResponse;
-import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
-import io.shulie.takin.common.beans.response.ResponseResult;
-import org.springframework.stereotype.Service;
+import io.shulie.takin.cloud.sdk.model.request.common.CloudCommonInfoWrapperReq;
+import io.shulie.takin.cloud.sdk.model.request.report.UpdateReportConclusionReq;
 
 /**
  * @author 无涯
@@ -56,15 +58,15 @@ public class CloudReportApiImpl implements CloudReportApi {
     }
 
     @Override
-    public TrendResponse trend(TrendRequest req) {
+    public ReportTrendResp trend(ReportTrendQueryReq req) {
         return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_TREND),
-            req, new TypeReference<ResponseResult<TrendResponse>>() {}).getData();
+            req, new TypeReference<ResponseResult<ReportTrendResp>>() {}).getData();
     }
 
     @Override
-    public TrendResponse tempTrend(TrendRequest req) {
+    public ReportTrendResp tempTrend(ReportTrendQueryReq req) {
         return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_TREND_TEMP),
-            req, new TypeReference<ResponseResult<TrendResponse>>() {}).getData();
+            req, new TypeReference<ResponseResult<ReportTrendResp>>() {}).getData();
     }
 
     @Override

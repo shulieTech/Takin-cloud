@@ -1,27 +1,28 @@
 package io.shulie.takin.cloud.entrypoint.report;
 
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import io.shulie.takin.cloud.sdk.model.request.common.CloudCommonInfoWrapperReq;
-import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailByIdReq;
-import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailBySceneIdReq;
-import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
-import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
-import io.shulie.takin.cloud.sdk.model.request.report.TrendRequest;
-import io.shulie.takin.cloud.sdk.model.request.report.UpdateReportConclusionReq;
-import io.shulie.takin.cloud.sdk.model.request.report.WarnCreateReq;
+import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportResp;
 import io.shulie.takin.cloud.sdk.model.request.report.WarnQueryReq;
+import io.shulie.takin.cloud.sdk.model.request.report.TrendRequest;
+import io.shulie.takin.cloud.sdk.model.request.report.WarnCreateReq;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ActivityResponse;
 import io.shulie.takin.cloud.sdk.model.response.report.MetricesResponse;
-import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportDetailResp;
-import io.shulie.takin.cloud.sdk.model.response.report.ReportResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
-import io.shulie.takin.cloud.sdk.model.response.report.TrendResponse;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailByIdReq;
+import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
+import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailBySceneIdReq;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.WarnDetailResponse;
-import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.sdk.model.request.common.CloudCommonInfoWrapperReq;
+import io.shulie.takin.cloud.sdk.model.request.report.UpdateReportConclusionReq;
 
 /**
  * @author mubai
@@ -52,7 +53,7 @@ public interface CloudReportApi {
      * @param req 请求入参
      * @return 出参
      */
-    TrendResponse trend(TrendRequest req);
+    ReportTrendResp trend(ReportTrendQueryReq req);
 
     /**
      * 临时报告趋势
@@ -60,7 +61,7 @@ public interface CloudReportApi {
      * @param req 请求入参
      * @return 出参
      */
-    TrendResponse tempTrend(TrendRequest req);
+    ReportTrendResp tempTrend(ReportTrendQueryReq req);
 
     /**
      * 添加警告
