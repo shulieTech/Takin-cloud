@@ -63,7 +63,7 @@ public interface CloudFileApi {
      * @param fileCreateByStringParamReq -
      * @return -
      */
-    Boolean createFileByPathAndString(FileCreateByStringParamReq fileCreateByStringParamReq);
+    String createFileByPathAndString(FileCreateByStringParamReq fileCreateByStringParamReq);
 
     /**
      * 上传文件

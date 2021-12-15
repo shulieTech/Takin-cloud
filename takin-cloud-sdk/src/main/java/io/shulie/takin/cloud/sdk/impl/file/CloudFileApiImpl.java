@@ -64,9 +64,9 @@ public class CloudFileApiImpl implements CloudFileApi {
     }
 
     @Override
-    public Boolean createFileByPathAndString(FileCreateByStringParamReq req) {
+    public String createFileByPathAndString(FileCreateByStringParamReq req) {
         return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_CREATE_BY_STRING),
-            req, new TypeReference<ResponseResult<Boolean>>() {}).getData();
+            req, new TypeReference<ResponseResult<String>>() {}).getData();
     }
 
     /**
