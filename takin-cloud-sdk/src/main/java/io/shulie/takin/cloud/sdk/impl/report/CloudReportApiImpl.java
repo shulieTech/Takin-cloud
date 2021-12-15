@@ -10,7 +10,6 @@ import com.alibaba.fastjson.TypeReference;
 import io.shulie.takin.cloud.entrypoint.report.CloudReportApi;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
-import io.shulie.takin.cloud.sdk.model.common.BusinessActivitySummaryBean;
 import io.shulie.takin.cloud.sdk.model.request.common.CloudCommonInfoWrapperReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailByIdReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailBySceneIdReq;
@@ -131,15 +130,15 @@ public class CloudReportApiImpl implements CloudReportApi {
     }
 
     /**
-     * 获取压测总结
+     * 压测明细
      *
-     * @param req 压测主键
-     * @return 总结信息
+     * @param req 请求参数
+     * @return 压测明细结果-节点树摘要
      */
     @Override
-    public List<BusinessActivitySummaryBean> summary(ReportDetailByIdReq req) {
+    public NodeTreeSummaryResp summary(ReportDetailByIdReq req) {
         return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_SUMMARY),
-            req, new TypeReference<ResponseResult<List<BusinessActivitySummaryBean>>>() {}).getData();
+            req, new TypeReference<ResponseResult<NodeTreeSummaryResp>>() {}).getData();
     }
 
     /**
@@ -210,7 +209,7 @@ public class CloudReportApiImpl implements CloudReportApi {
      */
     @Override
     public List<MetricesResponse> metrics(TrendRequest req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_METRICES),
+        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_METRICS),
             req, new TypeReference<ResponseResult<List<MetricesResponse>>>() {}).getData();
     }
 
@@ -218,21 +217,11 @@ public class CloudReportApiImpl implements CloudReportApi {
      * 查询脚本节点树
      *
      * @param req 请求参数
-     * @return
+     * @return 脚本节点数结果
      */
     @Override
-    public ResponseResult<List<ScriptNodeTreeResp>> queryNodeTree(ScriptNodeTreeQueryReq req) {
-        return null;
-    }
-
-    /**
-     * 压测明细
-     *
-     * @param req 请求参数
-     * @return
-     */
-    @Override
-    public ResponseResult<NodeTreeSummaryResp> getSummaryList(ReportDetailByIdReq req) {
-        return null;
+    public List<ScriptNodeTreeResp> queryNodeTree(ScriptNodeTreeQueryReq req) {
+        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_SCRIPT_NODE_TREE),
+            req, new TypeReference<ResponseResult<List<ScriptNodeTreeResp>>>() {}).getData();
     }
 }

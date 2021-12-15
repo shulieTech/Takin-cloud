@@ -1,4 +1,4 @@
-package io.shulie.takin.cloud.entrypoint.scenemanage;
+package io.shulie.takin.cloud.entrypoint.scene.manage;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,7 +26,8 @@ import org.springframework.validation.annotation.Validated;
  * @date 2020/10/20 3:42 下午
  */
 @Validated
-public interface CloudSceneApi {
+@SuppressWarnings("unused")
+public interface SceneManageApi {
 
     /**
      * 根据脚本实例id, 更新所有的场景对应该脚本的文件

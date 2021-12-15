@@ -1,37 +1,38 @@
 package io.shulie.takin.cloud.sdk.impl.scene.manage;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.math.BigDecimal;
 
 import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
-import io.shulie.takin.cloud.entrypoint.scenemanage.CloudSceneApi;
-import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import org.springframework.stereotype.Service;
+
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.CloudUpdateSceneFileRequest;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
+import io.shulie.takin.cloud.entrypoint.scene.manage.SceneManageApi;
+import io.shulie.takin.cloud.sdk.model.response.strategy.StrategyResp;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneIpNumReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageDeleteReq;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageQueryByIdsReq;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.ScriptCheckResp;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageQueryReq;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageDeleteReq;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageListResp;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageWrapperReq;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.ScriptCheckAndUpdateReq;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageListResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResp;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.ScriptCheckResp;
-import io.shulie.takin.cloud.sdk.model.response.strategy.StrategyResp;
-import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
-import io.shulie.takin.common.beans.response.ResponseResult;
-import org.springframework.stereotype.Service;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageQueryByIdsReq;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.CloudUpdateSceneFileRequest;
 
 /**
  * @author 何仲奇
  * @date 2020/10/21 3:03 下午
  */
 @Service
-public class CloudSceneApiImpl implements CloudSceneApi {
+public class SceneManageApiImpl implements SceneManageApi {
 
     @Resource
     CloudApiSenderService cloudApiSenderService;

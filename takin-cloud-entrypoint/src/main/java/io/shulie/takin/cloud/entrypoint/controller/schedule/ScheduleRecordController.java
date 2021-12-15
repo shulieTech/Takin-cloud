@@ -5,18 +5,19 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import com.github.pagehelper.PageInfo;
-import com.pamirs.takin.entity.domain.dto.schedule.ScheduleRecordDTO;
-import com.pamirs.takin.entity.domain.vo.schedule.ScheduleRecordQueryVO;
 import io.shulie.takin.cloud.biz.cache.DictionaryCache;
-import io.shulie.takin.cloud.biz.service.record.ScheduleRecordService;
-import io.shulie.takin.cloud.common.constants.DicKeyConstant;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.common.constants.DicKeyConstant;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import com.pamirs.takin.entity.domain.dto.schedule.ScheduleRecordDTO;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.biz.service.record.ScheduleRecordService;
+import com.pamirs.takin.entity.domain.vo.schedule.ScheduleRecordQueryVO;
+
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,9 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
  * @author qianshui
  * @date 2020/5/9 下午2:05
  */
+@Api(tags = "调度记录")
 @RestController
 @RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_SCHEDULE)
-@Api(tags = "调度记录")
 public class ScheduleRecordController {
     @Resource
     private ScheduleRecordService scheduleRecordService;

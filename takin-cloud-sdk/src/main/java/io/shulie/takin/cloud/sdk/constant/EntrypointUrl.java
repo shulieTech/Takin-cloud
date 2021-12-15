@@ -5,7 +5,7 @@ package io.shulie.takin.cloud.sdk.constant;
  *
  * @author 张天赐
  */
-//@SuppressWarnings("SpellCheckingInspection")
+@SuppressWarnings("SpellCheckingInspection")
 public class EntrypointUrl {
     public static String join(String... path) {
         return BASIC + "/"
@@ -73,6 +73,11 @@ public class EntrypointUrl {
     public final static String METHOD_MODULE_MIDDLEWARE_JAR_COMPARE = "compare";
 
     /**
+     * 新业务流程
+     */
+    public final static String MODULE_PROCESS = "process";
+    public final static String METHOD_PROCESS_SCRIPT_ANALYZE = "scriptAnalyze";
+    /**
      * 模块 - 压测报告
      */
     public final static String MODULE_REPORT = "report";
@@ -81,7 +86,7 @@ public class EntrypointUrl {
     public final static String METHOD_REPORT_UNLOCK = "unlock";
     public final static String METHOD_REPORT_FINISH = "finish";
     public final static String METHOD_REPORT_WARN_COUNT = "warn/count";
-    public final static String METHOD_REPORT_METRICES = "metrices";
+    public final static String METHOD_REPORT_METRICS = "metrices";
     public final static String METHOD_REPORT_SUMMARY = "businessActivity/summary/list";
     public final static String METHOD_REPORT_ACTIVITY_REPORT_ID = "queryReportActivityByReportId";
     public final static String METHOD_REPORT_ACTIVITY_SCENE_ID = "queryReportActivityBySceneId";
@@ -92,6 +97,9 @@ public class EntrypointUrl {
     public final static String METHOD_REPORT_DETAIL_TEMP = "tempReportDetail";
     public final static String METHOD_REPORT_ONE_RUNNING = "running";
     public final static String METHOD_REPORT_LIST_RUNNING = "running/list";
+    public final static String METHOD_REPORT_LIST_PRESSURING = "pressuring/list";
+    public final static String METHOD_REPORT_SCRIPT_NODE_TREE = "nodeTree";
+
     public final static String METHOD_REPORT_TREND = "queryReportTrend";
     public final static String METHOD_REPORT_TREND_TEMP = "queryTempReportTrend";
 
@@ -99,6 +107,14 @@ public class EntrypointUrl {
      * 模块 - 场景
      */
     private final static String MODULE_SCENE = "scene";
+    /**
+     * 模块 - 场景管理 (v2-混合压测)
+     */
+    public final static String MODULE_SCENE_MIX = MODULE_SCENE + "/mix";
+    public final static String METHOD_SCENE_MIX_CREATE = "create";
+    public final static String METHOD_SCENE_MIX_UPDATE = "update";
+    public final static String METHOD_SCENE_MIX_DETAIL = "detail";
+    public final static String METHOD_SCENE_MIX_SYNCHRONIZE = "synchronize";
     /**
      * 模块 - 场景管理
      */

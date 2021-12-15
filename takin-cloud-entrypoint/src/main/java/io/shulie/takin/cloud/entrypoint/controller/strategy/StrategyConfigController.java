@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/5/9 下午3:27
  */
 @RestController
-@RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_STATISTICS)
+@RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_STRATEGY)
 @Api(tags = "策略配置管理")
 public class StrategyConfigController {
 

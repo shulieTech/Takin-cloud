@@ -3,22 +3,24 @@ package io.shulie.takin.cloud.entrypoint.controller.scene;
 import java.io.File;
 import java.util.List;
 
+import javax.annotation.Resource;
+
+import io.shulie.takin.cloud.ext.api.EngineExtApi;
+import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
+import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
+import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
-import io.shulie.takin.cloud.ext.api.EngineExtApi;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.ScriptAnalyzeRequest;
-import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.ext.content.script.ScriptNode;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -27,18 +29,17 @@ import org.springframework.web.bind.annotation.RestController;
  * @author liyuanba
  * @date 2021/10/26 12:02 下午
  */
-@RestController("openSceneController")
-@RequestMapping("scene")
+@RestController()
+@RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_PROCESS)
 @Api(tags = "新业务流程相关接口")
-public class SceneController {
+public class ProcessController {
 
-    @Autowired
+    @Resource
     private EnginePluginUtils enginePluginUtils;
 
     @ApiOperation(value = "脚本解析")
-    @PostMapping("/scriptAnalyze")
-    @ResponseBody
-    public ResponseResult<?> scriptAnalyze(@RequestBody ScriptAnalyzeRequest request) {
+    @PostMapping(EntrypointUrl.METHOD_PROCESS_SCRIPT_ANALYZE)
+    public ResponseResult<List<ScriptNode>> scriptAnalyze(@RequestBody ScriptAnalyzeRequest request) {
         if (StringUtils.isBlank(request.getScriptFile())) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCRIPT_ANALYZE_PARAMS_ERROR, "请提供脚本文件完整的路径和名称");
         }

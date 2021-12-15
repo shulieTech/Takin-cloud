@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import io.shulie.takin.cloud.sdk.model.common.BusinessActivitySummaryBean;
 import io.shulie.takin.cloud.sdk.model.request.common.CloudCommonInfoWrapperReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailByIdReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailBySceneIdReq;
@@ -133,7 +132,7 @@ public interface CloudReportApi {
      * @param req 压测主键
      * @return 总结信息
      */
-    List<BusinessActivitySummaryBean> summary(ReportDetailByIdReq req);
+    NodeTreeSummaryResp summary(ReportDetailByIdReq req);
 
     /**
      * 获取报告告警总数
@@ -187,15 +186,7 @@ public interface CloudReportApi {
      * 查询脚本节点树
      *
      * @param req 请求参数
-     * @return 脚本节点响应
+     * @return 脚本节点树结果
      */
-    ResponseResult<List<ScriptNodeTreeResp>> queryNodeTree(ScriptNodeTreeQueryReq req);
-
-    /**
-     * 压测明细
-     *
-     * @param req 请求参数
-     * @return 节点树汇总响应
-     */
-    ResponseResult<NodeTreeSummaryResp> getSummaryList(ReportDetailByIdReq req);
+    List<ScriptNodeTreeResp> queryNodeTree(ScriptNodeTreeQueryReq req);
 }
