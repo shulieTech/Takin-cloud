@@ -52,8 +52,6 @@ public class CollectorService extends AbstractIndicators {
     public static final String METRICS_EVENTS_STARTED = "started";
     public static final String METRICS_EVENTS_ENDED = "ended";
 
-    private static final Map<String, List<String>> cacheTasks = new ConcurrentHashMap<>();
-
     @Resource
     private TReportMapper tReportMapper;
     @Resource
@@ -73,8 +71,7 @@ public class CollectorService extends AbstractIndicators {
 
     @Value("${script.path}")
     private String ptlDir;
-    @Value("${cloud.push.log:false}")
-    private boolean cloudPushPtlLog;
+
     @Resource
     private EnginePluginUtils enginePluginUtils;
     @Resource
@@ -219,10 +216,9 @@ public class CollectorService extends AbstractIndicators {
                     if (PressureLogUploadConstants.UPLOAD_BY_CLOUD.equals(appConfig.getEngineLogUploadModel())){
                         log.info("开始异步上传ptl日志，场景ID：{},报告ID:{},PodNum:{}", sceneId, reportId,metric.getPodNo());
                         EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
-                        String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_JTL_FILE_NAME_SYSTEM_PROP_KEY);
+                        String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_PTL_FILE_NAME_SYSTEM_PROP_KEY);
                         THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, tenantId, logUploadDAO, redisClientUtils,
-                            pushLogService, sceneManageDAO, ptlDir, fileName,engineCallExtApi) {
-                        });
+                            pushLogService, sceneManageDAO, ptlDir, fileName,engineCallExtApi) {});
                     }
                 }
                 if (isLast) {
@@ -273,14 +269,9 @@ public class CollectorService extends AbstractIndicators {
     }
 
     private boolean isLastSign(Long lastSignCount, String engineName) {
-        if (
-            // redis中有信息
-            StringUtils.isNotEmpty(redisClientUtils.getString(engineName))
-                // 且信息匹配
-            && lastSignCount.equals(Long.valueOf(redisClientUtils.getString(engineName)))) {
-            return true;
-        }
-        return false;
+        // redis中有信息 且信息匹配
+        return StringUtils.isNotEmpty(redisClientUtils.getString(engineName))
+            && lastSignCount.equals(Long.valueOf(redisClientUtils.getString(engineName)));
     }
 
     /**

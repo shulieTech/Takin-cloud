@@ -122,8 +122,8 @@ public class AsyncServiceImpl implements AsyncService {
             String startedPodNum = redisClientUtils.getString(pressureNodeName);
             redisClientUtils.hmset(k8sPodKey, SceneTaskRedisConstants.PRESSURE_NODE_START_ERROR,
                 String.format("节点没有在设定时间【%s】s内启动，计划启动节点个数【%s】,实际启动节点个数【%s】,"
-                        + "，导致压测停止", pressureNodeStartExpireTime, redisClientUtils.getString(pressureNodeTotalName),
-                    StringUtils.isBlank(startedPodNum) ? 0 : startedPodNum));
+                    + "导致压测停止", pressureNodeStartExpireTime, redisClientUtils.getString(pressureNodeTotalName),
+                    StringUtils.isBlank(startedPodNum)? 0: startedPodNum));
             callStop(startRequest);
         }
     }
