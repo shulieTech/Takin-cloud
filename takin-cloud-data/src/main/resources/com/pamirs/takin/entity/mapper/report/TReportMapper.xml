@@ -112,6 +112,12 @@
             <if test="param.endTime != null">
                 and start_time  <![CDATA[ <= ]]> #{param.endTime}
             </if>
+            <if test="param.userIds != null and param.userIds.size() != 0">
+                 and operate_id in
+                  <foreach collection="param.userIds" open="(" close=")" separator="," item="userId">
+                    #{userId}
+                </foreach>
+            </if>
             <if test="param.type != null">
                 and `type` = #{param.type}
             </if>

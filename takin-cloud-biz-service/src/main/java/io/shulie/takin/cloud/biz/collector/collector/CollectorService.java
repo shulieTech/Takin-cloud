@@ -1,13 +1,7 @@
 package io.shulie.takin.cloud.biz.collector.collector;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 
 import javax.annotation.Resource;
 
@@ -25,12 +19,7 @@ import io.shulie.takin.cloud.common.bean.collector.EventMetrics;
 import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.common.constants.CollectorConstants;
-import io.shulie.takin.cloud.common.constants.NoLengthBlockingQueue;
-import io.shulie.takin.cloud.common.constants.PressureEngineConstants;
-import io.shulie.takin.cloud.common.constants.PressureLogUploadConstants;
-import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
-import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.common.constants.*;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
@@ -60,8 +49,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class CollectorService extends AbstractIndicators {
 
-    public static final String METRICS_EVENTS_ENDED = "ended";
     public static final String METRICS_EVENTS_STARTED = "started";
+    public static final String METRICS_EVENTS_ENDED = "ended";
+
+    private static final Map<String, List<String>> cacheTasks = new ConcurrentHashMap<>();
 
     @Resource
     private TReportMapper tReportMapper;
@@ -91,7 +82,7 @@ public class CollectorService extends AbstractIndicators {
     @Resource
     private AppConfig appConfig;
 
-    private final static ExecutorService THREAD_POOL = new ThreadPoolExecutor(5, 200,
+    private final static ExecutorService THREAD_POOL = new ThreadPoolExecutor(100, 200,
         300L, TimeUnit.SECONDS,
         new NoLengthBlockingQueue<>(), new ThreadFactoryBuilder()
         .setNameFormat("ptl-log-push-%d").build(), new ThreadPoolExecutor.AbortPolicy());
@@ -126,6 +117,7 @@ public class CollectorService extends AbstractIndicators {
             .map(metrics -> InfluxUtil.toPoint(measurement, metrics.getTimestamp(), metrics))
             .forEach(influxWriter::insert);
     }
+
 
     /**
      * 记录时间
@@ -221,20 +213,16 @@ public class CollectorService extends AbstractIndicators {
                             .checkEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING)
                             .updateEnum(SceneManageStatusEnum.ENGINE_RUNNING)
                             .build());
-
-                        //从压测引擎上传请求流量明细还是从cloud上传请求流量明细
-                        if (PressureLogUploadConstants.UPLOAD_BY_CLOUD.equals(appConfig.getEngineLogUploadModel())) {
-                            log.info("开始异步上传ptl日志，场景ID：{},报告ID:{}", sceneId, reportId);
-                            taskStatusCache.cacheStatus(sceneId, reportId, SceneRunTaskStatusEnum.RUNNING);
-                            EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
-                            String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_JTL_FILE_NAME_SYSTEM_PROP_KEY);
-                            THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, tenantId, logUploadDAO, redisClientUtils,
-                                pushLogService, sceneManageDAO, ptlDir, fileName, engineCallExtApi) {
-                            });
-                        } else {
-                            cacheTryRunTaskStatus(sceneId, reportId, tenantId, SceneRunTaskStatusEnum.RUNNING);
-                        }
-
+                        cacheTryRunTaskStatus(sceneId, reportId, tenantId, SceneRunTaskStatusEnum.RUNNING);
+                    }
+                    //如果从cloud上传请求流量明细，则需要启动异步线程去读取ptl文件上传
+                    if (PressureLogUploadConstants.UPLOAD_BY_CLOUD.equals(appConfig.getEngineLogUploadModel())){
+                        log.info("开始异步上传ptl日志，场景ID：{},报告ID:{},PodNum:{}", sceneId, reportId,metric.getPodNo());
+                        EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
+                        String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_JTL_FILE_NAME_SYSTEM_PROP_KEY);
+                        THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, tenantId, logUploadDAO, redisClientUtils,
+                            pushLogService, sceneManageDAO, ptlDir, fileName,engineCallExtApi) {
+                        });
                     }
                 }
                 if (isLast) {
@@ -269,7 +257,6 @@ public class CollectorService extends AbstractIndicators {
         }
 
     }
-
     private void cacheTryRunTaskStatus(Long sceneId, Long reportId, Long customerId, SceneRunTaskStatusEnum status) {
         taskStatusCache.cacheStatus(sceneId, reportId, status);
         Report report = tReportMapper.selectByPrimaryKey(reportId);
@@ -290,7 +277,7 @@ public class CollectorService extends AbstractIndicators {
             // redis中有信息
             StringUtils.isNotEmpty(redisClientUtils.getString(engineName))
                 // 且信息匹配
-                && lastSignCount.equals(Long.valueOf(redisClientUtils.getString(engineName)))) {
+            && lastSignCount.equals(Long.valueOf(redisClientUtils.getString(engineName)))) {
             return true;
         }
         return false;

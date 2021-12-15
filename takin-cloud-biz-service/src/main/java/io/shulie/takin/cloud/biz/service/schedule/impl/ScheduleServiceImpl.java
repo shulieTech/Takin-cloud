@@ -47,7 +47,6 @@ import io.shulie.takin.ext.content.enginecall.PtlLogConfigExt;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -60,43 +59,32 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 public class ScheduleServiceImpl implements ScheduleService {
-
-    @Autowired
+    @Resource
     private StrategyConfigService strategyConfigService;
-
     @Resource
     private TScheduleRecordMapper tScheduleRecordMapper;
-
-    @Autowired
+    @Resource
     private ScheduleEventService scheduleEvent;
-
-    @Autowired
+    @Resource
     private SceneManageService sceneManageService;
-
     @Resource
     private ScheduleRecordEnginePluginService scheduleRecordEnginePluginService;
-
-    @Autowired
+    @Resource
     private RedisClientUtils redisClientUtils;
-
-    @Autowired
+    @Resource
     private AsyncService asyncService;
-
-    @Autowired
+    @Resource
     private RedisTemplate<String, String> redisTemplate;
-
-    @Autowired
+    @Resource
     @Qualifier("stopThreadPool")
     protected ThreadPoolExecutor stopExecutor;
-
-    @Autowired
+    @Resource
     private ReportService reportService;
-
-    @Autowired
+    @Resource
     private EnginePluginUtils pluginUtils;
     @Resource
     private AppConfig appConfig;
-    @Autowired
+    @Resource
     private EngineConfigService engineConfigService;
 
     @Override
@@ -133,7 +121,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         scheduleRecord.setPodClass(scheduleName);
         tScheduleRecordMapper.insertSelective(scheduleRecord);
 
-        //add by lipeng 保存调度对应压测引擎插件记录信息
+        //add by 李鹏 保存调度对应压测引擎插件记录信息
         scheduleRecordEnginePluginService.saveScheduleRecordEnginePlugins(
             scheduleRecord.getId(), request.getEnginePluginsFilePath());
         //add end
@@ -143,7 +131,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         eventRequest.setScheduleId(scheduleRecord.getId());
         eventRequest.setRequest(request);
         eventRequest.setStrategyConfig(config);
-        String memSetting = null;
+        String memSetting;
         if (PressureSceneEnum.INSPECTION_MODE.equals(request.getPressureScene())) {
             memSetting = "-XX:MaxRAMPercentage=90.0";
         } else {
@@ -167,6 +155,8 @@ public class ScheduleServiceImpl implements ScheduleService {
         EngineLogPtlConfigOutput engineLogPtlConfigOutput = engineConfigService.getEnginePtlConfig();
         PtlLogConfigExt ptlLogConfig = new PtlLogConfigExt();
         BeanUtils.copyProperties(engineLogPtlConfigOutput, ptlLogConfig);
+        //增加ptl日志上传位置参数
+        ptlLogConfig.setPtlUploadFrom(appConfig.getEngineLogUploadModel());
         eventRequest.setPtlLogConfig(ptlLogConfig);
 
         //把数据放入缓存，初始化回调调度需要

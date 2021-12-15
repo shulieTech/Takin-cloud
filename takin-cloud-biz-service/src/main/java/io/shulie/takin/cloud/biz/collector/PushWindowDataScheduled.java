@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.biz.collector;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.List;
@@ -133,10 +134,10 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         if (MapUtils.isNotEmpty(extMap)) {
             refList.addAll((List)extMap.get("businessActivityBindRef"));
         }
-        ArrayList<String> transation = new ArrayList<>(refList);
-        transation.add("all");
+        ArrayList<String> transition = new ArrayList<>(refList);
+        transition.add("all");
         String redisKey = String.format(CollectorConstants.REDIS_PRESSURE_TASK_KEY, taskKey);
-        redisTemplate.opsForValue().set(redisKey, transation, taskTimeout, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(redisKey, transition, taskTimeout, TimeUnit.SECONDS);
         log.info("PushWindowDataScheduled Create Redis Key = {}, expireDuration={}min, refList={} Success....",
             redisKey, taskTimeout, refList);
     }
@@ -298,12 +299,12 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             return timeWindow;
         }
         //timeWindow如果为空，则获取全部metrics数据，如果不为空则获取该时间窗口的数据
-        List<ResponseMetrics> metriceses = queryMetrics(sceneId, reportId, customerId, timeWindow);
-        if (CollectionUtils.isNotEmpty(metriceses)) {
+        List<ResponseMetrics> metricsList = queryMetrics(sceneId, reportId, customerId, timeWindow);
+        if (CollectionUtils.isNotEmpty(metricsList)) {
             log.info(logPre + " queryMetrics timeWindow=" + DateUtil.showTime(timeWindow) + ", endTime=" + DateUtil
-                .showTime(endTime) + ", metricses.size=" + metriceses.size());
+                .showTime(endTime) + ", metricsList.size=" + metricsList.size());
             if (null == timeWindow) {
-                timeWindow = metriceses.stream().filter(Objects::nonNull)
+                timeWindow = metricsList.stream().filter(Objects::nonNull)
                     .map(ResponseMetrics::getTime)
                     .filter(l -> l > 0)
                     .findFirst()
@@ -316,7 +317,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 return timeWindow;
             }
 
-            List<String> transactions = metriceses.stream().filter(Objects::nonNull)
+            List<String> transactions = metricsList.stream().filter(Objects::nonNull)
                 .map(ResponseMetrics::getTransaction)
                 .filter(StringUtils::isNotBlank)
                 //过滤掉控制器
@@ -332,7 +333,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             long time = timeWindow;
 
             List<PressureOutput> results = transactions.stream().filter(StringUtils::isNotBlank)
-                .map(s -> this.filterByTransactionAndPodNo(metriceses, s))
+                .map(s -> this.filterByTransactionAndPodNo(metricsList, s))
                 .filter(CollectionUtils::isNotEmpty)
                 .map(l -> this.toPressureOutput(l, podNum, time))
                 .filter(Objects::nonNull)
@@ -506,12 +507,12 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     /**
      * 单个时间窗口数据，根据transaction过滤，并且每个pod只取1条数据
      */
-    private List<ResponseMetrics> filterByTransactionAndPodNo(List<ResponseMetrics> metricses, String transaction) {
-        if (CollectionUtils.isEmpty(metricses)) {
-            return metricses;
+    private List<ResponseMetrics> filterByTransactionAndPodNo(List<ResponseMetrics> metricsList, String transaction) {
+        if (CollectionUtils.isEmpty(metricsList)) {
+            return metricsList;
         }
         List<String> pods = Lists.newArrayList();
-        return metricses.stream().filter(Objects::nonNull)
+        return metricsList.stream().filter(Objects::nonNull)
             .filter(m -> transaction.equals(m.getTransaction()))
             .filter(m -> !pods.contains(m.getPodNo()))
             .peek(m -> pods.add(m.getPodNo()))
@@ -565,61 +566,61 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     /**
      * 实时数据统计
      */
-    private PressureOutput toPressureOutput(List<ResponseMetrics> metricses, Integer podNum, long time) {
-        if (CollectionUtils.isEmpty(metricses)) {
+    private PressureOutput toPressureOutput(List<ResponseMetrics> metricsList, Integer podNum, long time) {
+        if (CollectionUtils.isEmpty(metricsList)) {
             return null;
         }
-        String transaction = metricses.get(0).getTransaction();
-        String testName = metricses.get(0).getTestName();
+        String transaction = metricsList.get(0).getTransaction();
+        String testName = metricsList.get(0).getTestName();
 
-        int count = metricses.stream().filter(Objects::nonNull)
+        int count = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getCount)
             .mapToInt(i -> Objects.nonNull(i) ? i : 0)
             .sum();
-        int failCount = metricses.stream().filter(Objects::nonNull)
+        int failCount = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getFailCount)
             .mapToInt(i -> Objects.nonNull(i) ? i : 0)
             .sum();
-        int saCount = metricses.stream().filter(Objects::nonNull)
+        int saCount = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getSaCount)
             .mapToInt(i -> Objects.nonNull(i) ? i : 0)
             .sum();
         double sa = NumberUtil.getPercentRate(saCount, count);
         double successRate = NumberUtil.getPercentRate(count - failCount, count);
-        long sendBytes = metricses.stream().filter(Objects::nonNull)
+        long sendBytes = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getSentBytes)
             .mapToLong(l -> Objects.isNull(l) ? 0 : l)
             .sum();
-        long receivedBytes = metricses.stream().filter(Objects::nonNull)
+        long receivedBytes = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getReceivedBytes)
             .mapToLong(l -> Objects.isNull(l) ? 0 : l)
             .sum();
-        long sumRt = metricses.stream().filter(Objects::nonNull)
+        long sumRt = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getSumRt)
             .mapToLong(l -> Objects.isNull(l) ? 0 : l)
             .sum();
         double avgRt = NumberUtil.getRate(sumRt, count);
-        double maxRt = metricses.stream().filter(Objects::nonNull)
+        double maxRt = metricsList.stream().filter(Objects::nonNull)
             .mapToDouble(ResponseMetrics::getMaxRt)
             .filter(Objects::nonNull)
             .max()
             .orElse(0);
-        double minRt = metricses.stream().filter(Objects::nonNull)
+        double minRt = metricsList.stream().filter(Objects::nonNull)
             .mapToDouble(ResponseMetrics::getMinRt)
             .filter(Objects::nonNull)
             .min()
             .orElse(0);
-        int activeThreads = metricses.stream().filter(Objects::nonNull)
+        int activeThreads = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getActiveThreads)
             .mapToInt(i -> Objects.nonNull(i) ? i : 0)
             .sum();
         double avgTps = NumberUtil.getRate(count, CollectorConstants.SEND_TIME);
-        List<String> percentDatas = metricses.stream().filter(Objects::nonNull)
+        List<String> percentDataList = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getPercentData)
             .filter(StringUtils::isNotBlank)
             .collect(Collectors.toList());
-        String percentSa = calculateSaPercent(percentDatas);
-        List<String> podNos = metricses.stream().filter(Objects::nonNull)
+        String percentSa = calculateSaPercent(percentDataList);
+        List<String> podNos = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getPodNo)
             .filter(StringUtils::isNotBlank)
             .distinct()
@@ -748,6 +749,11 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                     long breakTime = Math.min(endTime, nowTimeWindow);
                     Long timeWindow = null;
                     do {
+                        //获取最后一条数据的时间，如果最后一条回传数据的时间比当前时间少3分钟以上，则认为引擎不会继续回传数据了，结束掉,设置endTime为最后一条数据的时间
+                        //if(ifReportOutOfTime(sceneId, reportId, customerId,r)){
+                        //    log.error("3分钟未收到压测引擎回传数据或上条数据已超过三分钟，停止数据收集，场景ID:{},报告ID:{}",sceneId,reportId);
+                        //    break;
+                        //}
                         //不用递归，而是采用do...while...的方式是防止需要处理的时间段太长引起stackOverFlow错误
                         timeWindow = reduceMetrics(sceneId, reportId, customerId, podNum, breakTime, timeWindow, nodes);
                         if (null == timeWindow) {
@@ -773,6 +779,44 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 }
             })
             .forEach(Executors::execute);
+    }
+
+    /**
+     * 暂时先不用
+     *
+     * @param sceneId
+     * @param reportId
+     * @param customerId
+     * @param report
+     * @return
+     */
+    private boolean ifReportOutOfTime(Long sceneId, Long reportId, Long customerId, ReportResult report) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("select * from ")
+            .append(InfluxUtil.getMetricsMeasurement(sceneId, reportId, customerId))
+            .append(" order by create_time desc limit 1");
+        try {
+            PressureOutput pressure = influxWriter.querySingle(sql.toString(), PressureOutput.class);
+            if (Objects.nonNull(pressure)) {
+                long lastMetricsTime = pressure.getTime();
+                if (lastMetricsTime > 0) {
+                    long s = (System.currentTimeMillis() - lastMetricsTime) / (1000 * 60);
+                    if (s > 3) {
+                        report.setEndTime(new Date(lastMetricsTime));
+                        return true;
+                    }
+                }
+            } else {
+                long s = (System.currentTimeMillis() - report.getStartTime().getTime()) / (1000 * 60);
+                if (s > 3) {
+                    report.setEndTime(new Date());
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            log.error("查询metrics数据异常:{}", e.toString());
+        }
+        return false;
     }
 
     /**
@@ -890,7 +934,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                             forceClose(taskKey, timeWindow, sceneId, reportId, customerId);
                         }
                     } catch (Exception e) {
-                        log.error("【collector】Real-time data analysis for anomalies hashkey:{}, error:{}",
+                        log.error("【collector】Real-time data analysis for anomalies hashKey:{}, error:{}",
                             sceneReportKey, e);
                     } finally {
                         unlock(sceneReportKey, "collectorSchedulerPool");
@@ -968,8 +1012,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             Double saRate = getSaRate(count, saCount);
             Double successRate = getSuccessRate(count, failCount);
 
-            List<String> percentDatas = getStringValue(percentDataKey(taskKey, transaction, timeWindow));
-            String percentSa = calculateSaPercent(percentDatas);
+            List<String> percentDataList = getStringValue(percentDataKey(taskKey, transaction, timeWindow));
+            String percentSa = calculateSaPercent(percentDataList);
 
             Map<String, String> tags = new HashMap<>(0);
             tags.put("transaction", transaction);
@@ -996,7 +1040,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             } else {
                 Map<String, Object> fields = getInfluxdbFieldMap(count, failCount,
                     saCount, sumRt, maxRt, minRt, avgTps, avgRt, saRate, successRate, activeThreads, percentSa);
-                log.debug("metrics数据入库:时间窗:{},percentSa:{}", timeWindow, percentDatas);
+                log.debug("metrics数据入库:时间窗:{},percentSa:{}", timeWindow, percentDataList);
                 influxWriter.insert(InfluxUtil.getMeasurement(sceneId, reportId, tenantId), tags,
                     fields, timeWindow);
             }
@@ -1066,8 +1110,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     /**
      * 计算sa
      */
-    private String calculateSaPercent(List<String> percentDatas) {
-        List<Map<Integer, RtDataOutput>> percentMapList = percentDatas.stream().filter(StringUtils::isNotBlank)
+    private String calculateSaPercent(List<String> percentDataList) {
+        List<Map<Integer, RtDataOutput>> percentMapList = percentDataList.stream().filter(StringUtils::isNotBlank)
             .map(DataUtils::parseToPercentMap)
             .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(percentMapList)) {
@@ -1081,7 +1125,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             .sum();
 
         //所有rt按耗时排序
-        List<RtDataOutput> rtDatas = percentMapList.stream().filter(Objects::nonNull)
+        List<RtDataOutput> rtDataList = percentMapList.stream().filter(Objects::nonNull)
             .peek(DataUtils::percentMapRemoveDuplicateHits)
             .map(Map::values)
             .filter(CollectionUtils::isNotEmpty)
@@ -1096,7 +1140,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             int hits = 0;
             int time = 0;
             double need = total * i / 100d;
-            for (RtDataOutput d : rtDatas) {
+            for (RtDataOutput d : rtDataList) {
                 if (hits < need || d.getTime() <= time) {
                     hits += d.getHits();
                     if (d.getTime() > time) {

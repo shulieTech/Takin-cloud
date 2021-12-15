@@ -128,6 +128,11 @@ public class PressureTestLogUploadTask implements Runnable {
                             lastSize);
                         if (data != null && data.length > 0) {
                             pushLogService.pushLogToAmdb(data, VERSION);
+                        }else if(lastSize > 0){
+                            TimeUnit.SECONDS.sleep(10);
+                            data = readFile(ptlFile, subFileName, position, ptlFile.getAbsolutePath(), fileFetcher,
+                                lastSize);
+                            pushLogService.pushLogToAmdb(data, VERSION);
                         }
                         position = getPosition(subFileName);
                         log.info("上传Jmeter日志--场景ID:{},文件【{}】上传完成，文件大小【{}】", this.sceneId, this.fileName, position);

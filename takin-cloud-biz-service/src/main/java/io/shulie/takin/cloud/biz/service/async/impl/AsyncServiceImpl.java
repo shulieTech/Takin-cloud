@@ -5,30 +5,34 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
-import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
-import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
-import io.shulie.takin.cloud.biz.service.async.AsyncService;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.common.bean.task.TaskResult;
-import io.shulie.takin.cloud.common.constants.SceneManageConstant;
-import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
-import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
-import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
-import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
-import io.shulie.takin.eventcenter.Event;
-import io.shulie.takin.eventcenter.EventCenterTemplate;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
+
+import io.shulie.takin.eventcenter.Event;
+import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
+import io.shulie.takin.eventcenter.EventCenterTemplate;
+import io.shulie.takin.cloud.common.bean.task.TaskResult;
+import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.takin.cloud.biz.service.async.AsyncService;
+import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
+import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
+import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
 
 /**
  * @author qianshui
@@ -115,9 +119,11 @@ public class AsyncServiceImpl implements AsyncService {
             // 补充停止原因
             //设置缓存，用以检查压测场景启动状态 lxr 20210623
             String k8sPodKey = String.format(SceneTaskRedisConstants.PRESSURE_NODE_ERROR_KEY + "%s_%s", startRequest.getSceneId(), startRequest.getTaskId());
+            String startedPodNum = redisClientUtils.getString(pressureNodeName);
             redisClientUtils.hmset(k8sPodKey, SceneTaskRedisConstants.PRESSURE_NODE_START_ERROR,
                 String.format("节点没有在设定时间【%s】s内启动，计划启动节点个数【%s】,实际启动节点个数【%s】,"
-                    + "，导致压测停止", pressureNodeStartExpireTime, redisClientUtils.getString(pressureNodeTotalName), redisClientUtils.getString(pressureNodeName)));
+                        + "，导致压测停止", pressureNodeStartExpireTime, redisClientUtils.getString(pressureNodeTotalName),
+                    StringUtils.isBlank(startedPodNum) ? 0 : startedPodNum));
             callStop(startRequest);
         }
     }

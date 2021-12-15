@@ -12,6 +12,12 @@ import io.shulie.takin.ext.content.AbstractEntry;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PtlLogConfigExt extends AbstractEntry {
+
+    /**
+     * 日志上传位置，engine代表从压测引擎上传，cloud代表从cloud上传
+     */
+    private String ptlUploadFrom;
+
     /**
      * 是否输出ptl日志文件
      */

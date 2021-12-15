@@ -78,6 +78,7 @@ import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.ext.content.asset.RealAssectBillExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.cloud.biz.output.report.ReportOutput;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.sdk.model.common.DistributeBean;
 import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
@@ -590,6 +591,7 @@ public class ReportServiceImpl implements ReportService {
                 bean.setPassFlag((Optional.ofNullable(detail.getPassFlag()).orElse(0)));
                 bean.setDistribute(getDistributes(detail.getRtDistribute()));
                 bean.setApplicationIds(detail.getApplicationIds());
+                bean.setActivityId(detail.getBusinessActivityId());
                 return bean;
             }).collect(Collectors.toList());
     }
@@ -665,7 +667,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean unLockReport(Long reportId) {
         ReportResult reportResult = reportDao.selectById(reportId);
-        if (ReportConstants.LOCK_STATUS != reportResult.getLock()) {
+        if (reportResult.getType() != PressureSceneEnum.DEFAULT.getCode() && ReportConstants.LOCK_STATUS != reportResult.getLock()) {
             log.error("异常代码【{}】,异常内容：解锁报告异常 --> 报告{}非锁定状态，不能解锁",
                 TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId);
             return false;
@@ -680,8 +682,27 @@ public class ReportServiceImpl implements ReportService {
     public Boolean finishReport(Long reportId) {
         log.info("web -> cloud finish reportId【{}】,starting", reportId);
         ReportResult reportResult = reportDao.selectById(reportId);
+        //只有常规模式需要生成报告内容
+        if (reportResult.getType() != PressureSceneEnum.DEFAULT.getCode()) {
+            reportDao.finishReport(reportId);
+            sceneManageService.updateSceneLifeCycle(
+                UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId())
+                    .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING,
+                        SceneManageStatusEnum.STOP).updateEnum(SceneManageStatusEnum.WAIT).build());
+            return true;
+        }
         if (checkReportError(reportResult)) {
             return false;
+        }
+        //判断报告是否已经汇总，如果没有汇总，先汇总报告，然后在更新报告状态
+        if (Objects.isNull(reportResult.getEndTime())
+            || (Objects.isNull(reportResult.getTotalRequest()) && Objects.isNull(reportResult.getAvgTps()))) {
+            TaskResult taskResult = new TaskResult();
+            taskResult.setSceneId(reportResult.getSceneId());
+            taskResult.setTaskId(reportResult.getId());
+            taskResult.setTenantId(reportResult.getCustomerId());
+            modifyReport(taskResult);
+            reportResult = reportDao.selectById(reportId);
         }
         if (ReportConstants.RUN_STATUS != reportResult.getStatus()) {
             log.info("报告状态不正确：reportId=" + reportId + ", status=" + reportResult.getStatus());
@@ -698,8 +719,8 @@ public class ReportServiceImpl implements ReportService {
             .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
         if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {
             sceneManageService.updateSceneLifeCycle(
-                UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getTenantId())
-                    .checkEnum(
+                UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId())
+                    .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING,
                         SceneManageStatusEnum.STOP).updateEnum(SceneManageStatusEnum.WAIT).build());
         }
         //报告结束应该放在场景之后
@@ -1054,24 +1075,8 @@ public class ReportServiceImpl implements ReportService {
             log.error("not find reportId= {}", reportId);
             return;
         }
-        // 现版本应固定为true
         Boolean updateVersion = true;
-        log.info("ReportId={}, tenantId={}, CompareResult={}", reportId, reportResult.getTenantId(), updateVersion);
-        if (updateVersion) {
-            UpdateStatusBean reportStatus = new UpdateStatusBean();
-            reportStatus.setResultId(reportId);
-            reportStatus.setPreStatus(ReportConstants.INIT_STATUS);
-            reportStatus.setAfterStatus(ReportConstants.RUN_STATUS);
-            int row = tReportMapper.updateReportStatus(reportStatus);
-            // modify by 李鹏
-            // 添加TotalRequest不为null 保证报告是有数据的  20210707
-            if (row != 1 && reportResult.getTotalRequest() != null) {
-                log.error("异常代码【{}】,异常内容：更新报告到生成中状态异常 --> 报告{}状态非0,状态为:{}",
-                    TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId, reportResult.getStatus());
-                return;
-            }
-            reportResult.setStatus(ReportConstants.RUN_STATUS);
-        }
+        log.info("ReportId={}, tenantId={}, CompareResult={}", reportId, reportResult.getCustomerId(), updateVersion);
 
         String testPlanXpathMD5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
         String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
@@ -1085,15 +1090,24 @@ public class ReportServiceImpl implements ReportService {
         //更新报表业务活动 isConclusion 指标是否通过
         boolean isConclusion = updateReportBusinessActivity(taskResult.getSceneId(), taskResult.getTaskId(),
             taskResult.getTenantId());
-
-        if (Objects.isNull(reportResult.getStartTime())) {
-            reportResult.setStartTime(reportResult.getGmtCreate());
-        }
-        if (Objects.isNull(reportResult.getEndTime())) {
-            reportResult.setEndTime(getFinalDateTime(taskResult.getSceneId(), reportId, taskResult.getTaskId()));
-        }
         //保存报表结果
         saveReportResult(reportResult, taskResult, statReport, isConclusion);
+
+        //先保存报告内容，再更新报告状态，防止报告内容没有填充，就触发finishReport操作
+        if (updateVersion) {
+            UpdateStatusBean reportStatus = new UpdateStatusBean();
+            reportStatus.setResultId(reportId);
+            reportStatus.setPreStatus(ReportConstants.INIT_STATUS);
+            reportStatus.setAfterStatus(ReportConstants.RUN_STATUS);
+            int row = tReportMapper.updateReportStatus(reportStatus);
+            // modify by 李鹏
+            // 添加TotalRequest不为null 保证报告是有数据的  20210707
+            if (row != 1 && reportResult.getTotalRequest() != null) {
+                log.error("异常代码【{}】,异常内容：更新报告到生成中状态异常 --> 报告{}状态非0,状态为:{}",
+                    TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId, reportResult.getStatus());
+                return;
+            }
+        }
 
         if (!updateVersion) {
             log.info("old version finish report ={} updateVersion={} ", reportId, updateVersion);
@@ -1181,6 +1195,8 @@ public class ReportServiceImpl implements ReportService {
             StatReportDTO data = statReport(sceneId, reportId, tenantId,
                 reportBusinessActivityDetail.getBindRef());
             if (data == null) {
+                //如果有一个业务活动没有找到对应的数据，则认为压测不通过
+                totalPassFlag = false;
                 log.warn("没有找到匹配的压测数据：场景ID[{}],报告ID:[{}],业务活动:[{}]", sceneId, reportId,
                     reportBusinessActivityDetail.getBindRef());
                 continue;
@@ -1297,7 +1313,7 @@ public class ReportServiceImpl implements ReportService {
 
         //链路通知存在一定耗时，如果大于预设值，则置为预设值
         //SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(reportResult.getSceneId(),
-        //    new SceneManageQueryOpitons());
+        //    new SceneManageQueryOptions());
         //Long totalTestTime = sceneManage.getTotalTestTime();
 
         String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(),
@@ -1354,7 +1370,17 @@ public class ReportServiceImpl implements ReportService {
             BigDecimal paymentRes = assetExtApi.payment(invoice);
             reportResult.setAmount(paymentRes);
         }
-
+        if (Objects.isNull(reportResult.getStartTime())) {
+            reportResult.setStartTime(reportResult.getGmtCreate());
+        }
+        if (Objects.isNull(reportResult.getEndTime())) {
+            Date finalDateTime = getFinalDateTime(taskResult.getSceneId(), reportResult.getId(),
+                taskResult.getTenantId());
+            if (Objects.isNull(finalDateTime) || finalDateTime.getTime() < reportResult.getStartTime().getTime()) {
+                finalDateTime = new Date();
+            }
+            reportResult.setEndTime(finalDateTime);
+        }
         // 更新
         ReportUpdateParam param = new ReportUpdateParam();
         BeanUtils.copyProperties(reportResult, param);

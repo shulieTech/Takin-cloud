@@ -1,12 +1,13 @@
 package io.shulie.takin.cloud.common.utils;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.annotation.PostConstruct;
+
+import org.springframework.stereotype.Component;
 
 import io.shulie.takin.cloud.ext.api.DataTraceExtApi;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
-import org.springframework.stereotype.Component;
 
 /**
  * @author hezhongqi
