@@ -46,7 +46,7 @@ public class SceneMixApiImpl implements SceneMixApi {
      */
     @Override
     public Boolean update(SceneRequest request) {
-        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_MIX, EntrypointUrl.METHOD_SCENE_MIX_CREATE),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_MIX, EntrypointUrl.METHOD_SCENE_MIX_UPDATE),
             request, new TypeReference<ResponseResult<Boolean>>() {}).getData();
     }
 
@@ -58,7 +58,7 @@ public class SceneMixApiImpl implements SceneMixApi {
      */
     @Override
     public SceneDetailV2Response detail(SceneManageQueryReq sceneId) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_MIX, EntrypointUrl.METHOD_SCENE_MIX_CREATE),
+        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_MIX, EntrypointUrl.METHOD_SCENE_MIX_DETAIL),
             sceneId, new TypeReference<ResponseResult<SceneDetailV2Response>>() {}).getData();
     }
 
@@ -70,7 +70,7 @@ public class SceneMixApiImpl implements SceneMixApi {
      */
     @Override
     public String synchronize(SynchronizeRequest request) {
-        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_MIX, EntrypointUrl.METHOD_SCENE_MIX_CREATE),
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_MIX, EntrypointUrl.METHOD_SCENE_MIX_SYNCHRONIZE),
             request, new TypeReference<ResponseResult<String>>() {}).getData();
     }
 }
