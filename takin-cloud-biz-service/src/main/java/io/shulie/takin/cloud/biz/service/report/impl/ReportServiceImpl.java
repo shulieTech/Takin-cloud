@@ -317,7 +317,7 @@ public class ReportServiceImpl implements ReportService {
         String testPlanXpathMd5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
         String transaction = StringUtils.isBlank(testPlanXpathMd5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
             : testPlanXpathMd5;
-        StatReportDTO statReport = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
+        StatReportDTO statReport = statTempReport(sceneId, reportResult.getId(), reportResult.getTenantId(),
             transaction);
         if (statReport == null) {
             log.warn("实况报表:[{}]，暂无数据", reportResult.getId());
@@ -331,7 +331,7 @@ public class ReportServiceImpl implements ReportService {
         }
         reportDetail.setSceneName(wrapper.getPressureTestSceneName());
         //最大并发
-        Integer maxConcurrence = getMaxConcurrence(sceneId, reportResult.getId(), reportResult.getCustomerId(),
+        Integer maxConcurrence = getMaxConcurrence(sceneId, reportResult.getId(), reportResult.getTenantId(),
             transaction);
         if (Objects.nonNull(statReport) && Objects.nonNull(statReport.getAvgConcurrenceNum())) {
             maxConcurrence = Math.max(maxConcurrence, statReport.getAvgConcurrenceNum().intValue());
@@ -352,7 +352,7 @@ public class ReportServiceImpl implements ReportService {
             reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
                 .forEach(ref -> {
-                    StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
+                    StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getTenantId(),
                         ref.getBindRef());
                     Map<String, Object> objectMap = fillTempMap(data, ref);
                     resultMap.put(ref.getBindRef(), objectMap);
@@ -364,7 +364,7 @@ public class ReportServiceImpl implements ReportService {
             List<ScriptNodeSummaryBean> nodeDetails = reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
                 .map(ref -> {
-                    StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getCustomerId(),
+                    StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getTenantId(),
                         ref.getBindRef());
                     return new ScriptNodeSummaryBean() {{
                         setName(ref.getBusinessActivityName());
@@ -686,7 +686,7 @@ public class ReportServiceImpl implements ReportService {
         if (reportResult.getPressureType() != PressureSceneEnum.DEFAULT.getCode()) {
             reportDao.finishReport(reportId);
             sceneManageService.updateSceneLifeCycle(
-                UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId())
+                UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getTenantId())
                     .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING,
                         SceneManageStatusEnum.STOP).updateEnum(SceneManageStatusEnum.WAIT).build());
             return true;
@@ -700,7 +700,7 @@ public class ReportServiceImpl implements ReportService {
             TaskResult taskResult = new TaskResult();
             taskResult.setSceneId(reportResult.getSceneId());
             taskResult.setTaskId(reportResult.getId());
-            taskResult.setTenantId(reportResult.getCustomerId());
+            taskResult.setTenantId(reportResult.getTenantId());
             modifyReport(taskResult);
             reportResult = reportDao.selectById(reportId);
         }
@@ -719,7 +719,7 @@ public class ReportServiceImpl implements ReportService {
             .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
         if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {
             sceneManageService.updateSceneLifeCycle(
-                UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getCustomerId())
+                UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getTenantId())
                     .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING,
                         SceneManageStatusEnum.STOP).updateEnum(SceneManageStatusEnum.WAIT).build());
         }
@@ -1076,7 +1076,7 @@ public class ReportServiceImpl implements ReportService {
             return;
         }
         Boolean updateVersion = true;
-        log.info("ReportId={}, tenantId={}, CompareResult={}", reportId, reportResult.getCustomerId(), updateVersion);
+        log.info("ReportId={}, tenantId={}, CompareResult={}", reportId, reportResult.getTenantId(), updateVersion);
 
         String testPlanXpathMD5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
         String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
@@ -1317,7 +1317,7 @@ public class ReportServiceImpl implements ReportService {
         //Long totalTestTime = sceneManage.getTotalTestTime();
 
         String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(),
-            reportResult.getCustomerId());
+            reportResult.getTenantId());
         Long eTime = (Long)redisClientUtils.getObject(engineName + ScheduleConstants.LAST_SIGN);
         Date curDate;
         if (eTime != null) {
@@ -1347,7 +1347,7 @@ public class ReportServiceImpl implements ReportService {
             AssetInvoiceExt<RealAssectBillExt> invoice = new AssetInvoiceExt<>();
             invoice.setSceneId(reportResult.getSceneId());
             invoice.setTaskId(reportResult.getId());
-            invoice.setCustomerId(reportResult.getCustomerId());
+            invoice.setCustomerId(reportResult.getTenantId());
             invoice.setResourceId(reportResult.getId());
             invoice.setResourceType(AssetTypeEnum.PRESS_REPORT.getCode());
             invoice.setResourceName(AssetTypeEnum.PRESS_REPORT.getName());
