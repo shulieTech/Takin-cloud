@@ -15,8 +15,16 @@ import lombok.EqualsAndHashCode;
 @ApiModel
 @EqualsAndHashCode(callSuper = true)
 public class ReportQueryReq extends PagingContextExt {
+    /**
+     * 场景主键
+     */
     @ApiModelProperty(name = "sceneId", value = "场景ID")
     private Long sceneId;
+    /**
+     * 报告主键
+     */
+    @ApiModelProperty(name = "reportId", value = "报告ID")
+    private Long reportId;
     /**
      * 场景名称
      */

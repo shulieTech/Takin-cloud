@@ -93,13 +93,13 @@
         limit 100
     </select>
     <select id="listReport" resultMap="BaseResultMap"
-            parameterType="com.pamirs.takin.entity.domain.vo.report.ReportQueryParam">
+            parameterType="io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq">
         select id, scene_id,scene_name,start_time,end_time,`status`,`type`,conclusion,concurrent,amount,customer_id,features,dept_id,user_id
         from t_report
         <where>
-          <if test="param.reportId != null">
-              and `id` = #{param.reportId}
-          </if>
+            <if test="param.reportId != null">
+                and `id` = #{param.reportId}
+            </if>
             <if test="param.sceneId != null">
                 and `scene_id` = #{param.sceneId}
             </if>
@@ -111,12 +111,6 @@
             </if>
             <if test="param.endTime != null">
                 and start_time  <![CDATA[ <= ]]> #{param.endTime}
-            </if>
-            <if test="param.userIds != null and param.userIds.size() != 0">
-                 and operate_id in
-                  <foreach collection="param.userIds" open="(" close=")" separator="," item="userId">
-                    #{userId}
-                </foreach>
             </if>
             <if test="param.type != null">
                 and `type` = #{param.type}

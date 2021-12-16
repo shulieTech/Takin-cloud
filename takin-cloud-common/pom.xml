@@ -32,6 +32,10 @@
                     <groupId>ch.ethz.ganymed</groupId>
                     <artifactId>ganymed-ssh2</artifactId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>log4j-to-slf4j</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
