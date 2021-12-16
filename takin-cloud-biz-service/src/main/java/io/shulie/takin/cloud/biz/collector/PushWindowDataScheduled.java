@@ -720,7 +720,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             .map(r -> (Runnable)() -> {
                 Long sceneId = r.getSceneId();
                 Long reportId = r.getId();
-                Long customerId = r.getCustomerId();
+                Long customerId = r.getTenantId();
                 String lockKey = String.format("pushData:%s:%s:%s", sceneId, reportId, customerId);
                 if (!lock(lockKey, "1")) {
                     return;
