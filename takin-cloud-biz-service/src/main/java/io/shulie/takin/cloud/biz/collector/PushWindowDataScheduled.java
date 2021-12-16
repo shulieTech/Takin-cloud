@@ -711,7 +711,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         param.setIsDel(0);
         List<ReportResult> results = reportDao.queryReportList(param);
         if (CollectionUtils.isEmpty(results)) {
-            log.info("没有需要统计的报告！");
+            log.debug("没有需要统计的报告！");
             return;
         }
         List<Long> reportIds = CommonUtil.getList(results, ReportResult::getId);
