@@ -352,6 +352,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             setTenantId(t.getTenantId());
             setUserId(t.getUserId());
             setUserName(null);
+            setScriptAnalysisResult(t.getScriptAnalysisResult());
         }}).collect(Collectors.toList());
         Map<Long, Integer> threadNum = new HashMap<>(1);
         for (SceneManageEntity sceneManage : queryList) {
