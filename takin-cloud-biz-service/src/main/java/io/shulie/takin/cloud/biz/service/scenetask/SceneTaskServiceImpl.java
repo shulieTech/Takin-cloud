@@ -591,8 +591,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 return r;
             }
 
-            String jobName = ScheduleConstants.getScheduleName(report.getSceneId(), reportId, report.getCustomerId());
-            String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(report.getSceneId(), reportId, report.getCustomerId());
+            String jobName = ScheduleConstants.getScheduleName(report.getSceneId(), reportId, report.getTenantId());
+            String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(report.getSceneId(), reportId, report.getTenantId());
             engineService.deleteJob(jobName, engineInstanceRedisKey);
 
             // 触发强制停止
