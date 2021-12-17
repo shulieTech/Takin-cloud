@@ -1237,15 +1237,21 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private boolean isPass(ReportBusinessActivityDetail detail) {
-        if (detail.getTargetSuccessRate().compareTo(detail.getSuccessRate()) > 0) {
-            return false;
-        } else if (detail.getTargetSa().compareTo(detail.getSa()) > 0) {
-            return false;
-        } else if (detail.getTargetRt().compareTo(detail.getRt()) < 0) {
-            return false;
-        } else {
+        //先判断目标是否大于0，如果目标不大于0，则认为不关心此目标，不以此目标作为压测是否通过的依据
+        if (detail.getTargetSuccessRate().compareTo(new BigDecimal(0)) > 0 ) {
+            //成功率
+            return detail.getTargetSuccessRate().compareTo(detail.getSuccessRate()) <= 0;
+        } else if (detail.getTargetSa().compareTo(new BigDecimal(0)) > 0) {
+            //sa
+            return detail.getTargetSa().compareTo(detail.getSa()) <= 0;
+        } else if (detail.getTargetRt().compareTo(new BigDecimal(0)) > 0 ) {
+            //rt
+            return detail.getTargetRt().compareTo(detail.getRt()) >= 0;
+        } else if(detail.getTargetTps().compareTo(new BigDecimal(0)) > 0){
+            //tps
             return detail.getTargetTps().compareTo(detail.getTps()) <= 0;
         }
+        return true;
     }
 
     private void getRedisInfo(ReportResult reportResult, TaskResult taskResult) {
@@ -1270,25 +1276,9 @@ public class ReportServiceImpl implements ReportService {
             getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG,
                 StrUtil.format("压测引擎计划运行{}个，实际运行{}个", podTotal, redisClientUtils.getObject(engineName)));
         }
-
-        //        // startTime endTime 补充
-        //        long startTime = System.currentTimeMillis();
-        //        if (redisClientUtils.hasKey(engineName + ScheduleConstants.FIRST_SIGN)) {
-        //            startTime = Long.parseLong(redisClientUtils.getString(engineName + ScheduleConstants.FIRST_SIGN));
-        //            reportResult.setStartTime(new Date(startTime));
-        //        }
-        //
-        //        //Long.valueOf(redisClientUtils.getString(engineName + ScheduleConstants.FIRST_SIGN));
-        //        long endTime = System.currentTimeMillis();
-        //        if (redisClientUtils.hasKey(engineName + ScheduleConstants.LAST_SIGN)) {
-        //            endTime = Long.parseLong(redisClientUtils.getString(engineName + ScheduleConstants.LAST_SIGN));
-        //        }
-        //        // metric 数据是从事件中获取
-        //        reportResult.setEndTime(new Date(endTime));
         // 删除缓存
         redisClientUtils.del(podName, podTotalName, ScheduleConstants.TEMP_FAIL_SIGN + engineName,
             engineName + ScheduleConstants.FIRST_SIGN, engineName + ScheduleConstants.LAST_SIGN, engineName);
-        //CollectorService.events.remove(engineName);
     }
 
     /**
@@ -1311,10 +1301,6 @@ public class ReportServiceImpl implements ReportService {
         // 这里 要判断下 压力节点 情况，并记录下来 压力节点 最后一位就是 压力节点 数量 开始时间 结束时间更新
         getRedisInfo(reportResult, taskResult);
 
-        //链路通知存在一定耗时，如果大于预设值，则置为预设值
-        //SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(reportResult.getSceneId(),
-        //    new SceneManageQueryOptions());
-        //Long totalTestTime = sceneManage.getTotalTestTime();
 
         String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(),
             reportResult.getTenantId());
@@ -1370,6 +1356,7 @@ public class ReportServiceImpl implements ReportService {
             BigDecimal paymentRes = assetExtApi.payment(invoice);
             reportResult.setAmount(paymentRes);
         }
+        //填充开始结束时间
         if (Objects.isNull(reportResult.getStartTime())) {
             reportResult.setStartTime(reportResult.getGmtCreate());
         }
