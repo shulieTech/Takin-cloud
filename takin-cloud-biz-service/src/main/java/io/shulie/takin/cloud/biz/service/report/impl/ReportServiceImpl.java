@@ -1237,23 +1237,21 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private boolean isPass(ReportBusinessActivityDetail detail) {
-        if (isTargetBiggerThanZero(detail.getTargetSuccessRate()) && detail.getTargetSuccessRate().compareTo(
-            detail.getSuccessRate()) > 0) {
-            return false;
-        } else if (isTargetBiggerThanZero(detail.getTargetSa()) && detail.getTargetSa().compareTo(detail.getSa()) > 0) {
-            return false;
-        } else if (isTargetBiggerThanZero(detail.getTargetRt()) && detail.getTargetRt().compareTo(detail.getRt()) < 0) {
-            return false;
-        } else {
-            return !isTargetBiggerThanZero(detail.getTargetTps()) || detail.getTargetTps().compareTo(detail.getTps()) <= 0;
+        //先判断目标是否大于0，如果目标不大于0，则认为不关心此目标，不以此目标作为压测是否通过的依据
+        if (detail.getTargetSuccessRate().compareTo(new BigDecimal(0)) > 0 ) {
+            //成功率
+            return detail.getTargetSuccessRate().compareTo(detail.getSuccessRate()) <= 0;
+        } else if (detail.getTargetSa().compareTo(new BigDecimal(0)) > 0) {
+            //sa
+            return detail.getTargetSa().compareTo(detail.getSa()) <= 0;
+        } else if (detail.getTargetRt().compareTo(new BigDecimal(0)) > 0 ) {
+            //rt
+            return detail.getTargetRt().compareTo(detail.getRt()) >= 0;
+        } else if(detail.getTargetTps().compareTo(new BigDecimal(0)) > 0){
+            //tps
+            return detail.getTargetTps().compareTo(detail.getTps()) <= 0;
         }
-    }
-
-    private boolean isTargetBiggerThanZero(BigDecimal target){
-        if (Objects.nonNull(target)) {
-            return target.compareTo(new BigDecimal(0)) > 0;
-        }
-        return false;
+        return true;
     }
 
     private void getRedisInfo(ReportResult reportResult, TaskResult taskResult) {

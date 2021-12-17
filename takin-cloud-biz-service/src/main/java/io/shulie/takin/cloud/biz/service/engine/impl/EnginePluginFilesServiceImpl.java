@@ -1,31 +1,32 @@
 package io.shulie.takin.cloud.biz.service.engine.impl;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.io.IOException;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
-import io.shulie.takin.cloud.biz.output.engine.EnginePluginFileOutput;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.biz.service.engine.EnginePluginFilesService;
-import io.shulie.takin.cloud.common.bean.file.FileManageInfo;
-import io.shulie.takin.cloud.data.mapper.mysql.EnginePluginFilesMapper;
-import io.shulie.takin.cloud.data.mapper.mysql.EnginePluginSupportedMapper;
-import io.shulie.takin.cloud.data.model.mysql.EnginePluginFilesRef;
-import io.shulie.takin.cloud.data.model.mysql.EnginePluginSupportedVersionEntity;
-import io.shulie.takin.utils.file.FileManagerHelper;
 import io.shulie.takin.utils.string.StringUtil;
+import io.shulie.takin.utils.file.FileManagerHelper;
+import io.shulie.takin.cloud.common.bean.file.FileManageInfo;
+import io.shulie.takin.cloud.data.model.mysql.EnginePluginFilesRef;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import io.shulie.takin.cloud.biz.output.engine.EnginePluginFileOutput;
+import io.shulie.takin.cloud.data.mapper.mysql.EnginePluginFilesMapper;
+import io.shulie.takin.cloud.biz.service.engine.EnginePluginFilesService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import io.shulie.takin.cloud.data.mapper.mysql.EnginePluginSupportedMapper;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.data.model.mysql.EnginePluginSupportedVersionEntity;
+
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**

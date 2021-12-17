@@ -3,10 +3,10 @@ package io.shulie.takin.cloud.biz.service.engine;
 import java.util.List;
 import java.util.Map;
 
+import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.biz.input.engine.EnginePluginWrapperInput;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginDetailOutput;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginSimpleInfoOutput;
-import io.shulie.takin.common.beans.response.ResponseResult;
 
 /**
  * 引擎接口
