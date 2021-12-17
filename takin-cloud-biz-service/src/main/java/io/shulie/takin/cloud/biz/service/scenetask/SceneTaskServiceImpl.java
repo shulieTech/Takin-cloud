@@ -420,7 +420,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             input.getTenantId());
         Object totalIp = redisTemplate.opsForHash().get(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_POD_NUM);
         if (totalIp == null) {
-            log.error("异常代码【{}】,异常内容：更新运行任务tps，获取不到pod总数 --> 异常信息:SceneId:{},ReportId:{}, CustomerId:{}",
+            log.error("异常代码【{}】,异常内容：更新运行任务tps，获取不到pod总数 --> 异常信息:场景:{},报告:{},租户:{}",
                 TakinCloudExceptionEnum.TASK_START_ERROR_CHECK_POD, input.getSceneId(), input.getReportId(),
                 input.getTenantId());
             return;
@@ -560,7 +560,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //启动该压测场景
         SceneTaskStartInput sceneTaskStartInput = new SceneTaskStartInput();
         sceneTaskStartInput.setSceneId(sceneManageId);
-        //sceneTaskStartInput.setEnginePluginIds(enginePluginIds);
         sceneTaskStartInput.setEnginePlugins(enginePlugins);
         Long fixTimer = input.getFixTimer();
         Integer loopsNum = input.getLoopsNum();
@@ -682,7 +681,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //启动该压测场景
         SceneTaskStartInput sceneTaskStartInput = new SceneTaskStartInput();
         sceneTaskStartInput.setSceneId(sceneManageId);
-        //sceneTaskStartInput.setEnginePluginIds(enginePluginIds);
         sceneTaskStartInput.setEnginePlugins(enginePlugins);
         sceneTaskStartInput.setContinueRead(false);
         //TODO 根据次数，设置时间
@@ -962,9 +960,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         List<SceneBusinessActivityRefOutput> businessActivityConfig, List<ReportBusinessActivityDetail> detailList) {
         List<ScriptNode> childSamplers = JsonPathUtil.getChildSamplers(scriptNodeTree, scriptNode.getXpathMd5());
         if (CollectionUtils.isNotEmpty(childSamplers)) {
-            List<String> samplersMD5 = childSamplers.stream().map(ScriptNode::getXpathMd5).collect(Collectors.toList());
+            List<String> samplersMd5 = childSamplers.stream().map(ScriptNode::getXpathMd5).collect(Collectors.toList());
             List<SceneBusinessActivityRefOutput> refList = businessActivityConfig.stream()
-                .filter(config -> samplersMD5.contains(config.getBindRef()))
+                .filter(config -> samplersMd5.contains(config.getBindRef()))
                 .collect(Collectors.toList());
             int targetRt = refList.stream().filter(Objects::nonNull)
                 .map(SceneBusinessActivityRefOutput::getTargetRT)
