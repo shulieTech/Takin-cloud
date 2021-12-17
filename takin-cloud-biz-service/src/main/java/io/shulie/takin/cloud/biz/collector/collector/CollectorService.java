@@ -210,6 +210,7 @@ public class CollectorService extends AbstractIndicators {
                             .checkEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING)
                             .updateEnum(SceneManageStatusEnum.ENGINE_RUNNING)
                             .build());
+                        notifyStart(sceneId, reportId, metric.getTimestamp());
                         cacheTryRunTaskStatus(sceneId, reportId, tenantId, SceneRunTaskStatusEnum.RUNNING);
                     }
                     //如果从cloud上传请求流量明细，则需要启动异步线程去读取ptl文件上传
@@ -261,6 +262,11 @@ public class CollectorService extends AbstractIndicators {
             && status.getCode() == SceneRunTaskStatusEnum.RUNNING.getCode()) {
             asyncService.updateSceneRunningStatus(sceneId, reportId, customerId);
         }
+    }
+
+    private void notifyStart(Long sceneId, Long reportId, long startTime){
+        log.info("场景[{}]压测任务开始，更新报告[{}]开始时间[{}]", sceneId, reportId, startTime);
+        reportDao.updateReportStartTime(reportId,new Date(startTime));
     }
 
     private void notifyEnd(Long sceneId, Long reportId, long endTime) {

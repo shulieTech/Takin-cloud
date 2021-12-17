@@ -98,6 +98,13 @@ public interface ReportDao {
     int updateStatus(Long sceneId, Integer status);
 
     /**
+     * 更新报告开始时间
+     * @param reportId 报告主键
+     * @param startTime 开始时间
+     */
+    void updateReportStartTime(Long reportId,Date startTime);
+
+    /**
      * 更新报告结束时间
      *
      * @param resultId 报告主键
