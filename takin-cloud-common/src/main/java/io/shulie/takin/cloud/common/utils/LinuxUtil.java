@@ -62,7 +62,4 @@ public class LinuxUtil {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(LinuxUtil.getPrintSize(100000));
-    }
 }

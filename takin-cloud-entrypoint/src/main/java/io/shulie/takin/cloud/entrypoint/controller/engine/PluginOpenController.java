@@ -11,7 +11,6 @@ import io.shulie.takin.cloud.biz.input.engine.EnginePluginWrapperInput;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginDetailOutput;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginSimpleInfoOutput;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginService;
-import io.shulie.takin.cloud.common.constants.EnginePluginConstants;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
@@ -86,7 +85,7 @@ public class PluginOpenController {
         if (Objects.isNull(pluginId) || pluginId == 0) {
             throw new TakinCloudException(TakinCloudExceptionEnum.ENGINE_PLUGIN_PARAM_VERIFY_ERROR, "pluginId不能为空");
         }
-        enginePluginService.changeEnginePluginStatus(pluginId, EnginePluginConstants.ENGINE_PLUGIN_STATUS_ENABLED);
+        enginePluginService.changeEnginePluginStatus(pluginId, true);
         return ResponseResult.success();
     }
 
@@ -97,7 +96,7 @@ public class PluginOpenController {
         if (Objects.isNull(pluginId) || pluginId == 0) {
             throw new TakinCloudException(TakinCloudExceptionEnum.ENGINE_PLUGIN_PARAM_VERIFY_ERROR, "pluginId不能为空");
         }
-        enginePluginService.changeEnginePluginStatus(pluginId, EnginePluginConstants.ENGINE_PLUGIN_STATUS_DISABLED);
+        enginePluginService.changeEnginePluginStatus(pluginId, false);
         return ResponseResult.success();
     }
 

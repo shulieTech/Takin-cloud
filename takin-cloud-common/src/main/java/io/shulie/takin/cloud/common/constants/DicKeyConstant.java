@@ -41,7 +41,7 @@ public class DicKeyConstant {
     /**
      * SLA指标类型
      */
-    public static final String SLA_TARGER_TYPE = "SLA_TARGER_TYPE";
+    public static final String SLA_TARGET_TYPE = "SLA_TARGET_TYPE";
 
     /**
      * 比较类型

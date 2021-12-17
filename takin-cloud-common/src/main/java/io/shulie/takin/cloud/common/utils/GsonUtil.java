@@ -2,15 +2,16 @@ package io.shulie.takin.cloud.common.utils;
 
 import java.util.Map;
 
-import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
-import com.google.gson.TypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import com.google.gson.TypeAdapterFactory;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 
 /**
  * 说明: 序列化
@@ -70,7 +71,7 @@ public class GsonUtil {
         } catch (Exception e) {
             StringBuilder builder = new StringBuilder("object = {");
             if (object instanceof Map) {
-                Map mapObj = (Map)object;
+                Map<?, ?> mapObj = (Map<?, ?>)object;
                 for (Object key : mapObj.keySet()) {
                     Object value = mapObj.get(key);
                     builder.append(key).append("=").append(value.toString()).append(",");
@@ -78,52 +79,10 @@ public class GsonUtil {
             }
             builder.append("}");
             log.error("异常代码【{}】,异常内容：gsonToString失败,内容为:{} --> 异常信息: {}",
-                TakinCloudExceptionEnum.JSON_PARSE_ERROR, builder.toString(), e);
+                TakinCloudExceptionEnum.JSON_PARSE_ERROR, builder, e);
 
         }
         return EMPTY_JSON.equals(result) ? GsonUtil.EMPTY_STRING : result;
-    }
-
-    //    public static void main(String[] args) {
-    //        Map<String, Object> anonymousClassMap = new HashMap<String, Object>() {
-    //
-    //            {
-    //                put("item", 10135668);
-    //                put("color", "black");
-    //            }
-    //        };
-    //        String gsonSerializeAnonymousClass = new Gson().toJson(anonymousClassMap);
-    //        System.out.println("gsonSerializeAnonymousClass=" + gsonSerializeAnonymousClass);
-    //
-    //        Map<String, Object> gsonSerializeMap = Maps.newHashMap();
-    //        gsonSerializeMap.put("item", 10135668);
-    //        gsonSerializeMap.put("color", null);
-    //        String gsonSerializeMapResult = new Gson().toJson(gsonSerializeMap);
-    //        System.out.println("gsonSerializeMapResult=" + gsonSerializeMapResult);
-    //
-    //        ObjectMapper objectMapper = new ObjectMapper();
-    //        try {
-    //            String jacsongSerializeAnonymousClassResult = objectMapper.writeValueAsString(anonymousClassMap);
-    //            System.out.println("jacsongSerializeAnonymousClassResult=" + jacsongSerializeAnonymousClassResult);
-    //        } catch (JsonProcessingException e) {
-    //            e.printStackTrace();
-    //        }
-    //
-    //        String fastJsonSerializeAnonymousClassResult = JSON.toJSONString(anonymousClassMap);
-    //        System.out.println("fastJsonSerializeAnonymousClassResult=" + fastJsonSerializeAnonymousClassResult);
-    //
-    //    }
-
-    /**
-     * 说明: 将对象转化为字符串(泛型实现)
-     *
-     * @param t 泛型对象
-     * @return -
-     * @author shulie
-     * @date 2018/7/16 10:40
-     */
-    public static <T> String gsonToStringWithGeneric(T t) {
-        return Strings.nullToEmpty(GSON.toJson(t));
     }
 
     /**

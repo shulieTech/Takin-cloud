@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 
 import lombok.extern.slf4j.Slf4j;
 
+import io.shulie.takin.cloud.common.constants.FileConstants;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 
@@ -25,9 +26,8 @@ public class FileSliceByPodNum {
     private final long fileLength;
     private RandomAccessFile rAccessFile;
     private final Set<StartEndPair> startEndPairs;
-    private final String fileEncode;
 
-    private FileSliceByPodNum(File file, int partSize, String encode) {
+    private FileSliceByPodNum(File file, int partSize) {
         this.fileLength = file.length();
         this.partSize = partSize;
         try {
@@ -36,7 +36,6 @@ public class FileSliceByPodNum {
             log.error("异常代码【{}】,异常内容：文件读取异常 --> BigFileReaderUtil方法执行异常，异常信息: {}",
                 TakinCloudExceptionEnum.FILE_READ_ERROR, e);
         }
-        this.fileEncode = encode;
         this.startEndPairs = new HashSet<>();
     }
 
@@ -68,7 +67,7 @@ public class FileSliceByPodNum {
 
         rAccessFile.seek(endPosition);
         byte tmp = (byte)rAccessFile.read();
-        while (tmp != '\n' && tmp != '\r') {
+        while (tmp != FileConstants.LINE_KEY && tmp != FileConstants.ENTER_KEY) {
             endPosition++;
             if (endPosition >= fileLength - 1) {
                 endPosition = fileLength;
@@ -80,7 +79,7 @@ public class FileSliceByPodNum {
         //判断换行符是否为"\r\n"，即windows下的换行符CRLF，如果是，则将结束位置再+1
         rAccessFile.seek(endPosition + 1);
         tmp = (byte)rAccessFile.read();
-        if (tmp == '\r' || tmp == '\n') {
+        if (tmp == FileConstants.ENTER_KEY || tmp == FileConstants.LINE_KEY) {
             endPosition++;
         }
         pair.setEnd(endPosition);
@@ -102,7 +101,6 @@ public class FileSliceByPodNum {
     public static class Builder {
         private int partSize = 1;
         private final File file;
-        private String fileEncode;
 
         public Builder(String filepath) {
             this.file = new File(filepath);
@@ -116,13 +114,8 @@ public class FileSliceByPodNum {
             return this;
         }
 
-        public Builder withEncode(String encode) {
-            this.fileEncode = encode;
-            return this;
-        }
-
         public FileSliceByPodNum build() {
-            return new FileSliceByPodNum(this.file, this.partSize, this.fileEncode);
+            return new FileSliceByPodNum(this.file, this.partSize);
         }
     }
 

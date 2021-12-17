@@ -1,33 +1,33 @@
 package io.shulie.takin.cloud.biz.service.engine.impl;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 import java.util.Objects;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Maps;
-import io.shulie.takin.cloud.biz.cloudserver.EnginePluginSimpleResultConvert;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.data.model.mysql.EnginePluginEntity;
+import io.shulie.takin.cloud.data.mapper.mysql.EnginePluginMapper;
+import io.shulie.takin.cloud.biz.service.engine.EnginePluginService;
+import io.shulie.takin.cloud.biz.output.engine.EnginePluginFileOutput;
 import io.shulie.takin.cloud.biz.input.engine.EnginePluginWrapperInput;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginDetailOutput;
-import io.shulie.takin.cloud.biz.output.engine.EnginePluginFileOutput;
-import io.shulie.takin.cloud.biz.output.engine.EnginePluginSimpleInfoOutput;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginFilesService;
-import io.shulie.takin.cloud.biz.service.engine.EnginePluginService;
-import io.shulie.takin.cloud.biz.service.engine.EnginePluginSupportedService;
-import io.shulie.takin.cloud.common.constants.EnginePluginConstants;
-import io.shulie.takin.cloud.common.constants.ResponseResultConstant;
-import io.shulie.takin.cloud.data.mapper.mysql.EnginePluginMapper;
-import io.shulie.takin.cloud.data.model.mysql.EnginePluginEntity;
+import io.shulie.takin.cloud.biz.output.engine.EnginePluginSimpleInfoOutput;
+import io.shulie.takin.cloud.biz.cloudserver.EnginePluginSimpleResultConvert;
 import io.shulie.takin.cloud.data.result.engine.EnginePluginSimpleInfoResult;
-import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.biz.service.engine.EnginePluginSupportedService;
+
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -70,7 +70,7 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
     /**
      * 根据插件ID获取插件详情
      *
-     * @param pluginId
+     * @param pluginId 插件ID
      * @return -
      */
     @Override
@@ -78,7 +78,7 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
         //获取插件信息
         EnginePluginEntity enginePluginInfo = enginePluginMapper.selectById(pluginId);
         if (enginePluginInfo == null) {
-            return ResponseResult.fail(ResponseResultConstant.RESPONSE_RESULT_CODE_ERROR, "引擎插件信息不存在，请核实");
+            return ResponseResult.fail("引擎插件信息不存在，请核实", "");
         }
         //获取支持的版本信息
         List<String> supportedVersions = enginePluginSupportedService.findSupportedVersionsByPluginId(pluginId);
@@ -91,8 +91,7 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
     /**
      * 保存引擎插件
      *
-     * @param input
-     * @return -
+     * @param input 引擎插件信息
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -113,7 +112,7 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
             //添加创建时间
             pressureEnginePluginEntity.setGmtCreate(now);
             pressureEnginePluginEntity.setGmtUpdate(now);
-            pressureEnginePluginEntity.setStatus(EnginePluginConstants.ENGINE_PLUGIN_STATUS_ENABLED);
+            pressureEnginePluginEntity.setStatus(true);
             enginePluginMapper.insert(pressureEnginePluginEntity);
         }
 
@@ -132,13 +131,14 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
     }
 
     /**
-     * @param pluginId
-     * @param status
-     * @return -
+     * 更改引擎插件状态
+     *
+     * @param pluginId 引擎ID
+     * @param status   状态
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void changeEnginePluginStatus(Long pluginId, Integer status) {
+    public void changeEnginePluginStatus(Long pluginId, Boolean status) {
         EnginePluginEntity enginePlugin = enginePluginMapper.selectById(pluginId);
         if (Objects.isNull(enginePlugin)) {
             log.warn("引擎插件信息不存在");
