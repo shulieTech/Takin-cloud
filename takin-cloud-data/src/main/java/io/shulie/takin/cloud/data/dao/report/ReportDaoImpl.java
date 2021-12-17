@@ -182,6 +182,15 @@ public class ReportDaoImpl implements ReportDao {
         return null;
     }
 
+    @Override
+    public void updateReportStartTime(Long reportId, Date startTime) {
+        ReportEntity entity = new ReportEntity();
+        entity.setId(reportId);
+        entity.setStartTime(startTime);
+        entity.setGmtUpdate(new Date());
+        reportMapper.updateById(entity);
+    }
+
     /**
      * 根据场景主键设置压测报告状态
      *
