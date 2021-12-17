@@ -45,6 +45,6 @@ public interface EnginePluginService {
      * @param pluginId 插件主键
      * @param status   状态
      */
-    void changeEnginePluginStatus(Long pluginId, Integer status);
+    void changeEnginePluginStatus(Long pluginId, Boolean status);
 
 }

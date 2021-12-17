@@ -10,6 +10,8 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
+
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.ExcelImportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
@@ -40,7 +42,6 @@ import io.shulie.takin.cloud.data.result.middleware.MiddlewareJarResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,11 +56,10 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppConstants, LockKeyConstants {
 
-    @Autowired
-    private MiddlewareJarDAO middlewareJarDAO;
-
-    @Autowired
+    @Resource
     private DistributedLock distributedLock;
+    @Resource
+    private MiddlewareJarDAO middlewareJarDAO;
 
     @Transactional(rollbackFor = Throwable.class)
     @Override

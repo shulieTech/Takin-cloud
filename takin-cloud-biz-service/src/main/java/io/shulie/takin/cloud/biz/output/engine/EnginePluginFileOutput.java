@@ -24,5 +24,5 @@ public class EnginePluginFileOutput {
     private String filePath;
 
     @ApiModelProperty("是否删除")
-    private Integer isDeleted;
+    private Boolean isDeleted;
 }

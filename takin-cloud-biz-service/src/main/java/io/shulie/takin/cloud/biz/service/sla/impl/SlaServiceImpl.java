@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.biz.service.sla.impl;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -89,7 +90,7 @@ public class SlaServiceImpl implements SlaService {
                     TakinCloudExceptionEnum.TASK_START_BUILD_SAL, JSON.toJSONString(metricsEvent));
                 return false;
             }
-            if (Objects.isNull(dto.getPressureType()) || dto.getPressureType() == PressureSceneEnum.TRY_RUN.getCode()){
+            if (Objects.isNull(dto.getPressureType()) || dto.getPressureType() == PressureSceneEnum.TRY_RUN.getCode()) {
                 log.info("脚本调试不进行SLA校验");
                 return false;
             }
@@ -180,8 +181,8 @@ public class SlaServiceImpl implements SlaService {
                     scheduleStopRequest.setSceneId(sceneId);
                     // 增加顾客id
                     scheduleStopRequest.setTenantId(metricsEvent.getTenantId());
-                    Map<String, Object> extendMap = Maps.newHashMap();
-                    extendMap.put(Constants.SLA_DESTORY_EXTEND, "SLA发送压测任务终止事件");
+                    Map<String, Object> extendMap = new HashMap<>(1);
+                    extendMap.put(Constants.SLA_DESTROY_EXTEND, "SLA发送压测任务终止事件");
                     scheduleStopRequest.setExtend(extendMap);
                     //报告未结束，才通知
                     if (redisClientUtils.hasKey(PREFIX_TASK + metricsEvent.getSceneId())) {

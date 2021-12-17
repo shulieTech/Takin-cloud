@@ -52,6 +52,6 @@ public class EnginePluginEntity {
      * 状态  1 启用  0 禁用
      */
     @TableField
-    private Integer status;
+    private Boolean status;
 
 }

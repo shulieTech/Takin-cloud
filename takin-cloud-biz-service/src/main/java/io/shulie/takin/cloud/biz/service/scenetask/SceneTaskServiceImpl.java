@@ -68,7 +68,6 @@ import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
 import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
 import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
-import io.shulie.takin.cloud.common.constants.ReportConstans;
 import io.shulie.takin.cloud.ext.content.asset.AccountInfoExt;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
@@ -595,15 +594,15 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             engineService.deleteJob(jobName, engineInstanceRedisKey);
 
             // 触发强制停止
-            if (isNeedFinishReport && ReportConstans.INIT_STATUS.equals(report.getStatus()) && null != report.getStartTime()) {
+            if (isNeedFinishReport && ReportConstants.INIT_STATUS == (report.getStatus()) && null != report.getStartTime()) {
                 ReportUpdateParam param = new ReportUpdateParam();
                 param.setId(reportId);
-                param.setStatus(ReportConstans.RUN_STATUS);
+                param.setStatus(ReportConstants.RUN_STATUS);
                 if (null == report.getEndTime()) {
                     param.setEndTime(Calendar.getInstance().getTime());
                 }
                 reportDao.updateReport(param);
-            } else if (!ReportConstans.FINISH_STATUS.equals(report.getStatus())) {
+            } else if (ReportConstants.FINISH_STATUS != (report.getStatus())) {
                 reportService.forceFinishReport(reportId);
             }
         } catch (Throwable t) {

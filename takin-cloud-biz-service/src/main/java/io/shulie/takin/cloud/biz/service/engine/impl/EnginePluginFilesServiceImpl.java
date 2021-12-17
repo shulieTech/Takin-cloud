@@ -16,7 +16,6 @@ import io.shulie.takin.cloud.biz.output.engine.EnginePluginFileOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginFilesService;
 import io.shulie.takin.cloud.common.bean.file.FileManageInfo;
-import io.shulie.takin.cloud.common.constants.FileManageConstants;
 import io.shulie.takin.cloud.data.mapper.mysql.EnginePluginFilesMapper;
 import io.shulie.takin.cloud.data.mapper.mysql.EnginePluginSupportedMapper;
 import io.shulie.takin.cloud.data.model.mysql.EnginePluginFilesRef;
@@ -93,7 +92,7 @@ public class EnginePluginFilesServiceImpl extends ServiceImpl<EnginePluginFilesM
                 row.setFileId(item.getId());
                 row.setFileName(item.getFileName());
                 row.setFilePath(item.getFilePath());
-                row.setIsDeleted(FileManageConstants.FILE_STATUS_UNDELETED);
+                row.setIsDeleted(false);
                 result.add(row);
             });
         }
@@ -121,12 +120,12 @@ public class EnginePluginFilesServiceImpl extends ServiceImpl<EnginePluginFilesM
             //本次要新增或覆盖的文件
             List<FileManageInfo> newAddFiles = Lists.newArrayList();
             for (FileManageInfo file : files) {
-                Integer isDeleted = file.getIsDeleted();
+                Boolean isDeleted = file.getIsDeleted();
                 //已存在
                 Long fileId = file.getFileId();
                 if (fileId != null && fileId != 0) {
                     //已存在但要移除的
-                    if (FileManageConstants.FILE_STATUS_DELETED.equals(isDeleted)) {
+                    if (Boolean.TRUE.equals(isDeleted)) {
                         removeIds.add(file.getFileId());
                     }
                 }

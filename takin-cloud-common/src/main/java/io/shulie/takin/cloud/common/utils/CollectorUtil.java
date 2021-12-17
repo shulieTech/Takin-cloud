@@ -2,9 +2,9 @@ package io.shulie.takin.cloud.common.utils;
 
 import java.util.Calendar;
 
-import io.shulie.takin.cloud.common.constants.CollectorConstants;
-import io.shulie.takin.cloud.common.constants.Constants;
 import org.apache.commons.lang3.StringUtils;
+
+import io.shulie.takin.cloud.common.constants.CollectorConstants;
 
 /**
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
@@ -20,18 +20,7 @@ public class CollectorUtil {
      * @return -
      */
     public static String getTimestampPodNum(Long timestamp, String podNum) {
-        return timestamp + (StringUtils.isNotBlank(podNum) ? podNum : Constants.NULL_SIGN);
-    }
-
-    /**
-     * 组装时间戳 +  podNum
-     *
-     * @param timestamp 时间戳
-     * @param podNum    pod数量
-     * @return -
-     */
-    public static String coverTimestampPodNum(Long timestamp, String podNum) {
-        return timestamp + (StringUtils.isNotBlank(podNum) ? podNum : Constants.NULL_SIGN);
+        return timestamp + (StringUtils.isNotBlank(podNum) ? podNum : "null");
     }
 
     /**
@@ -119,13 +108,4 @@ public class CollectorUtil {
         Calendar instance = getTimeWindow(timestamp);
         return instance.getTimeInMillis();
     }
-
-    public static void main(String[] args) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.SECOND, 56);
-
-        Calendar timeWindow = getTimeWindow(calendar.getTimeInMillis());
-        System.out.println(timeWindow.getTime());
-    }
-
 }

@@ -15,7 +15,6 @@ import com.jayway.jsonpath.DocumentContext;
 import org.apache.commons.lang3.StringUtils;
 import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.ext.content.enums.NodeTypeEnum;
-import org.apache.commons.collections4.CollectionUtils;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 
@@ -50,20 +49,6 @@ public class JsonPathUtil {
         .build();
 
     public static final TypeRef<List<ScriptNode>> SCRIPT_NODE_TYPE_REF = new TypeRef<List<ScriptNode>>() {};
-
-    public static DocumentContext deleteByXpathMd5(String jsonString, List<String> md5Keys) {
-        if (StringUtils.isBlank(jsonString)) {
-            return null;
-        }
-        DocumentContext document = JsonPath.using(JACKSON_CONFIGURATION).parse(jsonString);
-        if (CollectionUtils.isEmpty(md5Keys)) {
-            return document;
-        }
-        md5Keys.stream()
-            .filter(StringUtils::isNotBlank)
-            .forEach(md5 -> document.delete(JsonPath.compile("$..[?(@.xpathMd5=='" + md5 + "')]")));
-        return document;
-    }
 
     /**
      * 删除json字符串中的节点
@@ -133,34 +118,10 @@ public class JsonPathUtil {
         return context.jsonString();
     }
 
-    public static List<ScriptNode> getCurrentNodeByMd5(String nodeTree, String xpathMd5) {
-        return JsonPath.using(JACKSON_CONFIGURATION)
-            .parse(nodeTree)
-            .read("$..[?(@.xpathMd5=='" + xpathMd5 + "')]", SCRIPT_NODE_TYPE_REF);
-    }
-
     public static List<ScriptNode> getCurrentNodeByType(String nodeTree, String type) {
         return JsonPath.using(JACKSON_CONFIGURATION)
             .parse(nodeTree)
             .read("$..[?(@.type=='" + type + "')]", SCRIPT_NODE_TYPE_REF);
-    }
-
-    public static List<ScriptNode> removeSamplers(String nodeTree, List<String> xpathMd5List) {
-        if (StringUtils.isBlank(nodeTree)) {
-            return null;
-        }
-        try {
-            DocumentContext finalContext = JsonPath.parse(nodeTree);
-            xpathMd5List.stream().filter(StringUtils::isNotBlank)
-                .forEach(md5 -> finalContext.delete(JsonPath.compile("$..[?(@.xpathMd5=='" + md5 + "')]")));
-            return JsonPath.using(JACKSON_CONFIGURATION)
-                .parse(finalContext.jsonString())
-                .read("$..[?(@.type=='TEST_PLAN')]", SCRIPT_NODE_TYPE_REF);
-        } catch (Exception e) {
-            log.error("json delete regex error!json={}", nodeTree);
-        }
-        return null;
-
     }
 
     /**
@@ -222,55 +183,5 @@ public class JsonPathUtil {
      */
     public static List<ScriptNode> getChildSamplers(String nodeTree, String xpathMd5) {
         return getChildrenByMd5(nodeTree, xpathMd5, NodeTypeEnum.SAMPLER);
-    }
-
-    public static void main(String[] args) {
-        String json = "[{\"md5\": \"631bffae6bfadfb7f440abae865ddc9f\", \"name\": \"TestPlan\", \"type\": "
-            + "\"TEST_PLAN\", \"xpath\": \"/jmeterTestPlan/hashTree/TestPlan\", \"children\": [{\"md5\": "
-            + "\"c95ebdb9f76aca38f519308c26c42c46\", \"name\": \"ThreadGroup\", \"type\": \"THREAD_GROUP\", "
-            + "\"props\": {\"ThreadGroup.delay\": \"\", \"ThreadGroup.duration\": \"\", \"ThreadGroup.ramp_time\": "
-            + "\"1\", \"ThreadGroup.scheduler\": \"false\", \"ThreadGroup.num_threads\": \"1\", \"ThreadGroup"
-            + ".on_sample_error\": \"continue\", \"ThreadGroup.same_user_on_next_iteration\": \"true\"}, \"xpath\": "
-            + "\"/jmeterTestPlan/hashTree/hashTree/ThreadGroup[1]\", \"children\": [{\"md5\": "
-            + "\"745e042aa65772d075d89001fec5fe5b\", \"name\": \"TransactionController\", \"type\": \"CONTROLLER\", "
-            + "\"xpath\": \"/jmeterTestPlan/hashTree/hashTree/hashTree[3]/TransactionController\", \"children\": "
-            + "[{\"md5\": \"3deacc1044eff4a5b5cc91feac336485\", \"name\": \"HTTPSamplerProxy\", \"type\": "
-            + "\"SAMPLER\", \"props\": {\"HTTPSampler.path\": \"/order/add?index=lxr_test\", \"HTTPSampler.port\": "
-            + "\"9876\", \"HTTPSampler.domain\": \"192.168.1.214\", \"HTTPSampler.method\": \"POST\", \"HTTPSampler"
-            + ".protocol\": \"http\", \"HTTPSampler.postBodyRaw\": \"true\", \"HTTPSampler.use_keepalive\": \"true\","
-            + " \"HTTPSampler.auto_redirects\": \"false\", \"HTTPSampler.connect_timeout\": \"\", \"HTTPSampler"
-            + ".contentEncoding\": \"utf-8\", \"HTTPSampler.embedded_url_re\": \"\", \"HTTPSampler"
-            + ".follow_redirects\": \"true\", \"HTTPSampler.response_timeout\": \"\", \"HTTPSampler"
-            + ".DO_MULTIPART_POST\": \"false\"}, \"xpath\": "
-            + "\"/jmeterTestPlan/hashTree/hashTree/hashTree[3]/hashTree/HTTPSamplerProxy\", \"testName\": \"新增订单\", "
-            + "\"xpathMd5\": \"c58a30d96fc8d510c476165557dbbd64\", \"samplerType\": \"HTTP\", \"identification\": "
-            + "\"POST|/order/add|0\"}], \"testName\": \"Transaction Controller\", \"xpathMd5\": "
-            + "\"29c6cf0e9f60540216f7f6397de489d2\"}], \"testName\": \"新增订单\", \"xpathMd5\": "
-            + "\"cec45d27c5e20cca29526c54b4c9ad34\"}, {\"md5\": \"6cb3e4ccd7eb33c92dbd3a8443ea2023\", \"name\": "
-            + "\"ThreadGroup\", \"type\": \"THREAD_GROUP\", \"props\": {\"ThreadGroup.delay\": \"\", \"ThreadGroup"
-            + ".duration\": \"\", \"ThreadGroup.ramp_time\": \"1\", \"ThreadGroup.scheduler\": \"false\", "
-            + "\"ThreadGroup.num_threads\": \"1\", \"ThreadGroup.on_sample_error\": \"continue\", \"ThreadGroup"
-            + ".same_user_on_next_iteration\": \"true\"}, \"xpath\": "
-            + "\"/jmeterTestPlan/hashTree/hashTree/ThreadGroup[2]\", \"children\": [{\"md5\": "
-            + "\"bc065d71fbf3e935abfae5df35d2c62d\", \"name\": \"HTTPSamplerProxy\", \"type\": \"SAMPLER\", "
-            + "\"props\": {\"HTTPSampler.path\": \"/order/get?id=${id}\", \"HTTPSampler.port\": \"9876\", "
-            + "\"HTTPSampler.domain\": \"192.168.1.214\", \"HTTPSampler.method\": \"GET\", \"HTTPSampler.protocol\": "
-            + "\"http\", \"HTTPSampler.use_keepalive\": \"true\", \"HTTPSampler.auto_redirects\": \"false\", "
-            + "\"HTTPSampler.connect_timeout\": \"\", \"HTTPSampler.contentEncoding\": \"\", \"HTTPSampler"
-            + ".embedded_url_re\": \"\", \"HTTPSampler.follow_redirects\": \"true\", \"HTTPSampler"
-            + ".response_timeout\": \"\", \"HTTPSampler.DO_MULTIPART_POST\": \"false\"}, \"xpath\": "
-            + "\"/jmeterTestPlan/hashTree/hashTree/hashTree[4]/HTTPSamplerProxy\", \"testName\": \"查询订单\", "
-            + "\"xpathMd5\": \"d7dc2c20c587e9ea4dd9b4f579bae753\", \"samplerType\": \"HTTP\", \"identification\": "
-            + "\"GET|/order/get|0\"}], \"testName\": \"查询订单\", \"xpathMd5\": \"3e28e54a021a746688a31e176c67224f\"}], "
-            + "\"testName\": \"Test Plan\", \"xpathMd5\": \"0f1a197a2040e645dcdb4dfff8a3f960\"}]";
-
-        //DocumentContext context = JsonPathUtil.deleteByXpathMd5(json, Arrays.asList("d53759e4d7aadda84e6a1b2c517eddf8","db65854f3f8b92d60658fbdbde490d38","79ed27c6b3472714af1a09a9842b9114"));
-        //DocumentContext context1 = JsonPathUtil.deleteNodes(context.jsonString());
-        //List<ScriptNode> childSamplers = JsonPathUtil.getChildSamplers(json,
-        //    "159036bb8a7ad4451f55b16772d16305");
-        //childSamplers.forEach(System.out::println);
-        List<ScriptNode> nodeList = JsonPathUtil.getCurrentNodeByType(json, NodeTypeEnum.THREAD_GROUP.name());
-        nodeList = JsonPathUtil.getNodeListByType(json, NodeTypeEnum.TEST_PLAN);
-        nodeList.forEach(node -> System.out.println(node.getXpathMd5()));
     }
 }

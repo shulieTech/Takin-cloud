@@ -1,9 +1,10 @@
 package io.shulie.takin.cloud.common.serialize;
 
-import java.io.IOException;
 import java.util.Date;
+import java.io.IOException;
 
 import cn.hutool.core.date.DateUtil;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -23,7 +24,6 @@ public class DateToStringFormatSerialize extends JsonSerializer<Date> {
      * @param gen  JsonGenerator gen
      * @author shulie
      * @date 2018年5月21日
-     * @version v1.1
      */
     @Override
     public void serialize(Date date, JsonGenerator gen, SerializerProvider provider) throws IOException {

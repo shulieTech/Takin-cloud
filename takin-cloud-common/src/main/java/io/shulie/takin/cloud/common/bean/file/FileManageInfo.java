@@ -26,6 +26,6 @@ public class FileManageInfo {
     @ApiModelProperty(value = "文件名称", dataType = "string")
     private String fileName;
 
-    @ApiModelProperty(value = "文件是否删除", dataType = "int")
-    private Integer isDeleted;
+    @ApiModelProperty(value = "文件是否删除")
+    private Boolean isDeleted;
 }

@@ -1,39 +1,38 @@
 package io.shulie.takin.cloud.common.utils;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.TreeMap;
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.RandomAccessFile;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
-import com.alibaba.fastjson.JSONObject;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
+import io.shulie.takin.cloud.common.constants.FileConstants;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 大文件分片
  *
  * @author moriarty
  */
+@Slf4j
 public class FileSliceByLine {
-    private static final Logger logger = LoggerFactory.getLogger(FileSliceByLine.class);
-
     private final String filePath;
     private final String separator;
     private Long prePosition;
     private Integer nextPartitionNum;
+    private final Integer orderColumnNum;
     private final Map<String, Integer> partitionMap;
     private final Map<Integer, FileSliceInfo> fileSliceInfoMap;
-    private final Integer orderColumnNum;
 
     private FileSliceByLine(String filePath, String separator, Integer columnNum) {
         this.filePath = filePath;
@@ -103,7 +102,7 @@ public class FileSliceByLine {
                     reader.close();
                 }
             } catch (IOException ex) {
-                logger.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
+                log.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
                     TakinCloudExceptionEnum.FILE_CLOSE_ERROR, ex);
             }
         }
@@ -114,24 +113,24 @@ public class FileSliceByLine {
         RandomAccessFile rAccessFile = null;
         try {
             reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(this.filePath), "UTF-8"));
+                new InputStreamReader(new FileInputStream(this.filePath), StandardCharsets.UTF_8));
             int lineLength = reader.readLine().length();
             rAccessFile = new RandomAccessFile(file, "r");
             rAccessFile.seek(lineLength);
             byte tmp = (byte)rAccessFile.read();
-            while (tmp != '\r' && tmp != '\n') {
+            while (tmp != FileConstants.ENTER_KEY && tmp != FileConstants.LINE_KEY) {
                 rAccessFile.seek(++lineLength);
                 tmp = (byte)rAccessFile.read();
             }
             rAccessFile.seek(++lineLength);
             tmp = (byte)rAccessFile.read();
-            if (tmp == '\r' || tmp == '\n') {
+            if (tmp == FileConstants.ENTER_KEY || tmp == FileConstants.LINE_KEY) {
                 return 2;
             } else {
                 return 1;
             }
         } catch (IOException e) {
-            logger.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
+            log.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
                 TakinCloudExceptionEnum.FILE_READ_ERROR, e);
         } finally {
             try {
@@ -142,7 +141,7 @@ public class FileSliceByLine {
                     reader.close();
                 }
             } catch (IOException ex) {
-                logger.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
+                log.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
                     TakinCloudExceptionEnum.FILE_CLOSE_ERROR, ex);
             }
         }
@@ -182,17 +181,5 @@ public class FileSliceByLine {
         private Integer partition;
         private Long start;
         private Long end;
-    }
-
-    public static void main(String[] args) {
-        String filePath = "/Users/moriarty/Desktop/OrderInfo_02.csv";
-        FileSliceByLine fileSliceUtil = new FileSliceByLine(filePath, ",", null);
-        Long start = System.currentTimeMillis();
-        System.out.println(start);
-        Map<Integer, FileSliceInfo> stringFileSliceInfoMap = fileSliceUtil.sliceFile();
-        JSONObject.toJSONString(stringFileSliceInfoMap);
-        System.out.println(System.currentTimeMillis() - start);
-        String s = JSONObject.toJSONString(stringFileSliceInfoMap);
-        System.out.println(s);
     }
 }
