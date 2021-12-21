@@ -365,6 +365,25 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                         .filter(t -> !transactions.contains(t.getXpathMd5()))
                         .forEach(t -> this.summaryNodeMetrics(t, podNum, time, results, slaList));
                 }
+                //todo 统计sa（事务控制器取压测引擎回传的数据，没有sa的信息需要根据其子节点采样器的sa去计算）
+                results.stream().filter(Objects::nonNull)
+                    .filter(out -> Objects.isNull(out.getSa()))
+                    .forEach(out -> {
+                        ScriptNode scriptNode = JmxUtil.getScriptNodeByType(NodeTypeEnum.CONTROLLER, nodes)
+                            .stream()
+                            .filter(Objects::nonNull)
+                            .filter(node -> StringUtils.isNotBlank(node.getXpathMd5()))
+                            .filter(node -> node.getXpathMd5().equals(out.getTransaction()))
+                            .findFirst().orElse(null);
+                        if (Objects.nonNull(scriptNode)) {
+                            String saPercent = this.calculateControllerSa(results, scriptNode);
+                            if (StringUtils.isNotBlank(saPercent)) {
+                                out.setSaPercent(saPercent);
+                            } else {
+                                out.setSaPercent("0");
+                            }
+                        }
+                    });
             }
             //如果是老版本的，统计ALL
             else {
@@ -504,6 +523,29 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         output.setStatus(status);
         output.setTestName(testName);
         return output;
+    }
+
+    public String calculateControllerSa(List<PressureOutput> results,ScriptNode nodes){
+        if (Objects.isNull(nodes)){
+            return null;
+        }
+        List<ScriptNode> childSamplers = JmxUtil.getScriptNodeByType(NodeTypeEnum.SAMPLER, nodes.getChildren());
+        Map<String, List<PressureOutput>> dataMap = results.stream().collect(
+            Collectors.groupingBy(PressureOutput::getTransaction));
+        List<PressureOutput> tmpData = new ArrayList<>();
+        List<String> samplerTransactions = childSamplers.stream().filter(Objects::nonNull)
+            .map(ScriptNode::getXpathMd5)
+            .collect(Collectors.toList());
+        for (Map.Entry<String, List<PressureOutput>> entry : dataMap.entrySet()) {
+            if (samplerTransactions.contains(entry.getKey())) {
+                tmpData.addAll(entry.getValue());
+            }
+        }
+        List<String> percentData = tmpData.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getSaPercent)
+            .filter(StringUtils::isNotBlank)
+            .collect(Collectors.toList());
+        return calculateSaPercent(percentData);
     }
 
     /**
