@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.common.enums.scenemanage;
 
-import io.shulie.takin.cloud.common.bean.sla.SlaBean;
+import io.shulie.takin.cloud.sdk.model.common.SlaBean;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

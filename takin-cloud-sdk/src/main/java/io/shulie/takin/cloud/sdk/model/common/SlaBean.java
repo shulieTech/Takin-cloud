@@ -10,5 +10,6 @@ import lombok.Data;
 public class SlaBean {
     private String ruleName;
     private String businessActivity;
+    private String bindRef;
     private String rule;
 }

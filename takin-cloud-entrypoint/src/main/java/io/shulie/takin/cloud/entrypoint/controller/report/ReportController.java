@@ -156,6 +156,9 @@ public class ReportController {
         }
         ReportDetailResp resp = new ReportDetailResp();
         BeanUtils.copyProperties(detailOutput, resp);
+        if (CollectionUtils.isNotEmpty(detailOutput.getStopReasons())){
+            resp.setStopReasons(detailOutput.getStopReasons());
+        }
         return ResponseResult.success(resp);
     }
 

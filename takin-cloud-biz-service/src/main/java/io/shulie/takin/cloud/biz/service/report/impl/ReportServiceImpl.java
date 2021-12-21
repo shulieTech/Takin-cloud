@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import io.shulie.takin.cloud.sdk.model.common.SlaBean;
+import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
 import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSON;
@@ -61,7 +63,6 @@ import io.shulie.takin.cloud.ext.api.AssetExtApi;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.ext.content.script.ScriptNode;
-import io.shulie.takin.cloud.common.bean.sla.SlaBean;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
 import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.common.utils.TestTimeUtil;
@@ -98,7 +99,6 @@ import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
-import io.shulie.takin.cloud.common.bean.scenemanage.StopReasonBean;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventService;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;

@@ -13,6 +13,7 @@ import javax.annotation.Resource;
 import com.alibaba.fastjson.JSON;
 
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
+import io.shulie.takin.cloud.sdk.model.common.SlaBean;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.date.DateUtil;
 import com.google.common.collect.Maps;
@@ -26,7 +27,6 @@ import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
 
 import io.shulie.takin.cloud.biz.utils.SlaUtil;
 import io.shulie.takin.cloud.biz.event.SlaPublish;
-import io.shulie.takin.cloud.common.bean.sla.SlaBean;
 import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.biz.service.sla.SlaService;

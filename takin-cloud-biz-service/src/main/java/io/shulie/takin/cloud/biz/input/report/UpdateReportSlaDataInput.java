@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.biz.input.report;
 
-import io.shulie.takin.cloud.common.bean.sla.SlaBean;
+import io.shulie.takin.cloud.sdk.model.common.SlaBean;
 import lombok.Data;
 
 /**

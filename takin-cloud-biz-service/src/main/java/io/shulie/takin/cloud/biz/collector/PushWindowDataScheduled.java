@@ -322,7 +322,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 .map(ResponseMetrics::getTransaction)
                 .filter(StringUtils::isNotBlank)
                 //过滤掉控制器
-                .filter(t -> !this.isController(t, nodes))
+                //.filter(t -> !this.isController(t, nodes))
                 .distinct()
                 .collect(Collectors.toList());
             if (CollectionUtils.isEmpty(transactions)) {
