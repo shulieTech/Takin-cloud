@@ -126,7 +126,7 @@ public class FileController {
     }
 
     @ApiOperation("脚本文件下载")
-    @GetMapping(value = "/download", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/download", produces = MediaType.APPLICATION_JSON_VALUE)
     public void downloadFile(@RequestParam("fileName") String fileName, HttpServletResponse response) {
         try {
             String filePath = scriptPath + SceneManageConstant.FILE_SPLIT + fileName;
@@ -208,11 +208,14 @@ public class FileController {
 
     @PostMapping(EntrypointUrl.METHOD_FILE_CREATE_BY_STRING)
     @ApiOperation(value = "根据字符串创建文件")
-    public String createFileByPathAndString(@RequestBody FileCreateByStringParamRequest fileContent) {
+    public ResponseResult<String> createFileByPathAndString(@RequestBody FileCreateByStringParamRequest fileContent) {
         Boolean fileCreateResult = FileManagerHelper.createFileByPathAndString(fileContent.getFilePath(), fileContent.getFileContent());
-        if (!fileCreateResult) {return "";}
+        if (!fileCreateResult) {return ResponseResult.success();}
         // 返回文件的MD5值
-        else {return Md5Util.md5File(fileContent.getFilePath());}
+        else {
+            String fileMd5 = Md5Util.md5File(fileContent.getFilePath());
+            return ResponseResult.success(fileMd5);
+        }
     }
 
     private void setDataCount(File file, FileDTO dto) {
@@ -224,10 +227,7 @@ public class FileController {
         try {
             br = new BufferedReader(new FileReader(file));
             Long length = 0L;
-            String readData = null;
-            while ((readData = br.readLine()) != null) {
-                length++;
-            }
+            while (br.readLine() != null) {length++;}
             dto.setUploadedData(length);
             dto.setTopic(topic);
         } catch (FileNotFoundException e) {
