@@ -957,7 +957,14 @@ public class ReportServiceImpl implements ReportService {
             if (errKey.equals(ReportConstants.SLA_ERROR_MSG) && map.containsKey(ReportConstants.SLA_ERROR_MSG)) {
                 return;
             }
-            map.compute(errKey, (k, v) -> StringUtils.isBlank(v) ? errMsg : (v + "、" + errMsg));
+            if (errMsg.length() > 100){
+                errMsg = errMsg.substring(0,100);
+            }
+            String existsMsg = map.get(errKey);
+            if (StringUtils.isNotBlank(existsMsg) && existsMsg.length() < 10000){
+                map.put(errKey, existsMsg + "、" + errMsg);
+            }
+            //map.compute(errKey, (k, v) -> StringUtils.isBlank(v) ? errMsg : (v + "、" + errMsg));
             reportResult.setFeatures(GsonUtil.gsonToString(map));
         }
     }
