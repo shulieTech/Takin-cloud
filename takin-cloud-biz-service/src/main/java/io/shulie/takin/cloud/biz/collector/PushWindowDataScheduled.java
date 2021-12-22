@@ -350,6 +350,11 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                         //过滤掉已经有数据的控制器
                         .filter(c -> !transactions.contains(c.getXpathMd5()))
                         .forEach(c -> this.summaryNodeMetrics(c, podNum, time, results, slaList));
+
+                    //事务控制器sa计算
+                    controllerNodes.stream().filter(Objects::nonNull)
+                        .filter(c -> transactions.contains(c.getXpathMd5()))
+                        .forEach(c -> this.calculateControllerSa(results,c));
                 }
                 //线程组统计
                 List<ScriptNode> threadGroupNodes = JmxUtil.getScriptNodeByType(NodeTypeEnum.THREAD_GROUP, nodes);
@@ -365,25 +370,6 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                         .filter(t -> !transactions.contains(t.getXpathMd5()))
                         .forEach(t -> this.summaryNodeMetrics(t, podNum, time, results, slaList));
                 }
-                //todo 统计sa（事务控制器取压测引擎回传的数据，没有sa的信息需要根据其子节点采样器的sa去计算）
-                results.stream().filter(Objects::nonNull)
-                    .filter(out -> Objects.isNull(out.getSa()))
-                    .forEach(out -> {
-                        ScriptNode scriptNode = JmxUtil.getScriptNodeByType(NodeTypeEnum.CONTROLLER, nodes)
-                            .stream()
-                            .filter(Objects::nonNull)
-                            .filter(node -> StringUtils.isNotBlank(node.getXpathMd5()))
-                            .filter(node -> node.getXpathMd5().equals(out.getTransaction()))
-                            .findFirst().orElse(null);
-                        if (Objects.nonNull(scriptNode)) {
-                            String saPercent = this.calculateControllerSa(results, scriptNode);
-                            if (StringUtils.isNotBlank(saPercent)) {
-                                out.setSaPercent(saPercent);
-                            } else {
-                                out.setSaPercent("0");
-                            }
-                        }
-                    });
             }
             //如果是老版本的，统计ALL
             else {
@@ -525,15 +511,17 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         return output;
     }
 
-    public String calculateControllerSa(List<PressureOutput> results,ScriptNode nodes){
-        if (Objects.isNull(nodes)){
-            return null;
+    private void calculateControllerSa(List<PressureOutput> results,ScriptNode node){
+        List<ScriptNode> samplerNode = JmxUtil.getScriptNodeByType(NodeTypeEnum.SAMPLER, node.getChildren());
+        PressureOutput output = results.stream().filter(r -> r.getTransaction().equals(node.getXpathMd5()))
+            .findFirst().orElse(null);
+        if (Objects.isNull(output)){
+            return;
         }
-        List<ScriptNode> childSamplers = JmxUtil.getScriptNodeByType(NodeTypeEnum.SAMPLER, nodes.getChildren());
         Map<String, List<PressureOutput>> dataMap = results.stream().collect(
             Collectors.groupingBy(PressureOutput::getTransaction));
         List<PressureOutput> tmpData = new ArrayList<>();
-        List<String> samplerTransactions = childSamplers.stream().filter(Objects::nonNull)
+        List<String> samplerTransactions = samplerNode.stream().filter(Objects::nonNull)
             .map(ScriptNode::getXpathMd5)
             .collect(Collectors.toList());
         for (Map.Entry<String, List<PressureOutput>> entry : dataMap.entrySet()) {
@@ -541,11 +529,16 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 tmpData.addAll(entry.getValue());
             }
         }
-        List<String> percentData = tmpData.stream().filter(Objects::nonNull)
-            .map(PressureOutput::getSaPercent)
-            .filter(StringUtils::isNotBlank)
-            .collect(Collectors.toList());
-        return calculateSaPercent(percentData);
+        int count = tmpData.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getCount)
+            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+            .sum();
+        int saCount = tmpData.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getSaCount)
+            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+            .sum();
+        double sa = NumberUtil.getPercentRate(saCount, count);
+        output.setSa(sa);
     }
 
     /**

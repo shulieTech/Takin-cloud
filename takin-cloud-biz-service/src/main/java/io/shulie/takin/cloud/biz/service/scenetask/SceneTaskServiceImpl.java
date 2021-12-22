@@ -886,7 +886,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             reportBusinessActivityDetail.setBusinessActivityName(activity.getBusinessActivityName());
             reportBusinessActivityDetail.setApplicationIds(activity.getApplicationIds());
             reportBusinessActivityDetail.setBindRef(activity.getBindRef());
-            if (null != activity.getTargetRT()) {
+            if (null != activity.getTargetTPS()) {
                 reportBusinessActivityDetail.setTargetTps(new BigDecimal(activity.getTargetTPS()));
             }
             if (null != activity.getTargetRT()) {
@@ -896,7 +896,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             reportBusinessActivityDetail.setTargetSa(activity.getTargetSA());
             reportBusinessActivityDetailDao.insert(reportBusinessActivityDetail);
         });
-        calculateNodesTarget(scene.getId(), reportId, report.getScriptNodeTree(), scene.getBusinessActivityConfig());
+        saveNonTargetNode(scene.getId(), reportId, report.getScriptNodeTree(), scene.getBusinessActivityConfig());
         log.info("启动[{}]场景测试，初始化报表数据,报表ID: {}", scene.getId(), report.getId());
         return report;
     }
@@ -909,7 +909,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
      * @param scriptNodeTree         节点树
      * @param businessActivityConfig 场景业务活动信息
      */
-    private void calculateNodesTarget(Long sceneId, Long reportId, String scriptNodeTree,
+    private void saveNonTargetNode(Long sceneId, Long reportId, String scriptNodeTree,
         List<SceneBusinessActivityRefOutput> businessActivityConfig) {
         if (StringUtils.isBlank(scriptNodeTree) || CollectionUtils.isEmpty(businessActivityConfig)) {
             return;
@@ -922,21 +922,20 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             NodeTypeEnum.TEST_PLAN.name());
         if (CollectionUtils.isNotEmpty(testPlanNodeList) && testPlanNodeList.size() == 1) {
             ScriptNode scriptNode = testPlanNodeList.get(0);
-            calculateTarget(sceneId, reportId, scriptNodeTree, scriptNode, businessActivityConfig, resultList);
+            fillNonTargetActivityDetail(sceneId, reportId, scriptNode, resultList);
         }
         List<ScriptNode> threadGroupNodes = JsonPathUtil.getCurrentNodeByType(scriptNodeTree,
             NodeTypeEnum.THREAD_GROUP.name());
         if (CollectionUtils.isNotEmpty(threadGroupNodes)) {
             threadGroupNodes.stream().filter(Objects::nonNull)
-                .forEach(node -> calculateTarget(sceneId, reportId, scriptNodeTree, node, businessActivityConfig, resultList));
+                .forEach(node -> fillNonTargetActivityDetail(sceneId, reportId, node, resultList));
         }
         List<ScriptNode> controllerNodes = JsonPathUtil.getCurrentNodeByType(scriptNodeTree,
             NodeTypeEnum.CONTROLLER.name());
         if (CollectionUtils.isNotEmpty(controllerNodes)) {
             controllerNodes.stream().filter(Objects::nonNull)
                 .filter(node -> !bindRefList.contains(node.getXpathMd5()))
-                .forEach(node -> calculateTarget(sceneId, reportId, scriptNodeTree, node, businessActivityConfig,
-                    resultList));
+                .forEach(node -> fillNonTargetActivityDetail(sceneId, reportId, node, resultList));
         }
         if (CollectionUtils.isNotEmpty(resultList)) {
             resultList.stream().filter(Objects::nonNull)
@@ -950,43 +949,21 @@ public class SceneTaskServiceImpl implements SceneTaskService {
      *
      * @param sceneId                场景ID
      * @param reportId               报告ID
-     * @param scriptNodeTree         节点树
      * @param scriptNode             目标节点
-     * @param businessActivityConfig 场景中关联的业务活动
      * @param detailList             结果
      */
-    private void calculateTarget(Long sceneId, Long reportId, String scriptNodeTree, ScriptNode scriptNode,
-        List<SceneBusinessActivityRefOutput> businessActivityConfig, List<ReportBusinessActivityDetail> detailList) {
-        List<ScriptNode> childSamplers = JsonPathUtil.getChildSamplers(scriptNodeTree, scriptNode.getXpathMd5());
-        if (CollectionUtils.isNotEmpty(childSamplers)) {
-            List<String> samplersMd5 = childSamplers.stream().map(ScriptNode::getXpathMd5).collect(Collectors.toList());
-            List<SceneBusinessActivityRefOutput> refList = businessActivityConfig.stream()
-                .filter(config -> samplersMd5.contains(config.getBindRef()))
-                .collect(Collectors.toList());
-            int targetRt = refList.stream().filter(Objects::nonNull)
-                .map(SceneBusinessActivityRefOutput::getTargetRT)
-                .mapToInt(i -> Objects.isNull(i) ? 0 : i).max().orElse(0);
-            double targetSa = refList.stream().filter(Objects::nonNull)
-                .map(SceneBusinessActivityRefOutput::getTargetSA)
-                .mapToDouble(d -> Objects.isNull(d) ? 0 : d.doubleValue()).max().orElse(0);
-            int targetTps = refList.stream().filter(Objects::nonNull)
-                .map(SceneBusinessActivityRefOutput::getTargetTPS)
-                .mapToInt(i -> Objects.isNull(i) ? 0 : i).sum();
-            double targetSr = refList.stream().filter(Objects::nonNull)
-                .map(SceneBusinessActivityRefOutput::getTargetSuccessRate)
-                .mapToDouble(d -> Objects.isNull(d) ? 0 : d.doubleValue()).max().orElse(0);
+    private void fillNonTargetActivityDetail(Long sceneId, Long reportId, ScriptNode scriptNode,List<ReportBusinessActivityDetail> detailList) {
             ReportBusinessActivityDetail detail = new ReportBusinessActivityDetail();
-            detail.setTargetTps(new BigDecimal(targetTps));
-            detail.setTargetRt(new BigDecimal(targetRt));
-            detail.setTargetSa(new BigDecimal(targetSa));
-            detail.setTargetSuccessRate(new BigDecimal(targetSr));
+            detail.setTargetTps(new BigDecimal(-1));
+            detail.setTargetRt(new BigDecimal(-1));
+            detail.setTargetSa(new BigDecimal(-1));
+            detail.setTargetSuccessRate(new BigDecimal(-1));
             detail.setSceneId(sceneId);
             detail.setReportId(reportId);
             detail.setBusinessActivityId(-1L);
             detail.setBusinessActivityName(scriptNode.getTestName());
             detail.setBindRef(scriptNode.getXpathMd5());
             detailList.add(detail);
-        }
     }
 
     /**
