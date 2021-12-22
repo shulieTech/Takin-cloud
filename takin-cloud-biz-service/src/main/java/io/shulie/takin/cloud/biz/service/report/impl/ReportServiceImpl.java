@@ -1075,7 +1075,7 @@ public class ReportServiceImpl implements ReportService {
      * V4.2.2以前版本的客户端，由cloud更新报告、场景状态
      * V4.2.2及以后版本的客户端，由web调用cloud，来更新报告、场景状态
      */
-    @Transactional(rollbackFor = Exception.class)
+    //@Transactional(rollbackFor = Exception.class)
     public void modifyReport(TaskResult taskResult) {
         //保存报表状态为生成中
         Long reportId = taskResult.getTaskId();
@@ -1310,7 +1310,11 @@ public class ReportServiceImpl implements ReportService {
         }
 
         // 这里 要判断下 压力节点 情况，并记录下来 压力节点 最后一位就是 压力节点 数量 开始时间 结束时间更新
-        getRedisInfo(reportResult, taskResult);
+        try {
+            getRedisInfo(reportResult, taskResult);
+        }catch (Exception e){
+            log.error("保存报表结果异常，查询redis失败！场景ID:{},报告ID:{}",reportResult.getSceneId(),reportResult.getId());
+        }
 
 
         String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(),
