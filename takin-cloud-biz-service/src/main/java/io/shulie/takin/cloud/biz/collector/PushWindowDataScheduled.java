@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.biz.collector;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.OptionalDouble;
 import java.util.Set;
 import java.util.List;
 import java.util.HashMap;
@@ -518,6 +519,9 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         if (Objects.isNull(output)){
             return;
         }
+        if (Objects.nonNull(output.getSaCount()) && output.getSaCount() > 0) {
+            return;
+        }
         Map<String, List<PressureOutput>> dataMap = results.stream().collect(
             Collectors.groupingBy(PressureOutput::getTransaction));
         List<PressureOutput> tmpData = new ArrayList<>();
@@ -529,15 +533,17 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 tmpData.addAll(entry.getValue());
             }
         }
-        int count = tmpData.stream().filter(Objects::nonNull)
-            .map(PressureOutput::getCount)
-            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-            .sum();
+        double sa = tmpData.stream().filter(Objects::nonNull)
+            .map(PressureOutput::getSa)
+            .mapToDouble(d -> Objects.isNull(d) ? 0 : d)
+            .min()
+            .getAsDouble();
         int saCount = tmpData.stream().filter(Objects::nonNull)
             .map(PressureOutput::getSaCount)
             .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-            .sum();
-        double sa = NumberUtil.getPercentRate(saCount, count);
+            .min()
+            .getAsInt();
+        output.setSaCount(saCount);
         output.setSa(sa);
     }
 
