@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageInfo;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
@@ -87,9 +88,7 @@ public class ReportController {
         if (detailOutput == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在Id:" + reportId);
         }
-        ReportDetailResp resp = new ReportDetailResp();
-        BeanUtils.copyProperties(detailOutput, resp);
-        return ResponseResult.success(resp);
+        return ResponseResult.success(BeanUtil.copyProperties(detailOutput, ReportDetailResp.class));
     }
 
     /**
@@ -156,7 +155,7 @@ public class ReportController {
         }
         ReportDetailResp resp = new ReportDetailResp();
         BeanUtils.copyProperties(detailOutput, resp);
-        if (CollectionUtils.isNotEmpty(detailOutput.getStopReasons())){
+        if (CollectionUtils.isNotEmpty(detailOutput.getStopReasons())) {
             resp.setStopReasons(detailOutput.getStopReasons());
         }
         return ResponseResult.success(resp);
