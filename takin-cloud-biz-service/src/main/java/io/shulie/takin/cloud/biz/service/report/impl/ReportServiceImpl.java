@@ -191,7 +191,7 @@ public class ReportServiceImpl implements ReportService {
             if (report.getConclusion() != null && report.getConclusion() == 0 && report.getFeatures() != null) {
                 JSONObject jsonObject = JSON.parseObject(report.getFeatures());
                 String key = "error_msg";
-                if (jsonObject.containsKey(key)) {
+                if (Objects.nonNull(jsonObject) && jsonObject.containsKey(key)) {
                     errorMsgMap.put(report.getId(), jsonObject.getString(key));
                 }
             }
@@ -961,7 +961,9 @@ public class ReportServiceImpl implements ReportService {
                 errMsg = errMsg.substring(0,100);
             }
             String existsMsg = map.get(errKey);
-            if (StringUtils.isNotBlank(existsMsg) && existsMsg.length() < 10000){
+            if (StringUtils.isBlank(existsMsg)) {
+                map.put(errKey, errMsg);
+            } else if (existsMsg.length() < 10000) {
                 map.put(errKey, existsMsg + "、" + errMsg);
             }
             //map.compute(errKey, (k, v) -> StringUtils.isBlank(v) ? errMsg : (v + "、" + errMsg));
