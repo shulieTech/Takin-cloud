@@ -3,7 +3,6 @@ package io.shulie.takin.cloud.data.dao.middleware;
 import java.util.List;
 
 import io.shulie.takin.cloud.data.model.mysql.MiddlewareJarEntity;
-import io.shulie.takin.cloud.data.result.middleware.MiddlewareJarResult;
 
 /**
  * 中间件包表(MiddlewareJar)表数据库 dao
@@ -35,7 +34,7 @@ public interface MiddlewareJarDAO {
      * @param artifactIds artifactIds
      * @return 列表
      */
-    List<MiddlewareJarResult> listByArtifactIds(List<String> artifactIds);
+    List<MiddlewareJarEntity> listByArtifactIds(List<String> artifactIds);
 
 }
 
