@@ -7,7 +7,6 @@ import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.param.report.ReportQueryParam;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
-import io.shulie.takin.cloud.data.param.report.ReportInsertParam;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
 import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
 
@@ -22,7 +21,7 @@ public interface ReportDao {
      * @param param 数据项
      * @return 插入结果
      */
-    int insert(ReportInsertParam param);
+    int insert(ReportEntity param);
 
     /**
      * 获取列表

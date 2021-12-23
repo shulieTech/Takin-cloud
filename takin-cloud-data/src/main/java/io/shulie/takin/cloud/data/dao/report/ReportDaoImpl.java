@@ -24,7 +24,6 @@ import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.data.param.report.ReportQueryParam;
-import io.shulie.takin.cloud.data.param.report.ReportInsertParam;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
 import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
@@ -44,10 +43,8 @@ public class ReportDaoImpl implements ReportDao {
     private ReportBusinessActivityDetailMapper detailMapper;
 
     @Override
-    public int insert(ReportInsertParam param) {
-        if (Objects.nonNull(param)) {
-            ReportEntity entity = new ReportEntity();
-            BeanUtils.copyProperties(param, entity);
+    public int insert(ReportEntity entity) {
+        if (Objects.nonNull(entity)) {
             Date insertDate = new Date();
             entity.setGmtCreate(insertDate);
             entity.setGmtUpdate(insertDate);
