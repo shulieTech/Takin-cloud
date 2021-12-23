@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.cloud.data.dto.PageDTO;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -23,43 +22,12 @@ public interface MPUtil<T> {
     /**
      * 设置分页参数
      *
-     * @param pageDTO 分页参数类
-     * @return mybatis plus page 类
-     */
-    default Page<T> setPage(PageDTO pageDTO) {
-        return new Page<>(pageDTO.getPage(), pageDTO.getSize());
-    }
-
-    /**
-     * 设置分页参数
-     *
      * @param page 当前页数
      * @param size 每页大小
      * @return mybatis plus page 类
      */
     default Page<T> setPage(Integer page, Integer size) {
         return new Page<>(page, size);
-    }
-
-    /**
-     * 设置分页参数, 无总数的返回
-     *
-     * @param pageDTO 分页参数类
-     * @return mybatis plus page 类
-     */
-    default Page<T> setPageNoCount(PageDTO pageDTO) {
-        return setPage(pageDTO, false);
-    }
-
-    /**
-     * 设置分页参数, 根据入参, 返回是否需要总数的返回
-     *
-     * @param pageDTO       分页参数类
-     * @param isSearchCount 是否需要总数
-     * @return mybatis plus page 类
-     */
-    default Page<T> setPage(PageDTO pageDTO, boolean isSearchCount) {
-        return new Page<>(pageDTO.getPage(), pageDTO.getSize(), isSearchCount);
     }
 
     /**
