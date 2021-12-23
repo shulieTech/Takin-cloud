@@ -6,7 +6,6 @@ import java.util.Map;
 import com.github.pagehelper.PageInfo;
 import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
 import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
-import com.pamirs.takin.entity.domain.dto.report.Metrices;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
@@ -168,7 +167,7 @@ public interface ReportService {
      * @param sceneId  场景主键
      * @return -
      */
-    List<Metrices> metric(Long reportId, Long sceneId);
+    List<Map<String, Object>> metric(Long reportId, Long sceneId);
 
     /**
      * 更新扩展字段

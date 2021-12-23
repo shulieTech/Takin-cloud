@@ -46,7 +46,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.domain.dto.report.Metrices;
 import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
 import com.pamirs.takin.entity.domain.dto.report.StatReportDTO;
@@ -770,15 +769,11 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private Integer getMaxConcurrence(Long sceneId, Long reportId, Long customerId, String transaction) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(" max(active_threads) as maxConcurrenceNum");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, customerId));
-        influxDbSql.append(" where ");
-        influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
-        influxDbSql.append(" order by time desc limit 1");
-        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        String influxDbSql =
+            "select max(active_threads) as maxConcurrenceNum from "
+                + InfluxUtil.getMeasurement(sceneId, reportId, customerId)
+                + " where transaction = '" + transaction + "' order by time desc limit 1";
+        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql, StatReportDTO.class);
         if (Objects.nonNull(statReportDTO)) {
             return statReportDTO.getMaxConcurrenceNum();
         }
@@ -930,20 +925,23 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     @Override
-    public List<Metrices> metric(Long reportId, Long sceneId) {
-        List<Metrices> metricList = Lists.newArrayList();
+    public List<Map<String, Object>> metric(Long reportId, Long sceneId) {
         if (StringUtils.isBlank(String.valueOf(reportId))) {
-            return metricList;
+            return new ArrayList<>();
         }
         try {
             String measurement = InfluxUtil.getMeasurement(sceneId, reportId, CloudPluginUtils.getContext().getTenantId());
-            metricList = influxWriter.query(
-                "select time,avg_tps as avgTps from " + measurement + " where transaction='all'", Metrices.class);
+            return influxWriter.query(
+                    "select time,avg_tps as avgTps from " + measurement + " where transaction='all'", Map.class)
+                .stream().map(t -> new HashMap<String, Object>(2) {{
+                    put("time", t.get("time"));
+                    put("avgTps", t.get("avgTps"));
+                }}).collect(Collectors.toList());
         } catch (Throwable e) {
             log.error("异常代码【{}】,异常内容：获取压测中jmeter上报的数据异常 --> influxdb数据查询异常: {}",
                 TakinCloudExceptionEnum.REPORT_GET_ERROR, e);
+            throw e;
         }
-        return metricList;
     }
 
     private void getReportFeatures(ReportEntity reportResult, String errKey, String errMsg) {
@@ -1133,13 +1131,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private Date getFinalDateTime(Long sceneId, Long reportId, Long customerId) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(
-            " max(create_time) as time");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, customerId));
-        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        String influxDbSql = "select max(create_time) as time from "
+            + InfluxUtil.getMeasurement(sceneId, reportId, customerId);
+        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql, StatReportDTO.class);
         Date date;
         if (Objects.nonNull(statReportDTO) && StringUtils.isNotBlank(statReportDTO.getTime())) {
             try {
@@ -1164,20 +1158,16 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private StatReportDTO statReport(Long sceneId, Long reportId, Long customerId, String transaction) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(
-            " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps ,sum(sum_rt)/sum"
-                + "(count) as  "
-                + "avgRt, sum(sa_count) as saCount,  max(avg_tps) as maxTps, min(min_rt) as minRt, max(max_rt) as "
-                + "maxRt, count(avg_rt) as recordCount ,max(active_threads) as maxConcurrenceNum,round(mean"
-                + "(active_threads)) as avgConcurrenceNum");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, customerId));
-        influxDbSql.append(" where ");
-        influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
+        String influxDbSql = "select"
+            + " sum(count)              as totalRequest,    sum(fail_count) as failRequest, mean(avg_tps)   as tps,"
+            + " sum(sum_rt)/sum(count)  as avgRt,           sum(sa_count)   as saCount,     max(avg_tps)    as maxTps,"
+            + " min(min_rt)             as minRt,           max(max_rt)     as maxRt,       count(avg_rt)   as recordCount,"
+            + " max(active_threads)         as maxConcurrenceNum,"
+            + " round(mean(active_threads)) as avgConcurrenceNum from "
+            + InfluxUtil.getMeasurement(sceneId, reportId, customerId)
+            + " where  transaction = '" + transaction + "'";
 
-        return influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        return influxWriter.querySingle(influxDbSql, StatReportDTO.class);
     }
 
     /**
@@ -1457,7 +1447,7 @@ public class ReportServiceImpl implements ReportService {
         if (Objects.isNull(detail)) {
             return null;
         }
-        Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>(6);
         if (Objects.nonNull(statReport)) {
             resultMap.put("avgRt", new DataBean(statReport.getAvgRt(), detail.getTargetRt()));
             resultMap.put("sa", new DataBean(statReport.getSa(), detail.getTargetSa()));
@@ -1504,7 +1494,7 @@ public class ReportServiceImpl implements ReportService {
                 .forEach(detail -> {
                     Map<String, Object> tmpMap = new HashMap<>(1);
                     tmpMap.put("businessActivityId", detail.getBusinessActivityId());
-                    Map<String, Map<String, Object>> resultMap = new HashMap<>();
+                    Map<String, Map<String, Object>> resultMap = new HashMap<>(1);
                     resultMap.put(detail.getBindRef(), tmpMap);
                     JsonPathUtil.putNodesToJson(context, resultMap);
                 });

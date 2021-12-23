@@ -12,7 +12,6 @@ import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageInfo;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import com.pamirs.takin.entity.domain.dto.report.Metrices;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
@@ -244,7 +243,7 @@ public class ReportController {
 
     @ApiOperation("当前压测的所有数据")
     @GetMapping(EntrypointUrl.METHOD_REPORT_METRICS)
-    public ResponseResult<List<Metrices>> metrics(Long reportId, Long sceneId) {
+    public ResponseResult<List<Map<String, Object>>> metrics(Long reportId, Long sceneId) {
         return ResponseResult.success(reportService.metric(reportId, sceneId));
     }
 
