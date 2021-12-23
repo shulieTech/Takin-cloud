@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.sdk.model.common.SlaBean;
 import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
 import lombok.extern.slf4j.Slf4j;
@@ -42,18 +44,14 @@ import org.apache.commons.collections4.MapUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.domain.dto.report.Metrices;
-import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
 import com.pamirs.takin.entity.domain.dto.report.StatReportDTO;
 import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
 import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
 import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
 import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
-import com.pamirs.takin.entity.domain.dto.report.StatInspectReportDTO;
 import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
 import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
 
@@ -82,7 +80,6 @@ import io.shulie.takin.cloud.biz.output.report.ReportOutput;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.sdk.model.common.DistributeBean;
 import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.biz.cloudserver.ReportConverter;
 import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
@@ -107,7 +104,6 @@ import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
@@ -181,13 +177,13 @@ public class ReportServiceImpl implements ReportService {
         }
         param.setEnvCode(CloudPluginUtils.getContext().getEnvCode());
         param.setTenantId(CloudPluginUtils.getContext().getTenantId());
-        List<Report> reportList = tReportMapper.listReport(param);
+        List<ReportEntity> reportList = tReportMapper.listReport(param);
         if (CollectionUtils.isEmpty(reportList)) {
             return new PageInfo<>(new ArrayList<>(0));
         }
-        PageInfo<Report> old = new PageInfo<>(reportList);
+        PageInfo<ReportEntity> old = new PageInfo<>(reportList);
         Map<Long, String> errorMsgMap = new HashMap<>(0);
-        for (Report report : reportList) {
+        for (ReportEntity report : reportList) {
             if (report.getConclusion() != null && report.getConclusion() == 0 && report.getFeatures() != null) {
                 JSONObject jsonObject = JSON.parseObject(report.getFeatures());
                 String key = "error_msg";
@@ -196,7 +192,7 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
         }
-        List<CloudReportDTO> list = ReportConverter.INSTANCE.ofReport(reportList);
+        List<CloudReportDTO> list = reportList.stream().map(CloudReportDTO::new).collect(Collectors.toList());
         for (CloudReportDTO dto : list) {
             if (errorMsgMap.containsKey(dto.getId())) {
                 dto.setErrorMsg(errorMsgMap.get(dto.getId()));
@@ -210,7 +206,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ReportDetailOutput getReportByReportId(Long reportId) {
-        ReportResult report = reportDao.selectById(reportId);
+        ReportEntity report = reportDao.selectById(reportId);
         if (report == null) {
             log.warn("获取报告异常，报告数据不存在。报告ID：{}", reportId);
             return null;
@@ -297,7 +293,7 @@ public class ReportServiceImpl implements ReportService {
         long start = System.currentTimeMillis();
         ReportDetailOutput reportDetail = new ReportDetailOutput();
 
-        ReportResult reportResult = reportDao.getTempReportBySceneId(sceneId);
+        ReportEntity reportResult = reportDao.getTempReportBySceneId(sceneId);
         if (reportResult == null) {
             reportDetail.setTaskStatus(ReportConstants.FINISH_STATUS);
             return reportDetail;
@@ -449,7 +445,7 @@ public class ReportServiceImpl implements ReportService {
             stopReasonBean.setDescription(SceneStopReasonEnum.toDesc(pressureNodeStartError.toString()));
             stopReasons.add(stopReasonBean);
             //  持久化
-            ReportResult reportResult = reportDao.selectById(reportId);
+            ReportEntity reportResult = reportDao.selectById(reportId);
             getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG, pressureNodeStartError.toString());
             ReportUpdateParam param = new ReportUpdateParam();
             param.setId(reportId);
@@ -469,7 +465,7 @@ public class ReportServiceImpl implements ReportService {
             engineReasonBean.setDescription(SceneStopReasonEnum.toEngineDesc(errorObj.toString()));
             stopReasons.add(engineReasonBean);
             //  持久化
-            ReportResult reportResult = reportDao.selectById(reportId);
+            ReportEntity reportResult = reportDao.selectById(reportId);
             getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG, errorObj.toString());
             ReportUpdateParam param = new ReportUpdateParam();
             param.setId(reportId);
@@ -511,7 +507,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<BusinessActivityDTO> queryReportActivityBySceneId(Long sceneId) {
-        ReportResult reportResult = reportDao.getReportBySceneId(sceneId);
+        ReportEntity reportResult = reportDao.getReportBySceneId(sceneId);
         if (reportResult != null) {
             return queryReportActivityByReportId(reportResult.getId());
         }
@@ -543,7 +539,7 @@ public class ReportServiceImpl implements ReportService {
         if (CollectionUtils.isEmpty(reportBusinessActivityDetailList)) {
             return resp;
         }
-        ReportResult reportResult = reportDao.selectById(reportId);
+        ReportEntity reportResult = reportDao.selectById(reportId);
         if (Objects.isNull(reportResult)) {
             throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "未查询到报告" + reportId);
         }
@@ -561,7 +557,7 @@ public class ReportServiceImpl implements ReportService {
      */
     private List<ScriptNodeSummaryBean> getScriptNodeSummaryBeans(String nodeTree,
         List<ReportBusinessActivityDetail> details) {
-        Map<String, Map<String, Object>> resultMap = new HashMap<>();
+        Map<String, Map<String, Object>> resultMap = new HashMap<>(details.size());
         if (StringUtils.isNotBlank(nodeTree)) {
             details.stream().filter(Objects::nonNull)
                 .forEach(detail -> {
@@ -608,26 +604,26 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Long queryRunningReport(ContextExt contextExt) {
-        Report report = tReportMapper.selectOneRunningReport(contextExt);
+        ReportEntity report = tReportMapper.selectOneRunningReport(contextExt);
         return report == null ? null : report.getId();
     }
 
     @Override
     public List<Long> queryListRunningReport() {
-        List<Report> report = tReportMapper.selectListRunningReport(CloudPluginUtils.getContext());
-        return CollectionUtils.isEmpty(report) ? new ArrayList<>(0) : report.stream().map(Report::getId).collect(Collectors.toList());
+        List<ReportEntity> report = tReportMapper.selectListRunningReport(CloudPluginUtils.getContext());
+        return CollectionUtils.isEmpty(report) ? new ArrayList<>(0) : report.stream().map(ReportEntity::getId).collect(Collectors.toList());
     }
 
     @Override
     public List<Long> queryListPressuringReport() {
-        List<Report> report = tReportMapper.selectListPressuringReport();
-        return CollectionUtils.isEmpty(report) ? null : report.stream().map(Report::getId).collect(Collectors.toList());
+        List<ReportEntity> report = tReportMapper.selectListPressuringReport();
+        return CollectionUtils.isEmpty(report) ? null : report.stream().map(ReportEntity::getId).collect(Collectors.toList());
     }
 
     @Override
     public Boolean lockReport(Long reportId) {
         log.info("web -> cloud lock reportId【{}】,starting", reportId);
-        ReportResult reportResult = reportDao.selectById(reportId);
+        ReportEntity reportResult = reportDao.selectById(reportId);
         if (checkReportError(reportResult)) {
             return false;
         }
@@ -650,7 +646,7 @@ public class ReportServiceImpl implements ReportService {
         return true;
     }
 
-    private boolean checkReportError(ReportResult reportResult) {
+    private boolean checkReportError(ReportEntity reportResult) {
         // 锁定报告前提也是要有结束时间
         if (reportResult == null) {
             log.error("io.shulie.takin.cloud.biz.service.report.impl.ReportServiceImpl#checkReportError"
@@ -666,7 +662,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Boolean unLockReport(Long reportId) {
-        ReportResult reportResult = reportDao.selectById(reportId);
+        ReportEntity reportResult = reportDao.selectById(reportId);
         if (reportResult.getType() != PressureSceneEnum.DEFAULT.getCode() && ReportConstants.LOCK_STATUS != reportResult.getLock()) {
             log.error("异常代码【{}】,异常内容：解锁报告异常 --> 报告{}非锁定状态，不能解锁",
                 TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId);
@@ -681,7 +677,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean finishReport(Long reportId) {
         log.info("web -> cloud finish reportId【{}】,starting", reportId);
-        ReportResult reportResult = reportDao.selectById(reportId);
+        ReportEntity reportResult = reportDao.selectById(reportId);
         //只有常规模式需要生成报告内容
         if (reportResult.getPressureType() != PressureSceneEnum.DEFAULT.getCode()) {
             reportDao.finishReport(reportId);
@@ -711,10 +707,10 @@ public class ReportServiceImpl implements ReportService {
 
         // 两个地方关闭压测引擎，版本不同，关闭方式不同
         //更新场景 压测引擎停止 ---> 待启动
-        SceneManageResult sceneManage = sceneManageDao.getSceneById(reportResult.getSceneId());
+        SceneManageEntity sceneManage = sceneManageDao.getSceneById(reportResult.getSceneId());
         //如果是强制停止 不需要更新
         log.info("finish scene {}, state :{}", reportResult.getSceneId(), Optional.ofNullable(sceneManage)
-            .map(SceneManageResult::getStatus)
+            .map(SceneManageEntity::getStatus)
             .map(SceneManageStatusEnum::getSceneManageStatusEnum)
             .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
         if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {
@@ -733,7 +729,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public void forceFinishReport(Long reportId) {
         // 更新场景
-        ReportResult reportResult = reportDao.selectById(reportId);
+        ReportEntity reportResult = reportDao.selectById(reportId);
         // 完成报告
         if (reportResult.getStatus() != ReportConstants.FINISH_STATUS) {
             log.info("{}报告触发强制停止", reportId);
@@ -771,34 +767,15 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private Integer getMaxConcurrence(Long sceneId, Long reportId, Long customerId, String transaction) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(" max(active_threads) as maxConcurrenceNum");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, customerId));
-        influxDbSql.append(" where ");
-        influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
-        influxDbSql.append(" order by time desc limit 1");
-        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        String influxDbSql =
+            "select max(active_threads) as maxConcurrenceNum from "
+                + InfluxUtil.getMeasurement(sceneId, reportId, customerId)
+                + " where transaction = '" + transaction + "' order by time desc limit 1";
+        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql, StatReportDTO.class);
         if (Objects.nonNull(statReportDTO)) {
             return statReportDTO.getMaxConcurrenceNum();
         }
         return 0;
-    }
-
-    /**
-     * 巡检报告取值
-     */
-    private StatInspectReportDTO statInspectReport(Long sceneId, Long reportId, Long tenantId, String transaction,
-        String startTime, String endTime) {
-        String influxDbSql = "select"
-            + " sum(count) as totalRequest,mean(avg_tps) as avgTps , sum(sum_rt)/sum(count) as avgRt , mean(success_rate) as avgSuccessRate"
-            + " from "
-            + InfluxUtil.getMeasurement(sceneId, reportId, tenantId)
-            + " where transaction = '" + transaction + "'"
-            + " and time >= '" + startTime + "'"
-            + " and time <= '" + endTime + "' tz('Asia/Shanghai')";
-        return influxWriter.querySingle(influxDbSql, StatInspectReportDTO.class);
     }
 
     /**
@@ -811,7 +788,7 @@ public class ReportServiceImpl implements ReportService {
     private ReportTrendResp queryReportTrend(ReportTrendQueryReq reportTrendQuery, boolean isTempReport) {
         long start = System.currentTimeMillis();
         ReportTrendResp reportTrend = new ReportTrendResp();
-        ReportResult reportResult;
+        ReportEntity reportResult;
         if (isTempReport) {
             reportResult = reportDao.getTempReportBySceneId(reportTrendQuery.getSceneId());
         } else {
@@ -820,9 +797,9 @@ public class ReportServiceImpl implements ReportService {
         if (reportResult == null) {
             return new ReportTrendResp();
         }
-        String testPlanXpathMD5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
-        String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
-            : testPlanXpathMD5;
+        String testPlanXpathMd5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
+        String transaction = StringUtils.isBlank(testPlanXpathMd5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
+            : testPlanXpathMd5;
         if (StringUtils.isNotBlank(reportTrendQuery.getXpathMd5())) {
             transaction = reportTrendQuery.getXpathMd5();
         }
@@ -914,7 +891,7 @@ public class ReportServiceImpl implements ReportService {
     /**
      * 检查场景状态是否超时
      */
-    public boolean checkSceneTaskIsTimeOut(ReportResult reportResult, SceneManageWrapperOutput scene) {
+    public boolean checkSceneTaskIsTimeOut(ReportEntity reportResult, SceneManageWrapperOutput scene) {
         long totalTestTime = scene.getTotalTestTime();
         long runTime = DateUtil.between(reportResult.getStartTime(), new Date(), DateUnit.SECOND);
         if (runTime >= totalTestTime + forceCloseTime) {
@@ -931,23 +908,26 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     @Override
-    public List<Metrices> metric(Long reportId, Long sceneId) {
-        List<Metrices> metricList = Lists.newArrayList();
+    public List<Map<String, Object>> metric(Long reportId, Long sceneId) {
         if (StringUtils.isBlank(String.valueOf(reportId))) {
-            return metricList;
+            return new ArrayList<>();
         }
         try {
             String measurement = InfluxUtil.getMeasurement(sceneId, reportId, CloudPluginUtils.getContext().getTenantId());
-            metricList = influxWriter.query(
-                "select time,avg_tps as avgTps from " + measurement + " where transaction='all'", Metrices.class);
+            return influxWriter.query(
+                    "select time,avg_tps as avgTps from " + measurement + " where transaction='all'", Map.class)
+                .stream().map(t -> new HashMap<String, Object>(2) {{
+                    put("time", t.get("time"));
+                    put("avgTps", t.get("avgTps"));
+                }}).collect(Collectors.toList());
         } catch (Throwable e) {
             log.error("异常代码【{}】,异常内容：获取压测中jmeter上报的数据异常 --> influxdb数据查询异常: {}",
                 TakinCloudExceptionEnum.REPORT_GET_ERROR, e);
+            throw e;
         }
-        return metricList;
     }
 
-    private void getReportFeatures(ReportResult reportResult, String errKey, String errMsg) {
+    private void getReportFeatures(ReportEntity reportResult, String errKey, String errMsg) {
         Map<String, String> map = Maps.newHashMap();
         if (StringUtils.isNotBlank(reportResult.getFeatures())) {
             map = JsonHelper.string2Obj(reportResult.getFeatures(), new TypeReference<Map<String, String>>() {
@@ -957,8 +937,8 @@ public class ReportServiceImpl implements ReportService {
             if (errKey.equals(ReportConstants.SLA_ERROR_MSG) && map.containsKey(ReportConstants.SLA_ERROR_MSG)) {
                 return;
             }
-            if (errMsg.length() > 100){
-                errMsg = errMsg.substring(0,100);
+            if (errMsg.length() > 100) {
+                errMsg = errMsg.substring(0, 100);
             }
             String existsMsg = map.get(errKey);
             if (StringUtils.isBlank(existsMsg)) {
@@ -973,7 +953,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public void updateReportFeatures(Long reportId, Integer status, String errKey, String errMsg) {
-        ReportResult reportResult = reportDao.selectById(reportId);
+        ReportEntity reportResult = reportDao.selectById(reportId);
         // 完成状态
         reportResult.setStatus(status);
         getReportFeatures(reportResult, errKey, errMsg);
@@ -984,7 +964,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public void updateReportConclusion(UpdateReportConclusionInput input) {
-        ReportResult reportResult = reportDao.selectById(input.getId());
+        ReportEntity reportResult = reportDao.selectById(input.getId());
         if (reportResult == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告" + input.getId() + "不存在");
         }
@@ -999,7 +979,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public void updateReportSlaData(UpdateReportSlaDataInput input) {
-        ReportResult reportResult = reportDao.selectById(input.getReportId());
+        ReportEntity reportResult = reportDao.selectById(input.getReportId());
         if (reportResult == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告" + input.getReportId() + "不存在");
         }
@@ -1037,7 +1017,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ReportOutput selectById(Long id) {
-        ReportResult reportResult = reportDao.selectById(id);
+        ReportEntity reportResult = reportDao.selectById(id);
         if (reportResult == null) {
             return null;
         }
@@ -1065,7 +1045,7 @@ public class ReportServiceImpl implements ReportService {
      * @return 基础表数据
      */
     @Override
-    public ReportResult getReportBaseInfo(Long reportId) {
+    public ReportEntity getReportBaseInfo(Long reportId) {
         return reportDao.selectById(reportId);
     }
 
@@ -1075,11 +1055,10 @@ public class ReportServiceImpl implements ReportService {
      * V4.2.2以前版本的客户端，由cloud更新报告、场景状态
      * V4.2.2及以后版本的客户端，由web调用cloud，来更新报告、场景状态
      */
-    //@Transactional(rollbackFor = Exception.class)
     public void modifyReport(TaskResult taskResult) {
         //保存报表状态为生成中
         Long reportId = taskResult.getTaskId();
-        ReportResult reportResult = reportDao.selectById(reportId);
+        ReportEntity reportResult = reportDao.selectById(reportId);
         if (reportResult == null) {
             log.error("not find reportId= {}", reportId);
             return;
@@ -1087,9 +1066,9 @@ public class ReportServiceImpl implements ReportService {
         Boolean updateVersion = true;
         log.info("ReportId={}, tenantId={}, CompareResult={}", reportId, reportResult.getTenantId(), updateVersion);
 
-        String testPlanXpathMD5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
-        String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
-            : testPlanXpathMD5;
+        String testPlanXpathMd5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
+        String transaction = StringUtils.isBlank(testPlanXpathMd5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
+            : testPlanXpathMd5;
         //汇总所有业务活动数据
         StatReportDTO statReport = statReport(taskResult.getSceneId(), reportId, taskResult.getTenantId(), transaction);
         if (statReport == null) {
@@ -1135,13 +1114,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private Date getFinalDateTime(Long sceneId, Long reportId, Long customerId) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(
-            " max(create_time) as time");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, customerId));
-        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        String influxDbSql = "select max(create_time) as time from "
+            + InfluxUtil.getMeasurement(sceneId, reportId, customerId);
+        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql, StatReportDTO.class);
         Date date;
         if (Objects.nonNull(statReportDTO) && StringUtils.isNotBlank(statReportDTO.getTime())) {
             try {
@@ -1166,20 +1141,16 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private StatReportDTO statReport(Long sceneId, Long reportId, Long customerId, String transaction) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(
-            " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps ,sum(sum_rt)/sum"
-                + "(count) as  "
-                + "avgRt, sum(sa_count) as saCount,  max(avg_tps) as maxTps, min(min_rt) as minRt, max(max_rt) as "
-                + "maxRt, count(avg_rt) as recordCount ,max(active_threads) as maxConcurrenceNum,round(mean"
-                + "(active_threads)) as avgConcurrenceNum");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, customerId));
-        influxDbSql.append(" where ");
-        influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
+        String influxDbSql = "select"
+            + " sum(count)              as totalRequest,    sum(fail_count) as failRequest, mean(avg_tps)   as tps,"
+            + " sum(sum_rt)/sum(count)  as avgRt,           sum(sa_count)   as saCount,     max(avg_tps)    as maxTps,"
+            + " min(min_rt)             as minRt,           max(max_rt)     as maxRt,       count(avg_rt)   as recordCount,"
+            + " max(active_threads)         as maxConcurrenceNum,"
+            + " round(mean(active_threads)) as avgConcurrenceNum from "
+            + InfluxUtil.getMeasurement(sceneId, reportId, customerId)
+            + " where  transaction = '" + transaction + "'";
 
-        return influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        return influxWriter.querySingle(influxDbSql, StatReportDTO.class);
     }
 
     /**
@@ -1258,14 +1229,14 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    private boolean isTargetBiggerThanZero(BigDecimal target){
+    private boolean isTargetBiggerThanZero(BigDecimal target) {
         if (Objects.nonNull(target)) {
             return target.compareTo(new BigDecimal(0)) > 0;
         }
         return false;
     }
 
-    private void getRedisInfo(ReportResult reportResult, TaskResult taskResult) {
+    private void getRedisInfo(ReportEntity reportResult, TaskResult taskResult) {
         // 压力节点 启动情况
         String podName = ScheduleConstants.getPressureNodeName(taskResult.getSceneId(), taskResult.getTaskId(),
             taskResult.getTenantId());
@@ -1295,7 +1266,7 @@ public class ReportServiceImpl implements ReportService {
     /**
      * 保存报表结果
      */
-    public void saveReportResult(ReportResult reportResult, TaskResult taskResult, StatReportDTO statReport,
+    public void saveReportResult(ReportEntity reportResult, TaskResult taskResult, StatReportDTO statReport,
         boolean isConclusion) {
         //SLA规则优先
 
@@ -1312,10 +1283,9 @@ public class ReportServiceImpl implements ReportService {
         // 这里 要判断下 压力节点 情况，并记录下来 压力节点 最后一位就是 压力节点 数量 开始时间 结束时间更新
         try {
             getRedisInfo(reportResult, taskResult);
-        }catch (Exception e){
-            log.error("保存报表结果异常，查询redis失败！场景ID:{},报告ID:{}",reportResult.getSceneId(),reportResult.getId());
+        } catch (Exception e) {
+            log.error("保存报表结果异常，查询redis失败！场景ID:{},报告ID:{}", reportResult.getSceneId(), reportResult.getId());
         }
-
 
         String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(),
             reportResult.getTenantId());
@@ -1353,7 +1323,6 @@ public class ReportServiceImpl implements ReportService {
             invoice.setResourceType(AssetTypeEnum.PRESS_REPORT.getCode());
             invoice.setResourceName(AssetTypeEnum.PRESS_REPORT.getName());
             invoice.setOperateId(reportResult.getOperateId());
-            invoice.setOperateName(reportResult.getOperateName());
 
             RealAssectBillExt bill = new RealAssectBillExt();
             bill.setTime(testRunTime);
@@ -1398,7 +1367,7 @@ public class ReportServiceImpl implements ReportService {
         tWarnDetailMapper.insertSelective(warnDetail);
     }
 
-    private boolean isSla(ReportResult reportResult) {
+    private boolean isSla(ReportEntity reportResult) {
         if (StringUtils.isBlank(reportResult.getFeatures())) {
             return false;
         }
@@ -1410,7 +1379,7 @@ public class ReportServiceImpl implements ReportService {
 
     private Map<String, Object> fillReportMap(ReportBusinessActivityDetail detail) {
         if (Objects.nonNull(detail)) {
-            Map<String, Object> resultMap = new HashMap<>();
+            Map<String, Object> resultMap = new HashMap<>(13);
             resultMap.put("avgRt", new DataBean(detail.getRt(), detail.getTargetRt()));
             resultMap.put("sa", new DataBean(detail.getSa(), detail.getTargetSa()));
             resultMap.put("tps", new DataBean(detail.getTps(), detail.getTargetTps()));
@@ -1461,7 +1430,7 @@ public class ReportServiceImpl implements ReportService {
         if (Objects.isNull(detail)) {
             return null;
         }
-        Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>(6);
         if (Objects.nonNull(statReport)) {
             resultMap.put("avgRt", new DataBean(statReport.getAvgRt(), detail.getTargetRt()));
             resultMap.put("sa", new DataBean(statReport.getSa(), detail.getTargetSa()));
@@ -1482,7 +1451,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<ScriptNodeTreeResp> getNodeTree(ScriptNodeTreeQueryReq req) {
-        ReportResult reportResult;
+        ReportEntity reportResult;
         if (Objects.nonNull(req.getReportId())) {
             reportResult = reportDao.selectById(req.getReportId());
         } else {
@@ -1506,9 +1475,9 @@ public class ReportServiceImpl implements ReportService {
             reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
                 .forEach(detail -> {
-                    Map<String, Object> tmpMap = new HashMap<>();
+                    Map<String, Object> tmpMap = new HashMap<>(1);
                     tmpMap.put("businessActivityId", detail.getBusinessActivityId());
-                    Map<String, Map<String, Object>> resultMap = new HashMap<>();
+                    Map<String, Map<String, Object>> resultMap = new HashMap<>(1);
                     resultMap.put(detail.getBindRef(), tmpMap);
                     JsonPathUtil.putNodesToJson(context, resultMap);
                 });

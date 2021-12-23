@@ -30,9 +30,8 @@ import io.shulie.takin.cloud.common.constants.CloudAppConstants;
 import io.shulie.takin.cloud.data.dao.middleware.MiddlewareJarDAO;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.data.result.middleware.MiddlewareJarResult;
+import io.shulie.takin.cloud.data.model.mysql.MiddlewareJarEntity;
 import io.shulie.takin.cloud.biz.service.middleware.MiddlewareJarService;
-import io.shulie.takin.cloud.data.param.middleware.CreateMiddleWareJarParam;
 import io.shulie.takin.cloud.common.pojo.vo.middleware.ImportMiddlewareJarVO;
 import io.shulie.takin.cloud.common.enums.middleware.MiddlewareJarStatusEnum;
 import io.shulie.takin.cloud.common.pojo.vo.middleware.CompareMiddlewareJarVO;
@@ -151,17 +150,17 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
             .map(CompareMiddlewareJarVO::getArtifactId).collect(Collectors.toList());
 
         // 查询数据库
-        List<MiddlewareJarResult> middlewareJarResults = middlewareJarDAO.listByArtifactIds(artifactIds);
+        List<MiddlewareJarEntity> middlewareJarResults = middlewareJarDAO.listByArtifactIds(artifactIds);
         if (middlewareJarResults.isEmpty()) {
             correctList.forEach(result -> result.setStatusDesc(CompareMiddlewareJarStatusEnum.NO.getDesc()));
             return correctList;
         }
 
         // 查出的数据, map 形式
-        Map<String, List<MiddlewareJarResult>> artifactIdAboutResultListMap = middlewareJarResults.stream()
-            .collect(Collectors.groupingBy(MiddlewareJarResult::getArtifactId));
+        Map<String, List<MiddlewareJarEntity>> artifactIdAboutResultListMap = middlewareJarResults.stream()
+            .collect(Collectors.groupingBy(MiddlewareJarEntity::getArtifactId));
 
-        Map<String, List<MiddlewareJarResult>> artifactIdAndGroupIdAboutResultListMap = middlewareJarResults.stream()
+        Map<String, List<MiddlewareJarEntity>> artifactIdAndGroupIdAboutResultListMap = middlewareJarResults.stream()
             .collect(Collectors.groupingBy(middlewareJarResult ->
                 String.format("%s_%s", middlewareJarResult.getArtifactId(), middlewareJarResult.getGroupId())));
 
@@ -171,7 +170,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
         // 遍历比对
         correctList.forEach(compareResult -> {
             // 获得本地记录
-            List<MiddlewareJarResult> localResults;
+            List<MiddlewareJarEntity> localResults;
             String groupId = compareResult.getGroupId();
             if (StrUtil.isBlank(groupId)) {
                 localResults = artifactIdAboutResultListMap.get(compareResult.getArtifactId());
@@ -296,7 +295,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
      * @return 比对结果, 备注
      */
     private RemarksAndStatusDescVO getRemarksAndStatusDesc(CompareMiddlewareJarResultVO compareResult,
-        List<MiddlewareJarResult> localResults) {
+        List<MiddlewareJarEntity> localResults) {
         RemarksAndStatusDescVO vo = new RemarksAndStatusDescVO();
 
         // 没有匹配到本地记录, 未录入
@@ -321,7 +320,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
         vo.setRemarks(remarks);
 
         // 无需支持
-        MiddlewareJarResult noRequiredMatch = localResults.stream().filter(result ->
+        MiddlewareJarEntity noRequiredMatch = localResults.stream().filter(result ->
             this.isNoRequired(result.getStatus())).findFirst().orElse(null);
         if (noRequiredMatch != null) {
             vo.setStatusDesc(CompareMiddlewareJarStatusEnum.NO_REQUIRED.getDesc());
@@ -330,7 +329,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
 
         // 100%匹配的
         String version = compareResult.getVersion();
-        MiddlewareJarResult allMatch = localResults.stream().filter(result -> {
+        MiddlewareJarEntity allMatch = localResults.stream().filter(result -> {
             String resultVersion = result.getVersion();
             return Objects.equals(version, resultVersion);
         }).findFirst().orElse(null);
@@ -343,7 +342,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
         }
 
         // 前两位匹配的
-        MiddlewareJarResult firstTwoMatch = localResults.stream().filter(result -> {
+        MiddlewareJarEntity firstTwoMatch = localResults.stream().filter(result -> {
             String resultVersion = result.getVersion();
             if (StrUtil.isBlank(resultVersion) || StrUtil.isBlank(version)) {
                 return false;
@@ -458,7 +457,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
      */
     private void enduranceData(List<ImportMiddlewareJarVO> importList) {
         // 导入数据库
-        List<CreateMiddleWareJarParam> createParams = importList.stream().map(importVO -> {
+        List<MiddlewareJarEntity> createParams = importList.stream().map(importVO -> {
                 String groupId = importVO.getGroupId();
                 String artifactId = importVO.getArtifactId();
                 String statusDesc = importVO.getStatusDesc();
@@ -487,23 +486,26 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
                     return null;
                 }
 
-                CreateMiddleWareJarParam param = new CreateMiddleWareJarParam();
+                MiddlewareJarEntity param = new MiddlewareJarEntity();
                 BeanUtils.copyProperties(importVO, param);
                 param.setStatus(middlewareJarStatusEnum.getCode());
                 param.setAgv(String.format("%s_%s_%s", artifactId, groupId, version));
                 return param;
             }).filter(Objects::nonNull)
             .collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
-                new TreeSet<>(Comparator.comparing(CreateMiddleWareJarParam::getAgv))), ArrayList::new));
+                new TreeSet<>(Comparator.comparing(MiddlewareJarEntity::getAgv))), ArrayList::new));
 
         if (createParams.isEmpty()) {
             return;
         }
 
         List<String> agvList = createParams.stream()
-            .map(CreateMiddleWareJarParam::getAgv).collect(Collectors.toList());
+            .map(MiddlewareJarEntity::getAgv).collect(Collectors.toList());
         // 先删除, 然后再创建
-        middlewareJarDAO.removeByAgvList(agvList);
+        boolean result = middlewareJarDAO.removeByAgvList(agvList);
+        log.debug("io.shulie.takin.cloud.biz.service.middleware.impl.MiddlewareJarServiceImpl.enduranceData\n"
+            + "middlewareJarDAO.removeByAgvList(agvList)\n"
+            + "result:{}", result);
         this.isImportException(!middlewareJarDAO.saveBatch(createParams), "插入数据库错误!");
     }
 

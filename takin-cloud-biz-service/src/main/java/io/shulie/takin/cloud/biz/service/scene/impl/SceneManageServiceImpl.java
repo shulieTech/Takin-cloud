@@ -35,7 +35,6 @@ import com.pamirs.takin.entity.dao.scene.manage.TSceneBusinessActivityRefMapper;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneScriptRefMapper;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneSlaRefMapper;
-import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneBusinessActivityRef;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneRef;
@@ -82,8 +81,6 @@ import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
 import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.ext.api.AssetExtApi;
 import io.shulie.takin.cloud.ext.api.EngineExtApi;
 import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
@@ -380,7 +377,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
         List<Long> sceneIds = tReportMapper.listReportSceneIds(
                 resultList.stream().map(SceneManageListOutput::getId).collect(Collectors.toList()))
-            .stream().map(Report::getSceneId).distinct().collect(Collectors.toList());
+            .stream().map(ReportEntity::getSceneId).distinct().collect(Collectors.toList());
 
         resultList.forEach(t -> {
             t.setThreadNum(threadNum.get(t.getId()));
@@ -568,7 +565,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             Collectors.joining(","));
         String updateStatus = statusVO.getUpdateEnum().getDesc();
 
-        SceneManageResult sceneManageResult = sceneManageDAO.getSceneById(statusVO.getSceneId());
+        SceneManageEntity sceneManageResult = sceneManageDAO.getSceneById(statusVO.getSceneId());
         if (sceneManageResult == null) {
             log.error("异常代码【{}】,异常内容：更新生命周期失败 --> 找不到对应的场景: {}",
                 TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId());
@@ -623,7 +620,7 @@ public class SceneManageServiceImpl implements SceneManageService {
                 }});
             }
 
-            ReportResult recentlyReport = reportDao.getRecentlyReport(statusVO.getSceneId());
+            ReportEntity recentlyReport = reportDao.getRecentlyReport(statusVO.getSceneId());
             if (!statusVO.getResultId().equals(recentlyReport.getId())) {
                 log.error("更新压测生命周期，所更新的报告不是压测场景的最新报告,场景id:{},更新的报告id:{},当前最新的报告id:{}",
                     statusVO.getSceneId(), statusVO.getResultId(), recentlyReport.getId());
@@ -653,7 +650,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         // 记录失败原因，成功则不记录报告中 报告直接完成
         reportService.updateReportFeatures(reportId, ReportConstants.FINISH_STATUS, ReportConstants.PRESSURE_MSG,
             errorMsg);
-        ReportResult recentlyReport = reportDao.getRecentlyReport(sceneId);
+        ReportEntity recentlyReport = reportDao.getRecentlyReport(sceneId);
         if (!reportId.equals(recentlyReport.getId())) {
             log.error("更新压测生命周期，所更新的报告不是压测场景的最新报告,场景id:{},更新的报告id:{},当前最新的报告id:{}",
                 sceneId, reportId, recentlyReport.getId());
@@ -916,7 +913,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     @Override
     public SceneManageWrapperOutput getSceneManage(Long id, SceneManageQueryOpitons options) {
-        SceneManageResult sceneManageResult = getSceneManage(id);
+        SceneManageEntity sceneManageResult = getSceneManage(id);
         if (options == null) {
             options = new SceneManageQueryOpitons();
         }
@@ -990,11 +987,11 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     }
 
-    private SceneManageResult getSceneManage(Long id) {
+    private SceneManageEntity getSceneManage(Long id) {
         if (id == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "ID不能为空");
         }
-        SceneManageResult result = sceneManageDAO.getSceneById(id);
+        SceneManageEntity result = sceneManageDAO.getSceneById(id);
         if (result == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "场景记录不存在" + id);
         }
@@ -1021,7 +1018,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     }
 
-    private void fillBase(SceneManageWrapperOutput wrapperOutput, SceneManageResult sceneManageResult) {
+    private void fillBase(SceneManageWrapperOutput wrapperOutput, SceneManageEntity sceneManageResult) {
         wrapperOutput.setId(sceneManageResult.getId());
         wrapperOutput.setScriptType(sceneManageResult.getScriptType());
         wrapperOutput.setPressureTestSceneName(sceneManageResult.getSceneName());

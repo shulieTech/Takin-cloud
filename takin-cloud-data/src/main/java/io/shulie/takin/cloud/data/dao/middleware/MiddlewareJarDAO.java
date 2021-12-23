@@ -2,8 +2,7 @@ package io.shulie.takin.cloud.data.dao.middleware;
 
 import java.util.List;
 
-import io.shulie.takin.cloud.data.param.middleware.CreateMiddleWareJarParam;
-import io.shulie.takin.cloud.data.result.middleware.MiddlewareJarResult;
+import io.shulie.takin.cloud.data.model.mysql.MiddlewareJarEntity;
 
 /**
  * 中间件包表(MiddlewareJar)表数据库 dao
@@ -19,7 +18,7 @@ public interface MiddlewareJarDAO {
      * @param createParams 创建参数
      * @return 是否成功
      */
-    boolean saveBatch(List<CreateMiddleWareJarParam> createParams);
+    boolean saveBatch(List<MiddlewareJarEntity> createParams);
 
     /**
      * 通过 avgList 批量删除
@@ -35,7 +34,7 @@ public interface MiddlewareJarDAO {
      * @param artifactIds artifactIds
      * @return 列表
      */
-    List<MiddlewareJarResult> listByArtifactIds(List<String> artifactIds);
+    List<MiddlewareJarEntity> listByArtifactIds(List<String> artifactIds);
 
 }
 

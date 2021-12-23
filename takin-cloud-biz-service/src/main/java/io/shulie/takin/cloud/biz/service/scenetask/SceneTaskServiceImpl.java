@@ -35,7 +35,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
@@ -67,7 +66,6 @@ import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
 import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
 import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
 import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.ext.content.asset.AccountInfoExt;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
@@ -100,7 +98,6 @@ import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartInput;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.constants.SceneStartCheckConstants;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
 import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStopOutput;
@@ -282,14 +279,14 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     @Override
     public void stop(Long sceneId) {
-        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+        SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (sceneManage == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "压测场景不存在");
         }
         if (SceneManageStatusEnum.ifStop(sceneManage.getStatus())) {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "场景状态不为压测中");
         }
-        ReportResult reportResult = reportDao.getReportBySceneId(sceneId);
+        ReportEntity reportResult = reportDao.getReportBySceneId(sceneId);
 
         if (reportResult != null) {
             sceneTaskEventService.callStopEvent(reportResult);
@@ -308,12 +305,12 @@ public class SceneTaskServiceImpl implements SceneTaskService {
      */
     @Override
     public int blotStop(Long sceneId) {
-        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+        SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (sceneManage == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "停止压测失败，场景不存在!");
         }
 
-        ReportResult report = reportDao.getReportBySceneId(sceneId);
+        ReportEntity report = reportDao.getReportBySceneId(sceneId);
         if (report == null) {
             return 1;
         }
@@ -342,7 +339,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     public SceneActionOutput checkSceneTaskStatus(Long sceneId, Long reportId) {
         //为如果传入报告id，以报告id为准
         SceneActionOutput scene = new SceneActionOutput();
-        ReportResult reportResult = null;
+        ReportEntity reportResult = null;
         if (reportId != null) {
             reportResult = reportDao.selectById(reportId);
             //如果报告状态是已结束，查询结果为已结束
@@ -352,7 +349,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 scene.setData(SceneManageStatusEnum.PTING.getValue().longValue());
             }
         } else {
-            SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+            SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);
             if (sceneManage != null) {
                 // 监测启动状态
                 scene.setData(SceneManageStatusEnum.getAdaptStatus(sceneManage.getStatus()).longValue());
@@ -583,7 +580,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         SceneTaskStopOutput r = new SceneTaskStopOutput();
         r.setReportId(reportId);
         try {
-            ReportResult report = reportDao.selectById(reportId);
+            ReportEntity report = reportDao.selectById(reportId);
             if (null == report) {
                 r.addMsg("任务不存在");
                 return r;
@@ -616,7 +613,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     public SceneInspectTaskStopOutput stopInspectTask(Long sceneId) {
         SceneInspectTaskStopOutput output = new SceneInspectTaskStopOutput();
         output.setSceneId(sceneId);
-        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+        SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (!Objects.isNull(sceneManage)) {
             SceneManageStatusEnum statusEnum = SceneManageStatusEnum.getSceneManageStatusEnum(sceneManage.getStatus());
             if (!SceneManageStatusEnum.getWorking().contains(statusEnum)
@@ -727,7 +724,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     @Override
     public SceneJobStateOutput checkSceneJobStatus(Long sceneId) {
         SceneJobStateOutput state = new SceneJobStateOutput();
-        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+        SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (Objects.isNull(sceneManage)) {
             state.setState(SceneManageConstant.SCENE_TASK_JOB_STATUS_NONE);
             state.setMsg("未查询到相应的压测场景");
@@ -736,7 +733,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //获取报告ID
         String reportId = "";
         if (sceneManage.getStatus() >= 1) {
-            Report report = tReportMapper.getReportBySceneId(sceneId);
+            ReportEntity report = tReportMapper.getReportBySceneId(sceneId);
             if (report != null) {
                 reportId = report.getId().toString();
             }
@@ -947,23 +944,23 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     /**
      * 计算子节点的目标值
      *
-     * @param sceneId                场景ID
-     * @param reportId               报告ID
-     * @param scriptNode             目标节点
-     * @param detailList             结果
+     * @param sceneId    场景ID
+     * @param reportId   报告ID
+     * @param scriptNode 目标节点
+     * @param detailList 结果
      */
-    private void fillNonTargetActivityDetail(Long sceneId, Long reportId, ScriptNode scriptNode,List<ReportBusinessActivityDetail> detailList) {
-            ReportBusinessActivityDetail detail = new ReportBusinessActivityDetail();
-            detail.setTargetTps(new BigDecimal(-1));
-            detail.setTargetRt(new BigDecimal(-1));
-            detail.setTargetSa(new BigDecimal(-1));
-            detail.setTargetSuccessRate(new BigDecimal(-1));
-            detail.setSceneId(sceneId);
-            detail.setReportId(reportId);
-            detail.setBusinessActivityId(-1L);
-            detail.setBusinessActivityName(scriptNode.getTestName());
-            detail.setBindRef(scriptNode.getXpathMd5());
-            detailList.add(detail);
+    private void fillNonTargetActivityDetail(Long sceneId, Long reportId, ScriptNode scriptNode, List<ReportBusinessActivityDetail> detailList) {
+        ReportBusinessActivityDetail detail = new ReportBusinessActivityDetail();
+        detail.setTargetTps(new BigDecimal(-1));
+        detail.setTargetRt(new BigDecimal(-1));
+        detail.setTargetSa(new BigDecimal(-1));
+        detail.setTargetSuccessRate(new BigDecimal(-1));
+        detail.setSceneId(sceneId);
+        detail.setReportId(reportId);
+        detail.setBusinessActivityId(-1L);
+        detail.setBusinessActivityName(scriptNode.getTestName());
+        detail.setBindRef(scriptNode.getXpathMd5());
+        detailList.add(detail);
     }
 
     /**
@@ -1030,7 +1027,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                     log.error("释放流量失败！");
                 }
             }
-            ReportResult recentlyReport = reportDao.getRecentlyReport(taskResult.getSceneId());
+            ReportEntity recentlyReport = reportDao.getRecentlyReport(taskResult.getSceneId());
             if (!taskResult.getTaskId().equals(recentlyReport.getId())) {
                 log.error("更新压测生命周期，所更新的报告不是压测场景的最新报告,场景id:{},更新的报告id:{},当前最新的报告id:{}",
                     taskResult.getSceneId(), taskResult.getTaskId(), recentlyReport.getId());
@@ -1267,7 +1264,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
      * 冻结流量
      *
      * @param input     {@link SceneTaskStartInput}
-     * @param report    {@link Report}
+     * @param report    {@link ReportEntity}
      * @param sceneData {@link SceneManageWrapperOutput}
      */
     private void frozenAccountFlow(SceneTaskStartInput input, ReportEntity report, SceneManageWrapperOutput sceneData) {

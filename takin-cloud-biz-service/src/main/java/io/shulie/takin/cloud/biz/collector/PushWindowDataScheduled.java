@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import javax.annotation.Resource;
 
 import cn.hutool.core.date.DateUnit;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import lombok.extern.slf4j.Slf4j;
 
 import cn.hutool.core.date.DateUnit;
@@ -59,7 +60,6 @@ import io.shulie.takin.eventcenter.annotation.IntrestFor;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.bean.collector.Metrics;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.biz.output.statistics.RtDataOutput;
@@ -73,7 +73,6 @@ import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.biz.collector.collector.AbstractIndicators;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
@@ -170,7 +169,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     }
 
     private void delTask(Long sceneId, Long reportId, Long tenantId) {
-        ReportResult reportResult = reportDao.selectById(reportId);
+        ReportEntity reportResult = reportDao.selectById(reportId);
         if (reportResult == null || reportResult.getStatus() == 0) {
             log.info("删除收集数据key时，报告还未生成，sceneId:{},reportId:{}", sceneId, reportId);
             return;
@@ -704,7 +703,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             last,
             showTime(timeWindow), showTime(endTime), showTime(nowTimeWindow));
 
-        ReportResult report = reportDao.selectById(reportId);
+        ReportEntity report = reportDao.selectById(reportId);
         if (null != report && null != report.getEndTime()) {
             endTime = Math.min(endTime, report.getEndTime().getTime());
         }
@@ -752,12 +751,12 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         ReportQueryParam param = new ReportQueryParam();
         param.setStatus(0);
         param.setIsDel(0);
-        List<ReportResult> results = reportDao.queryReportList(param);
+        List<ReportEntity> results = reportDao.queryReportList(param);
         if (CollectionUtils.isEmpty(results)) {
             log.debug("没有需要统计的报告！");
             return;
         }
-        List<Long> reportIds = CommonUtil.getList(results, ReportResult::getId);
+        List<Long> reportIds = CommonUtil.getList(results, ReportEntity::getId);
         log.info("找到需要统计的报告：" + JsonHelper.bean2Json(reportIds));
         results.stream().filter(Objects::nonNull)
             .map(r -> (Runnable)() -> {
@@ -833,7 +832,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
      * @param report     报告信息
      * @return 是/否
      */
-    private boolean ifReportOutOfTime(Long sceneId, Long reportId, Long customerId, ReportResult report) {
+    private boolean ifReportOutOfTime(Long sceneId, Long reportId, Long customerId, ReportEntity report) {
         StringBuilder sql = new StringBuilder();
         sql.append("select * from ")
             .append(InfluxUtil.getMetricsMeasurement(sceneId, reportId, customerId))
@@ -897,7 +896,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                         if (split.length == 3) {
                             customerId = Long.valueOf(split[2]);
                         }
-                        ReportResult reportResult = reportDao.selectById(reportId);
+                        ReportEntity reportResult = reportDao.selectById(reportId);
                         SceneManageEntity sceneManageEntity = sceneManageDAO.queueSceneById(sceneId);
                         if (SceneManageStatusEnum.ifFree(sceneManageEntity.getStatus())) {
                             delTask(sceneId, reportId, customerId);
@@ -1003,10 +1002,10 @@ public class PushWindowDataScheduled extends AbstractIndicators {
 
             log.info("场景[{}]压测任务已完成,将要开始更新报告{}", sceneId, reportId);
             // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
-            SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+            SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);
             //如果是强制停止 不需要更新
             log.info("finish scene {}, state :{}", sceneId, Optional.ofNullable(sceneManage)
-                .map(SceneManageResult::getType)
+                .map(SceneManageEntity::getType)
                 .map(SceneManageStatusEnum::getSceneManageStatusEnum)
                 .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
             if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {

@@ -6,20 +6,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.cloud.data.converter.senemange.SceneManageEntityConverter;
 import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.data.mapper.mysql.SceneManageMapper;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.data.util.MPUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
@@ -59,10 +56,8 @@ public class SceneManageDAOImpl
     }
 
     @Override
-    public SceneManageResult getSceneById(Long id) {
-        SceneManageEntity entity = this.getById(id);
-        if (entity != null) {return BeanUtil.copyProperties(entity, SceneManageResult.class);}
-        return null;
+    public SceneManageEntity getSceneById(Long id) {
+        return this.getById(id);
     }
 
     @Override
@@ -101,7 +96,7 @@ public class SceneManageDAOImpl
         LambdaQueryWrapper<SceneManageEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SceneManageEntity::getSceneName, pressureTestSceneName);
         SceneManageEntity sceneManageEntity = this.getBaseMapper().selectOne(wrapper);
-        return SceneManageEntityConverter.INSTANCE.ofSceneManageEntity(sceneManageEntity);
+        return new SceneManageListResult(sceneManageEntity);
     }
 
     @Override
@@ -117,7 +112,7 @@ public class SceneManageDAOImpl
             wrapper.eq(SceneManageEntity::getId, sceneId);
         }
         SceneManageEntity sceneManageEntities = this.getBaseMapper().selectOne(wrapper);
-        return SceneManageEntityConverter.INSTANCE.ofSceneManageEntity(sceneManageEntities);
+        return new SceneManageListResult(sceneManageEntities);
     }
 
     @Override

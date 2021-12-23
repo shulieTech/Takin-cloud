@@ -3,7 +3,7 @@ package com.pamirs.takin.entity.dao.report;
 import java.util.Date;
 import java.util.List;
 
-import com.pamirs.takin.entity.domain.entity.report.Report;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.common.annotation.DataApartInterceptAnnotation;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
@@ -21,7 +21,7 @@ public interface TReportMapper {
      * @return 压测报告
      */
     @DataApartInterceptAnnotation
-    Report selectOneRunningReport(ContextExt contextExt);
+    ReportEntity selectOneRunningReport(ContextExt contextExt);
 
     /**
      * 查询所有运行中的报告
@@ -29,9 +29,9 @@ public interface TReportMapper {
      * @return 压测报告列表
      */
     @DataApartInterceptAnnotation
-    List<Report> selectListRunningReport(ContextExt contextExt);
+    List<ReportEntity> selectListRunningReport(ContextExt contextExt);
 
-    List<Report> selectListPressuringReport();
+    List<ReportEntity> selectListPressuringReport();
 
     /**
      * 依据主键更新
@@ -40,7 +40,7 @@ public interface TReportMapper {
      * @return 操作结果
      */
     @DataApartInterceptAnnotation
-    int updateByPrimaryKeySelective(Report record);
+    int updateByPrimaryKeySelective(ReportEntity record);
 
     /**
      * 根据主键查询
@@ -48,7 +48,7 @@ public interface TReportMapper {
      * @param id 数据主键
      * @return 报告信息
      */
-    Report selectByPrimaryKey(Long id);
+    ReportEntity selectByPrimaryKey(Long id);
 
     /**
      * 更新报告状态
@@ -73,7 +73,7 @@ public interface TReportMapper {
      * @return -
      */
     @DataApartInterceptAnnotation
-    List<Report> listReport(@Param("param") ReportQueryReq param);
+    List<ReportEntity> listReport(@Param("param") ReportQueryReq param);
 
     /**
      * 获取已经生成报告的场景ID
@@ -81,7 +81,7 @@ public interface TReportMapper {
      * @param sceneIds 场景主键集合
      * @return -
      */
-    List<Report> listReportSceneIds(@Param("sceneIds") List<Long> sceneIds);
+    List<ReportEntity> listReportSceneIds(@Param("sceneIds") List<Long> sceneIds);
 
     /**
      * 根据场景ID获取压测中的报告ID
@@ -89,7 +89,7 @@ public interface TReportMapper {
      * @param sceneId 场景主键
      * @return -
      */
-    Report getReportBySceneId(Long sceneId);
+    ReportEntity getReportBySceneId(Long sceneId);
 
     /**
      * 根据场景ID获取（临时）压测中的报告ID
@@ -97,7 +97,7 @@ public interface TReportMapper {
      * @param sceneId 场景主键
      * @return -
      */
-    Report getTempReportBySceneId(Long sceneId);
+    ReportEntity getTempReportBySceneId(Long sceneId);
 
     int resumeStatus(Long sceneId);
 

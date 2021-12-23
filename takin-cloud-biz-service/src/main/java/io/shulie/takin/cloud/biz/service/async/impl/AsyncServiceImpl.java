@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +30,6 @@ import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
 import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
@@ -155,7 +155,7 @@ public class AsyncServiceImpl implements AsyncService {
     }
 
     private boolean isSceneFinished(Long sceneId) {
-        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+        SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (Objects.isNull(sceneManage) || Objects.isNull(sceneManage.getStatus())) {
             return true;
         }

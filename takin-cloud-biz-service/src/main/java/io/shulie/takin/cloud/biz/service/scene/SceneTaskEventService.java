@@ -22,7 +22,7 @@ import io.shulie.takin.cloud.common.constants.ScheduleEventConstant;
 import io.shulie.takin.cloud.common.enums.scenemanage.TaskStatusEnum;
 import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
 import io.shulie.takin.eventcenter.Event;
@@ -158,7 +158,7 @@ public class SceneTaskEventService {
      *
      * @param reportResult 报告结果
      */
-    public void callStopEvent(ReportResult reportResult) {
+    public void callStopEvent(ReportEntity reportResult) {
         ScheduleStopRequestExt scheduleStopRequest = new ScheduleStopRequestExt();
         scheduleStopRequest.setSceneId(reportResult.getSceneId());
         scheduleStopRequest.setTaskId(reportResult.getId());
