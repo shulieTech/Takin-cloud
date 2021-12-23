@@ -7,7 +7,7 @@ import javax.annotation.Resource;
 import io.shulie.takin.app.Application;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.data.mapper.mysql.MiddlewareJarMapper;
-import io.shulie.takin.cloud.data.param.middleware.CreateMiddleWareJarParam;
+import io.shulie.takin.cloud.data.model.mysql.MiddlewareJarEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,7 +50,7 @@ public class MiddlewareJarServiceTest {
 
     @Test
     public void testInsertBatch() {
-        CreateMiddleWareJarParam param = new CreateMiddleWareJarParam();
+        MiddlewareJarEntity param = new MiddlewareJarEntity();
         param.setStatus(1);
         param.setType("连接池");
         param.setName("druid");
@@ -58,7 +58,7 @@ public class MiddlewareJarServiceTest {
         param.setArtifactId("druid");
         param.setVersion("1.0.6");
 
-        CreateMiddleWareJarParam param2 = new CreateMiddleWareJarParam();
+        MiddlewareJarEntity param2 = new MiddlewareJarEntity();
         param2.setStatus(1);
         param2.setType("连接池");
         param2.setName("druid");

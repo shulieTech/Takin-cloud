@@ -30,9 +30,9 @@ import io.shulie.takin.cloud.common.constants.CloudAppConstants;
 import io.shulie.takin.cloud.data.dao.middleware.MiddlewareJarDAO;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.data.model.mysql.MiddlewareJarEntity;
 import io.shulie.takin.cloud.data.result.middleware.MiddlewareJarResult;
 import io.shulie.takin.cloud.biz.service.middleware.MiddlewareJarService;
-import io.shulie.takin.cloud.data.param.middleware.CreateMiddleWareJarParam;
 import io.shulie.takin.cloud.common.pojo.vo.middleware.ImportMiddlewareJarVO;
 import io.shulie.takin.cloud.common.enums.middleware.MiddlewareJarStatusEnum;
 import io.shulie.takin.cloud.common.pojo.vo.middleware.CompareMiddlewareJarVO;
@@ -458,7 +458,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
      */
     private void enduranceData(List<ImportMiddlewareJarVO> importList) {
         // 导入数据库
-        List<CreateMiddleWareJarParam> createParams = importList.stream().map(importVO -> {
+        List<MiddlewareJarEntity> createParams = importList.stream().map(importVO -> {
                 String groupId = importVO.getGroupId();
                 String artifactId = importVO.getArtifactId();
                 String statusDesc = importVO.getStatusDesc();
@@ -487,23 +487,26 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
                     return null;
                 }
 
-                CreateMiddleWareJarParam param = new CreateMiddleWareJarParam();
+                MiddlewareJarEntity param = new MiddlewareJarEntity();
                 BeanUtils.copyProperties(importVO, param);
                 param.setStatus(middlewareJarStatusEnum.getCode());
                 param.setAgv(String.format("%s_%s_%s", artifactId, groupId, version));
                 return param;
             }).filter(Objects::nonNull)
             .collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
-                new TreeSet<>(Comparator.comparing(CreateMiddleWareJarParam::getAgv))), ArrayList::new));
+                new TreeSet<>(Comparator.comparing(MiddlewareJarEntity::getAgv))), ArrayList::new));
 
         if (createParams.isEmpty()) {
             return;
         }
 
         List<String> agvList = createParams.stream()
-            .map(CreateMiddleWareJarParam::getAgv).collect(Collectors.toList());
+            .map(MiddlewareJarEntity::getAgv).collect(Collectors.toList());
         // 先删除, 然后再创建
-        middlewareJarDAO.removeByAgvList(agvList);
+        boolean result = middlewareJarDAO.removeByAgvList(agvList);
+        log.debug("io.shulie.takin.cloud.biz.service.middleware.impl.MiddlewareJarServiceImpl.enduranceData\n"
+            + "middlewareJarDAO.removeByAgvList(agvList)\n"
+            + "result:{}", result);
         this.isImportException(!middlewareJarDAO.saveBatch(createParams), "插入数据库错误!");
     }
 
