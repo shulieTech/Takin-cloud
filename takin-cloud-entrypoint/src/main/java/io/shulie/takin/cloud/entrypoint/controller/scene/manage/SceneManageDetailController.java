@@ -25,7 +25,7 @@ import io.shulie.takin.cloud.common.constants.DicKeyConstant;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.entrypoint.convert.SceneBusinessActivityRefRespConvertor;
 import io.shulie.takin.cloud.entrypoint.convert.SceneManageRespConvertor;
 import io.shulie.takin.cloud.entrypoint.convert.SceneScriptRefRespConvertor;
@@ -73,7 +73,7 @@ public class SceneManageDetailController {
         @ApiParam(name = "id", value = "ID") Long id,
         @ApiParam(name = "reportId", value = "reportId") Long reportId) {
         if (reportId != null && reportId != 0) {
-            ReportResult reportBaseInfo = reportService.getReportBaseInfo(reportId);
+            ReportEntity reportBaseInfo = reportService.getReportBaseInfo(reportId);
             if (reportBaseInfo != null) {
                 id = reportBaseInfo.getSceneId();
             } else {
@@ -134,8 +134,8 @@ public class SceneManageDetailController {
         //旧版本
         else {
             if (map.containsKey(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL)) {
-                Integer schedualInterval = (Integer)map.get(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL);
-                resp.setScheduleInterval(schedualInterval);
+                Integer scheduleInterval = (Integer)map.get(SceneManageConstant.FEATURES_SCHEDULE_INTERVAL);
+                resp.setScheduleInterval(scheduleInterval);
             }
         }
     }

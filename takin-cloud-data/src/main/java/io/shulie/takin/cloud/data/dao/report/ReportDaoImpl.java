@@ -22,7 +22,6 @@ import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.data.param.report.ReportQueryParam;
 import io.shulie.takin.cloud.data.param.report.ReportInsertParam;
@@ -59,7 +58,7 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public List<ReportResult> queryReportList(ReportQueryParam param) {
+    public List<ReportEntity> queryReportList(ReportQueryParam param) {
         LambdaQueryWrapper<ReportEntity> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(param.getEndTime())) {
             wrapper.le(ReportEntity::getGmtCreate, param.getEndTime());
@@ -72,24 +71,14 @@ public class ReportDaoImpl implements ReportDao {
         }
         List<ReportEntity> entities = reportMapper.selectList(wrapper);
         if (entities != null && entities.size() > 0) {
-            return entities.stream().map(entity -> {
-                ReportResult reportResult = new ReportResult();
-                BeanUtils.copyProperties(entity, reportResult);
-                return reportResult;
-            }).collect(Collectors.toList());
+            return entities;
         }
         return Lists.newArrayList();
     }
 
     @Override
-    public ReportResult selectById(Long id) {
-        ReportEntity entity = reportMapper.selectById(id);
-        if (entity == null) {
-            return null;
-        }
-        ReportResult reportResult = new ReportResult();
-        BeanUtils.copyProperties(entity, reportResult);
-        return reportResult;
+    public ReportEntity selectById(Long id) {
+        return reportMapper.selectById(id);
     }
 
     /**
@@ -99,16 +88,14 @@ public class ReportDaoImpl implements ReportDao {
      * @return -
      */
     @Override
-    public ReportResult getRecentlyReport(Long sceneId) {
+    public ReportEntity getRecentlyReport(Long sceneId) {
         LambdaQueryWrapper<ReportEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ReportEntity::getSceneId, sceneId);
         wrapper.orderByDesc(ReportEntity::getId);
         wrapper.last("limit 1");
         List<ReportEntity> entities = reportMapper.selectList(wrapper);
         if (entities != null && entities.size() > 0) {
-            ReportResult reportResult = new ReportResult();
-            BeanUtils.copyProperties(entities.get(0), reportResult);
-            return reportResult;
+            return entities.get(0);
         }
         return null;
     }
@@ -149,7 +136,7 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public ReportResult getTempReportBySceneId(Long sceneId) {
+    public ReportEntity getTempReportBySceneId(Long sceneId) {
         LambdaQueryWrapper<ReportEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ReportEntity::getSceneId, sceneId);
         wrapper.eq(ReportEntity::getIsDeleted, 0);
@@ -157,15 +144,13 @@ public class ReportDaoImpl implements ReportDao {
         wrapper.last("limit 1");
         List<ReportEntity> entities = reportMapper.selectList(wrapper);
         if (entities != null && entities.size() > 0) {
-            ReportResult reportResult = new ReportResult();
-            BeanUtils.copyProperties(entities.get(0), reportResult);
-            return reportResult;
+            return entities.get(0);
         }
         return null;
     }
 
     @Override
-    public ReportResult getReportBySceneId(Long sceneId) {
+    public ReportEntity getReportBySceneId(Long sceneId) {
         LambdaQueryWrapper<ReportEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ReportEntity::getSceneId, sceneId);
         // 根据状态
@@ -175,9 +160,7 @@ public class ReportDaoImpl implements ReportDao {
         wrapper.last("limit 1");
         List<ReportEntity> entities = reportMapper.selectList(wrapper);
         if (entities != null && entities.size() > 0) {
-            ReportResult reportResult = new ReportResult();
-            BeanUtils.copyProperties(entities.get(0), reportResult);
-            return reportResult;
+            return entities.get(0);
         }
         return null;
     }
@@ -215,14 +198,9 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public ReportResult getById(Long resultId) {
-        if (resultId == null) {
-            return null;
-        }
-        ReportEntity reportEntity = reportMapper.selectById(resultId);
-        ReportResult reportResult = new ReportResult();
-        BeanUtils.copyProperties(reportEntity, reportResult);
-        return reportResult;
+    public ReportEntity getById(Long resultId) {
+        if (resultId == null) {return null;}
+        return reportMapper.selectById(resultId);
     }
 
     @Override

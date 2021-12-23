@@ -67,7 +67,6 @@ import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
 import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
 import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
 import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.ext.content.asset.AccountInfoExt;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
@@ -289,7 +288,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         if (SceneManageStatusEnum.ifStop(sceneManage.getStatus())) {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "场景状态不为压测中");
         }
-        ReportResult reportResult = reportDao.getReportBySceneId(sceneId);
+        ReportEntity reportResult = reportDao.getReportBySceneId(sceneId);
 
         if (reportResult != null) {
             sceneTaskEventService.callStopEvent(reportResult);
@@ -313,7 +312,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "停止压测失败，场景不存在!");
         }
 
-        ReportResult report = reportDao.getReportBySceneId(sceneId);
+        ReportEntity report = reportDao.getReportBySceneId(sceneId);
         if (report == null) {
             return 1;
         }
@@ -342,7 +341,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     public SceneActionOutput checkSceneTaskStatus(Long sceneId, Long reportId) {
         //为如果传入报告id，以报告id为准
         SceneActionOutput scene = new SceneActionOutput();
-        ReportResult reportResult = null;
+        ReportEntity reportResult = null;
         if (reportId != null) {
             reportResult = reportDao.selectById(reportId);
             //如果报告状态是已结束，查询结果为已结束
@@ -583,7 +582,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         SceneTaskStopOutput r = new SceneTaskStopOutput();
         r.setReportId(reportId);
         try {
-            ReportResult report = reportDao.selectById(reportId);
+            ReportEntity report = reportDao.selectById(reportId);
             if (null == report) {
                 r.addMsg("任务不存在");
                 return r;
@@ -1030,7 +1029,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                     log.error("释放流量失败！");
                 }
             }
-            ReportResult recentlyReport = reportDao.getRecentlyReport(taskResult.getSceneId());
+            ReportEntity recentlyReport = reportDao.getRecentlyReport(taskResult.getSceneId());
             if (!taskResult.getTaskId().equals(recentlyReport.getId())) {
                 log.error("更新压测生命周期，所更新的报告不是压测场景的最新报告,场景id:{},更新的报告id:{},当前最新的报告id:{}",
                     taskResult.getSceneId(), taskResult.getTaskId(), recentlyReport.getId());

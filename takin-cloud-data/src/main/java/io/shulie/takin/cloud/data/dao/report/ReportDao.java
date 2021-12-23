@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import io.shulie.takin.ext.content.enums.NodeTypeEnum;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.param.report.ReportQueryParam;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import io.shulie.takin.cloud.data.param.report.ReportInsertParam;
@@ -16,7 +16,12 @@ import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity
  * @date 2020/12/17 3:30 下午
  */
 public interface ReportDao {
-
+    /**
+     * 插入
+     *
+     * @param param 数据项
+     * @return 插入结果
+     */
     int insert(ReportInsertParam param);
 
     /**
@@ -25,7 +30,7 @@ public interface ReportDao {
      * @param param -
      * @return -
      */
-    List<ReportResult> queryReportList(ReportQueryParam param);
+    List<ReportEntity> queryReportList(ReportQueryParam param);
 
     /**
      * 获取报告
@@ -33,7 +38,7 @@ public interface ReportDao {
      * @param id 报告主键
      * @return -
      */
-    ReportResult selectById(Long id);
+    ReportEntity selectById(Long id);
 
     /**
      * 获取当前场景最新一条报告
@@ -41,7 +46,7 @@ public interface ReportDao {
      * @param sceneId 场景主键
      * @return -
      */
-    ReportResult getRecentlyReport(Long sceneId);
+    ReportEntity getRecentlyReport(Long sceneId);
 
     /**
      * 更新通过是否通过
@@ -78,7 +83,7 @@ public interface ReportDao {
      * @param sceneId 场景主键
      * @return -
      */
-    ReportResult getTempReportBySceneId(Long sceneId);
+    ReportEntity getTempReportBySceneId(Long sceneId);
 
     /**
      * 根据场景ID获取压测中的报告ID
@@ -86,7 +91,7 @@ public interface ReportDao {
      * @param sceneId 场景主键
      * @return -
      */
-    ReportResult getReportBySceneId(Long sceneId);
+    ReportEntity getReportBySceneId(Long sceneId);
 
     /**
      * 根据场景主键设置压测报告状态
@@ -99,10 +104,11 @@ public interface ReportDao {
 
     /**
      * 更新报告开始时间
-     * @param reportId 报告主键
+     *
+     * @param reportId  报告主键
      * @param startTime 开始时间
      */
-    void updateReportStartTime(Long reportId,Date startTime);
+    void updateReportStartTime(Long reportId, Date startTime);
 
     /**
      * 更新报告结束时间
@@ -118,7 +124,7 @@ public interface ReportDao {
      * @param resultId 报告主键
      * @return 报告详情
      */
-    ReportResult getById(Long resultId);
+    ReportEntity getById(Long resultId);
 
     /**
      * 查询报告关联的节点信息

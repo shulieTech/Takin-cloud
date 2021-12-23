@@ -82,7 +82,6 @@ import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
 import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.ext.api.AssetExtApi;
 import io.shulie.takin.cloud.ext.api.EngineExtApi;
@@ -623,7 +622,7 @@ public class SceneManageServiceImpl implements SceneManageService {
                 }});
             }
 
-            ReportResult recentlyReport = reportDao.getRecentlyReport(statusVO.getSceneId());
+            ReportEntity recentlyReport = reportDao.getRecentlyReport(statusVO.getSceneId());
             if (!statusVO.getResultId().equals(recentlyReport.getId())) {
                 log.error("更新压测生命周期，所更新的报告不是压测场景的最新报告,场景id:{},更新的报告id:{},当前最新的报告id:{}",
                     statusVO.getSceneId(), statusVO.getResultId(), recentlyReport.getId());
@@ -653,7 +652,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         // 记录失败原因，成功则不记录报告中 报告直接完成
         reportService.updateReportFeatures(reportId, ReportConstants.FINISH_STATUS, ReportConstants.PRESSURE_MSG,
             errorMsg);
-        ReportResult recentlyReport = reportDao.getRecentlyReport(sceneId);
+        ReportEntity recentlyReport = reportDao.getRecentlyReport(sceneId);
         if (!reportId.equals(recentlyReport.getId())) {
             log.error("更新压测生命周期，所更新的报告不是压测场景的最新报告,场景id:{},更新的报告id:{},当前最新的报告id:{}",
                 sceneId, reportId, recentlyReport.getId());
