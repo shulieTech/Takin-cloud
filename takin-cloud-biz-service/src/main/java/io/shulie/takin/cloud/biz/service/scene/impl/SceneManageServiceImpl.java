@@ -35,7 +35,6 @@ import com.pamirs.takin.entity.dao.scene.manage.TSceneBusinessActivityRefMapper;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneScriptRefMapper;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneSlaRefMapper;
-import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneBusinessActivityRef;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneRef;
@@ -378,7 +377,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
         List<Long> sceneIds = tReportMapper.listReportSceneIds(
                 resultList.stream().map(SceneManageListOutput::getId).collect(Collectors.toList()))
-            .stream().map(Report::getSceneId).distinct().collect(Collectors.toList());
+            .stream().map(ReportEntity::getSceneId).distinct().collect(Collectors.toList());
 
         resultList.forEach(t -> {
             t.setThreadNum(threadNum.get(t.getId()));

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <!--suppress ALL -->
 <mapper namespace="com.pamirs.takin.entity.dao.report.TReportMapper">
-    <resultMap id="BaseResultMap" type="com.pamirs.takin.entity.domain.entity.report.Report">
+    <resultMap id="BaseResultMap" type="io.shulie.takin.cloud.data.model.mysql.ReportEntity">
         <!--@mbg.generated-->
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="scene_id" jdbcType="BIGINT" property="sceneId"/>
@@ -140,7 +140,7 @@
         group by scene_id
     </select>
 
-    <select id="getReportBySceneId" resultType="com.pamirs.takin.entity.domain.entity.report.Report">
+    <select id="getReportBySceneId" resultType="io.shulie.takin.cloud.data.model.mysql.ReportEntity">
         select id,
                scene_id,
                scene_name,
@@ -158,7 +158,7 @@
         limit 1
     </select>
 
-    <select id="getTempReportBySceneId" resultType="com.pamirs.takin.entity.domain.entity.report.Report">
+    <select id="getTempReportBySceneId" resultType="io.shulie.takin.cloud.data.model.mysql.ReportEntity">
         select id,
                scene_id,
                scene_name,
@@ -178,7 +178,7 @@
         limit 1
     </select>
 
-    <update id="updateByPrimaryKeySelective" parameterType="com.pamirs.takin.entity.domain.entity.report.Report">
+    <update id="updateByPrimaryKeySelective" parameterType="io.shulie.takin.cloud.data.model.mysql.ReportEntity">
         <!--@mbg.generated-->
         update t_report
         <set>

@@ -8,9 +8,7 @@ import org.mapstruct.factory.Mappers;
 
 import cn.hutool.core.date.DateUtil;
 
-import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
-import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
 import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
 import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
 import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
@@ -39,14 +37,6 @@ public interface ReportConverter {
      */
     @Mapping(target = "startTime", expression = "java(DateUtil.formatDateTime(report.getStartTime()))")
     ReportDetailOutput ofReportDetail(ReportEntity report);
-
-    /**
-     * Report Converter ReportDTO
-     *
-     * @param report -
-     * @return -
-     */
-    List<CloudReportDTO> ofReport(List<Report> report);
 
     /**
      * WarnBO Converter WarnBean

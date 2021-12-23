@@ -46,14 +46,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
 import com.pamirs.takin.entity.domain.dto.report.StatReportDTO;
 import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
 import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
 import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
 import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
-import com.pamirs.takin.entity.domain.dto.report.StatInspectReportDTO;
 import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
 import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
 
@@ -179,13 +177,13 @@ public class ReportServiceImpl implements ReportService {
         }
         param.setEnvCode(CloudPluginUtils.getContext().getEnvCode());
         param.setTenantId(CloudPluginUtils.getContext().getTenantId());
-        List<Report> reportList = tReportMapper.listReport(param);
+        List<ReportEntity> reportList = tReportMapper.listReport(param);
         if (CollectionUtils.isEmpty(reportList)) {
             return new PageInfo<>(new ArrayList<>(0));
         }
-        PageInfo<Report> old = new PageInfo<>(reportList);
+        PageInfo<ReportEntity> old = new PageInfo<>(reportList);
         Map<Long, String> errorMsgMap = new HashMap<>(0);
-        for (Report report : reportList) {
+        for (ReportEntity report : reportList) {
             if (report.getConclusion() != null && report.getConclusion() == 0 && report.getFeatures() != null) {
                 JSONObject jsonObject = JSON.parseObject(report.getFeatures());
                 String key = "error_msg";
@@ -194,7 +192,7 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
         }
-        List<CloudReportDTO> list = ReportConverter.INSTANCE.ofReport(reportList);
+        List<CloudReportDTO> list = reportList.stream().map(CloudReportDTO::new).collect(Collectors.toList());
         for (CloudReportDTO dto : list) {
             if (errorMsgMap.containsKey(dto.getId())) {
                 dto.setErrorMsg(errorMsgMap.get(dto.getId()));
@@ -606,20 +604,20 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Long queryRunningReport(ContextExt contextExt) {
-        Report report = tReportMapper.selectOneRunningReport(contextExt);
+        ReportEntity report = tReportMapper.selectOneRunningReport(contextExt);
         return report == null ? null : report.getId();
     }
 
     @Override
     public List<Long> queryListRunningReport() {
-        List<Report> report = tReportMapper.selectListRunningReport(CloudPluginUtils.getContext());
-        return CollectionUtils.isEmpty(report) ? new ArrayList<>(0) : report.stream().map(Report::getId).collect(Collectors.toList());
+        List<ReportEntity> report = tReportMapper.selectListRunningReport(CloudPluginUtils.getContext());
+        return CollectionUtils.isEmpty(report) ? new ArrayList<>(0) : report.stream().map(ReportEntity::getId).collect(Collectors.toList());
     }
 
     @Override
     public List<Long> queryListPressuringReport() {
-        List<Report> report = tReportMapper.selectListPressuringReport();
-        return CollectionUtils.isEmpty(report) ? null : report.stream().map(Report::getId).collect(Collectors.toList());
+        List<ReportEntity> report = tReportMapper.selectListPressuringReport();
+        return CollectionUtils.isEmpty(report) ? null : report.stream().map(ReportEntity::getId).collect(Collectors.toList());
     }
 
     @Override
@@ -778,21 +776,6 @@ public class ReportServiceImpl implements ReportService {
             return statReportDTO.getMaxConcurrenceNum();
         }
         return 0;
-    }
-
-    /**
-     * 巡检报告取值
-     */
-    private StatInspectReportDTO statInspectReport(Long sceneId, Long reportId, Long tenantId, String transaction,
-        String startTime, String endTime) {
-        String influxDbSql = "select"
-            + " sum(count) as totalRequest,mean(avg_tps) as avgTps , sum(sum_rt)/sum(count) as avgRt , mean(success_rate) as avgSuccessRate"
-            + " from "
-            + InfluxUtil.getMeasurement(sceneId, reportId, tenantId)
-            + " where transaction = '" + transaction + "'"
-            + " and time >= '" + startTime + "'"
-            + " and time <= '" + endTime + "' tz('Asia/Shanghai')";
-        return influxWriter.querySingle(influxDbSql, StatInspectReportDTO.class);
     }
 
     /**

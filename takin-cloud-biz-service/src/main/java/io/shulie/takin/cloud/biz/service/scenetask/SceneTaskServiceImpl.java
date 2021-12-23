@@ -35,7 +35,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
@@ -734,7 +733,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //获取报告ID
         String reportId = "";
         if (sceneManage.getStatus() >= 1) {
-            Report report = tReportMapper.getReportBySceneId(sceneId);
+            ReportEntity report = tReportMapper.getReportBySceneId(sceneId);
             if (report != null) {
                 reportId = report.getId().toString();
             }
@@ -1265,7 +1264,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
      * 冻结流量
      *
      * @param input     {@link SceneTaskStartInput}
-     * @param report    {@link Report}
+     * @param report    {@link ReportEntity}
      * @param sceneData {@link SceneManageWrapperOutput}
      */
     private void frozenAccountFlow(SceneTaskStartInput input, ReportEntity report, SceneManageWrapperOutput sceneData) {

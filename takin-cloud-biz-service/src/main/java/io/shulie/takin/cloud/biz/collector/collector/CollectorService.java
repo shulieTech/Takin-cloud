@@ -7,7 +7,6 @@ import javax.annotation.Resource;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.domain.entity.report.Report;
 import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
 import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
@@ -33,6 +32,7 @@ import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
 import io.shulie.takin.utils.json.JsonHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -114,7 +114,6 @@ public class CollectorService extends AbstractIndicators {
             .map(metrics -> InfluxUtil.toPoint(measurement, metrics.getTimestamp(), metrics))
             .forEach(influxWriter::insert);
     }
-
 
     /**
      * 记录时间
@@ -214,12 +213,12 @@ public class CollectorService extends AbstractIndicators {
                         cacheTryRunTaskStatus(sceneId, reportId, tenantId, SceneRunTaskStatusEnum.RUNNING);
                     }
                     //如果从cloud上传请求流量明细，则需要启动异步线程去读取ptl文件上传
-                    if (PressureLogUploadConstants.UPLOAD_BY_CLOUD.equals(appConfig.getEngineLogUploadModel())){
-                        log.info("开始异步上传ptl日志，场景ID：{},报告ID:{},PodNum:{}", sceneId, reportId,metric.getPodNo());
+                    if (PressureLogUploadConstants.UPLOAD_BY_CLOUD.equals(appConfig.getEngineLogUploadModel())) {
+                        log.info("开始异步上传ptl日志，场景ID：{},报告ID:{},PodNum:{}", sceneId, reportId, metric.getPodNo());
                         EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
                         String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_PTL_FILE_NAME_SYSTEM_PROP_KEY);
                         THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, tenantId, logUploadDAO, redisClientUtils,
-                            pushLogService, sceneManageDAO, ptlDir, fileName,engineCallExtApi) {});
+                            pushLogService, sceneManageDAO, ptlDir, fileName, engineCallExtApi) {});
                     }
                 }
                 if (isLast) {
@@ -254,9 +253,10 @@ public class CollectorService extends AbstractIndicators {
         }
 
     }
+
     private void cacheTryRunTaskStatus(Long sceneId, Long reportId, Long customerId, SceneRunTaskStatusEnum status) {
         taskStatusCache.cacheStatus(sceneId, reportId, status);
-        Report report = tReportMapper.selectByPrimaryKey(reportId);
+        ReportEntity report = tReportMapper.selectByPrimaryKey(reportId);
         if (Objects.nonNull(report) && report.getPressureType() != PressureSceneEnum.FLOW_DEBUG.getCode()
             && report.getPressureType() != PressureSceneEnum.INSPECTION_MODE.getCode()
             && status.getCode() == SceneRunTaskStatusEnum.RUNNING.getCode()) {
@@ -264,9 +264,9 @@ public class CollectorService extends AbstractIndicators {
         }
     }
 
-    private void notifyStart(Long sceneId, Long reportId, long startTime){
+    private void notifyStart(Long sceneId, Long reportId, long startTime) {
         log.info("场景[{}]压测任务开始，更新报告[{}]开始时间[{}]", sceneId, reportId, startTime);
-        reportDao.updateReportStartTime(reportId,new Date(startTime));
+        reportDao.updateReportStartTime(reportId, new Date(startTime));
     }
 
     private void notifyEnd(Long sceneId, Long reportId, long endTime) {
