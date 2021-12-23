@@ -99,7 +99,6 @@ import io.shulie.takin.cloud.data.model.mysql.SceneBigFileSliceEntity;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartInput;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.constants.SceneStartCheckConstants;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
 import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStopOutput;
@@ -281,7 +280,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     @Override
     public void stop(Long sceneId) {
-        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+        SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (sceneManage == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "压测场景不存在");
         }
@@ -307,7 +306,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
      */
     @Override
     public int blotStop(Long sceneId) {
-        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+        SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (sceneManage == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "停止压测失败，场景不存在!");
         }
@@ -351,7 +350,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 scene.setData(SceneManageStatusEnum.PTING.getValue().longValue());
             }
         } else {
-            SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+            SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);
             if (sceneManage != null) {
                 // 监测启动状态
                 scene.setData(SceneManageStatusEnum.getAdaptStatus(sceneManage.getStatus()).longValue());
@@ -615,7 +614,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     public SceneInspectTaskStopOutput stopInspectTask(Long sceneId) {
         SceneInspectTaskStopOutput output = new SceneInspectTaskStopOutput();
         output.setSceneId(sceneId);
-        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+        SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (!Objects.isNull(sceneManage)) {
             SceneManageStatusEnum statusEnum = SceneManageStatusEnum.getSceneManageStatusEnum(sceneManage.getStatus());
             if (!SceneManageStatusEnum.getWorking().contains(statusEnum)
@@ -726,7 +725,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     @Override
     public SceneJobStateOutput checkSceneJobStatus(Long sceneId) {
         SceneJobStateOutput state = new SceneJobStateOutput();
-        SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+        SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (Objects.isNull(sceneManage)) {
             state.setState(SceneManageConstant.SCENE_TASK_JOB_STATUS_NONE);
             state.setMsg("未查询到相应的压测场景");
@@ -946,23 +945,23 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     /**
      * 计算子节点的目标值
      *
-     * @param sceneId                场景ID
-     * @param reportId               报告ID
-     * @param scriptNode             目标节点
-     * @param detailList             结果
+     * @param sceneId    场景ID
+     * @param reportId   报告ID
+     * @param scriptNode 目标节点
+     * @param detailList 结果
      */
-    private void fillNonTargetActivityDetail(Long sceneId, Long reportId, ScriptNode scriptNode,List<ReportBusinessActivityDetail> detailList) {
-            ReportBusinessActivityDetail detail = new ReportBusinessActivityDetail();
-            detail.setTargetTps(new BigDecimal(-1));
-            detail.setTargetRt(new BigDecimal(-1));
-            detail.setTargetSa(new BigDecimal(-1));
-            detail.setTargetSuccessRate(new BigDecimal(-1));
-            detail.setSceneId(sceneId);
-            detail.setReportId(reportId);
-            detail.setBusinessActivityId(-1L);
-            detail.setBusinessActivityName(scriptNode.getTestName());
-            detail.setBindRef(scriptNode.getXpathMd5());
-            detailList.add(detail);
+    private void fillNonTargetActivityDetail(Long sceneId, Long reportId, ScriptNode scriptNode, List<ReportBusinessActivityDetail> detailList) {
+        ReportBusinessActivityDetail detail = new ReportBusinessActivityDetail();
+        detail.setTargetTps(new BigDecimal(-1));
+        detail.setTargetRt(new BigDecimal(-1));
+        detail.setTargetSa(new BigDecimal(-1));
+        detail.setTargetSuccessRate(new BigDecimal(-1));
+        detail.setSceneId(sceneId);
+        detail.setReportId(reportId);
+        detail.setBusinessActivityId(-1L);
+        detail.setBusinessActivityName(scriptNode.getTestName());
+        detail.setBindRef(scriptNode.getXpathMd5());
+        detailList.add(detail);
     }
 
     /**
