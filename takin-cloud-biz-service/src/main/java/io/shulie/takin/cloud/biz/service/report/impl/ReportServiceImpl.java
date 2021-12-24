@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import io.shulie.takin.cloud.sdk.model.common.SlaBean;
-import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
 import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSON;
@@ -42,7 +40,6 @@ import org.apache.commons.collections4.MapUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
@@ -64,6 +61,7 @@ import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
+import io.shulie.takin.cloud.sdk.model.common.SlaBean;
 import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.common.utils.TestTimeUtil;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
@@ -81,6 +79,7 @@ import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.cloud.biz.output.report.ReportOutput;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.sdk.model.common.DistributeBean;
+import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
 import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.biz.cloudserver.ReportConverter;
@@ -118,7 +117,7 @@ import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivitySummaryBean;
 
 /**
  * @author 莫问
@@ -820,9 +819,9 @@ public class ReportServiceImpl implements ReportService {
         if (reportResult == null) {
             return new ReportTrendResp();
         }
-        String testPlanXpathMD5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
-        String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
-            : testPlanXpathMD5;
+        String testPlanXpathMd5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
+        String transaction = StringUtils.isBlank(testPlanXpathMd5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
+            : testPlanXpathMd5;
         if (StringUtils.isNotBlank(reportTrendQuery.getXpathMd5())) {
             transaction = reportTrendQuery.getXpathMd5();
         }
@@ -1087,9 +1086,9 @@ public class ReportServiceImpl implements ReportService {
         Boolean updateVersion = true;
         log.info("ReportId={}, tenantId={}, CompareResult={}", reportId, reportResult.getTenantId(), updateVersion);
 
-        String testPlanXpathMD5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
-        String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
-            : testPlanXpathMD5;
+        String testPlanXpathMd5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
+        String transaction = StringUtils.isBlank(testPlanXpathMd5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
+            : testPlanXpathMd5;
         //汇总所有业务活动数据
         StatReportDTO statReport = statReport(taskResult.getSceneId(), reportId, taskResult.getTenantId(), transaction);
         if (statReport == null) {
