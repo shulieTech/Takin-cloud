@@ -2,6 +2,9 @@ package io.shulie.takin.cloud.biz.cloudserver;
 
 import java.util.List;
 
+import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
+import io.shulie.takin.cloud.sdk.model.common.WarnBean;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportDetailResp;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -11,12 +14,9 @@ import cn.hutool.core.date.DateUtil;
 import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
 import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
 import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
-import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
 
 import io.shulie.takin.cloud.common.utils.TestTimeUtil;
 import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
-import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
-import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
 
 /**
@@ -36,7 +36,7 @@ public interface ReportConverter {
      * @return -
      */
     @Mapping(target = "startTime", expression = "java(DateUtil.formatDateTime(report.getStartTime()))")
-    ReportDetailOutput ofReportDetail(ReportEntity report);
+    ReportDetailResp ofReportDetail(ReportEntity report);
 
     /**
      * WarnBO Converter WarnBean
@@ -55,10 +55,10 @@ public interface ReportConverter {
     List<WarnDetailOutput> ofWarnDetail(List<WarnDetail> warnDetail);
 
     /**
-     * ReportBusinessActivityDetail Converter BusinessActivityDTO
+     * io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity Converter BusinessActivityDTO
      *
      * @param data -
      * @return -
      */
-    List<BusinessActivityDTO> ofBusinessActivity(List<ReportBusinessActivityDetail> data);
+    List<BusinessActivityDTO> ofBusinessActivity(List<ReportBusinessActivityDetailEntity> data);
 }

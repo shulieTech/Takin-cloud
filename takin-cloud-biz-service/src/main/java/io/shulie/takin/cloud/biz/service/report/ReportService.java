@@ -9,7 +9,6 @@ import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
-import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.biz.output.report.ReportOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
 import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
@@ -19,6 +18,7 @@ import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportDetailResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
 
@@ -41,7 +41,7 @@ public interface ReportService {
      * @param reportId 报告主键
      * @return -
      */
-    ReportDetailOutput getReportByReportId(Long reportId);
+    ReportDetailResp getReportByReportId(Long reportId);
 
     /**
      * 报告链路趋势
@@ -57,7 +57,7 @@ public interface ReportService {
      * @param sceneId 场景主键
      * @return -
      */
-    ReportDetailOutput tempReportDetail(Long sceneId);
+    ReportDetailResp tempReportDetail(Long sceneId);
 
     /**
      * 实况链路趋势

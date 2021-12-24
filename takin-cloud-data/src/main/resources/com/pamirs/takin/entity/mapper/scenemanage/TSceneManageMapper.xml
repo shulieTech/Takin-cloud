@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper">
-    <resultMap id="BaseResultMap" type="com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage">
+    <resultMap id="BaseResultMap" type="io.shulie.takin.cloud.data.model.mysql.SceneManageEntity">
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="customer_id" property="tenantId" jdbcType="BIGINT"/>
-        <result column="deptId" property="deptId" jdbcType="BIGINT"/>
         <result column="user_id" property="userId" jdbcType="BIGINT"/>
         <result column="scene_name" property="sceneName" jdbcType="VARCHAR"/>
         <result column="status" property="status" jdbcType="TINYINT"/>
@@ -38,7 +37,7 @@
     </select>
 
     <update id="updateByPrimaryKeySelective"
-            parameterType="com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage">
+            parameterType="io.shulie.takin.cloud.data.model.mysql.SceneManageEntity">
         update t_scene_manage
         <set>
             <if test="tenantId != null">

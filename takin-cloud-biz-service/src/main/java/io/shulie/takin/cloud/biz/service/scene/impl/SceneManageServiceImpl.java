@@ -36,7 +36,6 @@ import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneScriptRefMapper;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneSlaRefMapper;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneBusinessActivityRef;
-import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneRef;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneSlaRef;
@@ -46,12 +45,10 @@ import io.shulie.takin.cloud.biz.input.scenemanage.SceneBusinessActivityRefInput
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageQueryInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneScriptRefInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneBusinessActivityRefOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneScriptRefOutput;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneSlaRefOutput;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.utils.FileTypeBusinessUtil;
@@ -88,6 +85,7 @@ import io.shulie.takin.cloud.ext.content.script.ScriptVerityExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
 import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.shulie.takin.cloud.sdk.model.common.TimeBean;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 import io.shulie.takin.ext.content.enginecall.PtConfigExt;
 import io.shulie.takin.ext.content.enginecall.ThreadGroupConfigExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
@@ -688,12 +686,9 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     @Override
     public List<SceneManageListOutput> querySceneManageList() {
-        List<SceneManage> sceneManages = tSceneManageMapper.selectAllSceneManageList();
-        if (CollectionUtils.isNotEmpty(sceneManages)) {
-            return SceneManageDTOConvert.INSTANCE.ofs(sceneManages);
-        }
-
-        return Lists.newArrayList();
+        List<SceneManageEntity> sceneManages = tSceneManageMapper.selectAllSceneManageList();
+        return sceneManages.stream().map(t -> new SceneManageListOutput(t))
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -748,7 +743,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             return Lists.newArrayList();
 
         }
-        List<SceneManage> byIds = tSceneManageMapper.getByIds(sceneIds);
+        List<SceneManageEntity> byIds = tSceneManageMapper.getByIds(sceneIds);
         List<SceneManageWrapperOutput> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(byIds)) {
             byIds.forEach(sceneManage -> {
@@ -938,7 +933,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
         if (Boolean.TRUE.equals(options.getIncludeSLA())) {
             List<SceneSlaRef> slaList = tSceneSlaRefMapper.selectBySceneId(id);
-            List<SceneSlaRefOutput> dtoList = SceneManageDTOConvert.INSTANCE.ofSlaList(slaList);
+            List<SceneSlaRefResponse> dtoList = SceneManageDTOConvert.INSTANCE.ofSlaList(slaList);
             wrapperDTO.setStopCondition(
                 dtoList.stream().filter(data -> SceneManageConstant.EVENT_DESTORY.equals(data.getEvent()))
                     .collect(Collectors.toList()));
@@ -1244,7 +1239,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         return scriptList;
     }
 
-    private List<SceneSlaRef> buildSceneSlaRef(List<SceneSlaRefInput> voList, String event) {
+    private List<SceneSlaRef> buildSceneSlaRef(List<SceneSlaRefResponse> voList, String event) {
         List<SceneSlaRef> slaList = Lists.newArrayList();
         voList = voList.stream().filter(
             data -> data.getBusinessActivity() != null && data.getBusinessActivity().length > 0).collect(

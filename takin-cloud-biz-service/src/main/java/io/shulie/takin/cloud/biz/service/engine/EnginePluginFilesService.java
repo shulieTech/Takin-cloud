@@ -2,9 +2,9 @@ package io.shulie.takin.cloud.biz.service.engine;
 
 import java.util.List;
 
+import io.shulie.takin.cloud.sdk.model.common.FileManageInfo;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginFileOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.common.bean.file.FileManageInfo;
 
 /**
  * 引擎插件文件信息接口

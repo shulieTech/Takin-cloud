@@ -16,16 +16,15 @@ import io.shulie.takin.cloud.data.model.mysql.EnginePluginEntity;
 import io.shulie.takin.cloud.data.mapper.mysql.EnginePluginMapper;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginService;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginFileOutput;
-import io.shulie.takin.cloud.biz.input.engine.EnginePluginWrapperInput;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginDetailOutput;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginFilesService;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginSimpleInfoOutput;
 import io.shulie.takin.cloud.biz.cloudserver.EnginePluginSimpleResultConvert;
 import io.shulie.takin.cloud.data.result.engine.EnginePluginSimpleInfoResult;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginSupportedService;
+import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginWrapperReq;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,14 +94,15 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void saveEnginePlugin(EnginePluginWrapperInput input) {
+    public void saveEnginePlugin(EnginePluginWrapperReq input) {
         Long pluginId = input.getPluginId();
         boolean isEdit = (pluginId != null && pluginId != 0);
         //创建引擎插件实体
         EnginePluginEntity pressureEnginePluginEntity = isEdit
             ? enginePluginMapper.selectById(pluginId) : new EnginePluginEntity();
 
-        BeanUtils.copyProperties(input, pressureEnginePluginEntity);
+        pressureEnginePluginEntity.setPluginName(input.getPluginName());
+        pressureEnginePluginEntity.setPluginType(input.getPluginType());
         LocalDateTime now = LocalDateTime.now();
         //保存引擎插件信息
         if (isEdit) {

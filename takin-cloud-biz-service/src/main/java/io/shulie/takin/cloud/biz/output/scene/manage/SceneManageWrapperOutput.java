@@ -7,8 +7,8 @@ import java.util.Map;
 
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneBusinessActivityRefBean;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.shulie.takin.cloud.sdk.model.common.TimeBean;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 import io.shulie.takin.ext.content.enginecall.ThreadGroupConfigExt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -55,19 +55,6 @@ public class SceneManageWrapperOutput extends ContextExt {
     @ApiModelProperty(value = "压测时长")
     private TimeBean pressureTestTime;
 
-    //    @ApiModelProperty(value = "施压模式")
-    //    @NotNull(message = "施压模式不能为空")
-    //    private Integer pressureMode;
-    //
-    //    @ApiModelProperty(value = "递增时长(秒)")
-    //    private Long increasingSecond;
-    //
-    //    @ApiModelProperty(value = "递增时长")
-    //    private TimeBean increasingTime;
-    //
-    //    @ApiModelProperty(value = "阶梯层数")
-    //    private Integer step;
-
     @ApiModelProperty(value = "预计消耗流量")
     private BigDecimal estimateFlow;
 
@@ -78,10 +65,10 @@ public class SceneManageWrapperOutput extends ContextExt {
     private List<SceneScriptRefOutput> uploadFile;
 
     @ApiModelProperty(name = "stopCondition", value = "SLA终止配置")
-    private List<SceneSlaRefOutput> stopCondition;
+    private List<SceneSlaRefResponse> stopCondition;
 
     @ApiModelProperty(name = "warningCondition", value = "SLA警告配置")
-    private List<SceneSlaRefOutput> warningCondition;
+    private List<SceneSlaRefResponse> warningCondition;
 
     @ApiModelProperty(name = "status", value = "压测状态")
     private Integer status;
@@ -150,28 +137,6 @@ public class SceneManageWrapperOutput extends ContextExt {
          */
         private Boolean hasPT;
 
-    }
-
-    @Data
-    public static class SceneSlaRefOutput {
-
-        @ApiModelProperty(value = "ID")
-        private Long id;
-
-        @ApiModelProperty(value = "规则名称")
-        private String ruleName;
-
-        @ApiModelProperty(value = "适用对象")
-        private String[] businessActivity;
-
-        @ApiModelProperty(value = "规则")
-        private RuleBean rule;
-
-        @ApiModelProperty(value = "状态")
-        private Integer status;
-
-        @ApiModelProperty(value = "触发事件")
-        private String event;
     }
 
     @Data

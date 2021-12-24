@@ -1,11 +1,12 @@
 package io.shulie.takin.cloud.entrypoint.convert;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneSlaRefOpen;
 import org.springframework.beans.BeanUtils;
+
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneSlaRefOpen;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 
 /**
  * @author mubai
@@ -14,14 +15,14 @@ import org.springframework.beans.BeanUtils;
 
 public class SceneSlaRefInputConverter {
 
-    public static SceneSlaRefInput of(SceneSlaRefOpen sceneSlaRef) {
-        SceneSlaRefInput out = new SceneSlaRefInput();
+    public static SceneSlaRefResponse of(SceneSlaRefOpen sceneSlaRef) {
+        SceneSlaRefResponse out = new SceneSlaRefResponse();
         BeanUtils.copyProperties(sceneSlaRef, out);
         return out;
     }
 
-    public static List<SceneSlaRefInput> ofList(List<SceneSlaRefOpen> sceneSlaRefs) {
-        List<SceneSlaRefInput> result = new ArrayList<>();
+    public static List<SceneSlaRefResponse> ofList(List<SceneSlaRefOpen> sceneSlaRefs) {
+        List<SceneSlaRefResponse> result = new ArrayList<>();
         sceneSlaRefs.forEach(sceneSlaRef -> result.add(of(sceneSlaRef)));
         return result;
     }

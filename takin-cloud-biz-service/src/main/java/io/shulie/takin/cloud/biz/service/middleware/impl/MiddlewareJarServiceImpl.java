@@ -32,12 +32,12 @@ import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.data.model.mysql.MiddlewareJarEntity;
 import io.shulie.takin.cloud.biz.service.middleware.MiddlewareJarService;
-import io.shulie.takin.cloud.common.pojo.vo.middleware.ImportMiddlewareJarVO;
+import io.shulie.takin.cloud.biz.output.middleware.ImportMiddlewareJarVO;
 import io.shulie.takin.cloud.common.enums.middleware.MiddlewareJarStatusEnum;
-import io.shulie.takin.cloud.common.pojo.vo.middleware.CompareMiddlewareJarVO;
-import io.shulie.takin.cloud.common.pojo.vo.middleware.RemarksAndStatusDescVO;
-import io.shulie.takin.cloud.common.pojo.vo.middleware.ImportMiddlewareJarResultVO;
-import io.shulie.takin.cloud.common.pojo.vo.middleware.CompareMiddlewareJarResultVO;
+import io.shulie.takin.cloud.biz.output.middleware.CompareMiddlewareJarVO;
+import io.shulie.takin.cloud.biz.output.middleware.RemarksAndStatusDescVO;
+import io.shulie.takin.cloud.biz.output.middleware.ImportMiddlewareJarResultVO;
+import io.shulie.takin.cloud.biz.output.middleware.CompareMiddlewareJarResultVO;
 import io.shulie.takin.cloud.common.enums.middleware.CompareMiddlewareJarStatusEnum;
 
 import lombok.extern.slf4j.Slf4j;
@@ -136,10 +136,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
             if (StrUtil.isBlank(artifactId)) {
                 return null;
             }
-
-            CompareMiddlewareJarResultVO compareResultVO = new CompareMiddlewareJarResultVO();
-            BeanUtils.copyProperties(importVO, compareResultVO);
-            return compareResultVO;
+            return new CompareMiddlewareJarResultVO(importVO);
         }).filter(Objects::nonNull).collect(Collectors.toList());
         if (correctList.isEmpty()) {
             return Collections.emptyList();
@@ -391,9 +388,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
             if (StrUtil.isNotBlank(importVO.getArtifactId())) {
                 return null;
             }
-
-            CompareMiddlewareJarResultVO compareResultVO = new CompareMiddlewareJarResultVO();
-            BeanUtils.copyProperties(importVO, compareResultVO);
+            CompareMiddlewareJarResultVO compareResultVO = new CompareMiddlewareJarResultVO(importVO);
             compareResultVO.setRemark("artifactId 未填写");
             return compareResultVO;
 
@@ -442,8 +437,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
                 messages.add("导入成功");
             }
 
-            ImportMiddlewareJarResultVO exportVO = new ImportMiddlewareJarResultVO();
-            BeanUtils.copyProperties(importVO, exportVO);
+            ImportMiddlewareJarResultVO exportVO = new ImportMiddlewareJarResultVO(importVO);
             String remark = String.join(COMMA_SPACE, messages);
             exportVO.setRemark(remark);
             return exportVO;
@@ -486,11 +480,9 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
                     return null;
                 }
 
-                MiddlewareJarEntity param = new MiddlewareJarEntity();
-                BeanUtils.copyProperties(importVO, param);
-                param.setStatus(middlewareJarStatusEnum.getCode());
-                param.setAgv(String.format("%s_%s_%s", artifactId, groupId, version));
-                return param;
+                importVO.setStatus(middlewareJarStatusEnum.getCode());
+                importVO.setAgv(String.format("%s_%s_%s", artifactId, groupId, version));
+                return importVO;
             }).filter(Objects::nonNull)
             .collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
                 new TreeSet<>(Comparator.comparing(MiddlewareJarEntity::getAgv))), ArrayList::new));

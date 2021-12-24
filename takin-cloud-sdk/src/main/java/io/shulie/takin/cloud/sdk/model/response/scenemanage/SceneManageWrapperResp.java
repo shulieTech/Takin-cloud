@@ -11,10 +11,10 @@ import lombok.EqualsAndHashCode;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import io.shulie.takin.cloud.sdk.model.common.RuleBean;
-import io.shulie.takin.cloud.sdk.model.common.SceneBusinessActivityRefBean;
 import io.shulie.takin.cloud.sdk.model.common.TimeBean;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.sdk.model.common.SceneBusinessActivityRefBean;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 
 /**
  * @author qianshui
@@ -72,10 +72,10 @@ public class SceneManageWrapperResp extends ContextExt {
     private List<SceneScriptRefResp> uploadFile;
 
     @ApiModelProperty(name = "stopCondition", value = "SLA终止配置")
-    private List<SceneSlaRefResp> stopCondition;
+    private List<SceneSlaRefResponse> stopCondition;
 
     @ApiModelProperty(name = "warningCondition", value = "SLA警告配置")
-    private List<SceneSlaRefResp> warningCondition;
+    private List<SceneSlaRefResponse> warningCondition;
 
     @ApiModelProperty(name = "status", value = "压测状态")
     private Integer status;
@@ -124,28 +124,6 @@ public class SceneManageWrapperResp extends ContextExt {
 
         private Long scriptId;
 
-    }
-
-    @Data
-    public static class SceneSlaRefResp {
-
-        @ApiModelProperty(value = "ID")
-        private Long id;
-
-        @ApiModelProperty(value = "规则名称")
-        private String ruleName;
-
-        @ApiModelProperty(value = "适用对象")
-        private String[] businessActivity;
-
-        @ApiModelProperty(value = "规则")
-        private RuleBean rule;
-
-        @ApiModelProperty(value = "状态")
-        private Integer status;
-
-        @ApiModelProperty(value = "触发事件")
-        private String event;
     }
 
     @Data

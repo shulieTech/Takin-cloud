@@ -1,4 +1,4 @@
-package io.shulie.takin.cloud.common.pojo.vo.middleware;
+package io.shulie.takin.cloud.biz.output.middleware;
 
 import java.util.List;
 

@@ -4,18 +4,14 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import io.shulie.takin.cloud.biz.input.statistics.PressureTotalInput;
-import io.shulie.takin.cloud.biz.output.statistics.PressureListTotalOutput;
-import io.shulie.takin.cloud.biz.output.statistics.PressurePieTotalOutput;
-import io.shulie.takin.cloud.biz.output.statistics.ReportTotalOutput;
-import io.shulie.takin.cloud.biz.service.statistics.PressureStatisticsService;
-import io.shulie.takin.cloud.entrypoint.convert.StatisticsConvert;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
+import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.biz.input.statistics.PressureTotalInput;
 import io.shulie.takin.cloud.sdk.model.request.statistics.PressureTotalReq;
+import io.shulie.takin.cloud.sdk.model.response.statistics.ReportTotalResp;
+import io.shulie.takin.cloud.biz.service.statistics.PressureStatisticsService;
 import io.shulie.takin.cloud.sdk.model.response.statistics.PressureListTotalResp;
 import io.shulie.takin.cloud.sdk.model.response.statistics.PressurePieTotalResp;
-import io.shulie.takin.cloud.sdk.model.response.statistics.ReportTotalResp;
-import io.shulie.takin.common.beans.response.ResponseResult;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,8 +41,8 @@ public class StatisticsController {
         PressureTotalInput input = new PressureTotalInput();
         input.setStartTime(req.getStartTime());
         input.setEndTime(req.getEndTime());
-        PressurePieTotalOutput output = pressureStatisticsService.getPressurePieTotal(input);
-        return ResponseResult.success(StatisticsConvert.of(output));
+        PressurePieTotalResp output = pressureStatisticsService.getPressurePieTotal(input);
+        return ResponseResult.success(output);
     }
 
     /**
@@ -60,8 +56,8 @@ public class StatisticsController {
         PressureTotalInput input = new PressureTotalInput();
         input.setStartTime(req.getStartTime());
         input.setEndTime(req.getEndTime());
-        ReportTotalOutput output = pressureStatisticsService.getReportTotal(input);
-        return ResponseResult.success(StatisticsConvert.of(output));
+        ReportTotalResp output = pressureStatisticsService.getReportTotal(input);
+        return ResponseResult.success(output);
     }
 
     /**
@@ -77,8 +73,8 @@ public class StatisticsController {
         input.setEndTime(req.getEndTime());
         input.setScriptIds(req.getScriptIds());
         input.setType(req.getType());
-        List<PressureListTotalOutput> output = pressureStatisticsService.getPressureListTotal(input);
-        return ResponseResult.success(StatisticsConvert.of(output));
+        List<PressureListTotalResp> output = pressureStatisticsService.getPressureListTotal(input);
+        return ResponseResult.success(output);
     }
 
 }

@@ -26,20 +26,19 @@ import lombok.extern.slf4j.Slf4j;
 import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections.MapUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
-import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
 
 import io.shulie.takin.utils.json.JsonHelper;
 import io.shulie.takin.cloud.ext.api.AssetExtApi;
@@ -82,8 +81,6 @@ import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
-import io.shulie.takin.cloud.biz.output.scenetask.SceneActionOutput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTryRunInput;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventService;
 import io.shulie.takin.cloud.biz.input.scenemanage.EnginePluginInput;
@@ -101,6 +98,7 @@ import io.shulie.takin.cloud.common.constants.SceneStartCheckConstants;
 import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
 import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStopOutput;
+import io.shulie.takin.cloud.sdk.model.response.scenetask.SceneActionResp;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskQueryTpsInput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskQueryTpsOutput;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
@@ -119,10 +117,12 @@ import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStartOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStatusOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneBusinessActivityRefInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput.FileInfo;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput.FileReadInfo;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneScriptRefOutput;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneBusinessActivityRefOutput;
 
 /**
@@ -180,13 +180,13 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public SceneActionOutput start(SceneTaskStartInput input) {
+    public SceneActionResp start(SceneTaskStartInput input) {
         input.setAssetType(AssetTypeEnum.PRESS_REPORT.getCode());
         input.setResourceId(null);
         return startTask(input, null);
     }
 
-    private SceneActionOutput startTask(SceneTaskStartInput input, SceneStartTrialRunInput trialRunInput) {
+    private SceneActionResp startTask(SceneTaskStartInput input, SceneStartTrialRunInput trialRunInput) {
         log.info("启动任务接收到入参：{}", JsonUtil.toJson(input));
         SceneManageQueryOpitons options = new SceneManageQueryOpitons();
         options.setIncludeBusinessActivity(true);
@@ -246,7 +246,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //创建临时报表数据
         ReportEntity report = initReport(sceneData, input);
 
-        SceneActionOutput sceneAction = new SceneActionOutput();
+        SceneActionResp sceneAction = new SceneActionResp();
         sceneAction.setData(report.getId());
         // 报告已经完成，则退出
         if (report.getStatus() == ReportConstants.FINISH_STATUS) {
@@ -336,9 +336,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     }
 
     @Override
-    public SceneActionOutput checkSceneTaskStatus(Long sceneId, Long reportId) {
+    public SceneActionResp checkSceneTaskStatus(Long sceneId, Long reportId) {
         //为如果传入报告id，以报告id为准
-        SceneActionOutput scene = new SceneActionOutput();
+        SceneActionResp scene = new SceneActionResp();
         ReportEntity reportResult = null;
         if (reportId != null) {
             reportResult = reportDao.selectById(reportId);
@@ -361,20 +361,20 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         if (reportResult != null) {
 
             // 记录错误信息
-            List<String> errorMsgs = Lists.newArrayList();
+            List<String> errorMessageList = Lists.newArrayList();
             // 检查压测引擎返回内容
             SceneRunTaskStatusOutput status = taskStatusCache.getStatus(sceneId, reportResult.getId());
             if (Objects.nonNull(status) && Objects.nonNull(status.getTaskStatus())
                 && status.getTaskStatus() == SceneRunTaskStatusEnum.FAILED.getCode()) {
-                errorMsgs.add(SceneStopReasonEnum.ENGINE.getType() + ":" + status.getErrorMsg());
+                errorMessageList.add(SceneStopReasonEnum.ENGINE.getType() + ":" + status.getErrorMsg());
             }
             scene.setReportId(reportResult.getId());
             if (StringUtils.isNotEmpty(reportResult.getFeatures())) {
                 JSONObject jb = JSON.parseObject(reportResult.getFeatures());
-                errorMsgs.add(jb.getString(ReportConstants.FEATURES_ERROR_MSG));
+                errorMessageList.add(jb.getString(ReportConstants.FEATURES_ERROR_MSG));
             }
-            if (CollectionUtils.isNotEmpty(errorMsgs)) {
-                scene.setMsg(errorMsgs);
+            if (CollectionUtils.isNotEmpty(errorMessageList)) {
+                scene.setMsg(errorMessageList);
                 //  前端只有等于0,才会显示错误
                 scene.setData(0L);
             }
@@ -470,7 +470,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             input.setPressureMode(PressureModeEnum.FIXED.getCode());
             input.setType(PressureSceneEnum.FLOW_DEBUG.getCode());
 
-            SceneSlaRefInput sceneSlaRefInput = new SceneSlaRefInput();
+            SceneSlaRefResponse sceneSlaRefInput = new SceneSlaRefResponse();
             sceneSlaRefInput.setRuleName("FLOW_DEBUG_SLA");
             sceneSlaRefInput.setBusinessActivity(new String[] {"-1"});
             RuleBean ruleBean = new RuleBean();
@@ -499,7 +499,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setResourceName(activityRefInput.getBusinessActivityName());
         sceneTaskStartInput.setUserId(operateId);
         sceneTaskStartInput.setUserName(operateName);
-        SceneActionOutput sceneActionDTO = startTask(sceneTaskStartInput, null);
+        SceneActionResp sceneActionDTO = startTask(sceneTaskStartInput, null);
         //返回报告id
         return sceneActionDTO.getData();
     }
@@ -525,7 +525,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             input.setPressureTestTime(new TimeBean(365L, "d"));
             input.setPressureMode(0);
             input.setType(1);
-            SceneSlaRefInput sceneSlaRefInput = new SceneSlaRefInput();
+            SceneSlaRefResponse sceneSlaRefInput = new SceneSlaRefResponse();
             sceneSlaRefInput.setRuleName("INSPECT_SLA");
             sceneSlaRefInput.setBusinessActivity(new String[] {"-2"});
             RuleBean ruleBean = new RuleBean();
@@ -564,7 +564,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setContinueRead(false);
         sceneTaskStartInput.setTenantId(input.getTenantId());
         sceneTaskStartInput.setEnvCode(input.getEnvCode());
-        SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput, null);
+        SceneActionResp sceneActionOutput = startTask(sceneTaskStartInput, null);
         startOutput.setSceneId(sceneManageId);
         startOutput.setReportId(sceneActionOutput.getData());
         //开始试跑就设置一个状态，后面区分试跑任务和正常压测
@@ -657,7 +657,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             input.setPressureMode(0);
 
             input.setType(1);
-            SceneSlaRefInput sceneSlaRefInput = new SceneSlaRefInput();
+            SceneSlaRefResponse sceneSlaRefInput = new SceneSlaRefResponse();
             sceneSlaRefInput.setRuleName("TRY_RUN_SLA");
             sceneSlaRefInput.setBusinessActivity(new String[] {"-1"});
             RuleBean ruleBean = new RuleBean();
@@ -691,7 +691,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setOperateId(input.getOperateId());
         sceneTaskStartInput.setOperateName(input.getOperateName());
         sceneTaskStartInput.setEnvCode(input.getEnvCode());
-        SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput, null);
+        SceneActionResp sceneActionOutput = startTask(sceneTaskStartInput, null);
         sceneTryRunTaskStartOutput.setReportId(sceneActionOutput.getData());
 
         return sceneTryRunTaskStartOutput;
@@ -876,7 +876,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         Long reportId = report.getId();
         //初始化业务活动
         scene.getBusinessActivityConfig().forEach(activity -> {
-            ReportBusinessActivityDetail reportBusinessActivityDetail = new ReportBusinessActivityDetail();
+            ReportBusinessActivityDetailEntity reportBusinessActivityDetail = new ReportBusinessActivityDetailEntity();
             reportBusinessActivityDetail.setReportId(reportId);
             reportBusinessActivityDetail.setSceneId(scene.getId());
             reportBusinessActivityDetail.setBusinessActivityId(activity.getBusinessActivityId());
@@ -914,7 +914,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         List<String> bindRefList = businessActivityConfig.stream().filter(Objects::nonNull)
             .map(SceneBusinessActivityRefOutput::getBindRef)
             .collect(Collectors.toList());
-        List<ReportBusinessActivityDetail> resultList = new ArrayList<>();
+        List<ReportBusinessActivityDetailEntity> resultList = new ArrayList<>();
         List<ScriptNode> testPlanNodeList = JsonPathUtil.getCurrentNodeByType(scriptNodeTree,
             NodeTypeEnum.TEST_PLAN.name());
         if (CollectionUtils.isNotEmpty(testPlanNodeList) && testPlanNodeList.size() == 1) {
@@ -949,8 +949,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
      * @param scriptNode 目标节点
      * @param detailList 结果
      */
-    private void fillNonTargetActivityDetail(Long sceneId, Long reportId, ScriptNode scriptNode, List<ReportBusinessActivityDetail> detailList) {
-        ReportBusinessActivityDetail detail = new ReportBusinessActivityDetail();
+    private void fillNonTargetActivityDetail(Long sceneId, Long reportId, ScriptNode scriptNode, List<ReportBusinessActivityDetailEntity> detailList) {
+        ReportBusinessActivityDetailEntity detail = new ReportBusinessActivityDetailEntity();
         detail.setTargetTps(new BigDecimal(-1));
         detail.setTargetRt(new BigDecimal(-1));
         detail.setTargetSa(new BigDecimal(-1));

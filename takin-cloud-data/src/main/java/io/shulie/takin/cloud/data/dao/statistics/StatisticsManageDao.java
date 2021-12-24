@@ -4,7 +4,7 @@ import java.util.List;
 
 import io.shulie.takin.cloud.data.result.statistics.PressureListTotalResult;
 import io.shulie.takin.cloud.data.result.statistics.PressurePieTotalResult;
-import io.shulie.takin.cloud.data.result.statistics.ReportTotalResult;
+import io.shulie.takin.cloud.sdk.model.response.statistics.ReportTotalResp;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -39,7 +39,7 @@ public interface StatisticsManageDao {
         + "FROM t_report  "
         + "WHERE gmt_create &gt;= #{startTime} and gmt_create &lt;= #{endTime} "
         + "and status = 2 and is_deleted =0</script>")
-    ReportTotalResult getReportTotal(@Param("startTime") String startTime, @Param("endTime") String endTime);
+    ReportTotalResp getReportTotal(@Param("startTime") String startTime, @Param("endTime") String endTime);
 
     /**
      * 压测场景次数统计  标签数据需要从web获取

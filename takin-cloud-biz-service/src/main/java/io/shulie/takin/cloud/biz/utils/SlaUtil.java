@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 
 /**
  * @author qianshui
@@ -13,7 +13,7 @@ import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
  */
 public class SlaUtil {
 
-    public static Map<String, Object> matchCondition(SceneSlaRefInput dto, SendMetricsEvent metricsEvent) {
+    public static Map<String, Object> matchCondition(SceneSlaRefResponse dto, SendMetricsEvent metricsEvent) {
         Map<String, Object> resultMap = Maps.newHashMap();
         Integer targetType = dto.getRule().getIndexInfo();
         switch (targetType) {

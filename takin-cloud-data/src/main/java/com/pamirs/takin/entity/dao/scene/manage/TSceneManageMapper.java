@@ -2,8 +2,8 @@ package com.pamirs.takin.entity.dao.scene.manage;
 
 import java.util.List;
 
-import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -22,7 +22,7 @@ public interface TSceneManageMapper {
      * @param record 数据内容(包括主键)
      * @return -
      */
-    int updateByPrimaryKeySelective(SceneManage record);
+    int updateByPrimaryKeySelective(SceneManageEntity  record);
 
     /**
      * 更新状态
@@ -37,7 +37,7 @@ public interface TSceneManageMapper {
      *
      * @return -
      */
-    List<SceneManage> selectAllSceneManageList();
+    List<SceneManageEntity > selectAllSceneManageList();
 
     /**
      * 依据主键集合查询
@@ -45,6 +45,6 @@ public interface TSceneManageMapper {
      * @param ids 主键集合
      * @return 查询结果
      */
-    List<SceneManage> getByIds(@Param("ids") List<Long> ids);
+    List<SceneManageEntity > getByIds(@Param("ids") List<Long> ids);
 
 }

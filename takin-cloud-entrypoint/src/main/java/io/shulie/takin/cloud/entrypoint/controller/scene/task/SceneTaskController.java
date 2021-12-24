@@ -19,7 +19,6 @@ import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskUpdateTpsInput;
 import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStartOutput;
 import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStopOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneContactFileOutput;
-import io.shulie.takin.cloud.biz.output.scenetask.SceneActionOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneJobStateOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskQueryTpsOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput;
@@ -133,10 +132,8 @@ public class SceneTaskController {
 
         SceneTaskStartInput input = new SceneTaskStartInput();
         BeanUtils.copyProperties(request, input);
-        SceneActionOutput output = sceneTaskService.start(input);
-        SceneActionResp resp = new SceneActionResp();
-        BeanUtils.copyProperties(output, resp);
-        return ResponseResult.success(resp);
+        SceneActionResp output = sceneTaskService.start(input);
+        return ResponseResult.success(output);
     }
 
     @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_START_FLOW_DEBUG)
@@ -226,12 +223,8 @@ public class SceneTaskController {
     @ApiOperation(value = "检查启动状态")
     public ResponseResult<SceneActionResp> checkStartStatus(@RequestParam("id") Long id,
         @RequestParam(value = "reportId", required = false) Long reportId) {
-        SceneActionOutput sceneAction = sceneTaskService.checkSceneTaskStatus(id, reportId);
-        SceneActionResp resp = new SceneActionResp();
-        resp.setData(sceneAction.getData());
-        resp.setMsg(sceneAction.getMsg());
-        resp.setReportId(sceneAction.getReportId());
-        return ResponseResult.success(resp);
+        SceneActionResp sceneAction = sceneTaskService.checkSceneTaskStatus(id, reportId);
+        return ResponseResult.success(sceneAction);
 
     }
 
