@@ -271,10 +271,8 @@ public class ReportServiceImpl implements ReportService {
                 summaryBean.setTotalRequest(bean.getTotalRequest());
                 summaryBean.setTps(bean.getTps());
                 result.add(summaryBean);
-                if (CollectionUtils.isNotEmpty(bean.getChildren())) {
-                    buildFailActivitiesByNodeDetails(bean.getChildren(), result);
-                }
-            } else if (CollectionUtils.isNotEmpty(bean.getChildren())) {
+            }
+            if (CollectionUtils.isNotEmpty(bean.getChildren())) {
                 buildFailActivitiesByNodeDetails(bean.getChildren(), result);
             }
         }
