@@ -31,7 +31,6 @@ import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
@@ -49,6 +48,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,11 +70,11 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Resource
     private ScheduleRecordEnginePluginService scheduleRecordEnginePluginService;
     @Resource
-    private RedisClientUtils redisClientUtils;
+    private RedisTemplate<String, Object> redisTemplate;
+    @Resource
+    StringRedisTemplate stringRedisTemplate;
     @Resource
     private AsyncService asyncService;
-    @Resource
-    private RedisTemplate<String, String> redisTemplate;
     @Resource
     @Qualifier("stopThreadPool")
     protected ThreadPoolExecutor stopExecutor;
@@ -160,10 +160,10 @@ public class ScheduleServiceImpl implements ScheduleService {
         eventRequest.setPtlLogConfig(ptlLogConfig);
 
         //把数据放入缓存，初始化回调调度需要
-        redisClientUtils.setString(scheduleName, JSON.toJSONString(eventRequest));
+        stringRedisTemplate.opsForValue().set(scheduleName, JSON.toJSONString(eventRequest));
         // 需要将 本次调度 pod数量存入redis,报告中用到
         // 总计 报告生成用到 调度期间出现错误，这份数据只存24小时
-        redisClientUtils.set(
+        redisTemplate.opsForValue().set(
             ScheduleConstants.getPressureNodeTotalKey(request.getSceneId(), request.getTaskId(), request.getTenantId()),
             request.getTotalIp(), 24 * 60 * 60 * 1000);
         //调度初始化
@@ -177,8 +177,8 @@ public class ScheduleServiceImpl implements ScheduleService {
         if (scheduleRecord != null) {
             // 增加中断
             String scheduleName = ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getTenantId());
-            boolean flag = redisClientUtils.set(ScheduleConstants.INTERRUPT_POD + scheduleName, true, 24 * 60 * 60 * 1000);
-            if (flag && !Boolean.parseBoolean(redisClientUtils.getString(ScheduleConstants.FORCE_STOP_POD + scheduleName))) {
+            redisTemplate.opsForValue().set(ScheduleConstants.INTERRUPT_POD + scheduleName, true, 24 * 60 * 60 * 1000);
+            if (!Boolean.parseBoolean(stringRedisTemplate.opsForValue().get(ScheduleConstants.FORCE_STOP_POD + scheduleName))) {
                 // 3分钟没有停止成功 ，将强制停止
                 stopExecutor.execute(new SceneStopThread(request));
             }
@@ -237,7 +237,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             numList.add(i + "");
         }
 
-        redisClientUtils.leftPushAll(key, numList);
+        redisTemplate.opsForList().leftPushAll(key, numList);
     }
 
     /**
@@ -261,7 +261,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             EngineCallExtApi engineCallExtApi = pluginUtils.getEngineCallExtApi();
             engineCallExtApi.deleteJob(scheduleStopRequest);
 
-            redisTemplate.expire(engineInstanceRedisKey, 10, TimeUnit.MINUTES);
+            stringRedisTemplate.expire(engineInstanceRedisKey, 10, TimeUnit.MINUTES);
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：任务停止失败失败 --> 【deleteJob】处理finished事件异常: {}",
                 TakinCloudExceptionEnum.TASK_STOP_DELETE_TASK_ERROR, e);
@@ -283,30 +283,28 @@ public class ScheduleServiceImpl implements ScheduleService {
         @Override
         public void run() {
             String scheduleName = ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getTenantId());
-            boolean flag = redisClientUtils.set(ScheduleConstants.FORCE_STOP_POD + scheduleName, true, 24 * 60 * 60 * 1000);
-            if (flag) {
-                try {
-                    Thread.sleep(3 * 60 * 1000L);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    log.info("stop wait error :{}", e.getMessage());
-                }
-                // 查看场景状态
-                SceneManageQueryOpitons options = new SceneManageQueryOpitons();
-                options.setIncludeBusinessActivity(true);
-                SceneManageWrapperOutput dto = sceneManageService.getSceneManage(request.getSceneId(), options);
-                if (!SceneManageStatusEnum.WAIT.getValue().equals(dto.getStatus())) {
-                    // 触发强制停止
-                    reportService.forceFinishReport(request.getTaskId());
-                    Event event = new Event();
-                    event.setEventName("删除job");
-                    TaskResult taskResult = new TaskResult();
-                    taskResult.setSceneId(request.getSceneId());
-                    taskResult.setTaskId(request.getTaskId());
-                    taskResult.setTenantId(request.getTenantId());
-                    event.setExt(taskResult);
-                    doDeleteJob(event);
-                }
+            redisTemplate.opsForValue().set(ScheduleConstants.FORCE_STOP_POD + scheduleName, true, 24 * 60 * 60 * 1000);
+            try {
+                Thread.sleep(3 * 60 * 1000L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                log.info("stop wait error :{}", e.getMessage());
+            }
+            // 查看场景状态
+            SceneManageQueryOpitons options = new SceneManageQueryOpitons();
+            options.setIncludeBusinessActivity(true);
+            SceneManageWrapperOutput dto = sceneManageService.getSceneManage(request.getSceneId(), options);
+            if (!SceneManageStatusEnum.WAIT.getValue().equals(dto.getStatus())) {
+                // 触发强制停止
+                reportService.forceFinishReport(request.getTaskId());
+                Event event = new Event();
+                event.setEventName("删除job");
+                TaskResult taskResult = new TaskResult();
+                taskResult.setSceneId(request.getSceneId());
+                taskResult.setTaskId(request.getTaskId());
+                taskResult.setTenantId(request.getTenantId());
+                event.setExt(taskResult);
+                doDeleteJob(event);
             }
         }
     }

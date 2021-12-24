@@ -9,10 +9,11 @@ import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
 
@@ -20,7 +21,6 @@ import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
 import io.shulie.takin.eventcenter.EventCenterTemplate;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.biz.service.async.AsyncService;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
@@ -42,26 +42,24 @@ import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
 @Slf4j
 public class AsyncServiceImpl implements AsyncService {
 
-    @Autowired
-    private RedisClientUtils redisClientUtils;
-
-    @Autowired
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+    @Resource
     private EventCenterTemplate eventCenterTemplate;
-
-    @Autowired
+    @Resource
     private SceneManageService sceneManageService;
-
     @Resource
     private SceneManageDAO sceneManageDAO;
+    @Resource
+    private EnginePluginUtils enginePluginUtils;
 
     /**
      * 压力节点 启动时间超时
      */
     @Value("${pressure.node.start.expireTime: 30}")
     private Integer pressureNodeStartExpireTime;
-
-    @Autowired
-    private EnginePluginUtils enginePluginUtils;
 
     /**
      * 线程定时检查休眠时间
@@ -77,9 +75,9 @@ public class AsyncServiceImpl implements AsyncService {
 
         String pressureNodeTotalName = ScheduleConstants.getPressureNodeTotalKey(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getTenantId());
         String pressureNodeName = ScheduleConstants.getPressureNodeName(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getTenantId());
-        String pressureNodeTotal = redisClientUtils.getString(pressureNodeTotalName);
+        String pressureNodeTotal = stringRedisTemplate.opsForValue().get(pressureNodeTotalName);
         while (currentTime <= pressureNodeStartExpireTime) {
-            String pressureNodeNum = redisClientUtils.getString(pressureNodeName);
+            String pressureNodeNum = stringRedisTemplate.opsForValue().get(pressureNodeName);
             log.info("任务id={}, 计划启动【{}】个节点，当前启动【{}】个节点.....", startRequest.getTaskId(), pressureNodeTotal, pressureNodeNum);
             if (pressureNodeTotal != null && pressureNodeNum != null) {
                 try {
@@ -110,7 +108,7 @@ public class AsyncServiceImpl implements AsyncService {
                 for (int i = 1; i <= podTotalNum; i++) {
                     String enginePodNoStartKey = ScheduleConstants.getEnginePodNoStartKey(startRequest.getSceneId(), startRequest.getTaskId(),
                         startRequest.getTenantId(), i + "", CollectorService.METRICS_EVENTS_STARTED);
-                    if (!redisClientUtils.hasKey(enginePodNoStartKey)) {
+                    if (!Boolean.TRUE.equals(redisTemplate.hasKey(enginePodNoStartKey))) {
                         log.warn("调度任务 pod " + i + "没有在设定时间启动，redisKey为" + enginePodNoStartKey);
                     }
                 }
@@ -119,11 +117,11 @@ public class AsyncServiceImpl implements AsyncService {
             // 补充停止原因
             //设置缓存，用以检查压测场景启动状态 lxr 20210623
             String k8sPodKey = String.format(SceneTaskRedisConstants.PRESSURE_NODE_ERROR_KEY + "%s_%s", startRequest.getSceneId(), startRequest.getTaskId());
-            String startedPodNum = redisClientUtils.getString(pressureNodeName);
-            redisClientUtils.hmset(k8sPodKey, SceneTaskRedisConstants.PRESSURE_NODE_START_ERROR,
+            String startedPodNum = stringRedisTemplate.opsForValue().get(pressureNodeName);
+            redisTemplate.opsForHash().put(k8sPodKey, SceneTaskRedisConstants.PRESSURE_NODE_START_ERROR,
                 String.format("节点没有在设定时间【%s】s内启动，计划启动节点个数【%s】,实际启动节点个数【%s】,"
-                    + "导致压测停止", pressureNodeStartExpireTime, redisClientUtils.getString(pressureNodeTotalName),
-                    StringUtils.isBlank(startedPodNum)? 0: startedPodNum));
+                        + "导致压测停止", pressureNodeStartExpireTime, stringRedisTemplate.opsForValue().get(pressureNodeTotalName),
+                    StringUtils.isBlank(startedPodNum) ? 0 : startedPodNum));
             callStop(startRequest);
         }
     }
@@ -137,12 +135,12 @@ public class AsyncServiceImpl implements AsyncService {
             if (jobFinished || isSceneFinished) {
                 String statusKey = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneId,
                     reportId);
-                boolean updateResult = redisClientUtils.hmset(statusKey, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY,
-                    SceneRunTaskStatusEnum.ENDED.getText());
-                if (updateResult) {
+                try {
+                    redisTemplate.opsForHash().put(statusKey, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY,
+                        SceneRunTaskStatusEnum.ENDED.getText());
                     log.info("更新场景运行状态缓存成功。场景ID:{},报告ID:{}", sceneId, reportId);
-                } else {
-                    log.error("更新场景运行状态缓存失败。场景ID:{},报告ID:{}", sceneId, reportId);
+                } catch (Exception e) {
+                    log.error("更新场景运行状态缓存失败。场景ID:{},报告ID:{}", sceneId, reportId, e);
                 }
                 break;
             }

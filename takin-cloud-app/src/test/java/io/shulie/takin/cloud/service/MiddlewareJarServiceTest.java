@@ -5,13 +5,13 @@ import java.util.Arrays;
 import javax.annotation.Resource;
 
 import io.shulie.takin.app.Application;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.data.mapper.mysql.MiddlewareJarMapper;
 import io.shulie.takin.cloud.data.model.mysql.MiddlewareJarEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
@@ -22,8 +22,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class MiddlewareJarServiceTest {
-    @Resource(type = RedisClientUtils.class)
-    private RedisClientUtils redisClientUtils;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
     @Resource(type = MiddlewareJarMapper.class)
     private MiddlewareJarMapper middlewareJarMapper;
 
@@ -38,8 +38,8 @@ public class MiddlewareJarServiceTest {
 
     @Test
     public void testSetString() {
-        redisClientUtils.setString("a", "b");
-        redisClientUtils.delete("a");
+        stringRedisTemplate.opsForValue().set("a", "b");
+        stringRedisTemplate.delete("a");
     }
 
     @Test

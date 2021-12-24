@@ -15,7 +15,6 @@ import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
@@ -23,6 +22,7 @@ import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
 import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 
 /**
  * 压测日志上传任务
@@ -41,7 +41,7 @@ public class PressureTestLogUploadTask implements Runnable {
 
     private SceneTaskPressureTestLogUploadDAO logUploadDAO;
 
-    private RedisClientUtils redisClientUtils;
+    private RedisTemplate<String, Object> redisTemplate;
 
     private PushLogService pushLogService;
 
@@ -54,14 +54,14 @@ public class PressureTestLogUploadTask implements Runnable {
     private EngineCallExtApi engineCallExtApi;
 
     public PressureTestLogUploadTask(Long sceneId, Long reportId, Long tenantId,
-        SceneTaskPressureTestLogUploadDAO logUploadDAO, RedisClientUtils redisClientUtils,
+        SceneTaskPressureTestLogUploadDAO logUploadDAO, RedisTemplate<String, Object> redisTemplate,
         PushLogService pushLogService, SceneManageDAO sceneManageDAO,
         String logDir, String fileName, EngineCallExtApi engineCallExtApi) {
         this.sceneId = sceneId;
         this.reportId = reportId;
         this.tenantId = tenantId;
         this.logUploadDAO = logUploadDAO;
-        this.redisClientUtils = redisClientUtils;
+        this.redisTemplate = redisTemplate;
         this.pushLogService = pushLogService;
         this.sceneManageDAO = sceneManageDAO;
         this.logDir = logDir;
@@ -128,7 +128,7 @@ public class PressureTestLogUploadTask implements Runnable {
                             lastSize);
                         if (data != null && data.length > 0) {
                             pushLogService.pushLogToAmdb(data, VERSION);
-                        }else if(lastSize > 0){
+                        } else if (lastSize > 0) {
                             TimeUnit.SECONDS.sleep(10);
                             data = readFile(ptlFile, subFileName, position, ptlFile.getAbsolutePath(), fileFetcher,
                                 lastSize);
@@ -159,10 +159,10 @@ public class PressureTestLogUploadTask implements Runnable {
     private void cleanCache(String fileName) {
         String statusKey = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", this.sceneId,
             this.reportId);
-        redisClientUtils.hmdelete(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
+        redisTemplate.opsForHash().delete(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
             String.format("%s_%s_%s", this.sceneId,
                 this.reportId, fileName));
-        redisClientUtils.hmset(statusKey, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY,
+        redisTemplate.opsForHash().put(statusKey, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY,
             SceneRunTaskStatusEnum.ENDED.getText());
     }
 
@@ -173,7 +173,7 @@ public class PressureTestLogUploadTask implements Runnable {
      * @param position -
      */
     private void cacheFileUploadedPosition(String fileName, Long position) {
-        this.redisClientUtils.hmset(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
+        this.redisTemplate.opsForHash().put(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
             String.format("%s_%s_%s", this.sceneId, this.reportId, fileName),
             position);
     }
@@ -185,7 +185,7 @@ public class PressureTestLogUploadTask implements Runnable {
      * @return -
      */
     private Long getPosition(String fileName) {
-        Object position = this.redisClientUtils.hmget(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
+        Object position = this.redisTemplate.opsForHash().get(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
             String.format("%s_%s_%s", this.sceneId, this.reportId, fileName));
         if (Objects.isNull(position)) {
             return 0L;

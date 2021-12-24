@@ -12,9 +12,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageInfo;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
 import io.shulie.takin.cloud.sdk.model.request.WarnQueryParam;
 import com.pamirs.takin.entity.domain.vo.report.ReportIdParam;
@@ -43,6 +41,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -63,7 +62,7 @@ public class ReportController {
     @Resource
     private ReportService reportService;
     @Resource
-    private RedisClientUtils redisClientUtils;
+    private RedisTemplate<String, String> redisTemplate;
 
     @ApiOperation("报告列表")
     @GetMapping(EntrypointUrl.METHOD_REPORT_LIST)
@@ -91,22 +90,6 @@ public class ReportController {
     }
 
     /**
-     * 解析数结构并获取ApplicationIds字段
-     *
-     * @param resource       树结构
-     * @param applicationIds 树中关联的所有业务活动对应的业务活动主键
-     *                       <p>结果类似于:["1,2,3","2,3","1,3"]</p>
-     */
-    public void fillApplicationIds(List<ScriptNodeSummaryBean> resource, List<String> applicationIds) {
-        if (resource != null && resource.size() > 0) {
-            for (ScriptNodeSummaryBean item : resource) {
-                applicationIds.add(item.getApplicationIds());
-                fillApplicationIds(item.getChildren(), applicationIds);
-            }
-        }
-    }
-
-    /**
      * 缓存报告链路数据
      *
      * @param reportTrendQuery 请求数据
@@ -118,8 +101,8 @@ public class ReportController {
         try {
             String key = JSON.toJSONString(reportTrendQuery);
             ReportTrendResp data;
-            if (redisClientUtils.hasKey(key)) {
-                data = JSON.parseObject(redisClientUtils.getString(key), ReportTrendResp.class);
+            if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
+                data = JSON.parseObject(redisTemplate.opsForValue().get(key), ReportTrendResp.class);
                 if (Objects.isNull(data)
                     || CollectionUtils.isEmpty(data.getConcurrent())
                     || CollectionUtils.isEmpty(data.getSa())
@@ -127,11 +110,11 @@ public class ReportController {
                     || CollectionUtils.isEmpty(data.getTps())
                     || CollectionUtils.isEmpty(data.getSuccessRate())) {
                     data = reportService.queryReportTrend(reportTrendQuery);
-                    redisClientUtils.setString(key, JSON.toJSONString(data));
+                    redisTemplate.opsForValue().set(key, JSON.toJSONString(data));
                 }
             } else {
                 data = reportService.queryReportTrend(reportTrendQuery);
-                redisClientUtils.setString(key, JSON.toJSONString(data));
+                redisTemplate.opsForValue().set(key, JSON.toJSONString(data));
             }
             return ResponseResult.success(data);
         } catch (Exception e) {
