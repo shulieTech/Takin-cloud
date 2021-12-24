@@ -1,37 +1,39 @@
 package io.shulie.takin.cloud.biz.service.cloud.server.impl;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.nio.ByteBuffer;
+import java.io.OutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
+import java.io.BufferedOutputStream;
 import java.nio.channels.FileChannel;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
+import lombok.extern.slf4j.Slf4j;
+
 import cn.hutool.crypto.SecureUtil;
+
+import com.pamirs.takin.entity.domain.vo.file.Part;
+import com.pamirs.takin.entity.domain.query.SceneScriptRefQueryParam;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneScriptRefMapper;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
-import com.pamirs.takin.entity.domain.query.SceneScriptRefQueryParam;
-import com.pamirs.takin.entity.domain.vo.file.Part;
-import io.shulie.takin.cloud.biz.service.cloud.server.BigFileService;
+
+import io.shulie.takin.utils.json.JsonHelper;
+import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.biz.service.cloud.server.BigFileService;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.utils.json.JsonHelper;
-import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * @author hengyu
@@ -41,27 +43,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class BigFileServiceImpl implements BigFileService {
 
-    private static final String FALSE_CODE = "0";
-    private static final String BIG_FILE_KEY_PREFIX = "big:file:cache";
-    public static final int SUCCESS_VALUE = 200;
-    public static final int RETRY_CODE = 502;
-    public static final int ERROR_CODE = 500;
-    @Value("${pradar.upload.client.dir}")
-    private String uploadClientPath;
+    @Resource
+    private SceneTaskService sceneTaskService;
     @Resource
     private TSceneScriptRefMapper tSceneScriptRefMapper;
-
     @Resource
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Value("${script.temp.path}")
     private String tempPath;
-
     @Value("${script.path}")
     private String scriptPath;
+    @Value("${pradar.upload.client.dir}")
+    private String uploadClientPath;
 
-    @Autowired
-    private SceneTaskService sceneTaskService;
+    public static final int SUCCESS_VALUE = 200;
+    private static final String BIG_FILE_KEY_PREFIX = "big:file:cache";
 
     @Override
     public ResponseResult<?> upload(Part dto) {
@@ -117,7 +114,7 @@ public class BigFileServiceImpl implements BigFileService {
             throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "fileName or sceneId param validator fail!");
         }
 
-        List<Part> errors = new LinkedList<>();
+        //List<Part> errors = new LinkedList<>();
         String parentPath = getParentPath(part.getUuid());
 
         long start = System.currentTimeMillis();
@@ -166,9 +163,7 @@ public class BigFileServiceImpl implements BigFileService {
                 fileInputStream.close();
             }
             dest.flush();
-            if (dest != null) {
-                dest.close();
-            }
+            dest.close();
             log.info("{}:聚合文件成功路径为：{}", part.getOriginalName(), destFile.getAbsolutePath());
             fileSize = destFile.length();
         } catch (Exception ex) {
@@ -230,22 +225,24 @@ public class BigFileServiceImpl implements BigFileService {
         String parentPath) {
         try {
             //进行文件块校验
-            Map<String, Part> entries = redisTemplate.opsForHash().entries(getKey(part.getUuid()));
-            for (String key : entries.keySet()) {
-                Part cachePart = entries.get(key);
-                String fileName = cachePart.getFileName();
-                File targetFile = new File(parentPath.concat("/").concat(fileName));
-                FileInputStream fileInputStream = new FileInputStream(targetFile);
+            Map<Object, Object> entries = redisTemplate.opsForHash().entries(getKey(part.getUuid()));
+            for (Object key : entries.keySet()) {
+                if (entries.get(key) instanceof Part) {
+                    Part cachePart = (Part)entries.get(key);
+                    String fileName = cachePart.getFileName();
+                    File targetFile = new File(parentPath.concat("/").concat(fileName));
+                    FileInputStream fileInputStream = new FileInputStream(targetFile);
 
-                FileChannel pc = fileInputStream.getChannel();
-                long length = targetFile.length();
-                ByteBuffer allocate = ByteBuffer.allocate((int)length);
-                pc.read(allocate);
-                byte[] array = allocate.array();
-                String md5 = SecureUtil.md5().digestHex(array);
-                boolean result = cachePart.getMd5().equals(md5);
-                if (!result) {
-                    errors.add(cachePart);
+                    FileChannel pc = fileInputStream.getChannel();
+                    long length = targetFile.length();
+                    ByteBuffer allocate = ByteBuffer.allocate((int)length);
+                    pc.read(allocate);
+                    byte[] array = allocate.array();
+                    String md5 = SecureUtil.md5().digestHex(array);
+                    boolean result = cachePart.getMd5().equals(md5);
+                    if (!result) {
+                        errors.add(cachePart);
+                    }
                 }
             }
         } catch (Exception e) {

@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.biz.service.report.impl;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Date;
 import java.util.List;
@@ -39,6 +40,8 @@ import com.github.pagehelper.PageHelper;
 import org.springframework.beans.BeanUtils;
 import com.jayway.jsonpath.DocumentContext;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.MapUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -72,7 +75,6 @@ import io.shulie.takin.cloud.common.bean.task.TaskResult;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.ext.content.asset.RealAssectBillExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
@@ -134,7 +136,7 @@ public class ReportServiceImpl implements ReportService {
     @Resource
     SceneManageDAO sceneManageDao;
     @Resource
-    RedisClientUtils redisClientUtils;
+    private RedisTemplate<String, Object> redisTemplate;
     @Resource
     SceneTaskService sceneTaskService;
     @Resource
@@ -143,6 +145,8 @@ public class ReportServiceImpl implements ReportService {
     ReportEventService reportEventService;
     @Resource
     SceneManageService sceneManageService;
+    @Resource
+    StringRedisTemplate stringRedisTemplate;
     @Resource
     SceneTaskEventService sceneTaskEventService;
     @Resource
@@ -436,7 +440,7 @@ public class ReportServiceImpl implements ReportService {
         // 检查压力节点 情况
         String pressureNodeKey = String.format(SceneTaskRedisConstants.PRESSURE_NODE_ERROR_KEY + "%s_%s", sceneId,
             reportId);
-        Object pressureNodeStartError = redisClientUtils.hmget(pressureNodeKey,
+        Object pressureNodeStartError = redisTemplate.opsForHash().get(pressureNodeKey,
             SceneTaskRedisConstants.PRESSURE_NODE_START_ERROR);
         if (Objects.nonNull(pressureNodeStartError)) {
             // 组装压力节点异常显示数据
@@ -457,7 +461,7 @@ public class ReportServiceImpl implements ReportService {
 
         // 查询压测引擎是否有异常
         String key = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneId, reportId);
-        Object errorObj = redisClientUtils.hmget(key, SceneTaskRedisConstants.SCENE_RUN_TASK_ERROR);
+        Object errorObj = redisTemplate.opsForHash().get(key, SceneTaskRedisConstants.SCENE_RUN_TASK_ERROR);
         if (Objects.nonNull(errorObj)) {
             // 组装压测引擎异常显示数据
             StopReasonBean engineReasonBean = new StopReasonBean();
@@ -1242,25 +1246,25 @@ public class ReportServiceImpl implements ReportService {
             taskResult.getTenantId());
         String podTotalName = ScheduleConstants.getPressureNodeTotalKey(taskResult.getSceneId(), taskResult.getTaskId(),
             taskResult.getTenantId());
-        String podTotal = redisClientUtils.getString(podTotalName);
+        String podTotal = stringRedisTemplate.opsForValue().get(podTotalName);
         podTotal = null == podTotal ? "" : podTotal;
-        if (!podTotal.equals(redisClientUtils.getObject(podName))) {
+        if (!podTotal.equals(stringRedisTemplate.opsForValue().get(podName))) {
             // 两者不同
             getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG,
-                StrUtil.format("pod计划启动{}个，实际启动{}个", podTotal, redisClientUtils.getObject(podName)));
+                StrUtil.format("pod计划启动{}个，实际启动{}个", podTotal, stringRedisTemplate.opsForValue().get(podName)));
         }
         // 压测引擎
         String engineName = ScheduleConstants.getEngineName(taskResult.getSceneId(), taskResult.getTaskId(),
             taskResult.getTenantId());
-        if (redisClientUtils.getObject(engineName) == null || !podTotal.equals(
-            redisClientUtils.getString(engineName))) {
+        if (stringRedisTemplate.opsForValue().get(engineName) == null ||
+            !podTotal.equals(stringRedisTemplate.opsForValue().get(engineName))) {
             // 两者不同
             getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG,
-                StrUtil.format("压测引擎计划运行{}个，实际运行{}个", podTotal, redisClientUtils.getObject(engineName)));
+                StrUtil.format("压测引擎计划运行{}个，实际运行{}个", podTotal, stringRedisTemplate.opsForValue().get(engineName)));
         }
         // 删除缓存
-        redisClientUtils.del(podName, podTotalName, ScheduleConstants.TEMP_FAIL_SIGN + engineName,
-            engineName + ScheduleConstants.FIRST_SIGN, engineName + ScheduleConstants.LAST_SIGN, engineName);
+        redisTemplate.delete(Arrays.asList(podName, podTotalName, ScheduleConstants.TEMP_FAIL_SIGN + engineName,
+            engineName + ScheduleConstants.FIRST_SIGN, engineName + ScheduleConstants.LAST_SIGN, engineName));
     }
 
     /**
@@ -1289,7 +1293,7 @@ public class ReportServiceImpl implements ReportService {
 
         String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(),
             reportResult.getTenantId());
-        Long eTime = (Long)redisClientUtils.getObject(engineName + ScheduleConstants.LAST_SIGN);
+        Long eTime = Long.valueOf(stringRedisTemplate.opsForValue().get(engineName + ScheduleConstants.LAST_SIGN));
         Date curDate;
         if (eTime != null) {
             curDate = new Date(eTime);

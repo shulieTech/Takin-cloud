@@ -1,8 +1,8 @@
 package io.shulie.takin.cloud.biz.collector.collector;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -51,7 +51,7 @@ public abstract class AbstractIndicators {
         //                    "   return 0\n" +
         "end";
     @Autowired
-    protected RedisTemplate redisTemplate;
+    protected RedisTemplate<String, Object> redisTemplate;
     @Autowired
     protected EventCenterTemplate eventCenterTemplate;
     @Autowired
@@ -59,7 +59,7 @@ public abstract class AbstractIndicators {
     private DefaultRedisScript<Void> minRedisScript;
     private DefaultRedisScript<Void> maxRedisScript;
     private DefaultRedisScript<Void> unlockRedisScript;
-    private Expiration expiration = Expiration.seconds((int)CollectorConstants.REDIS_KEY_TIMEOUT);
+    private final Expiration expiration = Expiration.seconds((int)CollectorConstants.REDIS_KEY_TIMEOUT);
 
     /**
      * 压测场景强行关闭预留时间
@@ -85,10 +85,9 @@ public abstract class AbstractIndicators {
 
     public boolean lock(String key, String value) {
 
-        return (boolean)redisTemplate.execute((RedisCallback<Boolean>)connection -> {
+        return redisTemplate.execute((RedisCallback<Boolean>)connection -> {
             Boolean bl = connection.set(getLockPrefix(key).getBytes(), value.getBytes(), expiration,
                 RedisStringCommands.SetOption.SET_IF_ABSENT);
-            //connection.expire(key.getBytes(), EXPIREMSECS * 1000);
             return null != bl && bl;
         });
     }
@@ -213,14 +212,12 @@ public abstract class AbstractIndicators {
     protected void doubleSaveRedisMap(String key, String timestampPodNum, Double value) {
         // 归纳
         redisTemplate.opsForHash().put(key, timestampPodNum, value);
-        //redisTemplate.opsForValue().increment(key, value);
         setTtl(key);
     }
 
     protected void longSaveRedisMap(String key, String timestampPodNum, Long value) {
         // 归纳
         redisTemplate.opsForHash().put(key, timestampPodNum, value);
-        //redisTemplate.opsForValue().increment(key, value);
         setTtl(key);
     }
 
@@ -253,14 +250,11 @@ public abstract class AbstractIndicators {
     protected void intSaveRedisMap(String key, String timestampPodNum, Integer value) {
         // 归纳 数据
         redisTemplate.opsForHash().put(key, timestampPodNum, value);
-        // 计算 数据
-        //redisTemplate.opsForValue().increment(key, value);
         setTtl(key);
     }
 
     protected void setError(String key, String timestampPodNum, String value) {
         redisTemplate.opsForHash().put(key, timestampPodNum, value);
-        //redisTemplate.opsForValue().set(key, value);
         setTtl(key);
     }
 
@@ -301,20 +295,22 @@ public abstract class AbstractIndicators {
 
     protected Integer getIntValue(String key) {
         // 数据进行集合
-        if (redisTemplate.hasKey(key) && redisTemplate.opsForHash().size(key) > 0) {
-            Map<String, Integer> map = redisTemplate.opsForHash().entries(key);
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(key)) && redisTemplate.opsForHash().size(key) > 0) {
+            Map<Object, Object> map = redisTemplate.opsForHash().entries(key);
             // 数据聚合
-            return map.values().stream().reduce(Integer::sum).orElse(0);
+            return map.values().stream()
+                .map(t -> Integer.parseInt(t.toString()))
+                .reduce(Integer::sum).orElse(0);
         }
         return null;
     }
 
     protected List<String> getStringValue(String key) {
         // 数据进行集合
-        if (redisTemplate.hasKey(key) && redisTemplate.opsForHash().size(key) > 0) {
-            Map<String, String> map = redisTemplate.opsForHash().entries(key);
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(key)) && redisTemplate.opsForHash().size(key) > 0) {
+            Map<Object, Object> map = redisTemplate.opsForHash().entries(key);
             // 数据聚合
-            return new ArrayList<>(map.values());
+            return map.values().stream().map(String::valueOf).collect(Collectors.toList());
         }
         return null;
     }
@@ -334,8 +330,8 @@ public abstract class AbstractIndicators {
     }
 
     protected Long getLongValueFromMap(String key) {
-        if (redisTemplate.hasKey(key) && redisTemplate.opsForHash().size(key) > 0) {
-            Map<String, Object> map = redisTemplate.opsForHash().entries(key);
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(key)) && redisTemplate.opsForHash().size(key) > 0) {
+            Map<Object, Object> map = redisTemplate.opsForHash().entries(key);
             // 数据聚合
             return map.values().stream().map(String::valueOf)
                 .map(Long::valueOf).reduce(Long::sum).orElse(0L);
