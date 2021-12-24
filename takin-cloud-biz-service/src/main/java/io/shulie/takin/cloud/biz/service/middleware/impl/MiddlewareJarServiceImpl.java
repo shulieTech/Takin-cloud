@@ -136,10 +136,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
             if (StrUtil.isBlank(artifactId)) {
                 return null;
             }
-
-            CompareMiddlewareJarResultVO compareResultVO = new CompareMiddlewareJarResultVO();
-            BeanUtils.copyProperties(importVO, compareResultVO);
-            return compareResultVO;
+            return new CompareMiddlewareJarResultVO(importVO);
         }).filter(Objects::nonNull).collect(Collectors.toList());
         if (correctList.isEmpty()) {
             return Collections.emptyList();
@@ -391,9 +388,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
             if (StrUtil.isNotBlank(importVO.getArtifactId())) {
                 return null;
             }
-
-            CompareMiddlewareJarResultVO compareResultVO = new CompareMiddlewareJarResultVO();
-            BeanUtils.copyProperties(importVO, compareResultVO);
+            CompareMiddlewareJarResultVO compareResultVO = new CompareMiddlewareJarResultVO(importVO);
             compareResultVO.setRemark("artifactId 未填写");
             return compareResultVO;
 
@@ -442,8 +437,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
                 messages.add("导入成功");
             }
 
-            ImportMiddlewareJarResultVO exportVO = new ImportMiddlewareJarResultVO();
-            BeanUtils.copyProperties(importVO, exportVO);
+            ImportMiddlewareJarResultVO exportVO = new ImportMiddlewareJarResultVO(importVO);
             String remark = String.join(COMMA_SPACE, messages);
             exportVO.setRemark(remark);
             return exportVO;

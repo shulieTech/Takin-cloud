@@ -1,10 +1,11 @@
 package com.pamirs.takin.entity.dao.report;
 
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 
-import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
 import org.apache.ibatis.annotations.Param;
+
+import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
 
 /**
  * @author -
@@ -17,7 +18,7 @@ public interface TReportBusinessActivityDetailMapper {
      * @param record -
      * @return -
      */
-    int insertSelective(ReportBusinessActivityDetail record);
+    int insertSelective(ReportBusinessActivityDetailEntity record);
 
     /**
      * 更新
@@ -25,7 +26,7 @@ public interface TReportBusinessActivityDetailMapper {
      * @param record -
      * @return -
      */
-    int updateByPrimaryKeySelective(ReportBusinessActivityDetail record);
+    int updateByPrimaryKeySelective(ReportBusinessActivityDetailEntity record);
 
     /**
      * 根据主键查询
@@ -33,7 +34,7 @@ public interface TReportBusinessActivityDetailMapper {
      * @param id 数据主键
      * @return -
      */
-    ReportBusinessActivityDetail selectByPrimaryKey(Long id);
+    ReportBusinessActivityDetailEntity selectByPrimaryKey(Long id);
 
     /**
      * 查询报告关联的业务活动详情
@@ -41,7 +42,7 @@ public interface TReportBusinessActivityDetailMapper {
      * @param reportId 报告主键
      * @return -
      */
-    List<ReportBusinessActivityDetail> queryReportBusinessActivityDetailByReportId(@Param("reportId") Long reportId);
+    List<ReportBusinessActivityDetailEntity> queryReportBusinessActivityDetailByReportId(@Param("reportId") Long reportId);
 
     /**
      * 根据报告主键查询关联的业务活动总数

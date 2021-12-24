@@ -14,7 +14,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.biz.cache.DictionaryCache;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
@@ -29,7 +28,6 @@ import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.entrypoint.convert.SceneBusinessActivityRefRespConvertor;
 import io.shulie.takin.cloud.entrypoint.convert.SceneManageRespConvertor;
 import io.shulie.takin.cloud.entrypoint.convert.SceneScriptRefRespConvertor;
-import io.shulie.takin.cloud.entrypoint.convert.SceneSlaRefRespConvertor;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivityDetailResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivityDetailResponse;
@@ -44,7 +42,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -265,9 +262,7 @@ public class SceneManageDetailController {
     }
 
     private String buildRule(SceneSlaRefResponse slaRefDTO) {
-        SceneSlaRefInput input = new SceneSlaRefInput();
-        BeanUtils.copyProperties(slaRefDTO, input);
-        Map<String, Object> dataMap = SlaUtil.matchCondition(input, new SendMetricsEvent());
+        Map<String, Object> dataMap = SlaUtil.matchCondition(slaRefDTO, new SendMetricsEvent());
         return String.valueOf(dataMap.get("type"))
             + dataMap.get("compare")
             + slaRefDTO.getRule().getDuring()
@@ -283,8 +278,8 @@ public class SceneManageDetailController {
 
         response.setBusinessActivityConfig(
             SceneBusinessActivityRefRespConvertor.INSTANCE.ofList(sceneManage.getBusinessActivityConfig()));
-        response.setStopCondition(SceneSlaRefRespConvertor.INSTANCE.ofList(sceneManage.getStopCondition()));
-        response.setWarningCondition(SceneSlaRefRespConvertor.INSTANCE.ofList(sceneManage.getWarningCondition()));
+        response.setStopCondition(sceneManage.getStopCondition());
+        response.setWarningCondition(sceneManage.getWarningCondition());
         response.setUploadFile(SceneScriptRefRespConvertor.INSTANCE.ofList(sceneManage.getUploadFile()));
         response.setScheduleInterval(sceneManage.getScheduleInterval());
 

@@ -29,16 +29,8 @@ public class MiddlewareJarDAOImpl implements MiddlewareJarDAO, MPUtil<Middleware
 
     @Override
     public boolean saveBatch(List<MiddlewareJarEntity> createParams) {
-        if (CollectionUtil.isEmpty(createParams)) {
-            return false;
-        }
-
-        List<MiddlewareJarEntity> entities = createParams.stream().map(createParam -> {
-            MiddlewareJarEntity middlewareJarEntity = new MiddlewareJarEntity();
-            BeanUtils.copyProperties(createParam, middlewareJarEntity);
-            return middlewareJarEntity;
-        }).collect(Collectors.toList());
-        return SqlHelper.retBool(middlewareJarMapper.insertBatch(entities));
+        if (CollectionUtil.isEmpty(createParams)) {return false;}
+        return SqlHelper.retBool(middlewareJarMapper.insertBatch(createParams));
     }
 
     @Override

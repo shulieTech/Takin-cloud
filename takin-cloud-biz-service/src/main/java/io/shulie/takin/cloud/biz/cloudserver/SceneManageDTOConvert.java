@@ -15,6 +15,7 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.sdk.model.common.RuleBean;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 import io.shulie.takin.ext.content.enginecall.BusinessActivityExt;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.AfterMapping;
@@ -171,7 +172,7 @@ public interface SceneManageDTOConvert {
         @Mapping(source = "status", target = "status"),
         @Mapping(source = "businessActivityIds", target = "businessActivity", ignore = true)
     })
-    SceneManageWrapperOutput.SceneSlaRefOutput of(SceneSlaRef source);
+    SceneSlaRefResponse of(SceneSlaRef source);
 
     /**
      * 填充Sla规则数据
@@ -180,7 +181,7 @@ public interface SceneManageDTOConvert {
      * @param dto    Sla规则
      */
     @AfterMapping
-    default void fillSlaRule(SceneSlaRef source, @MappingTarget SceneManageWrapperOutput.SceneSlaRefOutput dto) {
+    default void fillSlaRule(SceneSlaRef source, @MappingTarget SceneSlaRefResponse dto) {
         String condition = source.getCondition();
         JSONObject jsonObject = JSON.parseObject(condition);
         Integer compareType = jsonObject.getInteger(SceneManageConstant.COMPARE_TYPE);
@@ -203,7 +204,7 @@ public interface SceneManageDTOConvert {
      * @param sources 原数据
      * @return 转换后数据
      */
-    List<SceneManageWrapperOutput.SceneSlaRefOutput> ofSlaList(List<SceneSlaRef> sources);
+    List<SceneSlaRefResponse> ofSlaList(List<SceneSlaRef> sources);
 
     @Mappings({
         @Mapping(source = "bindRef", target = "bindRef"),

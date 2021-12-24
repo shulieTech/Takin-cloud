@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSON;
 
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.sdk.model.common.SlaBean;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.date.DateUtil;
 import com.google.common.collect.Maps;
@@ -150,15 +151,13 @@ public class SlaServiceImpl implements SlaService {
     }
 
     private void doDestroy(Long sceneId, SendMetricsEvent metricsEvent,
-        List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList,
+        List<SceneSlaRefResponse> slaList,
         SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivityDTO) {
         if (CollectionUtils.isEmpty(slaList)) {
             return;
         }
         slaList.forEach(dto -> {
-            SceneSlaRefInput input = new SceneSlaRefInput();
-            BeanUtils.copyProperties(dto, input);
-            Map<String, Object> conditionMap = SlaUtil.matchCondition(input, metricsEvent);
+            Map<String, Object> conditionMap = SlaUtil.matchCondition(dto, metricsEvent);
             if (!(Boolean)conditionMap.get("result")) {
                 redisTemplate.opsForHash().delete(SLA_DESTROY_KEY, String.valueOf(dto.getId()));
                 return;
@@ -214,14 +213,12 @@ public class SlaServiceImpl implements SlaService {
     }
 
     private void doWarn(SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivityDTO,
-        SendMetricsEvent metricsEvent, List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
+        SendMetricsEvent metricsEvent, List<SceneSlaRefResponse> slaList) {
         if (CollectionUtils.isEmpty(slaList)) {
             return;
         }
         slaList.forEach(dto -> {
-            SceneSlaRefInput input = new SceneSlaRefInput();
-            BeanUtils.copyProperties(dto, input);
-            Map<String, Object> conditionMap = SlaUtil.matchCondition(input, metricsEvent);
+            Map<String, Object> conditionMap = SlaUtil.matchCondition(dto, metricsEvent);
             if (!(Boolean)conditionMap.get("result")) {
                 redisTemplate.opsForHash().delete(SLA_WARN_KEY, String.valueOf(dto.getId()));
                 return;
@@ -273,7 +270,7 @@ public class SlaServiceImpl implements SlaService {
     private WarnDetail buildWarnDetail(Map<String, Object> conditionMap,
         SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivityDTO,
         SendMetricsEvent metricsEvent,
-        SceneManageWrapperOutput.SceneSlaRefOutput slaDto) {
+        SceneSlaRefResponse slaDto) {
         WarnDetail warnDetail = new WarnDetail();
         warnDetail.setPtId(metricsEvent.getReportId());
         warnDetail.setSlaId(slaDto.getId());
@@ -293,8 +290,8 @@ public class SlaServiceImpl implements SlaService {
         return warnDetail;
     }
 
-    private List<SceneManageWrapperOutput.SceneSlaRefOutput> filterSlaListByMd5(String bindRef,
-        List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
+    private List<SceneSlaRefResponse> filterSlaListByMd5(String bindRef,
+        List<SceneSlaRefResponse> slaList) {
         if (CollectionUtils.isEmpty(slaList)) {
             return new ArrayList<>(0);
         }
@@ -315,8 +312,8 @@ public class SlaServiceImpl implements SlaService {
         return false;
     }
 
-    private List<SceneManageWrapperOutput.SceneSlaRefOutput> filterSlaListByActivityId(Long businessActivityId,
-        List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
+    private List<SceneSlaRefResponse> filterSlaListByActivityId(Long businessActivityId,
+        List<SceneSlaRefResponse> slaList) {
         if (CollectionUtils.isEmpty(slaList)) {
             return new ArrayList<>(0);
         }
