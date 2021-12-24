@@ -1,10 +1,10 @@
 package io.shulie.takin.cloud.biz.service.report.impl;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Date;
 import java.util.List;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Calendar;
@@ -18,10 +18,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
-import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.sdk.model.common.SlaBean;
-import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
 import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSON;
@@ -40,13 +36,13 @@ import com.github.pagehelper.PageHelper;
 import org.springframework.beans.BeanUtils;
 import com.jayway.jsonpath.DocumentContext;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.MapUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
@@ -65,6 +61,7 @@ import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
+import io.shulie.takin.cloud.sdk.model.common.SlaBean;
 import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.common.utils.TestTimeUtil;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
@@ -78,9 +75,11 @@ import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.ext.content.asset.RealAssectBillExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.biz.output.report.ReportOutput;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.sdk.model.common.DistributeBean;
+import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
 import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.biz.cloudserver.ReportConverter;
 import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
@@ -92,6 +91,7 @@ import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.ext.content.asset.AssetInvoiceExt;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
@@ -116,7 +116,7 @@ import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivitySummaryBean;
 
 /**
  * @author 莫问
@@ -272,10 +272,8 @@ public class ReportServiceImpl implements ReportService {
                 summaryBean.setTotalRequest(bean.getTotalRequest());
                 summaryBean.setTps(bean.getTps());
                 result.add(summaryBean);
-                if (CollectionUtils.isNotEmpty(bean.getChildren())) {
-                    buildFailActivitiesByNodeDetails(bean.getChildren(), result);
-                }
-            } else if (CollectionUtils.isNotEmpty(bean.getChildren())) {
+            }
+            if (CollectionUtils.isNotEmpty(bean.getChildren())) {
                 buildFailActivitiesByNodeDetails(bean.getChildren(), result);
             }
         }
