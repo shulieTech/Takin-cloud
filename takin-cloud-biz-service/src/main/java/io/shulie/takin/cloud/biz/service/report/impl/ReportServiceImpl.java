@@ -1,10 +1,10 @@
 package io.shulie.takin.cloud.biz.service.report.impl;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Date;
 import java.util.List;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Calendar;
@@ -18,10 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
-import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.sdk.model.common.SlaBean;
-import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
+import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
 import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSON;
@@ -40,13 +37,13 @@ import com.github.pagehelper.PageHelper;
 import org.springframework.beans.BeanUtils;
 import com.jayway.jsonpath.DocumentContext;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.MapUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
@@ -56,7 +53,6 @@ import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
 import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
 import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
 import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
-import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
 
 import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.utils.json.JsonHelper;
@@ -65,6 +61,7 @@ import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
+import io.shulie.takin.cloud.sdk.model.common.SlaBean;
 import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.common.utils.TestTimeUtil;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
@@ -78,9 +75,11 @@ import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.ext.content.asset.RealAssectBillExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.biz.output.report.ReportOutput;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.sdk.model.common.DistributeBean;
+import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
 import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.biz.cloudserver.ReportConverter;
 import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
@@ -92,6 +91,7 @@ import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.ext.content.asset.AssetInvoiceExt;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
@@ -116,7 +116,7 @@ import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivitySummaryBean;
 
 /**
  * @author 莫问
@@ -272,17 +272,15 @@ public class ReportServiceImpl implements ReportService {
                 summaryBean.setTotalRequest(bean.getTotalRequest());
                 summaryBean.setTps(bean.getTps());
                 result.add(summaryBean);
-                if (CollectionUtils.isNotEmpty(bean.getChildren())) {
-                    buildFailActivitiesByNodeDetails(bean.getChildren(), result);
-                }
-            } else if (CollectionUtils.isNotEmpty(bean.getChildren())) {
+            }
+            if (CollectionUtils.isNotEmpty(bean.getChildren())) {
                 buildFailActivitiesByNodeDetails(bean.getChildren(), result);
             }
         }
     }
 
     private List<ScriptNodeSummaryBean> getReportNodeDetail(String scriptNodeTree, Long reportId) {
-        List<ReportBusinessActivityDetail> activities = tReportBusinessActivityDetailMapper
+        List<ReportBusinessActivityDetailEntity> activities = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportId);
         return getScriptNodeSummaryBeans(scriptNodeTree, activities);
     }
@@ -344,7 +342,7 @@ public class ReportServiceImpl implements ReportService {
             String.format("%d'%d\"", wrapper.getTotalTestTime() / 60, wrapper.getTotalTestTime() % 60));
 
         // 补充操作人
-        List<ReportBusinessActivityDetail> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper
+        List<ReportBusinessActivityDetailEntity> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportResult.getId());
         if (StringUtils.isNotBlank(reportResult.getScriptNodeTree())) {
             String nodeTree = reportResult.getScriptNodeTree();
@@ -504,7 +502,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<BusinessActivityDTO> queryReportActivityByReportId(Long reportId) {
-        List<ReportBusinessActivityDetail> reportBusinessActivityDetailList = tReportBusinessActivityDetailMapper
+        List<ReportBusinessActivityDetailEntity> reportBusinessActivityDetailList = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportId);
         return ReportConverter.INSTANCE.ofBusinessActivity(reportBusinessActivityDetailList);
     }
@@ -537,7 +535,7 @@ public class ReportServiceImpl implements ReportService {
     public NodeTreeSummaryResp getNodeSummaryList(Long reportId) {
         //List<BusinessActivitySummaryBean> list = Lists.newArrayList();
         //查询业务活动的概况
-        List<ReportBusinessActivityDetail> reportBusinessActivityDetailList = tReportBusinessActivityDetailMapper
+        List<ReportBusinessActivityDetailEntity> reportBusinessActivityDetailList = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportId);
         NodeTreeSummaryResp resp = new NodeTreeSummaryResp();
         if (CollectionUtils.isEmpty(reportBusinessActivityDetailList)) {
@@ -560,7 +558,7 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private List<ScriptNodeSummaryBean> getScriptNodeSummaryBeans(String nodeTree,
-        List<ReportBusinessActivityDetail> details) {
+        List<ReportBusinessActivityDetailEntity> details) {
         Map<String, Map<String, Object>> resultMap = new HashMap<>(details.size());
         if (StringUtils.isNotBlank(nodeTree)) {
             details.stream().filter(Objects::nonNull)
@@ -1164,14 +1162,14 @@ public class ReportServiceImpl implements ReportService {
      */
     private boolean updateReportBusinessActivity(Long sceneId, Long reportId, Long tenantId) {
         //报表活动
-        List<ReportBusinessActivityDetail> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper
+        List<ReportBusinessActivityDetailEntity> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportId);
 
         //业务活动是否匹配
         boolean totalPassFlag = true;
         boolean passFlag;
         String tableName = InfluxUtil.getMeasurement(sceneId, reportId, tenantId);
-        for (ReportBusinessActivityDetail reportBusinessActivityDetail : reportBusinessActivityDetails) {
+        for (ReportBusinessActivityDetailEntity reportBusinessActivityDetail : reportBusinessActivityDetails) {
             if (StringUtils.isBlank(reportBusinessActivityDetail.getBindRef())) {
                 continue;
             }
@@ -1220,7 +1218,7 @@ public class ReportServiceImpl implements ReportService {
      *
      * @return -
      */
-    private boolean isPass(ReportBusinessActivityDetail detail) {
+    private boolean isPass(ReportBusinessActivityDetailEntity detail) {
         if (isTargetBiggerThanZero(detail.getTargetSuccessRate()) && detail.getTargetSuccessRate().compareTo(
             detail.getSuccessRate()) > 0) {
             return false;
@@ -1381,7 +1379,7 @@ public class ReportServiceImpl implements ReportService {
             && StringUtils.isNotEmpty(jsonObject.getString(ReportConstants.SLA_ERROR_MSG));
     }
 
-    private Map<String, Object> fillReportMap(ReportBusinessActivityDetail detail) {
+    private Map<String, Object> fillReportMap(ReportBusinessActivityDetailEntity detail) {
         if (Objects.nonNull(detail)) {
             Map<String, Object> resultMap = new HashMap<>(13);
             resultMap.put("avgRt", new DataBean(detail.getRt(), detail.getTargetRt()));
@@ -1430,7 +1428,7 @@ public class ReportServiceImpl implements ReportService {
         return result;
     }
 
-    private Map<String, Object> fillTempMap(StatReportDTO statReport, ReportBusinessActivityDetail detail) {
+    private Map<String, Object> fillTempMap(StatReportDTO statReport, ReportBusinessActivityDetailEntity detail) {
         if (Objects.isNull(detail)) {
             return null;
         }
@@ -1468,7 +1466,7 @@ public class ReportServiceImpl implements ReportService {
             }
             return null;
         }
-        List<ReportBusinessActivityDetail> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper
+        List<ReportBusinessActivityDetailEntity> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportResult.getId());
         if (CollectionUtils.isEmpty(reportBusinessActivityDetails)) {
             return null;

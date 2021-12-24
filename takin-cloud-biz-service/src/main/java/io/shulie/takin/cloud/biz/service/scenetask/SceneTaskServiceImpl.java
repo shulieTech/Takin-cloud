@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
+import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
 import lombok.extern.slf4j.Slf4j;
 
 import cn.hutool.json.JSONUtil;
@@ -39,7 +40,6 @@ import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.vo.file.FileSliceRequest;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneFileReadPosition;
-import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
 
 import io.shulie.takin.utils.json.JsonHelper;
 import io.shulie.takin.cloud.ext.api.AssetExtApi;
@@ -876,7 +876,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         Long reportId = report.getId();
         //初始化业务活动
         scene.getBusinessActivityConfig().forEach(activity -> {
-            ReportBusinessActivityDetail reportBusinessActivityDetail = new ReportBusinessActivityDetail();
+            ReportBusinessActivityDetailEntity reportBusinessActivityDetail = new ReportBusinessActivityDetailEntity();
             reportBusinessActivityDetail.setReportId(reportId);
             reportBusinessActivityDetail.setSceneId(scene.getId());
             reportBusinessActivityDetail.setBusinessActivityId(activity.getBusinessActivityId());
@@ -914,7 +914,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         List<String> bindRefList = businessActivityConfig.stream().filter(Objects::nonNull)
             .map(SceneBusinessActivityRefOutput::getBindRef)
             .collect(Collectors.toList());
-        List<ReportBusinessActivityDetail> resultList = new ArrayList<>();
+        List<ReportBusinessActivityDetailEntity> resultList = new ArrayList<>();
         List<ScriptNode> testPlanNodeList = JsonPathUtil.getCurrentNodeByType(scriptNodeTree,
             NodeTypeEnum.TEST_PLAN.name());
         if (CollectionUtils.isNotEmpty(testPlanNodeList) && testPlanNodeList.size() == 1) {
@@ -949,8 +949,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
      * @param scriptNode 目标节点
      * @param detailList 结果
      */
-    private void fillNonTargetActivityDetail(Long sceneId, Long reportId, ScriptNode scriptNode, List<ReportBusinessActivityDetail> detailList) {
-        ReportBusinessActivityDetail detail = new ReportBusinessActivityDetail();
+    private void fillNonTargetActivityDetail(Long sceneId, Long reportId, ScriptNode scriptNode, List<ReportBusinessActivityDetailEntity> detailList) {
+        ReportBusinessActivityDetailEntity detail = new ReportBusinessActivityDetailEntity();
         detail.setTargetTps(new BigDecimal(-1));
         detail.setTargetRt(new BigDecimal(-1));
         detail.setTargetSa(new BigDecimal(-1));

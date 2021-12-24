@@ -102,7 +102,8 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
         EnginePluginEntity pressureEnginePluginEntity = isEdit
             ? enginePluginMapper.selectById(pluginId) : new EnginePluginEntity();
 
-        BeanUtils.copyProperties(input, pressureEnginePluginEntity);
+        pressureEnginePluginEntity.setPluginName(input.getPluginName());
+        pressureEnginePluginEntity.setPluginType(input.getPluginType());
         LocalDateTime now = LocalDateTime.now();
         //保存引擎插件信息
         if (isEdit) {

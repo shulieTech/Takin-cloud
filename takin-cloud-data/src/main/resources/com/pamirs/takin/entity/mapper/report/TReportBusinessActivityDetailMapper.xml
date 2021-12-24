@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper">
-    <resultMap id="BaseResultMap" type="com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail">
+    <resultMap id="BaseResultMap" type="io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity">
         <!--@mbg.generated-->
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="report_id" jdbcType="BIGINT" property="reportId"/>
@@ -44,7 +44,7 @@
         where id = #{id,jdbcType=BIGINT}
     </select>
     <insert id="insertSelective"
-            parameterType="com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail">
+            parameterType="io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity">
         <!--@mbg.generated-->
         insert into t_report_business_activity_detail
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -214,7 +214,7 @@
     </select>
 
     <update id="updateByPrimaryKeySelective"
-            parameterType="com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail">
+            parameterType="io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity">
         <!--@mbg.generated-->
         update t_report_business_activity_detail
         <set>

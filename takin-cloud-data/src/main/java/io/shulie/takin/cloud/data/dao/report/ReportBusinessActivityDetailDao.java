@@ -2,8 +2,6 @@ package io.shulie.takin.cloud.data.dao.report;
 
 import java.util.List;
 
-import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
-
 import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
 
 /**
@@ -11,9 +9,9 @@ import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity
  */
 public interface ReportBusinessActivityDetailDao {
 
-    int insert(ReportBusinessActivityDetail activityDetail);
+    int insert(ReportBusinessActivityDetailEntity activityDetail);
 
-    int update(ReportBusinessActivityDetail activityDetail);
+    int update(ReportBusinessActivityDetailEntity activityDetail);
 
     ReportBusinessActivityDetailEntity selectById(Long id);
 
