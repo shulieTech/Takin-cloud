@@ -132,7 +132,7 @@ public class FileController {
         try {
             String filePath = scriptPath + SceneManageConstant.FILE_SPLIT + fileName;
             //处理安全问题
-            filePath = FilenameUtils.getName(filePath);
+            filePath = FilenameUtils.getFullPath(filePath) + FilenameUtils.getName(filePath);
 
             if (new File(filePath).exists()) {
                 ServletOutputStream outputStream = response.getOutputStream();
@@ -153,7 +153,7 @@ public class FileController {
     public void downloadFileByPath(@RequestParam("filePath") String filePath, HttpServletResponse response) {
         try {
             //处理安全问题
-            filePath = FilenameUtils.getName(filePath);
+            filePath = FilenameUtils.getFullPath(filePath) + FilenameUtils.getName(filePath);
             //反编码
             filePath = URLDecoder.decode(filePath, "utf-8");
             boolean permit = fileStrategy.filePathValidate(filePath);
