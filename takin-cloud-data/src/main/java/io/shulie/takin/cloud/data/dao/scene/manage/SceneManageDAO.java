@@ -2,11 +2,12 @@ package io.shulie.takin.cloud.data.dao.scene.manage;
 
 import java.util.List;
 
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import com.baomidou.mybatisplus.extension.service.IService;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
+import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
 
 /**
  * @author 无涯
@@ -95,4 +96,21 @@ public interface SceneManageDAO extends IService<SceneManageEntity> {
      * @return 操作影响行数
      */
     int updateStatus(Long sceneId, Integer status, Integer compareStatus);
+
+    /**
+     * 依据主键集合查询
+     *
+     * @param ids        主键集合
+     * @param contextExt 溯源数据
+     * @return 查询结果
+     */
+    List<SceneManageEntity> getByIds(List<Long> ids, ContextExt contextExt);
+
+    /**
+     * 查询所有场景信息
+     *
+     * @param contextExt 溯源数据
+     * @return 所有场景信息
+     */
+    List<SceneManageEntity> selectAllSceneManageList(ContextExt contextExt);
 }

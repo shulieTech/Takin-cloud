@@ -21,18 +21,20 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
+import cn.hutool.json.JSONUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
+import cn.hutool.core.util.ObjectUtil;
+
 import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
+import com.github.pagehelper.PageHelper;
+
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneBusinessActivityRefMapper;
-import com.pamirs.takin.entity.dao.scene.manage.TSceneManageMapper;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneScriptRefMapper;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneSlaRefMapper;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneBusinessActivityRef;
@@ -121,15 +123,13 @@ public class SceneManageServiceImpl implements SceneManageService {
     @Resource
     private ReportService reportService;
     @Resource
-    private SceneManageDAO sceneManageDAO;
+    private SceneManageDAO sceneManageDao;
     @Resource
     StringRedisTemplate stringRedisTemplate;
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
     @Resource
     private EnginePluginUtils enginePluginUtils;
-    @Resource
-    private TSceneManageMapper tSceneManageMapper;
     @Resource
     private TSceneSlaRefMapper tSceneSlaRefMapper;
     @Resource
@@ -168,14 +168,17 @@ public class SceneManageServiceImpl implements SceneManageService {
             isScriptManage = json.get(SceneManageConstant.FEATURES_SCRIPT_ID) != null;
         }
         Map<String, Object> maps = buildSceneManageRef(wrapperRequest);
-        List<SceneBusinessActivityRef> businessActivityRefs = (List<SceneBusinessActivityRef>)maps.get(SCENE_BUSINESS_ACTIVITY);
-        List<SceneScriptRef> sceneScriptRefList = (List<SceneScriptRef>)maps.get(SCENE_SCRIPT);
-        List<SceneSlaRef> sceneSlaRefs = (List<SceneSlaRef>)maps.get(SCENE_SLA);
+        List<SceneBusinessActivityRef> businessActivityRefs =
+            convertObjectToList(maps.get(SCENE_BUSINESS_ACTIVITY), SceneBusinessActivityRef.class);
+        List<SceneScriptRef> sceneScriptRefList =
+            convertObjectToList(maps.get(SCENE_SCRIPT), SceneScriptRef.class);
+        List<SceneSlaRef> sceneSlaRefList =
+            convertObjectToList(maps.get(SCENE_SLA), SceneSlaRef.class);
         if (isScriptManage) {
             matchScriptBusinessActivity(businessActivityRefs, sceneScriptRefList);
         }
         Long sceneId = saveToDatabase((SceneManageCreateOrUpdateParam)maps.get(SCENE_MANAGE),
-            businessActivityRefs, sceneScriptRefList, sceneSlaRefs, isScriptManage);
+            businessActivityRefs, sceneScriptRefList, sceneSlaRefList, isScriptManage);
 
         //使用了脚本，需要转移文件
         if (isScriptManage) {
@@ -288,7 +291,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     private Long saveToDatabase(SceneManageCreateOrUpdateParam createParam, List<SceneBusinessActivityRef> businessActivityList,
         List<SceneScriptRef> scriptList, List<SceneSlaRef> slaList, boolean isScriptManage) {
         //负责人默认创建人
-        Long sceneId = sceneManageDAO.insert(createParam);
+        Long sceneId = sceneManageDao.insert(createParam);
         if (sceneId == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_ADD_ERROR, "create scene error");
         }
@@ -332,7 +335,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (sceneManageQueryBean.getType() == null) {
             sceneManageQueryBean.setType(0);
         }
-        List<SceneManageEntity> queryList = sceneManageDAO.getPageList(sceneManageQueryBean);
+        List<SceneManageEntity> queryList = sceneManageDao.getPageList(sceneManageQueryBean);
         if (CollectionUtils.isEmpty(queryList)) {
             return new PageInfo<>(Lists.newArrayList());
         }
@@ -393,7 +396,6 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     private Map<String, Object> buildSceneManageRef(SceneManageWrapperInput wrapperRequest) {
         List<SceneScriptRef> scriptList = buildScriptRef(wrapperRequest.getUploadFile(), wrapperRequest.getScriptType());
-        //        List<SceneBusinessActivityRefInput> inputs = SceneManageInputConvertor.INSTANCE.ofListSceneBusinessActivityRefInput(wrapperRequest.getBusinessActivityConfig());
         List<SceneBusinessActivityRef> businessActivityList = buildSceneBusinessActivityRef(wrapperRequest.getBusinessActivityConfig());
         SceneManageCreateOrUpdateParam createParam = buildSceneManage(wrapperRequest);
         List<SceneSlaRef> slaList = Lists.newArrayList();
@@ -431,13 +433,16 @@ public class SceneManageServiceImpl implements SceneManageService {
 
         Map<String, Object> maps = buildSceneManageRef(wrapperRequest);
         SceneManageCreateOrUpdateParam manageCreateOrUpdateParam = (SceneManageCreateOrUpdateParam)maps.get(SCENE_MANAGE);
-        List<SceneBusinessActivityRef> businessActivityRefs = (List<SceneBusinessActivityRef>)maps.get(SCENE_BUSINESS_ACTIVITY);
-        List<SceneScriptRef> sceneScriptRefList = (List<SceneScriptRef>)maps.get(SCENE_SCRIPT);
-        List<SceneSlaRef> sceneSlaRefs = (List<SceneSlaRef>)maps.get(SCENE_SLA);
+        List<SceneBusinessActivityRef> businessActivityRefList =
+            convertObjectToList(maps.get(SCENE_BUSINESS_ACTIVITY), SceneBusinessActivityRef.class);
+        List<SceneScriptRef> sceneScriptRefList =
+            convertObjectToList(maps.get(SCENE_SCRIPT), SceneScriptRef.class);
+        List<SceneSlaRef> sceneSlaRefList =
+            convertObjectToList(maps.get(SCENE_SLA), SceneSlaRef.class);
         if (isScriptManage) {
-            matchScriptBusinessActivity(businessActivityRefs, sceneScriptRefList);
+            matchScriptBusinessActivity(businessActivityRefList, sceneScriptRefList);
         }
-        updateToDatabase(manageCreateOrUpdateParam, businessActivityRefs, sceneScriptRefList, sceneSlaRefs, isScriptManage);
+        updateToDatabase(manageCreateOrUpdateParam, businessActivityRefList, sceneScriptRefList, sceneSlaRefList, isScriptManage);
         //删除脚本文件、从新从文件库重新copy
         Long sceneId = wrapperRequest.getId();
         if (isScriptManage && fileNeedChange && StringUtils.isNotBlank(scriptPath) && sceneId != null) {
@@ -447,7 +452,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     private void updateToDatabase(SceneManageCreateOrUpdateParam updateParam, List<SceneBusinessActivityRef> businessActivityList,
         List<SceneScriptRef> scriptList, List<SceneSlaRef> slaList, boolean isScriptManage) {
-        sceneManageDAO.update(updateParam);
+        sceneManageDao.update(updateParam);
         Long sceneId = updateParam.getId();
         fillSceneId(businessActivityList, sceneId);
         fillSceneId(scriptList, sceneId);
@@ -557,7 +562,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     @Override
     public void updateSceneManageStatus(UpdateStatusBean statusVO) {
-        sceneManageDAO.updateStatus(statusVO.getSceneId(), statusVO.getAfterStatus(), statusVO.getPreStatus());
+        sceneManageDao.updateStatus(statusVO.getSceneId(), statusVO.getAfterStatus(), statusVO.getPreStatus());
     }
 
     @Override
@@ -566,7 +571,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             Collectors.joining(","));
         String updateStatus = statusVO.getUpdateEnum().getDesc();
 
-        SceneManageEntity sceneManageResult = sceneManageDAO.getSceneById(statusVO.getSceneId());
+        SceneManageEntity sceneManageResult = sceneManageDao.getSceneById(statusVO.getSceneId());
         if (sceneManageResult == null) {
             log.error("异常代码【{}】,异常内容：更新生命周期失败 --> 找不到对应的场景: {}",
                 TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId());
@@ -611,6 +616,10 @@ public class SceneManageServiceImpl implements SceneManageService {
                     // 1.从REDIS中取
                     String redisKey = engineName + ScheduleConstants.FIRST_SIGN;
                     String dateTimeString = stringRedisTemplate.opsForValue().get(redisKey);
+                    if (ObjectUtil.isNull(dateTimeString)) {
+                        log.warn("Redis中,键{}的值为空.", redisKey);
+                        dateTimeString = "";
+                    }
                     if (StrUtil.isNotBlank(dateTimeString)) {startTime = new Date(Long.parseLong(dateTimeString));}
                     // 2.设定为当前时间
                     else {startTime = new Date();}
@@ -627,10 +636,7 @@ public class SceneManageServiceImpl implements SceneManageService {
                     statusVO.getSceneId(), statusVO.getResultId(), recentlyReport.getId());
                 return false;
             }
-
-            //   这个报告startTime 压测正式真实开始时间，所以后续要被更新
-            //        report.setStartTime(new Date());
-            sceneManageDAO.update(updateParam);
+            sceneManageDao.update(updateParam);
             log.info("本次压测{}-{}-{} 状态更新成功，更新生命周期：{} -> {},check:{}", statusVO.getSceneId(), statusVO.getResultId(),
                 statusVO.getTenantId(), statusMsg, updateStatus, checkStatus);
         } catch (Exception e) {
@@ -666,7 +672,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         }};
         // --->update 失败状态
         sceneManage.setStatus(SceneManageStatusEnum.FAILED.getValue());
-        sceneManageDAO.getBaseMapper().updateById(sceneManage);
+        sceneManageDao.getBaseMapper().updateById(sceneManage);
 
     }
 
@@ -686,9 +692,8 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     @Override
     public List<SceneManageListOutput> querySceneManageList() {
-        List<SceneManageEntity> sceneManages = tSceneManageMapper.selectAllSceneManageList();
-        return sceneManages.stream().map(t -> new SceneManageListOutput(t))
-            .collect(Collectors.toList());
+        List<SceneManageEntity> sceneManages = sceneManageDao.selectAllSceneManageList(null);
+        return sceneManages.stream().map(SceneManageListOutput::new).collect(Collectors.toList());
     }
 
     @Override
@@ -696,7 +701,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     public void updateFileByScriptId(UpdateSceneFileRequest request) {
         // 查出所有请求租户的所有场景
         log.info("更新脚本对应的文件 --> 求出租户下的所有场景");
-        List<SceneManageEntity> sceneManageList = sceneManageDAO.listFromUpdateScript();
+        List<SceneManageEntity> sceneManageList = sceneManageDao.listFromUpdateScript();
         if (sceneManageList.isEmpty()) {
             return;
         }
@@ -743,7 +748,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             return Lists.newArrayList();
 
         }
-        List<SceneManageEntity> byIds = tSceneManageMapper.getByIds(sceneIds);
+        List<SceneManageEntity> byIds = sceneManageDao.getByIds(sceneIds, null);
         List<SceneManageWrapperOutput> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(byIds)) {
             byIds.forEach(sceneManage -> {
@@ -795,7 +800,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
         // 更新 scene
         log.info("更新脚本对应的文件 --> 场景更新, 更新对应的脚本发布id");
-        if (!sceneManageDAO.updateBatchById(newSceneManageEntities)) {
+        if (!sceneManageDao.updateBatchById(newSceneManageEntities)) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_ERROR, "场景数据更新失败!");
         }
 
@@ -901,12 +906,12 @@ public class SceneManageServiceImpl implements SceneManageService {
     }
 
     private Boolean existSceneManage(Long sceneId) {
-        return sceneManageDAO.getSceneById(sceneId) != null;
+        return sceneManageDao.getSceneById(sceneId) != null;
     }
 
     @Override
     public void delete(Long id) {
-        sceneManageDAO.removeById(id);
+        sceneManageDao.removeById(id);
     }
 
     @Override
@@ -989,7 +994,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (id == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "ID不能为空");
         }
-        SceneManageEntity result = sceneManageDAO.getSceneById(id);
+        SceneManageEntity result = sceneManageDao.getSceneById(id);
         if (result == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "场景记录不存在" + id);
         }
@@ -1163,9 +1168,6 @@ public class SceneManageServiceImpl implements SceneManageService {
             wrapperVO.setPressureType(0);
         }
         map.put(SceneManageConstant.PT_TYPE, wrapperVO.getPressureType());
-        //        if (PressureSceneEnum.DEFAULT.equals(wrapperVO.getPressureType()) && wrapperVO.getConcurrenceNum() == null) {
-        //            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_BUILD_PARAM_ERROR, "并发模式中，并发数不能为空");
-        //        }
         map.put(SceneManageConstant.THREAD_NUM, wrapperVO.getConcurrenceNum());
         map.put(SceneManageConstant.HOST_NUM, wrapperVO.getIpNum());
         map.put(SceneManageConstant.PT_DURATION, wrapperVO.getPressureTestTime().getTime());
@@ -1315,5 +1317,19 @@ public class SceneManageServiceImpl implements SceneManageService {
                 + SceneManageConstant.FILE_SPLIT
                 + file)
         );
+    }
+
+    private <T> List<T> convertObjectToList(Object o, Class<T> resultClass) {
+        List<T> resultList = new ArrayList<>(0);
+        if (ObjectUtil.isNotNull(o)) {
+            if (o instanceof List) {
+                List<?> listResult = (List<?>)o;
+                listResult.stream()
+                    .filter(resultClass::isInstance)
+                    .map(resultClass::cast)
+                    .forEach(resultList::add);
+            }
+        }
+        return resultList;
     }
 }
