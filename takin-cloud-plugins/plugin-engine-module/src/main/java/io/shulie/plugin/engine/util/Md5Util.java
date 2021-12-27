@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.security.MessageDigest;
 
+import cn.hutool.crypto.SecureUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.codec.binary.Hex;
@@ -44,7 +45,7 @@ public class Md5Util {
      * 字符串md5
      */
     public static String md5(String text) {
-        return DigestUtils.md5Hex(text);
+        return SecureUtil.md5().digestHex(text);
     }
 
     /**
@@ -122,11 +123,6 @@ public class Md5Util {
         if (null == in) {
             return null;
         }
-        try {
-            return DigestUtils.md5Hex(in);
-        } catch (IOException e) {
-            log.error("md5File error!!", e);
-        }
-        return null;
+        return SecureUtil.md5().digestHex(in);
     }
 }
