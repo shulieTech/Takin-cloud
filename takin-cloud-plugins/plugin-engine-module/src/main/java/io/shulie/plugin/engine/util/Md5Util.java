@@ -1,16 +1,14 @@
 package io.shulie.plugin.engine.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.security.MessageDigest;
-
 import cn.hutool.crypto.SecureUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
 
 /**
  * @author liyuanba
@@ -94,17 +92,18 @@ public class Md5Util {
             long fileSize = file.length();
             long per = fileSize / BIG_FILE_PART;
             String fileInfo = file.lastModified() + "|" + fileSize + "|";
-            MessageDigest MD5 = MessageDigest.getInstance("MD5");
-            MD5.update(fileInfo.getBytes());
+            MessageDigest md5 = SecureUtil.md5().getDigest();
+
+            md5.update(fileInfo.getBytes());
             fileInputStream = new FileInputStream(file);
             byte[] buffer = new byte[PART_SIZE];
             for (int i = 1; i <= BIG_FILE_PART; i++) {
                 long start = i == BIG_FILE_PART ? (fileSize - per * i) + per : per;
                 fileInputStream.skip(start - PART_SIZE);
                 int length = fileInputStream.read(buffer);
-                MD5.update(buffer, 0, length);
+                md5.update(buffer, 0, length);
             }
-            return new String(Hex.encodeHex(MD5.digest()));
+            return new String(Hex.encodeHex(md5.digest()));
         } catch (Exception e) {
             log.error("md5 big file error!!file=" + file.getAbsolutePath(), e);
             return null;

@@ -41,6 +41,7 @@ import io.shulie.takin.utils.file.FileManagerHelper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -130,6 +131,8 @@ public class FileController {
     public void downloadFile(@RequestParam("fileName") String fileName, HttpServletResponse response) {
         try {
             String filePath = scriptPath + SceneManageConstant.FILE_SPLIT + fileName;
+            //处理安全问题
+            filePath = FilenameUtils.getName(filePath);
 
             if (new File(filePath).exists()) {
                 ServletOutputStream outputStream = response.getOutputStream();
@@ -149,6 +152,8 @@ public class FileController {
     @GetMapping(value = EntrypointUrl.METHOD_FILE_DOWNLOAD)
     public void downloadFileByPath(@RequestParam("filePath") String filePath, HttpServletResponse response) {
         try {
+            //处理安全问题
+            filePath = FilenameUtils.getName(filePath);
             //反编码
             filePath = URLDecoder.decode(filePath, "utf-8");
             boolean permit = fileStrategy.filePathValidate(filePath);
