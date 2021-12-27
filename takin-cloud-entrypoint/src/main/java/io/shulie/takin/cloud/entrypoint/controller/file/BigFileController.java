@@ -1,14 +1,14 @@
 package io.shulie.takin.cloud.entrypoint.controller.file;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.util.Map;
+import java.util.List;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.io.FileInputStream;
 import java.util.concurrent.Future;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.Resource;
@@ -18,20 +18,22 @@ import javax.servlet.http.HttpServletResponse;
 import com.alibaba.fastjson.JSON;
 
 import com.pamirs.takin.entity.domain.vo.file.Part;
-import io.shulie.takin.cloud.biz.service.cloud.server.BigFileService;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.swagger.annotations.ApiOperation;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.biz.service.cloud.server.BigFileService;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author mubai
@@ -73,7 +75,7 @@ public class BigFileController {
 
     @PostMapping(EntrypointUrl.METHOD_BIG_FILE_UPLOAD)
     public ResponseResult<?> upload(HttpServletRequest request, String param, @RequestBody List<MultipartFile> file) {
-
+        log.debug("io.shulie.takin.cloud.entrypoint.controller.file.BigFileController.upload\nrequest.url:{}", request.getRequestURI());
         Part uploadVO = JSON.parseObject(param, Part.class);
 
         if (uploadVO.getUserAppKey() == null || uploadVO.getSceneId() == null || uploadVO.getFileName() == null) {
@@ -84,7 +86,7 @@ public class BigFileController {
             throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "upload file can not be null");
         }
 
-        Future<ResponseResult> responseResultFuture = bigFileThreadPool.submit(() -> {
+        Future<ResponseResult<?>> responseResultFuture = bigFileThreadPool.submit(() -> {
             try {
                 MultipartFile multipartFile = file.get(0);
                 byte[] bytes = multipartFile.getBytes();
@@ -107,30 +109,9 @@ public class BigFileController {
         }
     }
 
-    private Part getBigFileUploadVO(HttpServletRequest request) {
-        //字段放在header 中，body 放字节数组
-        String userAppKey = request.getHeader("userAppKey");
-        String sceneId = request.getHeader("sceneId");
-        String fileName = request.getHeader("fileName");
-        String start = request.getHeader("start");
-        String end = request.getHeader("end");
-        String md5 = request.getHeader("md5");
-        String originalName = request.getHeader("originalName");
-
-        Part param = new Part();
-        param.setStart(Long.valueOf(start));
-        param.setFileName(fileName);
-        param.setUserAppKey(userAppKey);
-        param.setSceneId(Long.valueOf(sceneId));
-        param.setOriginalName(originalName);
-        param.setEnd(Long.valueOf(end));
-        param.setMd5(md5);
-        return param;
-    }
-
     @PostMapping(EntrypointUrl.METHOD_BIG_FILE_COMPACT)
     public ResponseResult<Map<String, Object>> compact(HttpServletRequest request, @RequestBody Part param) {
-        //BigFileUploadVO param = JSON.parseObject(json,BigFileUploadVO.class);
+        log.debug("io.shulie.takin.cloud.entrypoint.controller.file.BigFileController.upload\nrequest.url:{}", request.getRequestURI());
         if (param.getUserAppKey() == null || param.getSceneId() == null || param.getOriginalName() == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "license | sceneId | fileName can not be null");
 
@@ -139,7 +120,7 @@ public class BigFileController {
     }
 
     @ApiOperation("客户端下载")
-    @GetMapping(value = EntrypointUrl.METHOD_BIG_FILE_DOWNLOAD, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = EntrypointUrl.METHOD_BIG_FILE_DOWNLOAD, produces = MediaType.APPLICATION_JSON_VALUE)
     public void downloadFile(HttpServletResponse response) {
         log.info("上传客户端下载...");
         File pradarUploadFile = bigFileService.getPradarUploadFile();
