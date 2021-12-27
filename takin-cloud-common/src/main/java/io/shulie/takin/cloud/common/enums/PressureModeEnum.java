@@ -1,66 +1,57 @@
 package io.shulie.takin.cloud.common.enums;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import lombok.Getter;
+import lombok.AllArgsConstructor;
 
 /**
  * @author shiyajian
- * create: 2020-07-30
+ * @date 2020-07-30
  */
+@Getter
+@AllArgsConstructor
 public enum PressureModeEnum {
 
     /**
      * 固定模式
      */
-    FIXED("fixed", 1),
+    FIXED(1, "fixed"),
 
     /**
      * 线性增长
      */
-    LINEAR("linear", 2),
+    LINEAR(2, "linear"),
 
     /**
      * 阶梯增长
      */
-    STAIR("stair", 3);
-
-    /**
-     * 名称
-     */
-    @Getter
-    private final String text;
+    STAIR(3, "stair");
 
     /**
      * 编码
      */
-    @Getter
     private final int code;
-
-    PressureModeEnum(String text, int code) {
-        this.text = text;
-        this.code = code;
-    }
+    /**
+     * 名称
+     */
+    private final String description;
 
     public boolean equals(Integer code) {
-        PressureModeEnum mode = PressureModeEnum.value(code);
+        PressureModeEnum mode = PressureModeEnum.of(code);
         return this == mode;
     }
 
-    private static final Map<Integer, PressureModeEnum> pool = new HashMap<>();
+    private static final HashMap<Integer, PressureModeEnum> INSTANCES = new HashMap<>(3);
 
     static {
         for (PressureModeEnum e : PressureModeEnum.values()) {
-            pool.put(e.getCode(), e);
+            INSTANCES.put(e.getCode(), e);
         }
     }
 
-    public static PressureModeEnum value(Integer code) {
-        if (null == code) {
-            return null;
-        }
-        return pool.get(code);
+    public static PressureModeEnum of(Integer code) {
+        return INSTANCES.get(code);
     }
 
 }

@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.common.enums.engine;
 
+import java.util.HashMap;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -25,21 +27,24 @@ public enum EngineStatusEnum {
     /**
      * 中断成功
      */
-    INTERRUPT_SUCCESSED("中断成功", "interruptSuccess"),
+    INTERRUPT_SUCCEED("中断成功", "interruptSuccess"),
     /**
      * 中断失败
      */
     INTERRUPT_FAILED("中断失败", "interruptFail");
 
-    private String message;
-    private String status;
+    private final String message;
+    private final String status;
 
-    public static EngineStatusEnum getEngineStatusEnum(String status) {
-        for (EngineStatusEnum statusEnum : values()) {
-            if (status.equals(statusEnum.getStatus())) {
-                return statusEnum;
-            }
+    private static final HashMap<String, EngineStatusEnum> INSTANCES = new HashMap<>(5);
+
+    static {
+        for (EngineStatusEnum e : EngineStatusEnum.values()) {
+            INSTANCES.put(e.getStatus(), e);
         }
-        return null;
+    }
+
+    public static EngineStatusEnum of(String status) {
+        return INSTANCES.get(status);
     }
 }

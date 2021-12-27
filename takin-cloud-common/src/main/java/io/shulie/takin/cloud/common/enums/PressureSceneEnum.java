@@ -1,67 +1,59 @@
 package io.shulie.takin.cloud.common.enums;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import lombok.Getter;
+import lombok.AllArgsConstructor;
 
 /**
  * @author zhaoyong
  */
+@Getter
+@AllArgsConstructor
 public enum PressureSceneEnum {
+    /**
+     * 常规模式
+     */
     DEFAULT(0, "常规模式"),
-
+    /**
+     * 流量调试
+     */
     FLOW_DEBUG(3, "流量调试"),
-
+    /**
+     * 巡检模式
+     */
     INSPECTION_MODE(4, "巡检模式"),
-
+    /**
+     * 试跑模式
+     */
     TRY_RUN(5, "试跑模式");
 
-    @Getter
-    private int code;
+    private final int code;
+    private final String description;
 
-    @Getter
-    private String description;
-
-    private static final Map<Integer, PressureSceneEnum> instances = new HashMap<>();
+    private static final HashMap<Integer, PressureSceneEnum> INSTANCES = new HashMap<>(4);
 
     static {
         for (PressureSceneEnum e : PressureSceneEnum.values()) {
-            instances.put(e.getCode(), e);
+            INSTANCES.put(e.getCode(), e);
         }
         //为了兼容老版本数据，将1，2转化为常规模式
-        instances.put(1, DEFAULT);
-        instances.put(2, DEFAULT);
+        INSTANCES.put(1, DEFAULT);
+        INSTANCES.put(2, DEFAULT);
     }
 
-    public static PressureSceneEnum value(Integer code) {
+    public static PressureSceneEnum of(Integer code) {
         if (null == code) {
             return null;
         }
-        return instances.get(code);
-    }
-
-    public static String toDoc() {
-        StringBuilder sb = new StringBuilder();
-        for (PressureSceneEnum e : PressureSceneEnum.values()) {
-            if (sb.length() > 0) {
-                sb.append(",");
-            }
-            sb.append(e.getCode()).append(e.getDescription());
-        }
-        return sb.toString();
-    }
-
-    PressureSceneEnum(Integer code, String description) {
-        this.code = code;
-        this.description = description;
+        return INSTANCES.get(code);
     }
 
     /**
      * PressureTypeEnums.equels(code)
      */
     public boolean equals(Integer code) {
-        PressureSceneEnum pressureType = value(code);
+        PressureSceneEnum pressureType = of(code);
         return this == pressureType;
     }
 }

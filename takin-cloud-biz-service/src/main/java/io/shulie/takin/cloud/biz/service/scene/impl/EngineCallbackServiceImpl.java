@@ -45,7 +45,7 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
         String engineName = ScheduleConstants.getEngineName(notify.getSceneId(), notify.getResultId(), notify.getTenantId());
         String scheduleName = ScheduleConstants.getScheduleName(notify.getSceneId(), notify.getResultId(),
             notify.getTenantId());
-        EngineStatusEnum engineStatusEnum = EngineStatusEnum.getEngineStatusEnum(notify.getStatus());
+        EngineStatusEnum engineStatusEnum = EngineStatusEnum.of(notify.getStatus());
         if (engineStatusEnum == null) {
             log.warn("没有找到引擎回传状态所对应的枚举，回传状态为:{}", notify.getStatus());
             return ResponseResult.success();
@@ -76,7 +76,7 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
                 //获取中断状态
                 boolean interruptFlag = Boolean.parseBoolean(stringRedisTemplate.opsForValue().get(ScheduleConstants.INTERRUPT_POD + scheduleName));
                 return ResponseResult.success(interruptFlag);
-            case INTERRUPT_SUCCESSED:
+            case INTERRUPT_SUCCEED:
                 // 中断成功
                 log.info("本次压测{}-{}-{} 中断成功", notify.getSceneId(), notify.getResultId(), notify.getTenantId());
                 Long interruptSuccessCount = stringRedisTemplate.opsForValue().increment(ScheduleConstants.INTERRUPT_POD_NUM + engineName, 1);

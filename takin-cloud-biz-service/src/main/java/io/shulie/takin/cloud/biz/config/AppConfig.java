@@ -82,6 +82,6 @@ public class AppConfig {
     }
 
     public DeploymentMethodEnum getDeploymentMethod() {
-        return CommonUtil.getValue(DeploymentMethodEnum.PRIVATE, this.deploymentMethod, DeploymentMethodEnum::valueBy);
+        return CommonUtil.getValue(DeploymentMethodEnum.PRIVATE, this.deploymentMethod, DeploymentMethodEnum::of);
     }
 }

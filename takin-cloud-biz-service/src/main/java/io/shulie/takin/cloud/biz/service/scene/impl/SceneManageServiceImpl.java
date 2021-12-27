@@ -1036,7 +1036,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (StringUtils.isBlank(sceneManageResult.getScriptAnalysisResult())) {
             fillPtConfigOld(wrapperOutput, sceneManageResult.getPtConfig());
         } else {
-            PressureSceneEnum type = PressureSceneEnum.value(sceneManageResult.getType());
+            PressureSceneEnum type = PressureSceneEnum.of(sceneManageResult.getType());
             if (null != type) {
                 wrapperOutput.setPressureType(type.getCode());
             }
@@ -1058,7 +1058,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
             ThreadGroupConfigExt tgConfig = new ThreadGroupConfigExt();
             tgConfig.setThreadNum(json.getInteger(SceneManageConstant.THREAD_NUM));
-            PressureModeEnum mode = PressureModeEnum.value(json.getInteger(SceneManageConstant.PT_MODE));
+            PressureModeEnum mode = PressureModeEnum.of(json.getInteger(SceneManageConstant.PT_MODE));
             if (null != mode) {
                 tgConfig.setMode(mode.getCode());
             }
@@ -1077,7 +1077,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             map.put("all", tgConfig);
 
             wrapperOutput.setIpNum(json.getInteger(SceneManageConstant.HOST_NUM));
-            PressureSceneEnum pressureType = PressureSceneEnum.value(json.getInteger(SceneManageConstant.PT_TYPE));
+            PressureSceneEnum pressureType = PressureSceneEnum.of(json.getInteger(SceneManageConstant.PT_TYPE));
             wrapperOutput.setPressureType(null == pressureType ? PressureSceneEnum.DEFAULT.getCode() : pressureType.getCode());
             //压测时长
             TimeBean duration = new TimeBean(json.getLong(SceneManageConstant.PT_DURATION), json.getString(SceneManageConstant.PT_DURATION_UNIT));

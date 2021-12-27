@@ -41,7 +41,6 @@ import io.shulie.takin.cloud.biz.output.middleware.CompareMiddlewareJarResultVO;
 import io.shulie.takin.cloud.common.enums.middleware.CompareMiddlewareJarStatusEnum;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -332,8 +331,8 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
         }).findFirst().orElse(null);
         if (allMatch != null) {
             MiddlewareJarStatusEnum middlewareJarStatusEnum =
-                MiddlewareJarStatusEnum.getByCode(allMatch.getStatus());
-            vo.setStatusDesc(middlewareJarStatusEnum == null ? "" : middlewareJarStatusEnum.getDesc());
+                MiddlewareJarStatusEnum.of(allMatch.getStatus());
+            vo.setStatusDesc(middlewareJarStatusEnum == null ? "" : middlewareJarStatusEnum.getDescription());
             remarks.add("100%匹配");
             return vo;
         }
@@ -351,9 +350,9 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
             return resultVersionFirstTwo.equals(firstTwo);
         }).findFirst().orElse(null);
         if (firstTwoMatch != null) {
-            MiddlewareJarStatusEnum middlewareJarStatusEnum = MiddlewareJarStatusEnum.getByCode(
+            MiddlewareJarStatusEnum middlewareJarStatusEnum = MiddlewareJarStatusEnum.of(
                 firstTwoMatch.getStatus());
-            vo.setStatusDesc(middlewareJarStatusEnum == null ? "" : middlewareJarStatusEnum.getDesc());
+            vo.setStatusDesc(middlewareJarStatusEnum == null ? "" : middlewareJarStatusEnum.getDescription());
             remarks.add("前2位匹配");
             return vo;
         }
@@ -475,7 +474,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
                 }
 
                 // 根据状态字符串获得枚举
-                MiddlewareJarStatusEnum middlewareJarStatusEnum = MiddlewareJarStatusEnum.getByDesc(statusDesc);
+                MiddlewareJarStatusEnum middlewareJarStatusEnum = MiddlewareJarStatusEnum.of(statusDesc);
                 if (middlewareJarStatusEnum == null) {
                     return null;
                 }
@@ -508,7 +507,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
      * @return 是否是 无需支持
      */
     private boolean isNoRequired(String statusDesc) {
-        return MiddlewareJarStatusEnum.NO_REQUIRED.getDesc().equals(statusDesc);
+        return MiddlewareJarStatusEnum.NO_REQUIRED.getDescription().equals(statusDesc);
     }
 
     /**

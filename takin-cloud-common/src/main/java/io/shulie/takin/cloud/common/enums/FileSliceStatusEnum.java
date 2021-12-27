@@ -1,10 +1,15 @@
 package io.shulie.takin.cloud.common.enums;
 
+import java.util.HashMap;
+
 import lombok.Getter;
+import lombok.AllArgsConstructor;
 
 /**
  * @author moriarty
  */
+@Getter
+@AllArgsConstructor
 public enum FileSliceStatusEnum {
 
     /**
@@ -15,22 +20,18 @@ public enum FileSliceStatusEnum {
     SLICING(2, "拆分中"),
     FILE_CHANGED(3, "文件变更");
 
-    @Getter
-    private String status;
-    @Getter
-    private int code;
+    private final int code;
+    private final String status;
 
-    FileSliceStatusEnum(Integer code, String status) {
-        this.code = code;
-        this.status = status;
+    private static final HashMap<Integer, FileSliceStatusEnum> INSTANCES = new HashMap<>(4);
+
+    static {
+        for (FileSliceStatusEnum e : FileSliceStatusEnum.values()) {
+            INSTANCES.put(e.getCode(), e);
+        }
     }
 
-    public static FileSliceStatusEnum getFileSliceStatusEnumByCode(int code) {
-        for (FileSliceStatusEnum statusEnum : FileSliceStatusEnum.values()) {
-            if (code == statusEnum.code) {
-                return statusEnum;
-            }
-        }
-        return null;
+    public static FileSliceStatusEnum of(int code) {
+        return INSTANCES.get(code);
     }
 }

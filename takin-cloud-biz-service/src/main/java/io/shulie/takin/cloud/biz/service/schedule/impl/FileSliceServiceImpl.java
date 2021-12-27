@@ -59,7 +59,7 @@ public class FileSliceServiceImpl implements FileSliceService {
     @Override
     public boolean fileSlice(FileSliceRequest request) throws TakinCloudException {
         Integer fileSliceStatusCode = this.isFileSliced(request);
-        FileSliceStatusEnum fileSliceStatus = FileSliceStatusEnum.getFileSliceStatusEnumByCode(
+        FileSliceStatusEnum fileSliceStatus = FileSliceStatusEnum.of(
             fileSliceStatusCode);
         SceneBigFileSliceParam param = new SceneBigFileSliceParam() {{
             setSceneId(request.getSceneId());
