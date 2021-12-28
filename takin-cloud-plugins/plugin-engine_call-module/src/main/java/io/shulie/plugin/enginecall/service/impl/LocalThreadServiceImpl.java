@@ -26,6 +26,7 @@ import io.shulie.takin.utils.json.JsonHelper;
 import io.shulie.takin.utils.linux.LinuxHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -62,6 +63,7 @@ public class LocalThreadServiceImpl implements EngineCallService {
     public String createJob(Long sceneId, Long taskId, Long tenantId) {
         String jobName = ScheduleConstants.getScheduleName(sceneId, taskId, tenantId);
         String configMapName = ScheduleConstants.getConfigMapName(sceneId, taskId, tenantId);
+        installDir = FilenameUtils.getFullPath(installDir) + FilenameUtils.getName(installDir);
         if (!new File(installDir).exists()) {
             return "未找到引擎包";
         }
@@ -156,6 +158,7 @@ public class LocalThreadServiceImpl implements EngineCallService {
         // 查看 /pressure-engine 下的目录
         //new File(fileDir).listFiles()[1].getPath()
         try {
+            enginePackDir = FilenameUtils.getFullPath(enginePackDir) + FilenameUtils.getName(enginePackDir);
             File[] files = new File(enginePackDir).listFiles();
             if (files == null || files.length == 0) {
                 return null;
@@ -169,6 +172,8 @@ public class LocalThreadServiceImpl implements EngineCallService {
     }
 
     private String getEnginePackDir() {
+        //文件路径安全处理
+        installDir = FilenameUtils.getFullPath(installDir) + FilenameUtils.getName(installDir);
         return new File(installDir).getParent() + "/pressure-engine";
     }
 

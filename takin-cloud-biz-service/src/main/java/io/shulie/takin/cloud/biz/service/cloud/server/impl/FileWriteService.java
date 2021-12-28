@@ -7,6 +7,7 @@ import java.io.RandomAccessFile;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -99,6 +100,8 @@ public class FileWriteService {
      */
     private File createFile(String filepath, final Long sizeInBytes) throws IOException {
 
+        //文件路径安全处理
+        filepath = FilenameUtils.getFullPath(filepath) + FilenameUtils.getName(filepath);
         File file = new File(filepath);
         if (!file.exists()) {
             File parentFile = file.getParentFile();

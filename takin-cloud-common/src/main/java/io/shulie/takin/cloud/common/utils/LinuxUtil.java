@@ -16,27 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LinuxUtil {
 
-    public static void executeLinuxCmd(String cmd) {
-        BufferedReader read = null;
-        try {
-            Process pro = Runtime.getRuntime().exec(cmd);
-            pro.waitFor();
-            read = new BufferedReader(new InputStreamReader(pro.getInputStream()));
-        } catch (Exception e) {
-            log.error("异常代码【{}】,异常内容：linux命令执行一次，cmd:{} --> 异常信息: {}",
-                TakinCloudExceptionEnum.LINUX_CMD_EXECUTE_ERROR, cmd, e);
-        } finally {
-            if (read != null) {
-                try {
-                    read.close();
-                } catch (IOException e) {
-                    log.error("异常代码【{}】,异常内容：文件关闭异常 --> 异常信息: {}",
-                        TakinCloudExceptionEnum.FILE_CLOSE_ERROR, e);
-                }
-            }
-        }
-    }
-
     public static String getPrintSize(long size) {
         // 如果字节数少于1024，则直接以B为单位，否则先除于1024，后3位因太少无意义
         double value = (double)size;

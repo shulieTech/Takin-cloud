@@ -27,6 +27,7 @@ import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.utils.json.JsonHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -102,6 +103,8 @@ public class BigFileServiceImpl implements BigFileService {
 
     private File getDestFile(String parentPath, String fileName) {
         String filePath = parentPath.concat("/").concat(fileName);
+        //文件路径安全处理
+        filePath = FilenameUtils.getFullPath(filePath) + FilenameUtils.getName(filePath);
         return new File(filePath);
     }
 
@@ -132,7 +135,8 @@ public class BigFileServiceImpl implements BigFileService {
 
         String nfsFilePath = scriptPath.concat("/").concat(String.valueOf(part.getSceneId())).concat("/").concat(
             part.getOriginalName());
-
+        //文件路径安全处理
+        nfsFilePath = FilenameUtils.getFullPath(nfsFilePath) + FilenameUtils.getName(nfsFilePath);
         File destFile = new File(nfsFilePath);
         if (!destFile.getParentFile().exists()) {
             destFile.getParentFile().mkdirs();
@@ -234,7 +238,10 @@ public class BigFileServiceImpl implements BigFileService {
             for (String key : entries.keySet()) {
                 Part cachePart = entries.get(key);
                 String fileName = cachePart.getFileName();
-                File targetFile = new File(parentPath.concat("/").concat(fileName));
+                String filePath = parentPath.concat("/").concat(fileName);
+                //文件路径安全处理
+                filePath = FilenameUtils.getFullPath(filePath) + FilenameUtils.getName(filePath);
+                File targetFile = new File(filePath);
                 FileInputStream fileInputStream = new FileInputStream(targetFile);
 
                 FileChannel pc = fileInputStream.getChannel();
@@ -355,6 +362,8 @@ public class BigFileServiceImpl implements BigFileService {
 
     @Override
     public File getPradarUploadFile() {
+        //文件路径安全处理
+        uploadClientPath = FilenameUtils.getFullPath(uploadClientPath) + FilenameUtils.getName(uploadClientPath);
         File docDir = new File(uploadClientPath);
         if (!docDir.exists()) {
             if (!docDir.mkdirs()) {

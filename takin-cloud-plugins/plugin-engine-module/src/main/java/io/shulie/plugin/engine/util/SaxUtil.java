@@ -19,6 +19,7 @@ import io.shulie.takin.cloud.ext.content.script.ScriptUrlExt;
 import io.shulie.takin.utils.file.FileManagerHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -52,6 +53,8 @@ public class SaxUtil {
         SAXReader saxReader = new SAXReader();
         ScriptParseExt scriptParseExt = new ScriptParseExt();
         try {
+            //文件路径安全处理
+            path = FilenameUtils.getFullPath(path) + FilenameUtils.getName(path);
             File file = new File(path);
             String content = FileManagerHelper.readFileToString(file, "utf-8");
             // 读取文件内容
@@ -85,6 +88,8 @@ public class SaxUtil {
     public static void updateJmx(String path) {
         SAXReader saxReader = new SAXReader();
         try {
+            //文件路径安全处理
+            path = FilenameUtils.getFullPath(path) + FilenameUtils.getName(path);
             File file = new File(path);
             String content = FileManagerHelper.readFileToString(file, "utf-8");
             Document document = saxReader.read(new File(path));
@@ -228,7 +233,8 @@ public class SaxUtil {
     public static void updatePressTestTags(String path) {
         SAXReader saxReader = new SAXReader();
         try {
-
+            //文件路径安全处理
+            path = FilenameUtils.getFullPath(path) + FilenameUtils.getName(path);
             File file = new File(path);
             //因为新增场景脚本是异步的，这里最多等待5分钟
             int i = 0;
