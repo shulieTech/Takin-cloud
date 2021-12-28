@@ -122,7 +122,7 @@ public class MicroCleanTask implements InitializingBean {
             String tempString = jobName.replace(ScheduleConstants.SCENE_TASK + sceneId + "-", "");
             //包含"-"说明有tenantId
             if (tempString.contains("-")) {
-                tempString = tempString.substring(0, tempString.indexOf("-"));
+                tempString = tempString.substring(0, tempString.indexOf('-'));
             }
             return Long.parseLong(tempString);
         } catch (Exception e) {
@@ -135,7 +135,7 @@ public class MicroCleanTask implements InitializingBean {
     private Long getSceneId(String jobName) {
         try {
             String tempString = jobName.replace(ScheduleConstants.SCENE_TASK, "");
-            String substring = tempString.substring(0, tempString.indexOf("-"));
+            String substring = tempString.substring(0, tempString.indexOf('-'));
             return Long.parseLong(substring);
         } catch (Exception e) {
             log.error("jod名称解析失败，存在类似的jobName:{},异常信息:{}", jobName, e);

@@ -803,7 +803,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             List<Long> sceneTaskJobNames = allRunningJobName.stream().filter(jobName -> jobName.startsWith(ScheduleConstants.SCENE_TASK))
                 .map(jobName -> {
                     String tempString = jobName.replace(ScheduleConstants.SCENE_TASK, "");
-                    String substring = tempString.substring(0, tempString.indexOf("-"));
+                    String substring = tempString.substring(0, tempString.indexOf('-'));
                     return Long.parseLong(substring);
                 }).collect(Collectors.toList());
 

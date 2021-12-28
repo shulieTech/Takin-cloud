@@ -176,7 +176,7 @@ public class SceneManageController {
     @PostMapping(EntrypointUrl.METHOD_SCENE_MANAGE_CALC_FLOW)
     @ApiOperation(value = "预估流量计算")
     public ResponseResult<BigDecimal> calcFlow(@RequestBody AssetBillExt bill) {
-        BigDecimal flow = new BigDecimal(0);
+        BigDecimal flow = BigDecimal.ZERO;
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
             flow = assetExtApi.calcEstimateAmount(bill);

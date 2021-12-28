@@ -73,8 +73,8 @@ public class SceneManageDAOImpl
         if (StrUtil.isNotBlank(CloudPluginUtils.getContext().getFilterSql())) {
             userIds = CloudPluginUtils.getContext().getFilterSql();
             // 去除左右的括号
-            if (userIds.lastIndexOf("(") == 0
-                && userIds.lastIndexOf(")") == userIds.length() - 1) {
+            if (userIds.lastIndexOf('(') == 0
+                && userIds.lastIndexOf(')') == userIds.length() - 1) {
                 userIds = userIds.substring(1, userIds.length() - 1);
             }
         }

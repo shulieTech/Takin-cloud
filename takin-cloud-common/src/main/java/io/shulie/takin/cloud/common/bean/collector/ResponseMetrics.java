@@ -84,7 +84,7 @@ public class ResponseMetrics extends AbstractMetrics {
     }
 
     @Data
-    class ErrorInfo {
+   static class ErrorInfo {
         private String responseMessage;
         private String responseCode;
     }

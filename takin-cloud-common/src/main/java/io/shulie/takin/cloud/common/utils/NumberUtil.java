@@ -131,9 +131,8 @@ public class NumberUtil {
     }
 
     public static boolean isZero(double a) {
-        BigDecimal zero = new BigDecimal(0);
         BigDecimal aa = new BigDecimal(a);
-        return aa.compareTo(zero) == 0;
+        return aa.compareTo(BigDecimal.ZERO) == 0;
     }
 
     public static String decimalToString(BigDecimal decimal, int scale, RoundingMode roundingMode) {

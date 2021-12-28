@@ -82,9 +82,9 @@ public class IPUtils {
             return 0;
         }
         long[] ip = new long[4];
-        int position1 = strIP.indexOf(".");
-        int position2 = strIP.indexOf(".", position1 + 1);
-        int position3 = strIP.indexOf(".", position2 + 1);
+        int position1 = strIP.indexOf('.');
+        int position2 = strIP.indexOf('.', position1 + 1);
+        int position3 = strIP.indexOf('.', position2 + 1);
         ip[0] = Long.parseLong(strIP.substring(0, position1));
         ip[1] = Long.parseLong(strIP.substring(position1 + 1, position2));
         ip[2] = Long.parseLong(strIP.substring(position2 + 1, position3));

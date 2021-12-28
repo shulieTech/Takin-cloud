@@ -249,7 +249,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             return;
         }
 
-        File file = new File(dest.substring(0, dest.lastIndexOf("/")));
+        File file = new File(dest.substring(0, dest.lastIndexOf('/')));
         if (!file.exists()) {
             boolean mkdirs = file.mkdirs();
             log.debug("io.shulie.takin.cloud.biz.service.scene.impl.SceneManageServiceImpl#copyFile:mkdirs:{}", mkdirs);
@@ -309,7 +309,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             if (isScriptManage) {
                 scriptList.forEach(sceneScriptRef -> {
                     String uploadPath = sceneScriptRef.getUploadPath();
-                    uploadPath = sceneId + "/" + uploadPath.substring(uploadPath.lastIndexOf("/") + 1);
+                    uploadPath = sceneId + "/" + uploadPath.substring(uploadPath.lastIndexOf('/') + 1);
                     sceneScriptRef.setUploadPath(uploadPath);
                 });
             } else {
@@ -1178,7 +1178,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         map.put(SceneManageConstant.STEP_DURATION_UNIT,
             wrapperVO.getIncreasingTime() != null ? wrapperVO.getIncreasingTime().getUnit() : null);
         map.put(SceneManageConstant.STEP, wrapperVO.getStep());
-        BigDecimal value = new BigDecimal(0);
+        BigDecimal value = BigDecimal.ZERO;
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
             value = assetExtApi.calcEstimateAmount(BeanUtil.copyProperties(wrapperVO, AssetBillExt.class, ""));

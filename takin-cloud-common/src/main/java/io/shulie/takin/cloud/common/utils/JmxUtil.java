@@ -769,16 +769,16 @@ public class JmxUtil {
             return path;
         }
         if (path.contains("?")) {
-            path = path.substring(0, path.indexOf("?"));
+            path = path.substring(0, path.indexOf('?'));
         }
         if (!path.startsWith("/")) {
             path = "/" + path;
         }
         if (path.contains("#")) {
-            String temp = path.substring(0, path.indexOf("#"));
+            String temp = path.substring(0, path.indexOf('#'));
             if (temp.endsWith("/")) {
                 temp = temp.substring(0, temp.length() - 1);
-                path = temp + path.substring(path.indexOf("#"));
+                path = temp + path.substring(path.indexOf('#'));
             }
         } else {
             if (path.endsWith("/")) {

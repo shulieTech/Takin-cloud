@@ -162,7 +162,7 @@ public class FileController {
                 ServletOutputStream outputStream = response.getOutputStream();
                 Files.copy(Paths.get(filePath), outputStream);
                 response.setContentType("application/octet-stream");
-                String saveName = filePath.substring(filePath.lastIndexOf("/") + 1);
+                String saveName = filePath.substring(filePath.lastIndexOf('/') + 1);
                 response.setHeader("Content-Disposition",
                     "attachment;filename=" + new String(saveName.getBytes(StandardCharsets.UTF_8),
                         StandardCharsets.ISO_8859_1));

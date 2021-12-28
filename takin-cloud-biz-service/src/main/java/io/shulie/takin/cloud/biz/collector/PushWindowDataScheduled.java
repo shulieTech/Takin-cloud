@@ -884,7 +884,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             for (String sceneReportKey : keys) {
                 Executors.execute(() -> {
                     try {
-                        int lastIndex = sceneReportKey.lastIndexOf(":");
+                        int lastIndex = sceneReportKey.lastIndexOf(':');
                         if (-1 == lastIndex) {
                             return;
                         }

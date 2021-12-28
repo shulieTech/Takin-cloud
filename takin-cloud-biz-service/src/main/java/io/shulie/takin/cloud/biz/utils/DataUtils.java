@@ -137,7 +137,7 @@ public class DataUtils {
             Integer time = 0;
             if (StringUtils.isNotBlank(ss[2])) {
                 if (ss[2].contains(".")) {
-                    ss[2] = ss[2].substring(0, ss[2].lastIndexOf("."));
+                    ss[2] = ss[2].substring(0, ss[2].lastIndexOf('.'));
                 }
                 time = NumberUtils.toInt(ss[2]);
             }

@@ -27,11 +27,11 @@ public class UrlUtil {
         if (StringUtils.isBlank(pradarPath) || StringUtils.isBlank(jmeterPath)) {
             return false;
         }
-        int pos = pradarPath.indexOf("?");
+        int pos = pradarPath.indexOf('?');
         if (pos > 0) {
             pradarPath = pradarPath.substring(0, pos);
         }
-        pos = jmeterPath.indexOf("?");
+        pos = jmeterPath.indexOf('?');
         if (pos > 0) {
             jmeterPath = jmeterPath.substring(0, pos);
         }
@@ -53,7 +53,7 @@ public class UrlUtil {
         if (StringUtils.isBlank(str)) {
             return str;
         }
-        int index = str.lastIndexOf(":");
+        int index = str.lastIndexOf(':');
         if (index == -1) {
             return str;
         }
@@ -61,7 +61,7 @@ public class UrlUtil {
         if (StringUtils.startsWith(str, "/")) {
             str = str.substring(1);
         }
-        index = str.indexOf("/");
+        index = str.indexOf('/');
         return str.substring(index + 1);
     }
 }

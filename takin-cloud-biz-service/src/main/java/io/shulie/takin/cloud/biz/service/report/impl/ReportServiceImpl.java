@@ -380,7 +380,7 @@ public class ReportServiceImpl implements ReportService {
                             setSa(new DataBean("0", ref.getTargetSa()));
                             setTps(new DataBean("0", ref.getTargetTps()));
                             setSuccessRate(new DataBean("0", ref.getTargetSuccessRate()));
-                            setAvgConcurrenceNum(new BigDecimal(0));
+                            setAvgConcurrenceNum(BigDecimal.ZERO);
                             setTotalRequest(0L);
                         }
                     }};
@@ -1233,7 +1233,7 @@ public class ReportServiceImpl implements ReportService {
 
     private boolean isTargetBiggerThanZero(BigDecimal target) {
         if (Objects.nonNull(target)) {
-            return target.compareTo(new BigDecimal(0)) > 0;
+            return target.compareTo(BigDecimal.ZERO) > 0;
         }
         return false;
     }
