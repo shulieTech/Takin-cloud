@@ -55,7 +55,7 @@ public class SaxUtil {
         ScriptParseExt scriptParseExt = new ScriptParseExt();
         try {
             //文件路径安全处理
-            FileUtils.verityFilePath(path);
+            path = FileUtils.verityFilePath(path);
             File file = new File(path);
             String content = FileManagerHelper.readFileToString(file, "utf-8");
             // 读取文件内容

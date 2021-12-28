@@ -30,16 +30,17 @@ import org.slf4j.LoggerFactory;
 public class FileUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
 
-    public static void verityFilePath(String path){
+    public static String verityFilePath(String path){
         if ("".equals(path) || null == path){
-            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,"文件路径校验错误，路径为空");
+            return "";
         }
         if (path.contains("..")){
-            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,"文件路径校验错误，路径中包含..");
+            path = path.replaceAll("..","_");
         }
         if (path.contains("\n")){
-            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,"文件路径校验错误，路径中包含回车符");
+            path = path.replaceAll("\n","_");
         }
+        return path;
     }
 
     public static File createFileDE(String filePathName) {
