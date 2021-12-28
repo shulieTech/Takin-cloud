@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import cn.hutool.core.bean.BeanUtil;
-
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -24,18 +22,14 @@ public class ReportBusinessActivityDetailDaoImpl implements ReportBusinessActivi
     ReportBusinessActivityDetailMapper mapper;
 
     @Override
-    public int insert(ReportBusinessActivityDetailEntity activityDetail) {
-        ReportBusinessActivityDetailEntity entity = new ReportBusinessActivityDetailEntity();
-        BeanUtil.copyProperties(activityDetail, entity);
+    public int insert(ReportBusinessActivityDetailEntity entity) {
         entity.setGmtCreate(new Date());
         entity.setGmtUpdate(new Date());
         return mapper.insert(entity);
     }
 
     @Override
-    public int update(ReportBusinessActivityDetailEntity activityDetail) {
-        ReportBusinessActivityDetailEntity entity = new ReportBusinessActivityDetailEntity();
-        BeanUtil.copyProperties(activityDetail, entity);
+    public int update(ReportBusinessActivityDetailEntity entity) {
         entity.setGmtUpdate(new Date());
         return mapper.updateById(entity);
     }

@@ -8,12 +8,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneBusinessActivityRef;
-import com.pamirs.takin.entity.domain.entity.scene.manage.SceneManage;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneSlaRef;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 import io.shulie.takin.ext.content.enginecall.BusinessActivityExt;
@@ -33,79 +33,6 @@ import org.mapstruct.factory.Mappers;
 public interface SceneManageDTOConvert {
 
     SceneManageDTOConvert INSTANCE = Mappers.getMapper(SceneManageDTOConvert.class);
-
-    /**
-     * 类型装换
-     *
-     * @param source 原数据
-     * @return 转换后数据
-     */
-    @Mappings({
-        @Mapping(source = "id", target = "id"),
-        @Mapping(source = "tenantId", target = "tenantId"),
-        @Mapping(source = "sceneName", target = "sceneName"),
-        @Mapping(source = "lastPtTime", target = "lastPtTime", dateFormat = "yyyy-MM-dd HH:mm:ss"),
-        @Mapping(source = "status", target = "status")
-    })
-    SceneManageListOutput of(SceneManage source);
-
-    /**
-     * 批量类型装换
-     *
-     * @param sources 原数据(批量)
-     * @return 转换后数据(批量)
-     */
-    List<SceneManageListOutput> ofs(List<SceneManage> sources);
-
-    /**
-     * 填充场景列表
-     *
-     * @param source 元数据
-     * @param dto    场景列表数据
-     */
-    @AfterMapping
-    default void fillSceneManageListDTO(SceneManage source, @MappingTarget SceneManageListOutput dto) {
-        String ptConfig = source.getPtConfig();
-        if (ptConfig == null) {
-            return;
-        }
-        JSONObject jsonObject = JSON.parseObject(ptConfig);
-        BigDecimal flow = jsonObject.getBigDecimal(SceneManageConstant.ESTIMATE_FLOW);
-        dto.setEstimateFlow(flow != null ? flow.setScale(2, RoundingMode.HALF_UP) : null);
-    }
-
-    /**
-     * 数据转换
-     *
-     * @param source 原数据
-     * @return 转换后数据
-     */
-    @Mappings({
-        @Mapping(source = "id", target = "id"),
-        @Mapping(source = "bindRef", target = "bindRef"),
-        @Mapping(source = "businessActivityId", target = "businessActivityId"),
-        @Mapping(source = "businessActivityName", target = "businessActivityName")
-    })
-    SceneManageWrapperOutput.SceneBusinessActivityRefOutput of(SceneBusinessActivityRef source);
-
-    /**
-     * 填充目标数据
-     *
-     * @param source 原数据
-     * @param dto    目标数据
-     */
-    @AfterMapping
-    default void fillGoalValue(SceneBusinessActivityRef source, @MappingTarget SceneManageWrapperOutput.SceneBusinessActivityRefOutput dto) {
-        String goalValue = source.getGoalValue();
-        if (StringUtils.isBlank(goalValue)) {
-            return;
-        }
-        JSONObject jsonObject = JSON.parseObject(goalValue);
-        dto.setTargetTPS(jsonObject.getInteger(SceneManageConstant.TPS));
-        dto.setTargetRT(jsonObject.getInteger(SceneManageConstant.RT));
-        dto.setTargetSuccessRate(jsonObject.getBigDecimal(SceneManageConstant.SUCCESS_RATE));
-        dto.setTargetSA(jsonObject.getBigDecimal(SceneManageConstant.SA));
-    }
 
     /**
      * 数据转换

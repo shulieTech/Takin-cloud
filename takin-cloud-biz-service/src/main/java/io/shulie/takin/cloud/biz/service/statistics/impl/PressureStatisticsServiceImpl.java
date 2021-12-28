@@ -4,19 +4,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.google.common.collect.Lists;
-import io.shulie.takin.cloud.biz.cloudserver.StatisticsConverter;
 import io.shulie.takin.cloud.biz.input.statistics.PressureTotalInput;
-import io.shulie.takin.cloud.biz.output.statistics.PressureListTotalOutput;
-import io.shulie.takin.cloud.biz.service.statistics.PressureStatisticsService;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.data.dao.statistics.StatisticsManageDao;
-import io.shulie.takin.cloud.data.result.statistics.PressureListTotalResult;
-import io.shulie.takin.cloud.data.result.statistics.PressurePieTotalResult;
-import io.shulie.takin.cloud.sdk.model.response.statistics.PressurePieTotalResp;
 import io.shulie.takin.cloud.sdk.model.response.statistics.ReportTotalResp;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.shulie.takin.cloud.data.result.statistics.PressurePieTotalResult;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.data.result.statistics.PressureListTotalResult;
+import io.shulie.takin.cloud.biz.service.statistics.PressureStatisticsService;
+import io.shulie.takin.cloud.sdk.model.response.statistics.PressurePieTotalResp;
+import io.shulie.takin.cloud.sdk.model.response.statistics.PressureListTotalResp;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author 无涯
@@ -80,7 +80,7 @@ public class PressureStatisticsServiceImpl implements PressureStatisticsService 
     }
 
     @Override
-    public List<PressureListTotalOutput> getPressureListTotal(PressureTotalInput input) {
+    public List<PressureListTotalResp> getPressureListTotal(PressureTotalInput input) {
         List<PressureListTotalResult> list = Lists.newArrayList();
         switch (input.getType()) {
             case "0":
@@ -94,7 +94,8 @@ public class PressureStatisticsServiceImpl implements PressureStatisticsService 
             default: {}
         }
 
-        return StatisticsConverter.INSTANCE.ofResult(list);
+        return list.stream().map(t -> BeanUtil.copyProperties(t, PressureListTotalResp.class))
+            .collect(Collectors.toList());
     }
 
 }

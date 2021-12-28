@@ -8,7 +8,6 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageInfo;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
@@ -19,7 +18,6 @@ import com.pamirs.takin.entity.domain.vo.report.ReportIdParam;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
 import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.sdk.model.request.report.WarnCreateReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
 import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
@@ -82,11 +80,11 @@ public class ReportController {
     @ApiImplicitParam(name = "reportId", value = "报告ID")
     @GetMapping(value = EntrypointUrl.METHOD_REPORT_DETAIL)
     public ResponseResult<ReportDetailResp> getReportByReportId(Long reportId) {
-        ReportDetailOutput detailOutput = reportService.getReportByReportId(reportId);
+        ReportDetailResp detailOutput = reportService.getReportByReportId(reportId);
         if (detailOutput == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在Id:" + reportId);
         }
-        return ResponseResult.success(BeanUtil.copyProperties(detailOutput, ReportDetailResp.class));
+        return ResponseResult.success(detailOutput);
     }
 
     /**
@@ -131,7 +129,7 @@ public class ReportController {
     @GetMapping(EntrypointUrl.METHOD_REPORT_DETAIL_TEMP)
     @ApiImplicitParam(name = "sceneId", value = "场景ID")
     public ResponseResult<ReportDetailResp> tempReportDetail(Long sceneId) {
-        ReportDetailOutput detailOutput = reportService.tempReportDetail(sceneId);
+        ReportDetailResp detailOutput = reportService.tempReportDetail(sceneId);
         if (detailOutput == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在");
         }

@@ -7,20 +7,26 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.collection.CollUtil;
+
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
-import io.shulie.takin.cloud.data.mapper.mysql.SceneManageMapper;
-import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+
 import io.shulie.takin.cloud.data.util.MPUtil;
-import org.apache.commons.collections4.CollectionUtils;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
+import io.shulie.takin.cloud.data.mapper.mysql.SceneManageMapper;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
+import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
+import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
+import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * @author 无涯
@@ -152,5 +158,22 @@ public class SceneManageDAOImpl
             .eq(!Objects.isNull(sceneId), SceneManageEntity::getId, sceneId)
             .eq(!Objects.isNull(compareStatus), SceneManageEntity::getStatus, compareStatus);
         return this.baseMapper.update(new SceneManageEntity() {{setStatus(status);}}, wrapper);
+    }
+
+    @Override
+    public List<SceneManageEntity> getByIds(List<Long> ids, ContextExt contextExt) {
+        LambdaQueryWrapper<SceneManageEntity> wrapper = Wrappers.lambdaQuery(SceneManageEntity.class)
+            .in(CollUtil.isNotEmpty(ids), SceneManageEntity::getId, ids)
+            .eq(ObjectUtil.isNotNull(contextExt) && StrUtil.isNotEmpty(contextExt.getEnvCode()), SceneManageEntity::getEnvCode, contextExt.getEnvCode())
+            .eq(ObjectUtil.isNotNull(contextExt) && ObjectUtil.isNotNull(contextExt.getTenantId()), SceneManageEntity::getTenantId, contextExt.getTenantId());
+        return this.baseMapper.selectList(wrapper);
+    }
+
+    @Override
+    public List<SceneManageEntity> selectAllSceneManageList(ContextExt contextExt) {
+        LambdaQueryWrapper<SceneManageEntity> wrapper = Wrappers.lambdaQuery(SceneManageEntity.class)
+            .eq(ObjectUtil.isNotNull(contextExt) && StrUtil.isNotEmpty(contextExt.getEnvCode()), SceneManageEntity::getEnvCode, contextExt.getEnvCode())
+            .eq(ObjectUtil.isNotNull(contextExt) && ObjectUtil.isNotNull(contextExt.getTenantId()), SceneManageEntity::getTenantId, contextExt.getTenantId());
+        return this.baseMapper.selectList(wrapper);
     }
 }

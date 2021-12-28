@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 

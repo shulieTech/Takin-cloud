@@ -25,24 +25,4 @@ public class EnumResult {
      */
     private Boolean disable = false;
 
-    public EnumResult disable() {
-        this.disable = true;
-        return this;
-    }
-
-    public EnumResult label(String label) {
-        this.label = label;
-        return this;
-
-    }
-
-    public EnumResult value(String value) {
-        this.value = value;
-        return this;
-    }
-
-    public EnumResult num(Integer num) {
-        this.num = num;
-        return this;
-    }
 }

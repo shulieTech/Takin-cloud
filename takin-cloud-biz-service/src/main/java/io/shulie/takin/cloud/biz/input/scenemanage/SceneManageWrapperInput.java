@@ -5,12 +5,15 @@ import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import io.shulie.takin.cloud.sdk.model.common.TimeBean;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+import io.shulie.takin.cloud.sdk.model.common.TimeBean;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 
 /**
  * @author qianshui
@@ -72,10 +75,10 @@ public class SceneManageWrapperInput extends ContextExt {
 
     @ApiModelProperty(name = "stopCondition", value = "SLA终止配置")
     @NotEmpty(message = "SLA终止配置不能为空")
-    private List<SceneSlaRefInput> stopCondition;
+    private List<SceneSlaRefResponse> stopCondition;
 
     @ApiModelProperty(name = "warningCondition", value = "SLA警告配置")
-    private List<SceneSlaRefInput> warningCondition;
+    private List<SceneSlaRefResponse> warningCondition;
 
     private String features;
 

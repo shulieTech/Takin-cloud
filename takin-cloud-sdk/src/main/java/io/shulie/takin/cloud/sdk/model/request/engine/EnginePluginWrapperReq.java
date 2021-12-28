@@ -2,12 +2,14 @@ package io.shulie.takin.cloud.sdk.model.request.engine;
 
 import java.util.List;
 
-import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import io.shulie.takin.cloud.sdk.model.common.FileManageInfo;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.sdk.model.common.FileManageInfo;
 
 /**
  * 引擎插件保存入参

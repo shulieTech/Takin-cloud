@@ -7,24 +7,24 @@ import java.util.Objects;
 import javax.annotation.Resource;
 
 import com.google.common.collect.Lists;
-import io.shulie.takin.cloud.biz.input.engine.EnginePluginWrapperInput;
+
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
+import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.biz.service.engine.EnginePluginService;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginDetailOutput;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginSimpleInfoOutput;
-import io.shulie.takin.cloud.biz.service.engine.EnginePluginService;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
-import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginDetailsWrapperReq;
+import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginWrapperReq;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginFetchWrapperReq;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginStatusWrapperReq;
-import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginWrapperReq;
-import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginDetailsWrapperReq;
+
+import lombok.extern.slf4j.Slf4j;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -72,9 +72,7 @@ public class PluginOpenController {
     @ApiOperation(value = "保存引擎插件")
     @PostMapping(EntrypointUrl.METHOD_ENGINE_PLUGIN_SAVE)
     public ResponseResult<?> saveEnginePlugin(@RequestBody EnginePluginWrapperReq request) {
-        EnginePluginWrapperInput input = new EnginePluginWrapperInput();
-        BeanUtils.copyProperties(request, input);
-        enginePluginService.saveEnginePlugin(input);
+        enginePluginService.saveEnginePlugin(request);
         return ResponseResult.success();
     }
 

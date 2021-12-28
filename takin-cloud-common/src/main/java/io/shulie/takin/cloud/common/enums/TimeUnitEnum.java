@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import cn.hutool.core.util.StrUtil;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,6 +13,8 @@ import org.apache.commons.lang3.StringUtils;
  * @author qianshui
  * @date 2020/5/11 下午7:58
  */
+@Getter
+@AllArgsConstructor
 public enum TimeUnitEnum {
     /**
      * 天
@@ -29,32 +33,23 @@ public enum TimeUnitEnum {
      */
     SECOND(TimeUnit.SECONDS, "s", "秒");
 
-    @Getter
-    private TimeUnit unit;
-    @Getter
-    private String value;
-    @Getter
-    private String name;
+    private final TimeUnit unit;
+    private final String value;
+    private final String name;
 
-    TimeUnitEnum(TimeUnit unit, String value, String name) {
-        this.unit = unit;
-        this.value = value;
-        this.name = name;
-    }
-
-    private static final Map<String, TimeUnitEnum> pool = new HashMap<>();
+    private static final Map<String, TimeUnitEnum> INSTANCES = new HashMap<>(4);
 
     static {
         for (TimeUnitEnum e : TimeUnitEnum.values()) {
-            pool.put(e.value.toLowerCase(), e);
+            INSTANCES.put(e.value.toLowerCase(), e);
         }
     }
 
     public static TimeUnitEnum value(String value) {
-        if (StringUtils.isBlank(value)) {
+        if (StrUtil.isBlank(value)) {
             return null;
         }
-        return pool.get(value.toLowerCase());
+        return INSTANCES.get(value.toLowerCase());
     }
 
 }

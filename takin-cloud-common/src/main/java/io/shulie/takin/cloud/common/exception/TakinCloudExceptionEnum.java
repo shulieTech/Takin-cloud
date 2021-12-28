@@ -1,13 +1,15 @@
 package io.shulie.takin.cloud.common.exception;
 
-import io.shulie.takin.parent.exception.entity.ExceptionReadable;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.AllArgsConstructor;
+
+import io.shulie.takin.parent.exception.entity.ExceptionReadable;
 
 /**
- * @author shiyajian
- * create: 2020-09-04
  * 这边添加的所有code，需要在message.properties中有对应的值
+ *
+ * @author shiyajian
+ * @date 2020-09-04
  */
 @Getter
 @AllArgsConstructor
@@ -19,8 +21,13 @@ public enum TakinCloudExceptionEnum implements ExceptionReadable {
     COMMON_VERIFY_ERROR("cloud-000-s0000", "校验失败"),
 
     /**
-     * 压测场景相关模块 cloud-001-
-     * 0200新增  0300更新 0400查询 0500文件相关
+     * 压测场景相关模块 cloud-001-****
+     * <ul>
+     *     <li>0200:新增</li>
+     *     <li>0300:更新</li>
+     *     <li>0400:查询</li>
+     *     <li>0500:文件</li>
+     * </ul>
      */
     SCENE_MANAGE_ADD_ERROR("cloud-001-s0201", "新增场景失败"),
     SCENE_MANAGE_BUILD_PARAM_ERROR("cloud-001-s0202", "场景构建参数失败"),

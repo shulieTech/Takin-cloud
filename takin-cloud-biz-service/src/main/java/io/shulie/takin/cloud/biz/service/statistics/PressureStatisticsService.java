@@ -3,9 +3,9 @@ package io.shulie.takin.cloud.biz.service.statistics;
 import java.util.List;
 
 import io.shulie.takin.cloud.biz.input.statistics.PressureTotalInput;
-import io.shulie.takin.cloud.biz.output.statistics.PressureListTotalOutput;
-import io.shulie.takin.cloud.sdk.model.response.statistics.PressurePieTotalResp;
 import io.shulie.takin.cloud.sdk.model.response.statistics.ReportTotalResp;
+import io.shulie.takin.cloud.sdk.model.response.statistics.PressurePieTotalResp;
+import io.shulie.takin.cloud.sdk.model.response.statistics.PressureListTotalResp;
 
 /**
  * @author 无涯
@@ -34,7 +34,7 @@ public interface PressureStatisticsService {
      * @param input 入参
      * @return -
      */
-    List<PressureListTotalOutput> getPressureListTotal(PressureTotalInput input);
+    List<PressureListTotalResp> getPressureListTotal(PressureTotalInput input);
 
 }
 

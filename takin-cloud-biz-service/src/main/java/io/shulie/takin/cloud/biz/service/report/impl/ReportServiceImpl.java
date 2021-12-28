@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
+import io.shulie.takin.cloud.sdk.model.common.WarnBean;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportDetailResp;
 import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSON;
@@ -85,7 +87,6 @@ import io.shulie.takin.cloud.biz.cloudserver.ReportConverter;
 import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
-import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
 import io.shulie.takin.cloud.sdk.model.request.WarnQueryParam;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.ext.content.asset.AssetInvoiceExt;
@@ -93,7 +94,6 @@ import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
-import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
@@ -209,13 +209,13 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public ReportDetailOutput getReportByReportId(Long reportId) {
+    public ReportDetailResp getReportByReportId(Long reportId) {
         ReportEntity report = reportDao.selectById(reportId);
         if (report == null) {
             log.warn("获取报告异常，报告数据不存在。报告ID：{}", reportId);
             return null;
         }
-        ReportDetailOutput detail = ReportConverter.INSTANCE.ofReportDetail(report);
+        ReportDetailResp detail = ReportConverter.INSTANCE.ofReportDetail(report);
 
         //警告列表
         List<WarnBean> warnList = listWarn(reportId);
@@ -291,9 +291,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public ReportDetailOutput tempReportDetail(Long sceneId) {
+    public ReportDetailResp tempReportDetail(Long sceneId) {
         long start = System.currentTimeMillis();
-        ReportDetailOutput reportDetail = new ReportDetailOutput();
+        ReportDetailResp reportDetail = new ReportDetailResp();
 
         ReportEntity reportResult = reportDao.getTempReportBySceneId(sceneId);
         if (reportResult == null) {
@@ -310,7 +310,7 @@ public class ReportServiceImpl implements ReportService {
         reportDetail.setStopReasons(getStopReasonBean(sceneId, reportResult.getId()));
 
         // 查询sla熔断数据
-        ReportDetailOutput detailOutput = this.getReportByReportId(reportResult.getId());
+        ReportDetailResp detailOutput = this.getReportByReportId(reportResult.getId());
         reportDetail.setSlaMsg(detailOutput.getSlaMsg());
         String testPlanXpathMd5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
         String transaction = StringUtils.isBlank(testPlanXpathMd5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
@@ -428,7 +428,7 @@ public class ReportServiceImpl implements ReportService {
         List<StopReasonBean> stopReasons = Lists.newArrayList();
 
         // 查询sla熔断数据
-        ReportDetailOutput detailOutput = this.getReportByReportId(reportId);
+        ReportDetailResp detailOutput = this.getReportByReportId(reportId);
         if (detailOutput.getSlaMsg() != null) {
             StopReasonBean slaReasonBean = new StopReasonBean();
             slaReasonBean.setType(SceneStopReasonEnum.SLA.getType());

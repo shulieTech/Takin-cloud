@@ -3,6 +3,8 @@ package io.shulie.takin.cloud.biz.cloudserver;
 import java.util.List;
 
 import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
+import io.shulie.takin.cloud.sdk.model.common.WarnBean;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportDetailResp;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -15,8 +17,6 @@ import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
 
 import io.shulie.takin.cloud.common.utils.TestTimeUtil;
 import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
-import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
-import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
 
 /**
@@ -36,7 +36,7 @@ public interface ReportConverter {
      * @return -
      */
     @Mapping(target = "startTime", expression = "java(DateUtil.formatDateTime(report.getStartTime()))")
-    ReportDetailOutput ofReportDetail(ReportEntity report);
+    ReportDetailResp ofReportDetail(ReportEntity report);
 
     /**
      * WarnBO Converter WarnBean

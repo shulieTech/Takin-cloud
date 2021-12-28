@@ -1,10 +1,9 @@
-package io.shulie.takin.cloud.common.pojo.vo.middleware;
+package io.shulie.takin.cloud.biz.output.middleware;
 
 import cn.afterturn.easypoi.excel.annotation.Excel;
 import cn.hutool.core.bean.BeanUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
 /**
  * @author liuchuan

@@ -11,7 +11,7 @@ import javax.annotation.Resource;
 import com.google.common.collect.Lists;
 import io.shulie.takin.utils.string.StringUtil;
 import io.shulie.takin.utils.file.FileManagerHelper;
-import io.shulie.takin.cloud.common.bean.file.FileManageInfo;
+import io.shulie.takin.cloud.sdk.model.common.FileManageInfo;
 import io.shulie.takin.cloud.data.model.mysql.EnginePluginFilesRef;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;

@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.cloud.biz.input.engine.EnginePluginWrapperInput;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginDetailOutput;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginSimpleInfoOutput;
+import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginWrapperReq;
 
 /**
  * 引擎接口
@@ -37,7 +37,7 @@ public interface EnginePluginService {
      *
      * @param input 入参
      */
-    void saveEnginePlugin(EnginePluginWrapperInput input);
+    void saveEnginePlugin(EnginePluginWrapperReq input);
 
     /**
      * 更改压测引擎状态

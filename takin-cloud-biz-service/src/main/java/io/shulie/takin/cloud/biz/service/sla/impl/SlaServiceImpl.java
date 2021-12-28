@@ -1,10 +1,10 @@
 package io.shulie.takin.cloud.biz.service.sla.impl;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit;
 
@@ -12,17 +12,13 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
-import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
-import io.shulie.takin.cloud.sdk.model.common.SlaBean;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.date.DateUtil;
 import com.google.common.collect.Maps;
-import org.springframework.beans.BeanUtils;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
 import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
@@ -30,23 +26,24 @@ import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
 import io.shulie.takin.cloud.biz.utils.SlaUtil;
 import io.shulie.takin.cloud.biz.event.SlaPublish;
 import io.shulie.takin.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.cloud.sdk.model.common.SlaBean;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.biz.service.sla.SlaService;
 import io.shulie.takin.cloud.common.constants.Constants;
 import io.shulie.takin.cloud.common.bean.sla.AchieveModel;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneSlaRefResult;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageWrapperResult;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneBusinessActivityRefOutput;
 
 /**
@@ -136,9 +133,9 @@ public class SlaServiceImpl implements SlaService {
         }
         SceneManageWrapperResult dto = JSON.parseObject(scene, SceneManageWrapperResult.class);
 
-        dto.getStopCondition().stream().map(SceneSlaRefResult::getId).forEach(
+        dto.getStopCondition().stream().map(SceneSlaRefResponse::getId).forEach(
             id -> redisTemplate.opsForHash().delete(SLA_DESTROY_KEY, String.valueOf(id)));
-        dto.getWarningCondition().stream().map(SceneSlaRefResult::getId).forEach(
+        dto.getWarningCondition().stream().map(SceneSlaRefResponse::getId).forEach(
             id -> redisTemplate.opsForHash().delete(SLA_WARN_KEY, String.valueOf(id)));
         redisTemplate.opsForHash().delete(SLA_SCENE_KEY, String.valueOf(sceneId));
         redisTemplate.delete(PREFIX_TASK + sceneId);

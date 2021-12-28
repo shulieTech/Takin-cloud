@@ -1,11 +1,9 @@
 package io.shulie.takin.cloud.common.enums.deployment;
 
 import java.util.HashMap;
-import java.util.Map;
 
-import cn.hutool.core.util.StrUtil;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.AllArgsConstructor;
 
 /**
  * @author 无涯
@@ -22,42 +20,25 @@ public enum DeploymentMethodEnum {
      * 公开的
      */
     PUBLIC(1, "public");
-    public Integer type;
-    private String desc;
+    public final Integer code;
+    private final String description;
 
-    private static Map<String, DeploymentMethodEnum> pool = new HashMap<>();
+    private static final HashMap<Integer, DeploymentMethodEnum> CODE_INSTANCES = new HashMap<>(2);
+    private static final HashMap<String, DeploymentMethodEnum> DESCRIPTION_INSTANCES = new HashMap<>(2);
 
     static {
         for (DeploymentMethodEnum e : DeploymentMethodEnum.values()) {
-            pool.put(e.getDesc(), e);
+            CODE_INSTANCES.put(e.getCode(), e);
+            DESCRIPTION_INSTANCES.put(e.getDescription(), e);
         }
     }
 
-    public static DeploymentMethodEnum valueBy(String desc) {
-        if (StrUtil.isBlank(desc)) {
-            return null;
-        }
-        return pool.get(desc);
+    public static DeploymentMethodEnum of(String desc) {
+        return DESCRIPTION_INSTANCES.getOrDefault(desc, DeploymentMethodEnum.PRIVATE);
     }
 
-    public static String getByType(Integer type) {
-        if (type == null) {
-            return DeploymentMethodEnum.PUBLIC.getDesc();
-        }
-        for (DeploymentMethodEnum methodEnum : DeploymentMethodEnum.values()) {
-            if (methodEnum.type.equals(type)) {
-                return methodEnum.getDesc();
-            }
-        }
-        // 默认私有化
-        return DeploymentMethodEnum.PRIVATE.getDesc();
+    public static DeploymentMethodEnum of(Integer code) {
+        return CODE_INSTANCES.getOrDefault(code, DeploymentMethodEnum.PRIVATE);
     }
 
-    public boolean equals(String desc) {
-        if (StrUtil.isBlank(desc)) {
-            return false;
-        }
-        DeploymentMethodEnum input = DeploymentMethodEnum.valueBy(desc);
-        return this == input;
-    }
 }

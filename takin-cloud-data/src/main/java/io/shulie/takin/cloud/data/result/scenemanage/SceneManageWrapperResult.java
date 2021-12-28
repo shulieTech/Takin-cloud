@@ -5,12 +5,15 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import io.shulie.takin.cloud.sdk.model.common.TimeBean;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+import io.shulie.takin.cloud.sdk.model.common.TimeBean;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
 
 /**
  * @author qianshui
@@ -65,10 +68,10 @@ public class SceneManageWrapperResult extends ContextExt {
     private List<SceneScriptRefResult> uploadFile;
 
     @ApiModelProperty(name = "stopCondition", value = "SLA终止配置")
-    private List<SceneSlaRefResult> stopCondition;
+    private List<SceneSlaRefResponse> stopCondition;
 
     @ApiModelProperty(name = "warningCondition", value = "SLA警告配置")
-    private List<SceneSlaRefResult> warningCondition;
+    private List<SceneSlaRefResponse> warningCondition;
 
     @ApiModelProperty(name = "status", value = "压测状态")
     private Integer status;

@@ -109,7 +109,7 @@ public class StrategyConfigServiceImpl implements StrategyConfigService {
         PageInfo<StrategyConfigExt> pageInfo = queryPageList(new StrategyConfigQueryVO());
         if (null != pageInfo && CollectionUtils.isNotEmpty(pageInfo.getList())) {
             strategyConfig = pageInfo.getList().stream().filter(Objects::nonNull)
-                .filter(config -> appConfig.getDeploymentMethod().equals(config.getDeploymentMethod()))
+                .filter(config -> appConfig.getDeploymentMethod().getDescription().equals(config.getDeploymentMethod()))
                 .findFirst()
                 .orElse(pageInfo.getList().get(0));
         }
@@ -155,7 +155,7 @@ public class StrategyConfigServiceImpl implements StrategyConfigService {
             BigDecimal limitMemorySize = object.getBigDecimal("limitMemorySize");
             dto.setLimitMemorySize(limitMemorySize == null ? memorySize : limitMemorySize);
             dto.setTpsNum(object.getInteger("tpsNum"));
-            dto.setDeploymentMethod(DeploymentMethodEnum.getByType(object.getInteger("deploymentMethod")));
+            dto.setDeploymentMethod(DeploymentMethodEnum.of(object.getInteger("deploymentMethod")).getDescription());
 
             dto.setTpsThreadMode(object.getInteger("tpsThreadMode"));
             Double tpsTargetLevelFactor = object.getDouble("tpsTargetLevelFactor");

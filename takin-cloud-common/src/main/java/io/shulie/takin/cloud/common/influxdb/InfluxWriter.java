@@ -1,7 +1,7 @@
 package io.shulie.takin.cloud.common.influxdb;
 
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -9,18 +9,19 @@ import javax.annotation.PostConstruct;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Query;
+import lombok.extern.slf4j.Slf4j;
+import cn.hutool.core.util.StrUtil;
+import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.QueryResult;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 
 /**
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@SuppressWarnings("unused")
 public class InfluxWriter {
 
     /**
@@ -56,13 +58,13 @@ public class InfluxWriter {
 
     private InfluxDB influx;
 
-    public static BatchPoints batchPoints(String sdatabase) {
-        return BatchPoints.database(sdatabase).build();
+    public static BatchPoints batchPoints(String database) {
+        return BatchPoints.database(database).build();
     }
 
     @PostConstruct
     public void init() {
-        if (StringUtils.isBlank(influxdbUrl)) {
+        if (StrUtil.isBlank(influxdbUrl)) {
             return;
         }
         influx = InfluxDBFactory.connect(influxdbUrl, userName, password);
@@ -143,14 +145,14 @@ public class InfluxWriter {
 
         JSONArray resultArr = new JSONArray();
         for (QueryResult.Result result : results) {
-            List<QueryResult.Series> series = result.getSeries();
-            if (series == null) {
+            List<QueryResult.Series> seriesList = result.getSeries();
+            if (seriesList == null) {
                 continue;
             }
-            for (QueryResult.Series serie : series) {
-                List<List<Object>> values = serie.getValues();
-                List<String> colums = serie.getColumns();
-                Map<String, String> tags = serie.getTags();
+            for (QueryResult.Series series : seriesList) {
+                List<List<Object>> values = series.getValues();
+                List<String> columns = series.getColumns();
+                Map<String, String> tags = series.getTags();
 
                 // 封装查询结果
                 for (List<Object> value : values) {
@@ -158,8 +160,8 @@ public class InfluxWriter {
                     if (tags != null && tags.keySet().size() > 0) {
                         jsonData.putAll(tags);
                     }
-                    for (int j = 0; j < colums.size(); ++j) {
-                        jsonData.put(colums.get(j), value.get(j));
+                    for (int j = 0; j < columns.size(); ++j) {
+                        jsonData.put(columns.get(j), value.get(j));
                     }
                     resultArr.add(jsonData);
                 }
@@ -178,12 +180,12 @@ public class InfluxWriter {
 
     /**
      * 设置数据保存策略
-     * defalut 策略名 /database 数据库名/ 30d 数据保存时限30天/ 1
+     * default 策略名 /database 数据库名/ 30d 数据保存时限30天/ 1
      * 副本个数为1/ 结尾DEFAULT 表示 设为默认的策略
      */
     public void createRetentionPolicy() {
         String command = String.format("CREATE RETENTION POLICY \"%s\" ON \"%s\" DURATION %s REPLICATION %s DEFAULT",
-            "defalut", database, "30d", 1);
+            "default", database, "30d", 1);
         influx.query(new Query(command, database));
     }
 
