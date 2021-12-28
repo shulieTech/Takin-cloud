@@ -10,10 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -27,6 +24,7 @@ import com.pamirs.takin.entity.domain.dto.file.FileDTO;
 import com.pamirs.takin.entity.domain.vo.file.FileDeleteVO;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.utils.FileUtils;
 import io.shulie.takin.cloud.common.utils.LinuxUtil;
 import io.shulie.takin.cloud.common.utils.Md5Util;
 import io.shulie.takin.cloud.entrypoint.controller.strategy.LocalFileStrategy;
@@ -41,6 +39,7 @@ import io.shulie.takin.utils.file.FileManagerHelper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -120,7 +119,7 @@ public class FileController {
         String tempPath = scriptPath;
         if (vo.getUploadId() != null) {
             String targetDir = tempPath + SceneManageConstant.FILE_SPLIT + vo.getUploadId();
-            LinuxUtil.executeLinuxCmd("rm -rf " + targetDir);
+            FileUtils.deleteDirectory(targetDir);
         }
         //根据文件： 删除大文件行数，删除大文件起始位置
         return ResponseResult.success();
@@ -181,14 +180,40 @@ public class FileController {
     @PostMapping(EntrypointUrl.METHOD_FILE_DELETE)
     @ApiOperation(value = "文件删除")
     public ResponseResult<Boolean> deleteFile(@RequestBody FileDeleteParamRequest fileDeleteParamDTO) {
-        return ResponseResult.success(FileManagerHelper.deleteFiles(fileDeleteParamDTO.getPaths()));
+        if (fileDeleteParamDTO == null || CollectionUtils.isEmpty(fileDeleteParamDTO.getPaths())){
+            return ResponseResult.success();
+        }
+        //做文件路径安全处理
+        List<String> deleteFilePath = new ArrayList<>();
+        fileDeleteParamDTO.getPaths().forEach(path ->{
+            String filepath = FilenameUtils.getFullPath(path) + FilenameUtils.getName(path);
+            if (StringUtils.isNotBlank(filepath)){
+                deleteFilePath.add(filepath);
+            }
+        });
+        return ResponseResult.success(FileManagerHelper.deleteFiles(deleteFilePath));
     }
 
     @PostMapping(EntrypointUrl.METHOD_FILE_COPY)
     @ApiOperation(value = "复制文件")
     public ResponseResult<Boolean> copyFile(@RequestBody FileCopyParamRequest fileCopyParamDTO) {
         try {
-            FileManagerHelper.copyFiles(fileCopyParamDTO.getSourcePaths(), fileCopyParamDTO.getTargetPath());
+            if (fileCopyParamDTO == null || CollectionUtils.isEmpty(fileCopyParamDTO.getSourcePaths())
+                    || StringUtils.isBlank(fileCopyParamDTO.getTargetPath())){
+                return ResponseResult.success(Boolean.FALSE);
+            }
+            //做文件路径安全处理
+            List<String> sourcePaths = new ArrayList<>();
+            fileCopyParamDTO.getSourcePaths().forEach(path ->{
+                String filepath = FilenameUtils.getFullPath(path) + FilenameUtils.getName(path);
+                if (StringUtils.isNotBlank(filepath)){
+                    sourcePaths.add(filepath);
+                }
+            });
+
+            //做文件路径安全处理
+            String targetPath = FilenameUtils.getFullPath(fileCopyParamDTO.getTargetPath()) + FilenameUtils.getName(fileCopyParamDTO.getTargetPath());
+            FileManagerHelper.copyFiles(sourcePaths, targetPath);
         } catch (IOException e) {
             log.error("异常代码【{}】,异常内容：文件复制异常 --> 异常信息: {}",
                 TakinCloudExceptionEnum.FILE_COPY_ERROR, e);
@@ -201,8 +226,24 @@ public class FileController {
     @ApiOperation(value = "打包文件")
     public ResponseResult<Boolean> zipFile(@RequestBody FileZipParamRequest fileZipParamDTO) {
         try {
-            FileManagerHelper.zipFiles(fileZipParamDTO.getSourcePaths(), fileZipParamDTO.getTargetPath()
-                , fileZipParamDTO.getZipFileName(), fileZipParamDTO.getIsCovered());
+            if (fileZipParamDTO == null || CollectionUtils.isEmpty(fileZipParamDTO.getSourcePaths())
+                    || StringUtils.isBlank(fileZipParamDTO.getTargetPath())){
+                return ResponseResult.success(Boolean.FALSE);
+            }
+            //做文件路径安全处理
+            List<String> sourcePaths = new ArrayList<>();
+            fileZipParamDTO.getSourcePaths().forEach(path ->{
+                String filepath = FilenameUtils.getFullPath(path) + FilenameUtils.getName(path);
+                if (StringUtils.isNotBlank(filepath)){
+                    sourcePaths.add(filepath);
+                }
+            });
+
+            //做文件路径安全处理
+            String targetPath = FilenameUtils.getFullPath(fileZipParamDTO.getTargetPath()) + FilenameUtils.getName(fileZipParamDTO.getTargetPath());
+
+            FileManagerHelper.zipFiles(sourcePaths, targetPath, FilenameUtils.getName(fileZipParamDTO.getZipFileName()),
+                    fileZipParamDTO.getIsCovered());
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：文件打包失败 --> 异常信息: {}",
                 TakinCloudExceptionEnum.FILE_ZIP_ERROR, e);
@@ -259,6 +300,8 @@ public class FileController {
         Map<String, Object> result = Maps.newHashMap();
         try {
             for (String filePath : req.getPaths()) {
+                //做文件路径安全处理
+                filePath = FilenameUtils.getFullPath(filePath) + FilenameUtils.getName(filePath);
                 if (new File(filePath).exists()) {
                     result.put(filePath, FileManagerHelper.readFileToString(new File(filePath), "UTF-8"));
                 }

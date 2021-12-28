@@ -1,8 +1,10 @@
 package io.shulie.takin.cloud.biz.service.schedule;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.utils.file.FileManagerHelper;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,13 +23,11 @@ public class CopyFileTask implements Runnable {
 
     @Override
     public void run() {
-
-        String cmd = "cmd /c copy" + source + " " + dest;
         try {
-            Runtime.getRuntime().exec(cmd);
+            FileManagerHelper.copyFiles(Collections.singletonList(source), dest);
         } catch (IOException e) {
             log.error("异常代码【{}】,异常内容：文件复制失败 --> 异常信息: {}",
-                TakinCloudExceptionEnum.FILE_COPY_ERROR, e);
+                    TakinCloudExceptionEnum.FILE_COPY_ERROR, e);
         }
     }
 }

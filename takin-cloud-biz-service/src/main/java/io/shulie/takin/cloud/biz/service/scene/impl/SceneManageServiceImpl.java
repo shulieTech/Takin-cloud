@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.biz.service.scene.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -72,10 +73,7 @@ import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.pojo.dto.scenemanage.UploadFileDTO;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
-import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
-import io.shulie.takin.cloud.common.utils.JsonUtil;
-import io.shulie.takin.cloud.common.utils.LinuxUtil;
-import io.shulie.takin.cloud.common.utils.UrlUtil;
+import io.shulie.takin.cloud.common.utils.*;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
@@ -101,6 +99,7 @@ import io.shulie.takin.utils.string.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -248,7 +247,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             return;
         }
 
-        File file = new File(dest.substring(0, dest.lastIndexOf("/")));
+        File file = new File(FilenameUtils.getFullPath(dest));
         if (!file.exists()) {
             boolean mkdirs = file.mkdirs();
             log.debug("io.shulie.takin.cloud.biz.service.scene.impl.SceneManageServiceImpl#copyFile:mkdirs:{}", mkdirs);
@@ -1295,19 +1294,22 @@ public class SceneManageServiceImpl implements SceneManageService {
             boolean mkdir = dir.mkdir();
             log.debug("io.shulie.takin.cloud.biz.service.scene.impl.SceneManageServiceImpl#moveTempFile:mkdir:{}.", mkdir);
         }
+        String finalDirPath = FilenameUtils.getFullPath(dirPath);
         scriptList.stream().filter(data -> data.getUploadId() != null).forEach(data -> {
             String tempPath = scriptTempPath
                 + SceneManageConstant.FILE_SPLIT
                 + data.getUploadId()
                 + SceneManageConstant.FILE_SPLIT
-                + data.getFileName();
+                + FilenameUtils.getName(data.getFileName());
             File file = new File(tempPath);
             data.setFileSize(LinuxUtil.getPrintSize(file.length()));
             data.setUploadPath(sceneId + SceneManageConstant.FILE_SPLIT + data.getFileName());
-            LinuxUtil.executeLinuxCmd("mv " + tempPath + " " + dirPath);
-            LinuxUtil.executeLinuxCmd("rm -rf " + scriptTempPath
-                + SceneManageConstant.FILE_SPLIT
-                + data.getUploadId());
+            try {
+                FileManagerHelper.copyFiles(Collections.singletonList(tempPath),finalDirPath);
+                FileUtils.deleteDirectory(scriptTempPath + SceneManageConstant.FILE_SPLIT + data.getUploadId());
+            } catch (IOException e) {
+                log.error("文件处理异常:【{}", TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR, e);
+            }
         });
     }
 

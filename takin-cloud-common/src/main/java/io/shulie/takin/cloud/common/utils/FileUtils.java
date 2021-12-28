@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.slf4j.Logger;
@@ -218,6 +220,12 @@ public class FileUtils {
      * @return 目录删除成功返回true，否则返回false
      */
     public static boolean deleteDirectory(String dir) {
+        //安全处理
+        dir = FilenameUtils.getFullPath(dir);
+        //不能删除根目录
+        if (StringUtils.isBlank(dir) || "/".equals(dir)){
+            return false;
+        }
         // 如果dir不以文件分隔符结尾，自动添加文件分隔符
         if (!dir.endsWith(File.separator)) {
             dir = dir + File.separator;
@@ -229,18 +237,21 @@ public class FileUtils {
             return false;
         }
         boolean flag = true;
-        // 删除文件夹中的所有文件包括子目录
+
         File[] files = dirFile.listFiles();
-        for (File file : files) {
-            // 删除子文件
-            if (file.isFile()) {
-                flag = deleteFile(file.getAbsolutePath());
-                if (!flag) {break;}
-            }
-            // 删除子目录
-            else if (file.isDirectory()) {
-                flag = deleteDirectory(file.getAbsolutePath());
-                if (!flag) {break;}
+        if (files != null && files.length > 0){
+            // 删除文件夹中的所有文件包括子目录
+            for (File file : files) {
+                // 删除子文件
+                if (file.isFile()) {
+                    flag = deleteFile(file.getAbsolutePath());
+                    if (!flag) {break;}
+                }
+                // 删除子目录
+                else if (file.isDirectory()) {
+                    flag = deleteDirectory(file.getAbsolutePath());
+                    if (!flag) {break;}
+                }
             }
         }
         // 删除目录成功
