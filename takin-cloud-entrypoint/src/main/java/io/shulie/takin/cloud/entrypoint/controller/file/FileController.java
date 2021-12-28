@@ -116,7 +116,7 @@ public class FileController {
     @DeleteMapping(EntrypointUrl.METHOD_FILE_DELETE_TEMP)
     @ApiOperation(value = "临时文件删除")
     public ResponseResult<?> delete(@RequestBody FileDeleteVO vo) {
-        String tempPath = scriptPath;
+        //String tempPath = scriptPath;
         if (vo.getUploadId() != null) {
             String targetDir = tempPath + SceneManageConstant.FILE_SPLIT + vo.getUploadId();
             LinuxUtil.executeLinuxCmd("rm -rf " + targetDir);
