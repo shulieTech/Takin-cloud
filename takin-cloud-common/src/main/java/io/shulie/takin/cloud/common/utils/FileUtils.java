@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +29,18 @@ import org.slf4j.LoggerFactory;
  */
 public class FileUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
+
+    public static void verityFilePath(String path){
+        if ("".equals(path) || null == path){
+            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,"文件路径校验错误，路径为空");
+        }
+        if (path.contains("..")){
+            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,"文件路径校验错误，路径中包含..");
+        }
+        if (path.contains("\n")){
+            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,"文件路径校验错误，路径中包含回车符");
+        }
+    }
 
     public static File createFileDE(String filePathName) {
         File file = new File(filePathName);

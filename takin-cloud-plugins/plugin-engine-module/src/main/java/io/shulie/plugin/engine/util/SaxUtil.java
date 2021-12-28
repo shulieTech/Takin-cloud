@@ -14,6 +14,7 @@ import io.shulie.plugin.engine.jmeter.XmlJdbcJmxParser;
 import io.shulie.plugin.engine.jmeter.XmlKafkaJmxParser;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.utils.FileUtils;
 import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptUrlExt;
 import io.shulie.takin.utils.file.FileManagerHelper;
@@ -54,7 +55,7 @@ public class SaxUtil {
         ScriptParseExt scriptParseExt = new ScriptParseExt();
         try {
             //文件路径安全处理
-            path = FilenameUtils.getFullPath(path) + FilenameUtils.getName(path);
+            FileUtils.verityFilePath(path);
             File file = new File(path);
             String content = FileManagerHelper.readFileToString(file, "utf-8");
             // 读取文件内容
