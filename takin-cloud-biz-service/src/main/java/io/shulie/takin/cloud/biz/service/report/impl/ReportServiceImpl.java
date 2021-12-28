@@ -735,6 +735,12 @@ public class ReportServiceImpl implements ReportService {
         // 完成报告
         if (reportResult.getStatus() != ReportConstants.FINISH_STATUS) {
             log.info("{}报告触发强制停止", reportId);
+            //先汇总数据，之后再去强制停止
+            TaskResult taskResult = new TaskResult();
+            taskResult.setSceneId(reportResult.getSceneId());
+            taskResult.setTaskId(reportId);
+            taskResult.setTenantId(reportResult.getTenantId());
+            modifyReport(taskResult);
             reportDao.finishReport(reportId);
         }
 
