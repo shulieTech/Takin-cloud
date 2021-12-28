@@ -215,7 +215,8 @@ public class CollectorService extends AbstractIndicators {
                     }
                     //如果从cloud上传请求流量明细，则需要启动异步线程去读取ptl文件上传
                     if (PressureLogUploadConstants.UPLOAD_BY_CLOUD.equals(appConfig.getEngineLogUploadModel())){
-                        log.info("开始异步上传ptl日志，场景ID：{},报告ID:{},PodNum:{}", sceneId, reportId,metric.getPodNo());
+                        log.info("开始异步上传ptl日志，场景ID：{},报告ID:{},PodNum:{}", sceneId, reportId,
+                                metric.getPodNo() == null ? "null" : metric.getPodNo().replaceAll("\n","_").replaceAll("\r","_"));
                         EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
                         String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_PTL_FILE_NAME_SYSTEM_PROP_KEY);
                         THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, tenantId, logUploadDAO, redisClientUtils,
@@ -313,7 +314,8 @@ public class CollectorService extends AbstractIndicators {
     private boolean validate(long time, Long sceneId, Long reportId, Long tenantId, List<ResponseMetrics> metrics) {
         if ((System.currentTimeMillis() - time) > CollectorConstants.OVERDUE_TIME) {
             log.info("{}-{}-{}数据丢失,超时时间{}，数据原文：{}", sceneId, reportId, tenantId,
-                System.currentTimeMillis() - time, JsonHelper.bean2Json(metrics));
+                System.currentTimeMillis() - time, JsonHelper.bean2Json(metrics) == null ? "null" :
+                            JsonHelper.bean2Json(metrics).replaceAll("\n","_").replaceAll("\r","_"));
             return false;
         }
         return true;

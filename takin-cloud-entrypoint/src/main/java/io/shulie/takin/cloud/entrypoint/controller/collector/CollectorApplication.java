@@ -90,7 +90,8 @@ public class CollectorApplication {
             long time = System.currentTimeMillis();
             if (responseMetrics.size() > 0) {
                 long timestamp = responseMetrics.get(0).getTimestamp();
-                log.debug("【收集器调度-debug】{}-{}-{}:接受到的数据:{}", sceneId, reportId, tenantId, GsonUtil.gsonToString(responseMetrics));
+                log.debug("【收集器调度-debug】{}-{}-{}:接受到的数据:{}", sceneId, reportId, tenantId,
+                        GsonUtil.gsonToString(responseMetrics).replaceAll("\n","_").replaceAll("\r","_"));
                 log.info("【收集器调度-metrics】{}-{}-{}: 接收到的数据:{}条,时间范围:{},已耗时:{}",
                     sceneId, reportId, tenantId, responseMetrics.size(), timestamp, (System.currentTimeMillis() - time));
                 // 刷新任务状态的Redis缓存
@@ -100,7 +101,7 @@ public class CollectorApplication {
             }
             if (eventMetrics.size() > 0) {
                 log.info("【收集器调度-事件】{}-{}-{}:{}", sceneId, reportId, tenantId,
-                    GsonUtil.gsonToString(eventMetrics));
+                    GsonUtil.gsonToString(eventMetrics).replaceAll("\n","_").replaceAll("\r","_"));
                 collectorService.verifyEvent(sceneId, reportId, tenantId, eventMetrics);
             }
             return ResponseEntity.ok("success");

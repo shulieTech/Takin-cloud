@@ -1318,9 +1318,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             return;
         }
         files.forEach(file ->
-            LinuxUtil.executeLinuxCmd("rm -rf " + scriptPath
-                + SceneManageConstant.FILE_SPLIT
-                + file)
+            FileUtils.deleteFile(scriptPath + SceneManageConstant.FILE_SPLIT + file)
         );
     }
 }
