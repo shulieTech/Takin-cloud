@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.io.RandomAccessFile;
 import java.io.FileNotFoundException;
 
+import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import io.shulie.takin.cloud.common.constants.FileConstants;
@@ -103,7 +104,7 @@ public class FileSliceByPodNum {
         private final File file;
 
         public Builder(String filepath) {
-            this.file = new File(filepath);
+            this.file = FileUtil.file(filepath);
             if (!this.file.exists()) {
                 throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR, "文件不存在！filepath:[" + filepath + "]");
             }

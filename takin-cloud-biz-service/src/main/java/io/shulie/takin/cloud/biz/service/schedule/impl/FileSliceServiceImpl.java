@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSONObject;
@@ -189,7 +190,7 @@ public class FileSliceServiceImpl implements FileSliceService {
         SceneContactFileOutput output = new SceneContactFileOutput();
         output.setSceneId(param.getSceneId());
         String fileDir = nfsDir + DEFAULT_PATH_SEPARATOR + param.getSceneId() + DEFAULT_PATH_SEPARATOR;
-        File dir = new File(fileDir);
+        File dir = FileUtil.file(fileDir);
         File[] files;
         File targetFile = null;
         String errorInfo;

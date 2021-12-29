@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -215,7 +216,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     private void delDirFile(String dest) {
         log.info("开始删除路径[{}].", dest);
-        File file = new File(dest);
+        File file = FileUtil.file(dest);
         boolean deleteResult;
         // 是个文件
         if (!file.isDirectory()) {
@@ -227,7 +228,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             String[] fileList = file.list();
             if (fileList != null) {
                 for (String s : fileList) {
-                    File deleteFile = new File(dest + "/" + s);
+                    File deleteFile = FileUtil.file(dest + "/" + s);
                     if (!deleteFile.isDirectory()) {
                         deleteResult = deleteFile.delete();
                         log.info("[{}]删除文件夹下文件结果:{}.", deleteFile.getAbsolutePath(), deleteResult);
@@ -247,7 +248,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             return;
         }
 
-        File file = new File(FilenameUtils.getFullPath(dest));
+        File file = FileUtil.file(dest);
         if (!file.exists()) {
             boolean mkdirs = file.mkdirs();
             log.debug("io.shulie.takin.cloud.biz.service.scene.impl.SceneManageServiceImpl#copyFile:mkdirs:{}", mkdirs);
@@ -875,7 +876,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             }).map(SceneScriptRefInput::getFileName).collect(Collectors.toList());
         String bigFileName = CollectionUtils.isEmpty(bigFileNames) ? null : bigFileNames.get(0);
         //删除除了大文件之外的文件
-        File destDir = new File(destPath);
+        File destDir = FileUtil.file(destPath);
         if (destDir.exists()) {
             File[] listFiles = destDir.listFiles();
             if (null != listFiles) {
@@ -962,7 +963,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (!isAbsolutePath) {
             path = scriptPath + SceneManageConstant.FILE_SPLIT + uploadPath;
             //兼容性处理
-            File file = new File(path);
+            File file = FileUtil.file(path);
             if (!file.exists() && uploadPath.startsWith(scriptPath + SceneManageConstant.FILE_SPLIT)) {
                 path = uploadPath;
             }
@@ -1289,7 +1290,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     private void moveTempFile(List<SceneScriptRef> scriptList, Long sceneId) {
         String dirPath = scriptPath + SceneManageConstant.FILE_SPLIT + sceneId;
-        File dir = new File(dirPath);
+        File dir = FileUtil.file(dirPath);
         if (!dir.exists()) {
             boolean mkdir = dir.mkdir();
             log.debug("io.shulie.takin.cloud.biz.service.scene.impl.SceneManageServiceImpl#moveTempFile:mkdir:{}.", mkdir);
@@ -1301,7 +1302,7 @@ public class SceneManageServiceImpl implements SceneManageService {
                 + data.getUploadId()
                 + SceneManageConstant.FILE_SPLIT
                 + FilenameUtils.getName(data.getFileName());
-            File file = new File(tempPath);
+            File file = FileUtil.file(tempPath);
             data.setFileSize(LinuxUtil.getPrintSize(file.length()));
             data.setUploadPath(sceneId + SceneManageConstant.FILE_SPLIT + data.getFileName());
             try {

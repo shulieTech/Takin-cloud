@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import cn.hutool.core.io.FileUtil;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import org.apache.commons.io.FilenameUtils;
@@ -31,28 +32,8 @@ import org.springframework.beans.factory.annotation.Value;
 public class FileUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
 
-    @Value("${script.temp.path}")
-    private static String scriptTempPath;
-    @Value("${script.path}")
-    private static String scriptPath;
-
-    public static void verityFilePath(String path){
-        if ("".equals(path) || null == path){
-            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,"文件路径校验错误，路径为空");
-        }
-        if (!path.startsWith(scriptTempPath) && !path.startsWith(scriptPath)){
-            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,"该文件不是脚本文件");
-        }
-        if (path.contains("..")){
-            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,"文件路径校验错误，路径中包含..");
-        }
-        if (path.contains("\n")){
-            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,"文件路径校验错误，路径中包含回车符");
-        }
-    }
-
     public static File createFileDE(String filePathName) {
-        File file = new File(filePathName);
+        File file = FileUtil.file(filePathName);
         if (file.exists()) {
             if (!file.delete()) {
                 return null;
@@ -87,7 +68,7 @@ public class FileUtils {
         if (dir == null) {
             return null;
         }
-        File fileDir = new File(dir);
+        File fileDir = FileUtil.file(dir);
         if (!fileDir.isDirectory()) {
             LOGGER.warn("Expected a dir, but not: '{}'", fileDir.getPath());
         }
@@ -109,7 +90,7 @@ public class FileUtils {
             String[] children = dir.list();
             if (children != null) {
                 for (String child : children) {
-                    if (!deleteDir(new File(child))) {
+                    if (!deleteDir(FileUtil.file(child))) {
                         return false;
                     }
                 }
@@ -174,10 +155,10 @@ public class FileUtils {
      * @param subDir    -
      */
     public static void createDirectory(String outputDir, String subDir) {
-        File file = new File(outputDir);
+        File file = FileUtil.file(outputDir);
         //子目录不为空
         if (!(subDir == null || "".equals(subDir.trim()))) {
-            file = new File(outputDir + "/" + subDir);
+            file = FileUtil.file(outputDir + "/" + subDir);
         }
         if (!file.exists()) {
             if (!file.getParentFile().exists()) {
@@ -205,7 +186,7 @@ public class FileUtils {
                     createDirectory(extractPath, entry.getName());
                 } else {
                     //是文件
-                    File tmpFile = new File(extractPath + "/" + entry.getName());
+                    File tmpFile = FileUtil.file(extractPath + "/" + entry.getName());
                     //创建输出目录
                     createDirectory(tmpFile.getParent() + "/", null);
                     try (OutputStream out = new FileOutputStream(tmpFile)) {
@@ -252,7 +233,7 @@ public class FileUtils {
         if (!dir.endsWith(File.separator)) {
             dir = dir + File.separator;
         }
-        File dirFile = new File(dir);
+        File dirFile = FileUtil.file(dir);
         // 如果dir对应的文件不存在，或者不是一个目录，则退出
         if ((!dirFile.exists()) || (!dirFile.isDirectory())) {
             LOGGER.warn("删除目录失败：" + dir + "不存在！");
@@ -293,7 +274,7 @@ public class FileUtils {
      * @return 单个文件删除成功返回true，否则返回false
      */
     public static boolean deleteFile(String fileName) {
-        File file = new File(fileName);
+        File file = FileUtil.file(fileName);
         // 如果文件路径所对应的文件存在，并且是一个文件，则直接删除
         if (file.exists() && file.isFile()) {
             if (file.delete()) {

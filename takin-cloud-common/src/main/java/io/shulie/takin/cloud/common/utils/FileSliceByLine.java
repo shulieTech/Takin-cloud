@@ -11,6 +11,7 @@ import java.io.RandomAccessFile;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
+import cn.hutool.core.io.FileUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +49,7 @@ public class FileSliceByLine {
         BufferedReader reader = null;
         try {
             String fileEncoder = "UTF-8";
-            File file = new File(this.filePath);
+            File file = FileUtil.file(this.filePath);
             int lineBreakSize = getLineBreakSize(file);
             reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(this.filePath), fileEncoder));
@@ -155,7 +156,7 @@ public class FileSliceByLine {
 
         public Builder(String filepath) {
             this.filePath = filepath;
-            File file = new File(this.filePath);
+            File file = FileUtil.file(this.filePath);
             if (!file.exists()) {
                 throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_CSV_FILE_SPLIT_ERROR, "文件不存在！filepath:[" + filepath + "]");
             }

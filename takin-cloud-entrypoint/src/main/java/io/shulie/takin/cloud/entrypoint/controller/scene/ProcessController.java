@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import cn.hutool.core.io.FileUtil;
 import io.shulie.takin.cloud.ext.api.EngineExtApi;
 import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
@@ -43,7 +44,7 @@ public class ProcessController {
         if (StringUtils.isBlank(request.getScriptFile())) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCRIPT_ANALYZE_PARAMS_ERROR, "请提供脚本文件完整的路径和名称");
         }
-        File file = new File(request.getScriptFile());
+        File file = FileUtil.file(request.getScriptFile());
         if (!file.exists() || !file.isFile()) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCRIPT_FILE_NOT_EXISTS, "请检测脚本文件是否存在");
         }

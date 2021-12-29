@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import cn.hutool.core.io.FileUtil;
 import io.shulie.takin.cloud.biz.service.log.PushLogService;
 import io.shulie.takin.cloud.biz.utils.FileFetcher;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
@@ -268,7 +269,7 @@ public class PressureTestLogUploadTask implements Runnable {
     }
 
     private File getFile(String filePath) {
-        File file = new File(filePath);
+        File file = FileUtil.file(filePath);
         if (file.exists() && file.isFile()) {
             return file;
         }

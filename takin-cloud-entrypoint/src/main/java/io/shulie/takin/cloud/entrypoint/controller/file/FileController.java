@@ -18,6 +18,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Maps;
 import com.pamirs.takin.entity.domain.dto.file.FileDTO;
@@ -77,12 +78,12 @@ public class FileController {
     public ResponseResult<List<FileDTO>> upload(@RequestBody List<MultipartFile> file) {
         List<FileDTO> result = file.stream().map(t -> {
             String uploadId = UUID.randomUUID().toString();
-            File targetDir = new File(tempPath + SceneManageConstant.FILE_SPLIT + uploadId);
+            File targetDir = FileUtil.file(tempPath + SceneManageConstant.FILE_SPLIT + uploadId);
             if (!targetDir.exists()) {
                 boolean mkdirResult = targetDir.mkdirs();
                 log.debug("io.shulie.takin.cloud.web.entrypoint.controller.file.NewFileController#upload-mkdirResult:{}", mkdirResult);
             }
-            File targetFile = new File(tempPath + SceneManageConstant.FILE_SPLIT
+            File targetFile = FileUtil.file(tempPath + SceneManageConstant.FILE_SPLIT
                 + uploadId + SceneManageConstant.FILE_SPLIT + t.getOriginalFilename());
             FileDTO dto = new FileDTO();
             try {
@@ -130,10 +131,8 @@ public class FileController {
     public void downloadFile(@RequestParam("fileName") String fileName, HttpServletResponse response) {
         try {
             String filePath = scriptPath + SceneManageConstant.FILE_SPLIT + fileName;
-            //处理安全问题
-            filePath = FilenameUtils.getFullPath(filePath) + FilenameUtils.getName(filePath);
 
-            if (new File(filePath).exists()) {
+            if (FileUtil.file(filePath).exists()) {
                 ServletOutputStream outputStream = response.getOutputStream();
                 Files.copy(Paths.get(filePath), outputStream);
                 response.setContentType("application/octet-stream");
@@ -151,8 +150,6 @@ public class FileController {
     @GetMapping(value = EntrypointUrl.METHOD_FILE_DOWNLOAD)
     public void downloadFileByPath(@RequestParam("filePath") String filePath, HttpServletResponse response) {
         try {
-            //处理安全问题
-            filePath = FilenameUtils.getFullPath(filePath) + FilenameUtils.getName(filePath);
             //反编码
             filePath = URLDecoder.decode(filePath, "utf-8");
             boolean permit = fileStrategy.filePathValidate(filePath);
@@ -162,7 +159,7 @@ public class FileController {
                 return;
             }
 
-            if (new File(filePath).exists()) {
+            if (FileUtil.file(filePath).exists()) {
                 ServletOutputStream outputStream = response.getOutputStream();
                 Files.copy(Paths.get(filePath), outputStream);
                 response.setContentType("application/octet-stream");
@@ -186,7 +183,7 @@ public class FileController {
         //做文件路径安全处理
         List<String> deleteFilePath = new ArrayList<>();
         fileDeleteParamDTO.getPaths().forEach(path ->{
-            String filepath = FilenameUtils.getFullPath(path) + FilenameUtils.getName(path);
+            String filepath = FileUtil.getAbsolutePath(path);
             if (StringUtils.isNotBlank(filepath)){
                 deleteFilePath.add(filepath);
             }
@@ -205,14 +202,14 @@ public class FileController {
             //做文件路径安全处理
             List<String> sourcePaths = new ArrayList<>();
             fileCopyParamDTO.getSourcePaths().forEach(path ->{
-                String filepath = FilenameUtils.getFullPath(path) + FilenameUtils.getName(path);
+                String filepath = FileUtil.getAbsolutePath(path);
                 if (StringUtils.isNotBlank(filepath)){
                     sourcePaths.add(filepath);
                 }
             });
 
             //做文件路径安全处理
-            String targetPath = FilenameUtils.getFullPath(fileCopyParamDTO.getTargetPath()) + FilenameUtils.getName(fileCopyParamDTO.getTargetPath());
+            String targetPath = FileUtil.getAbsolutePath(fileCopyParamDTO.getTargetPath());
             FileManagerHelper.copyFiles(sourcePaths, targetPath);
         } catch (IOException e) {
             log.error("异常代码【{}】,异常内容：文件复制异常 --> 异常信息: {}",
@@ -233,15 +230,14 @@ public class FileController {
             //做文件路径安全处理
             List<String> sourcePaths = new ArrayList<>();
             fileZipParamDTO.getSourcePaths().forEach(path ->{
-                String filepath = FilenameUtils.getFullPath(path) + FilenameUtils.getName(path);
+                String filepath = FileUtil.getAbsolutePath(path);
                 if (StringUtils.isNotBlank(filepath)){
                     sourcePaths.add(filepath);
                 }
             });
 
             //做文件路径安全处理
-            String targetPath = FilenameUtils.getFullPath(fileZipParamDTO.getTargetPath()) + FilenameUtils.getName(fileZipParamDTO.getTargetPath());
-
+            String targetPath = FileUtil.getAbsolutePath(fileZipParamDTO.getTargetPath());
             FileManagerHelper.zipFiles(sourcePaths, targetPath, FilenameUtils.getName(fileZipParamDTO.getZipFileName()),
                     fileZipParamDTO.getIsCovered());
         } catch (Exception e) {
@@ -300,10 +296,8 @@ public class FileController {
         Map<String, Object> result = Maps.newHashMap();
         try {
             for (String filePath : req.getPaths()) {
-                //做文件路径安全处理
-                filePath = FilenameUtils.getFullPath(filePath) + FilenameUtils.getName(filePath);
-                if (new File(filePath).exists()) {
-                    result.put(filePath, FileManagerHelper.readFileToString(new File(filePath), "UTF-8"));
+                if (FileUtil.exist(filePath)) {
+                    result.put(filePath, FileManagerHelper.readFileToString(FileUtil.file(filePath), "UTF-8"));
                 }
             }
         } catch (IOException e) {

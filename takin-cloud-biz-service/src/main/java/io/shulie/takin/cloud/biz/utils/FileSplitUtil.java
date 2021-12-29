@@ -22,6 +22,7 @@ import java.io.RandomAccessFile;
 import java.util.Arrays;
 import java.util.List;
 
+import cn.hutool.core.io.FileUtil;
 import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.biz.pojo.FileSplitInfo;
 import lombok.Data;
@@ -47,7 +48,7 @@ public class FileSplitUtil {
         if (StringUtils.isBlank(file)) {
             return null;
         }
-        File f = new File(file);
+        File f = FileUtil.file(file);
         if (!f.exists() || !f.isFile()) {
             return null;
         }

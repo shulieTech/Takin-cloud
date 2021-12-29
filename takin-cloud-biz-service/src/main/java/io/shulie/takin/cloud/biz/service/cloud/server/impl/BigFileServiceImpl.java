@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.pamirs.takin.entity.dao.scene.manage.TSceneScriptRefMapper;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
@@ -103,9 +104,7 @@ public class BigFileServiceImpl implements BigFileService {
 
     private File getDestFile(String parentPath, String fileName) {
         String filePath = parentPath.concat("/").concat(fileName);
-        //文件路径安全处理
-        filePath = FilenameUtils.getFullPath(filePath) + FilenameUtils.getName(filePath);
-        return new File(filePath);
+        return FileUtil.file(filePath);
     }
 
     private String getParentPath(String originalName) {
@@ -135,9 +134,8 @@ public class BigFileServiceImpl implements BigFileService {
 
         String nfsFilePath = scriptPath.concat("/").concat(String.valueOf(part.getSceneId())).concat("/").concat(
             part.getOriginalName());
-        //文件路径安全处理
-        nfsFilePath = FilenameUtils.getFullPath(nfsFilePath) + FilenameUtils.getName(nfsFilePath);
-        File destFile = new File(nfsFilePath);
+
+        File destFile = FileUtil.file(nfsFilePath);
         if (!destFile.getParentFile().exists()) {
             destFile.getParentFile().mkdirs();
         }
@@ -239,9 +237,8 @@ public class BigFileServiceImpl implements BigFileService {
                 Part cachePart = entries.get(key);
                 String fileName = cachePart.getFileName();
                 String filePath = parentPath.concat("/").concat(fileName);
-                //文件路径安全处理
-                filePath = FilenameUtils.getFullPath(filePath) + FilenameUtils.getName(filePath);
-                File targetFile = new File(filePath);
+
+                File targetFile = FileUtil.file(filePath);
                 FileInputStream fileInputStream = new FileInputStream(targetFile);
 
                 FileChannel pc = fileInputStream.getChannel();
@@ -362,9 +359,8 @@ public class BigFileServiceImpl implements BigFileService {
 
     @Override
     public File getPradarUploadFile() {
-        //文件路径安全处理
-        uploadClientPath = FilenameUtils.getFullPath(uploadClientPath) + FilenameUtils.getName(uploadClientPath);
-        File docDir = new File(uploadClientPath);
+
+        File docDir = FileUtil.file(uploadClientPath);
         if (!docDir.exists()) {
             if (!docDir.mkdirs()) {
                 throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_UPLOAD_FILE_ERROR, "pradarUpload client dir create failed.");

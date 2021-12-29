@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import cn.hutool.core.io.FileUtil;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -100,9 +101,7 @@ public class FileWriteService {
      */
     private File createFile(String filepath, final Long sizeInBytes) throws IOException {
 
-        //文件路径安全处理
-        filepath = FilenameUtils.getFullPath(filepath) + FilenameUtils.getName(filepath);
-        File file = new File(filepath);
+        File file = FileUtil.file(filepath);
         if (!file.exists()) {
             File parentFile = file.getParentFile();
             if (!parentFile.exists()) {
@@ -114,7 +113,7 @@ public class FileWriteService {
     }
 
     public boolean exitFile(String path) {
-        File file = new File(path);
+        File file = FileUtil.file(path);
         return file.exists();
     }
 

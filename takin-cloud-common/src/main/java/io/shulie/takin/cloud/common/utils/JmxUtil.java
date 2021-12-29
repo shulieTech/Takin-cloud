@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -48,7 +49,7 @@ public class JmxUtil {
         if (StringUtils.isBlank(file)) {
             return null;
         }
-        File f = new File(file);
+        File f = FileUtil.file(file);
         if (!f.exists() || !f.isFile()) {
             return null;
         }

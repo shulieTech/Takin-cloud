@@ -55,9 +55,7 @@ public class SaxUtil {
         SAXReader saxReader = new SAXReader();
         ScriptParseExt scriptParseExt = new ScriptParseExt();
         try {
-            //文件路径安全处理
-            FileUtils.verityFilePath(path);
-            File file = FileUtil.file("/data" + path);
+            File file = FileUtil.file(path);
             String content = FileManagerHelper.readFileToString(file, "utf-8");
             // 读取文件内容
             Document document = saxReader.read(file);
@@ -90,11 +88,9 @@ public class SaxUtil {
     public static void updateJmx(String path) {
         SAXReader saxReader = new SAXReader();
         try {
-            //文件路径安全处理
-            path = FilenameUtils.getFullPath(path) + FilenameUtils.getName(path);
-            File file = new File(path);
+            File file = FileUtil.file(path);
             String content = FileManagerHelper.readFileToString(file, "utf-8");
-            Document document = saxReader.read(new File(path));
+            Document document = saxReader.read(FileUtil.file(path));
             //去除所有禁用节点和对应的所有子节点
             cleanAllDisableElement(document);
             getScriptUrlFromJmx(new ScriptParseExt(), content, document);
@@ -213,7 +209,7 @@ public class SaxUtil {
     public static void main(String[] args) throws InterruptedException {
         String path = "/Users/shulie/Documents/test.jmx";
         //        SaxUtil.updatePressTestTags(path);
-        File file = new File(path);
+        File file = FileUtil.file(path);
         //因为新增场景脚本是异步的，这里最多等待5分钟
         int i = 0;
         while (!file.exists()) {
@@ -235,9 +231,7 @@ public class SaxUtil {
     public static void updatePressTestTags(String path) {
         SAXReader saxReader = new SAXReader();
         try {
-            //文件路径安全处理
-            path = FilenameUtils.getFullPath(path) + FilenameUtils.getName(path);
-            File file = new File(path);
+            File file = FileUtil.file(path);
             //因为新增场景脚本是异步的，这里最多等待5分钟
             int i = 0;
             while (!file.exists()) {

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.crypto.SecureUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
@@ -41,7 +42,7 @@ public class Md5Util {
      * 文件MD5，支持超大文件
      */
     public static String md5File(String file) {
-        return md5File(new File(file));
+        return md5File(FileUtil.file(file));
     }
 
     /**
