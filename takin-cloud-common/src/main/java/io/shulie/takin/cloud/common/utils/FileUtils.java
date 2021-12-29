@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public class FileUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
 
-    public static String verityFilePath(String path){
+    public static String dealFilePath(String path){
         if ("".equals(path) || null == path){
             return "";
         }
