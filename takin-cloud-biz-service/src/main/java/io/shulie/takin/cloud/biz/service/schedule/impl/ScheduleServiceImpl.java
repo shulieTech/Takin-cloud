@@ -189,8 +189,6 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public void runSchedule(ScheduleRunRequest request) {
         ScheduleStartRequestExt startRequest = request.getRequest();
-        // 压力机数目记录
-        push(startRequest);
 
         Long sceneId = startRequest.getSceneId();
         Long taskId = startRequest.getTaskId();
@@ -219,26 +217,6 @@ public class ScheduleServiceImpl implements ScheduleService {
         }
     }
 
-    @Override
-    public void initScheduleCallback(ScheduleInitParamExt param) {
-
-    }
-
-    /**
-     * 临时方案：
-     * 拆分文件的索引都存入到redis队列, 避免控制台集群环境下索引获取不正确
-     */
-    private void push(ScheduleStartRequestExt request) {
-        //把数据放入队列
-        String key = ScheduleConstants.getFileSplitQueue(request.getSceneId(), request.getTaskId(), request.getTenantId());
-
-        List<String> numList = Lists.newArrayList();
-        for (int i = 1; i <= request.getTotalIp(); i++) {
-            numList.add(i + "");
-        }
-
-        redisTemplate.opsForList().leftPushAll(key, numList);
-    }
 
     /**
      * 压测结束，删除 压力节点 job configMap

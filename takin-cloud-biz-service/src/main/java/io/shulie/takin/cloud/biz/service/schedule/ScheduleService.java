@@ -32,10 +32,4 @@ public interface ScheduleService {
      */
     void runSchedule(ScheduleRunRequest request);
 
-    /**
-     * 初始化回调
-     *
-     * @param param 请求参数
-     */
-    void initScheduleCallback(ScheduleInitParamExt param);
 }

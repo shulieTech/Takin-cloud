@@ -204,9 +204,9 @@ public class SceneTaskEventService {
                         .map(String::trim).distinct().collect(Collectors.toList()));
                 }
                 result.setExtendMap(extendMap);
-                String key = ScheduleConstants.getFileSplitQueue(param.getSceneId(), param.getTaskId(),
-                    param.getTenantId());
-                index = stringRedisTemplate.opsForList().leftPop(key);
+                //String key = ScheduleConstants.getFileSplitQueue(param.getSceneId(), param.getTaskId(),
+                //    param.getTenantId());
+                //index = stringRedisTemplate.opsForList().leftPop(key);
 
             } else if ("failed".equals(param.getStatus())) {
                 result.setStatus(TaskStatusEnum.FAILED);

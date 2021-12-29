@@ -28,7 +28,6 @@ import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStatusOutput;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.biz.service.schedule.FileSliceService;
-import io.shulie.takin.cloud.biz.service.schedule.ScheduleService;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
@@ -88,8 +87,6 @@ public class SceneTaskController {
     ReportService reportService;
     @Resource(type = SceneManageDAO.class)
     SceneManageDAO sceneManageDao;
-    @Resource(type = ScheduleService.class)
-    ScheduleService scheduleService;
     @Resource(type = SceneTaskService.class)
     SceneTaskService sceneTaskService;
     @Resource(type = FileSliceService.class)
@@ -102,13 +99,6 @@ public class SceneTaskController {
         return sceneTaskService.taskResultNotify(notify);
     }
 
-    @GetMapping(EntrypointUrl.METHOD_SCENE_TASK_INIT_CALL_BACK)
-    @ApiOperation(value = "调度初始化回调函数")
-    public ResponseResult<?> initCallback(ScheduleInitParamExt param) {
-        // 初始化调度
-        scheduleService.initScheduleCallback(param);
-        return ResponseResult.success();
-    }
 
     @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_FILE_CONTACT)
     @ApiModelProperty(value = "大文件关联场景")
