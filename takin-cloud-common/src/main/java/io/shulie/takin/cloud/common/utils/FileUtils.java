@@ -172,7 +172,7 @@ public class FileUtils {
         TarInputStream tarIn = null;
         try {
             tarIn = new TarInputStream(new GZIPInputStream(
-                new BufferedInputStream(new FileInputStream(sourcePath))),
+                new BufferedInputStream(new FileInputStream(FileUtil.getAbsolutePath(sourcePath)))),
                 1024 * 2);
             //创建输出目录
             createDirectory(extractPath, null);
