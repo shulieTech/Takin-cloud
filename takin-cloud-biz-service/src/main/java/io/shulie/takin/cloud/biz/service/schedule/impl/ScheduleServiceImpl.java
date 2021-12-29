@@ -39,7 +39,6 @@ import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.biz.service.schedule.ScheduleEventService;
 import io.shulie.takin.cloud.biz.output.engine.EngineLogPtlConfigOutput;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleInitParamExt;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
@@ -220,25 +219,6 @@ public class ScheduleServiceImpl implements ScheduleService {
         }
     }
 
-    @Override
-    public void initScheduleCallback(ScheduleInitParamExt param) {
-
-    }
-
-    /**
-     * 临时方案：
-     * 拆分文件的索引都存入到redis队列, 避免控制台集群环境下索引获取不正确
-     */
-    private void push(ScheduleStartRequestExt request) {
-        //把数据放入队列
-        String key = ScheduleConstants.getFileSplitQueue(request.getSceneId(), request.getTaskId(), request.getTenantId());
-
-        List<String> numList = new ArrayList<>(request.getTotalIp());
-        for (int i = 1; i <= request.getTotalIp(); i++) {
-            numList.add(i + "");
-        }
-        redisTemplate.opsForList().leftPushAll(key, numList);
-    }
 
     /**
      * 压测结束，删除 压力节点 job configMap

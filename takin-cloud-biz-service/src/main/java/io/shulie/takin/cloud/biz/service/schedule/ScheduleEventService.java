@@ -36,16 +36,6 @@ public class ScheduleEventService {
     }
 
     /**
-     * 运行调度
-     *
-     * @param event -
-     */
-    @IntrestFor(event = ScheduleEventConstant.RUN_SCHEDULE_EVENT)
-    public void runSchedule(Event event) {
-        scheduleService.runSchedule((ScheduleRunRequest)event.getExt());
-    }
-
-    /**
      * 启动调度
      *
      * @param event -
