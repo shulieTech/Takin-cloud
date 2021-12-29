@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.alibaba.fastjson.JSON;
 
+import cn.hutool.core.io.FileUtil;
 import io.shulie.plugin.engine.jmeter.XmlDubboJmxParser;
 import io.shulie.plugin.engine.jmeter.XmlHttpJmxParser;
 import io.shulie.plugin.engine.jmeter.XmlJdbcJmxParser;
@@ -56,7 +57,7 @@ public class SaxUtil {
         try {
             //文件路径安全处理
             FileUtils.verityFilePath(path);
-            File file = new File("/data" + path);
+            File file = FileUtil.file("/data" + path);
             String content = FileManagerHelper.readFileToString(file, "utf-8");
             // 读取文件内容
             Document document = saxReader.read(file);
