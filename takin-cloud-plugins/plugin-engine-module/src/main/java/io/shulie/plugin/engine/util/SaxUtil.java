@@ -56,7 +56,7 @@ public class SaxUtil {
         try {
             //文件路径安全处理
             FileUtils.verityFilePath(path);
-            File file = new File(path);
+            File file = new File("/data" + path);
             String content = FileManagerHelper.readFileToString(file, "utf-8");
             // 读取文件内容
             Document document = saxReader.read(file);
