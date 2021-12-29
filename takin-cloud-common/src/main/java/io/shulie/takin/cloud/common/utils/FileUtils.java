@@ -22,6 +22,7 @@ import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * @author xuyh
@@ -30,17 +31,24 @@ import org.slf4j.LoggerFactory;
 public class FileUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
 
-    public static String dealFilePath(String path){
+    @Value("${script.temp.path}")
+    private static String scriptTempPath;
+    @Value("${script.path}")
+    private static String scriptPath;
+
+    public static void verityFilePath(String path){
         if ("".equals(path) || null == path){
-            return "";
+            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,"文件路径校验错误，路径为空");
+        }
+        if (!path.startsWith(scriptTempPath) && !path.startsWith(scriptPath)){
+            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,"该文件不是脚本文件");
         }
         if (path.contains("..")){
-            path = path.replaceAll("..","_");
+            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,"文件路径校验错误，路径中包含..");
         }
         if (path.contains("\n")){
-            path = path.replaceAll("\n","_");
+            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_CMD_EXECUTE_ERROR,"文件路径校验错误，路径中包含回车符");
         }
-        return path;
     }
 
     public static File createFileDE(String filePathName) {
