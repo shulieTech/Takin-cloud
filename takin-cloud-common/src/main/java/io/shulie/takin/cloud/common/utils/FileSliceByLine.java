@@ -52,7 +52,7 @@ public class FileSliceByLine {
             File file = FileUtil.file(this.filePath);
             int lineBreakSize = getLineBreakSize(file);
             reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(FileUtil.getAbsolutePath(this.filePath)), fileEncoder));
+                new InputStreamReader(new FileInputStream(FileUtil.file(this.filePath)), fileEncoder));
             reader.lines().filter(StringUtils::isNotBlank).forEach(
                 line -> {
                     String[] values = line.split(this.separator);
@@ -114,7 +114,7 @@ public class FileSliceByLine {
         RandomAccessFile rAccessFile = null;
         try {
             reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(FileUtil.getAbsolutePath(this.filePath)), StandardCharsets.UTF_8));
+                new InputStreamReader(new FileInputStream(FileUtil.file(this.filePath)), StandardCharsets.UTF_8));
             int lineLength = reader.readLine().length();
             rAccessFile = new RandomAccessFile(file, "r");
             rAccessFile.seek(lineLength);

@@ -76,7 +76,7 @@ public class FileWriteService {
     public void writeByte(String filePath, byte[] bytes, Long startPos, Integer fileSize) throws IOException {
         RandomAccessFile file = null;
         try {
-            file = new RandomAccessFile(FileUtil.getAbsolutePath(filePath), "rw");
+            file = new RandomAccessFile(FileUtil.file(filePath), "rw");
             file.seek(startPos);
             file.write(bytes);
         } finally {
