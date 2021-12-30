@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import io.shulie.takin.cloud.ext.content.response.Response;
 import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSON;
@@ -59,10 +60,10 @@ import io.shulie.takin.utils.json.JsonHelper;
 import io.shulie.takin.cloud.ext.api.AssetExtApi;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
-import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
 import io.shulie.takin.cloud.sdk.model.common.SlaBean;
-import io.shulie.takin.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.common.utils.TestTimeUtil;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
@@ -74,7 +75,7 @@ import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.ext.content.asset.RealAssectBillExt;
+import io.shulie.takin.cloud.ext.content.asset.RealAssectBillExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.cloud.biz.output.report.ReportOutput;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
@@ -1365,8 +1366,10 @@ public class ReportServiceImpl implements ReportService {
             }
             bill.setAvgThreadNum(avgThreadNum);
             invoice.setData(bill);
-            BigDecimal paymentRes = assetExtApi.payment(invoice);
-            reportResult.setAmount(paymentRes);
+            Response<BigDecimal> paymentRes = assetExtApi.payment(invoice);
+            if (null != paymentRes && paymentRes.isSuccess()) {
+                reportResult.setAmount(paymentRes.getData());
+            }
         }
         //填充开始结束时间
         if (Objects.isNull(reportResult.getStartTime())) {

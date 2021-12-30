@@ -15,7 +15,7 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.sdk.model.common.RuleBean;
-import io.shulie.takin.ext.content.enginecall.BusinessActivityExt;
+import io.shulie.takin.cloud.ext.content.enginecall.BusinessActivityExt;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;

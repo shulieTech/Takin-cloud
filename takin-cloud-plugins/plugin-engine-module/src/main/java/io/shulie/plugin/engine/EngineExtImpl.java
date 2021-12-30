@@ -12,7 +12,7 @@ import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptUrlExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
-import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
 import org.apache.commons.collections4.CollectionUtils;
 import org.pf4j.Extension;
 

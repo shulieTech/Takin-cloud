@@ -24,6 +24,7 @@ import io.shulie.takin.cloud.entrypoint.convert.SceneTaskOpenConverter;
 import io.shulie.takin.cloud.ext.api.AssetExtApi;
 import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
 import io.shulie.takin.cloud.ext.content.enginecall.StrategyOutputExt;
+import io.shulie.takin.cloud.ext.content.response.Response;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageDeleteReq;
@@ -179,7 +180,10 @@ public class SceneManageController {
         BigDecimal flow = new BigDecimal(0);
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
-            flow = assetExtApi.calcEstimateAmount(bill);
+            Response<BigDecimal> calcResponse = assetExtApi.calcEstimateAmount(bill);
+            if (calcResponse.isSuccess()) {
+                flow = calcResponse.getData();
+            }
         }
         return ResponseResult.success(flow);
     }
