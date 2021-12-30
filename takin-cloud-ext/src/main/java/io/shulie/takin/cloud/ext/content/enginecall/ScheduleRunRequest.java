@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.ext.content.enginecall;
 
-import io.shulie.takin.ext.content.enginecall.PtlLogConfigExt;
 import lombok.Data;
 
 /**

@@ -7,8 +7,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import io.shulie.takin.ext.content.enginecall.PtConfigExt;
-import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

@@ -8,7 +8,7 @@ import com.alibaba.fastjson.TypeReference;
 
 import org.springframework.stereotype.Service;
 
-import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.entrypoint.process.ProcessApi;
 import io.shulie.takin.common.beans.response.ResponseResult;

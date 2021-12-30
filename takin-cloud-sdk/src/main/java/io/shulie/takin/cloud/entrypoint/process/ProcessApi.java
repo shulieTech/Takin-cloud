@@ -2,7 +2,7 @@ package io.shulie.takin.cloud.entrypoint.process;
 
 import java.util.List;
 
-import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.ScriptAnalyzeRequest;
 
 /**
