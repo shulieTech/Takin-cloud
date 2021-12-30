@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
+import io.shulie.takin.cloud.ext.content.response.Response;
 import lombok.extern.slf4j.Slf4j;
 
 import cn.hutool.json.JSONUtil;
@@ -47,8 +48,8 @@ import io.shulie.takin.cloud.biz.utils.DataUtils;
 import io.shulie.takin.cloud.common.utils.Md5Util;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.cloud.common.utils.CommonUtil;
-import io.shulie.takin.ext.content.script.ScriptNode;
-import io.shulie.takin.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
@@ -1324,15 +1325,15 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 invoice.setData(Lists.newArrayList(bill));
             }
             try {
-                boolean lockResult = assetExtApi.lock(invoice);
-                if (lockResult) {
+                Response<String> res = assetExtApi.lock(invoice);
+                if (null != res && res.isSuccess() && StringUtils.isNotBlank(res.getData())) {
                     ReportUpdateParam rp = new ReportUpdateParam();
                     rp.setId(report.getId());
                     JSONObject features = JsonUtil.parse(report.getFeatures());
                     if (null == features) {
                         features = new JSONObject();
                     }
-                    features.put("lockId", lockResult);
+                    features.put("lockId", res.getData());
                     reportDao.updateReport(rp);
                 } else {
                     log.error("流量冻结失败");

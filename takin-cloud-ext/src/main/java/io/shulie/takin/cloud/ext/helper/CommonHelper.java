@@ -1,4 +1,4 @@
-package io.shulie.takin.ext.helper;
+package io.shulie.takin.cloud.ext.helper;
 
 import java.io.File;
 

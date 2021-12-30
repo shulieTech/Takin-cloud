@@ -43,7 +43,7 @@ import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
 import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
 import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
-import io.shulie.takin.ext.content.enginecall.PtlLogConfigExt;
+import io.shulie.takin.cloud.ext.content.enginecall.PtlLogConfigExt;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;

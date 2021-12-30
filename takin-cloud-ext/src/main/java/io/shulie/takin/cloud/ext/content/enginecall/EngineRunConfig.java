@@ -1,4 +1,4 @@
-package io.shulie.takin.ext.content.enginecall;
+package io.shulie.takin.cloud.ext.content.enginecall;
 
 import java.util.List;
 import java.util.Map;
@@ -6,8 +6,7 @@ import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import io.shulie.takin.ext.content.AbstractEntry;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.ext.content.AbstractEntry;
 
 /**
  * 压测引擎启动配置

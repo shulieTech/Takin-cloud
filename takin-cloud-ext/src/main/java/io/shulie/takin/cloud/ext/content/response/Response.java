@@ -1,6 +1,6 @@
-package io.shulie.takin.ext.content.response;
+package io.shulie.takin.cloud.ext.content.response;
 
-import io.shulie.takin.ext.content.AbstractEntry;
+import io.shulie.takin.cloud.ext.content.AbstractEntry;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

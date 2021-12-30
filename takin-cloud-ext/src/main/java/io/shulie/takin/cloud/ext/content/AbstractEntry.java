@@ -1,4 +1,4 @@
-package io.shulie.takin.ext.content;
+package io.shulie.takin.cloud.ext.content;
 
 import java.io.Serializable;
 

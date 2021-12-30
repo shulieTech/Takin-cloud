@@ -28,7 +28,7 @@ import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
 import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.eventcenter.EventCenterTemplate;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
-import io.shulie.takin.ext.content.enginecall.BusinessActivityExt;
+import io.shulie.takin.cloud.ext.content.enginecall.BusinessActivityExt;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;

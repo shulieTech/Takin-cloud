@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import io.shulie.takin.cloud.ext.api.EngineExtApi;
-import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.common.beans.response.ResponseResult;

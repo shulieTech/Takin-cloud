@@ -3,7 +3,7 @@ package io.shulie.takin.cloud.data.dao.report;
 import java.util.Date;
 import java.util.List;
 
-import io.shulie.takin.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.data.param.report.ReportQueryParam;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;

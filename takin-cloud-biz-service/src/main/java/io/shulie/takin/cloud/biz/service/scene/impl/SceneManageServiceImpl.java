@@ -87,13 +87,14 @@ import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.ext.api.AssetExtApi;
 import io.shulie.takin.cloud.ext.api.EngineExtApi;
 import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
+import io.shulie.takin.cloud.ext.content.response.Response;
 import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
 import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.shulie.takin.cloud.sdk.model.common.TimeBean;
-import io.shulie.takin.ext.content.enginecall.PtConfigExt;
-import io.shulie.takin.ext.content.enginecall.ThreadGroupConfigExt;
+import io.shulie.takin.cloud.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.utils.file.FileManagerHelper;
 import io.shulie.takin.utils.json.JsonHelper;
@@ -1012,7 +1013,11 @@ public class SceneManageServiceImpl implements SceneManageService {
         // 尝试调用插件
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
-            return assetExtApi.calcEstimateAmount(bills);
+            Response<BigDecimal> res = assetExtApi.calcEstimateAmount(bills);
+            if (null != res && res.isSuccess()) {
+                return res.getData();
+            }
+            return BigDecimal.ZERO;
         }
         // 返回0
         else {
@@ -1184,7 +1189,10 @@ public class SceneManageServiceImpl implements SceneManageService {
         BigDecimal value = new BigDecimal(0);
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
-            value = assetExtApi.calcEstimateAmount(BeanUtil.copyProperties(wrapperVO, AssetBillExt.class, ""));
+            Response<BigDecimal> res = assetExtApi.calcEstimateAmount(BeanUtil.copyProperties(wrapperVO, AssetBillExt.class, ""));
+            if (null != res && res.isSuccess() && null != res.getData()) {
+                value = res.getData();
+            }
         }
         map.put(SceneManageConstant.ESTIMATE_FLOW, value);
         return JSON.toJSONString(map);

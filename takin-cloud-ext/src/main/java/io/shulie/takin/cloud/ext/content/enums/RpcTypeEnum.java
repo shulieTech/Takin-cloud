@@ -1,4 +1,4 @@
-package io.shulie.takin.ext.content.enums;
+package io.shulie.takin.cloud.ext.content.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

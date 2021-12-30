@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import io.shulie.takin.ext.content.enginecall.BusinessActivityExt;
-import io.shulie.takin.ext.content.enginecall.ThreadGroupConfigExt;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -50,11 +48,6 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt {
      * 压测时长
      */
     private Long continuedTime;
-
-    //    /**
-    //     * 施压类型,0:并发,1:tps,2:自定义;不填默认为0
-    //     */
-    //    private Integer pressureType;
     /**
      * 施压场景：常规（压测场景页面），试跑，巡检
      */
@@ -64,17 +57,6 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt {
      * 最大并发
      */
     private Integer expectThroughput;
-
-    //    /**
-    //     * 递增时长
-    //     */
-    //    private Long rampUp;
-    //
-    //    /**
-    //     * 阶梯层数
-    //     */
-    //    private Integer steps;
-
     /**
      * cloud数据上报接口
      */
@@ -101,20 +83,6 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt {
      * 是否通过xpath的md5进行关联，新老板区分
      */
     private Boolean bindByXpathMd5;
-
-    //    /**
-    //     * 业务指标，目标tps
-    //     */
-    //    private Map<String, Integer> businessTpsData;
-    //    /**
-    //     * 业务目标tps占总的tps百分比
-    //     */
-    //    private List<Map<String, String>> businessActivities;
-    //    /**
-    //     * 业务活动名称和testName绑定关系
-    //     */
-    //    private Map<String, String> businessNameData;
-
     /**
      * 压测引擎插件文件位置  一个压测场景可能有多个插件 一个插件也有可能有多个文件
      */
@@ -149,15 +117,13 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt {
      * 添加引擎插件路径
      *
      * @param enginePluginsFilePath 引擎插件路径
-     * @return -
      * @author lipeng
      */
-    public List<String> addEnginePluginsFilePath(String enginePluginsFilePath) {
+    public void addEnginePluginsFilePath(String enginePluginsFilePath) {
         if (null == this.enginePluginsFilePath) {
             this.enginePluginsFilePath = new ArrayList<>();
         }
         this.enginePluginsFilePath.add(enginePluginsFilePath);
-        return this.enginePluginsFilePath;
     }
 
     @Data
