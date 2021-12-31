@@ -184,10 +184,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     public SceneActionResp start(SceneTaskStartInput input) {
         input.setAssetType(AssetTypeEnum.PRESS_REPORT.getCode());
         input.setResourceId(null);
-        return startTask(input, null);
+        return startTask(input);
     }
 
-    private SceneActionResp startTask(SceneTaskStartInput input, SceneStartTrialRunInput trialRunInput) {
+    private SceneActionResp startTask(SceneTaskStartInput input) {
         log.info("启动任务接收到入参：{}", JsonUtil.toJson(input));
         SceneManageQueryOpitons options = new SceneManageQueryOpitons();
         options.setIncludeBusinessActivity(true);
@@ -205,9 +205,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             sceneData.setEnginePlugins(null);
         }
 
-        if (Objects.nonNull(trialRunInput)) {
-            sceneData.setPressureTestSecond(trialRunInput.getPressureTestSecond());
-        }
 
         //设置巡检参数
         if (Objects.nonNull(input.getSceneInspectInput())) {
@@ -500,7 +497,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setResourceName(activityRefInput.getBusinessActivityName());
         sceneTaskStartInput.setUserId(operateId);
         sceneTaskStartInput.setUserName(operateName);
-        SceneActionResp sceneActionDTO = startTask(sceneTaskStartInput, null);
+        SceneActionResp sceneActionDTO = startTask(sceneTaskStartInput);
         //返回报告id
         return sceneActionDTO.getData();
     }
@@ -565,7 +562,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setContinueRead(false);
         sceneTaskStartInput.setTenantId(input.getTenantId());
         sceneTaskStartInput.setEnvCode(input.getEnvCode());
-        SceneActionResp sceneActionOutput = startTask(sceneTaskStartInput, null);
+        SceneActionResp sceneActionOutput = startTask(sceneTaskStartInput);
         startOutput.setSceneId(sceneManageId);
         startOutput.setReportId(sceneActionOutput.getData());
         //开始试跑就设置一个状态，后面区分试跑任务和正常压测
@@ -692,7 +689,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setOperateId(input.getOperateId());
         sceneTaskStartInput.setOperateName(input.getOperateName());
         sceneTaskStartInput.setEnvCode(input.getEnvCode());
-        SceneActionResp sceneActionOutput = startTask(sceneTaskStartInput, null);
+        SceneActionResp sceneActionOutput = startTask(sceneTaskStartInput);
         sceneTryRunTaskStartOutput.setReportId(sceneActionOutput.getData());
 
         return sceneTryRunTaskStartOutput;

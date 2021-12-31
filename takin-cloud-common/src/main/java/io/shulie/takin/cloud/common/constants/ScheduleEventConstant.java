@@ -17,11 +17,6 @@ public class ScheduleEventConstant {
     public static final String STOP_SCHEDULE_EVENT = "stopSchedule";
 
     /**
-     * 运行
-     */
-    public static final String RUN_SCHEDULE_EVENT = "runSchedule";
-
-    /**
      * 初始化
      */
     public static final String INIT_SCHEDULE_EVENT = "initSchedule";

@@ -54,10 +54,10 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.Sc
 @Slf4j
 public class SlaServiceImpl implements SlaService {
 
-    public static final String PREFIX_TASK = "TAKIN:SLA:TASK:";
-    public static final String SLA_WARN_KEY = "TAKIN:SLA:WARN:KEY";
-    public static final String SLA_SCENE_KEY = "TAKIN:SLA:SCENE:KEY";
-    public static final String SLA_DESTROY_KEY = "TAKIN:SLA:DESTROY:KEY";
+    public static final String PREFIX_TASK = "TAKIN_SLA:TASK:";
+    public static final String SLA_WARN_KEY = "TAKIN_SLA:WARN:KEY";
+    public static final String SLA_SCENE_KEY = "TAKIN_SLA:SCENE:KEY";
+    public static final String SLA_DESTROY_KEY = "TAKIN_SLA:DESTROY:KEY";
     public static final Long EXPIRE_TIME = 24 * 3600L;
 
     @Resource

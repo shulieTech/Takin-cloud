@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.biz.service.schedule.impl;
 
-import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -8,7 +7,6 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
-import com.google.common.collect.Lists;
 import com.pamirs.takin.entity.dao.schedule.TScheduleRecordMapper;
 import com.pamirs.takin.entity.domain.entity.schedule.ScheduleRecord;
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
@@ -35,7 +33,6 @@ import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
 import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleInitParamExt;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
