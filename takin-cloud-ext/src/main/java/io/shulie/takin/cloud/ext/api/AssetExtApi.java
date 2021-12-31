@@ -74,6 +74,15 @@ public interface AssetExtApi extends ExtensionPoint {
     /**
      * 查询账户信息
      *
+     * @param customerId 组户ID
+     * @param operateId  操作者id
+     * @return 账户信息集合
+     */
+    AccountInfoExt queryAccount(Long customerId, Long operateId);
+
+    /**
+     * 查询账户信息
+     *
      * @param userIdList 用户主键集合
      * @return 账户信息集合
      */
