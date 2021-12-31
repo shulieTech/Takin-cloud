@@ -216,7 +216,7 @@ public class CollectorService extends AbstractIndicators {
                     //如果从cloud上传请求流量明细，则需要启动异步线程去读取ptl文件上传
                     if (PressureLogUploadConstants.UPLOAD_BY_CLOUD.equals(appConfig.getEngineLogUploadModel())){
                         log.info("开始异步上传ptl日志，场景ID：{},报告ID:{},PodNum:{}", sceneId, reportId,
-                                metric.getPodNo() == null ? "null" : metric.getPodNo().replaceAll("\n","_").replaceAll("\r","_"));
+                                safeHttpHeader(metric.getPodNo()));
                         EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
                         String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_PTL_FILE_NAME_SYSTEM_PROP_KEY);
                         THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, tenantId, logUploadDAO, redisClientUtils,
@@ -254,6 +254,34 @@ public class CollectorService extends AbstractIndicators {
             }
         }
 
+    }
+
+
+    private String safeHttpHeader(String value) {
+        String result = "";
+        if (value != null) {
+            char[] chars = value.toCharArray();
+            StringBuilder buffer = new StringBuilder(chars.length);
+            for (int i = 0; i < chars.length; i++) {
+                switch (chars[i]) {
+                    case '\r':
+                        buffer.append('%');
+                        buffer.append('0');
+                        buffer.append('D');
+                        break;
+                    case '\n':
+                        buffer.append('%');
+                        buffer.append('0');
+                        buffer.append('A');
+                        break;
+                    default:
+                        buffer.append(chars[i]);
+                        break;
+                }
+            }
+            result = buffer.toString();
+        }
+        return result;
     }
     private void cacheTryRunTaskStatus(Long sceneId, Long reportId, Long customerId, SceneRunTaskStatusEnum status) {
         taskStatusCache.cacheStatus(sceneId, reportId, status);
