@@ -29,7 +29,8 @@ public class EntrypointUrl {
      */
     public final static String MODULE_FILE = "file";
     public final static String METHOD_FILE_UPLOAD = "upload";
-    public final static String METHOD_FILE_DOWNLOAD = "downloadFileByPath";
+    public final static String METHOD_FILE_DOWNLOAD_BY_PATH = "downloadFileByPath";
+    public final static String METHOD_FILE_DOWNLOAD = "download";
     public final static String METHOD_FILE_CONTENT = "getFileContentByPaths";
     public final static String METHOD_FILE_DELETE = "deleteFile";
     public final static String METHOD_FILE_DELETE_TEMP = "";

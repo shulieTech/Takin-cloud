@@ -42,7 +42,6 @@ import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.sdk.model.common.SlaBean;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginsRefOpen;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdRequest;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneTaskStartReq;
 import io.shulie.takin.cloud.sdk.model.request.scenetask.SceneStartCheckResp;
 import io.shulie.takin.cloud.sdk.model.request.scenetask.SceneTaskUpdateTpsReq;
@@ -332,7 +331,7 @@ public class SceneTaskController {
 
     @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_BOLT_STOP)
     @ApiOperation(value = "直接停止场景")
-    public ResponseResult<Integer> boltStop(@RequestBody SceneManageIdRequest request) {
+    public ResponseResult<Integer> boltStop(@RequestBody SceneManageIdReq request) {
         try {
             return ResponseResult.success(sceneTaskService.blotStop(request.getId()));
         } catch (Exception ex) {

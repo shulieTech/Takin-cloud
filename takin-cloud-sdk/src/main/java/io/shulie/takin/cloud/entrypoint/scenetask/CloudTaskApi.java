@@ -47,6 +47,14 @@ public interface CloudTaskApi {
     String stopTask(SceneManageIdReq req);
 
     /**
+     * 强制停止任务
+     *
+     * @param req 请求入参
+     * @return 停止结果
+     */
+    Integer boltStopTask(SceneManageIdReq req);
+
+    /**
      * 检查任务状态
      *
      * @param req 入参
