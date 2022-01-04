@@ -24,6 +24,7 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.data.model.mysql.EnginePluginSupportedVersionEntity;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -193,19 +194,29 @@ public class EnginePluginFilesServiceImpl extends ServiceImpl<EnginePluginFilesM
 
     @Override
     public List<String> findPluginFilesPathByPluginIdAndVersion(List<SceneManageWrapperOutput.EnginePluginRefOutput> plugins) {
-        return plugins.stream().map(plugin -> {
-            LambdaQueryWrapper<EnginePluginSupportedVersionEntity> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(EnginePluginSupportedVersionEntity::getPluginId, plugin.getId());
-            wrapper.eq(EnginePluginSupportedVersionEntity::getSupportedVersion, plugin.getVersion());
-            List<EnginePluginSupportedVersionEntity> versionEntities = enginePluginSupportedMapper.selectList(wrapper);
-            if (versionEntities.size() == 1) {
-                EnginePluginFilesRef enginePluginFilesRef = enginePluginFilesMapper.selectById(
-                    versionEntities.get(0).getFileRefId());
-                if (Objects.nonNull(enginePluginFilesRef)) {
-                    return enginePluginFilesRef.getFilePath();
-                }
-            }
+        return plugins.stream().map(plugin -> findPluginFilesPathByPluginIdAndVersion(plugin.getId(), plugin.getVersion())).collect(Collectors.toList());
+    }
+
+    @Override
+    public String findPluginFilesPathByPluginIdAndVersion(Long id, String version) {
+        if (null == id) {
             return null;
-        }).collect(Collectors.toList());
+        }
+        LambdaQueryWrapper<EnginePluginSupportedVersionEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(EnginePluginSupportedVersionEntity::getPluginId, id);
+        wrapper.eq(EnginePluginSupportedVersionEntity::getSupportedVersion, version);
+        List<EnginePluginSupportedVersionEntity> versionEntities = enginePluginSupportedMapper.selectList(wrapper);
+        if (CollectionUtils.isEmpty(versionEntities)) {
+            return null;
+        }
+        return versionEntities.stream().filter(Objects::nonNull)
+                .map(EnginePluginSupportedVersionEntity::getFileRefId)
+                .filter(Objects::nonNull)
+                .map(enginePluginFilesMapper::selectById)
+                .filter(Objects::nonNull)
+                .map(EnginePluginFilesRef::getFilePath)
+                .filter(StringUtils::isNotBlank)
+                .findAny()
+                .orElse(null);
     }
 }

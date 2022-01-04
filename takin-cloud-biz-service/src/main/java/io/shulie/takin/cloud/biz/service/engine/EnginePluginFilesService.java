@@ -45,4 +45,6 @@ public interface EnginePluginFilesService {
      * @return -
      */
     List<String> findPluginFilesPathByPluginIdAndVersion(List<SceneManageWrapperOutput.EnginePluginRefOutput> plugins);
+
+    String findPluginFilesPathByPluginIdAndVersion(Long id, String version);
 }

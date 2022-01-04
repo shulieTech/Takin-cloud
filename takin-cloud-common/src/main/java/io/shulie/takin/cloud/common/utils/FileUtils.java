@@ -9,12 +9,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import cn.hutool.core.io.FileUtil;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.slf4j.Logger;
@@ -24,8 +28,102 @@ import org.slf4j.LoggerFactory;
  * @author xuyh
  * @date 2020/4/18 16:00
  */
+@Slf4j
 public class FileUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
+
+    public static boolean isExists(String filePath) {
+        if (StringUtils.isBlank(filePath)) {
+            return false;
+        }
+        File f = FileUtil.file(filePath);
+        return f.isFile() && f.exists() && f.canRead();
+    }
+
+    /**
+     * 拼装文件目录路径
+     */
+    public static String mergeDirPath(String dir, String path) {
+        return mergePath(dir, path, File.separator);
+    }
+
+    public static String mergePath(String path1, String path2, String split) {
+        if (path1.endsWith(split)) {
+            path1 = path1.substring(0, path1.length() - 1);
+        }
+        if (!path2.startsWith(split)) {
+            path2 = split + path2;
+        }
+        return path1 + path2;
+    }
+
+    public static String mergePaths(String... paths) {
+        String p = null;
+        for (String path : paths) {
+            if (null == p) {
+                p = path;
+            } else {
+                p = mergePath(p, path, File.separator);
+            }
+        }
+        return p;
+    }
+
+    /**
+     * 复制文件到对应目录下
+     * @param source    原文件
+     * @param targetDir 目标目录
+     * @return 新路径
+     */
+    public static String copy(String source, String targetDir) {
+        if (StringUtils.isBlank(targetDir) || StringUtils.isBlank(source)) {
+            return null;
+        }
+
+        try {
+            File file = FileUtil.file(targetDir);
+            if (!file.exists()) {
+                boolean mkdirs = file.mkdirs();
+                log.debug("mkdirs:{}", mkdirs);
+            }
+            File sourceFile = FileUtil.file(source);
+            String fileName = sourceFile.getName();
+            String targetFilePath = mergeDirPath(targetDir, fileName);
+            File targetFile = FileUtil.file(targetFilePath);
+            if (!file.exists()) {
+                Files.copy(sourceFile.toPath(), targetFile.toPath());
+            }
+            return targetFilePath;
+        } catch (Exception e) {
+            log.error("异常代码【{}】,异常内容：压测场景处理文件异常 --> 文件复制失败: {}",
+                    TakinCloudExceptionEnum.SCENE_MANAGE_FILE_COPY_ERROR, e);
+        }
+        return null;
+    }
+//    /**
+//     * 复制文件到对应目录下
+//     * @param source    原文件
+//     * @param targetDir 目标目录
+//     */
+//    public static void copy(String source, String targetDir) {
+//        if (StringUtils.isBlank(targetDir) || StringUtils.isBlank(source)) {
+//            return;
+//        }
+//
+//        File file = new File(targetDir.substring(0, targetDir.lastIndexOf("/")));
+//        if (!file.exists()) {
+//            boolean mkdirs = file.mkdirs();
+//            log.debug("mkdirs:{}", mkdirs);
+//        }
+//        new Thread(() -> {
+//            try {
+//                FileManagerHelper.copyFiles(Collections.singletonList(source), targetDir);
+//            } catch (Exception e) {
+//                log.error("异常代码【{}】,异常内容：压测场景处理文件异常 --> 文件复制失败: {}",
+//                        TakinCloudExceptionEnum.SCENE_MANAGE_FILE_COPY_ERROR, e);
+//            }
+//        }).start();
+//    }
 
     public static File createFileDE(String filePathName) {
         File file = new File(filePathName);

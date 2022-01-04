@@ -6,6 +6,9 @@ import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
 import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
 import io.shulie.takin.cloud.ext.content.enginecall.StrategyOutputExt;
+import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.ext.content.enginecall.EngineRunConfig;
+import io.shulie.takin.ext.content.response.Response;
 import io.shulie.takin.plugin.framework.core.extension.ExtensionPoint;
 
 /**
@@ -13,6 +16,21 @@ import io.shulie.takin.plugin.framework.core.extension.ExtensionPoint;
  * 引擎调用拓展点
  */
 public interface EngineCallExtApi extends ExtensionPoint, Typed {
+    /**
+     * 检测资源：当未限制资源时掺入0
+     * @param podNum 要启动的pod数量
+     * @param requestCpu 单pod申请的cpu大小，单位：m
+     * @param requestMemory 单pod申请的内存大小，单位:M
+     * @param limitCpu 单pod申请的CPU最大限制，单位:M
+     * @param limitMemory 单pod申请的内存最大限制，单位:M
+     * @return 返回检测状态：0成功，1cpu资源不足，2memory资源不足
+     */
+    int check(Integer podNum, Long requestCpu, Long requestMemory, Long limitCpu, Long limitMemory);
+
+    /**
+     * 启动压测任务
+     */
+    ResponseResult<?> startJob(EngineRunConfig config);
 
     /**
      * 构建压测任务

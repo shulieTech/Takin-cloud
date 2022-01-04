@@ -192,4 +192,9 @@ public class EntrypointUrl {
     public final static String MODULE_HEALTH = "health";
     public final static String METHOD_HEALTH_CHECK = "";
 
+    /**
+     * 压测
+     */
+    public final static String MODULE_PRESSURE = "pressure";
+    public final static String METHOD_PRESSURE_START = "start";
 }

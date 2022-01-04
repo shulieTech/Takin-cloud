@@ -1,7 +1,8 @@
-package io.shulie.takin.cloud.sdk.model.request.engine;
+package io.shulie.takin.cloud.sdk.model.request.pressure;
 
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginsRefOpen;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneBusinessActivityRefOpen;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneScriptRefOpen;
 import io.swagger.annotations.ApiModelProperty;
@@ -24,18 +25,20 @@ public class StartEngineReq extends ContextExt {
 
     @ApiModelProperty(value = "压测场景类型")
     @NotNull(message = "压测场景类型不能为空")
-    private PressureSceneEnum type;
+    private PressureSceneEnum sceneType;
 
     @ApiModelProperty(value = "业务活动配置")
-    @NotEmpty(message = "业务活动配置不能为空")
     private List<SceneBusinessActivityRefOpen> businessActivityConfig;
 
-    @ApiModelProperty(name = "uploadFile", value = "压测脚本/文件")
+    @ApiModelProperty(name = "uploadFiles", value = "压测脚本/文件")
     @NotEmpty(message = "压测脚本/文件不能为空")
-    private List<SceneScriptRefOpen> uploadFile;
+    private List<SceneScriptRefOpen> uploadFiles;
 
     @ApiModelProperty(value = "关联到的插件列表")
     private List<EnginePluginsRefOpen> enginePlugins;
+
+    @ApiModelProperty(value = "是否从上传压测的结束的位置开始读")
+    private Boolean continueRead;
 
     @ApiModelProperty(value = "脚本id")
     private Long scriptId;
@@ -44,12 +47,24 @@ public class StartEngineReq extends ContextExt {
     private Long scriptDeployId;
 
     @ApiModelProperty(value = "脚本节点信息")
-    private String scriptAnalysisResult;
+    private String scriptNodes;
 
-    /**
-     * 定时器周期，单位：毫秒
-     */
+    @ApiModelProperty(value = "启动的pod数量，默认1")
+    private Integer podNum;
+
+    @ApiModelProperty(value = "压测时长")
+    private Long holdTime;
+
+    @ApiModelProperty(value = "压测时长单位：枚举TimeUnitEnum的value值，如s表示秒，m表示分")
+    private String holdTimeUnit;
+
+    @ApiModelProperty(value = "并发线程数")
+    private Integer throughput;
+
     @ApiModelProperty(value = "定时器周期，单位：毫秒")
     private Long fixTimer;
+
+    @ApiModelProperty(value = "循环次数")
+    private Long loopsNum;
 
 }

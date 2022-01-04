@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.common.constants;
 
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
+
 /**
  * @author 莫问
  * @date 2020-05-21
@@ -81,6 +83,9 @@ public class ScheduleConstants {
      * 调度任务job
      */
     public static String SCENE_TASK = "scene-task-";
+    public static String E2E_TASK = "e2e-task-";
+    public static String TRY_RUN_TASK = "try-run-task-";
+    public static String DEBUG_TASK = "debug-task-";
 
     /**
      * 文件分割调度名称
@@ -116,6 +121,43 @@ public class ScheduleConstants {
             return String.format(SCENE_TASK + "%s-%s", sceneId, taskId);
         }
         return String.format(SCENE_TASK + "%s-%s-%s", sceneId, taskId, tenantId);
+    }
+
+    public static String getJobName(Integer sceneType, Long sceneId, Long taskId, Long tenantId) {
+        return getJobName(PressureSceneEnum.value(sceneType), sceneId, taskId, tenantId);
+    }
+
+    public static String getJobName(PressureSceneEnum sceneType, Long sceneId, Long taskId, Long tenantId) {
+        if (null == sceneType) {
+            sceneType = PressureSceneEnum.DEFAULT;
+        }
+        String taskPre;
+        switch (sceneType) {
+            case FLOW_DEBUG:
+                taskPre = DEBUG_TASK;
+                break;
+            case TRY_RUN:
+                taskPre = TRY_RUN_TASK;
+                break;
+            case INSPECTION_MODE:
+                taskPre = E2E_TASK;
+                break;
+            case DEFAULT:
+                taskPre = SCENE_TASK;
+                break;
+            default:
+                taskPre = SCENE_TASK;
+                break;
+        }
+        // 兼容原始redis key
+        if (null == tenantId) {
+            return getJobName(taskPre + "%s-%s", sceneId, taskId);
+        }
+        return getJobName(taskPre + "%s-%s-%s", sceneId, taskId, tenantId);
+    }
+
+    public static String getJobName(String format, Object... args) {
+        return String.format(format, args);
     }
 
     /**

@@ -19,9 +19,13 @@ import io.shulie.takin.cloud.common.constants.NoLengthBlockingQueue;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.FileUtils;
+import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.ext.content.enginecall.EngineRunConfig;
+import io.shulie.takin.ext.content.response.Response;
 import io.shulie.takin.utils.json.JsonHelper;
 import io.shulie.takin.utils.linux.LinuxHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -59,9 +63,30 @@ public class LocalThreadServiceImpl implements EngineCallService {
     private String taskDir;
 
     @Override
+    public ResponseResult<?> startJob(EngineRunConfig config) {
+        Long sceneId = config.getSceneId();
+        Long taskId = config.getTaskId();
+        Long customerId = config.getCustomerId();
+        Integer sceneType = config.getPressureScene();
+
+        String configFileName =  ScheduleConstants.getConfigMapName(sceneId, taskId, customerId);
+        FileUtils.writeTextFile(JsonHelper.obj2StringPretty(config), taskDir + "/" + configFileName);
+        String jobName = ScheduleConstants.getJobName(sceneType, sceneId, taskId, customerId);
+        String result = createJob(jobName, configFileName);
+        if (StringUtils.isNotBlank(result)) {
+            return ResponseResult.fail(result, "请联系管理员");
+        }
+        return ResponseResult.success();
+    }
+
+    @Override
     public String createJob(Long sceneId, Long taskId, Long tenantId) {
         String jobName = ScheduleConstants.getScheduleName(sceneId, taskId, tenantId);
         String configMapName = ScheduleConstants.getConfigMapName(sceneId, taskId, tenantId);
+        return createJob(jobName, configMapName);
+    }
+
+    private String createJob(String jobName, String configMapName) {
         if (!new File(installDir).exists()) {
             return "未找到引擎包";
         }
