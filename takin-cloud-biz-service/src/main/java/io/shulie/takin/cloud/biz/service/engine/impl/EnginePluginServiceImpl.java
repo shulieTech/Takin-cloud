@@ -2,8 +2,8 @@ package io.shulie.takin.cloud.biz.service.engine.impl;
 
 import java.util.Map;
 import java.util.List;
+import java.util.Date;
 import java.util.Objects;
-import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -106,7 +106,7 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
             ? enginePluginMapper.selectById(pluginId) : new EnginePluginEntity();
 
         BeanUtils.copyProperties(input, pressureEnginePluginEntity);
-        LocalDateTime now = LocalDateTime.now();
+        Date now = new Date();
         //保存引擎插件信息
         if (isEdit) {
             pressureEnginePluginEntity.setGmtUpdate(now);
