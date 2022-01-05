@@ -64,6 +64,7 @@ import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.PressureModeEnum;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
+import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
 import io.shulie.takin.cloud.common.enums.TimeUnitEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageErrorEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
@@ -1062,6 +1063,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             }
 
             ThreadGroupConfigExt tgConfig = new ThreadGroupConfigExt();
+            tgConfig.setType(json.getInteger(SceneManageConstant.PT_TYPE));
             tgConfig.setThreadNum(json.getInteger(SceneManageConstant.THREAD_NUM));
             PressureModeEnum mode = PressureModeEnum.value(json.getInteger(SceneManageConstant.PT_MODE));
             if (null != mode) {
