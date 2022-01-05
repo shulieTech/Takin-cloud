@@ -3,7 +3,6 @@ package io.shulie.plugin.engine.util;
 import java.io.File;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
@@ -197,19 +196,22 @@ public class SaxUtil {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        String path = "/Users/shulie/Documents/test.jmx";
-        //        SaxUtil.updatePressTestTags(path);
-        File file = new File(path);
-        //因为新增场景脚本是异步的，这里最多等待5分钟
-        int i = 0;
-        while (!file.exists()) {
-            i++;
-            Thread.sleep(100L);
-            if (i > 3000) {
-                return;
-            }
-        }
-        System.out.println("有文件");
+        String path = "/Users/liyuanba/Downloads/SQL1-DB.jmx";
+        ScriptParseExt scriptParseExt = SaxUtil.parseJmx(path);
+        System.out.println("scriptParseExt="+JsonUtil.toJson(scriptParseExt));
+//        String path = "/Users/shulie/Documents/test.jmx";
+//        //        SaxUtil.updatePressTestTags(path);
+//        File file = new File(path);
+//        //因为新增场景脚本是异步的，这里最多等待5分钟
+//        int i = 0;
+//        while (!file.exists()) {
+//            i++;
+//            Thread.sleep(100L);
+//            if (i > 3000) {
+//                return;
+//            }
+//        }
+//        System.out.println("有文件");
     }
 
     /**
