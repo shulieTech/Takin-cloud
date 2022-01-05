@@ -3,13 +3,13 @@ package io.shulie.takin.cloud.entrypoint.controller.engine;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.ArrayList;
 
 import javax.annotation.Resource;
 
-import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.biz.input.engine.EnginePluginWrapperInput;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginDetailOutput;
-import io.shulie.takin.cloud.biz.output.engine.EnginePluginSimpleInfoOutput;
+import io.shulie.takin.cloud.data.model.mysql.EnginePluginEntity;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginService;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
@@ -22,8 +22,6 @@ import io.shulie.takin.common.beans.response.ResponseResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,16 +45,13 @@ public class PluginOpenController {
 
     @ApiOperation(value = "获取引擎支持的插件信息")
     @PostMapping(EntrypointUrl.METHOD_ENGINE_PLUGIN_LIST)
-    public ResponseResult<Map<String, List<EnginePluginSimpleInfoOutput>>> fetchAvailableEnginePlugins(@RequestBody EnginePluginFetchWrapperReq request) {
+    public ResponseResult<Map<String, List<EnginePluginEntity>>> fetchAvailableEnginePlugins(@RequestBody EnginePluginFetchWrapperReq request) {
         List<String> pluginTypes = request.getPluginTypes();
-        List<String> pluginTypesInput = Lists.newArrayList();
+        if (pluginTypes == null) {pluginTypes = new ArrayList<>(0);}
         //插件类型小写存储
-        if (CollectionUtils.isNotEmpty(pluginTypes)) {
-            pluginTypes.forEach(item -> pluginTypesInput.add(StringUtils.lowerCase(item)));
-        } else {
-            throw new TakinCloudException(TakinCloudExceptionEnum.ENGINE_PLUGIN_PARAM_VERIFY_ERROR, "参数不能为空");
-        }
-        return ResponseResult.success(enginePluginService.findEngineAvailablePluginsByType(pluginTypesInput));
+        pluginTypes.forEach(t -> t = t.toLowerCase());
+        // 查询数据
+        return ResponseResult.success(enginePluginService.findEngineAvailablePluginsByType(pluginTypes));
     }
 
     @ApiOperation(value = "获取引擎插件详情信息")
