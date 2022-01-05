@@ -1,15 +1,6 @@
-
-
 package io.shulie.takin.cloud.open.entrypoint.controller.report;
 
-import java.util.Set;
 import java.util.List;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.LinkedHashSet;
-import java.util.stream.Collectors;
-
-import cn.hutool.core.util.StrUtil;
 
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
@@ -29,7 +20,6 @@ import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
 import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.common.bean.scenemanage.ScriptNodeSummaryBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;

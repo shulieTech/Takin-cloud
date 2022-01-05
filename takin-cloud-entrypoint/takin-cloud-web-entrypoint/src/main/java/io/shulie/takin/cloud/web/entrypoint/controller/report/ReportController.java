@@ -11,7 +11,6 @@ import com.alibaba.fastjson.JSON;
 
 import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
-import io.shulie.takin.cloud.open.resp.report.NodeTreeSummaryResp;
 import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
 import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
 import io.swagger.annotations.Api;
@@ -42,7 +41,6 @@ import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import io.shulie.takin.cloud.web.entrypoint.convert.WarnDetailRespConvertor;
-import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
 import io.shulie.takin.cloud.web.entrypoint.response.scenemanage.WarnDetailResponse;
 
 /**
