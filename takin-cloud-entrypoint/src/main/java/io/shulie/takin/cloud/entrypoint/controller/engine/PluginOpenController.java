@@ -1,9 +1,11 @@
 package io.shulie.takin.cloud.entrypoint.controller.engine;
 
-import java.util.List;
 import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -18,10 +20,12 @@ import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginDetailsWrapper
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginFetchWrapperReq;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginStatusWrapperReq;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginWrapperReq;
+import io.shulie.takin.cloud.sdk.model.response.engine.EnginePluginSimpleInfoResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import cn.hutool.core.date.DateUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,13 +49,23 @@ public class PluginOpenController {
 
     @ApiOperation(value = "获取引擎支持的插件信息")
     @PostMapping(EntrypointUrl.METHOD_ENGINE_PLUGIN_LIST)
-    public ResponseResult<Map<String, List<EnginePluginEntity>>> fetchAvailableEnginePlugins(@RequestBody EnginePluginFetchWrapperReq request) {
+    public ResponseResult<Map<String, List<EnginePluginSimpleInfoResp>>> fetchAvailableEnginePlugins(@RequestBody EnginePluginFetchWrapperReq request) {
         List<String> pluginTypes = request.getPluginTypes();
         if (pluginTypes == null) {pluginTypes = new ArrayList<>(0);}
         //插件类型小写存储
         pluginTypes.forEach(t -> t = t.toLowerCase());
+        Map<String, List<EnginePluginEntity>> dbResult = enginePluginService.findEngineAvailablePluginsByType(pluginTypes);
+        Map<String, List<EnginePluginSimpleInfoResp>> result = new HashMap<>(dbResult.size());
+        dbResult.forEach((k, v) -> {
+            result.put(k, v.stream().map(c -> new EnginePluginSimpleInfoResp() {{
+                setPluginId(c.getId());
+                setPluginName(c.getPluginName());
+                setPluginType(c.getPluginType());
+                setGmtUpdate(DateUtil.formatDateTime(c.getGmtUpdate()));
+            }}).collect(Collectors.toList()));
+        });
         // 查询数据
-        return ResponseResult.success(enginePluginService.findEngineAvailablePluginsByType(pluginTypes));
+        return ResponseResult.success(result);
     }
 
     @ApiOperation(value = "获取引擎插件详情信息")
