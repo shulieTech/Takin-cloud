@@ -107,6 +107,9 @@ public class PressureOpenController {
         return engineService.start(config);
     }
 
+    /**
+     * 初始化入参
+     */
     private void init(StartEngineReq req) {
         if (null == req.getPodNum()) {
             req.setPodNum(1);
@@ -135,14 +138,14 @@ public class PressureOpenController {
                 if (null == req.getLoopsNum() || req.getLoopsNum() <= 0) {
                     return ResponseResult.fail("1", "循环次数为空或值非法", "请传入一个大于0的整数");
                 }
-                minVum = new BigDecimal(1);
+                minVum = BigDecimal.ONE;;
                 break;
             //流量调试好像不需要场景id
             case FLOW_DEBUG:
-                minVum = new BigDecimal(1);
+                minVum = BigDecimal.ONE;
                 break;
             case INSPECTION_MODE:
-                minVum = new BigDecimal(1);
+                minVum = BigDecimal.ONE;
                 if (null == req.getId()) {
                     return ResponseResult.fail("1", "场景ID不能为空", "请传入场景ID");
                 } else if (0 >= req.getId()) {
