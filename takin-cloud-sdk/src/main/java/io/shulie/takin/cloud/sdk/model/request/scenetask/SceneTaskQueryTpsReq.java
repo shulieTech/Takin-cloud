@@ -21,4 +21,8 @@ public class SceneTaskQueryTpsReq extends ContextExt {
     @NotNull
     @ApiModelProperty(value = "reportId")
     private Long reportId;
+
+    @NotNull
+    @ApiModelProperty(value = "节点MD5")
+    private String xpathMd5;
 }

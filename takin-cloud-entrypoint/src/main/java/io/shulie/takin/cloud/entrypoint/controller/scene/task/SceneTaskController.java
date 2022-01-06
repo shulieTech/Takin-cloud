@@ -21,7 +21,6 @@ import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStopOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneContactFileOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneActionOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneJobStateOutput;
-import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskQueryTpsOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStopOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStartOutput;
@@ -201,24 +200,23 @@ public class SceneTaskController {
         input.setSceneId(sceneTaskUpdateTpsReq.getSceneId());
         input.setReportId(sceneTaskUpdateTpsReq.getReportId());
         input.setTpsNum(sceneTaskUpdateTpsReq.getTpsNum());
+        input.setXpathMd5(sceneTaskUpdateTpsReq.getXpathMd5());
         sceneTaskService.updateSceneTaskTps(input);
         return ResponseResult.success("tps更新成功");
     }
 
     @GetMapping(EntrypointUrl.METHOD_SCENE_TASK_ADJUST_TPS)
     @ApiOperation(value = "获取调整的任务tps")
-    ResponseResult<SceneTaskAdjustTpsResp> queryAdjustTaskTps(@RequestParam Long sceneId, @RequestParam Long reportId) {
+    ResponseResult<SceneTaskAdjustTpsResp> queryAdjustTaskTps(@RequestParam Long sceneId, @RequestParam Long reportId, @RequestParam String xpathMd5) {
 
         SceneTaskQueryTpsInput input = new SceneTaskQueryTpsInput();
         input.setSceneId(sceneId);
         input.setReportId(reportId);
-        SceneTaskQueryTpsOutput sceneTaskQueryTpsOutput = sceneTaskService.queryAdjustTaskTps(input);
-        if (sceneTaskQueryTpsOutput != null) {
-            SceneTaskAdjustTpsResp sceneTaskAdjustTpsResp = new SceneTaskAdjustTpsResp();
-            sceneTaskAdjustTpsResp.setTotalTps(sceneTaskQueryTpsOutput.getTotalTps());
-            return ResponseResult.success(sceneTaskAdjustTpsResp);
-        }
-        return ResponseResult.success();
+        input.setXpathMd5(xpathMd5);
+        double value = sceneTaskService.queryAdjustTaskTps(input);
+        SceneTaskAdjustTpsResp sceneTaskAdjustTpsResp = new SceneTaskAdjustTpsResp();
+        sceneTaskAdjustTpsResp.setTotalTps(Double.valueOf(value).longValue());
+        return ResponseResult.success(sceneTaskAdjustTpsResp);
     }
 
     @GetMapping(EntrypointUrl.METHOD_SCENE_TASK_CHECK_TASK)
