@@ -1522,8 +1522,9 @@ public class ReportServiceImpl implements ReportService {
             return result;
         } else {
             ScriptNodeTreeResp all = new ScriptNodeTreeResp();
-            all.setTestName("all");
-            all.setName("全局趋势");
+            all.setTestName("全局趋势");
+            all.setName("all");
+            all.setXpathMd5("all");
             List<ScriptNodeTreeResp> list = reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
                 .map(detail -> new ScriptNodeTreeResp() {{
