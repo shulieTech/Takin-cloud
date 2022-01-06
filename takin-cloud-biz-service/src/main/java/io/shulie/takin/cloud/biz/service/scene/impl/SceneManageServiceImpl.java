@@ -1083,6 +1083,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             Map<String, ThreadGroupConfigExt> map = new HashMap<>(1);
             map.put("all", tgConfig);
 
+            wrapperOutput.setConcurrenceNum(tgConfig.getThreadNum());
             wrapperOutput.setIpNum(json.getInteger(SceneManageConstant.HOST_NUM));
             PressureSceneEnum pressureType = PressureSceneEnum.value(json.getInteger(SceneManageConstant.PT_TYPE));
             wrapperOutput.setPressureType(null == pressureType ? PressureSceneEnum.DEFAULT.getCode() : pressureType.getCode());
