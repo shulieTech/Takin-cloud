@@ -35,5 +35,11 @@ public class ScriptNodeTreeResp implements Serializable {
 
     @ApiModelProperty(value = "子节点")
     private List<ScriptNodeTreeResp> children;
+    /**
+     * 施压类型
+     * 参考:io.shulie.takin.cloud.data.result.report.ReportResult#pressureType
+     */
+    @ApiModelProperty(value = "施压类型")
+    private Integer pressureType;
 
 }
