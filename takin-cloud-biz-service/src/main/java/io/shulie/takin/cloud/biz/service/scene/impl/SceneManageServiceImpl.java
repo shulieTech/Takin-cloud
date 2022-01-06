@@ -1042,10 +1042,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (StringUtils.isBlank(sceneManageResult.getScriptAnalysisResult())) {
             fillPtConfigOld(wrapperOutput, sceneManageResult.getPtConfig());
         } else {
-            PressureSceneEnum type = PressureSceneEnum.value(sceneManageResult.getType());
-            if (null != type) {
-                wrapperOutput.setPressureType(type.getCode());
-            }
+            wrapperOutput.setPressureType(sceneManageResult.getType());
             fillPtConfig(wrapperOutput, sceneManageResult.getPtConfig());
         }
         wrapperOutput.setFeatures(sceneManageResult.getFeatures());
@@ -1062,8 +1059,9 @@ public class SceneManageServiceImpl implements SceneManageService {
                 return;
             }
 
+            Integer ptType = json.getInteger(SceneManageConstant.PT_TYPE);
             ThreadGroupConfigExt tgConfig = new ThreadGroupConfigExt();
-            tgConfig.setType(json.getInteger(SceneManageConstant.PT_TYPE));
+            tgConfig.setType(ptType);
             tgConfig.setThreadNum(json.getInteger(SceneManageConstant.THREAD_NUM));
             PressureModeEnum mode = PressureModeEnum.value(json.getInteger(SceneManageConstant.PT_MODE));
             if (null != mode) {
@@ -1085,8 +1083,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
             wrapperOutput.setConcurrenceNum(tgConfig.getThreadNum());
             wrapperOutput.setIpNum(json.getInteger(SceneManageConstant.HOST_NUM));
-            PressureSceneEnum pressureType = PressureSceneEnum.value(json.getInteger(SceneManageConstant.PT_TYPE));
-            wrapperOutput.setPressureType(null == pressureType ? PressureSceneEnum.DEFAULT.getCode() : pressureType.getCode());
+            wrapperOutput.setPressureType(ptType);
             //压测时长
             TimeBean duration = new TimeBean(json.getLong(SceneManageConstant.PT_DURATION), json.getString(SceneManageConstant.PT_DURATION_UNIT));
             wrapperOutput.setPressureTestTime(duration);
