@@ -951,7 +951,8 @@ public class ReportServiceImpl implements ReportService {
             if (errKey.equals(ReportConstants.SLA_ERROR_MSG) && map.containsKey(ReportConstants.SLA_ERROR_MSG)) {
                 return;
             }
-            if (errMsg.length() > 100) {
+            errMsg = StringUtils.trim(errMsg);
+            if (!errMsg.startsWith("[") && !errMsg.startsWith("{") && errMsg.length() > 100) {
                 errMsg = errMsg.substring(0, 100);
             }
             String existsMsg = map.get(errKey);
