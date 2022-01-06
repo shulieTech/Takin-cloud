@@ -1521,7 +1521,10 @@ public class ReportServiceImpl implements ReportService {
             }
             return result;
         } else {
-            return reportBusinessActivityDetails.stream()
+            ScriptNodeTreeResp all = new ScriptNodeTreeResp();
+            all.setTestName("all");
+            all.setName("全局趋势");
+            List<ScriptNodeTreeResp> list = reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
                 .map(detail -> new ScriptNodeTreeResp() {{
                     setName(detail.getBindRef());
@@ -1529,7 +1532,10 @@ public class ReportServiceImpl implements ReportService {
                     setTestName(detail.getBusinessActivityName());
                     //兼容老版本，将后续趋势查询条件设置为bindRef
                     setXpathMd5(detail.getBindRef());
-                }}).collect(Collectors.toList());
+                }})
+                .collect(Collectors.toList());
+            list.add(0, all);
+            return list;
         }
     }
 
