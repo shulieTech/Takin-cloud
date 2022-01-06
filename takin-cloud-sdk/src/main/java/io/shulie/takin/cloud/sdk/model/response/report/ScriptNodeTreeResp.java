@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.sdk.model.response.report;
 
 import java.util.List;
 
+import io.shulie.takin.cloud.ext.content.AbstractEntry;
 import lombok.Data;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -10,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @author moriarty
  */
 @Data
-public class ScriptNodeTreeResp {
+public class ScriptNodeTreeResp extends AbstractEntry {
 
     @ApiModelProperty(value = "业务活动ID")
     private Long businessActivityId;
