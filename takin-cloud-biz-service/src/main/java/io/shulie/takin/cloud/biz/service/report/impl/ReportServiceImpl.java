@@ -955,8 +955,8 @@ public class ReportServiceImpl implements ReportService {
             if (errKey.equals(ReportConstants.SLA_ERROR_MSG) && map.containsKey(ReportConstants.SLA_ERROR_MSG)) {
                 return;
             }
-            if (errMsg.length() > 100){
-                errMsg = errMsg.substring(0,100);
+            if (errMsg.length() > 100) {
+                errMsg = errMsg.substring(0, 100);
             }
             String existsMsg = map.get(errKey);
             if (StringUtils.isBlank(existsMsg)) {
@@ -1256,7 +1256,7 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    private boolean isTargetBiggerThanZero(BigDecimal target){
+    private boolean isTargetBiggerThanZero(BigDecimal target) {
         if (Objects.nonNull(target)) {
             return target.compareTo(new BigDecimal(0)) > 0;
         }
@@ -1310,10 +1310,9 @@ public class ReportServiceImpl implements ReportService {
         // 这里 要判断下 压力节点 情况，并记录下来 压力节点 最后一位就是 压力节点 数量 开始时间 结束时间更新
         try {
             getRedisInfo(reportResult, taskResult);
-        }catch (Exception e){
-            log.error("保存报表结果异常，查询redis失败！场景ID:{},报告ID:{}",reportResult.getSceneId(),reportResult.getId());
+        } catch (Exception e) {
+            log.error("保存报表结果异常，查询redis失败！场景ID:{},报告ID:{}", reportResult.getSceneId(), reportResult.getId());
         }
-
 
         String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(),
             reportResult.getTenantId());
@@ -1512,7 +1511,11 @@ public class ReportServiceImpl implements ReportService {
                     resultMap.put(detail.getBindRef(), tmpMap);
                     JsonPathUtil.putNodesToJson(context, resultMap);
                 });
-            return JSONArray.parseArray(context.jsonString(), ScriptNodeTreeResp.class);
+            List<ScriptNodeTreeResp> result = JSONArray.parseArray(context.jsonString(), ScriptNodeTreeResp.class);
+            if (result.size() == 1) {
+                result.get(0).getChildren().forEach(t -> fullScriptNodeTreePressureType(t, t.getPressureType()));
+            }
+            return result;
         } else {
             return reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
@@ -1523,6 +1526,19 @@ public class ReportServiceImpl implements ReportService {
                     //兼容老版本，将后续趋势查询条件设置为bindRef
                     setXpathMd5(detail.getBindRef());
                 }}).collect(Collectors.toList());
+        }
+    }
+
+    /**
+     * 填充脚本节点树的施压类型
+     *
+     * @param scriptNodeTree 树节点
+     * @param target         施压类型
+     */
+    private void fullScriptNodeTreePressureType(ScriptNodeTreeResp scriptNodeTree, int target) {
+        scriptNodeTree.setPressureType(target);
+        if (scriptNodeTree.getChildren() != null) {
+            scriptNodeTree.getChildren().forEach(t -> fullScriptNodeTreePressureType(t, target));
         }
     }
 }
