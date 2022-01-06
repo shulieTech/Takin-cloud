@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.math.RoundingMode;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -106,7 +105,6 @@ import io.shulie.takin.cloud.common.utils.FileSliceByPodNum.StartEndPair;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
 import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStopOutput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskQueryTpsInput;
-import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskQueryTpsOutput;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneBigFileSliceParam;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
 import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStartOutput;
@@ -137,36 +135,38 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.Sc
 @Slf4j
 public class SceneTaskServiceImpl implements SceneTaskService {
     @Resource
-    private SceneTaskEventService sceneTaskEventService;
+    private ReportDao reportDao;
+    @Resource
+    private ReportMapper reportMapper;
+    @Resource
+    private EngineService engineService;
+    @Resource
+    private ReportService reportService;
+    @Resource
+    private PluginManager pluginManager;
     @Resource
     private TReportMapper tReportMapper;
     @Resource
-    private RedisTemplate<String, String> redisTemplate;
-    @Resource(type = ReportDao.class)
-    private ReportDao reportDao;
-    @Resource(type = PluginManager.class)
-    private PluginManager pluginManager;
-    @Resource(type = ReportMapper.class)
-    private ReportMapper reportMapper;
-    @Resource(type = EngineService.class)
-    private EngineService engineService;
-    @Resource(type = ReportService.class)
-    private ReportService reportService;
-    @Resource(type = SceneManageDAO.class)
     private SceneManageDAO sceneManageDao;
-    @Resource(type = SceneManageDAO.class)
+    @Resource
     private SceneManageDAO sceneManageDAO;
-    @Resource(type = RedisClientUtils.class)
+    @Resource
     private RedisClientUtils redisClientUtils;
-    @Resource(type = FileSliceService.class)
+    @Resource
     private FileSliceService fileSliceService;
-    @Resource(type = EnginePluginUtils.class)
+    @Resource
     private EnginePluginUtils enginePluginUtils;
-    @Resource(type = SceneTaskStatusCache.class)
+    @Resource
+    private DynamicTpsService dynamicTpsService;
+    @Resource
     private SceneTaskStatusCache taskStatusCache;
-    @Resource(type = SceneManageService.class)
+    @Resource
     private SceneManageService sceneManageService;
-    @Resource(type = ReportBusinessActivityDetailDao.class)
+    @Resource
+    private RedisTemplate<String, String> redisTemplate;
+    @Resource
+    private SceneTaskEventService sceneTaskEventService;
+    @Resource
     private ReportBusinessActivityDetailDao reportBusinessActivityDetailDao;
 
     /**
@@ -415,37 +415,32 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     @Override
     public void updateSceneTaskTps(SceneTaskUpdateTpsInput input) {
+        // 补充租户信息
         CloudPluginUtils.fillUserData(input);
-        String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(), input.getReportId(),
-            input.getTenantId());
-        Object totalIp = redisTemplate.opsForHash().get(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_POD_NUM);
-        if (totalIp == null) {
-            log.error("异常代码【{}】,异常内容：更新运行任务tps，获取不到pod总数 --> 异常信息:场景:{},报告:{},租户:{}",
-                TakinCloudExceptionEnum.TASK_START_ERROR_CHECK_POD, input.getSceneId(), input.getReportId(),
-                input.getTenantId());
-            return;
-        }
-        BigDecimal podTpsNum = new BigDecimal(input.getTpsNum()).divide(new BigDecimal(totalIp.toString()), 0,
-            RoundingMode.UP);
-        redisTemplate.opsForHash().put(engineInstanceRedisKey,
-            PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_ALL_LIMIT, input.getTpsNum());
-        redisTemplate.opsForHash().put(engineInstanceRedisKey,
-            PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_LIMIT, podTpsNum);
+        // 设置动态值
+        dynamicTpsService.set(input.getSceneId(), input.getReportId(), input.getTenantId(), input.getXpathMd5(), input.getTpsNum());
     }
 
     @Override
-    public SceneTaskQueryTpsOutput queryAdjustTaskTps(SceneTaskQueryTpsInput input) {
+    public double queryAdjustTaskTps(SceneTaskQueryTpsInput input) {
+        // 补充租户信息
         CloudPluginUtils.fillUserData(input);
-        String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(), input.getReportId(),
-            input.getTenantId());
-        Object object = redisTemplate.opsForHash().get(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.REDIS_TPS_ALL_LIMIT);
-
-        SceneTaskQueryTpsOutput sceneTaskQueryTpsOutput = new SceneTaskQueryTpsOutput();
-        if (object != null) {
-            sceneTaskQueryTpsOutput.setTotalTps(Long.parseLong(object.toString()));
-            return sceneTaskQueryTpsOutput;
+        // 声明返回值字段
+        double result;
+        // 获取动态值
+        Double dynamicValue = dynamicTpsService.get(input.getSceneId(), input.getReportId(), input.getTenantId(), input.getXpathMd5());
+        // 如果动态值为空,则获取静态值
+        if (dynamicValue != null) {result = dynamicValue;}
+        // 获取静态值
+        else {
+            try {
+                result = dynamicTpsService.getStatic(input.getReportId(), input.getXpathMd5());
+            } catch (Exception e) {
+                log.warn("获取静态TPS值失败.", e);
+                result = 0.0;
+            }
         }
-        return null;
+        return result;
     }
 
     @Override
@@ -948,23 +943,23 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     /**
      * 计算子节点的目标值
      *
-     * @param sceneId                场景ID
-     * @param reportId               报告ID
-     * @param scriptNode             目标节点
-     * @param detailList             结果
+     * @param sceneId    场景ID
+     * @param reportId   报告ID
+     * @param scriptNode 目标节点
+     * @param detailList 结果
      */
-    private void fillNonTargetActivityDetail(Long sceneId, Long reportId, ScriptNode scriptNode,List<ReportBusinessActivityDetail> detailList) {
-            ReportBusinessActivityDetail detail = new ReportBusinessActivityDetail();
-            detail.setTargetTps(new BigDecimal(-1));
-            detail.setTargetRt(new BigDecimal(-1));
-            detail.setTargetSa(new BigDecimal(-1));
-            detail.setTargetSuccessRate(new BigDecimal(-1));
-            detail.setSceneId(sceneId);
-            detail.setReportId(reportId);
-            detail.setBusinessActivityId(-1L);
-            detail.setBusinessActivityName(scriptNode.getTestName());
-            detail.setBindRef(scriptNode.getXpathMd5());
-            detailList.add(detail);
+    private void fillNonTargetActivityDetail(Long sceneId, Long reportId, ScriptNode scriptNode, List<ReportBusinessActivityDetail> detailList) {
+        ReportBusinessActivityDetail detail = new ReportBusinessActivityDetail();
+        detail.setTargetTps(new BigDecimal(-1));
+        detail.setTargetRt(new BigDecimal(-1));
+        detail.setTargetSa(new BigDecimal(-1));
+        detail.setTargetSuccessRate(new BigDecimal(-1));
+        detail.setSceneId(sceneId);
+        detail.setReportId(reportId);
+        detail.setBusinessActivityId(-1L);
+        detail.setBusinessActivityName(scriptNode.getTestName());
+        detail.setBindRef(scriptNode.getXpathMd5());
+        detailList.add(detail);
     }
 
     /**

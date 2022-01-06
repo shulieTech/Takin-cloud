@@ -15,14 +15,18 @@ import lombok.EqualsAndHashCode;
 public class SceneTaskUpdateTpsReq extends ContextExt {
 
     @NotNull
-    @ApiModelProperty(value = "sceneId")
+    @ApiModelProperty(value = "场景主键")
     private Long sceneId;
 
     @NotNull
-    @ApiModelProperty(value = "reportId")
+    @ApiModelProperty(value = "报告主键")
     private Long reportId;
 
     @NotNull
-    @ApiModelProperty(value = "tpsNum")
+    @ApiModelProperty(value = "TPS值")
     private Long tpsNum;
+
+    @NotNull
+    @ApiModelProperty(value = "节点MD5")
+    private String xpathMd5;
 }
