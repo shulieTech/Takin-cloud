@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import io.shulie.takin.cloud.ext.content.response.Response;
 import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSON;
@@ -60,10 +59,8 @@ import io.shulie.takin.utils.json.JsonHelper;
 import io.shulie.takin.cloud.ext.api.AssetExtApi;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
-import io.shulie.takin.cloud.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
 import io.shulie.takin.cloud.sdk.model.common.SlaBean;
-import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.common.utils.TestTimeUtil;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
@@ -75,8 +72,10 @@ import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.cloud.ext.content.asset.RealAssectBillExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.ext.content.response.Response;
+import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.biz.output.report.ReportOutput;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.sdk.model.common.DistributeBean;
@@ -85,14 +84,16 @@ import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.biz.cloudserver.ReportConverter;
 import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
-import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
 import io.shulie.takin.cloud.sdk.model.request.WarnQueryParam;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.ext.content.asset.AssetInvoiceExt;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
+import io.shulie.takin.cloud.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.cloud.ext.content.asset.RealAssectBillExt;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
@@ -108,6 +109,7 @@ import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
@@ -454,7 +456,6 @@ public class ReportServiceImpl implements ReportService {
             param.setFeatures(reportResult.getFeatures());
             param.setGmtUpdate(new Date());
             reportDao.updateReport(param);
-            //sceneTaskService.stop(sceneId);
         }
 
         // 查询压测引擎是否有异常
@@ -533,7 +534,6 @@ public class ReportServiceImpl implements ReportService {
      */
     @Override
     public NodeTreeSummaryResp getNodeSummaryList(Long reportId) {
-        //List<BusinessActivitySummaryBean> list = Lists.newArrayList();
         //查询业务活动的概况
         List<ReportBusinessActivityDetail> reportBusinessActivityDetailList = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportId);
@@ -559,7 +559,7 @@ public class ReportServiceImpl implements ReportService {
      */
     private List<ScriptNodeSummaryBean> getScriptNodeSummaryBeans(String nodeTree,
         List<ReportBusinessActivityDetail> details) {
-        Map<String, Map<String, Object>> resultMap = new HashMap<>();
+        Map<String, Map<String, Object>> resultMap = new HashMap<>(details.size());
         if (StringUtils.isNotBlank(nodeTree)) {
             details.stream().filter(Objects::nonNull)
                 .forEach(detail -> {
@@ -769,15 +769,11 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private Integer getMaxConcurrence(Long sceneId, Long reportId, Long customerId, String transaction) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(" max(active_threads) as maxConcurrenceNum");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, customerId));
-        influxDbSql.append(" where ");
-        influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
-        influxDbSql.append(" order by time desc limit 1");
-        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        String influxDbSql = "select max(active_threads) as maxConcurrenceNum from "
+            + InfluxUtil.getMeasurement(sceneId, reportId, customerId)
+            + " where transaction = '" + transaction + "'"
+            + " order by time desc limit 1";
+        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql, StatReportDTO.class);
         if (Objects.nonNull(statReportDTO)) {
             return statReportDTO.getMaxConcurrenceNum();
         }
@@ -964,7 +960,6 @@ public class ReportServiceImpl implements ReportService {
             } else if (existsMsg.length() < 10000) {
                 map.put(errKey, existsMsg + "、" + errMsg);
             }
-            //map.compute(errKey, (k, v) -> StringUtils.isBlank(v) ? errMsg : (v + "、" + errMsg));
             reportResult.setFeatures(GsonUtil.gsonToString(map));
         }
     }
@@ -1133,13 +1128,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private Date getFinalDateTime(Long sceneId, Long reportId, Long customerId) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(
-            " max(create_time) as time");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, customerId));
-        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        String influxDbSql = "select max(create_time) as time from "
+            + InfluxUtil.getMeasurement(sceneId, reportId, customerId);
+        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql, StatReportDTO.class);
         Date date;
         if (Objects.nonNull(statReportDTO) && StringUtils.isNotBlank(statReportDTO.getTime())) {
             try {
@@ -1164,20 +1155,23 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private StatReportDTO statReport(Long sceneId, Long reportId, Long customerId, String transaction) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(
-            " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps ,sum(sum_rt)/sum"
-                + "(count) as  "
-                + "avgRt, sum(sa_count) as saCount,  max(avg_tps) as maxTps, min(min_rt) as minRt, max(max_rt) as "
-                + "maxRt, count(avg_rt) as recordCount ,max(active_threads) as maxConcurrenceNum,round(mean"
-                + "(active_threads)) as avgConcurrenceNum");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, customerId));
-        influxDbSql.append(" where ");
-        influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
+        String influxDbSql = "select "
+            + "sum(count)                   as totalRequest,"
+            + "sum(fail_count)              as failRequest,"
+            + "mean(avg_tps)                as tps ,"
+            + "sum(sum_rt)/sum(count)       as avgRt,"
+            + "sum(sa_count)                as saCount,"
+            + "max(avg_tps)                 as maxTps,"
+            + "min(min_rt)                  as minRt,"
+            + "max(max_rt)                  as maxRt,"
+            + "count(avg_rt)                as recordCount,"
+            + "max(active_threads)          as maxConcurrenceNum,"
+            + "round(mean(active_threads))  as avgConcurrenceNum"
+            + " from "
+            + InfluxUtil.getMeasurement(sceneId, reportId, customerId)
+            + " where transaction = '" + transaction + "'";
 
-        return influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        return influxWriter.querySingle(influxDbSql, StatReportDTO.class);
     }
 
     /**
@@ -1409,7 +1403,7 @@ public class ReportServiceImpl implements ReportService {
 
     private Map<String, Object> fillReportMap(ReportBusinessActivityDetail detail) {
         if (Objects.nonNull(detail)) {
-            Map<String, Object> resultMap = new HashMap<>();
+            Map<String, Object> resultMap = new HashMap<>(13);
             resultMap.put("avgRt", new DataBean(detail.getRt(), detail.getTargetRt()));
             resultMap.put("sa", new DataBean(detail.getSa(), detail.getTargetSa()));
             resultMap.put("tps", new DataBean(detail.getTps(), detail.getTargetTps()));
@@ -1460,7 +1454,7 @@ public class ReportServiceImpl implements ReportService {
         if (Objects.isNull(detail)) {
             return null;
         }
-        Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>(6);
         if (Objects.nonNull(statReport)) {
             resultMap.put("avgRt", new DataBean(statReport.getAvgRt(), detail.getTargetRt()));
             resultMap.put("sa", new DataBean(statReport.getSa(), detail.getTargetSa()));
@@ -1505,15 +1499,25 @@ public class ReportServiceImpl implements ReportService {
             reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
                 .forEach(detail -> {
-                    Map<String, Object> tmpMap = new HashMap<>();
+                    Map<String, Object> tmpMap = new HashMap<>(1);
                     tmpMap.put("businessActivityId", detail.getBusinessActivityId());
-                    Map<String, Map<String, Object>> resultMap = new HashMap<>();
+                    Map<String, Map<String, Object>> resultMap = new HashMap<>(1);
                     resultMap.put(detail.getBindRef(), tmpMap);
                     JsonPathUtil.putNodesToJson(context, resultMap);
                 });
             List<ScriptNodeTreeResp> result = JSONArray.parseArray(context.jsonString(), ScriptNodeTreeResp.class);
             if (result.size() == 1) {
-                result.get(0).getChildren().forEach(t -> fullScriptNodeTreePressureType(t, t.getPressureType()));
+                // 获取场景
+                SceneManageResult scene = sceneManageDao.getSceneById(reportResult.getSceneId());
+                // 获取施压配置
+                PtConfigExt ptConfig = JSON.parseObject(scene.getPtConfig(), PtConfigExt.class);
+                // 遍历填充压力模式
+                result.get(0).getChildren().forEach(t -> {
+                    // 根据MD5获取线程组配置
+                    ThreadGroupConfigExt threadGroupConfig = ptConfig.getThreadGroupConfigMap().get(t.getXpathMd5());
+                    // 填充压力模式
+                    fullScriptNodeTreePressureType(t, threadGroupConfig == null ? null : threadGroupConfig.getType());
+                });
             }
             return result;
         } else {
@@ -1530,12 +1534,12 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * 填充脚本节点树的施压类型
+     * 填充脚本节点树的压力模式
      *
      * @param scriptNodeTree 树节点
-     * @param target         施压类型
+     * @param target         压力模式
      */
-    private void fullScriptNodeTreePressureType(ScriptNodeTreeResp scriptNodeTree, int target) {
+    private void fullScriptNodeTreePressureType(ScriptNodeTreeResp scriptNodeTree, Integer target) {
         scriptNodeTree.setPressureType(target);
         if (scriptNodeTree.getChildren() != null) {
             scriptNodeTree.getChildren().forEach(t -> fullScriptNodeTreePressureType(t, target));
