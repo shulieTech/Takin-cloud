@@ -238,7 +238,9 @@ public interface ReportService {
      * 下载jtl路径
      *
      * @param reportId 报告主键
+     * @param needZip  是否需要打包
+     *                 <p>false代表只进行逻辑校验而不执行打包操作</p>
      * @return jtl文件的下载路径
      */
-    String getJtlDownLoadUrl(Long reportId);
+    String getJtlDownLoadUrl(Long reportId, boolean needZip);
 }

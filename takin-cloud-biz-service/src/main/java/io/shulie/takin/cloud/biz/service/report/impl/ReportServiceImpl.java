@@ -1560,7 +1560,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public String getJtlDownLoadUrl(Long reportId) {
+    public String getJtlDownLoadUrl(Long reportId, boolean needZip) {
         ReportResult reportResult = reportDao.selectById(reportId);
         if (reportResult == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.FILE_ZIP_ERROR, "未找到报告");
@@ -1571,7 +1571,7 @@ public class ReportServiceImpl implements ReportService {
         if (new File(jtlPath + "/" + "Jmeter.zip").exists()) {
             // 2.存在直接返回
             return jtlPath + "/" + "Jmeter.zip";
-        } else {
+        } else if (needZip) {
             // 开始压缩
             Boolean result = LinuxHelper.executeLinuxCmd(
                 "sudo zip -r -j " + jtlPath + "/" + "Jmeter.zip " + jtlPath + " " + logPath);
@@ -1580,7 +1580,7 @@ public class ReportServiceImpl implements ReportService {
                 return jtlPath + "/" + "Jmeter.zip";
             }
             throw new TakinCloudException(TakinCloudExceptionEnum.FILE_ZIP_ERROR, "查看" + jtlPath);
-        }
+        } else {return "";}
     }
 
 }
