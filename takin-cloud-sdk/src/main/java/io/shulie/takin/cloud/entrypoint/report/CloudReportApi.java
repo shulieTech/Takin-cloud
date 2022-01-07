@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.List;
 
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.sdk.model.request.report.JtlDownloadReq;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportResp;
 import io.shulie.takin.cloud.sdk.model.request.report.WarnQueryReq;
@@ -199,5 +200,5 @@ public interface CloudReportApi {
      *            <p>传入reportId即可</p>
      * @return 下载路径
      */
-    String getJtlDownLoadUrl(SceneManageIdReq req);
+    String getJtlDownLoadUrl(JtlDownloadReq req);
 }

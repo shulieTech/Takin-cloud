@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
+import io.shulie.takin.cloud.sdk.model.request.report.JtlDownloadReq;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
@@ -236,7 +237,7 @@ public class CloudReportApiImpl implements CloudReportApi {
      * @return 下载路径
      */
     @Override
-    public String getJtlDownLoadUrl(SceneManageIdReq req) {
+    public String getJtlDownLoadUrl(JtlDownloadReq req) {
         return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_GET_JTL_DOWNLOAD_URL),
             req, new TypeReference<ResponseResult<String>>() {}).getData();
     }
