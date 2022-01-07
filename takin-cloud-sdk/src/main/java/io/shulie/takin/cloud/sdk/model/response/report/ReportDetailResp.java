@@ -102,5 +102,8 @@ public class ReportDetailResp extends ContextExt {
     @ApiModelProperty(value = "节点链路详情")
     private List<ScriptNodeSummaryBean> nodeDetail;
 
+    @ApiModelProperty(value = "是否存在JTL文件")
+    private boolean hasJtl;
+
     private Long scriptId;
 }

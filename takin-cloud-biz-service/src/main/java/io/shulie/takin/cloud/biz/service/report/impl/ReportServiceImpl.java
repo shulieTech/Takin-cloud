@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.biz.service.report.impl;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Date;
 import java.util.List;
@@ -56,6 +57,7 @@ import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail
 
 import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.utils.json.JsonHelper;
+import io.shulie.takin.utils.linux.LinuxHelper;
 import io.shulie.takin.cloud.ext.api.AssetExtApi;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
@@ -161,6 +163,10 @@ public class ReportServiceImpl implements ReportService {
      */
     @Value("${scene.pressure.forceCloseTime: 20}")
     private Integer forceCloseTime;
+    @Value("${pressure.engine.jtl.path:/nfs_dir/jtl}")
+    private String pressureEngineJtlPath;
+    @Value("${pressure.engine.log.path:/nfs_dir/logs}")
+    private String pressureEngineLogPath;
 
     public static final String COMPARE = "<=";
 
@@ -1552,4 +1558,29 @@ public class ReportServiceImpl implements ReportService {
             scriptNodeTree.getChildren().forEach(t -> fullScriptNodeTreePressureType(t, target));
         }
     }
+
+    @Override
+    public String getJtlDownLoadUrl(Long reportId, boolean needZip) {
+        ReportResult reportResult = reportDao.selectById(reportId);
+        if (reportResult == null) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_ZIP_ERROR, "未找到报告");
+        }
+        // 1.查看是否有jtl.zip /nfs_dir/jtl/127/1637/pressure.jtl
+        String jtlPath = pressureEngineJtlPath + "/" + reportResult.getSceneId() + "/" + reportId;
+        String logPath = pressureEngineLogPath + "/" + reportResult.getSceneId() + "/" + reportId;
+        if (new File(jtlPath + "/" + "Jmeter.zip").exists()) {
+            // 2.存在直接返回
+            return jtlPath + "/" + "Jmeter.zip";
+        } else if (needZip) {
+            // 开始压缩
+            Boolean result = LinuxHelper.executeLinuxCmd(
+                "sudo zip -r -j " + jtlPath + "/" + "Jmeter.zip " + jtlPath + " " + logPath);
+            if (result) {
+                // 返回成功
+                return jtlPath + "/" + "Jmeter.zip";
+            }
+            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_ZIP_ERROR, "查看" + jtlPath);
+        } else {return "";}
+    }
+
 }

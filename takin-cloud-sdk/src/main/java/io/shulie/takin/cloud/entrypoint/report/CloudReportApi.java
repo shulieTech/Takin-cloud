@@ -18,6 +18,7 @@ import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailByIdReq;
 import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailBySceneIdReq;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.WarnDetailResponse;
@@ -190,4 +191,13 @@ public interface CloudReportApi {
      * @return 脚本节点树结果
      */
     List<ScriptNodeTreeResp> queryNodeTree(ScriptNodeTreeQueryReq req);
+
+    /**
+     * 获取下载jtl下载路径
+     *
+     * @param req 请求参数
+     *            <p>传入reportId即可</p>
+     * @return 下载路径
+     */
+    String getJtlDownLoadUrl(SceneManageIdReq req);
 }

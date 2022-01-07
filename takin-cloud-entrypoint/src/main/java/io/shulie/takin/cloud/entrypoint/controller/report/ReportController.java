@@ -40,8 +40,10 @@ import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.UpdateReportConclusionReq;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.WarnDetailResponse;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,10 +57,10 @@ import org.springframework.web.bind.annotation.RestController;
  * @author 莫问
  * @date 2020-04-17
  */
+@Slf4j
 @RestController
-
-@RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_REPORT)
 @Api(tags = "场景报告模块", value = "场景报告")
+@RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_REPORT)
 public class ReportController {
 
     @Resource
@@ -88,7 +90,15 @@ public class ReportController {
         if (detailOutput == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在Id:" + reportId);
         }
-        return ResponseResult.success(BeanUtil.copyProperties(detailOutput, ReportDetailResp.class));
+        ReportDetailResp result = BeanUtil.copyProperties(detailOutput, ReportDetailResp.class);
+        try {
+            String jtlDownLoadUrl = reportService.getJtlDownLoadUrl(result.getId(), false);
+            log.debug("获取报告详情时获取JTL下载路径:{}.", jtlDownLoadUrl);
+            result.setHasJtl(true);
+        } catch (Throwable e) {
+            result.setHasJtl(false);
+        }
+        return ResponseResult.success(result);
     }
 
     /**
@@ -275,4 +285,12 @@ public class ReportController {
         return ResponseResult.success("更新成功");
     }
 
+    /**
+     * 获取下载jtl下载路径
+     */
+    @ApiOperation("获取下载jtl下载路径")
+    @RequestMapping(EntrypointUrl.METHOD_REPORT_GET_JTL_DOWNLOAD_URL)
+    public ResponseResult<String> getJtlDownLoadUrl(@ApiParam(name = "reportId", value = "报告id") Long reportId) {
+        return ResponseResult.success(reportService.getJtlDownLoadUrl(reportId, true));
+    }
 }
