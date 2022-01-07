@@ -40,6 +40,7 @@ import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.UpdateReportConclusionReq;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.WarnDetailResponse;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
 import org.apache.commons.collections4.CollectionUtils;
@@ -275,4 +276,12 @@ public class ReportController {
         return ResponseResult.success("更新成功");
     }
 
+    /**
+     * 获取下载jtl下载路径
+     */
+    @ApiOperation("获取下载jtl下载路径")
+    @RequestMapping(EntrypointUrl.METHOD_REPORT_GET_JTL_DOWNLOAD_URL)
+    public ResponseResult<String> getJtlDownLoadUrl(@ApiParam(name = "reportId", value = "报告id") Long reportId) {
+        return ResponseResult.success(reportService.getJtlDownLoadUrl(reportId));
+    }
 }

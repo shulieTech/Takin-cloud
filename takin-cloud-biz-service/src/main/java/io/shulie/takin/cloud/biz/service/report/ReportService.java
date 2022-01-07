@@ -111,6 +111,7 @@ public interface ReportService {
     /**
      * 查询正在生成的报告
      *
+     * @param contextExt 溯源数据
      * @return -
      */
     Long queryRunningReport(ContextExt contextExt);
@@ -232,4 +233,12 @@ public interface ReportService {
      * @return 基础表数据
      */
     ReportResult getReportBaseInfo(Long reportId);
+
+    /**
+     * 下载jtl路径
+     *
+     * @param reportId 报告主键
+     * @return jtl文件的下载路径
+     */
+    String getJtlDownLoadUrl(Long reportId);
 }
