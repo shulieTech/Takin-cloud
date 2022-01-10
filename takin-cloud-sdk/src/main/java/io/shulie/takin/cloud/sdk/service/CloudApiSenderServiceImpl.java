@@ -1,15 +1,5 @@
 package io.shulie.takin.cloud.sdk.service;
 
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.TypeReference;
-
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.net.url.UrlQuery;
@@ -18,12 +8,25 @@ import cn.hutool.http.ContentType;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.HmacAlgorithms;
+import org.apache.commons.codec.digest.HmacUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Cloud接口统一发送服务
@@ -38,6 +41,10 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
     private String cloudUrl;
     @Value("${takin.cloud.timeout:-1}")
     private int timeout;
+    @Value("${takin.cloud.security.appkey:}")
+    private String validateAppkey;
+    @Value("${takin.cloud.security.public.appkey:}")
+    private String validatePublicAppkey;
 
     /**
      * 调用CLOUD接口的统一方法-GET
@@ -54,16 +61,23 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
         ContextExt context = drawDataTraceContext(request);
         // 组装请求路径
         String requestUrl = cloudUrl + url;
+        String requestContent = "";
         try {
             // 组装URL参数
-            String urlQuery = UrlQuery.of(BeanUtil.beanToMap(request, false, true)).build(StandardCharsets.UTF_8);
-            if (StrUtil.isNotBlank(urlQuery)) {requestUrl += '?' + urlQuery;}
+            Map<String, Object> stringObjectMap = BeanUtil.beanToMap(request, false, true);
+            if (!CollectionUtils.isEmpty(stringObjectMap)){
+                requestContent = JSONObject.toJSONString(stringObjectMap);
+            }
+            String urlQuery = UrlQuery.of(stringObjectMap).build(StandardCharsets.UTF_8);
+            if (StrUtil.isNotBlank(urlQuery)) {
+                requestUrl += '?' + urlQuery;
+            }
         } catch (Throwable throwable) {
             log.error("请求Cloud接口失败,GET前置组装失败.\n请求路径:{}.", requestUrl, throwable);
             throw throwable;
         }
         // 发送请求
-        return requestApi(context, Method.GET, requestUrl, new byte[0], responseClass);
+        return requestApi(context, Method.GET, requestUrl, new byte[0], responseClass, requestContent);
     }
 
     /**
@@ -157,30 +171,39 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
             throw throwable;
         }
         // 发送请求
-        return requestApi(context, method, requestUrl, requestBody, responseClass);
+        return requestApi(context, method, requestUrl, requestBody, responseClass, requestBodyString);
     }
 
     /**
      * 调用CLOUD接口的统一方法
      *
-     * @param context       数据溯源上下文
-     * @param method        请求方式
-     * @param url           请求路径
-     * @param requestBody   请求体
-     * @param responseClass 响应类型
-     * @param <T>           响应参数类型
+     * @param context        数据溯源上下文
+     * @param method         请求方式
+     * @param url            请求路径
+     * @param requestBody    请求体
+     * @param responseClass  响应类型
+     * @param <T>            响应参数类型
+     * @param requestContent 请求内容，用于请求加密验证
      * @return CLOUD接口响应
      * @throws RuntimeException 在网络异常\请求失败的时候抛出异常
      */
-    private <T> T requestApi(ContextExt context, Method method, String url, byte[] requestBody, TypeReference<T> responseClass) {
+    private <T> T requestApi(ContextExt context, Method method, String url, byte[] requestBody, TypeReference<T> responseClass, String requestContent) {
         String responseBody = "";
         try {
+            Map<String, String> headerMap = getDataTrace(context);
+            //在header中，请求加密验证
+            StringBuilder validateKey = new StringBuilder();
+            long currentTimeMillis = System.currentTimeMillis();
+            if (requestContent != null){
+                validateKey.append(requestContent);
+            }
+            sign(headerMap, validateKey, currentTimeMillis, validateAppkey);
             // 组装HTTP请求对象
             HttpRequest request = HttpUtil
-                .createRequest(method, url)
-                .contentType(ContentType.JSON.getValue())
-                .headerMap(getDataTrace(context), true)
-                .body(requestBody);
+                    .createRequest(method, url)
+                    .contentType(ContentType.JSON.getValue())
+                    .headerMap(headerMap, true)
+                    .body(requestBody);
             // 设置超时时间
             if (timeout > 0) {
                 int realTimeout = timeout * (Long.valueOf(DateUnit.SECOND.getMillis()).intValue());
@@ -191,18 +214,26 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
             responseBody = request.execute().body();
             long endTime = System.currentTimeMillis();
             log.debug("请求Cloud接口耗时:{}\n请求路径:{}\n请求参数:{}\n请求结果:{}",
-                (endTime - startTime), url, new String(requestBody), responseBody);
+                    (endTime - startTime), url, new String(requestBody), responseBody);
             // 返回接口响应
             T apiResponse = JSON.parseObject(responseBody, responseClass);
-            if (apiResponse == null) {throw new NullPointerException();}
+            if (apiResponse == null) {
+                throw new NullPointerException();
+            }
             if (ResponseResult.class.equals(apiResponse.getClass())) {
-                ResponseResult<?> cloudResult = (ResponseResult<?>)apiResponse;
+                ResponseResult<?> cloudResult = (ResponseResult<?>) apiResponse;
                 // 接口成功
-                if (Boolean.TRUE.equals(cloudResult.getSuccess())) {return apiResponse;}
+                if (Boolean.TRUE.equals(cloudResult.getSuccess())) {
+                    return apiResponse;
+                }
                 // success == null || success == false
-                else if (cloudResult.getError() != null) {throw new RuntimeException(cloudResult.getError().getMsg());}
+                else if (cloudResult.getError() != null) {
+                    throw new RuntimeException(cloudResult.getError().getMsg());
+                }
                 // cloud 回传的 error 信息为空
-                else {throw new RuntimeException("无法展示更多信息,请参照cloud日志");}
+                else {
+                    throw new RuntimeException("无法展示更多信息,请参照cloud日志");
+                }
             }
             return apiResponse;
         } catch (JSONException e) {
@@ -227,14 +258,24 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
      * @return CLOUD接口响应
      * @throws RuntimeException 在网络异常\请求失败的时候抛出异常
      */
-    private <T> T requestApi(ContextExt context, Method method, String url, String fileListName, File[] fileList, TypeReference<T> responseClass) {
+    private <T> T requestApi(ContextExt context, Method method, String url, String fileListName, File[] fileList,
+                             TypeReference<T> responseClass) {
         String responseBody = "";
         try {
+            Map<String, String> headerMap = getDataTrace(context);
+            //在header中，请求加密验证
+            StringBuilder validateKey = new StringBuilder();
+            long currentTimeMillis = System.currentTimeMillis();
+            for (File file : fileList){
+                validateKey.append("file-name=").append(file.getName()).append("file-size=").append(file.length());
+            }
+            sign(headerMap, validateKey, currentTimeMillis, validatePublicAppkey);
+
             // 组装HTTP请求对象
             HttpRequest request = HttpUtil
-                .createRequest(method, url)
-                .headerMap(getDataTrace(context), true)
-                .form(fileListName, fileList);
+                    .createRequest(method, url)
+                    .headerMap(headerMap, true)
+                    .form(fileListName, fileList);
             // 设置超时时间
             if (timeout > 0) {
                 int realTimeout = timeout * (Long.valueOf(DateUnit.SECOND.getMillis()).intValue());
@@ -245,18 +286,26 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
             responseBody = request.execute().body();
             long endTime = System.currentTimeMillis();
             log.debug("请求Cloud接口耗时:{}\n请求路径:{}\n请求参数:{}\n请求结果:{}",
-                (endTime - startTime), url, StrUtil.format("{}个文件", fileList.length), responseBody);
+                    (endTime - startTime), url, StrUtil.format("{}个文件", fileList.length), responseBody);
             // 返回接口响应
             T apiResponse = JSON.parseObject(responseBody, responseClass);
-            if (apiResponse == null) {throw new NullPointerException();}
+            if (apiResponse == null) {
+                throw new NullPointerException();
+            }
             if (ResponseResult.class.equals(apiResponse.getClass())) {
-                ResponseResult<?> cloudResult = (ResponseResult<?>)apiResponse;
+                ResponseResult<?> cloudResult = (ResponseResult<?>) apiResponse;
                 // 接口成功
-                if (Boolean.TRUE.equals(cloudResult.getSuccess())) {return apiResponse;}
+                if (Boolean.TRUE.equals(cloudResult.getSuccess())) {
+                    return apiResponse;
+                }
                 // success == null || success == false
-                else if (cloudResult.getError() != null) {throw new RuntimeException(cloudResult.getError().getMsg());}
+                else if (cloudResult.getError() != null) {
+                    throw new RuntimeException(cloudResult.getError().getMsg());
+                }
                 // cloud 回传的 error 信息为空
-                else {throw new RuntimeException("无法展示更多信息,请参照cloud日志");}
+                else {
+                    throw new RuntimeException("无法展示更多信息,请参照cloud日志");
+                }
             }
             return apiResponse;
         } catch (JSONException e) {
@@ -268,6 +317,15 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
         }
     }
 
+    private void sign(Map<String, String> headerMap, StringBuilder validateKey, long currentTimeMillis, String validatePublicAppkey) {
+        validateKey.append("validate-appkey=").append(validatePublicAppkey).append("validate-timestamp=")
+                .append(currentTimeMillis);
+        String signature = new HmacUtils(HmacAlgorithms.HMAC_SHA_256, validateAppkey).hmacHex(validateKey.toString());
+        headerMap.put("validate-appkey", validatePublicAppkey);
+        headerMap.put("validate-timestamp", currentTimeMillis + "");
+        headerMap.put("validate-signature", signature);
+    }
+
     /**
      * 抽离数据溯源参数
      *
@@ -277,12 +335,12 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
     private ContextExt drawDataTraceContext(ContextExt param) {
         // 纯净对象
         ContextExt context = new ContextExt(
-            param.getUserId(),
-            param.getTenantId(),
-            param.getEnvCode(),
-            param.getFilterSql(),
-            param.getUserName(),
-            param.getTenantCode());
+                param.getUserId(),
+                param.getTenantId(),
+                param.getEnvCode(),
+                param.getFilterSql(),
+                param.getUserName(),
+                param.getTenantCode());
         // 清理原来的上下文
         param.clean();
         // 返回对象
