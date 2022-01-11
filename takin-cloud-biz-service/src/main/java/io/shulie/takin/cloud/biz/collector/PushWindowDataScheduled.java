@@ -378,7 +378,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 //    .map(PressureOutput::getSaCount)
                 //    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
                 //    .sum();
-                results.add(createPressureOutput(results, time, podNum, ReportConstants.ALL_BUSINESS_ACTIVITY, ReportConstants.ALL_BUSINESS_ACTIVITY));
+                results.add(createPressureOutput(results, time, podNum, ReportConstants.ALL_BUSINESS_ACTIVITY, ReportConstants.ALL_BUSINESS_ACTIVITY, null));
 
             }
             //sla处理
@@ -424,7 +424,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         }
     }
 
-    private PressureOutput createPressureOutput(List<PressureOutput> results, long time, int podNum, String transaction, String testName) {
+    private PressureOutput createPressureOutput(List<PressureOutput> results, long time, int podNum, String transaction, String testName, NodeTypeEnum nodeType) {
         int count = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getCount)
             .mapToInt(i -> Objects.isNull(i) ? 0 : i)
@@ -467,16 +467,28 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             .min()
             .orElse(0);
 
-        int realActiveThreads = (int) Math.round(results.stream().filter(Objects::nonNull)
-                .map(PressureOutput::getRealActiveThreads)
-                .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-                .average()
-                .orElse(0d));
-        int activeThreads = (int) Math.round(results.stream().filter(Objects::nonNull)
-            .map(PressureOutput::getActiveThreads)
-            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-            .average()
-            .orElse(0));
+        int realActiveThreads;
+        int activeThreads;
+        if (NodeTypeEnum.TEST_PLAN == nodeType) {
+            realActiveThreads = results.stream().filter(Objects::nonNull)
+                    .map(PressureOutput::getRealActiveThreads)
+                    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+                    .sum();
+            activeThreads = results.stream().filter(Objects::nonNull)
+                    .map(PressureOutput::getActiveThreads)
+                    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+                    .sum();
+        } else {
+            realActiveThreads = (int) Math.round(results.stream().filter(Objects::nonNull)
+                    .map(PressureOutput::getRealActiveThreads)
+                    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+                    .average()
+                    .orElse(0d));
+            activeThreads = results.stream().filter(Objects::nonNull)
+                    .map(PressureOutput::getActiveThreads)
+                    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+                    .sum();
+        }
         double avgTps = NumberUtil.getRate(count, CollectorConstants.SEND_TIME);
         List<String> percentData = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getSaPercent)
@@ -602,7 +614,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 tmpData.addAll(entry.getValue());
             }
         }
-        PressureOutput pressureOutput = createPressureOutput(tmpData, time, podNum, transaction, testName);
+        PressureOutput pressureOutput = createPressureOutput(tmpData, time, podNum, transaction, testName, targetNode.getType());
         data.add(pressureOutput);
         if (CollectionUtils.isNotEmpty(slaList) && targetNode.getType() == NodeTypeEnum.TEST_PLAN) {
             slaList.add(pressureOutput);
@@ -661,7 +673,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             .mapToInt(i -> Objects.nonNull(i) ? i : 0)
             .sum();
         double avgTps = NumberUtil.getRate(count, CollectorConstants.SEND_TIME);
-        int activeThreads = (int) Math.ceil(avgRt * avgTps / 1000d);
+//        int activeThreads = (int) Math.ceil(avgRt * avgTps / 1000d);
+        int activeThreads = realActiveThreads;
         List<String> percentDataList = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getPercentData)
             .filter(StringUtils::isNotBlank)
