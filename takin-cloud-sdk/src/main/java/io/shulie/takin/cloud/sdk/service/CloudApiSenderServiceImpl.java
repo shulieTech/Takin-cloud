@@ -41,10 +41,10 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
     private String cloudUrl;
     @Value("${takin.cloud.timeout:-1}")
     private int timeout;
-    @Value("${takin.cloud.security.appkey:}")
-    private String validateAppkey;
-    @Value("${takin.cloud.security.public.appkey:}")
-    private String validatePublicAppkey;
+    @Value("${web.cloud.sign.key: }")
+    private String signValidateKey;
+    @Value("${web.cloud.sign.public.key: }")
+    private String signValidatePublicKey;
 
     /**
      * 调用CLOUD接口的统一方法-GET
@@ -192,12 +192,12 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
         try {
             Map<String, String> headerMap = getDataTrace(context);
             //在header中，请求加密验证
-            StringBuilder validateKey = new StringBuilder();
+            StringBuilder validateString = new StringBuilder();
             long currentTimeMillis = System.currentTimeMillis();
             if (requestContent != null){
-                validateKey.append(requestContent);
+                validateString.append(requestContent);
             }
-            sign(headerMap, validateKey, currentTimeMillis, validateAppkey);
+            sign(headerMap, validateString, currentTimeMillis, signValidateKey);
             // 组装HTTP请求对象
             HttpRequest request = HttpUtil
                     .createRequest(method, url)
@@ -264,12 +264,12 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
         try {
             Map<String, String> headerMap = getDataTrace(context);
             //在header中，请求加密验证
-            StringBuilder validateKey = new StringBuilder();
+            StringBuilder validateString = new StringBuilder();
             long currentTimeMillis = System.currentTimeMillis();
             for (File file : fileList){
-                validateKey.append("file-name=").append(file.getName()).append("file-size=").append(file.length());
+                validateString.append("file-name=").append(file.getName()).append("file-size=").append(file.length());
             }
-            sign(headerMap, validateKey, currentTimeMillis, validatePublicAppkey);
+            sign(headerMap, validateString, currentTimeMillis, signValidatePublicKey);
 
             // 组装HTTP请求对象
             HttpRequest request = HttpUtil
@@ -317,11 +317,11 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
         }
     }
 
-    private void sign(Map<String, String> headerMap, StringBuilder validateKey, long currentTimeMillis, String validatePublicAppkey) {
-        validateKey.append("validate-appkey=").append(validatePublicAppkey).append("validate-timestamp=")
+    private void sign(Map<String, String> headerMap, StringBuilder validateString, long currentTimeMillis, String validatePublicAppkey) {
+        validateString.append("validate-key=").append(validatePublicAppkey).append("validate-timestamp=")
                 .append(currentTimeMillis);
-        String signature = new HmacUtils(HmacAlgorithms.HMAC_SHA_256, validateAppkey).hmacHex(validateKey.toString());
-        headerMap.put("validate-appkey", validatePublicAppkey);
+        String signature = new HmacUtils(HmacAlgorithms.HMAC_SHA_256, signValidateKey).hmacHex(validateString.toString());
+        headerMap.put("validate-key", validatePublicAppkey);
         headerMap.put("validate-timestamp", currentTimeMillis + "");
         headerMap.put("validate-signature", signature);
     }

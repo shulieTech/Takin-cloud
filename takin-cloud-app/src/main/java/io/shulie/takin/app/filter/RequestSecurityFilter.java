@@ -29,16 +29,19 @@ public class RequestSecurityFilter implements Filter {
     /**
      * 秘钥存储
      */
-    @Value("${cloud.request.security.appkeys:}")
-    private String requestSecurityAppkeys;
+    @Value("${cloud.request.sign.keys: }")
+    private String requestSignKeys;
+
+    @Value("${cloud.request.sign.validate: false}")
+    private boolean signValidate;
 
     private static final Map<String, String> appKeySet = new HashMap<>(16);
 
     @Override
     public void init(FilterConfig filterConfig) {
         appKeySet.put("web_0423_appkey", "cloud_safdseadvdsa");
-        if (StringUtils.isNotBlank(requestSecurityAppkeys)) {
-            Map<String, String> requestSecurityKeyMap = JsonHelper.json2Map(requestSecurityAppkeys, String.class, String.class);
+        if (StringUtils.isNotBlank(requestSignKeys)) {
+            Map<String, String> requestSecurityKeyMap = JsonHelper.json2Map(requestSignKeys, String.class, String.class);
             appKeySet.putAll(requestSecurityKeyMap);
         }
     }
@@ -48,17 +51,17 @@ public class RequestSecurityFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
 
         //swagger文档相关接口不做拦截
-        if (httpServletRequest.getRequestURI().contains("/swagger")) {
+        if (!signValidate || httpServletRequest.getRequestURI().contains("/swagger")) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
-        String validateAppkey = httpServletRequest.getHeader("validate-appkey");
+        String validateKey = httpServletRequest.getHeader("validate-key");
         String validateTimestamp = httpServletRequest.getHeader("validate-timestamp");
         String validateSignature = httpServletRequest.getHeader("validate-signature");
 
         //没有秘钥，不能访问
-        if (!appKeySet.containsKey(validateAppkey)) {
+        if (!appKeySet.containsKey(validateKey)) {
             failRequest(servletResponse, "签名公钥错误", "请重新发起请求");
             return;
         }
@@ -74,40 +77,39 @@ public class RequestSecurityFilter implements Filter {
             failRequest(servletResponse, "签名时间格式不对，不能访问", "请使用正确的时间格式");
             return;
         }
-        StringBuilder validateKey = new StringBuilder();
+        StringBuilder validateString = new StringBuilder();
         /**
          * 文件导入
          */
         if (servletRequest.getContentType().startsWith("multipart/form-data")) {
             ((HttpServletRequest) servletRequest).getParts().forEach(part -> {
-                validateKey.append("file-name=").append(part.getSubmittedFileName()).append("file-size=").append(part.getSize());
+                validateString.append("file-name=").append(part.getSubmittedFileName()).append("file-size=").append(part.getSize());
             });
-            signValidate(servletRequest, servletResponse, filterChain, validateAppkey, validateTimestamp, validateSignature, validateKey);
+            signValidate(servletRequest, servletResponse, filterChain, validateKey, validateTimestamp, validateSignature, validateString);
 
         } else {
             RequestWrapper requestWrapper = new RequestWrapper((HttpServletRequest) servletRequest);
             if (!CollectionUtils.isEmpty(requestWrapper.getParameterMap())) {
                 Map<String, String[]> parameterMap = requestWrapper.getParameterMap();
                 String param = JSONObject.toJSONString(parameterMap);
-                validateKey.append(param);
+                validateString.append(param);
             }
             if (StringUtils.isNotBlank(requestWrapper.getBody())) {
-                validateKey.append(requestWrapper.getBody());
+                validateString.append(requestWrapper.getBody());
             }
-
-            signValidate(requestWrapper, servletResponse, filterChain, validateAppkey, validateTimestamp, validateSignature, validateKey);
+            signValidate(requestWrapper, servletResponse, filterChain, validateKey, validateTimestamp, validateSignature, validateString);
         }
 
     }
 
     private void signValidate(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain,
-                              String validateAppkey, String validateTimestamp, String validateSignature,
-                              StringBuilder validateKey) throws IOException, ServletException {
+                              String validateKey, String validateTimestamp, String validateSignature,
+                              StringBuilder validateString) throws IOException, ServletException {
 
-        validateKey.append("validate-appkey=").append(validateAppkey).append("validate-timestamp=")
+        validateString.append("validate-key=").append(validateKey).append("validate-timestamp=")
                 .append(validateTimestamp);
 
-        String signature = new HmacUtils(HmacAlgorithms.HMAC_SHA_256, appKeySet.get(validateAppkey)).hmacHex(validateKey.toString());
+        String signature = new HmacUtils(HmacAlgorithms.HMAC_SHA_256, appKeySet.get(validateKey)).hmacHex(validateString.toString());
         if (StringUtils.isBlank(signature) || !signature.equals(validateSignature)) {
             //秘钥错误
             failRequest(servletResponse, "签名校验失败", "请检查秘钥是否正确");

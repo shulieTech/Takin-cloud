@@ -84,5 +84,12 @@ public class EngineRunConfig extends AbstractEntry {
      * 压测引起java虚拟机内存配置
      */
     private String memSetting;
-
+    /**
+     * 签名校验私钥
+     */
+    private String signValidateKey;
+    /**
+     * 签名校验公钥
+     */
+    private String signValidatePublicKey;
 }
