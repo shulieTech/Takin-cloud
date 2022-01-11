@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
+import io.shulie.takin.cloud.sdk.model.request.report.JtlDownloadReq;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
@@ -27,6 +28,7 @@ import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailByIdReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailBySceneIdReq;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.WarnDetailResponse;
@@ -225,5 +227,18 @@ public class CloudReportApiImpl implements CloudReportApi {
     public List<ScriptNodeTreeResp> queryNodeTree(ScriptNodeTreeQueryReq req) {
         return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_SCRIPT_NODE_TREE),
             req, new TypeReference<ResponseResult<List<ScriptNodeTreeResp>>>() {}).getData();
+    }
+
+    /**
+     * 获取下载jtl下载路径
+     *
+     * @param req 请求参数
+     *            <p>传入reportId即可</p>
+     * @return 下载路径
+     */
+    @Override
+    public String getJtlDownLoadUrl(JtlDownloadReq req) {
+        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_GET_JTL_DOWNLOAD_URL),
+            req, new TypeReference<ResponseResult<String>>() {}).getData();
     }
 }

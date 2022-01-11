@@ -100,6 +100,7 @@ public class EntrypointUrl {
     public final static String METHOD_REPORT_LIST_RUNNING = "running/list";
     public final static String METHOD_REPORT_LIST_PRESSURING = "pressuring/list";
     public final static String METHOD_REPORT_SCRIPT_NODE_TREE = "nodeTree";
+    public final static String METHOD_REPORT_GET_JTL_DOWNLOAD_URL= "getJtlDownLoadUrl";
 
     public final static String METHOD_REPORT_TREND = "queryReportTrend";
     public final static String METHOD_REPORT_TREND_TEMP = "queryTempReportTrend";
