@@ -467,12 +467,16 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             .min()
             .orElse(0);
 
-        //fixme 目前压测采样器回传的活跃线程数就是整个线程组的活跃线程数,暂时先取一个最大值，理论上同一个时间窗口回传的活跃线程数都是相同的
-        int activeThreads = results.stream().filter(Objects::nonNull)
+        int realActiveThreads = (int) Math.round(results.stream().filter(Objects::nonNull)
+                .map(PressureOutput::getRealActiveThreads)
+                .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+                .average()
+                .orElse(0d));
+        int activeThreads = (int) Math.round(results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getActiveThreads)
             .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-            .max()
-            .orElse(0);
+            .average()
+            .orElse(0));
         double avgTps = NumberUtil.getRate(count, CollectorConstants.SEND_TIME);
         List<String> percentData = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getSaPercent)
@@ -501,6 +505,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         output.setMaxRt(maxRt);
         output.setMinRt(minRt);
         output.setActiveThreads(activeThreads);
+        output.setRealActiveThreads(realActiveThreads);
         output.setAvgTps(avgTps);
         output.setSaPercent(percentSa);
         output.setDataNum(podNos);
@@ -651,11 +656,12 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             .filter(Objects::nonNull)
             .min()
             .orElse(0);
-        int activeThreads = metricsList.stream().filter(Objects::nonNull)
+        int realActiveThreads = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getActiveThreads)
             .mapToInt(i -> Objects.nonNull(i) ? i : 0)
             .sum();
         double avgTps = NumberUtil.getRate(count, CollectorConstants.SEND_TIME);
+        int activeThreads = (int) Math.ceil(avgRt * avgTps / 1000d);
         List<String> percentDataList = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getPercentData)
             .filter(StringUtils::isNotBlank)
@@ -684,6 +690,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         p.setMaxRt(maxRt);
         p.setMinRt(minRt);
         p.setActiveThreads(activeThreads);
+        p.setRealActiveThreads(realActiveThreads);
         p.setAvgTps(avgTps);
         p.setSaPercent(percentSa);
         p.setDataNum(dataNum);
