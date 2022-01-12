@@ -60,8 +60,8 @@ public class PressureOutput {
     /**
      * 实际活跃线程数:对应metrics表中的activeThreads字段
      */
-    @Column(name = "real_active_threads")
-    private Integer realActiveThreads;
+//    @Column(name = "real_active_threads")
+//    private Integer realActiveThreads;
     @Column(name = "avg_tps")
     private Double avgTps;
     @Column(name = "sa_percent")

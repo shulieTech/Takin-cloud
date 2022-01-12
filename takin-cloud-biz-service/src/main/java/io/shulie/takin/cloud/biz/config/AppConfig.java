@@ -45,6 +45,9 @@ public class AppConfig {
     @Value("${report.data.collector:influxdb}")
     private String collector;
 
+    @Value("${report.data.holdRealThreadNum:true}")
+    private Boolean holdRealThreadNum;
+
     @Value("${spring.redis.host}")
     private String engineRedisAddress;
 

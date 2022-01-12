@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.apache.commons.collections4.MapUtils;
@@ -467,23 +468,23 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             .min()
             .orElse(0);
 
-        int realActiveThreads;
+//        int realActiveThreads;
         int activeThreads;
         if (NodeTypeEnum.TEST_PLAN == nodeType) {
-            realActiveThreads = results.stream().filter(Objects::nonNull)
-                    .map(PressureOutput::getRealActiveThreads)
-                    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-                    .sum();
+//            realActiveThreads = results.stream().filter(Objects::nonNull)
+//                    .map(PressureOutput::getRealActiveThreads)
+//                    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+//                    .sum();
             activeThreads = results.stream().filter(Objects::nonNull)
                     .map(PressureOutput::getActiveThreads)
                     .mapToInt(i -> Objects.isNull(i) ? 0 : i)
                     .sum();
         } else {
-            realActiveThreads = (int) Math.round(results.stream().filter(Objects::nonNull)
-                    .map(PressureOutput::getRealActiveThreads)
-                    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-                    .average()
-                    .orElse(0d));
+//            realActiveThreads = (int) Math.round(results.stream().filter(Objects::nonNull)
+//                    .map(PressureOutput::getRealActiveThreads)
+//                    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+//                    .average()
+//                    .orElse(0d));
             activeThreads = results.stream().filter(Objects::nonNull)
                     .map(PressureOutput::getActiveThreads)
                     .mapToInt(i -> Objects.isNull(i) ? 0 : i)
@@ -517,7 +518,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         output.setMaxRt(maxRt);
         output.setMinRt(minRt);
         output.setActiveThreads(activeThreads);
-        output.setRealActiveThreads(realActiveThreads);
+//        output.setRealActiveThreads(realActiveThreads);
         output.setAvgTps(avgTps);
         output.setSaPercent(percentSa);
         output.setDataNum(podNos);
@@ -669,13 +670,13 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             .min()
             .orElse(0);
         //实际线程数
-        int realActiveThreads = metricsList.stream().filter(Objects::nonNull)
+        int activeThreads = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getActiveThreads)
             .mapToInt(i -> Objects.nonNull(i) ? i : 0)
             .sum();
         double avgTps = NumberUtil.getRate(count, CollectorConstants.SEND_TIME);
-        //模型运算修正的线程数
-        int activeThreads = (int) Math.ceil(avgRt * avgTps / 1000d);
+        //模型运算修正的线程数(有效线程数)，顺丰需要这个
+//        int activeThreads = isRealThread ? realActiveThreads : (int) Math.ceil(avgRt * avgTps / 1000d);
 //        int activeThreads = realActiveThreads;
         List<String> percentDataList = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getPercentData)
@@ -705,7 +706,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         p.setMaxRt(maxRt);
         p.setMinRt(minRt);
         p.setActiveThreads(activeThreads);
-        p.setRealActiveThreads(realActiveThreads);
+//        p.setRealActiveThreads(realActiveThreads);
         p.setAvgTps(avgTps);
         p.setSaPercent(percentSa);
         p.setDataNum(dataNum);
