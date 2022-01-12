@@ -668,13 +668,15 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             .filter(Objects::nonNull)
             .min()
             .orElse(0);
+        //实际线程数
         int realActiveThreads = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getActiveThreads)
             .mapToInt(i -> Objects.nonNull(i) ? i : 0)
             .sum();
         double avgTps = NumberUtil.getRate(count, CollectorConstants.SEND_TIME);
-//        int activeThreads = (int) Math.ceil(avgRt * avgTps / 1000d);
-        int activeThreads = realActiveThreads;
+        //模型运算修正的线程数
+        int activeThreads = (int) Math.ceil(avgRt * avgTps / 1000d);
+//        int activeThreads = realActiveThreads;
         List<String> percentDataList = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getPercentData)
             .filter(StringUtils::isNotBlank)
