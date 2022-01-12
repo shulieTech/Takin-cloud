@@ -487,11 +487,11 @@ public class PushWindowDataScheduled extends AbstractIndicators {
 //                    .average()
 //                    .orElse(0d));
             //其他分组节点（控制器、线程组）：取平均
-            activeThreads = (int) Math.round(results.stream().filter(Objects::nonNull)
+            activeThreads = results.stream().filter(Objects::nonNull)
                     .map(PressureOutput::getActiveThreads)
                     .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-                    .average()
-                    .orElse(0d));
+                    .max()
+                    .orElse(0);
         }
         double avgTps = NumberUtil.getRate(count, CollectorConstants.SEND_TIME);
         List<String> percentData = results.stream().filter(Objects::nonNull)
