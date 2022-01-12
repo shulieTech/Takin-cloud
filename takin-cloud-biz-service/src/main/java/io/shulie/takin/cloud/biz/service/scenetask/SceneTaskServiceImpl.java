@@ -836,6 +836,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         report.setStatus(ReportConstants.INIT_STATUS);
         // 初始化
         report.setTenantId(scene.getTenantId());
+        report.setEnvCode(scene.getEnvCode());
         report.setOperateId(input.getOperateId());
         // 解决开始时间 偏移10s
         report.setStartTime(new Date(System.currentTimeMillis() + offsetStartTime * 1000));
@@ -854,9 +855,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         report.setTps(sumTps);
         report.setPressureType(scene.getPressureType());
         report.setType(scene.getType());
-        report.setUserId(input.getUserId());
-        report.setTenantId(input.getTenantId());
-        report.setEnvCode(input.getEnvCode());
         if (StringUtils.isNotBlank(scene.getScriptAnalysisResult())) {
             report.setScriptNodeTree(JsonPathUtil.deleteNodes(scene.getScriptAnalysisResult()).jsonString());
         }
