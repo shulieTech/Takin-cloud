@@ -187,10 +187,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     public SceneActionOutput start(SceneTaskStartInput input) {
         input.setAssetType(AssetTypeEnum.PRESS_REPORT.getCode());
         input.setResourceId(null);
-        return startTask(input, null);
+        return startTask(input);
     }
 
-    private SceneActionOutput startTask(SceneTaskStartInput input, SceneStartTrialRunInput trialRunInput) {
+    private SceneActionOutput startTask(SceneTaskStartInput input) {
         log.info("启动任务接收到入参：{}", JsonUtil.toJson(input));
         SceneManageQueryOpitons options = new SceneManageQueryOpitons();
         options.setIncludeBusinessActivity(true);
@@ -206,10 +206,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 .collect(Collectors.toList()));
         } else {
             sceneData.setEnginePlugins(null);
-        }
-
-        if (Objects.nonNull(trialRunInput)) {
-            sceneData.setPressureTestSecond(trialRunInput.getPressureTestSecond());
         }
 
         //设置巡检参数
@@ -268,7 +264,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         taskStatusCache.cachePodNum(input.getSceneId(), sceneData.getIpNum());
 
         String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(input.getSceneId(),
-            report.getId(), input.getTenantId());
+            report.getId(), report.getTenantId());
         List<String> activityRefs = sceneData.getBusinessActivityConfig().stream().map(
                 SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getBindRef)
             .collect(Collectors.toList());
@@ -496,9 +492,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setAssetType(AssetTypeEnum.ACTIVITY_CHECK.getCode());
         sceneTaskStartInput.setResourceId(activityRefInput.getBusinessActivityId());
         sceneTaskStartInput.setResourceName(activityRefInput.getBusinessActivityName());
-        sceneTaskStartInput.setUserId(operateId);
-        sceneTaskStartInput.setUserName(operateName);
-        SceneActionOutput sceneActionDTO = startTask(sceneTaskStartInput, null);
+        SceneActionOutput sceneActionDTO = startTask(sceneTaskStartInput);
         //返回报告id
         return sceneActionDTO.getData();
     }
@@ -561,9 +555,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         SceneInspectInput inspectInput = new SceneInspectInput().setFixedTimer(fixTimer).setLoopsNum(loopsNum);
         sceneTaskStartInput.setSceneInspectInput(inspectInput);
         sceneTaskStartInput.setContinueRead(false);
-        sceneTaskStartInput.setTenantId(input.getTenantId());
-        sceneTaskStartInput.setEnvCode(input.getEnvCode());
-        SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput, null);
+        SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput);
         startOutput.setSceneId(sceneManageId);
         startOutput.setReportId(sceneActionOutput.getData());
         //开始试跑就设置一个状态，后面区分试跑任务和正常压测
@@ -684,13 +676,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setAssetType(AssetTypeEnum.SCRIPT_DEBUG.getCode());
         sceneTaskStartInput.setResourceId(input.getScriptDeployId());
         sceneTaskStartInput.setResourceName(input.getScriptName());
-        sceneTaskStartInput.setUserId(input.getUserId());
-        sceneTaskStartInput.setUserName(input.getUserName());
-        sceneTaskStartInput.setTenantId(input.getTenantId());
         sceneTaskStartInput.setOperateId(input.getOperateId());
         sceneTaskStartInput.setOperateName(input.getOperateName());
-        sceneTaskStartInput.setEnvCode(input.getEnvCode());
-        SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput, null);
+        SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput);
         sceneTryRunTaskStartOutput.setReportId(sceneActionOutput.getData());
 
         return sceneTryRunTaskStartOutput;
@@ -835,6 +823,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         report.setConcurrent(scene.getConcurrenceNum());
         report.setStatus(ReportConstants.INIT_STATUS);
         // 初始化
+        report.setEnvCode(scene.getEnvCode());
         report.setTenantId(scene.getTenantId());
         report.setOperateId(input.getOperateId());
         // 解决开始时间 偏移10s
@@ -854,9 +843,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         report.setTps(sumTps);
         report.setPressureType(scene.getPressureType());
         report.setType(scene.getType());
-        report.setUserId(input.getUserId());
-        report.setTenantId(input.getTenantId());
-        report.setEnvCode(input.getEnvCode());
         if (StringUtils.isNotBlank(scene.getScriptAnalysisResult())) {
             report.setScriptNodeTree(JsonPathUtil.deleteNodes(scene.getScriptAnalysisResult()).jsonString());
         }
