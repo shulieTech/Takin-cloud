@@ -25,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.apache.commons.collections4.MapUtils;
@@ -72,7 +71,6 @@ import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.biz.collector.collector.AbstractIndicators;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
@@ -1033,10 +1031,10 @@ public class PushWindowDataScheduled extends AbstractIndicators {
 
             log.info("场景[{}]压测任务已完成,将要开始更新报告{}", sceneId, reportId);
             // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
-            SceneManageResult sceneManage = sceneManageDAO.getSceneById(sceneId);
+            SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);
             //如果是强制停止 不需要更新
             log.info("finish scene {}, state :{}", sceneId, Optional.ofNullable(sceneManage)
-                .map(SceneManageResult::getType)
+                .map(SceneManageEntity::getType)
                 .map(SceneManageStatusEnum::getSceneManageStatusEnum)
                 .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
             if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {
