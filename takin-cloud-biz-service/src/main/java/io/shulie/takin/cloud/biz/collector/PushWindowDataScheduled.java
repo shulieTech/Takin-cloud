@@ -544,9 +544,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         Map<String, List<PressureOutput>> dataMap = results.stream().collect(
             Collectors.groupingBy(PressureOutput::getTransaction));
         List<PressureOutput> tmpData = new ArrayList<>();
-        List<String> samplerTransactions = samplerNode.stream().filter(Objects::nonNull)
-            .map(ScriptNode::getXpathMd5)
-            .collect(Collectors.toList());
+        List<String> samplerTransactions = CommonUtil.getList(samplerNode, ScriptNode::getXpathMd5);
         for (Map.Entry<String, List<PressureOutput>> entry : dataMap.entrySet()) {
             if (samplerTransactions.contains(entry.getKey())) {
                 tmpData.addAll(entry.getValue());
@@ -606,18 +604,26 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     private void summaryNodeMetrics(ScriptNode targetNode, int podNum, Long time, List<PressureOutput> data, List<PressureOutput> slaList) {
         String transaction = targetNode.getXpathMd5();
         String testName = targetNode.getTestName();
-        List<ScriptNode> childSamplers = JmxUtil.getScriptNodeByType(NodeTypeEnum.SAMPLER, targetNode.getChildren());
-        Map<String, List<PressureOutput>> dataMap = data.stream().collect(
-            Collectors.groupingBy(PressureOutput::getTransaction));
+
+        Map<String, PressureOutput> dataMap = data.stream().collect(Collectors.toMap(PressureOutput::getTransaction, d -> d, (o1, o2) -> o1));
         List<PressureOutput> tmpData = new ArrayList<>();
-        List<String> samplerTransactions = childSamplers.stream().filter(Objects::nonNull)
-            .map(ScriptNode::getXpathMd5)
-            .collect(Collectors.toList());
-        for (Map.Entry<String, List<PressureOutput>> entry : dataMap.entrySet()) {
-            if (samplerTransactions.contains(entry.getKey())) {
-                tmpData.addAll(entry.getValue());
+        if (NodeTypeEnum.TEST_PLAN == targetNode.getType()) {
+            PressureOutput all = dataMap.get("all");
+            if (null != all) {
+                tmpData.add(all);
             }
         }
+        if (CollectionUtils.isEmpty(tmpData)) {
+            List<ScriptNode> childSamplers = JmxUtil.getScriptNodeByType(NodeTypeEnum.SAMPLER, targetNode.getChildren());
+            List<String> childTransactions = CommonUtil.getList(childSamplers, ScriptNode::getXpathMd5);
+            if (CollectionUtils.isNotEmpty(childTransactions)) {
+                childTransactions.stream().filter(Objects::nonNull)
+                        .map(dataMap::get)
+                        .filter(Objects::nonNull)
+                        .forEach(tmpData::add);
+            }
+        }
+
         PressureOutput pressureOutput = createPressureOutput(tmpData, time, podNum, transaction, testName, targetNode.getType());
         data.add(pressureOutput);
         if (CollectionUtils.isNotEmpty(slaList) && targetNode.getType() == NodeTypeEnum.TEST_PLAN) {
