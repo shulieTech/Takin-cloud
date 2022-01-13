@@ -70,6 +70,15 @@ public class CloudPluginUtils {
     }
 
     /**
+     * 环境编码
+     *
+     * @return -
+     */
+    public static String getEnvCode() {
+        return getContext().getEnvCode();
+    }
+
+    /**
      * 返回过滤sql
      *
      * @return -

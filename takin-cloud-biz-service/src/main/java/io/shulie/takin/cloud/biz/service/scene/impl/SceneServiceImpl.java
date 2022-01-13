@@ -89,7 +89,7 @@ public class SceneServiceImpl implements SceneService {
         TransactionStatus transactionStatus = platformTransactionManager.getTransaction(transactionDefinition);
         try {
             // 1.   创建场景
-            long sceneId = createScene(in.getBasicInfo(), in.getConfig(), in.getAnalysisResult(), in.getDataValidation(), in.getUserId());
+            long sceneId = createScene(in.getBasicInfo(), in.getConfig(), in.getAnalysisResult(), in.getDataValidation());
             // 2. 更新场景&业务活动关联关系
             buildBusinessActivity(sceneId, in.getContent(), in.getGoal());
             // 3.   处理脚本
@@ -410,13 +410,14 @@ public class SceneServiceImpl implements SceneService {
      * @return 压测场景主键
      */
     private Long createScene(BasicInfo basicInfo,
-        PtConfigExt config, List<?> analysisResult, DataValidation dataValidation, Long userId) {
+        PtConfigExt config, List<?> analysisResult, DataValidation dataValidation) {
         Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), dataValidation);
         // 组装数据实体类
         SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),
             basicInfo.getScriptType(), config, feature, analysisResult);
         // 设置创建者信息
-        sceneEntity.setUserId(userId);
+        sceneEntity.setUserId(CloudPluginUtils.getUserId());
+        sceneEntity.setEnvCode(CloudPluginUtils.getEnvCode());
         sceneEntity.setTenantId(CloudPluginUtils.getTenantId());
         // 执行数据库操作
         sceneManageMapper.insert(sceneEntity);
