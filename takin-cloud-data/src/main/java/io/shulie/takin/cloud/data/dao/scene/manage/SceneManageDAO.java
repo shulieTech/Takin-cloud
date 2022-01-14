@@ -7,7 +7,6 @@ import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 
 /**
  * @author 无涯
@@ -36,7 +35,7 @@ public interface SceneManageDAO extends IService<SceneManageEntity> {
      * @param id -
      * @return -
      */
-    SceneManageResult getSceneById(Long id);
+    SceneManageEntity getSceneById(Long id);
 
     /**
      * 根据条件分页查询

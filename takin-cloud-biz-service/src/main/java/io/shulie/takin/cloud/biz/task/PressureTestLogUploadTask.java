@@ -19,7 +19,7 @@ import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
 import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -206,7 +206,7 @@ public class PressureTestLogUploadTask implements Runnable {
      * @return 是否启用
      */
     private boolean isSceneEnded(Long sceneId) {
-        SceneManageResult manageResult = this.sceneManageDAO.getSceneById(sceneId);
+        SceneManageEntity manageResult = this.sceneManageDAO.getSceneById(sceneId);
         if (Objects.isNull(manageResult) || Objects.isNull(manageResult.getStatus())) {
             log.warn("上传Jmeter日志--场景ID:{},未查询到场景！", sceneId);
             return true;
