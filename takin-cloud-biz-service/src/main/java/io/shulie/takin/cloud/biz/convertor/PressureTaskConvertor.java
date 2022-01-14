@@ -18,11 +18,11 @@ public interface PressureTaskConvertor {
 
     @Mappings(
         value = {
-            @Mapping(target = "sceneType", source = "sceneType.getCode()"),
-            @Mapping(target = "businessActivityConfig", source = "java(JsonUtil.toJson(businessActivityConfig))"),
-            @Mapping(target = "uploadFiles", source = "java(JsonUtil.toJson(uploadFiles))"),
-            @Mapping(target = "enginePlugins", source = "java(JsonUtil.toJson(enginePlugins))"),
-            @Mapping(target = "scriptNodes", source = "java(JsonUtil.toJson(scriptNodes))"),
+            @Mapping(target = "sceneType", source = "sceneType.code"),
+            @Mapping(target = "businessActivityConfig", expression = "java(JsonUtil.toJson(po.getBusinessActivityConfig()))"),
+            @Mapping(target = "uploadFiles", expression = "java(JsonUtil.toJson(po.getUploadFiles()))"),
+            @Mapping(target = "enginePlugins", expression = "java(JsonUtil.toJson(po.getEnginePlugins()))"),
+            @Mapping(target = "scriptNodes", expression = "java(JsonUtil.toJson(po.getScriptNodes()))"),
         }
     )
     PressureTaskEntity of(PressureTaskPo po);

@@ -1,8 +1,7 @@
 package io.shulie.plugin.enginecall.service;
 
+import io.shulie.takin.cloud.ext.content.enginecall.EngineRunConfig;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.ext.content.enginecall.EngineRunConfig;
-import io.shulie.takin.ext.content.response.Response;
 
 import java.util.List;
 import java.util.Map;

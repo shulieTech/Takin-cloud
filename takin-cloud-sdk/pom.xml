@@ -7,21 +7,17 @@
         <groupId>io.shulie.takin</groupId>
         <artifactId>takin-cloud</artifactId>
         <relativePath>../pom.xml</relativePath>
-        <version>takin-cloud-5.2.0-SNAPSHOT</version>
+        <version>takin-cloud-5.2.1-SNAPSHOT</version>
     </parent>
 
     <name>takin-cloud-sdk</name>
     <artifactId>takin-cloud-sdk</artifactId>
-    <version>takin-cloud-sdk-5.2.0-SNAPSHOT</version>
+    <version>takin-cloud-sdk-5.2.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
             <groupId>io.shulie.takin</groupId>
             <artifactId>takin-cloud-ext</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.shulie.takin</groupId>
-            <artifactId>takin-cloud-common</artifactId>
         </dependency>
 
         <dependency>

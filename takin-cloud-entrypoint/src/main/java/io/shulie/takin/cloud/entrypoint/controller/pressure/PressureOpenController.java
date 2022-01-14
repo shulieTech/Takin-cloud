@@ -7,20 +7,21 @@ import io.shulie.takin.cloud.biz.service.pressure.PressureTaskService;
 import io.shulie.takin.cloud.biz.service.schedule.impl.FileSplitService;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 import io.shulie.takin.cloud.common.constants.FileConstants;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.FileUtils;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.cloud.data.model.mysql.PressureTaskEntity;
 import io.shulie.takin.cloud.ext.api.AssetExtApi;
 import io.shulie.takin.cloud.ext.content.asset.AccountInfoExt;
+import io.shulie.takin.cloud.ext.content.enginecall.EngineRunConfig;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
+import io.shulie.takin.cloud.ext.helper.CommonHelper;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.sdk.model.request.pressure.StartEngineReq;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneScriptRefOpen;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.ext.content.enginecall.EngineRunConfig;
-import io.shulie.takin.ext.helper.CommonHelper;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -92,8 +93,9 @@ public class PressureOpenController {
         EngineRunConfig config = pressureTaskService.buildEngineRunConfig(task, strategyConfig);
         String delimiter = CommonUtil.getValue("@—@", strategyConfig, StrategyConfigExt::getDelimiter);
         //文件拆分
+        PressureSceneEnum sceneType = PressureSceneEnum.value(req.getSceneType());
         List<ScheduleStartRequestExt.DataFile> files = fileSplitService.generateFileSlice(config.getFileSets(),
-                config.getSceneId(), req.getSceneType(), config.getTaskId(), config.getPodCount(), delimiter, task.getContinueRead());
+                config.getSceneId(), sceneType, config.getTaskId(), config.getPodCount(), delimiter, task.getContinueRead());
         //复制文件到任务目录下
         if (CollectionUtils.isNotEmpty(files)) {
             String targetDir = FileUtils.mergePaths(appConfig.getScriptPath(), FileConstants.RUNNING_SCRIPT_FILE_DIR, task.getId().toString());
@@ -129,7 +131,11 @@ public class PressureOpenController {
             return ResponseResult.fail("1", "启动pod数量为空", "请传入启动pod数");
         }
         BigDecimal minVum = null;
-        switch (req.getSceneType()) {
+        PressureSceneEnum sceneType = PressureSceneEnum.value(req.getSceneType());
+        if (null == sceneType) {
+            return ResponseResult.fail("1", "压测场景类型值非法", "请传入有效值");
+        }
+        switch (sceneType) {
             //脚本调试好像不需要场景id
             case TRY_RUN:
                 if (null == req.getThroughput() || req.getThroughput() <= 0) {
@@ -193,7 +199,7 @@ public class PressureOpenController {
             return ResponseResult.fail("1", "没有脚本文件", "请传入脚本文件");
         }
         //检测是否已经有任务在跑了
-        PressureTaskEntity have = pressureTaskService.getRunningTaskBySceneId(req.getId(), req.getSceneType());
+        PressureTaskEntity have = pressureTaskService.getRunningTaskBySceneId(req.getId(), sceneType);
         if (null != have) {
             return ResponseResult.fail("2", "任务已经在运行了！", "请确认当前压测场景状态，不要重复提交");
         }

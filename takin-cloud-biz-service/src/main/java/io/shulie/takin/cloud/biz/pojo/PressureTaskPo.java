@@ -3,10 +3,10 @@ package io.shulie.takin.cloud.biz.pojo;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.enums.TimeUnitEnum;
 import io.shulie.takin.cloud.common.pojo.AbstractEntry;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginsRefOpen;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneBusinessActivityRefOpen;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneScriptRefOpen;
-import io.shulie.takin.ext.content.script.ScriptNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

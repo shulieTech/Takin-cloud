@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.sdk.model.request.pressure;
 
-import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginsRefOpen;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneBusinessActivityRefOpen;
@@ -25,7 +24,7 @@ public class StartEngineReq extends ContextExt {
 
     @ApiModelProperty(value = "压测场景类型")
     @NotNull(message = "压测场景类型不能为空")
-    private PressureSceneEnum sceneType;
+    private Integer sceneType;
 
     @ApiModelProperty(value = "业务活动配置")
     private List<SceneBusinessActivityRefOpen> businessActivityConfig;

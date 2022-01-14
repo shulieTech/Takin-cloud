@@ -1,8 +1,7 @@
 package io.shulie.takin.cloud.biz.service.engine;
 
+import io.shulie.takin.cloud.ext.content.enginecall.EngineRunConfig;
 import io.shulie.takin.common.beans.response.ResponseResult;
-import io.shulie.takin.ext.content.enginecall.EngineRunConfig;
-import io.shulie.takin.ext.content.response.Response;
 
 /**
  * @author liyuanba
