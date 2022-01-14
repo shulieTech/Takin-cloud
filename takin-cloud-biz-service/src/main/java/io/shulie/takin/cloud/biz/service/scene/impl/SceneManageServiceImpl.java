@@ -64,6 +64,7 @@ import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.PressureModeEnum;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
+import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
 import io.shulie.takin.cloud.common.enums.TimeUnitEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageErrorEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
@@ -83,17 +84,17 @@ import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.ext.api.AssetExtApi;
 import io.shulie.takin.cloud.ext.api.EngineExtApi;
 import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
+import io.shulie.takin.cloud.ext.content.response.Response;
 import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
 import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.shulie.takin.cloud.sdk.model.common.TimeBean;
-import io.shulie.takin.ext.content.enginecall.PtConfigExt;
-import io.shulie.takin.ext.content.enginecall.ThreadGroupConfigExt;
+import io.shulie.takin.cloud.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.utils.file.FileManagerHelper;
 import io.shulie.takin.utils.json.JsonHelper;
@@ -568,7 +569,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             Collectors.joining(","));
         String updateStatus = statusVO.getUpdateEnum().getDesc();
 
-        SceneManageResult sceneManageResult = sceneManageDAO.getSceneById(statusVO.getSceneId());
+        SceneManageEntity sceneManageResult = sceneManageDAO.getSceneById(statusVO.getSceneId());
         if (sceneManageResult == null) {
             log.error("异常代码【{}】,异常内容：更新生命周期失败 --> 找不到对应的场景: {}",
                 TakinCloudExceptionEnum.SCENE_MANAGE_UPDATE_LIFE_CYCLE_ERROR, statusVO.getSceneId());
@@ -916,7 +917,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     @Override
     public SceneManageWrapperOutput getSceneManage(Long id, SceneManageQueryOpitons options) {
-        SceneManageResult sceneManageResult = getSceneManage(id);
+        SceneManageEntity sceneManageResult = getSceneManage(id);
         if (options == null) {
             options = new SceneManageQueryOpitons();
         }
@@ -990,11 +991,11 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     }
 
-    private SceneManageResult getSceneManage(Long id) {
+    private SceneManageEntity getSceneManage(Long id) {
         if (id == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "ID不能为空");
         }
-        SceneManageResult result = sceneManageDAO.getSceneById(id);
+        SceneManageEntity result = sceneManageDAO.getSceneById(id);
         if (result == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "场景记录不存在" + id);
         }
@@ -1012,7 +1013,11 @@ public class SceneManageServiceImpl implements SceneManageService {
         // 尝试调用插件
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
-            return assetExtApi.calcEstimateAmount(bills);
+            Response<BigDecimal> res = assetExtApi.calcEstimateAmount(bills);
+            if (null != res && res.isSuccess()) {
+                return res.getData();
+            }
+            return BigDecimal.ZERO;
         }
         // 返回0
         else {
@@ -1021,7 +1026,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     }
 
-    private void fillBase(SceneManageWrapperOutput wrapperOutput, SceneManageResult sceneManageResult) {
+    private void fillBase(SceneManageWrapperOutput wrapperOutput, SceneManageEntity sceneManageResult) {
         wrapperOutput.setId(sceneManageResult.getId());
         wrapperOutput.setScriptType(sceneManageResult.getScriptType());
         wrapperOutput.setPressureTestSceneName(sceneManageResult.getSceneName());
@@ -1029,6 +1034,8 @@ public class SceneManageServiceImpl implements SceneManageService {
 
         // 状态适配
         wrapperOutput.setStatus(SceneManageStatusEnum.getAdaptStatus(sceneManageResult.getStatus()));
+        wrapperOutput.setUserId(sceneManageResult.getUserId());
+        wrapperOutput.setEnvCode(sceneManageResult.getEnvCode());
         wrapperOutput.setTenantId(sceneManageResult.getTenantId());
         wrapperOutput.setUpdateTime(DateUtil.formatDateTime(sceneManageResult.getUpdateTime()));
         wrapperOutput.setLastPtTime(DateUtil.formatDateTime(sceneManageResult.getLastPtTime()));
@@ -1036,10 +1043,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (StringUtils.isBlank(sceneManageResult.getScriptAnalysisResult())) {
             fillPtConfigOld(wrapperOutput, sceneManageResult.getPtConfig());
         } else {
-            PressureSceneEnum type = PressureSceneEnum.value(sceneManageResult.getType());
-            if (null != type) {
-                wrapperOutput.setPressureType(type.getCode());
-            }
+            wrapperOutput.setPressureType(sceneManageResult.getType());
             fillPtConfig(wrapperOutput, sceneManageResult.getPtConfig());
         }
         wrapperOutput.setFeatures(sceneManageResult.getFeatures());
@@ -1056,7 +1060,9 @@ public class SceneManageServiceImpl implements SceneManageService {
                 return;
             }
 
+            Integer ptType = json.getInteger(SceneManageConstant.PT_TYPE);
             ThreadGroupConfigExt tgConfig = new ThreadGroupConfigExt();
+            tgConfig.setType(ptType);
             tgConfig.setThreadNum(json.getInteger(SceneManageConstant.THREAD_NUM));
             PressureModeEnum mode = PressureModeEnum.value(json.getInteger(SceneManageConstant.PT_MODE));
             if (null != mode) {
@@ -1076,9 +1082,9 @@ public class SceneManageServiceImpl implements SceneManageService {
             Map<String, ThreadGroupConfigExt> map = new HashMap<>(1);
             map.put("all", tgConfig);
 
+            wrapperOutput.setConcurrenceNum(tgConfig.getThreadNum());
             wrapperOutput.setIpNum(json.getInteger(SceneManageConstant.HOST_NUM));
-            PressureSceneEnum pressureType = PressureSceneEnum.value(json.getInteger(SceneManageConstant.PT_TYPE));
-            wrapperOutput.setPressureType(null == pressureType ? PressureSceneEnum.DEFAULT.getCode() : pressureType.getCode());
+            wrapperOutput.setPressureType(ptType);
             //压测时长
             TimeBean duration = new TimeBean(json.getLong(SceneManageConstant.PT_DURATION), json.getString(SceneManageConstant.PT_DURATION_UNIT));
             wrapperOutput.setPressureTestTime(duration);
@@ -1184,7 +1190,10 @@ public class SceneManageServiceImpl implements SceneManageService {
         BigDecimal value = new BigDecimal(0);
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
-            value = assetExtApi.calcEstimateAmount(BeanUtil.copyProperties(wrapperVO, AssetBillExt.class, ""));
+            Response<BigDecimal> res = assetExtApi.calcEstimateAmount(BeanUtil.copyProperties(wrapperVO, AssetBillExt.class, ""));
+            if (null != res && res.isSuccess() && null != res.getData()) {
+                value = res.getData();
+            }
         }
         map.put(SceneManageConstant.ESTIMATE_FLOW, value);
         return JSON.toJSONString(map);

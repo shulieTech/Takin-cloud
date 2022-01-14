@@ -1,4 +1,4 @@
-package io.shulie.takin.ext.content.enums;
+package io.shulie.takin.cloud.ext.content.enums;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,12 +1,13 @@
 package io.shulie.takin.cloud.data.model.mysql;
 
-import java.time.LocalDateTime;
+import java.util.Date;
+
+import lombok.Data;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
+import com.baomidou.mybatisplus.annotation.TableField;
 
 /**
  * 引擎插件实体
@@ -40,13 +41,13 @@ public class EnginePluginEntity {
      * 创建时间
      */
     @TableField(value = "gmt_create")
-    private LocalDateTime gmtCreate;
+    private Date gmtCreate;
 
     /**
      * 修改时间
      */
     @TableField(value = "gmt_update")
-    private LocalDateTime gmtUpdate;
+    private Date gmtUpdate;
 
     /**
      * 状态  1 启用  0 禁用

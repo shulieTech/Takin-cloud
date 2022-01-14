@@ -29,7 +29,8 @@ public class EntrypointUrl {
      */
     public final static String MODULE_FILE = "file";
     public final static String METHOD_FILE_UPLOAD = "upload";
-    public final static String METHOD_FILE_DOWNLOAD = "downloadFileByPath";
+    public final static String METHOD_FILE_DOWNLOAD_BY_PATH = "downloadFileByPath";
+    public final static String METHOD_FILE_DOWNLOAD = "download";
     public final static String METHOD_FILE_CONTENT = "getFileContentByPaths";
     public final static String METHOD_FILE_DELETE = "deleteFile";
     public final static String METHOD_FILE_DELETE_TEMP = "";
@@ -99,6 +100,7 @@ public class EntrypointUrl {
     public final static String METHOD_REPORT_LIST_RUNNING = "running/list";
     public final static String METHOD_REPORT_LIST_PRESSURING = "pressuring/list";
     public final static String METHOD_REPORT_SCRIPT_NODE_TREE = "nodeTree";
+    public final static String METHOD_REPORT_GET_JTL_DOWNLOAD_URL= "getJtlDownLoadUrl";
 
     public final static String METHOD_REPORT_TREND = "queryReportTrend";
     public final static String METHOD_REPORT_TREND_TEMP = "queryTempReportTrend";

@@ -52,8 +52,16 @@ public class PressureOutput {
     private Double maxRt;
     @Column(name = "min_rt")
     private Double minRt;
+    /**
+     * 活跃线程数（通过计算所得）
+     */
     @Column(name = "active_threads")
     private Integer activeThreads;
+    /**
+     * 实际活跃线程数:对应metrics表中的activeThreads字段
+     */
+//    @Column(name = "real_active_threads")
+//    private Integer realActiveThreads;
     @Column(name = "avg_tps")
     private Double avgTps;
     @Column(name = "sa_percent")

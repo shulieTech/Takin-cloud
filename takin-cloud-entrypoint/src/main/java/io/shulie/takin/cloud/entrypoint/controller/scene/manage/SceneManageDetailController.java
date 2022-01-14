@@ -30,7 +30,9 @@ import io.shulie.takin.cloud.entrypoint.convert.SceneBusinessActivityRefRespConv
 import io.shulie.takin.cloud.entrypoint.convert.SceneManageRespConvertor;
 import io.shulie.takin.cloud.entrypoint.convert.SceneScriptRefRespConvertor;
 import io.shulie.takin.cloud.entrypoint.convert.SceneSlaRefRespConvertor;
+import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
+import io.shulie.takin.cloud.sdk.model.common.TimeBean;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivityDetailResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivityDetailResponse;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResponse;
@@ -299,6 +301,21 @@ public class SceneManageDetailController {
                 data.setApplicationIds("-1");
             }
         });
+        //旧版
+        if (StringUtils.isBlank(sceneManage.getScriptAnalysisResult())) {
+            Map<String, ThreadGroupConfigExt> map = sceneManage.getThreadGroupConfigMap();
+            if (null != map) {
+                ThreadGroupConfigExt tgConfig = map.get("all");
+                if (null != tgConfig) {
+                    response.setPressureMode(tgConfig.getMode());
+                    if (null != tgConfig.getRampUp()) {
+                        TimeBean time = new TimeBean(tgConfig.getRampUp().longValue(), tgConfig.getRampUpUnit());
+                        response.setIncreasingSecond(time.getSecondTime());
+                        response.setIncreasingTime(time);
+                    }
+                }
+            }
+        }
         return ResponseResult.success(response);
     }
 }

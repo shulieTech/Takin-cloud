@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.biz.service.report.impl;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Date;
 import java.util.List;
@@ -17,8 +18,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import io.shulie.takin.cloud.sdk.model.common.SlaBean;
-import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
 import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSON;
@@ -42,7 +41,6 @@ import org.apache.commons.collections4.MapUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
@@ -59,12 +57,12 @@ import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail
 
 import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.utils.json.JsonHelper;
+import io.shulie.takin.utils.linux.LinuxHelper;
 import io.shulie.takin.cloud.ext.api.AssetExtApi;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
-import io.shulie.takin.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
-import io.shulie.takin.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.cloud.sdk.model.common.SlaBean;
 import io.shulie.takin.cloud.common.utils.TestTimeUtil;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
@@ -76,23 +74,28 @@ import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.ext.content.asset.RealAssectBillExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.ext.content.response.Response;
+import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.biz.output.report.ReportOutput;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.sdk.model.common.DistributeBean;
+import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
 import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.biz.cloudserver.ReportConverter;
 import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
-import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
 import io.shulie.takin.cloud.sdk.model.request.WarnQueryParam;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.ext.content.asset.AssetInvoiceExt;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
+import io.shulie.takin.cloud.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.cloud.ext.content.asset.RealAssectBillExt;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
 import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
@@ -107,7 +110,8 @@ import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
+import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
@@ -118,7 +122,7 @@ import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivitySummaryBean;
 
 /**
  * @author 莫问
@@ -159,6 +163,10 @@ public class ReportServiceImpl implements ReportService {
      */
     @Value("${scene.pressure.forceCloseTime: 20}")
     private Integer forceCloseTime;
+    @Value("${pressure.engine.jtl.path:/nfs_dir/jtl}")
+    private String pressureEngineJtlPath;
+    @Value("${pressure.engine.log.path:/nfs_dir/logs}")
+    private String pressureEngineLogPath;
 
     public static final String COMPARE = "<=";
 
@@ -272,10 +280,8 @@ public class ReportServiceImpl implements ReportService {
                 summaryBean.setTotalRequest(bean.getTotalRequest());
                 summaryBean.setTps(bean.getTps());
                 result.add(summaryBean);
-                if (CollectionUtils.isNotEmpty(bean.getChildren())) {
-                    buildFailActivitiesByNodeDetails(bean.getChildren(), result);
-                }
-            } else if (CollectionUtils.isNotEmpty(bean.getChildren())) {
+            }
+            if (CollectionUtils.isNotEmpty(bean.getChildren())) {
                 buildFailActivitiesByNodeDetails(bean.getChildren(), result);
             }
         }
@@ -456,7 +462,6 @@ public class ReportServiceImpl implements ReportService {
             param.setFeatures(reportResult.getFeatures());
             param.setGmtUpdate(new Date());
             reportDao.updateReport(param);
-            //sceneTaskService.stop(sceneId);
         }
 
         // 查询压测引擎是否有异常
@@ -535,7 +540,6 @@ public class ReportServiceImpl implements ReportService {
      */
     @Override
     public NodeTreeSummaryResp getNodeSummaryList(Long reportId) {
-        //List<BusinessActivitySummaryBean> list = Lists.newArrayList();
         //查询业务活动的概况
         List<ReportBusinessActivityDetail> reportBusinessActivityDetailList = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportId);
@@ -561,7 +565,7 @@ public class ReportServiceImpl implements ReportService {
      */
     private List<ScriptNodeSummaryBean> getScriptNodeSummaryBeans(String nodeTree,
         List<ReportBusinessActivityDetail> details) {
-        Map<String, Map<String, Object>> resultMap = new HashMap<>();
+        Map<String, Map<String, Object>> resultMap = new HashMap<>(details.size());
         if (StringUtils.isNotBlank(nodeTree)) {
             details.stream().filter(Objects::nonNull)
                 .forEach(detail -> {
@@ -711,10 +715,10 @@ public class ReportServiceImpl implements ReportService {
 
         // 两个地方关闭压测引擎，版本不同，关闭方式不同
         //更新场景 压测引擎停止 ---> 待启动
-        SceneManageResult sceneManage = sceneManageDao.getSceneById(reportResult.getSceneId());
+        SceneManageEntity sceneManage = sceneManageDao.getSceneById(reportResult.getSceneId());
         //如果是强制停止 不需要更新
         log.info("finish scene {}, state :{}", reportResult.getSceneId(), Optional.ofNullable(sceneManage)
-            .map(SceneManageResult::getStatus)
+            .map(SceneManageEntity::getStatus)
             .map(SceneManageStatusEnum::getSceneManageStatusEnum)
             .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
         if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {
@@ -771,15 +775,11 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private Integer getMaxConcurrence(Long sceneId, Long reportId, Long customerId, String transaction) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(" max(active_threads) as maxConcurrenceNum");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, customerId));
-        influxDbSql.append(" where ");
-        influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
-        influxDbSql.append(" order by time desc limit 1");
-        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        String influxDbSql = "select max(active_threads) as maxConcurrenceNum from "
+            + InfluxUtil.getMeasurement(sceneId, reportId, customerId)
+            + " where transaction = '" + transaction + "'"
+            + " order by time desc limit 1";
+        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql, StatReportDTO.class);
         if (Objects.nonNull(statReportDTO)) {
             return statReportDTO.getMaxConcurrenceNum();
         }
@@ -820,9 +820,9 @@ public class ReportServiceImpl implements ReportService {
         if (reportResult == null) {
             return new ReportTrendResp();
         }
-        String testPlanXpathMD5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
-        String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
-            : testPlanXpathMD5;
+        String testPlanXpathMd5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
+        String transaction = StringUtils.isBlank(testPlanXpathMd5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
+            : testPlanXpathMd5;
         if (StringUtils.isNotBlank(reportTrendQuery.getXpathMd5())) {
             transaction = reportTrendQuery.getXpathMd5();
         }
@@ -957,8 +957,9 @@ public class ReportServiceImpl implements ReportService {
             if (errKey.equals(ReportConstants.SLA_ERROR_MSG) && map.containsKey(ReportConstants.SLA_ERROR_MSG)) {
                 return;
             }
-            if (errMsg.length() > 100){
-                errMsg = errMsg.substring(0,100);
+            errMsg = StringUtils.trim(errMsg);
+            if (!errMsg.startsWith("[") && !errMsg.startsWith("{") && errMsg.length() > 100) {
+                errMsg = errMsg.substring(0, 100);
             }
             String existsMsg = map.get(errKey);
             if (StringUtils.isBlank(existsMsg)) {
@@ -966,7 +967,6 @@ public class ReportServiceImpl implements ReportService {
             } else if (existsMsg.length() < 10000) {
                 map.put(errKey, existsMsg + "、" + errMsg);
             }
-            //map.compute(errKey, (k, v) -> StringUtils.isBlank(v) ? errMsg : (v + "、" + errMsg));
             reportResult.setFeatures(GsonUtil.gsonToString(map));
         }
     }
@@ -1087,9 +1087,9 @@ public class ReportServiceImpl implements ReportService {
         Boolean updateVersion = true;
         log.info("ReportId={}, tenantId={}, CompareResult={}", reportId, reportResult.getTenantId(), updateVersion);
 
-        String testPlanXpathMD5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
-        String transaction = StringUtils.isBlank(testPlanXpathMD5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
-            : testPlanXpathMD5;
+        String testPlanXpathMd5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
+        String transaction = StringUtils.isBlank(testPlanXpathMd5) ? ReportConstants.ALL_BUSINESS_ACTIVITY
+            : testPlanXpathMd5;
         //汇总所有业务活动数据
         StatReportDTO statReport = statReport(taskResult.getSceneId(), reportId, taskResult.getTenantId(), transaction);
         if (statReport == null) {
@@ -1135,13 +1135,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private Date getFinalDateTime(Long sceneId, Long reportId, Long customerId) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(
-            " max(create_time) as time");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, customerId));
-        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        String influxDbSql = "select max(create_time) as time from "
+            + InfluxUtil.getMeasurement(sceneId, reportId, customerId);
+        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql, StatReportDTO.class);
         Date date;
         if (Objects.nonNull(statReportDTO) && StringUtils.isNotBlank(statReportDTO.getTime())) {
             try {
@@ -1166,20 +1162,23 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private StatReportDTO statReport(Long sceneId, Long reportId, Long customerId, String transaction) {
-        StringBuilder influxDbSql = new StringBuilder();
-        influxDbSql.append("select");
-        influxDbSql.append(
-            " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps ,sum(sum_rt)/sum"
-                + "(count) as  "
-                + "avgRt, sum(sa_count) as saCount,  max(avg_tps) as maxTps, min(min_rt) as minRt, max(max_rt) as "
-                + "maxRt, count(avg_rt) as recordCount ,max(active_threads) as maxConcurrenceNum,round(mean"
-                + "(active_threads)) as avgConcurrenceNum");
-        influxDbSql.append(" from ");
-        influxDbSql.append(InfluxUtil.getMeasurement(sceneId, reportId, customerId));
-        influxDbSql.append(" where ");
-        influxDbSql.append(" transaction = ").append("'").append(transaction).append("'");
+        String influxDbSql = "select "
+            + "sum(count)                   as totalRequest,"
+            + "sum(fail_count)              as failRequest,"
+            + "mean(avg_tps)                as tps ,"
+            + "sum(sum_rt)/sum(count)       as avgRt,"
+            + "sum(sa_count)                as saCount,"
+            + "max(avg_tps)                 as maxTps,"
+            + "min(min_rt)                  as minRt,"
+            + "max(max_rt)                  as maxRt,"
+            + "count(avg_rt)                as recordCount,"
+            + "max(active_threads)          as maxConcurrenceNum,"
+            + "round(mean(active_threads))  as avgConcurrenceNum"
+            + " from "
+            + InfluxUtil.getMeasurement(sceneId, reportId, customerId)
+            + " where transaction = '" + transaction + "'";
 
-        return influxWriter.querySingle(influxDbSql.toString(), StatReportDTO.class);
+        return influxWriter.querySingle(influxDbSql, StatReportDTO.class);
     }
 
     /**
@@ -1258,7 +1257,7 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    private boolean isTargetBiggerThanZero(BigDecimal target){
+    private boolean isTargetBiggerThanZero(BigDecimal target) {
         if (Objects.nonNull(target)) {
             return target.compareTo(new BigDecimal(0)) > 0;
         }
@@ -1312,10 +1311,9 @@ public class ReportServiceImpl implements ReportService {
         // 这里 要判断下 压力节点 情况，并记录下来 压力节点 最后一位就是 压力节点 数量 开始时间 结束时间更新
         try {
             getRedisInfo(reportResult, taskResult);
-        }catch (Exception e){
-            log.error("保存报表结果异常，查询redis失败！场景ID:{},报告ID:{}",reportResult.getSceneId(),reportResult.getId());
+        } catch (Exception e) {
+            log.error("保存报表结果异常，查询redis失败！场景ID:{},报告ID:{}", reportResult.getSceneId(), reportResult.getId());
         }
-
 
         String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(),
             reportResult.getTenantId());
@@ -1368,8 +1366,10 @@ public class ReportServiceImpl implements ReportService {
             }
             bill.setAvgThreadNum(avgThreadNum);
             invoice.setData(bill);
-            BigDecimal paymentRes = assetExtApi.payment(invoice);
-            reportResult.setAmount(paymentRes);
+            Response<BigDecimal> paymentRes = assetExtApi.payment(invoice);
+            if (null != paymentRes && paymentRes.isSuccess()) {
+                reportResult.setAmount(paymentRes.getData());
+            }
         }
         //填充开始结束时间
         if (Objects.isNull(reportResult.getStartTime())) {
@@ -1410,7 +1410,7 @@ public class ReportServiceImpl implements ReportService {
 
     private Map<String, Object> fillReportMap(ReportBusinessActivityDetail detail) {
         if (Objects.nonNull(detail)) {
-            Map<String, Object> resultMap = new HashMap<>();
+            Map<String, Object> resultMap = new HashMap<>(13);
             resultMap.put("avgRt", new DataBean(detail.getRt(), detail.getTargetRt()));
             resultMap.put("sa", new DataBean(detail.getSa(), detail.getTargetSa()));
             resultMap.put("tps", new DataBean(detail.getTps(), detail.getTargetTps()));
@@ -1461,7 +1461,7 @@ public class ReportServiceImpl implements ReportService {
         if (Objects.isNull(detail)) {
             return null;
         }
-        Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>(6);
         if (Objects.nonNull(statReport)) {
             resultMap.put("avgRt", new DataBean(statReport.getAvgRt(), detail.getTargetRt()));
             resultMap.put("sa", new DataBean(statReport.getSa(), detail.getTargetSa()));
@@ -1506,15 +1506,33 @@ public class ReportServiceImpl implements ReportService {
             reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
                 .forEach(detail -> {
-                    Map<String, Object> tmpMap = new HashMap<>();
+                    Map<String, Object> tmpMap = new HashMap<>(1);
                     tmpMap.put("businessActivityId", detail.getBusinessActivityId());
-                    Map<String, Map<String, Object>> resultMap = new HashMap<>();
+                    Map<String, Map<String, Object>> resultMap = new HashMap<>(1);
                     resultMap.put(detail.getBindRef(), tmpMap);
                     JsonPathUtil.putNodesToJson(context, resultMap);
                 });
-            return JSONArray.parseArray(context.jsonString(), ScriptNodeTreeResp.class);
+            List<ScriptNodeTreeResp> result = JSONArray.parseArray(context.jsonString(), ScriptNodeTreeResp.class);
+            if (result.size() == 1) {
+                // 获取场景
+                SceneManageEntity scene = sceneManageDao.getSceneById(reportResult.getSceneId());
+                // 获取施压配置
+                PtConfigExt ptConfig = JSON.parseObject(scene.getPtConfig(), PtConfigExt.class);
+                // 遍历填充压力模式
+                result.get(0).getChildren().forEach(t -> {
+                    // 根据MD5获取线程组配置
+                    ThreadGroupConfigExt threadGroupConfig = ptConfig.getThreadGroupConfigMap().get(t.getXpathMd5());
+                    // 填充压力模式
+                    fullScriptNodeTreePressureType(t, threadGroupConfig == null ? null : threadGroupConfig.getType());
+                });
+            }
+            return result;
         } else {
-            return reportBusinessActivityDetails.stream()
+            ScriptNodeTreeResp all = new ScriptNodeTreeResp();
+            all.setTestName("全局趋势");
+            all.setName("all");
+            all.setXpathMd5("all");
+            List<ScriptNodeTreeResp> list = reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
                 .map(detail -> new ScriptNodeTreeResp() {{
                     setName(detail.getBindRef());
@@ -1523,6 +1541,46 @@ public class ReportServiceImpl implements ReportService {
                     //兼容老版本，将后续趋势查询条件设置为bindRef
                     setXpathMd5(detail.getBindRef());
                 }}).collect(Collectors.toList());
+            list.add(0, all);
+            return list;
         }
     }
+
+    /**
+     * 填充脚本节点树的压力模式
+     *
+     * @param scriptNodeTree 树节点
+     * @param target         压力模式
+     */
+    private void fullScriptNodeTreePressureType(ScriptNodeTreeResp scriptNodeTree, Integer target) {
+        scriptNodeTree.setPressureType(target);
+        if (scriptNodeTree.getChildren() != null) {
+            scriptNodeTree.getChildren().forEach(t -> fullScriptNodeTreePressureType(t, target));
+        }
+    }
+
+    @Override
+    public String getJtlDownLoadUrl(Long reportId, boolean needZip) {
+        ReportResult reportResult = reportDao.selectById(reportId);
+        if (reportResult == null) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_ZIP_ERROR, "未找到报告");
+        }
+        // 1.查看是否有jtl.zip /nfs_dir/jtl/127/1637/pressure.jtl
+        String jtlPath = pressureEngineJtlPath + "/" + reportResult.getSceneId() + "/" + reportId;
+        String logPath = pressureEngineLogPath + "/" + reportResult.getSceneId() + "/" + reportId;
+        if (new File(jtlPath + "/" + "Jmeter.zip").exists()) {
+            // 2.存在直接返回
+            return jtlPath + "/" + "Jmeter.zip";
+        } else if (needZip) {
+            // 开始压缩
+            Boolean result = LinuxHelper.executeLinuxCmd(
+                "sudo zip -r -j " + jtlPath + "/" + "Jmeter.zip " + jtlPath + " " + logPath);
+            if (result) {
+                // 返回成功
+                return jtlPath + "/" + "Jmeter.zip";
+            }
+            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_ZIP_ERROR, "查看" + jtlPath);
+        } else {return "";}
+    }
+
 }

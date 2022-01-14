@@ -1,8 +1,8 @@
-package io.shulie.takin.ext.content.asset;
+package io.shulie.takin.cloud.ext.content.asset;
 
 import java.math.BigDecimal;
 
-import io.shulie.takin.ext.content.AbstractEntry;
+import io.shulie.takin.cloud.ext.content.AbstractEntry;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

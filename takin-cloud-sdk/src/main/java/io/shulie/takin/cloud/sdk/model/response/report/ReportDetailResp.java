@@ -1,18 +1,20 @@
 package io.shulie.takin.cloud.sdk.model.response.report;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.math.BigDecimal;
 
-import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
-import io.shulie.takin.cloud.sdk.model.common.BusinessActivitySummaryBean;
-import io.shulie.takin.cloud.sdk.model.common.SlaBean;
-import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
-import io.shulie.takin.cloud.sdk.model.common.WarnBean;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import io.swagger.annotations.ApiModelProperty;
+
+import io.shulie.takin.cloud.sdk.model.common.SlaBean;
+import io.shulie.takin.cloud.sdk.model.common.WarnBean;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
+import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivitySummaryBean;
 
 /**
  * @author 无涯
@@ -99,6 +101,9 @@ public class ReportDetailResp extends ContextExt {
 
     @ApiModelProperty(value = "节点链路详情")
     private List<ScriptNodeSummaryBean> nodeDetail;
+
+    @ApiModelProperty(value = "是否存在JTL文件")
+    private boolean hasJtl;
 
     private Long scriptId;
 }

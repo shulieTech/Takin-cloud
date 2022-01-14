@@ -2,8 +2,9 @@ package io.shulie.takin.cloud.sdk.model.common;
 
 import java.math.BigDecimal;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author qianshui

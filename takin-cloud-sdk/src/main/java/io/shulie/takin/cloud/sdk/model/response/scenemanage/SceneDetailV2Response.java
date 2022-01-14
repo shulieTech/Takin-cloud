@@ -10,8 +10,8 @@ import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest.Content
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest.DataValidation;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest.Goal;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest.MonitoringGoal;
-import io.shulie.takin.ext.content.enginecall.PtConfigExt;
-import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

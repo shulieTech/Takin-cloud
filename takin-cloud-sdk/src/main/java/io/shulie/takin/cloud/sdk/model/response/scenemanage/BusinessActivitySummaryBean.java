@@ -1,10 +1,14 @@
-package io.shulie.takin.cloud.sdk.model.common;
+package io.shulie.takin.cloud.sdk.model.response.scenemanage;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.math.BigDecimal;
+
+import lombok.Data;
 
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
+
+import io.shulie.takin.cloud.sdk.model.common.DataBean;
+import io.shulie.takin.cloud.sdk.model.common.DistributeBean;
 
 /**
  * @author 莫问
@@ -38,7 +42,7 @@ public class BusinessActivitySummaryBean {
     private DataBean avgRT;
 
     @ApiModelProperty(value = "请求成功率")
-    private DataBean sucessRate;
+    private DataBean successRate;
 
     @ApiModelProperty(value = "SA")
     private DataBean sa;

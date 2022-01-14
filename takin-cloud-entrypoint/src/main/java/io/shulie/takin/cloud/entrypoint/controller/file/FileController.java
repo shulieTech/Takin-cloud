@@ -116,7 +116,7 @@ public class FileController {
     @DeleteMapping(EntrypointUrl.METHOD_FILE_DELETE_TEMP)
     @ApiOperation(value = "临时文件删除")
     public ResponseResult<?> delete(@RequestBody FileDeleteVO vo) {
-        String tempPath = scriptPath;
+        //String tempPath = scriptPath;
         if (vo.getUploadId() != null) {
             String targetDir = tempPath + SceneManageConstant.FILE_SPLIT + vo.getUploadId();
             LinuxUtil.executeLinuxCmd("rm -rf " + targetDir);
@@ -126,7 +126,7 @@ public class FileController {
     }
 
     @ApiOperation("脚本文件下载")
-    @GetMapping(value = "/download", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = EntrypointUrl.METHOD_FILE_DOWNLOAD, produces = MediaType.APPLICATION_JSON_VALUE)
     public void downloadFile(@RequestParam("fileName") String fileName, HttpServletResponse response) {
         try {
             String filePath = scriptPath + SceneManageConstant.FILE_SPLIT + fileName;
@@ -146,7 +146,7 @@ public class FileController {
     }
 
     @ApiOperation("文件下载")
-    @GetMapping(value = EntrypointUrl.METHOD_FILE_DOWNLOAD)
+    @GetMapping(value = EntrypointUrl.METHOD_FILE_DOWNLOAD_BY_PATH)
     public void downloadFileByPath(@RequestParam("filePath") String filePath, HttpServletResponse response) {
         try {
             //反编码

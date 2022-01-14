@@ -1,13 +1,14 @@
-package io.shulie.takin.ext.helper;
+package io.shulie.takin.cloud.ext.helper;
 
 import java.io.File;
 import java.util.Objects;
 
+import io.shulie.takin.cloud.ext.content.enginecall.EnginePressureConfig;
+import io.shulie.takin.cloud.ext.content.enginecall.EngineRunConfig;
+import io.shulie.takin.plugin.framework.extension.spring.utils.CommonUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.collections.CollectionUtils;
 
-import io.shulie.takin.ext.content.enginecall.EngineRunConfig;
-import io.shulie.takin.ext.content.enginecall.EnginePressureConfig;
 import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
@@ -87,8 +88,8 @@ public class DataConvertHelper {
         pressureConfig.setTpsTargetLevel(startRequest.getTps());
 
         if (null != strategyConfig) {
-            pressureConfig.setTpsThreadMode(strategyConfig.getTpsThreadMode());
-            pressureConfig.setTpsTargetLevelFactor(strategyConfig.getTpsTargetLevelFactor());
+            pressureConfig.setTpsThreadMode(CommonHelper.getValue(0, strategyConfig, StrategyConfigExt::getTpsThreadMode));
+            pressureConfig.setTpsTargetLevelFactor(CommonHelper.getValue(0.1d, strategyConfig, StrategyConfigExt::getTpsTargetLevelFactor));
             pressureConfig.setMaxThreadNum(strategyConfig.getTpsRealThreadNum());
         }
         config.setPressureConfig(pressureConfig);
