@@ -35,6 +35,7 @@ import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
 import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
 import io.shulie.takin.utils.json.JsonHelper;
+import io.shulie.takin.utils.string.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -130,8 +131,8 @@ public class CollectorService extends AbstractIndicators {
                 long timeWindow = CollectorUtil.getTimeWindow(metric.getTimestamp()).getTimeInMillis();
                 if (validate(timeWindow, sceneId, reportId, tenantId, metrics)) {
                     // 写入redis
-                    log.info("{}-{}-{} write redis , timestamp-{},timeWindow-{}", sceneId, reportId, tenantId,
-                        metric.getTimestamp(), timeWindow);
+                    log.info(StringUtil.format("%s-%s-%s write redis , timestamp-%s,timeWindow-%s", sceneId, reportId, tenantId,
+                            metric.getTimestamp(), timeWindow));
                     String source = metric.getTransaction();
                     String transaction = source;
                     String testName = source;
@@ -194,7 +195,7 @@ public class CollectorService extends AbstractIndicators {
                     // 超时自动检修，强行触发关闭
                     if (!redisClientUtils.hasKey(forceCloseTime(taskKey))) {
                         // 获取压测时长
-                        log.info("本次压测{}-{}-{}:记录超时自动检修时间-{}", sceneId, reportId, tenantId, metric.getTimestamp());
+                        log.info(StringUtil.format("本次压测%s-%s-%s:记录超时自动检修时间-%s", sceneId, reportId, tenantId, metric.getTimestamp()));
                         SceneManageWrapperOutput wrapperDTO = sceneManageService.getSceneManage(sceneId, new SceneManageQueryOpitons());
                         setForceCloseTime(forceCloseTime(taskKey), metric.getTimestamp(), wrapperDTO.getPressureTestSecond());
                     }
@@ -215,8 +216,8 @@ public class CollectorService extends AbstractIndicators {
                     }
                     //如果从cloud上传请求流量明细，则需要启动异步线程去读取ptl文件上传
                     if (PressureLogUploadConstants.UPLOAD_BY_CLOUD.equals(appConfig.getEngineLogUploadModel())){
-                        log.info("开始异步上传ptl日志，场景ID：{},报告ID:{},PodNum:{}", sceneId, reportId,
-                                safeHttpHeader(metric.getPodNo()));
+                        log.info(StringUtil.format("开始异步上传ptl日志，场景ID：%s,报告ID:%s,PodNum:%s", sceneId, reportId,
+                                metric.getPodNo()));
                         EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
                         String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_PTL_FILE_NAME_SYSTEM_PROP_KEY);
                         THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, tenantId, logUploadDAO, redisClientUtils,
@@ -257,32 +258,6 @@ public class CollectorService extends AbstractIndicators {
     }
 
 
-    private String safeHttpHeader(String value) {
-        String result = "";
-        if (value != null) {
-            char[] chars = value.toCharArray();
-            StringBuilder buffer = new StringBuilder(chars.length);
-            for (int i = 0; i < chars.length; i++) {
-                switch (chars[i]) {
-                    case '\r':
-                        buffer.append('%');
-                        buffer.append('0');
-                        buffer.append('D');
-                        break;
-                    case '\n':
-                        buffer.append('%');
-                        buffer.append('0');
-                        buffer.append('A');
-                        break;
-                    default:
-                        buffer.append(chars[i]);
-                        break;
-                }
-            }
-            result = buffer.toString();
-        }
-        return result;
-    }
     private void cacheTryRunTaskStatus(Long sceneId, Long reportId, Long customerId, SceneRunTaskStatusEnum status) {
         taskStatusCache.cacheStatus(sceneId, reportId, status);
         Report report = tReportMapper.selectByPrimaryKey(reportId);
@@ -294,12 +269,12 @@ public class CollectorService extends AbstractIndicators {
     }
 
     private void notifyStart(Long sceneId, Long reportId, long startTime){
-        log.info("场景[{}]压测任务开始，更新报告[{}]开始时间[{}]", sceneId, reportId, startTime);
+        log.info(StringUtil.format("场景[%s]压测任务开始，更新报告[%s]开始时间[%s]", sceneId, reportId, startTime));
         reportDao.updateReportStartTime(reportId,new Date(startTime));
     }
 
     private void notifyEnd(Long sceneId, Long reportId, long endTime) {
-        log.info("场景[{}]压测任务已完成,更新结束时间{}", sceneId, reportId);
+        log.info(StringUtil.format("场景[%s]压测任务已完成,更新结束时间%s", sceneId, reportId));
         reportDao.updateReportEndTime(reportId, new Date(endTime));
     }
 
@@ -341,9 +316,8 @@ public class CollectorService extends AbstractIndicators {
      */
     private boolean validate(long time, Long sceneId, Long reportId, Long tenantId, List<ResponseMetrics> metrics) {
         if ((System.currentTimeMillis() - time) > CollectorConstants.OVERDUE_TIME) {
-            log.info("{}-{}-{}数据丢失,超时时间{}，数据原文：{}", sceneId, reportId, tenantId,
-                System.currentTimeMillis() - time, JsonHelper.bean2Json(metrics) == null ? "null" :
-                            JsonHelper.bean2Json(metrics).replaceAll("\n","_").replaceAll("\r","_"));
+            log.info(StringUtil.format("%s-%s-%s数据丢失,超时时间%s，数据原文：%s", sceneId, reportId, tenantId,
+                    System.currentTimeMillis() - time, JsonHelper.bean2Json(metrics)));
             return false;
         }
         return true;

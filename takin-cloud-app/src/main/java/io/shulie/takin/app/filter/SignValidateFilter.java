@@ -22,7 +22,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class RequestSecurityFilter implements Filter {
+public class SignValidateFilter implements Filter {
 
     @Value("${security.request.timeout: 180000}")
     private long timeout = 1000 * 60 * 3L;
