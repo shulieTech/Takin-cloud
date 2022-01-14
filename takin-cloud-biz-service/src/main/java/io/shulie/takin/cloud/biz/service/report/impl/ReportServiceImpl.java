@@ -1376,8 +1376,8 @@ public class ReportServiceImpl implements ReportService {
             reportResult.setStartTime(reportResult.getGmtCreate());
         }
         if (Objects.isNull(reportResult.getEndTime())) {
-            Date finalDateTime = getFinalDateTime(taskResult.getSceneId(), reportResult.getId(),
-                taskResult.getTenantId());
+            Date finalDateTime = getFinalDateTime(reportResult.getSceneId(), reportResult.getId(),
+                    reportResult.getTenantId());
             if (Objects.isNull(finalDateTime) || finalDateTime.getTime() < reportResult.getStartTime().getTime()) {
                 finalDateTime = new Date();
             }

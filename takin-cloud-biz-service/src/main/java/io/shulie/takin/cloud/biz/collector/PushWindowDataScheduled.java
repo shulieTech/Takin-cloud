@@ -961,7 +961,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             log.info("---> 本次压测{}-{}-{}完成，已发送finished事件！<------", sceneId, reportId, customerId);
         }
         // 超时自动检修，强行触发关闭
-        forceClose(nowTimeWindow, sceneId, reportId, customerId);
+        forceClose(nowTimeWindow, sceneId, reportId, customerId, endTime);
     }
 
     /**
@@ -989,12 +989,6 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 }
                 try {
                     List<ScriptNode> nodes = JsonUtil.parseArray(r.getScriptNodeTree(), ScriptNode.class);
-                    SceneManageWrapperOutput scene = sceneManageService.getSceneManage(sceneId, null);
-                    if (null == scene) {
-                        log.info("no such scene manager!sceneId=" + sceneId);
-                        forceClose(CollectorUtil.getNowTimeWindow(), sceneId, reportId, customerId);
-                        return;
-                    }
                     //结束时间取开始压测时间+总测试时间+3分钟， 3分钟富裕时间，给与pod启动和压测引擎启动延时时间
                     long endTime = TimeUnit.MINUTES.toMillis(3L);
                     if (null != r.getStartTime()) {
@@ -1002,6 +996,13 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                     } else if (null != r.getGmtCreate()) {
                         endTime += r.getGmtCreate().getTime();
                     }
+                    SceneManageWrapperOutput scene = sceneManageService.getSceneManage(sceneId, null);
+                    if (null == scene) {
+                        log.info("no such scene manager!sceneId=" + sceneId);
+                        forceClose(CollectorUtil.getNowTimeWindow(), sceneId, reportId, customerId, endTime);
+                        return;
+                    }
+
                     if (null != scene.getTotalTestTime()) {
                         endTime += TimeUnit.SECONDS.toMillis(scene.getTotalTestTime());
                     } else if (null != scene.getPressureTestSecond()) {
@@ -1212,12 +1213,12 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     /**
      * 超时自动检修，强行触发关闭
      *
-     * @param taskKey    任务key
+     * @param endTime    预计结束时间
      * @param timeWindow 数据窗口
      */
-    private void forceClose(Long timeWindow, Long sceneId, Long reportId, Long tenantId) {
+    private void forceClose(Long timeWindow, Long sceneId, Long reportId, Long tenantId, Long endTime) {
         String taskKey = getPressureTaskKey(sceneId, reportId, tenantId);
-        Long forceTime = (Long)Optional.ofNullable(redisTemplate.opsForValue().get(forceCloseTime(taskKey))).orElse(0L);
+        Long forceTime = (Long)Optional.ofNullable(redisTemplate.opsForValue().get(forceCloseTime(taskKey))).orElse(endTime);
         if (forceTime > 0 && timeWindow >= forceTime) {
             log.info("本次压测{}-{}-{}:触发超时自动检修，强行触发关闭，超时延迟时间-{}，触发时间-{}",
                 sceneId, reportId, tenantId, forceTime, timeWindow);
