@@ -1516,6 +1516,10 @@ public class ReportServiceImpl implements ReportService {
             if (result.size() == 1) {
                 // 获取场景
                 SceneManageEntity scene = sceneManageDao.getSceneById(reportResult.getSceneId());
+                // 校验场景是否存在
+                if (scene == null) {
+                    throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "压测不存在:" + reportResult.getSceneId());
+                }
                 // 获取施压配置
                 PtConfigExt ptConfig = JSON.parseObject(scene.getPtConfig(), PtConfigExt.class);
                 // 遍历填充压力模式
