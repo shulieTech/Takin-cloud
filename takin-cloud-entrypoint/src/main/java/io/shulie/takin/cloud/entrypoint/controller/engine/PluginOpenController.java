@@ -53,17 +53,16 @@ public class PluginOpenController {
         List<String> pluginTypes = request.getPluginTypes();
         if (pluginTypes == null) {pluginTypes = new ArrayList<>(0);}
         //插件类型小写存储
-        pluginTypes.forEach(t -> t = t.toLowerCase());
+        pluginTypes = pluginTypes.stream().map(String::toLowerCase).collect(Collectors.toList());
         Map<String, List<EnginePluginEntity>> dbResult = enginePluginService.findEngineAvailablePluginsByType(pluginTypes);
         Map<String, List<EnginePluginSimpleInfoResp>> result = new HashMap<>(dbResult.size());
-        dbResult.forEach((k, v) -> {
+        dbResult.forEach((k, v) ->
             result.put(k, v.stream().map(c -> new EnginePluginSimpleInfoResp() {{
                 setPluginId(c.getId());
                 setPluginName(c.getPluginName());
                 setPluginType(c.getPluginType());
                 setGmtUpdate(DateUtil.formatDateTime(c.getGmtUpdate()));
-            }}).collect(Collectors.toList()));
-        });
+            }}).collect(Collectors.toList())));
         // 查询数据
         return ResponseResult.success(result);
     }
