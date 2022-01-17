@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 
 import java.util.stream.Collectors;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.google.common.collect.Lists;
 import org.springframework.beans.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +22,7 @@ import io.shulie.takin.cloud.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
@@ -83,13 +85,14 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public ReportResult selectById(Long id) {
-        ReportEntity entity = reportMapper.selectById(id);
-        if (entity == null) {
-            return null;
-        }
-        ReportResult reportResult = new ReportResult();
-        BeanUtils.copyProperties(entity, reportResult);
-        return reportResult;
+        List<ReportEntity> entityList = reportMapper.selectList(
+            Wrappers.lambdaQuery(ReportEntity.class)
+                .eq(ReportEntity::getId, id)
+                .eq(ReportEntity::getEnvCode, CloudPluginUtils.getEnvCode())
+                .eq(ReportEntity::getTenantId, CloudPluginUtils.getTenantId())
+        );
+        if (entityList.size() != 1) {return null;}
+        return BeanUtil.copyProperties(entityList.get(0), ReportResult.class);
     }
 
     /**
