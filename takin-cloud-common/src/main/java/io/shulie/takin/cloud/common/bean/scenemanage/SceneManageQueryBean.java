@@ -36,4 +36,6 @@ public class SceneManageQueryBean extends CloudUserCommonRequestExt implements S
     private String lastPtStartTime;
 
     private String lastPtEndTime;
+
+    private List<Integer> statusList;
 }

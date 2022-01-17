@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.data.dao.report;
 import java.util.Date;
 import java.util.List;
 
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.param.report.ReportInsertParam;
 import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
@@ -104,4 +105,13 @@ public interface ReportDao {
      * @return
      */
     List<ReportBusinessActivityDetailEntity> getReportBusinessActivityDetailsByReportId(Long reportId, NodeTypeEnum nodeType);
+
+    /**
+     * 根据场景ID查询正在运行的压测报告
+     * @param sceneIds 场景ID
+     * @return
+     */
+    List<ReportEntity> queryReportBySceneIds(List<Long> sceneIds);
+
+    List<ReportBusinessActivityDetailEntity> getActivityByReportIds(List<Long> reportIds);
 }

@@ -77,4 +77,11 @@ public interface SceneManageDAO extends IService<SceneManageEntity> {
      */
     SceneManageEntity queueSceneById(Long sceneId);
 
+    /**
+     * 根据条件查询
+     * @param param
+     * @return
+     */
+    List<SceneManageEntity> queryScene(SceneManageQueryBean param);
+
 }

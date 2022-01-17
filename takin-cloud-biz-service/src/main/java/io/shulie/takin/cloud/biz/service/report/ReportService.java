@@ -18,6 +18,7 @@ import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.open.resp.report.NodeTreeSummaryResp;
+import io.shulie.takin.cloud.open.resp.report.ReportActivityResp;
 import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
 import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
 
@@ -223,4 +224,6 @@ public interface ReportService {
      * @return 树结构json字符串
      */
     List<ScriptNodeTreeResp> getNodeTree(ScriptNodeTreeQueryReq req);
+
+    List<ReportActivityResp> getNodeDetailBySceneIds(List<Long> sceneId);
 }

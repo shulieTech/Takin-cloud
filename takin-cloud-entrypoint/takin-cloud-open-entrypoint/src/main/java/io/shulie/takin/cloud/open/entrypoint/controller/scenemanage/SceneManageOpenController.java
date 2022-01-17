@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -305,6 +306,19 @@ public class SceneManageOpenController {
         ScriptVerityRespExt scriptVerityRespExt = sceneManageService.checkAndUpdate(req.getRequest(), req.getUploadPath(),
             req.isAbsolutePath(), req.isUpdate());
         return ResponseResult.success(SceneTaskOpenConverter.INSTANCE.ofScriptVerityRespExt(scriptVerityRespExt));
+    }
+
+    @GetMapping("/getByStatus")
+    @ApiOperation(value = "根据是否运行状态查询场景")
+    public ResponseResult<List<SceneManageListResp>> querySceneByStatus(Integer status){
+        List<SceneManageListOutput> sceneManageListOutputs = sceneManageService.getSceneByStatus(status);
+        List<SceneManageListResp> list = sceneManageListOutputs.stream()
+            .map(output -> {
+                SceneManageListResp resp = new SceneManageListResp();
+                BeanUtils.copyProperties(output, resp);
+                return resp;
+            }).collect(Collectors.toList());
+        return ResponseResult.success(list);
     }
 
     private void wrapperSceneManage(SceneManageWrapperOutput sceneManage) {

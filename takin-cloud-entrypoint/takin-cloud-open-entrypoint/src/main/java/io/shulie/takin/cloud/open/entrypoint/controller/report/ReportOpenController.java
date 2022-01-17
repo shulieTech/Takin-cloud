@@ -10,11 +10,13 @@ import io.shulie.takin.cloud.common.constants.APIUrls;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.open.req.report.ReportDetailByIdReq;
+import io.shulie.takin.cloud.open.req.report.ReportDetailByIdsReq;
 import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.open.req.report.UpdateReportConclusionReq;
 import io.shulie.takin.cloud.open.req.report.WarnCreateReq;
 import io.shulie.takin.cloud.open.resp.report.NodeTreeSummaryResp;
+import io.shulie.takin.cloud.open.resp.report.ReportActivityResp;
 import io.shulie.takin.cloud.open.resp.report.ReportDetailResp;
 import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
 import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
@@ -161,6 +163,12 @@ public class ReportOpenController {
     @ApiOperation("压测明细")
     public ResponseResult<NodeTreeSummaryResp> queryActivitiesSummaryList(ReportDetailByIdReq req) {
         return ResponseResult.success(reportService.getNodeSummaryList(req.getReportId()));
+    }
+
+    @GetMapping("report/activities")
+    @ApiOperation("根据场景ID查询正在压测报告的业务活动信息")
+    public ResponseResult<List<ReportActivityResp>> queryReportActivity(ReportDetailByIdsReq req){
+        return ResponseResult.success(reportService.getNodeDetailBySceneIds(req.getSceneIds()));
     }
 
 }

@@ -26,11 +26,16 @@ import com.jayway.jsonpath.JsonPath;
 import io.shulie.takin.cloud.common.bean.scenemanage.BusinessActivitySummaryBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
+import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
+import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.open.req.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.open.req.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.open.resp.report.NodeTreeSummaryResp;
+import io.shulie.takin.cloud.open.resp.report.ReportActivityResp;
+import io.shulie.takin.cloud.open.resp.report.ReportActivityResp.BusinessActivity;
 import io.shulie.takin.cloud.open.resp.report.ReportTrendResp;
 import io.shulie.takin.cloud.open.resp.report.ScriptNodeTreeResp;
 import io.shulie.takin.ext.content.asset.RealAssectBillExt;
@@ -1522,5 +1527,41 @@ public class ReportServiceImpl implements ReportService {
                     setXpathMd5(detail.getBindRef());
                 }}).collect(Collectors.toList());
         }
+    }
+
+    @Override
+    public List<ReportActivityResp> getNodeDetailBySceneIds(List<Long> sceneIds) {
+        if (CollectionUtils.isEmpty(sceneIds)){
+            return null;
+        }
+        List<ReportEntity> reportEntities = reportDao.queryReportBySceneIds(sceneIds);
+        if (CollectionUtils.isNotEmpty(reportEntities)){
+            List<Long> reportIds = CommonUtil.getList(reportEntities,ReportEntity::getId);
+            List<ReportBusinessActivityDetailEntity> activities = reportDao.getActivityByReportIds(reportIds);
+            if (CollectionUtils.isNotEmpty(activities)){
+                Map<Long, List<ReportBusinessActivityDetailEntity>> activityMap = activities.stream().filter(
+                    Objects::nonNull)
+                    .collect(Collectors.groupingBy(ReportBusinessActivityDetailEntity::getReportId));
+                return reportEntities.stream().filter(Objects::nonNull)
+                    .map(entity ->{
+                        ReportActivityResp resp = new ReportActivityResp();
+                        resp.setSceneId(entity.getSceneId());
+                        resp.setReportId(entity.getId());
+                        List<ReportBusinessActivityDetailEntity> details = activityMap.get(entity.getId());
+                        if (CollectionUtils.isNotEmpty(details)){
+                            List<BusinessActivity> activityList = details.stream().filter(Objects::nonNull)
+                                .map(detail -> {
+                                    BusinessActivity activity = new BusinessActivity();
+                                    activity.setActivityName(detail.getBusinessActivityName());
+                                    activity.setBindRef(detail.getBindRef());
+                                    return activity;
+                                }).collect(Collectors.toList());
+                            resp.setBusinessActivityList(activityList);
+                        }
+                        return resp;
+                    }).collect(Collectors.toList());
+            }
+        }
+        return null;
     }
 }

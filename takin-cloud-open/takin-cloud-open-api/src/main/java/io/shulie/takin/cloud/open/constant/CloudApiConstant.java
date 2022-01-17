@@ -42,6 +42,8 @@ public class CloudApiConstant {
 
     public static final String SCENE_MANAGE_BY_SCENE_IDS = "/open-api/scenemanage/query/ids" ;
 
+    public static final String SCENE_MANAGE_BY_STATUS = "/open-api/scenemanage/getByStatus";
+
 
     public static final String SCENE_START_TRIAL_RUN_URL = "/open-api/scene/task/startTrialRun";
     public static final String SCENE_SCRIPT_FILE_ANALYZE_URL = "/open-api/scene/scriptAnalyze";
@@ -73,6 +75,7 @@ public class CloudApiConstant {
     public static final String REPORT_TREND = "/open-api/report/reportTrend";
     public static final String REPORT_SUMMARY_LIST = "/open-api/report/summary/list";
     public static final String INSPECT_REPORT_DETAIL_GET_URL = "/open-api/report/inspect";
+    public static final String REPORT_ACTIVITIES = "/open-api/report/activities";
 
     /**
      * 统计相关接口

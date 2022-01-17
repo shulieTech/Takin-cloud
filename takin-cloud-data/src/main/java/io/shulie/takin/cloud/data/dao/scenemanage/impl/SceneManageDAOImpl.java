@@ -1,11 +1,13 @@
 package io.shulie.takin.cloud.data.dao.scenemanage.impl;
 
 import java.util.List;
+import java.util.Objects;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.data.converter.senemange.SceneManageEntityConverter;
 import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
 import io.shulie.takin.cloud.data.mapper.mysql.SceneManageMapper;
@@ -14,6 +16,7 @@ import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdatePar
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.data.util.MPUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
@@ -84,6 +87,32 @@ public class SceneManageDAOImpl
             wrapper.eq(SceneManageEntity::getId, sceneId);
         }
         return this.getBaseMapper().selectOne(wrapper);
+    }
+
+    @Override
+    public List<SceneManageEntity> queryScene(SceneManageQueryBean param) {
+        if (Objects.isNull(param)){
+            log.error("查询压测场景参数未空！");
+            return null;
+        }
+        LambdaQueryWrapper<SceneManageEntity> wrapper = new LambdaQueryWrapper<>();
+        if (Objects.nonNull(param.getSceneId())){
+            wrapper.eq(SceneManageEntity::getId,param.getSceneId());
+        }else if (CollectionUtils.isNotEmpty(param.getSceneIds())){
+            wrapper.in(SceneManageEntity::getId,param.getSceneIds());
+        }
+        if (Objects.nonNull(param.getSceneName())){
+            wrapper.eq(SceneManageEntity::getSceneName,param.getSceneName());
+        }
+        if (Objects.nonNull(param.getStatus())){
+            wrapper.eq(SceneManageEntity::getStatus,param.getStatus());
+        }else if (CollectionUtils.isNotEmpty(param.getStatusList())){
+            wrapper.in(SceneManageEntity::getStatus,param.getStatusList());
+        }
+        wrapper.eq(SceneManageEntity::getType, PressureSceneEnum.DEFAULT.getCode());
+        wrapper.eq(SceneManageEntity::getIsDeleted,0);
+        wrapper.orderByDesc(SceneManageEntity::getLastPtTime);
+        return this.baseMapper.selectList(wrapper);
     }
 
 }

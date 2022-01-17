@@ -109,4 +109,6 @@ public interface CloudSceneApi {
      */
     ResponseResult<List<ScriptNode>> scriptAnalyze(ScriptAnalyzeRequest request);
 
+    ResponseResult<List<SceneManageListResp>> querySceneByStatus(SceneManageQueryReq req);
+
 }

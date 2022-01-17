@@ -94,4 +94,6 @@ public interface SceneManageService {
     void saveUnUploadLogInfo();
 
     ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update);
+
+    List<SceneManageListOutput> getSceneByStatus(Integer status);
 }

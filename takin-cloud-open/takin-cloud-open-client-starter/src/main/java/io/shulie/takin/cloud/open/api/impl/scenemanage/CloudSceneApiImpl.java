@@ -180,4 +180,14 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
         return ResponseResult.fail(res.getHttpStatus().toString(), res.getErrorMsg(), "查看cloud日志");
     }
 
+    @Override
+    public ResponseResult<List<SceneManageListResp>> querySceneByStatus(SceneManageQueryReq request) {
+        String url = troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_BY_STATUS;
+        TakinResponseEntity<ResponseResult<List<SceneManageListResp>>> res =
+            HttpHelper.doPost(url, getHeaders(request), new TypeReference<ResponseResult<List<SceneManageListResp>>>() {}, request);
+        if (res.getSuccess()) {
+            return res.getBody();
+        }
+        return ResponseResult.fail(res.getHttpStatus().toString(), res.getErrorMsg(), "查看cloud日志");
+    }
 }
