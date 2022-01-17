@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONArray;
@@ -880,6 +881,24 @@ public class JmxUtil {
                     }
                 } else {
                     scriptNode.setChildren(null);
+                }
+            }
+        }
+        return result;
+    }
+
+    public static List<ScriptNode> getChildNodesByFilterFunc(ScriptNode node, Function<ScriptNode, Boolean> filterFunc) {
+        if (null == node || CollectionUtils.isEmpty(node.getChildren())) {
+            return null;
+        }
+        List<ScriptNode> result = Lists.newArrayList();
+        for (ScriptNode childNode : node.getChildren()) {
+            result.add(childNode);
+            if (filterFunc.apply(childNode)) {
+                result.add(childNode);
+                List<ScriptNode> subNodes = getChildNodesByFilterFunc(childNode, filterFunc);
+                if (CollectionUtils.isNotEmpty(subNodes)) {
+                    result.addAll(subNodes);
                 }
             }
         }

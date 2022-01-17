@@ -581,14 +581,15 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     /**
      * 统计各个节点的数据
      * @param node 节点
-     * @param sourceMap 现有的数据
+     * @param sourceMap 现有的数据和节点映射（jmeter上报的原生数据统计）
      * @param results   数据结果集合
      * @return          返回当前节点的统计结果
      */
     private PressureOutput countPressure(ScriptNode node, Map<String, PressureOutput> sourceMap, List<PressureOutput> results) {
-        if (null == node || StringUtils.isBlank(node.getXpathMd5())) {
+        if (null == node || StringUtils.isBlank(node.getXpathMd5()) || null == sourceMap) {
             return null;
         }
+        //sourceMap中的key都是jmeter上报的
         PressureOutput result = sourceMap.get(node.getXpathMd5());
         if (null != result) {
             return result;
@@ -599,7 +600,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         List<PressureOutput> childPressures = node.getChildren().stream().filter(Objects::nonNull)
                 .map(n -> countPressure(n, sourceMap, results))
                 .collect(Collectors.toList());
-        result = countPressure(node, childPressures);
+        result = countPressure(node, childPressures, sourceMap);
         if (null != result) {
             results.add(result);
         }
@@ -609,10 +610,10 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     /**
      * 根据子节点统计结果来统计当前节点的数据
      * @param node              当前节点
-     * @param childPressures    子节点统计数据结果
+     * @param childPressures    子节点统计数据结果(1级子节点)
      * @return                  返回当前节点统计结果
      */
-    private PressureOutput countPressure(ScriptNode node, List<PressureOutput> childPressures) {
+    private PressureOutput countPressure(ScriptNode node, List<PressureOutput> childPressures, Map<String, PressureOutput> sourceMap) {
         if (CollectionUtils.isEmpty(childPressures)) {
             return null;
         }
@@ -623,110 +624,51 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         if (0 == time) {
             return null;
         }
-        int count = childPressures.stream().filter(Objects::nonNull)
-                .map(PressureOutput::getCount)
-                .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-                .sum();
-        int failCount = childPressures.stream().filter(Objects::nonNull)
-                .map(PressureOutput::getFailCount)
-                .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-                .sum();
-        int saCount = childPressures.stream().filter(Objects::nonNull)
-                .map(PressureOutput::getSaCount)
-                .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-                .sum();
+        //多级子节点,满足过滤条件的多级子节点:如果节点含有事务控制器，则节点的count=事务控制器的count+所有事务控制器子节点的count
+        List<ScriptNode> childNodes = JmxUtil.getChildNodesByFilterFunc(node, n -> sourceMap.containsKey(n.getXpathMd5()));
+        List<PressureOutput> subPressures = childPressures;
+        if (CollectionUtils.isNotEmpty(childNodes)) {
+            subPressures = childNodes.stream().filter(Objects::nonNull)
+                    .map(ScriptNode::getXpathMd5)
+                    .filter(StringUtils::isNotBlank)
+                    .map(sourceMap::get)
+                    .collect(Collectors.toList());
+        }
+
+        int count = NumberUtil.sum(subPressures, PressureOutput::getCount);
+        int failCount = NumberUtil.sum(subPressures, PressureOutput::getFailCount);
+        int saCount = NumberUtil.sum(subPressures, PressureOutput::getSaCount);
+        long sumRt = NumberUtil.sumLong(subPressures, PressureOutput::getSumRt);
+        double maxRt = NumberUtil.maxDouble(subPressures, PressureOutput::getMaxRt);
+        double minRt = NumberUtil.minDouble(subPressures, PressureOutput::getMinRt);
+        double avgTps = NumberUtil.sumDouble(subPressures, PressureOutput::getAvgTps);
+
+        int activeThreads;
+        if (NodeTypeEnum.TEST_PLAN == node.getType()) {//TEST_PLAN节点取加总
+            activeThreads = NumberUtil.sum(childPressures, PressureOutput::getActiveThreads);
+        } else {//其他分组节点（控制器、线程组）：取平均
+            activeThreads = NumberUtil.maxInt(childPressures, PressureOutput::getActiveThreads);
+        }
+
         double sa = NumberUtil.getPercentRate(saCount, count);
-        double successRate = NumberUtil.getPercentRate(count - failCount, count);
-        long sendBytes = childPressures.stream().filter(Objects::nonNull)
-                .map(PressureOutput::getSentBytes)
-                .mapToLong(l -> Objects.isNull(l) ? 0 : l)
-                .sum();
-        long receiveBytes = childPressures.stream().filter(Objects::nonNull)
-                .map(PressureOutput::getReceivedBytes)
-                .mapToLong(l -> Objects.isNull(l) ? 0 : l)
-                .sum();
-
-        long sumRt = childPressures.stream().filter(Objects::nonNull)
-                .map(PressureOutput::getSumRt)
-                .mapToLong(l -> Objects.isNull(l) ? 0 : l)
-                .sum();
-
+        double successRate = NumberUtil.getPercentRate(Math.max(0, count - failCount), count);
+        long sendBytes = NumberUtil.sumLong(childPressures, PressureOutput::getSentBytes);
+        long receiveBytes = NumberUtil.sumLong(childPressures, PressureOutput::getReceivedBytes);
         double avgRt = NumberUtil.getRate(sumRt, count);
 
-        double maxRt = childPressures.stream().filter(Objects::nonNull)
-                .map(PressureOutput::getMaxRt)
-                .mapToDouble(d -> Objects.isNull(d) ? 0 : d)
-                .max()
-                .orElse(0);
-
-        double minRt = childPressures.stream().filter(Objects::nonNull)
-                .map(PressureOutput::getMinRt)
-                .mapToDouble(d -> Objects.isNull(d) ? 0 : d)
-                .min()
-                .orElse(0);
-
-//        int realActiveThreads;
-        int activeThreads;
-        double avgTps;
-        if (NodeTypeEnum.TEST_PLAN == node.getType()) {
-//            realActiveThreads = results.stream().filter(Objects::nonNull)
-//                    .map(PressureOutput::getRealActiveThreads)
-//                    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-//                    .sum();
-            //TEST_PLAN节点取加总
-            activeThreads = childPressures.stream().filter(Objects::nonNull)
-                    .map(PressureOutput::getActiveThreads)
-                    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-                    .sum();
-            avgTps = childPressures.stream().filter(Objects::nonNull)
-                    .map(PressureOutput::getAvgTps)
-                    .mapToDouble(d -> Objects.isNull(d) ? 0d : d)
-                    .sum();
-        } else {
-//            realActiveThreads = (int) Math.round(results.stream().filter(Objects::nonNull)
-//                    .map(PressureOutput::getRealActiveThreads)
-//                    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-//                    .average()
-//                    .orElse(0d));
-            //其他分组节点（控制器、线程组）：取平均
-            activeThreads = childPressures.stream().filter(Objects::nonNull)
-                    .map(PressureOutput::getActiveThreads)
-                    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-                    .max()
-                    .orElse(0);
-            avgTps = childPressures.stream().filter(Objects::nonNull)
-                    .map(PressureOutput::getAvgTps)
-                    .mapToDouble(d -> Objects.isNull(d) ? 0d : d)
-                    .max()
-                    .orElse(0d);
-        }
         List<String> percentData = childPressures.stream().filter(Objects::nonNull)
                 .map(PressureOutput::getSaPercent)
                 .filter(StringUtils::isNotBlank)
                 .collect(Collectors.toList());
         String percentSa = calculateSaPercent(percentData);
-        int dataNum = childPressures.stream().filter(Objects::nonNull)
-                .map(PressureOutput::getDataNum)
-                .filter(Objects::nonNull)
-                .mapToInt(d -> d)
-                .min()
-                .orElse(1);
-        double dataRate = childPressures.stream().filter(Objects::nonNull)
-                .map(PressureOutput::getDataRate)
-                .filter(Objects::nonNull)
-                .mapToDouble(d -> d)
-                .min()
-                .orElse(1d);
-        int status = childPressures.stream().filter(Objects::nonNull)
-                .map(PressureOutput::getStatus)
-                .filter(Objects::nonNull)
-                .mapToInt(i -> i)
-                .min()
-                .orElse(1);
+        int dataNum = NumberUtil.minInt(childPressures, PressureOutput::getDataNum, 1);
+        double dataRate = NumberUtil.minDouble(childPressures, PressureOutput::getDataRate, 1d);
+        int status = NumberUtil.minInt(childPressures, PressureOutput::getStatus, 1);
+
         PressureOutput output = new PressureOutput();
         output.setTime(time);
-        output.setCount(count);
         output.setTransaction(node.getXpathMd5());
+        output.setCount(count);
         output.setFailCount(failCount);
         output.setSaCount(saCount);
         output.setSa(sa);
@@ -738,7 +680,6 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         output.setMaxRt(maxRt);
         output.setMinRt(minRt);
         output.setActiveThreads(activeThreads);
-//        output.setRealActiveThreads(realActiveThreads);
         output.setAvgTps(avgTps);
         output.setSaPercent(percentSa);
         output.setDataNum(dataNum);
@@ -825,48 +766,18 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         String transaction = metricsList.get(0).getTransaction();
         String testName = metricsList.get(0).getTestName();
 
-        int count = metricsList.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getCount)
-            .mapToInt(i -> Objects.nonNull(i) ? i : 0)
-            .sum();
-        int failCount = metricsList.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getFailCount)
-            .mapToInt(i -> Objects.nonNull(i) ? i : 0)
-            .sum();
-        int saCount = metricsList.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getSaCount)
-            .mapToInt(i -> Objects.nonNull(i) ? i : 0)
-            .sum();
+        int count = NumberUtil.sum(metricsList, ResponseMetrics::getCount);
+        int failCount = NumberUtil.sum(metricsList, ResponseMetrics::getFailCount);
+        int saCount = NumberUtil.sum(metricsList, ResponseMetrics::getSaCount);
         double sa = NumberUtil.getPercentRate(saCount, count);
         double successRate = NumberUtil.getPercentRate(count - failCount, count);
-        long sendBytes = metricsList.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getSentBytes)
-            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
-            .sum();
-        long receivedBytes = metricsList.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getReceivedBytes)
-            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
-            .sum();
-        long sumRt = metricsList.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getSumRt)
-            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
-            .sum();
+        long sendBytes = NumberUtil.sumLong(metricsList, ResponseMetrics::getSentBytes);
+        long receivedBytes = NumberUtil.sumLong(metricsList, ResponseMetrics::getReceivedBytes);
+        long sumRt = NumberUtil.sumLong(metricsList, ResponseMetrics::getSumRt);
         double avgRt = NumberUtil.getRate(sumRt, count);
-        double maxRt = metricsList.stream().filter(Objects::nonNull)
-            .mapToDouble(ResponseMetrics::getMaxRt)
-            .filter(Objects::nonNull)
-            .max()
-            .orElse(0);
-        double minRt = metricsList.stream().filter(Objects::nonNull)
-            .mapToDouble(ResponseMetrics::getMinRt)
-            .filter(Objects::nonNull)
-            .min()
-            .orElse(0);
-        //实际线程数
-        int activeThreads = metricsList.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getActiveThreads)
-            .mapToInt(i -> Objects.nonNull(i) ? i : 0)
-            .sum();
+        double maxRt = NumberUtil.maxDouble(metricsList, ResponseMetrics::getMaxRt);
+        double minRt = NumberUtil.maxDouble(metricsList, ResponseMetrics::getMinRt);
+        int activeThreads = NumberUtil.sum(metricsList, ResponseMetrics::getActiveThreads);
         double avgTps = NumberUtil.getRate(count, CollectorConstants.SEND_TIME);
         //模型运算修正的线程数(有效线程数)，顺丰需要这个
 //        int activeThreads = isRealThread ? realActiveThreads : (int) Math.ceil(avgRt * avgTps / 1000d);
@@ -899,7 +810,6 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         p.setMaxRt(maxRt);
         p.setMinRt(minRt);
         p.setActiveThreads(activeThreads);
-//        p.setRealActiveThreads(realActiveThreads);
         p.setAvgTps(avgTps);
         p.setSaPercent(percentSa);
         p.setDataNum(dataNum);
@@ -1212,8 +1122,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     /**
      * 超时自动检修，强行触发关闭
      *
-     * @param taskKey    任务key
-     * @param timeWindow 数据窗口
+     * @param timeWindow 数据时间窗口
      */
     private void forceClose(Long timeWindow, Long sceneId, Long reportId, Long tenantId) {
         String taskKey = getPressureTaskKey(sceneId, reportId, tenantId);

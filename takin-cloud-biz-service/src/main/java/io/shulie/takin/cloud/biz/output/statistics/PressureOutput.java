@@ -15,15 +15,18 @@
 
 package io.shulie.takin.cloud.biz.output.statistics;
 
+import io.shulie.takin.cloud.common.pojo.AbstractEntry;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.influxdb.annotation.Column;
 
 /**
  * @author liyuanba
  * @date 2021/9/23 9:20 下午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class PressureOutput {
+public class PressureOutput extends AbstractEntry {
     @Column(tag = true, name = "transaction")
     private String transaction;
     @Column(name = "test_name")
