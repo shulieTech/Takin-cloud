@@ -165,9 +165,9 @@ public class ReportOpenController {
         return ResponseResult.success(reportService.getNodeSummaryList(req.getReportId()));
     }
 
-    @GetMapping("report/activities")
+    @PostMapping("report/activities")
     @ApiOperation("根据场景ID查询正在压测报告的业务活动信息")
-    public ResponseResult<List<ReportActivityResp>> queryReportActivity(ReportDetailByIdsReq req){
+    public ResponseResult<List<ReportActivityResp>> queryReportActivity(@RequestBody ReportDetailByIdsReq req){
         return ResponseResult.success(reportService.getNodeDetailBySceneIds(req.getSceneIds()));
     }
 

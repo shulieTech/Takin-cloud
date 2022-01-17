@@ -184,7 +184,7 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     public ResponseResult<List<SceneManageListResp>> querySceneByStatus(SceneManageQueryReq request) {
         String url = troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_BY_STATUS;
         TakinResponseEntity<ResponseResult<List<SceneManageListResp>>> res =
-            HttpHelper.doPost(url, getHeaders(request), new TypeReference<ResponseResult<List<SceneManageListResp>>>() {}, request);
+            HttpHelper.doGet(url, getHeaders(request), new TypeReference<ResponseResult<List<SceneManageListResp>>>() {});
         if (res.getSuccess()) {
             return res.getBody();
         }

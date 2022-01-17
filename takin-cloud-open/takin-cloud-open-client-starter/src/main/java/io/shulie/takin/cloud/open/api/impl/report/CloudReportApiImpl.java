@@ -140,8 +140,8 @@ public class CloudReportApiImpl extends CloudCommonApi implements CloudReportApi
     @Override
     public ResponseResult<List<ReportActivityResp>> getActivities(ReportDetailByIdsReq req) {
         TakinResponseEntity<ResponseResult<List<ReportActivityResp>>> entity =
-            HttpHelper.doGet(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_ACTIVITIES,
-                getHeaders(req), req, new TypeReference<ResponseResult<List<ReportActivityResp>>>() {});
+            HttpHelper.doPost(troCloudClientProperties.getUrl() + CloudApiConstant.REPORT_ACTIVITIES,
+                getHeaders(req), new TypeReference<ResponseResult<List<ReportActivityResp>>>() {},req);
         if (entity.getSuccess()){
             return entity.getBody();
         }
