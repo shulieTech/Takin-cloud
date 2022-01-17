@@ -225,5 +225,11 @@ public interface ReportService {
      */
     List<ScriptNodeTreeResp> getNodeTree(ScriptNodeTreeQueryReq req);
 
-    List<ReportActivityResp> getNodeDetailBySceneIds(List<Long> sceneId);
+    /**
+     * 根据场景ID列表获取场景ID
+     *
+     * @param sceneIds
+     * @return
+     */
+    List<ReportActivityResp> getNodeDetailBySceneIds(List<Long> sceneIds);
 }

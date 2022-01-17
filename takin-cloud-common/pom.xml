@@ -122,7 +122,16 @@
             <artifactId>json-path</artifactId>
         </dependency>
     </dependencies>
-
+    <distributionManagement>
+        <repository>
+            <id>rdc-releases</id>
+            <url>https://packages.aliyun.com/maven/repository/2101190-release-xxuvBf</url>
+        </repository>
+        <snapshotRepository>
+            <id>rdc-snapshots</id>
+            <url>https://packages.aliyun.com/maven/repository/2101190-snapshot-EQD7pQ</url>
+        </snapshotRepository>
+    </distributionManagement>
     <build>
         <plugins>
             <!-- 设置编译版本为1.8 -->

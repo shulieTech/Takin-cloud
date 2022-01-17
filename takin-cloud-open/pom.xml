@@ -12,7 +12,7 @@
     <packaging>pom</packaging>
 
     <artifactId>takin-cloud-open</artifactId>
-    <version>takin-cloud-open-5.0.2-SNAPSHOT</version>
+    <version>takin-cloud-open-5.0.2.1-SNAPSHOT</version>
 
     <modules>
         <module>takin-cloud-open-api</module>

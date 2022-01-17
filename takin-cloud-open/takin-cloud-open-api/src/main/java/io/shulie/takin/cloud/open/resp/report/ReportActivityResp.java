@@ -14,6 +14,8 @@ public class ReportActivityResp extends CloudUserCommonRequestExt implements Ser
 
     private Long sceneId;
 
+    private String sceneName;
+
     private Long reportId;
 
     private List<BusinessActivity> businessActivityList;

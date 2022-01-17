@@ -1547,9 +1547,11 @@ public class ReportServiceImpl implements ReportService {
                         ReportActivityResp resp = new ReportActivityResp();
                         resp.setSceneId(entity.getSceneId());
                         resp.setReportId(entity.getId());
+                        resp.setSceneName(entity.getSceneName());
                         List<ReportBusinessActivityDetailEntity> details = activityMap.get(entity.getId());
                         if (CollectionUtils.isNotEmpty(details)){
                             List<BusinessActivity> activityList = details.stream().filter(Objects::nonNull)
+                                .filter(detail -> detail.getBusinessActivityId() > 0)
                                 .map(detail -> {
                                     BusinessActivity activity = new BusinessActivity();
                                     activity.setActivityName(detail.getBusinessActivityName());

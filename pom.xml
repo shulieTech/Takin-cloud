@@ -223,7 +223,6 @@
 
         </dependencies>
     </dependencyManagement>
-
     <url>https://github.com/shulieTech/Takin-cloud.git</url>
     <description>takin-cloud</description>
     <developers>
