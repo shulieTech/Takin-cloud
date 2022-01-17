@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.open.api.impl.scenemanage;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
@@ -183,6 +184,9 @@ public class CloudSceneApiImpl extends CloudCommonApi implements CloudSceneApi {
     @Override
     public ResponseResult<List<SceneManageListResp>> querySceneByStatus(SceneManageQueryReq request) {
         String url = troCloudClientProperties.getUrl() + CloudApiConstant.SCENE_MANAGE_BY_STATUS;
+        if (Objects.nonNull(request) && Objects.nonNull(request.getStatus())){
+            url = url + "?status=" + request.getStatus();
+        }
         TakinResponseEntity<ResponseResult<List<SceneManageListResp>>> res =
             HttpHelper.doGet(url, getHeaders(request), new TypeReference<ResponseResult<List<SceneManageListResp>>>() {});
         if (res.getSuccess()) {
