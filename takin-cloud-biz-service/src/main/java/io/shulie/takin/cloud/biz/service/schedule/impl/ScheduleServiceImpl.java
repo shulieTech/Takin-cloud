@@ -199,7 +199,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         // 场景生命周期更新 启动中(文件拆分完成) ---> 创建Job中
         sceneManageService.updateSceneLifeCycle(
             UpdateStatusBean.build(sceneId, taskId, customerId)
-                .checkEnum(SceneManageStatusEnum.STARTING, SceneManageStatusEnum.FILESPLIT_END)
+                .checkEnum(SceneManageStatusEnum.STARTING, SceneManageStatusEnum.FILE_SPLIT_END)
                 .updateEnum(SceneManageStatusEnum.JOB_CREATING)
                 .build());
         EngineCallExtApi engineCallExtApi = pluginUtils.getEngineCallExtApi();

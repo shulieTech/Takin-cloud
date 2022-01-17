@@ -398,7 +398,7 @@ public class ReportServiceImpl implements ReportService {
         }
         //检查任务是否超时
         boolean taskIsTimeOut = checkSceneTaskIsTimeOut(reportResult, wrapper);
-        if (wrapper.getStatus().intValue() == SceneManageStatusEnum.PTING.getValue().intValue() && taskIsTimeOut) {
+        if (wrapper.getStatus().intValue() == SceneManageStatusEnum.PRESSURE_TESTING.getValue().intValue() && taskIsTimeOut) {
             log.info("报表[{}]超时，通知调度马上停止压测", reportResult.getId());
             //报告正在生成中
             reportDetail.setTaskStatus(ReportConstants.RUN_STATUS);
