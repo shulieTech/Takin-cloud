@@ -307,8 +307,10 @@ public class SlaServiceImpl implements SlaService {
             return false;
         }
         for (String data : md5s) {
-            if ("-1".equals(data) || ReportConstants.ALL_BUSINESS_ACTIVITY.equals(data) || String.valueOf(bindRef)
-                .equals(data)) {
+            if ("-1".equals(data)
+                || ReportConstants.TEST_PLAN_MD5.equals(data)
+                || ReportConstants.ALL_BUSINESS_ACTIVITY.equals(data)
+                || String.valueOf(bindRef).equals(data)) {
                 return true;
             }
         }
