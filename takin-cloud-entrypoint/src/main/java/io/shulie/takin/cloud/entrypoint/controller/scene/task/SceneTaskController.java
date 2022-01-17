@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 import cn.hutool.core.bean.BeanUtil;
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import com.pamirs.takin.entity.domain.vo.scenemanage.FileSplitResultVO;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.EnginePluginInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
@@ -128,9 +129,13 @@ public class SceneTaskController {
     @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_START)
     @ApiOperation(value = "开始场景测试")
     public ResponseResult<SceneActionResp> start(@RequestBody SceneTaskStartReq request) {
-
+        // 填充数据溯源信息
+        CloudPluginUtils.fillUserData(request);
         SceneTaskStartInput input = new SceneTaskStartInput();
         BeanUtils.copyProperties(request, input);
+        // 设置用户主键
+        input.setOperateId(request.getUserId());
+        // 启动场景
         SceneActionOutput output = sceneTaskService.start(input);
         SceneActionResp resp = new SceneActionResp();
         BeanUtils.copyProperties(output, resp);

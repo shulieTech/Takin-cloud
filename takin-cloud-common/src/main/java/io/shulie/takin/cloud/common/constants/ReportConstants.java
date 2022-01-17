@@ -60,5 +60,9 @@ public class ReportConstants {
      * influxDB没5秒汇总的数据
      */
     public static final String ALL_BUSINESS_ACTIVITY = "all";
+    /**
+     * 根测试计划的MD5
+     */
+    public static final String TEST_PLAN_MD5 = "0f1a197a2040e645dcdb4dfff8a3f960";
 
 }
