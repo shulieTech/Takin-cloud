@@ -20,3 +20,6 @@ takin:
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+data:
+  path: /Users/liyuanba/Downloads

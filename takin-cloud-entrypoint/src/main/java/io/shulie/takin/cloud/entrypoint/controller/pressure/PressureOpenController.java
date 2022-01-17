@@ -8,6 +8,7 @@ import io.shulie.takin.cloud.biz.service.schedule.impl.FileSplitService;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 import io.shulie.takin.cloud.common.constants.FileConstants;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.FileUtils;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
@@ -30,10 +31,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -66,7 +64,7 @@ public class PressureOpenController {
     @ApiOperation(value = "启动压测")
     @PostMapping(EntrypointUrl.METHOD_PRESSURE_START)
     @ResponseBody
-    public ResponseResult<?> start(StartEngineReq req) {
+    public ResponseResult<?> start(@RequestBody StartEngineReq req) {
         log.info("req="+JsonUtil.toJson(req));
         //部分参数默认初始化
         init(req);
@@ -113,6 +111,7 @@ public class PressureOpenController {
      * 初始化入参
      */
     private void init(StartEngineReq req) {
+        CloudPluginUtils.fillUserData(req);
         if (null == req.getPodNum()) {
             req.setPodNum(1);
         }

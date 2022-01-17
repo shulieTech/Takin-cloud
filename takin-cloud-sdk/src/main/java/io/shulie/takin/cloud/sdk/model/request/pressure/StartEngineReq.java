@@ -60,7 +60,7 @@ public class StartEngineReq extends ContextExt {
     @ApiModelProperty(value = "并发线程数")
     private Integer throughput;
 
-    @ApiModelProperty(value = "定时器周期，单位：毫秒")
+    @ApiModelProperty(value = "巡检间隔时间，单位：毫秒")
     private Long fixTimer;
 
     @ApiModelProperty(value = "循环次数")
