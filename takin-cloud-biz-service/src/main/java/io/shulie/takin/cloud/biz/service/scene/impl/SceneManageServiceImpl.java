@@ -103,7 +103,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -329,8 +328,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     public PageInfo<SceneManageListOutput> queryPageList(SceneManageQueryInput queryVO) {
 
         Page<SceneManageListOutput> page = PageHelper.startPage(queryVO.getPageNumber(), queryVO.getPageSize());
-        SceneManageQueryBean sceneManageQueryBean = new SceneManageQueryBean();
-        BeanUtils.copyProperties(queryVO, sceneManageQueryBean);
+        SceneManageQueryBean sceneManageQueryBean = BeanUtil.copyProperties(queryVO, SceneManageQueryBean.class);
         //默认查询普通类型场景，场景类型目前不透出去
         if (sceneManageQueryBean.getType() == null) {
             sceneManageQueryBean.setType(0);
@@ -898,11 +896,8 @@ public class SceneManageServiceImpl implements SceneManageService {
      * @return 入参类列表
      */
     private List<SceneScriptRefInput> uploadFiles2InputList(List<UploadFileDTO> uploadFiles) {
-        return uploadFiles.stream().map(uploadFile -> {
-                SceneScriptRefInput input = new SceneScriptRefInput();
-                BeanUtils.copyProperties(uploadFile, input);
-                return input;
-            })
+        return uploadFiles.stream()
+            .map(t -> BeanUtil.copyProperties(t, SceneScriptRefInput.class))
             .collect(Collectors.toList());
     }
 

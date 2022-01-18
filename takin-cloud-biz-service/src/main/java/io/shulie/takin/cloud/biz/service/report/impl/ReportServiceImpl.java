@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import cn.hutool.core.bean.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSON;
@@ -33,7 +34,6 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Lists;
 import com.github.pagehelper.PageHelper;
-import org.springframework.beans.BeanUtils;
 import com.jayway.jsonpath.DocumentContext;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -398,7 +398,7 @@ public class ReportServiceImpl implements ReportService {
         }
         //检查任务是否超时
         boolean taskIsTimeOut = checkSceneTaskIsTimeOut(reportResult, wrapper);
-        if (wrapper.getStatus().intValue() == SceneManageStatusEnum.PTING.getValue().intValue() && taskIsTimeOut) {
+        if (wrapper.getStatus().intValue() == SceneManageStatusEnum.PRESSURE_TESTING.getValue().intValue() && taskIsTimeOut) {
             log.info("报表[{}]超时，通知调度马上停止压测", reportResult.getId());
             //报告正在生成中
             reportDetail.setTaskStatus(ReportConstants.RUN_STATUS);
@@ -985,8 +985,7 @@ public class ReportServiceImpl implements ReportService {
         // 完成状态
         reportResult.setStatus(status);
         getReportFeatures(reportResult, errKey, errMsg);
-        ReportUpdateParam param = new ReportUpdateParam();
-        BeanUtils.copyProperties(reportResult, param);
+        ReportUpdateParam param = BeanUtil.copyProperties(reportResult, ReportUpdateParam.class);
         reportDao.updateReport(param);
     }
 
@@ -999,8 +998,7 @@ public class ReportServiceImpl implements ReportService {
         if (StringUtils.isNotBlank(input.getErrorMessage())) {
             getReportFeatures(reportResult, ReportConstants.FEATURES_ERROR_MSG, input.getErrorMessage());
         }
-        ReportUpdateConclusionParam param = new ReportUpdateConclusionParam();
-        BeanUtils.copyProperties(input, param);
+        ReportUpdateConclusionParam param = BeanUtil.copyProperties(input, ReportUpdateConclusionParam.class);
         param.setFeatures(reportResult.getFeatures());
         reportDao.updateReportConclusion(param);
     }
@@ -1046,12 +1044,8 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public ReportOutput selectById(Long id) {
         ReportResult reportResult = reportDao.selectById(id);
-        if (reportResult == null) {
-            return null;
-        }
-        ReportOutput output = new ReportOutput();
-        BeanUtils.copyProperties(reportResult, output);
-        return output;
+        if (reportResult == null) {return null;}
+        return BeanUtil.copyProperties(reportResult, ReportOutput.class);
     }
 
     @Override
@@ -1385,22 +1379,20 @@ public class ReportServiceImpl implements ReportService {
         }
         if (Objects.isNull(reportResult.getEndTime())) {
             Date finalDateTime = getFinalDateTime(reportResult.getSceneId(), reportResult.getId(),
-                    reportResult.getTenantId());
+                reportResult.getTenantId());
             if (Objects.isNull(finalDateTime) || finalDateTime.getTime() < reportResult.getStartTime().getTime()) {
                 finalDateTime = new Date();
             }
             reportResult.setEndTime(finalDateTime);
         }
         // 更新
-        ReportUpdateParam param = new ReportUpdateParam();
-        BeanUtils.copyProperties(reportResult, param);
+        ReportUpdateParam param = BeanUtil.copyProperties(reportResult, ReportUpdateParam.class);
         reportDao.updateReport(param);
     }
 
     @Override
     public void addWarn(WarnCreateInput input) {
-        WarnDetail warnDetail = new WarnDetail();
-        BeanUtils.copyProperties(input, warnDetail);
+        WarnDetail warnDetail = BeanUtil.copyProperties(input, WarnDetail.class);
         warnDetail.setWarnTime(DateUtil.parseDateTime(input.getWarnTime()));
         warnDetail.setCreateTime(new Date());
         tWarnDetailMapper.insertSelective(warnDetail);

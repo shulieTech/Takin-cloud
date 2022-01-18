@@ -69,6 +69,14 @@ public interface SceneManageApi {
     SceneManageWrapperResp getSceneDetail(SceneManageIdReq sceneManageIdVO);
 
     /**
+     * 获取场景明细 无租户版本
+     *
+     * @param sceneManageIdVO -
+     * @return 返回值
+     */
+    SceneManageWrapperResp getSceneDetailNoAuth(SceneManageIdReq sceneManageIdVO);
+
+    /**
      * 不分页查询所有场景带脚本信息
      *
      * @param request -
