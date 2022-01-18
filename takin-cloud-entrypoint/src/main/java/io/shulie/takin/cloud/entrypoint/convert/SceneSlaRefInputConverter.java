@@ -3,9 +3,9 @@ package io.shulie.takin.cloud.entrypoint.convert;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.hutool.core.bean.BeanUtil;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneSlaRefInput;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneSlaRefOpen;
-import org.springframework.beans.BeanUtils;
 
 /**
  * @author mubai
@@ -15,9 +15,7 @@ import org.springframework.beans.BeanUtils;
 public class SceneSlaRefInputConverter {
 
     public static SceneSlaRefInput of(SceneSlaRefOpen sceneSlaRef) {
-        SceneSlaRefInput out = new SceneSlaRefInput();
-        BeanUtils.copyProperties(sceneSlaRef, out);
-        return out;
+        return BeanUtil.copyProperties(sceneSlaRef, SceneSlaRefInput.class);
     }
 
     public static List<SceneSlaRefInput> ofList(List<SceneSlaRefOpen> sceneSlaRefs) {

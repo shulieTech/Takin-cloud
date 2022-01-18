@@ -46,7 +46,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -267,8 +266,7 @@ public class SceneManageDetailController {
     }
 
     private String buildRule(SceneSlaRefResponse slaRefDTO) {
-        SceneSlaRefInput input = new SceneSlaRefInput();
-        BeanUtils.copyProperties(slaRefDTO, input);
+        SceneSlaRefInput input = BeanUtil.copyProperties(slaRefDTO, SceneSlaRefInput.class);
         Map<String, Object> dataMap = SlaUtil.matchCondition(input, new SendMetricsEvent());
         return String.valueOf(dataMap.get("type"))
             + dataMap.get("compare")

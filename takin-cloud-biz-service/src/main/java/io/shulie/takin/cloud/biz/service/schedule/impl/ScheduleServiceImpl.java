@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.google.common.collect.Lists;
 import com.pamirs.takin.entity.dao.schedule.TScheduleRecordMapper;
 import com.pamirs.takin.entity.domain.entity.schedule.ScheduleRecord;
@@ -46,7 +47,6 @@ import io.shulie.takin.eventcenter.annotation.IntrestFor;
 import io.shulie.takin.cloud.ext.content.enginecall.PtlLogConfigExt;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -153,8 +153,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         }
         eventRequest.setTraceSampling(traceSampling);
         EngineLogPtlConfigOutput engineLogPtlConfigOutput = engineConfigService.getEnginePtlConfig();
-        PtlLogConfigExt ptlLogConfig = new PtlLogConfigExt();
-        BeanUtils.copyProperties(engineLogPtlConfigOutput, ptlLogConfig);
+        PtlLogConfigExt ptlLogConfig = BeanUtil.copyProperties(engineLogPtlConfigOutput, PtlLogConfigExt.class);
         //增加ptl日志上传位置参数
         ptlLogConfig.setPtlUploadFrom(appConfig.getEngineLogUploadModel());
         eventRequest.setPtlLogConfig(ptlLogConfig);

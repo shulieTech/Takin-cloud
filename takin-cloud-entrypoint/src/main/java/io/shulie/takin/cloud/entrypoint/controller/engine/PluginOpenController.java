@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import cn.hutool.core.bean.BeanUtil;
 import io.shulie.takin.cloud.biz.input.engine.EnginePluginWrapperInput;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginDetailOutput;
 import io.shulie.takin.cloud.data.model.mysql.EnginePluginEntity;
@@ -26,7 +27,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.date.DateUtil;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -80,8 +80,7 @@ public class PluginOpenController {
     @ApiOperation(value = "保存引擎插件")
     @PostMapping(EntrypointUrl.METHOD_ENGINE_PLUGIN_SAVE)
     public ResponseResult<?> saveEnginePlugin(@RequestBody EnginePluginWrapperReq request) {
-        EnginePluginWrapperInput input = new EnginePluginWrapperInput();
-        BeanUtils.copyProperties(request, input);
+        EnginePluginWrapperInput input = BeanUtil.copyProperties(request, EnginePluginWrapperInput.class);
         enginePluginService.saveEnginePlugin(input);
         return ResponseResult.success();
     }

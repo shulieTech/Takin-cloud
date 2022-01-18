@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.google.common.collect.Lists;
-import org.springframework.beans.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -49,8 +48,7 @@ public class ReportDaoImpl implements ReportDao {
     @Override
     public int insert(ReportInsertParam param) {
         if (Objects.nonNull(param)) {
-            ReportEntity entity = new ReportEntity();
-            BeanUtils.copyProperties(param, entity);
+            ReportEntity entity = BeanUtil.copyProperties(param, ReportEntity.class);
             Date insertDate = new Date();
             entity.setGmtCreate(insertDate);
             entity.setGmtUpdate(insertDate);
@@ -74,11 +72,9 @@ public class ReportDaoImpl implements ReportDao {
         }
         List<ReportEntity> entities = reportMapper.selectList(wrapper);
         if (entities != null && entities.size() > 0) {
-            return entities.stream().map(entity -> {
-                ReportResult reportResult = new ReportResult();
-                BeanUtils.copyProperties(entity, reportResult);
-                return reportResult;
-            }).collect(Collectors.toList());
+            return entities.stream()
+                .map(t -> BeanUtil.copyProperties(t, ReportResult.class))
+                .collect(Collectors.toList());
         }
         return Lists.newArrayList();
     }
@@ -109,24 +105,20 @@ public class ReportDaoImpl implements ReportDao {
         wrapper.last("limit 1");
         List<ReportEntity> entities = reportMapper.selectList(wrapper);
         if (entities != null && entities.size() > 0) {
-            ReportResult reportResult = new ReportResult();
-            BeanUtils.copyProperties(entities.get(0), reportResult);
-            return reportResult;
+            return BeanUtil.copyProperties(entities.get(0), ReportResult.class);
         }
         return null;
     }
 
     @Override
     public void updateReportConclusion(ReportUpdateConclusionParam param) {
-        ReportEntity entity = new ReportEntity();
-        BeanUtils.copyProperties(param, entity);
+        ReportEntity entity = BeanUtil.copyProperties(param, ReportEntity.class);
         reportMapper.updateById(entity);
     }
 
     @Override
     public void updateReport(ReportUpdateParam param) {
-        ReportEntity entity = new ReportEntity();
-        BeanUtils.copyProperties(param, entity);
+        ReportEntity entity = BeanUtil.copyProperties(param, ReportEntity.class);
         if (null == param.getGmtUpdate()) {
             entity.setGmtUpdate(Calendar.getInstance().getTime());
         }
@@ -160,9 +152,7 @@ public class ReportDaoImpl implements ReportDao {
         wrapper.last("limit 1");
         List<ReportEntity> entities = reportMapper.selectList(wrapper);
         if (entities != null && entities.size() > 0) {
-            ReportResult reportResult = new ReportResult();
-            BeanUtils.copyProperties(entities.get(0), reportResult);
-            return reportResult;
+            return BeanUtil.copyProperties(entities.get(0), ReportResult.class);
         }
         return null;
     }
@@ -178,9 +168,7 @@ public class ReportDaoImpl implements ReportDao {
         wrapper.last("limit 1");
         List<ReportEntity> entities = reportMapper.selectList(wrapper);
         if (entities != null && entities.size() > 0) {
-            ReportResult reportResult = new ReportResult();
-            BeanUtils.copyProperties(entities.get(0), reportResult);
-            return reportResult;
+            return BeanUtil.copyProperties(entities.get(0), ReportResult.class);
         }
         return null;
     }
@@ -219,13 +207,9 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public ReportResult getById(Long resultId) {
-        if (resultId == null) {
-            return null;
-        }
+        if (resultId == null) {return null;}
         ReportEntity reportEntity = reportMapper.selectById(resultId);
-        ReportResult reportResult = new ReportResult();
-        BeanUtils.copyProperties(reportEntity, reportResult);
-        return reportResult;
+        return BeanUtil.copyProperties(reportEntity, ReportResult.class);
     }
 
     @Override

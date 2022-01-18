@@ -21,7 +21,6 @@ import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdatePar
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
 import io.shulie.takin.cloud.data.util.MPUtil;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,8 +34,7 @@ public class SceneManageDAOImpl
 
     @Override
     public Long insert(SceneManageCreateOrUpdateParam createParam) {
-        SceneManageEntity entity = new SceneManageEntity();
-        BeanUtils.copyProperties(createParam, entity);
+        SceneManageEntity entity = BeanUtil.copyProperties(createParam, SceneManageEntity.class);
         entity.setUserId(CloudPluginUtils.getContext().getUserId());
         entity.setTenantId(CloudPluginUtils.getContext().getTenantId());
         entity.setEnvCode(CloudPluginUtils.getContext().getEnvCode());
@@ -46,8 +44,7 @@ public class SceneManageDAOImpl
 
     @Override
     public void update(SceneManageCreateOrUpdateParam updateParam) {
-        SceneManageEntity entity = new SceneManageEntity();
-        BeanUtils.copyProperties(updateParam, entity);
+        SceneManageEntity entity = BeanUtil.copyProperties(updateParam, SceneManageEntity.class);
         if (null == updateParam.getUpdateTime()) {
             updateParam.setUpdateTime(Calendar.getInstance().getTime());
         }

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageInfo;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageQueryInput;
@@ -39,7 +40,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,7 +75,7 @@ public class SceneManageController {
     }
 
     public void dataModelConvert(SceneManageWrapperReq wrapperReq, SceneManageWrapperInput input) {
-        BeanUtils.copyProperties(wrapperReq, input);
+        BeanUtil.copyProperties(wrapperReq, input);
         input.setStopCondition(SceneSlaRefInputConverter.ofList(wrapperReq.getStopCondition()));
         input.setWarningCondition(SceneSlaRefInputConverter.ofList(wrapperReq.getWarningCondition()));
         input.setBusinessActivityConfig(
@@ -138,8 +138,7 @@ public class SceneManageController {
         // 转换
         List<SceneManageListResp> list = pageInfo.getList().stream()
             .map(output -> {
-                SceneManageListResp resp = new SceneManageListResp();
-                BeanUtils.copyProperties(output, resp);
+                SceneManageListResp resp = BeanUtil.copyProperties(output, SceneManageListResp.class);
                 resp.setHasAnalysisResult(StrUtil.isNotBlank(output.getScriptAnalysisResult()));
                 return resp;
             }).collect(Collectors.toList());
@@ -166,11 +165,8 @@ public class SceneManageController {
         List<SceneManageListOutput> sceneManageListOutputs = sceneManageService.querySceneManageList();
         // 转换
         List<SceneManageListResp> list = sceneManageListOutputs.stream()
-            .map(output -> {
-                SceneManageListResp resp = new SceneManageListResp();
-                BeanUtils.copyProperties(output, resp);
-                return resp;
-            }).collect(Collectors.toList());
+            .map(t -> BeanUtil.copyProperties(t, SceneManageListResp.class))
+            .collect(Collectors.toList());
         return ResponseResult.success(list);
     }
 
@@ -198,8 +194,7 @@ public class SceneManageController {
     @ApiOperation(value = "获取机器数量范围")
     public ResponseResult<StrategyResp> getIpNum(Integer concurrenceNum, Integer tpsNum) {
         StrategyOutputExt output = strategyConfigService.getStrategy(concurrenceNum, tpsNum);
-        StrategyResp resp = new StrategyResp();
-        BeanUtils.copyProperties(output, resp);
+        StrategyResp resp = BeanUtil.copyProperties(output, StrategyResp.class);
         return ResponseResult.success(resp);
     }
 
