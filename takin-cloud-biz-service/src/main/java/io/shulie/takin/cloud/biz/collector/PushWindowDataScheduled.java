@@ -625,30 +625,36 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         if (0 == time) {
             return null;
         }
-        List<String> transactions = CommonUtil.getList(childPressures, PressureOutput::getTransaction);
-        //多级子节点,满足过滤条件的多级子节点:如果节点含有事务控制器，则节点的count=事务控制器的count+所有事务控制器子节点的count
-        List<ScriptNode> childNodes = JmxUtil.getChildNodesByFilterFunc(node, n -> {
-            if (!sourceMap.containsKey(n.getXpathMd5())) {
-                return false;
-            }
-            if (null != transactions && transactions.contains(n.getXpathMd5())) {
-                return false;
-            }
-            return true;
-        });
-        List<PressureOutput> subPressures = Lists.newArrayList(childPressures);
+        /*================== childPressures只用1级子节点 统计开始 =====================================================*/
+        int activeThreads;
+        if (NodeTypeEnum.TEST_PLAN == node.getType()) {//TEST_PLAN节点取加总
+            activeThreads = NumberUtil.sum(childPressures, PressureOutput::getActiveThreads);
+        } else {//其他分组节点（控制器、线程组）：取平均
+            activeThreads = NumberUtil.maxInt(childPressures, PressureOutput::getActiveThreads);
+        }
+        long sendBytes = NumberUtil.sumLong(childPressures, PressureOutput::getSentBytes);
+        long receiveBytes = NumberUtil.sumLong(childPressures, PressureOutput::getReceivedBytes);
+        int dataNum = NumberUtil.minInt(childPressures, PressureOutput::getDataNum, 1);
+        double dataRate = NumberUtil.minDouble(childPressures, PressureOutput::getDataRate, 1d);
+        int status = NumberUtil.minInt(childPressures, PressureOutput::getStatus, 1);
+        /*=================== childPressures只用1级子节点 统计结束 =====================================================/
+
+        /*=================== subPressures含有1级子节点和事务控制器这种子节点的子节点 计开始 ===============================*/
+        /*
+         * 多级子节点,满足过滤条件的多级子节点:如果该节点的子节点有自己上报数据，则继续递归取其子节点的子节点：
+         * 这里事务控制器会自己上报数据，当父节点包含事务控制器时，会取事务控制器和事务控制的子节点合并计算
+         */
+        List<ScriptNode> childNodes = JmxUtil.getChildNodesByFilterFunc(node, n -> sourceMap.containsKey(n.getXpathMd5()));
+        final List<PressureOutput> subPressures = Lists.newArrayList(childPressures);
         if (CollectionUtils.isNotEmpty(childNodes)) {
-            List<PressureOutput> temps = childNodes.stream().filter(Objects::nonNull)
+            childNodes.stream().filter(Objects::nonNull)
                     .map(ScriptNode::getXpathMd5)
                     .filter(StringUtils::isNotBlank)
                     .map(sourceMap::get)
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-            if (CollectionUtils.isNotEmpty(temps)) {
-                subPressures.addAll(temps);
-            }
+                    .filter(d -> !childPressures.contains(d))
+                    .forEach(subPressures::add);
         }
-
         int count = NumberUtil.sum(subPressures, PressureOutput::getCount);
         int failCount = NumberUtil.sum(subPressures, PressureOutput::getFailCount);
         int saCount = NumberUtil.sum(subPressures, PressureOutput::getSaCount);
@@ -656,28 +662,12 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         double maxRt = NumberUtil.maxDouble(subPressures, PressureOutput::getMaxRt);
         double minRt = NumberUtil.minDouble(subPressures, PressureOutput::getMinRt);
         double avgTps = NumberUtil.sumDouble(subPressures, PressureOutput::getAvgTps);
-
-        int activeThreads;
-        if (NodeTypeEnum.TEST_PLAN == node.getType()) {//TEST_PLAN节点取加总
-            activeThreads = NumberUtil.sum(childPressures, PressureOutput::getActiveThreads);
-        } else {//其他分组节点（控制器、线程组）：取平均
-            activeThreads = NumberUtil.maxInt(childPressures, PressureOutput::getActiveThreads);
-        }
+        String percentSa = calculateSaPercent(CommonUtil.getList(subPressures, PressureOutput::getSaPercent));
+        /*=================== subPressures含有1级子节点和事务控制器这种子节点的子节点 计结束 ===============================*/
 
         double sa = NumberUtil.getPercentRate(saCount, count);
         double successRate = NumberUtil.getPercentRate(Math.max(0, count - failCount), count);
-        long sendBytes = NumberUtil.sumLong(childPressures, PressureOutput::getSentBytes);
-        long receiveBytes = NumberUtil.sumLong(childPressures, PressureOutput::getReceivedBytes);
         double avgRt = NumberUtil.getRate(sumRt, count);
-
-        List<String> percentData = childPressures.stream().filter(Objects::nonNull)
-                .map(PressureOutput::getSaPercent)
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toList());
-        String percentSa = calculateSaPercent(percentData);
-        int dataNum = NumberUtil.minInt(childPressures, PressureOutput::getDataNum, 1);
-        double dataRate = NumberUtil.minDouble(childPressures, PressureOutput::getDataRate, 1d);
-        int status = NumberUtil.minInt(childPressures, PressureOutput::getStatus, 1);
 
         PressureOutput output = new PressureOutput();
         output.setTime(time);
@@ -1298,6 +1288,9 @@ public class PushWindowDataScheduled extends AbstractIndicators {
      * 计算sa
      */
     private String calculateSaPercent(List<String> percentDataList) {
+        if (CollectionUtils.isEmpty(percentDataList)) {
+            return null;
+        }
         List<Map<Integer, RtDataOutput>> percentMapList = percentDataList.stream().filter(StringUtils::isNotBlank)
             .map(DataUtils::parseToPercentMap)
             .collect(Collectors.toList());

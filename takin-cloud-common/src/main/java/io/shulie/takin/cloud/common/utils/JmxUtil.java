@@ -893,8 +893,8 @@ public class JmxUtil {
         }
         List<ScriptNode> result = Lists.newArrayList();
         for (ScriptNode childNode : node.getChildren()) {
+            result.add(childNode);
             if (filterFunc.apply(childNode)) {
-                result.add(childNode);
                 List<ScriptNode> subNodes = getChildNodesByFilterFunc(childNode, filterFunc);
                 if (CollectionUtils.isNotEmpty(subNodes)) {
                     result.addAll(subNodes);
