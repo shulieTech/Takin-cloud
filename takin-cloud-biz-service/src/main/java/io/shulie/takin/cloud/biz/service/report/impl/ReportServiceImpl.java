@@ -953,22 +953,30 @@ public class ReportServiceImpl implements ReportService {
             map = JsonHelper.string2Obj(reportResult.getFeatures(), new TypeReference<Map<String, String>>() {
             });
         }
-        if (StringUtils.isNotBlank(errMsg)) {
-            if (errKey.equals(ReportConstants.SLA_ERROR_MSG) && map.containsKey(ReportConstants.SLA_ERROR_MSG)) {
-                return;
-            }
+        if (StringUtils.isNotBlank(errKey) && StringUtils.isNotBlank(errMsg)) {
             errMsg = StringUtils.trim(errMsg);
             if (!errMsg.startsWith("[") && !errMsg.startsWith("{") && errMsg.length() > 100) {
                 errMsg = errMsg.substring(0, 100);
             }
-            String existsMsg = map.get(errKey);
-            if (StringUtils.isBlank(existsMsg)) {
-                map.put(errKey, errMsg);
-            } else if (existsMsg.length() < 10000) {
-                map.put(errKey, existsMsg + "、" + errMsg);
-            }
+            map.put(errKey, errMsg);
             reportResult.setFeatures(GsonUtil.gsonToString(map));
         }
+        //if (StringUtils.isNotBlank(errMsg)) {
+        //    if (errKey.equals(ReportConstants.SLA_ERROR_MSG) && map.containsKey(ReportConstants.SLA_ERROR_MSG)) {
+        //        return;
+        //    }
+        //    errMsg = StringUtils.trim(errMsg);
+        //    if (!errMsg.startsWith("[") && !errMsg.startsWith("{") && errMsg.length() > 100) {
+        //        errMsg = errMsg.substring(0, 100);
+        //    }
+        //    String existsMsg = map.get(errKey);
+        //    if (StringUtils.isBlank(existsMsg)) {
+        //        map.put(errKey, errMsg);
+        //    } else if (existsMsg.length() < 10000) {
+        //        map.put(errKey, existsMsg + "、" + errMsg);
+        //    }
+        //    reportResult.setFeatures(GsonUtil.gsonToString(map));
+        //}
     }
 
     @Override
