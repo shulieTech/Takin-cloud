@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -36,6 +37,7 @@ import io.shulie.takin.cloud.data.mapper.mysql.ReportBusinessActivityDetailMappe
  * @author 无涯
  * @date 2020/12/17 3:31 下午
  */
+@Slf4j
 @Service
 public class ReportDaoImpl implements ReportDao {
 
@@ -81,12 +83,15 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public ReportResult selectById(Long id) {
+        String envCode = CloudPluginUtils.getEnvCode();
+        Long tenantId = CloudPluginUtils.getTenantId();
         List<ReportEntity> entityList = reportMapper.selectList(
             Wrappers.lambdaQuery(ReportEntity.class)
                 .eq(ReportEntity::getId, id)
-                .eq(ReportEntity::getEnvCode, CloudPluginUtils.getEnvCode())
-                .eq(ReportEntity::getTenantId, CloudPluginUtils.getTenantId())
+                .eq(ReportEntity::getEnvCode, envCode)
+                .eq(ReportEntity::getTenantId, tenantId)
         );
+        log.info("临时使用，查看参数报告id{},环境code{},租户id{}，" ,id,envCode,tenantId);
         if (entityList.size() != 1) {return null;}
         return BeanUtil.copyProperties(entityList.get(0), ReportResult.class);
     }
