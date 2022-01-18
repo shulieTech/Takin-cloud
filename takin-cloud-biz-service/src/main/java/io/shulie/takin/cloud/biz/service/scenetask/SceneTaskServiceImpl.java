@@ -79,6 +79,7 @@ import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
+import io.shulie.takin.cloud.biz.service.sla.impl.SlaServiceImpl;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
@@ -256,6 +257,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //流量冻结
         frozenAccountFlow(input, report, sceneData);
 
+        // 清除SLA条件缓存
+        redisClientUtils.hmdelete(SlaServiceImpl.SLA_SCENE_KEY, String.valueOf(input.getSceneId()));
         //设置缓存，用以检查压测场景启动状态
         taskStatusCache.cacheStatus(input.getSceneId(), report.getId(), SceneRunTaskStatusEnum.STARTING);
         //缓存pod数量，上传jmeter日志时判断是否所有文件都上传完成
