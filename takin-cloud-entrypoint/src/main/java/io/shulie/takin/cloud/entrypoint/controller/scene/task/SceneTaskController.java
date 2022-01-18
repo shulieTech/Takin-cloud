@@ -291,8 +291,7 @@ public class SceneTaskController {
         SceneTaskStartCheckInput input = new SceneTaskStartCheckInput();
         input.setSceneId(sceneId);
         SceneTaskStartCheckOutput output = sceneTaskService.sceneStartCsvPositionCheck(input);
-        SceneStartCheckResp resp = new SceneStartCheckResp();
-        BeanUtils.copyProperties(output, resp);
+        SceneStartCheckResp resp = BeanUtil.copyProperties(output, SceneStartCheckResp.class);
         return ResponseResult.success(resp);
     }
 
