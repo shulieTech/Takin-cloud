@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS `t_pressure_task` (
     `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `gmt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `gmt_modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
-    `is_delete` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除，1是，0否',
+    `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除，1是，0否',
     `tenant_id` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '租户ID',
     `env_code` varchar(100) NOT NULL COMMENT '环境编码',
     `scene_id` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '场景id，注意这里的场景包含压测场景、巡检场景等',
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `t_pressure_task` (
     `script_deploy_id` bigint(20) unsigned DEFAULT NULL COMMENT '脚本发布记录id',
     `script_nodes` longtext COMMENT '脚本节点信息',
     `status` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT '状态：0压测引擎启动中，1压测中，2压测停止，3失败',
-    `admin_id` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '操作者ID',
+    `admin_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '操作者ID',
     `gmt_start` datetime DEFAULT NULL COMMENT '压测启动时间',
     `gmt_end` datetime DEFAULT NULL COMMENT '压测结束时间',
     `pod_num` int(10) unsigned NOT NULL COMMENT '启动的pod个数',
@@ -28,8 +28,12 @@ CREATE TABLE IF NOT EXISTS `t_pressure_task` (
     `jvm_settings` varchar(255) NOT NULL DEFAULT '' COMMENT 'jvm参数',
     `fix_timer` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '巡检任务巡间隔时间',
     `gmt_live` datetime DEFAULT NULL COMMENT '最后一次存活上报时间',
+    `throughput` int(10) unsigned DEFAULT NULL COMMENT '并发线程数，试跑的场景使用',
+    `loops_num` bigint(20) DEFAULT NULL COMMENT '循环次数，试跑等场景使用',
+    `trace_sampling` int(10) unsigned DEFAULT NULL COMMENT '采样率',
+    `continue_read` tinyint(1) DEFAULT NULL COMMENT '是否继续上次的位置继续读',
     PRIMARY KEY (`id`),
     KEY `idx_scene_id_type` (`scene_id`,`scene_type`),
-    KEY `idx_status` (`status`,`is_delete`),
+    KEY `idx_status` (`status`,`is_deleted`),
     KEY `idx_tenant_id_env_code` (`tenant_id`,`env_code`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT ='压测引擎压测任务表';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COMMENT='压测任务表';

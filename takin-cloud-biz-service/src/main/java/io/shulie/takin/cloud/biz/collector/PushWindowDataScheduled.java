@@ -1086,7 +1086,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
      * 每次从redis中取10秒前的数据
      */
     @Async("collectorSchedulerPool")
-    @Scheduled(cron = "0/5 * * * * ? ")
+//    @Scheduled(cron = "0/5 * * * * ? ")
     public void pushData() {
         if (!schedulingEnabled) {
             return;
