@@ -10,6 +10,7 @@ import javax.annotation.Resource;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -83,11 +84,13 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public ReportResult selectById(Long id) {
+        String envCode = CloudPluginUtils.getContext() == null ? null : CloudPluginUtils.getEnvCode();
+        Long tenantId = CloudPluginUtils.getContext() == null ? null : CloudPluginUtils.getTenantId();
         List<ReportEntity> entityList = reportMapper.selectList(
             Wrappers.lambdaQuery(ReportEntity.class)
                 .eq(ReportEntity::getId, id)
-                .eq(ReportEntity::getEnvCode, CloudPluginUtils.getEnvCode())
-                .eq(ReportEntity::getTenantId, CloudPluginUtils.getTenantId())
+                .eq(envCode != null, ReportEntity::getEnvCode, envCode)
+                .eq(tenantId != null, ReportEntity::getTenantId, tenantId)
         );
         if (entityList.size() != 1) {return null;}
         return BeanUtil.copyProperties(entityList.get(0), ReportResult.class);
