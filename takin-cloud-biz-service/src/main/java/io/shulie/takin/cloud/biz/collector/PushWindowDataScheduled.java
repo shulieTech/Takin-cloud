@@ -599,6 +599,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         }
         List<PressureOutput> childPressures = node.getChildren().stream().filter(Objects::nonNull)
                 .map(n -> countPressure(n, sourceMap, results))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         result = countPressure(node, childPressures, sourceMap);
         if (null != result) {
@@ -624,15 +625,28 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         if (0 == time) {
             return null;
         }
+        List<String> transactions = CommonUtil.getList(childPressures, PressureOutput::getTransaction);
         //多级子节点,满足过滤条件的多级子节点:如果节点含有事务控制器，则节点的count=事务控制器的count+所有事务控制器子节点的count
-        List<ScriptNode> childNodes = JmxUtil.getChildNodesByFilterFunc(node, n -> sourceMap.containsKey(n.getXpathMd5()));
+        List<ScriptNode> childNodes = JmxUtil.getChildNodesByFilterFunc(node, n -> {
+            if (!sourceMap.containsKey(n.getXpathMd5())) {
+                return false;
+            }
+            if (null != transactions && transactions.contains(n.getXpathMd5())) {
+                return false;
+            }
+            return true;
+        });
         List<PressureOutput> subPressures = childPressures;
         if (CollectionUtils.isNotEmpty(childNodes)) {
-            subPressures = childNodes.stream().filter(Objects::nonNull)
+            List<PressureOutput> temps = childNodes.stream().filter(Objects::nonNull)
                     .map(ScriptNode::getXpathMd5)
                     .filter(StringUtils::isNotBlank)
                     .map(sourceMap::get)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(temps)) {
+                subPressures.addAll(temps);
+            }
         }
 
         int count = NumberUtil.sum(subPressures, PressureOutput::getCount);
