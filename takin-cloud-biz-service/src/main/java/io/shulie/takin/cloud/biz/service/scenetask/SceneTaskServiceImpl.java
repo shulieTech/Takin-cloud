@@ -110,7 +110,6 @@ import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStartOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneRunTaskStatusOutput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskUpdateTpsInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneStartTrialRunInput;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneTaskStartCheckInput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput;
@@ -280,10 +279,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     public void stop(Long sceneId) {
         SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);
         if (sceneManage == null) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "压测场景不存在");
+            throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "压测场景不存在" + sceneId);
         }
-        if (SceneManageStatusEnum.ifStop(sceneManage.getStatus())) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "场景状态不为压测中");
+        if (SceneManageStatusEnum.canStop(sceneManage.getStatus())) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "场景状态不为压测中:" + sceneManage.getStatus());
         }
         ReportResult reportResult = reportDao.getReportBySceneId(sceneId);
 
@@ -345,7 +344,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             if (reportResult.getStatus() != null && reportResult.getStatus() > 0) {
                 scene.setData(0L);
             } else {
-                scene.setData(SceneManageStatusEnum.PTING.getValue().longValue());
+                scene.setData(SceneManageStatusEnum.PRESSURE_TESTING.getValue().longValue());
             }
         } else {
             SceneManageEntity sceneManage = sceneManageDAO.getSceneById(sceneId);

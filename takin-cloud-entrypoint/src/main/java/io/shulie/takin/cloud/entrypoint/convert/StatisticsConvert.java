@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.bean.BeanUtil;
-import org.springframework.beans.BeanUtils;
 
 import io.shulie.takin.cloud.biz.output.statistics.ReportTotalOutput;
 import io.shulie.takin.cloud.biz.output.statistics.PressurePieTotalOutput;
@@ -19,15 +18,11 @@ import io.shulie.takin.cloud.sdk.model.response.statistics.PressureListTotalResp
  */
 public class StatisticsConvert {
     public static PressurePieTotalResp of(PressurePieTotalOutput output) {
-        PressurePieTotalResp resp = new PressurePieTotalResp();
-        BeanUtils.copyProperties(output, resp);
-        return resp;
+        return BeanUtil.copyProperties(output, PressurePieTotalResp.class);
     }
 
     public static ReportTotalResp of(ReportTotalOutput output) {
-        ReportTotalResp resp = new ReportTotalResp();
-        BeanUtils.copyProperties(output, resp);
-        return resp;
+        return BeanUtil.copyProperties(output, ReportTotalResp.class);
     }
 
     public static List<PressureListTotalResp> of(List<PressureListTotalOutput> output) {

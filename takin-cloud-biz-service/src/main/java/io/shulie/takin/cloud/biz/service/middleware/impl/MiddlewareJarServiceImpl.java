@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.json.JSONArray;
@@ -42,7 +43,6 @@ import io.shulie.takin.cloud.common.pojo.vo.middleware.CompareMiddlewareJarResul
 import io.shulie.takin.cloud.common.enums.middleware.CompareMiddlewareJarStatusEnum;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -137,10 +137,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
             if (StrUtil.isBlank(artifactId)) {
                 return null;
             }
-
-            CompareMiddlewareJarResultVO compareResultVO = new CompareMiddlewareJarResultVO();
-            BeanUtils.copyProperties(importVO, compareResultVO);
-            return compareResultVO;
+            return BeanUtil.copyProperties(importVO, CompareMiddlewareJarResultVO.class);
         }).filter(Objects::nonNull).collect(Collectors.toList());
         if (correctList.isEmpty()) {
             return Collections.emptyList();
@@ -393,8 +390,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
                 return null;
             }
 
-            CompareMiddlewareJarResultVO compareResultVO = new CompareMiddlewareJarResultVO();
-            BeanUtils.copyProperties(importVO, compareResultVO);
+            CompareMiddlewareJarResultVO compareResultVO = BeanUtil.copyProperties(importVO, CompareMiddlewareJarResultVO.class);
             compareResultVO.setRemark("artifactId 未填写");
             return compareResultVO;
 
@@ -443,8 +439,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
                 messages.add("导入成功");
             }
 
-            ImportMiddlewareJarResultVO exportVO = new ImportMiddlewareJarResultVO();
-            BeanUtils.copyProperties(importVO, exportVO);
+            ImportMiddlewareJarResultVO exportVO = BeanUtil.copyProperties(importVO, ImportMiddlewareJarResultVO.class);
             String remark = String.join(COMMA_SPACE, messages);
             exportVO.setRemark(remark);
             return exportVO;
@@ -487,8 +482,7 @@ public class MiddlewareJarServiceImpl implements MiddlewareJarService, CloudAppC
                     return null;
                 }
 
-                CreateMiddleWareJarParam param = new CreateMiddleWareJarParam();
-                BeanUtils.copyProperties(importVO, param);
+                CreateMiddleWareJarParam param = BeanUtil.copyProperties(importVO, CreateMiddleWareJarParam.class);
                 param.setStatus(middlewareJarStatusEnum.getCode());
                 param.setAgv(String.format("%s_%s_%s", artifactId, groupId, version));
                 return param;

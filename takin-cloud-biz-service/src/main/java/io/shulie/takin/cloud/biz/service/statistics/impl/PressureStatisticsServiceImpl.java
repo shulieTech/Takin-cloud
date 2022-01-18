@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.biz.cloudserver.StatisticsConverter;
 import io.shulie.takin.cloud.biz.input.statistics.PressureTotalInput;
@@ -16,7 +17,6 @@ import io.shulie.takin.cloud.data.dao.statistics.StatisticsManageDao;
 import io.shulie.takin.cloud.data.result.statistics.PressureListTotalResult;
 import io.shulie.takin.cloud.data.result.statistics.PressurePieTotalResult;
 import io.shulie.takin.cloud.data.result.statistics.ReportTotalResult;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,10 +54,10 @@ public class PressureStatisticsServiceImpl implements PressureStatisticsService 
                 });
         }
         // 判断下是否有压测中
-        if (totals.stream().noneMatch(total -> total.getType().equals(SceneManageStatusEnum.PTING.getDesc()))) {
+        if (totals.stream().noneMatch(total -> total.getType().equals(SceneManageStatusEnum.PRESSURE_TESTING.getDesc()))) {
             PressurePieTotalOutput.PressurePieTotal pieTotal = new PressurePieTotalOutput.PressurePieTotal();
             pieTotal.setValue(0);
-            pieTotal.setType(SceneManageStatusEnum.PTING.getDesc());
+            pieTotal.setType(SceneManageStatusEnum.PRESSURE_TESTING.getDesc());
             totals.add(pieTotal);
         }
         // 判断是否有待启动
@@ -78,9 +78,7 @@ public class PressureStatisticsServiceImpl implements PressureStatisticsService 
     public ReportTotalOutput getReportTotal(PressureTotalInput input) {
         // 需要先统计这个时间内创建的场景
         ReportTotalResult result = statisticsManageDao.getReportTotal(input.getStartTime(), input.getEndTime());
-        ReportTotalOutput output = new ReportTotalOutput();
-        BeanUtils.copyProperties(result, output);
-        return output;
+        return BeanUtil.copyProperties(result, ReportTotalOutput.class);
     }
 
     @Override
