@@ -100,19 +100,10 @@ public class SceneManageDetailController {
      */
     @ApiOperation(value = "压测场景编辑详情-无租户")
     @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_DETAIL_NO_AUTH)
-    public ResponseResult<SceneManageWrapperResponse> getDetailNoAuth(@ApiParam Long sceneId) {
-        try {
-            SceneManageWrapperOutput sceneManage = sceneManageService.getSceneManage(sceneId,
-                new SceneManageQueryOpitons() {{
-                    setIncludeSLA(true);
-                    setIncludeScript(true);
-                    setIncludeBusinessActivity(true);
-                }});
-            assembleFeatures2(sceneManage);
-            return wrapperSceneManage(sceneManage);
-        } catch (TakinCloudException exception) {
-            return ResponseResult.fail(TakinCloudExceptionEnum.REPORT_GET_ERROR.getErrorCode(), exception.getMessage(), "");
-        }
+    public ResponseResult<SceneManageWrapperResponse> getDetailNoAuth(
+        @ApiParam(name = "id", value = "ID") Long id,
+        @ApiParam(name = "reportId", value = "reportId") Long reportId) {
+        return getDetailForEdit(id, reportId);
     }
 
     public void assembleFeatures2(SceneManageWrapperOutput resp) {

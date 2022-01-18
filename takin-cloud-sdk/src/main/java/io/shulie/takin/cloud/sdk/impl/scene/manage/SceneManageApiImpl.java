@@ -68,9 +68,9 @@ public class SceneManageApiImpl implements SceneManageApi {
     }
 
     @Override
-    public SceneManageWrapperResp getSceneDetailNoAuth(SceneManageQueryReq query) {
+    public SceneManageWrapperResp getSceneDetailNoAuth(SceneManageIdReq req) {
         return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_MANAGE, EntrypointUrl.METHOD_SCENE_MANAGE_DETAIL_NO_AUTH),
-            query, new TypeReference<ResponseResult<SceneManageWrapperResp>>() {}).getData();
+            req, new TypeReference<ResponseResult<SceneManageWrapperResp>>() {}).getData();
     }
 
     @Override
