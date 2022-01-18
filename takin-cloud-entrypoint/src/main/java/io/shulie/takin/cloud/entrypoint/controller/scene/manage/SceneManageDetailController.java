@@ -46,7 +46,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -94,6 +93,17 @@ public class SceneManageDetailController {
         } catch (TakinCloudException exception) {
             return ResponseResult.fail(TakinCloudExceptionEnum.REPORT_GET_ERROR.getErrorCode(), exception.getMessage(), "");
         }
+    }
+
+    /**
+     * 无租户版本
+     */
+    @ApiOperation(value = "压测场景编辑详情-无租户")
+    @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_DETAIL_NO_AUTH)
+    public ResponseResult<SceneManageWrapperResponse> getDetailNoAuth(
+        @ApiParam(name = "id", value = "ID") Long id,
+        @ApiParam(name = "reportId", value = "reportId") Long reportId) {
+        return getDetailForEdit(id, reportId);
     }
 
     public void assembleFeatures2(SceneManageWrapperOutput resp) {
@@ -267,8 +277,7 @@ public class SceneManageDetailController {
     }
 
     private String buildRule(SceneSlaRefResponse slaRefDTO) {
-        SceneSlaRefInput input = new SceneSlaRefInput();
-        BeanUtils.copyProperties(slaRefDTO, input);
+        SceneSlaRefInput input = BeanUtil.copyProperties(slaRefDTO, SceneSlaRefInput.class);
         Map<String, Object> dataMap = SlaUtil.matchCondition(input, new SendMetricsEvent());
         return String.valueOf(dataMap.get("type"))
             + dataMap.get("compare")

@@ -64,7 +64,6 @@ import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -131,14 +130,12 @@ public class SceneTaskController {
     public ResponseResult<SceneActionResp> start(@RequestBody SceneTaskStartReq request) {
         // 填充数据溯源信息
         CloudPluginUtils.fillUserData(request);
-        SceneTaskStartInput input = new SceneTaskStartInput();
-        BeanUtils.copyProperties(request, input);
+        SceneTaskStartInput input = BeanUtil.copyProperties(request, SceneTaskStartInput.class);
         // 设置用户主键
         input.setOperateId(request.getUserId());
         // 启动场景
         SceneActionOutput output = sceneTaskService.start(input);
-        SceneActionResp resp = new SceneActionResp();
-        BeanUtils.copyProperties(output, resp);
+        SceneActionResp resp = BeanUtil.copyProperties(output, SceneActionResp.class);
         return ResponseResult.success(resp);
     }
 
@@ -177,8 +174,7 @@ public class SceneTaskController {
             }}).collect(Collectors.toList());
         }
         SceneInspectTaskStartOutput output = sceneTaskService.startInspectTask(input, enginePluginInputs);
-        SceneInspectTaskStartResp startResp = new SceneInspectTaskStartResp();
-        BeanUtils.copyProperties(output, startResp);
+        SceneInspectTaskStartResp startResp = BeanUtil.copyProperties(output, SceneInspectTaskStartResp.class);
         return ResponseResult.success(startResp);
     }
 
@@ -186,8 +182,7 @@ public class SceneTaskController {
     @ApiOperation(value = "强制停止任务，提示：可能会造成压测数据丢失")
     ResponseResult<SceneTaskStopResp> forceStopTask(@RequestBody TaskStopReq req) {
         SceneTaskStopOutput output = sceneTaskService.forceStopTask(req.getReportId(), req.isFinishReport());
-        SceneTaskStopResp stopResp = new SceneTaskStopResp();
-        BeanUtils.copyProperties(output, stopResp);
+        SceneTaskStopResp stopResp = BeanUtil.copyProperties(output, SceneTaskStopResp.class);
         return ResponseResult.success(stopResp);
     }
 
@@ -195,8 +190,7 @@ public class SceneTaskController {
     @ApiOperation(value = "停止巡检任务")
     ResponseResult<SceneInspectTaskStopResp> stopInspectTask(@RequestBody TaskInspectStopReq taskFlowDebugStopReq) {
         SceneInspectTaskStopOutput output = sceneTaskService.stopInspectTask(taskFlowDebugStopReq.getSceneId());
-        SceneInspectTaskStopResp stopResp = new SceneInspectTaskStopResp();
-        BeanUtils.copyProperties(output, stopResp);
+        SceneInspectTaskStopResp stopResp = BeanUtil.copyProperties(output, SceneInspectTaskStopResp.class);
         return ResponseResult.success(stopResp);
     }
 
@@ -257,11 +251,9 @@ public class SceneTaskController {
                 setPluginVersion(plugin.getVersion());
             }}).collect(Collectors.toList());
         }
-        SceneTryRunTaskStartOutput sceneTryRunTaskStartOutput = sceneTaskService.startTryRun(input,
-            enginePluginInputs);
-        SceneTryRunTaskStartResp sceneTryRunTaskStartResp = new SceneTryRunTaskStartResp();
-        BeanUtils.copyProperties(sceneTryRunTaskStartOutput, sceneTryRunTaskStartResp);
-        return ResponseResult.success(sceneTryRunTaskStartResp);
+        SceneTryRunTaskStartOutput output = sceneTaskService.startTryRun(input, enginePluginInputs);
+        SceneTryRunTaskStartResp response = BeanUtil.copyProperties(output, SceneTryRunTaskStartResp.class);
+        return ResponseResult.success(response);
     }
 
     @GetMapping(EntrypointUrl.METHOD_SCENE_TASK_CALL_BACK_TO_WRITE_BALANCE)
@@ -274,10 +266,8 @@ public class SceneTaskController {
     @GetMapping(EntrypointUrl.METHOD_SCENE_TASK_CHECK_STATUS)
     @ApiOperation(value = "查询试跑状态")
     public ResponseResult<SceneTryRunTaskStatusResp> checkTaskStatus(@RequestParam Long sceneId, @RequestParam Long reportId) {
-        SceneTryRunTaskStatusOutput sceneTryRunTaskStatusOutput = sceneTaskService.checkTaskStatus(sceneId,
-            reportId);
-        SceneTryRunTaskStatusResp resp = new SceneTryRunTaskStatusResp();
-        BeanUtils.copyProperties(sceneTryRunTaskStatusOutput, resp);
+        SceneTryRunTaskStatusOutput output = sceneTaskService.checkTaskStatus(sceneId, reportId);
+        SceneTryRunTaskStatusResp resp = BeanUtil.copyProperties(output, SceneTryRunTaskStatusResp.class);
         return ResponseResult.success(resp);
     }
 
@@ -297,8 +287,7 @@ public class SceneTaskController {
         SceneTaskStartCheckInput input = new SceneTaskStartCheckInput();
         input.setSceneId(sceneId);
         SceneTaskStartCheckOutput output = sceneTaskService.sceneStartCsvPositionCheck(input);
-        SceneStartCheckResp resp = new SceneStartCheckResp();
-        BeanUtils.copyProperties(output, resp);
+        SceneStartCheckResp resp = BeanUtil.copyProperties(output, SceneStartCheckResp.class);
         return ResponseResult.success(resp);
     }
 

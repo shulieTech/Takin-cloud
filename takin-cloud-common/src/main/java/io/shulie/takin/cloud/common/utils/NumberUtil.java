@@ -17,9 +17,14 @@ package io.shulie.takin.cloud.common.utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.function.Function;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -29,6 +34,124 @@ import org.apache.commons.lang3.math.NumberUtils;
  */
 @Slf4j
 public class NumberUtil {
+    public static <T> double maxDouble(Collection<T> list, Function<T, Double> func) {
+        return maxDouble(list, func, 0d);
+    }
+    public static <T> Double maxDouble(Collection<T> list, Function<T, Double> func, Double defValue) {
+        if (CollectionUtils.isEmpty(list)) {
+            return defValue;
+        }
+        OptionalDouble maxOpt = list.stream().filter(Objects::nonNull)
+                .map(func)
+                .filter(Objects::nonNull)
+                .mapToDouble(d -> d)
+                .max();
+        return maxOpt.isPresent() ? maxOpt.getAsDouble() : defValue;
+    }
+
+    public static <T> int maxInt(Collection<T> list, Function<T, Integer> func) {
+        return maxInt(list, func, 0);
+    }
+    public static <T> Integer maxInt(Collection<T> list, Function<T, Integer> func, Integer defValue) {
+        if (CollectionUtils.isEmpty(list)) {
+            return defValue;
+        }
+        OptionalInt maxOpt = list.stream().filter(Objects::nonNull)
+                .map(func)
+                .filter(Objects::nonNull)
+                .mapToInt(d -> d)
+                .max();
+        return maxOpt.isPresent() ? maxOpt.getAsInt() : defValue;
+    }
+
+    public static <T> double minDouble(Collection<T> list, Function<T, Double> func) {
+        return maxDouble(list, func, 0d);
+    }
+    public static <T> Double minDouble(Collection<T> list, Function<T, Double> func, Double defValue) {
+        if (CollectionUtils.isEmpty(list)) {
+            return defValue;
+        }
+        OptionalDouble minOpt = list.stream().filter(Objects::nonNull)
+                .map(func)
+                .filter(Objects::nonNull)
+                .mapToDouble(d -> d)
+                .min();
+        return minOpt.isPresent() ? minOpt.getAsDouble() : defValue;
+    }
+
+    public static <T> int minInt(Collection<T> list, Function<T, Integer> func) {
+        return minInt(list, func, 0);
+    }
+    public static <T> Integer minInt(Collection<T> list, Function<T, Integer> func, Integer defValue) {
+        if (CollectionUtils.isEmpty(list)) {
+            return defValue;
+        }
+        OptionalInt minOpt = list.stream().filter(Objects::nonNull)
+                .map(func)
+                .filter(Objects::nonNull)
+                .mapToInt(d -> d)
+                .min();
+        return minOpt.isPresent() ? minOpt.getAsInt() : defValue;
+    }
+    /**
+     * 从list中对某个字段的数字进行累加
+     * 区别CommUtil.sum方法，一个是返回默认值0，一个返回null
+     */
+    public static <T> int sum(Collection<T> list, Function<T, Integer> func) {
+        return sum(list, func, 0);
+    }
+
+    public static <T> Integer sum(Collection<T> list, Function<T, Integer> func, Integer defValue) {
+        if (CollectionUtils.isEmpty(list)) {
+            return defValue;
+        }
+        return list.stream().filter(Objects::nonNull)
+                .map(func)
+                .filter(Objects::nonNull)
+                .mapToInt(d -> d)
+                .sum();
+    }
+
+    public static <T> Long sumLong(Collection<T> list, Function<T, Long> func) {
+        return sumLong(list, func, 0L);
+    }
+
+    public static <T> Long sumLong(Collection<T> list, Function<T, Long> func, Long defValue) {
+        if (CollectionUtils.isEmpty(list)) {
+            return defValue;
+        }
+        return list.stream().filter(Objects::nonNull)
+                .map(func)
+                .filter(Objects::nonNull)
+                .mapToLong(d -> d)
+                .sum();
+    }
+
+    public static <T> Double sumDouble(Collection<T> list, Function<T, Double> func) {
+        return sumDouble(list, func, 0d);
+    }
+
+    public static <T> Double sumDouble(Collection<T> list, Function<T, Double> func, Double devValue) {
+        if (CollectionUtils.isEmpty(list)) {
+            return devValue;
+        }
+        return list.stream().filter(Objects::nonNull)
+                .map(func)
+                .filter(Objects::nonNull)
+                .mapToDouble(d -> d)
+                .sum();
+    }
+
+    public static int sum(Integer a, Integer b) {
+        if (null == a) {
+            a = 0;
+        }
+        if (null == b) {
+            b = 0;
+        }
+        return a+b;
+    }
+
     public static int parseInt(String s) {
         return parseInt(s, 0);
     }

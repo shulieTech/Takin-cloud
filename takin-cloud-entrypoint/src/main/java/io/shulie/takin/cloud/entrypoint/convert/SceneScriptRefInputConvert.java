@@ -1,12 +1,13 @@
 package io.shulie.takin.cloud.entrypoint.convert;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
+
+import cn.hutool.core.bean.BeanUtil;
+import org.apache.commons.collections4.CollectionUtils;
 
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneScriptRefInput;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneScriptRefOpen;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.BeanUtils;
 
 /**
  * @author mubai
@@ -15,9 +16,7 @@ import org.springframework.beans.BeanUtils;
 public class SceneScriptRefInputConvert {
 
     public static SceneScriptRefInput of(SceneScriptRefOpen in) {
-        SceneScriptRefInput out = new SceneScriptRefInput();
-        BeanUtils.copyProperties(in, out);
-        return out;
+        return BeanUtil.copyProperties(in, SceneScriptRefInput.class);
     }
 
     public static List<SceneScriptRefInput> ofList(List<SceneScriptRefOpen> list) {
