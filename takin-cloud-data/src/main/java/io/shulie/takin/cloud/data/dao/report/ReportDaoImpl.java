@@ -83,15 +83,12 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public ReportResult selectById(Long id) {
-        String envCode = CloudPluginUtils.getEnvCode();
-        Long tenantId = CloudPluginUtils.getTenantId();
         List<ReportEntity> entityList = reportMapper.selectList(
             Wrappers.lambdaQuery(ReportEntity.class)
                 .eq(ReportEntity::getId, id)
-                .eq(ReportEntity::getEnvCode, envCode)
-                .eq(ReportEntity::getTenantId, tenantId)
+                .eq(ReportEntity::getEnvCode, CloudPluginUtils.getEnvCode())
+                .eq(ReportEntity::getTenantId, CloudPluginUtils.getTenantId())
         );
-        log.info("临时使用，查看参数报告id{},环境code{},租户id{}，" ,id,envCode,tenantId);
         if (entityList.size() != 1) {return null;}
         return BeanUtil.copyProperties(entityList.get(0), ReportResult.class);
     }
