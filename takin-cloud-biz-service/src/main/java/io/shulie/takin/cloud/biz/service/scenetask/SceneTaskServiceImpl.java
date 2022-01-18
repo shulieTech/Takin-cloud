@@ -281,8 +281,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         if (sceneManage == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "压测场景不存在" + sceneId);
         }
-        if (SceneManageStatusEnum.canStop(sceneManage.getStatus())) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "场景状态不为压测中:" + sceneManage.getStatus());
+        //压测场景已经关闭，不做处理
+        if (SceneManageStatusEnum.ifFree(sceneManage.getStatus())) {
+            return;
         }
         ReportResult reportResult = reportDao.getReportBySceneId(sceneId);
 
