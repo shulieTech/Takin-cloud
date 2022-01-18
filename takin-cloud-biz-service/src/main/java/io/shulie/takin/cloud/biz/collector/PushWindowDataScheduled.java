@@ -636,7 +636,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             }
             return true;
         });
-        List<PressureOutput> subPressures = childPressures;
+        List<PressureOutput> subPressures = Lists.newArrayList(childPressures);
         if (CollectionUtils.isNotEmpty(childNodes)) {
             List<PressureOutput> temps = childNodes.stream().filter(Objects::nonNull)
                     .map(ScriptNode::getXpathMd5)
