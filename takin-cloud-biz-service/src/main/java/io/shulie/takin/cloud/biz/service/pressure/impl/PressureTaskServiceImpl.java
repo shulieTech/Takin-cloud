@@ -14,6 +14,7 @@ import io.shulie.takin.cloud.biz.service.engine.EnginePluginFilesService;
 import io.shulie.takin.cloud.biz.service.pressure.PressureTaskService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.utils.DataUtils;
+import io.shulie.takin.cloud.common.bean.TimeBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
@@ -78,8 +79,11 @@ public class PressureTaskServiceImpl implements PressureTaskService {
         config.setPodCount(po.getPodNum());
         config.setScriptFile(po.getScriptFile());
         config.setScriptFileDir(DataUtils.mergeDirPath(appConfig.getNfsDir(), File.separator));
-        long holdTime = TimeUnit.SECONDS.convert(po.getHoldTime(), po.getHoldTimeUnit().getUnit());
-        config.setContinuedTime(holdTime);
+        if (null != po.getHoldTime()) {
+            TimeBean timeBean = new TimeBean(po.getHoldTime(), po.getHoldTimeUnit());
+            long holdTime = timeBean.getSecondTime();
+            config.setContinuedTime(holdTime);
+        }
 
         if (null != po.getThroughput()) {
             config.setExpectThroughput(po.getThroughput() / po.getPodNum());

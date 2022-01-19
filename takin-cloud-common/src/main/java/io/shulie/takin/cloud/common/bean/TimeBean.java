@@ -26,13 +26,16 @@ public class TimeBean {
         this.unit = unit;
     }
 
+    public TimeBean(Long time, TimeUnitEnum unit) {
+        this(time, null == unit ? null : unit.getValue());
+    }
+
     /**
      * 返回单位为秒的时间
      */
     public long getSecondTime() {
         TimeUnitEnum e = TimeUnitEnum.value(unit);
         long t = CommonUtil.getValue(0L, this, TimeBean::getTime);
-        ;
         if (null != e) {
             t = TimeUnit.SECONDS.convert(t, e.getUnit());
         }
