@@ -23,6 +23,11 @@ public class StatReportDTO {
     private Long totalRequest;
 
     /**
+     * 5s请求数
+     */
+    private Long tempRequestCount;
+
+    /**
      * 失败的总次数
      */
     private Long failRequest;

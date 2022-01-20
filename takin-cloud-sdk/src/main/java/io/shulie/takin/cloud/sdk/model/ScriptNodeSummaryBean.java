@@ -63,6 +63,9 @@ public class ScriptNodeSummaryBean {
     @ApiModelProperty(value = "总请求")
     private Long totalRequest;
 
+    @ApiModelProperty(value = "5s请求数")
+    private Long tempRequestCount;
+
     @ApiModelProperty(value = "平均线程数")
     private BigDecimal avgConcurrenceNum;
 
