@@ -263,7 +263,11 @@ public class PressureTaskServiceImpl implements PressureTaskService {
             return 0;
         }
         PressureTaskEntity entity = PressureTaskConvertor.INSTANCE.of(po);
-        return pressureTaskDao.insert(entity);
+        int n = pressureTaskDao.insert(entity);
+        if (n > 0) {
+            po.setId(entity.getId());
+        }
+        return n;
     }
 
     @Override

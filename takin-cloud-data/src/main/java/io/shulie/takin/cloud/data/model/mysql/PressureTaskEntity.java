@@ -14,22 +14,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @TableName(value = "t_pressure_task")
-public class PressureTaskEntity extends AbstractEntry {
-    @TableId(type = IdType.AUTO)
-    private Long id;
-    /**
-     * 创建时间
-     */
-    @TableField(value="gmt_create")
-    private Date gmtCreate;
-    /**
-     * 更新时间
-     */
-    @TableField(value="gmt_modified")
-    private Date gmtModified;
-    @TableLogic
-    private Integer isDeleted;
-
+public class PressureTaskEntity extends BaseDeleteEntity {
 
     /**
      * 租户主键
