@@ -72,6 +72,7 @@ public class PressureTaskServiceImpl implements PressureTaskService {
         config.setSceneId(sceneId);
         config.setTaskId(taskId);
         config.setCustomerId(tenantId);
+        config.setPressureScene(po.getSceneType().getCode());
         String consoleUrl = DataUtils.mergeUrl(appConfig.getConsole(), ScheduleConstants.getConsoleUrl(sceneId, taskId, tenantId));
         config.setConsoleUrl(consoleUrl);
         String callbackUrl = DataUtils.mergeUrl(appConfig.getConsole(), "/api/engine/callback");
@@ -122,7 +123,6 @@ public class PressureTaskServiceImpl implements PressureTaskService {
         }
         config.setEnginePluginsFiles(jarFiles);
 
-
         Map<String, BusinessActivityExt> businessData = Maps.newHashMap();
         if (null != po.getBusinessActivityConfig()) {
             Integer tps = CommonUtil.sum(po.getBusinessActivityConfig(), SceneBusinessActivityRefOpen::getTargetRT);
@@ -161,6 +161,7 @@ public class PressureTaskServiceImpl implements PressureTaskService {
         if (null != po.getLoopsNum()) {
             pressureConfig.setLoopsNum(po.getLoopsNum().intValue());
         }
+        pressureConfig.setFixedTimer(po.getFixTimer());
 
         EngineLogPtlConfigOutput engineLogPtlConfigOutput = engineConfigService.getEnginePtlConfig();
         if (null != engineLogPtlConfigOutput) {

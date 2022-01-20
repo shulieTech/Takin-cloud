@@ -25,3 +25,4 @@ logs
 plugins
 
 application-local.yml
+/engine/

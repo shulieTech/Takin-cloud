@@ -67,6 +67,10 @@ public class LocalThreadServiceImpl implements EngineCallService {
         Long customerId = config.getCustomerId();
         Integer sceneType = config.getPressureScene();
 
+        //todo 明确这2个参数是干啥的，然后考虑转移出去
+        config.setIsLocal(true);
+        config.setTaskDir(taskDir);
+
         String configFileName =  ScheduleConstants.getConfigMapName(sceneId, taskId, customerId);
         FileUtils.writeTextFile(JsonHelper.obj2StringPretty(config), taskDir + "/" + configFileName);
         String jobName = ScheduleConstants.getJobName(sceneType, sceneId, taskId, customerId);
