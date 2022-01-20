@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.data.dao.report;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.annotation.Resource;
@@ -9,6 +10,7 @@ import javax.annotation.Resource;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
+import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.data.param.report.ReportInsertParam;
 import org.springframework.beans.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -216,12 +218,7 @@ public class ReportDaoImpl implements ReportDao {
         if (CollectionUtils.isEmpty(sceneIds)){
             return null;
         }
-        LambdaQueryWrapper<ReportEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.in(ReportEntity::getSceneId,sceneIds);
-        wrapper.eq(ReportEntity::getStatus,ReportConstants.INIT_STATUS);
-        wrapper.eq(ReportEntity::getIsDeleted,0);
-        wrapper.orderByAsc(ReportEntity::getSceneId);
-        return reportMapper.selectList(wrapper);
+        return reportMapper.queryBySceneIds(sceneIds);
     }
 
     @Override

@@ -32,4 +32,17 @@
     total_request, avg_tps, avg_rt, concurrent, success_rate, sa, operate_id, features, script_node_tree,
     is_deleted, gmt_create, gmt_update
   </sql>
+
+  <select id="queryBySceneIds" parameterType="list" resultMap="BaseResultMap">
+    select t.id,t.scene_id,t.scene_name,t.status, t.gmt_create
+    from (
+        select distinct(a.id) tid, a.* from t_report a
+        where a.scene_id in
+        <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        order by a.id desc
+        ) t
+    group by t.scene_id
+  </select>
 </mapper>
