@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 @RestController
 @Api(tags = "压测相关接口", value = "压测相关接口")
 @RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_PRESSURE)
-public class PressureOpenController {
+public class PressureController {
     @Autowired
     private PressureTaskService pressureTaskService;
     @Autowired

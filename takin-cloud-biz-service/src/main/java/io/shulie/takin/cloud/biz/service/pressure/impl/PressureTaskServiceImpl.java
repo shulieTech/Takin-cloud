@@ -42,7 +42,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -73,10 +72,22 @@ public class PressureTaskServiceImpl implements PressureTaskService {
         config.setTaskId(taskId);
         config.setCustomerId(tenantId);
         config.setPressureScene(po.getSceneType().getCode());
-        String consoleUrl = DataUtils.mergeUrl(appConfig.getConsole(), ScheduleConstants.getConsoleUrl(sceneId, taskId, tenantId));
-        config.setConsoleUrl(consoleUrl);
-        String callbackUrl = DataUtils.mergeUrl(appConfig.getConsole(), "/api/engine/callback");
-        config.setCallbackUrl(callbackUrl);
+        switch (po.getSceneType()) {
+            case INSPECTION_MODE:
+                //巡检不用设置consoleUrl和callbackUrl
+                break;
+            case TRY_RUN:
+            case FLOW_DEBUG:
+            case DEFAULT:
+                String consoleUrl = DataUtils.mergeUrl(appConfig.getConsole(), ScheduleConstants.getConsoleUrl(sceneId, taskId, tenantId));
+                config.setConsoleUrl(consoleUrl);
+                String callbackUrl = DataUtils.mergeUrl(appConfig.getConsole(), "/api/engine/callback");
+                config.setCallbackUrl(callbackUrl);
+                break;
+            default:
+                break;
+        }
+
         config.setPodCount(po.getPodNum());
         config.setScriptFile(po.getScriptFile());
         config.setScriptFileDir(DataUtils.mergeDirPath(appConfig.getNfsDir(), File.separator));
