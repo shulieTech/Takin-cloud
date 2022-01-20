@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -23,7 +24,6 @@ import io.shulie.takin.cloud.biz.service.engine.EnginePluginFilesService;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginSupportedService;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,7 +105,7 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
         EnginePluginEntity pressureEnginePluginEntity = isEdit
             ? enginePluginMapper.selectById(pluginId) : new EnginePluginEntity();
 
-        BeanUtils.copyProperties(input, pressureEnginePluginEntity);
+        BeanUtil.copyProperties(input, pressureEnginePluginEntity);
         Date now = new Date();
         //保存引擎插件信息
         if (isEdit) {

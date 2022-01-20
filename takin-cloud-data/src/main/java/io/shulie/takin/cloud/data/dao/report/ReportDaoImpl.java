@@ -9,8 +9,9 @@ import javax.annotation.Resource;
 
 import java.util.stream.Collectors;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.google.common.collect.Lists;
-import org.springframework.beans.BeanUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -21,6 +22,7 @@ import io.shulie.takin.cloud.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
@@ -35,6 +37,7 @@ import io.shulie.takin.cloud.data.mapper.mysql.ReportBusinessActivityDetailMappe
  * @author 无涯
  * @date 2020/12/17 3:31 下午
  */
+@Slf4j
 @Service
 public class ReportDaoImpl implements ReportDao {
 
@@ -47,8 +50,7 @@ public class ReportDaoImpl implements ReportDao {
     @Override
     public int insert(ReportInsertParam param) {
         if (Objects.nonNull(param)) {
-            ReportEntity entity = new ReportEntity();
-            BeanUtils.copyProperties(param, entity);
+            ReportEntity entity = BeanUtil.copyProperties(param, ReportEntity.class);
             Date insertDate = new Date();
             entity.setGmtCreate(insertDate);
             entity.setGmtUpdate(insertDate);
@@ -72,24 +74,26 @@ public class ReportDaoImpl implements ReportDao {
         }
         List<ReportEntity> entities = reportMapper.selectList(wrapper);
         if (entities != null && entities.size() > 0) {
-            return entities.stream().map(entity -> {
-                ReportResult reportResult = new ReportResult();
-                BeanUtils.copyProperties(entity, reportResult);
-                return reportResult;
-            }).collect(Collectors.toList());
+            return entities.stream()
+                .map(t -> BeanUtil.copyProperties(t, ReportResult.class))
+                .collect(Collectors.toList());
         }
         return Lists.newArrayList();
     }
 
     @Override
     public ReportResult selectById(Long id) {
-        ReportEntity entity = reportMapper.selectById(id);
-        if (entity == null) {
-            return null;
-        }
-        ReportResult reportResult = new ReportResult();
-        BeanUtils.copyProperties(entity, reportResult);
-        return reportResult;
+        String envCode = CloudPluginUtils.getEnvCode();
+        Long tenantId = CloudPluginUtils.getTenantId();
+        List<ReportEntity> entityList = reportMapper.selectList(
+            Wrappers.lambdaQuery(ReportEntity.class)
+                .eq(ReportEntity::getId, id)
+                .eq(ReportEntity::getEnvCode, envCode)
+                .eq(ReportEntity::getTenantId, tenantId)
+        );
+        log.info("临时使用，查看参数报告id{},环境code{},租户id{}，" ,id,envCode,tenantId);
+        if (entityList.size() != 1) {return null;}
+        return BeanUtil.copyProperties(entityList.get(0), ReportResult.class);
     }
 
     /**
@@ -106,24 +110,20 @@ public class ReportDaoImpl implements ReportDao {
         wrapper.last("limit 1");
         List<ReportEntity> entities = reportMapper.selectList(wrapper);
         if (entities != null && entities.size() > 0) {
-            ReportResult reportResult = new ReportResult();
-            BeanUtils.copyProperties(entities.get(0), reportResult);
-            return reportResult;
+            return BeanUtil.copyProperties(entities.get(0), ReportResult.class);
         }
         return null;
     }
 
     @Override
     public void updateReportConclusion(ReportUpdateConclusionParam param) {
-        ReportEntity entity = new ReportEntity();
-        BeanUtils.copyProperties(param, entity);
+        ReportEntity entity = BeanUtil.copyProperties(param, ReportEntity.class);
         reportMapper.updateById(entity);
     }
 
     @Override
     public void updateReport(ReportUpdateParam param) {
-        ReportEntity entity = new ReportEntity();
-        BeanUtils.copyProperties(param, entity);
+        ReportEntity entity = BeanUtil.copyProperties(param, ReportEntity.class);
         if (null == param.getGmtUpdate()) {
             entity.setGmtUpdate(Calendar.getInstance().getTime());
         }
@@ -157,9 +157,7 @@ public class ReportDaoImpl implements ReportDao {
         wrapper.last("limit 1");
         List<ReportEntity> entities = reportMapper.selectList(wrapper);
         if (entities != null && entities.size() > 0) {
-            ReportResult reportResult = new ReportResult();
-            BeanUtils.copyProperties(entities.get(0), reportResult);
-            return reportResult;
+            return BeanUtil.copyProperties(entities.get(0), ReportResult.class);
         }
         return null;
     }
@@ -175,9 +173,7 @@ public class ReportDaoImpl implements ReportDao {
         wrapper.last("limit 1");
         List<ReportEntity> entities = reportMapper.selectList(wrapper);
         if (entities != null && entities.size() > 0) {
-            ReportResult reportResult = new ReportResult();
-            BeanUtils.copyProperties(entities.get(0), reportResult);
-            return reportResult;
+            return BeanUtil.copyProperties(entities.get(0), ReportResult.class);
         }
         return null;
     }
@@ -216,13 +212,9 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public ReportResult getById(Long resultId) {
-        if (resultId == null) {
-            return null;
-        }
+        if (resultId == null) {return null;}
         ReportEntity reportEntity = reportMapper.selectById(resultId);
-        ReportResult reportResult = new ReportResult();
-        BeanUtils.copyProperties(reportEntity, reportResult);
-        return reportResult;
+        return BeanUtil.copyProperties(reportEntity, ReportResult.class);
     }
 
     @Override

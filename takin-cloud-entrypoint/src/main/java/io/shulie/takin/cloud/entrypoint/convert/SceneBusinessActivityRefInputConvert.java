@@ -3,10 +3,10 @@ package io.shulie.takin.cloud.entrypoint.convert;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.hutool.core.bean.BeanUtil;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneBusinessActivityRefInput;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneBusinessActivityRefOpen;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.BeanUtils;
 
 /**
  * @author mubai
@@ -15,9 +15,7 @@ import org.springframework.beans.BeanUtils;
 public class SceneBusinessActivityRefInputConvert {
 
     public static SceneBusinessActivityRefInput of(SceneBusinessActivityRefOpen open) {
-        SceneBusinessActivityRefInput out = new SceneBusinessActivityRefInput();
-        BeanUtils.copyProperties(open, out);
-        return out;
+        return BeanUtil.copyProperties(open, SceneBusinessActivityRefInput.class);
     }
 
     public static List<SceneBusinessActivityRefInput> ofLists(List<SceneBusinessActivityRefOpen> list) {
