@@ -23,3 +23,7 @@ mybatis-plus:
 
 data:
   path: /Users/liyuanba/Downloads
+pressure:
+  engine:
+    install:
+      dir: /Users/liyuanba/develop/buildImages/pressure-engine/pressure-engine.tar.gz

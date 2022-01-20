@@ -199,4 +199,5 @@ public class EntrypointUrl {
      */
     public final static String MODULE_PRESSURE = "pressure";
     public final static String METHOD_PRESSURE_START = "start";
+    public final static String METHOD_PRESSURE_HEALTH = "health";
 }

@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.entrypoint.controller.pressure;
 
+import com.squareup.moshi.Json;
 import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.pojo.PressureTaskPo;
 import io.shulie.takin.cloud.biz.service.engine.EngineService;
@@ -59,6 +60,12 @@ public class PressureController {
     private FileSplitService fileSplitService;
     @Autowired
     private StrategyConfigService strategyConfigService;
+
+    @ApiOperation(value = "上报健康状态")
+    @PostMapping(EntrypointUrl.METHOD_PRESSURE_HEALTH)
+    public void health(@RequestBody Object object) {
+        log.info("object="+ JsonUtil.toJson(object));
+    }
 
 
     @ApiOperation(value = "启动压测")

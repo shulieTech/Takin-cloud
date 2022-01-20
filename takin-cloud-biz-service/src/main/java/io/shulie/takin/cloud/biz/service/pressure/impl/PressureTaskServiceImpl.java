@@ -72,21 +72,25 @@ public class PressureTaskServiceImpl implements PressureTaskService {
         config.setTaskId(taskId);
         config.setCustomerId(tenantId);
         config.setPressureScene(po.getSceneType().getCode());
+        String consoleUrl = null;
+        String callbackUrl = null;
         switch (po.getSceneType()) {
             case INSPECTION_MODE:
                 //巡检不用设置consoleUrl和callbackUrl
+                consoleUrl = DataUtils.mergeUrl(appConfig.getConsole(), "/api/pressure/health?sceneId="+sceneId+"&taskId"+taskId+"&customerId="+tenantId);
+                callbackUrl = DataUtils.mergeUrl(appConfig.getConsole(), "/api/pressure/health?sceneId="+sceneId+"&taskId"+taskId+"&customerId="+tenantId);
                 break;
             case TRY_RUN:
             case FLOW_DEBUG:
             case DEFAULT:
-                String consoleUrl = DataUtils.mergeUrl(appConfig.getConsole(), ScheduleConstants.getConsoleUrl(sceneId, taskId, tenantId));
-                config.setConsoleUrl(consoleUrl);
-                String callbackUrl = DataUtils.mergeUrl(appConfig.getConsole(), "/api/engine/callback");
-                config.setCallbackUrl(callbackUrl);
+                consoleUrl = DataUtils.mergeUrl(appConfig.getConsole(), ScheduleConstants.getConsoleUrl(sceneId, taskId, tenantId));
+                callbackUrl = DataUtils.mergeUrl(appConfig.getConsole(), "/api/engine/callback");
                 break;
             default:
                 break;
         }
+        config.setConsoleUrl(consoleUrl);
+        config.setCallbackUrl(callbackUrl);
 
         config.setPodCount(po.getPodNum());
         config.setScriptFile(po.getScriptFile());
