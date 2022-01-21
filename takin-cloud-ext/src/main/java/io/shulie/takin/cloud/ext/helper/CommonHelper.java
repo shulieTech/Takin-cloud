@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -52,6 +53,18 @@ public class CommonHelper {
      */
     public static String mergeUrl(String domain, String path) {
         return mergePath(domain, path, "/");
+    }
+
+
+    public static String mergeDirPath(String dir,String ...paths){
+        if (Objects.nonNull(paths) && paths.length > 0) {
+           StringBuilder builder = new StringBuilder();
+            for (String path : paths){
+              builder.append(path).append(File.separator);
+            }
+           return mergeDirPath(dir,builder.toString());
+        }
+        return null;
     }
 
     /**
