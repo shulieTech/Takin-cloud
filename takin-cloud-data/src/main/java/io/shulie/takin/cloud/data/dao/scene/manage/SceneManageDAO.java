@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.data.dao.scene.manage;
 import java.util.List;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
@@ -57,9 +58,10 @@ public interface SceneManageDAO extends IService<SceneManageEntity> {
      * 查询租户id下的所有压测场景
      * 注解, 自动执行数据隔离
      *
+     * @param contextExt 溯源数据
      * @return 场景列表
      */
-    List<SceneManageEntity> listFromUpdateScript();
+    List<SceneManageEntity> listFromUpdateScript(ContextExt contextExt);
 
     /**
      * 查询场景

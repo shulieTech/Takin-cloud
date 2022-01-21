@@ -701,7 +701,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         CloudPluginUtils.fillUserData(request);
         // 查出所有请求租户的所有场景
         log.info("更新脚本对应的文件 --> 求出租户下的所有场景");
-        List<SceneManageEntity> sceneManageList = sceneManageDAO.listFromUpdateScript();
+        List<SceneManageEntity> sceneManageList = sceneManageDAO.listFromUpdateScript(request);
         if (sceneManageList.isEmpty()) {
             return;
         }
