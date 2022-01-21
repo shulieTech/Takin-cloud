@@ -17,7 +17,7 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
-import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.CloudUpdateSceneFileRequest;
 import io.shulie.takin.cloud.entrypoint.convert.SceneBusinessActivityRefInputConvert;
 import io.shulie.takin.cloud.entrypoint.convert.SceneScriptRefInputConvert;
 import io.shulie.takin.cloud.entrypoint.convert.SceneSlaRefInputConverter;
@@ -147,7 +147,7 @@ public class SceneManageController {
 
     @ApiOperation(value = "|_ 更改脚本对应的压测场景的文件")
     @PutMapping(EntrypointUrl.METHOD_SCENE_MANAGE_UPDATE_FILE)
-    public ResponseResult<?> updateFile(@RequestBody @Validated UpdateSceneFileRequest request) {
+    public ResponseResult<?> updateFile(@RequestBody @Validated CloudUpdateSceneFileRequest request) {
         sceneManageService.updateFileByScriptId(request);
         return ResponseResult.success();
     }
