@@ -55,14 +55,17 @@ public class CommonHelper {
         return mergePath(domain, path, "/");
     }
 
-
-    public static String mergeDirPath(String dir,String ...paths){
+    public static String mergeDirPath(String dir, String... paths) {
         if (Objects.nonNull(paths) && paths.length > 0) {
-           StringBuilder builder = new StringBuilder();
-            for (String path : paths){
-              builder.append(path).append(File.separator);
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < paths.length; i++) {
+                if (i == paths.length - 1) {
+                    builder.append(paths[i]);
+                } else {
+                    builder.append(paths[i]).append(File.separator);
+                }
             }
-           return mergeDirPath(dir,builder.toString());
+            return mergeDirPath(dir, builder.toString());
         }
         return null;
     }
