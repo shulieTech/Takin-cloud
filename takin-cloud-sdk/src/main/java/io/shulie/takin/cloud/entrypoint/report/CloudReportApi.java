@@ -208,5 +208,5 @@ public interface CloudReportApi {
      * @param req -
      * @return -
      */
-    ReportDetailResp getReportById(ReportDetailByIdReq req);
+    Integer getReportStatusById(ReportDetailByIdReq req);
 }

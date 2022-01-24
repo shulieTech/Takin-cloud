@@ -22,6 +22,7 @@ import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
+import io.swagger.models.auth.In;
 
 /**
  * @author 数列科技
@@ -250,5 +251,5 @@ public interface ReportService {
      * @param reportId -
      * @return -
      */
-    ReportDetailOutput getReportById(Long reportId);
+    Integer getReportStatusById(Long reportId);
 }

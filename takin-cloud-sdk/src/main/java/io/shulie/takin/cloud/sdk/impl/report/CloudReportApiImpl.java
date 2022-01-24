@@ -243,9 +243,9 @@ public class CloudReportApiImpl implements CloudReportApi {
     }
 
     @Override
-    public ReportDetailResp getReportById(ReportDetailByIdReq req) {
+    public Integer getReportStatusById(ReportDetailByIdReq req) {
         return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_BY_ID),
-                req, new TypeReference<ResponseResult<ReportDetailResp>>() {}).getData();
+                req, new TypeReference<ResponseResult<Integer>>() {}).getData();
 
     }
 }
