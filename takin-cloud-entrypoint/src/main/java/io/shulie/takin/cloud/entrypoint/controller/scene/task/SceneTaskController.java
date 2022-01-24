@@ -240,6 +240,7 @@ public class SceneTaskController {
         SceneTryRunTaskStartReq sceneTryRunTaskStartReq) {
         SceneManageWrapperInput input = SceneTaskOpenConverter.INSTANCE.ofSceneTryRunTaskReq(sceneTryRunTaskStartReq);
         // 设置用户
+        CloudPluginUtils.fillUserData(input);
         input.setOperateId(input.getUserId());
         input.setOperateName(input.getUserName());
         //压测引擎插件需要传入插件id和插件版本 modified by xr.l 20210712
