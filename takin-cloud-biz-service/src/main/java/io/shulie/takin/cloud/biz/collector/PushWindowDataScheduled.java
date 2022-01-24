@@ -50,7 +50,6 @@ import io.shulie.takin.eventcenter.entity.TaskConfig;
 import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.eventcenter.EventCenterTemplate;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
-import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.common.influxdb.InfluxUtil;
 import io.shulie.takin.cloud.common.utils.CollectorUtil;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
@@ -211,7 +210,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             ResponseMetrics metrics = influxWriter.querySingle(
                 "select * from " + measurement + " where time>0 order by time asc limit 1", ResponseMetrics.class);
             if (null != metrics) {
-                timeWindow = metrics.getTime();
+                timeWindow = CollectorUtil.getTimeWindowTime(metrics.getTime());
             }
         } catch (Throwable e) {
             log.error("查询失败", e);
@@ -221,12 +220,14 @@ public class PushWindowDataScheduled extends AbstractIndicators {
 
     private List<ResponseMetrics> queryMetrics(Long sceneId, Long reportId, Long customerId, Long timeWindow) {
         try {
+            //查询引擎上报数据时，通过时间窗向前5s来查询，(0,5]
             String measurement = InfluxUtil.getMetricsMeasurement(sceneId, reportId, customerId);
             StringBuilder sql = new StringBuilder("select * from");
             sql.append(" ").append(measurement);
             if (null != timeWindow) {
                 long time = TimeUnit.NANOSECONDS.convert(timeWindow, TimeUnit.MILLISECONDS);
-                sql.append(" ").append("where").append(" ").append("time=").append(time);
+                sql.append(" ").append("where").append(" ").append("time<=").append(time).append(" and ")
+                        .append("time>").append(time - TimeUnit.NANOSECONDS.convert(CollectorConstants.SEND_TIME, TimeUnit.SECONDS));
                 return influxWriter.query(sql.toString(), ResponseMetrics.class);
             } else {
                 timeWindow = getMetricsMinTimeWindow(sceneId, reportId, customerId);
@@ -312,7 +313,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             logPre, showTime(timeWindow), showTime(endTime), metricsList.size());
         if (null == timeWindow) {
             timeWindow = metricsList.stream().filter(Objects::nonNull)
-                .map(ResponseMetrics::getTime)
+                .map(t -> CollectorUtil.getTimeWindowTime(t.getTime()))
                 .filter(l -> l > 0)
                 .findFirst()
                 .orElse(endTime);
@@ -340,7 +341,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         long time = timeWindow;
 
         List<PressureOutput> results = transactions.stream().filter(StringUtils::isNotBlank)
-            .map(s -> this.filterByTransactionAndPodNo(metricsList, s))
+            .map(s -> this.filterByTransaction(metricsList, s))
             .filter(CollectionUtils::isNotEmpty)
             .map(l -> this.toPressureOutput(l, podNum, time))
             .filter(Objects::nonNull)
@@ -694,17 +695,14 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     }
 
     /**
-     * 单个时间窗口数据，根据transaction过滤，并且每个pod只取1条数据
+     * 单个时间窗口数据，根据transaction过滤
      */
-    private List<ResponseMetrics> filterByTransactionAndPodNo(List<ResponseMetrics> metricsList, String transaction) {
+    private List<ResponseMetrics> filterByTransaction(List<ResponseMetrics> metricsList, String transaction) {
         if (CollectionUtils.isEmpty(metricsList)) {
             return metricsList;
         }
-        List<String> pods = Lists.newArrayList();
         return metricsList.stream().filter(Objects::nonNull)
             .filter(m -> transaction.equals(m.getTransaction()))
-            .filter(m -> !pods.contains(m.getPodNo()))
-            .peek(m -> pods.add(m.getPodNo()))
             .collect(Collectors.toList());
     }
 
@@ -791,11 +789,11 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             .filter(StringUtils::isNotBlank)
             .collect(Collectors.toList());
         String percentSa = calculateSaPercent(percentDataList);
-        List<String> podNos = metricsList.stream().filter(Objects::nonNull)
+        Set<String> podNos = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getPodNo)
             .filter(StringUtils::isNotBlank)
-            .distinct()
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
+
         int dataNum = CollectionUtils.isEmpty(podNos) ? 0 : podNos.size();
         double dataRate = NumberUtil.getPercentRate(dataNum, podNum, 100d);
         int status = dataNum < podNum ? 0 : 1;

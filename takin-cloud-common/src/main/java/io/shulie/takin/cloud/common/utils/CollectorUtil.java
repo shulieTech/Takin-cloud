@@ -94,7 +94,7 @@ public class CollectorUtil {
     public static long addWindowTime(long timestamp) {
         Calendar instance = Calendar.getInstance();
         instance.setTimeInMillis(timestamp);
-        instance.add(Calendar.SECOND, 5);
+        instance.add(Calendar.SECOND, CollectorConstants.SEND_TIME);
         return instance.getTimeInMillis();
     }
 

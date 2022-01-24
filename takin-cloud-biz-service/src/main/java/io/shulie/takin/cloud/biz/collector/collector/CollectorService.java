@@ -126,7 +126,7 @@ public class CollectorService extends AbstractIndicators {
         String taskKey = getPressureTaskKey(sceneId, reportId, tenantId);
         for (ResponseMetrics metric : metrics) {
             try {
-                long timeWindow = CollectorUtil.getTimeWindow(metric.getTimestamp()).getTimeInMillis();
+                long timeWindow = CollectorUtil.getTimeWindowTime(metric.getTimestamp());
                 if (validate(timeWindow, sceneId, reportId, tenantId, metrics)) {
                     // 写入redis
                     log.info("{}-{}-{} write redis , timestamp-{},timeWindow-{}", sceneId, reportId, tenantId,
@@ -294,7 +294,7 @@ public class CollectorService extends AbstractIndicators {
 
         String windowsTimeKey = String.format("%s:%s", getPressureTaskKey(sceneId, reportId, tenantId),
             "windowsTime");
-        String timeInMillis = String.valueOf(CollectorUtil.getTimeWindow(time).getTimeInMillis());
+        String timeInMillis = String.valueOf(CollectorUtil.getTimeWindowTime(time));
         List<String> ips;
         if (redisTemplate.getExpire(windowsTimeKey) == -2) {
             ips = new ArrayList<>();
