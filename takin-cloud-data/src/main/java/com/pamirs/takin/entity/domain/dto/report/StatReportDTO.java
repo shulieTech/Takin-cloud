@@ -94,13 +94,13 @@ public class StatReportDTO {
      * @return -
      */
     public BigDecimal getSuccessRate() {
-        if (null == getTotalRequest()) {
+        if (null == getTempRequestCount()) {
             return null;
         }
         if (null == getFailRequest()) {
             return BigDecimal.valueOf(100);
         }
-        return BigDecimal.valueOf(NumberUtil.getPercentRate(getTotalRequest() - getFailRequest(), getTotalRequest()));
+        return BigDecimal.valueOf(NumberUtil.getPercentRate(getTempRequestCount() - getFailRequest(), getTempRequestCount()));
         //fixed end
     }
 
