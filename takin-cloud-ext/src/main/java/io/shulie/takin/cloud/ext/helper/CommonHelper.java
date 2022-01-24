@@ -55,6 +55,12 @@ public class CommonHelper {
         return mergePath(domain, path, "/");
     }
 
+    /**
+     * 多层路径拼装
+     * @param dir 基本路径
+     * @param paths 需要拼接的路径
+     * @return 最终路径
+     */
     public static String mergeDirPath(String dir, String... paths) {
         if (Objects.nonNull(paths) && paths.length > 0) {
             StringBuilder builder = new StringBuilder();
