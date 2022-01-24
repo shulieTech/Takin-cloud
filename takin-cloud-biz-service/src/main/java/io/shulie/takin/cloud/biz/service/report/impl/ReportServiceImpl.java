@@ -1605,4 +1605,43 @@ public class ReportServiceImpl implements ReportService {
         } else {return "";}
     }
 
+    @Override
+    public ReportDetailOutput getReportById(Long reportId) {
+        ReportResult report = reportDao.selectById(reportId);
+        if (report == null) {
+            log.warn("获取报告异常，报告数据不存在。报告ID：{}", reportId);
+            return null;
+        }
+        ReportDetailOutput detail = ReportConverter.INSTANCE.ofReportDetail(report);
+
+        //警告列表
+        List<WarnBean> warnList = listWarn(reportId);
+        detail.setTaskStatus(report.getStatus());
+        if (CollectionUtils.isNotEmpty(warnList)) {
+            detail.setWarn(warnList);
+            detail.setTotalWarn(warnList.stream().mapToLong(WarnBean::getTotal).sum());
+        }
+        if (StringUtils.isNotEmpty(report.getFeatures())) {
+            detail.setConclusionRemark(
+                    JSON.parseObject(report.getFeatures()).getString(ReportConstants.FEATURES_ERROR_MSG));
+        }
+        detail.setTestTotalTime(TestTimeUtil.format(report.getStartTime(), report.getEndTime()));
+        List<ScriptNodeSummaryBean> reportNodeDetail = getReportNodeDetail(report.getScriptNodeTree(), reportId);
+        detail.setNodeDetail(reportNodeDetail);
+
+        List<BusinessActivitySummaryBean> businessActivities = new ArrayList<>();
+        buildFailActivitiesByNodeDetails(reportNodeDetail, businessActivities);
+        detail.setBusinessActivity(businessActivities);
+
+        // sla转换对象
+        if (StringUtils.isNotBlank(report.getFeatures())) {
+            JSONObject jsonObject = JSON.parseObject(report.getFeatures());
+            if (jsonObject.containsKey(ReportConstants.SLA_ERROR_MSG)) {
+                detail.setSlaMsg(
+                        JsonHelper.json2Bean(jsonObject.getString(ReportConstants.SLA_ERROR_MSG), SlaBean.class));
+            }
+        }
+        return detail;
+    }
+
 }

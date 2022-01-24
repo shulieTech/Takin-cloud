@@ -243,4 +243,12 @@ public interface ReportService {
      * @return jtl文件的下载路径
      */
     String getJtlDownLoadUrl(Long reportId, boolean needZip);
+
+    /**
+     * 根据报告id获取报告详情，之前的报告给页面使用，所以状态不是真实状态
+     *
+     * @param reportId -
+     * @return -
+     */
+    ReportDetailOutput getReportById(Long reportId);
 }

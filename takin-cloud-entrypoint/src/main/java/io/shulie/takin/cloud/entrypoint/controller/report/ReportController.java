@@ -102,6 +102,33 @@ public class ReportController {
     }
 
     /**
+     * 迁移到open-opi
+     *
+     * @param reportId 报告主键
+     * @return -
+     */
+    @Deprecated
+    @ApiOperation("报告详情")
+    @ApiImplicitParam(name = "reportId", value = "报告ID")
+    @GetMapping(value = EntrypointUrl.METHOD_REPORT_BY_ID)
+    public ResponseResult<ReportDetailResp> getReportById(Long reportId) {
+        ReportDetailOutput detailOutput = reportService.getReportById(reportId);
+        if (detailOutput == null) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在Id:" + reportId);
+        }
+        ReportDetailResp result = BeanUtil.copyProperties(detailOutput, ReportDetailResp.class);
+        try {
+            String jtlDownLoadUrl = reportService.getJtlDownLoadUrl(result.getId(), false);
+            log.debug("获取报告详情时获取JTL下载路径:{}.", jtlDownLoadUrl);
+            result.setHasJtl(true);
+        } catch (Throwable e) {
+            result.setHasJtl(false);
+        }
+        return ResponseResult.success(result);
+    }
+
+
+    /**
      * 解析数结构并获取ApplicationIds字段
      *
      * @param resource       树结构
