@@ -84,7 +84,7 @@ public class StatReportDTO {
      * @return -
      */
     public BigDecimal getSa() {
-        return BigDecimal.valueOf(NumberUtil.getPercentRate(saCount, getTotalRequest()));
+        return BigDecimal.valueOf(NumberUtil.getPercentRate(saCount, getTempRequestCount()));
     }
 
     /**
