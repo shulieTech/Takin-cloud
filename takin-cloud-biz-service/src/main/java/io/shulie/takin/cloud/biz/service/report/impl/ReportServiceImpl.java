@@ -1182,6 +1182,7 @@ public class ReportServiceImpl implements ReportService {
     private StatReportDTO statReport(Long sceneId, Long reportId, Long customerId, String transaction) {
         String influxDbSql = "select "
             + "sum(count)                   as totalRequest,"
+            + "sum(count)                   as tempRequestCount,"
             + "sum(fail_count)              as failRequest,"
             + "mean(avg_tps)                as tps ,"
             + "sum(sum_rt)/sum(count)       as avgRt,"
