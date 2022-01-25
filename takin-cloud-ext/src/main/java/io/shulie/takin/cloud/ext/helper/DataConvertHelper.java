@@ -74,7 +74,7 @@ public class DataConvertHelper {
         pressureConfig.setEngineRedisSentinelNodes(request.getEngineRedisSentinelNodes());
         pressureConfig.setEngineRedisSentinelMaster(request.getEngineRedisSentinelMaster());
         pressureConfig.setEngineRedisPassword(request.getEngineRedisPassword());
-        if (startRequest.isTryRun()) {
+        if (startRequest.isTryRun() || startRequest.isInspect()) {
             pressureConfig.setFixedTimer(startRequest.getFixedTimer());
             pressureConfig.setLoopsNum(startRequest.getLoopsNum());
         }
