@@ -43,7 +43,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -109,7 +108,7 @@ public class ReportController {
      */
     @ApiOperation("报告状态查询")
     @ApiImplicitParam(name = "reportId", value = "报告ID")
-    @GetMapping(value = EntrypointUrl.METHOD_REPORT_BY_ID)
+    @GetMapping(value = EntrypointUrl.METHOD_REPORT_STATUS_BY_ID)
     public ResponseResult<Integer> getReportStatusById(Long reportId) {
         return ResponseResult.success(reportService.getReportStatusById(reportId));
     }
