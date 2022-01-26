@@ -78,7 +78,7 @@ public class PushLogServiceImpl implements PushLogService {
             if (responseCommand.getCode() == CommandCode.SUCCESS) {
                 log.debug("日志上传成功..{}", System.currentTimeMillis());
                 return true;
-            } else if (responseCommand.getCode() == CommandCode.SYSTEM_ERROR) {
+            } else {
                 log.error("异常代码【{}】,异常内容：日志推送处理异常 --> 日志上传失败: {}",
                     TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, new String(responseCommand.getBody()));
                 return false;
@@ -88,7 +88,6 @@ public class PushLogServiceImpl implements PushLogService {
                 TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, e);
             return false;
         }
-        return true;
     }
 
 }
