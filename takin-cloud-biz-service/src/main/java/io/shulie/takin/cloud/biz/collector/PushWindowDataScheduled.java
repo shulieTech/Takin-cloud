@@ -228,7 +228,9 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 long time = TimeUnit.NANOSECONDS.convert(timeWindow, TimeUnit.MILLISECONDS);
                 sql.append(" ").append("where").append(" ").append("time<=").append(time).append(" and ")
                         .append("time>").append(time - TimeUnit.NANOSECONDS.convert(CollectorConstants.SEND_TIME, TimeUnit.SECONDS));
-                return influxWriter.query(sql.toString(), ResponseMetrics.class);
+                List<ResponseMetrics> query = influxWriter.query(sql.toString(), ResponseMetrics.class);
+                log.info("汇总查询日志：sceneId:{},sql:{},查询结果数量:{}",sceneId,sql,query == null ? "null": query.size());
+                return query;
             } else {
                 timeWindow = getMetricsMinTimeWindow(sceneId, reportId, customerId);
                 if (null != timeWindow) {
