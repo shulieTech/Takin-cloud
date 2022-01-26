@@ -37,7 +37,12 @@ public class CollectorUtil {
         int nowSecond = 0;
         Calendar instance = Calendar.getInstance();
         instance.setTimeInMillis(timestamp);
+
         int second = instance.get(Calendar.SECOND);
+        int millSecond = instance.get(Calendar.MILLISECOND);
+        if (millSecond > 0){
+            second = second + 1;
+        }
         for (int time : CollectorConstants.timeWindow) {
             if (second <= time) {
                 nowSecond = time;
