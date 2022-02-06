@@ -386,6 +386,11 @@ public class JmxUtil {
                     //interface + # + method
                     setDubboIdentification(node);
                     node.setSamplerType(SamplerTypeEnum.DUBBO);
+                } else if ("cn.ztc.jmeter.rabbit.RabbitPublisherSampler".equals(name)) {
+                    node.setProps(buildProps(element));
+                    //interface + # + method
+                    setRabbitIdentification(node);
+                    node.setSamplerType(SamplerTypeEnum.RABBITMQ);
                 } else {
                     node.setProps(buildProps(element));
                     node.setSamplerType(SamplerTypeEnum.UNKNOWN);
@@ -434,6 +439,20 @@ public class JmxUtil {
         node.setIdentification(format);
         node.setRequestPath(String.format("%s|%s", fieldDubboMethod, path));
 
+    }
+
+    private static void setRabbitIdentification(ScriptNode node) {
+        if (null == node) {return;}
+        Map<String, String> props = node.getProps();
+        if (null == props) {return;}
+        String queue = props.get("RabbitSampler.Queue");
+        String routingKey = props.get("RabbitSampler.RoutingKey");
+        String requestPath = StringUtils.isBlank(routingKey) ? queue : routingKey;
+        if (StringUtils.isBlank(requestPath) || requestPath.startsWith("$")) {
+            return;
+        }
+        node.setRequestPath(requestPath);
+        node.setIdentification(String.format("%s|%s|%s", routingKey, queue, SamplerTypeEnum.RABBITMQ.getRpcTypeEnum().getValue()));
     }
 
     private static SamplerTypeEnum getJavaSamplerType(ScriptNode node) {
@@ -731,9 +750,8 @@ public class JmxUtil {
             }
             node.setRequestPath(topic);
             node.setIdentification(String.format("%s|%s", topic, SamplerTypeEnum.KAFKA.getRpcTypeEnum().getValue()));
-            return;
         } else {
-            return;
+            log.warn("没有成功解析脚本节点:{}", javaClass);
         }
     }
 
