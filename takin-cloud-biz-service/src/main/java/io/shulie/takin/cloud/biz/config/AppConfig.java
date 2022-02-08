@@ -49,10 +49,13 @@ public class AppConfig {
     @Value("${report.data.holdRealThreadNum:true}")
     private Boolean holdRealThreadNum;
 
-    @Value("${spring.redis.host}")
+    @Value("${spring.redis.database:}")
+    private String engineRedisDatabase;
+
+    @Value("${spring.redis.host:}")
     private String engineRedisAddress;
 
-    @Value("${spring.redis.port}")
+    @Value("${spring.redis.port:}")
     private String engineRedisPort;
 
     @Value("${spring.redis.sentinel.nodes:}")
@@ -61,7 +64,7 @@ public class AppConfig {
     @Value("${spring.redis.sentinel.master:}")
     private String engineRedisSentinelMaster;
 
-    @Value("${spring.redis.password}")
+    @Value("${spring.redis.password:}")
     private String engineRedisPassword;
 
     @Value("${pradar.zk.servers}")

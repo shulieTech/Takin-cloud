@@ -34,6 +34,7 @@ import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneScriptRefOpen;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -157,6 +158,7 @@ public class PressureTaskServiceImpl implements PressureTaskService {
 
         EnginePressureConfig pressureConfig = new EnginePressureConfig();
         pressureConfig.setPressureEngineBackendQueueCapacity(appConfig.getPressureEngineBackendQueueCapacity());
+        pressureConfig.setEngineRedisDatabase(NumberUtils.toInt(appConfig.getEngineRedisAddress(), 0));
         pressureConfig.setEngineRedisAddress(appConfig.getEngineRedisAddress());
         pressureConfig.setEngineRedisPort(appConfig.getEngineRedisPort());
         pressureConfig.setEngineRedisSentinelNodes(appConfig.getEngineRedisSentinelNodes());

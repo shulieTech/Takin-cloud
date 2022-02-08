@@ -16,6 +16,10 @@ public class EnginePressureConfig extends AbstractEntry {
      */
     private String pressureEngineBackendQueueCapacity;
     /**
+     * redis库
+     */
+    private Integer engineRedisDatabase;
+    /**
      * redis地址
      */
     private String engineRedisAddress;
