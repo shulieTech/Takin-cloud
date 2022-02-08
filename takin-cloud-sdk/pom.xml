@@ -6,12 +6,12 @@
     <parent>
         <groupId>io.shulie.takin</groupId>
         <artifactId>takin-cloud</artifactId>
-        <version>takin-cloud-5.2.0</version>
+        <version>takin-cloud-5.2.1-SNAPSHOT</version>
     </parent>
 
     <name>takin-cloud-sdk</name>
     <artifactId>takin-cloud-sdk</artifactId>
-    <version>takin-cloud-sdk-5.2.0</version>
+    <version>takin-cloud-sdk-5.2.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
