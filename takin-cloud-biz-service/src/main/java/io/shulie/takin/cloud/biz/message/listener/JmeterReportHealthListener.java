@@ -31,18 +31,26 @@ public class JmeterReportHealthListener extends AbstractJmeterReportListener {
 
     @Override
     public boolean receive(TkMessage message) {
-        EngineHealthDataBo healthData = JsonUtil.parseObject(message.getContent(), EngineHealthDataBo.class);
-        PressureSceneEnum sceneType = PressureSceneEnum.value(healthData.getSceneType());
-        if (sceneType == PressureSceneEnum.INSPECTION_MODE) {
+        try {
+            EngineHealthDataBo healthData = JsonUtil.parseObject(message.getContent(), EngineHealthDataBo.class);
+            if (null == healthData) {
+                return true;
+            }
+            PressureSceneEnum sceneType = PressureSceneEnum.value(healthData.getSceneType());
+            if (sceneType != PressureSceneEnum.INSPECTION_MODE) {
+                return true;
+            }
             PressureTaskEntity task = pressureTaskService.getById(healthData.getTaskId());
             if (null == task) {
-                log.warn("任务不存在:message="+JsonUtil.toJson(message));
+                log.warn("任务不存在:message=" + JsonUtil.toJson(message));
                 return true;
             }
             PressureTaskEntity update = new PressureTaskEntity();
             update.setId(healthData.getTaskId());
             update.setGmtLive(Calendar.getInstance().getTime());
             pressureTaskService.update(update);
+        } catch (Throwable t) {
+            log.error("revice message error!message="+JsonUtil.toJson(message));
         }
         return true;
     }

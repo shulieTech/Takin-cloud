@@ -30,26 +30,30 @@ public class JmeterReportEventListener extends AbstractJmeterReportListener {
 
     @Override
     public boolean receive(TkMessage message) {
-        EngineEventInfoBo eventInfo = JsonUtil.parseObject(message.getContent(), EngineEventInfoBo.class);
-        if (null == eventInfo) {
-            return true;
+        try {
+            EngineEventInfoBo eventInfo = JsonUtil.parseObject(message.getContent(), EngineEventInfoBo.class);
+            if (null == eventInfo) {
+                return true;
+            }
+            if (null == eventInfo.getEvent() || null == eventInfo.getTaskId()) {
+                return true;
+            }
+            PressureSceneEnum sceneType = PressureSceneEnum.value(eventInfo.getSceneType());
+            if (sceneType != PressureSceneEnum.INSPECTION_MODE) {
+                return true;
+            }
+            PressureTaskEntity task = pressureTaskService.getById(eventInfo.getTaskId());
+            if (null == task) {
+                log.warn("任务不存在:message=" + JsonUtil.toJson(message));
+                return true;
+            }
+            PressureTaskEntity update = new PressureTaskEntity();
+            update.setId(eventInfo.getTaskId());
+            update.setStatus(eventInfo.getEvent().getCode());
+            pressureTaskService.update(update);
+        } catch (Throwable t) {
+            log.error("revice message error!message="+JsonUtil.toJson(message));
         }
-        if (null == eventInfo.getEvent() || null == eventInfo.getTaskId()) {
-            return true;
-        }
-        PressureSceneEnum sceneType = PressureSceneEnum.value(eventInfo.getSceneType());
-        if (sceneType != PressureSceneEnum.INSPECTION_MODE) {
-            return true;
-        }
-        PressureTaskEntity task = pressureTaskService.getById(eventInfo.getTaskId());
-        if (null == task) {
-            log.warn("任务不存在:message="+JsonUtil.toJson(message));
-            return true;
-        }
-        PressureTaskEntity update = new PressureTaskEntity();
-        update.setId(eventInfo.getTaskId());
-        update.setStatus(eventInfo.getEvent().getCode());
-        pressureTaskService.update(update);
         return true;
     }
 }
