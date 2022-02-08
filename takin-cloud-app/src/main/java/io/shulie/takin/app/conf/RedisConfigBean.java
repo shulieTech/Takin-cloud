@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  * create: 2020-10-29
  */
 @Component
-public class RedisConfig implements InitializingBean {
+public class RedisConfigBean implements InitializingBean {
     /**
      * <strong>不能设置泛型，否则报错</strong>
      */

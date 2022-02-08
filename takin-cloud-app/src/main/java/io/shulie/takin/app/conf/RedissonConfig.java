@@ -1,5 +1,6 @@
 package io.shulie.takin.app.conf;
 
+import io.shulie.jmeter.tool.redis.RedisConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -13,6 +14,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.CollectionUtils;
 
+import java.util.stream.Collectors;
+
 /**
  * 分布式锁 redisson config
  *
@@ -24,6 +27,34 @@ public class RedissonConfig {
 
     @Autowired
     private RedisProperties redisProperties;
+
+    @Bean
+    public RedisConfig buildRedisConfig() {
+        RedisConfig redisConfig = new RedisConfig();
+        redisConfig.setDatabase(redisProperties.getDatabase());
+        redisConfig.setHost(redisProperties.getHost());
+        redisConfig.setPort(redisProperties.getPort());
+        redisConfig.setPassword(redisProperties.getPassword());
+
+        Sentinel sentinel = redisProperties.getSentinel();
+        if (null != sentinel && !CollectionUtils.isEmpty(sentinel.getNodes())) {
+            String nodes = sentinel.getNodes().stream().filter(StringUtils::isNotBlank)
+                    .collect(Collectors.joining(","));
+            redisConfig.setNodes(nodes);
+            redisConfig.setMaster(sentinel.getMaster());
+        }
+        RedisProperties.Cluster cluster = redisProperties.getCluster();
+        if (null != cluster) {
+            String nodes = cluster.getNodes().stream().filter(StringUtils::isNotBlank)
+                    .collect(Collectors.joining(","));
+            redisConfig.setClusterNodes(nodes);
+        }
+        redisConfig.setMaxIdle(1);
+        redisConfig.setMaxTotal(1);
+        redisConfig.setTimeout(3000);
+        redisConfig.setSoTimeOut(3000);
+        return redisConfig;
+    }
 
     @Bean(destroyMethod = "shutdown")
     public RedissonClient redisson() {

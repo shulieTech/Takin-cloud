@@ -26,6 +26,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -37,10 +38,12 @@ public class Executors {
     /**
      * 业务线程池
      */
+    @Getter
     private static ThreadPoolExecutor threadPool;
     /**
      * 定时任务线程池
      */
+    @Getter
     private static ScheduledExecutorService scheduledExecutorService;
 
     static {

@@ -77,8 +77,8 @@ public class PressureTaskServiceImpl implements PressureTaskService {
         switch (po.getSceneType()) {
             case INSPECTION_MODE:
                 //巡检不用设置consoleUrl和callbackUrl
-                consoleUrl = DataUtils.mergeUrl(appConfig.getConsole(), "/api/pressure/health?sceneId="+sceneId+"&taskId"+taskId+"&customerId="+tenantId);
-                callbackUrl = DataUtils.mergeUrl(appConfig.getConsole(), "/api/pressure/health?sceneId="+sceneId+"&taskId"+taskId+"&customerId="+tenantId);
+                consoleUrl = DataUtils.mergeUrl(appConfig.getConsole(), "/api/pressure/health?sceneId="+sceneId+"&taskId="+taskId+"&customerId="+tenantId);
+                callbackUrl = DataUtils.mergeUrl(appConfig.getConsole(), "/api/pressure/health?sceneId="+sceneId+"&taskId="+taskId+"&customerId="+tenantId);
                 break;
             case TRY_RUN:
             case FLOW_DEBUG:
