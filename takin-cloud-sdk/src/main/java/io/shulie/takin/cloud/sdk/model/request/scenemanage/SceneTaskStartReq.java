@@ -25,7 +25,7 @@ public class SceneTaskStartReq extends ContextExt {
 
     private List<Long> enginePluginIds;
 
-    private List<EnginePluginsRefOpen> enginePlugins;
+    private List<SceneTaskStartRequest.EnginePluginInput> enginePlugins;
 
     private Boolean leakSqlEnable;
 
