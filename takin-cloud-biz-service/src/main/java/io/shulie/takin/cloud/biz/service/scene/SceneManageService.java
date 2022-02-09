@@ -12,7 +12,7 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneBusinessActivityRefOutput;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.CloudUpdateSceneFileRequest;
 import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
 
@@ -116,7 +116,7 @@ public interface SceneManageService {
      *
      * @param request 请求所需的参数
      */
-    void updateFileByScriptId(UpdateSceneFileRequest request);
+    void updateFileByScriptId(CloudUpdateSceneFileRequest request);
 
     /**
      * 根据主键批量获取

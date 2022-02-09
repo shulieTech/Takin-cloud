@@ -11,6 +11,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.data.converter.senemange.SceneManageEntityConverter;
@@ -99,9 +100,13 @@ public class SceneManageDAOImpl
     }
 
     @Override
-    public List<SceneManageEntity> listFromUpdateScript() {
-        return this.list(this.getTenantLQW().select(SceneManageEntity::getId,
-            SceneManageEntity::getTenantId, SceneManageEntity::getFeatures));
+    public List<SceneManageEntity> listFromUpdateScript(ContextExt contextExt) {
+        return this.getBaseMapper()
+            .selectList(new LambdaQueryWrapper<SceneManageEntity>()
+                .eq(SceneManageEntity::getEnvCode, contextExt.getEnvCode())
+                .eq(SceneManageEntity::getTenantId, contextExt.getTenantId())
+                .select(SceneManageEntity::getId, SceneManageEntity::getTenantId, SceneManageEntity::getFeatures)
+            );
     }
 
     @Override

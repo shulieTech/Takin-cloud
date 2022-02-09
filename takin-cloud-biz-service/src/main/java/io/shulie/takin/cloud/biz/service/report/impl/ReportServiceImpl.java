@@ -382,6 +382,7 @@ public class ReportServiceImpl implements ReportService {
                             setTps(new DataBean(data.getTps(), ref.getTargetTps()));
                             setSuccessRate(new DataBean(data.getSuccessRate(), ref.getTargetSuccessRate()));
                             setAvgConcurrenceNum(data.getAvgConcurrenceNum());
+                            setTempRequestCount(data.getTempRequestCount());
                             setTotalRequest(data.getTotalRequest());
                         } else {
                             setAvgRt(new DataBean("0", ref.getTargetRt()));
@@ -389,6 +390,7 @@ public class ReportServiceImpl implements ReportService {
                             setTps(new DataBean("0", ref.getTargetTps()));
                             setSuccessRate(new DataBean("0", ref.getTargetSuccessRate()));
                             setAvgConcurrenceNum(new BigDecimal(0));
+                            setTempRequestCount(0L);
                             setTotalRequest(0L);
                         }
                     }};
@@ -756,15 +758,29 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private StatReportDTO statTempReport(Long sceneId, Long reportId, Long tenantId, String transaction) {
+        String measurement = InfluxUtil.getMeasurement(sceneId, reportId, tenantId);
         String influxDbSql = "select"
-            + " count as totalRequest, fail_count as failRequest, avg_tps as tps , avg_rt as avgRt, sa_count as saCount, active_threads as avgConcurrenceNum"
+            + " count as tempRequestCount, fail_count as failRequest, avg_tps as tps , avg_rt as avgRt, sa_count as saCount, active_threads as avgConcurrenceNum"
             + " from "
-            + InfluxUtil.getMeasurement(sceneId, reportId, tenantId)
+            + measurement
             + " where transaction = '" + transaction + "'"
             + " order by time desc limit 1";
-        return influxWriter.querySingle(influxDbSql, StatReportDTO.class);
-    }
+        StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql, StatReportDTO.class);
+        if (Objects.nonNull(statReportDTO)){
+            String totalRequestSql = "select sum(count) as totalRequest from "
+                + measurement
+                + " where  transaction = '" + transaction + "'"
+                + " order by time desc limit 1";
+            StatReportDTO totalRequestDto = influxWriter.querySingle(totalRequestSql, StatReportDTO.class);
+            if (Objects.nonNull(totalRequestDto) && Objects.nonNull(totalRequestDto.getTotalRequest())){
+                statReportDTO.setTotalRequest(totalRequestDto.getTotalRequest());
+            }else {
+                statReportDTO.setTotalRequest(0L);
+            }
+        }
 
+        return statReportDTO;
+    }
     /**
      * 获取最大并发数
      *
@@ -829,7 +845,7 @@ public class ReportServiceImpl implements ReportService {
         StringBuilder influxDbSql = new StringBuilder();
         influxDbSql.append("select");
         influxDbSql.append(
-            " sum(count) as totalRequest, sum(fail_count) as failRequest, mean(avg_tps) as tps , sum(sum_rt)/sum"
+            " sum(count) as tempRequestCount, sum(fail_count) as failRequest, mean(avg_tps) as tps , sum(sum_rt)/sum"
                 + "(count) as "
                 + "avgRt, sum(sa_count) as saCount, count(avg_rt) as recordCount ,mean(active_threads) as "
                 + "avgConcurrenceNum ");
@@ -953,22 +969,30 @@ public class ReportServiceImpl implements ReportService {
             map = JsonHelper.string2Obj(reportResult.getFeatures(), new TypeReference<Map<String, String>>() {
             });
         }
-        if (StringUtils.isNotBlank(errMsg)) {
-            if (errKey.equals(ReportConstants.SLA_ERROR_MSG) && map.containsKey(ReportConstants.SLA_ERROR_MSG)) {
-                return;
-            }
+        if (StringUtils.isNotBlank(errKey) && StringUtils.isNotBlank(errMsg)) {
             errMsg = StringUtils.trim(errMsg);
             if (!errMsg.startsWith("[") && !errMsg.startsWith("{") && errMsg.length() > 100) {
                 errMsg = errMsg.substring(0, 100);
             }
-            String existsMsg = map.get(errKey);
-            if (StringUtils.isBlank(existsMsg)) {
-                map.put(errKey, errMsg);
-            } else if (existsMsg.length() < 10000) {
-                map.put(errKey, existsMsg + "、" + errMsg);
-            }
+            map.put(errKey, errMsg);
             reportResult.setFeatures(GsonUtil.gsonToString(map));
         }
+        //if (StringUtils.isNotBlank(errMsg)) {
+        //    if (errKey.equals(ReportConstants.SLA_ERROR_MSG) && map.containsKey(ReportConstants.SLA_ERROR_MSG)) {
+        //        return;
+        //    }
+        //    errMsg = StringUtils.trim(errMsg);
+        //    if (!errMsg.startsWith("[") && !errMsg.startsWith("{") && errMsg.length() > 100) {
+        //        errMsg = errMsg.substring(0, 100);
+        //    }
+        //    String existsMsg = map.get(errKey);
+        //    if (StringUtils.isBlank(existsMsg)) {
+        //        map.put(errKey, errMsg);
+        //    } else if (existsMsg.length() < 10000) {
+        //        map.put(errKey, existsMsg + "、" + errMsg);
+        //    }
+        //    reportResult.setFeatures(GsonUtil.gsonToString(map));
+        //}
     }
 
     @Override
@@ -1158,6 +1182,7 @@ public class ReportServiceImpl implements ReportService {
     private StatReportDTO statReport(Long sceneId, Long reportId, Long customerId, String transaction) {
         String influxDbSql = "select "
             + "sum(count)                   as totalRequest,"
+            + "sum(count)                   as tempRequestCount,"
             + "sum(fail_count)              as failRequest,"
             + "mean(avg_tps)                as tps ,"
             + "sum(sum_rt)/sum(count)       as avgRt,"
@@ -1461,12 +1486,14 @@ public class ReportServiceImpl implements ReportService {
             resultMap.put("successRate", new DataBean(statReport.getSuccessRate(), detail.getTargetSuccessRate()));
             resultMap.put("avgConcurrenceNum", statReport.getAvgConcurrenceNum().toString());
             resultMap.put("totalRequest", statReport.getTotalRequest());
+            resultMap.put("tempRequestCount",statReport.getTempRequestCount());
         } else {
             resultMap.put("avgRt", new DataBean("0", detail.getTargetRt()));
             resultMap.put("sa", new DataBean("0", detail.getTargetSa()));
             resultMap.put("tps", new DataBean("0", detail.getTargetTps()));
             resultMap.put("successRate", new DataBean("0", detail.getTargetSuccessRate()));
             resultMap.put("avgConcurrenceNum", "0");
+            resultMap.put("tempRequestCount",0L);
             resultMap.put("totalRequest", 0L);
         }
         return resultMap;
@@ -1577,6 +1604,16 @@ public class ReportServiceImpl implements ReportService {
             }
             throw new TakinCloudException(TakinCloudExceptionEnum.FILE_ZIP_ERROR, "查看" + jtlPath);
         } else {return "";}
+    }
+
+    @Override
+    public Integer getReportStatusById(Long reportId) {
+        ReportResult report = reportDao.selectById(reportId);
+        if (report == null) {
+            log.warn("获取报告异常，报告数据不存在。报告ID：{}", reportId);
+            return null;
+        }
+        return report.getStatus();
     }
 
 }

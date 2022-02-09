@@ -22,6 +22,7 @@ import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
+import io.swagger.models.auth.In;
 
 /**
  * @author 数列科技
@@ -243,4 +244,12 @@ public interface ReportService {
      * @return jtl文件的下载路径
      */
     String getJtlDownLoadUrl(Long reportId, boolean needZip);
+
+    /**
+     * 根据报告id获取报告详情，之前的报告给页面使用，所以状态不是真实状态
+     *
+     * @param reportId -
+     * @return -
+     */
+    Integer getReportStatusById(Long reportId);
 }

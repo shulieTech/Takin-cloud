@@ -75,7 +75,7 @@ public class AppConfig {
     @Value("${pressure.engine.backendQueueCapacity:5000}")
     private String pressureEngineBackendQueueCapacity;
 
-    @Value("${pressure.engine.logUpload:engine}")
+    @Value("${pressure.engine.logUpload:cloud}")
     private String engineLogUploadModel;
 
     @Value("${script.path}")

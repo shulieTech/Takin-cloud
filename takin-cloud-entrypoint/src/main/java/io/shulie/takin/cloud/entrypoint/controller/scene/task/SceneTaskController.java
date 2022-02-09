@@ -143,6 +143,9 @@ public class SceneTaskController {
     @ApiOperation(value = "启动调试流量任务")
     ResponseResult<Long> startFlowDebugTask(@RequestBody TaskFlowDebugStartReq taskFlowDebugStartReq) {
         SceneManageWrapperInput input = SceneTaskOpenConverter.INSTANCE.ofTaskDebugDataStartReq(taskFlowDebugStartReq);
+        // 设置用户
+        input.setOperateId(input.getUserId());
+        input.setOperateName(input.getUserName());
         //压测引擎插件需要传入插件id和插件版本 modified by xr.l 20210712
         List<EnginePluginInput> enginePluginInputs = null;
         if (CollectionUtils.isNotEmpty(taskFlowDebugStartReq.getEnginePlugins())) {
@@ -236,6 +239,10 @@ public class SceneTaskController {
     public ResponseResult<SceneTryRunTaskStartResp> startTryRunTask(@RequestBody
         SceneTryRunTaskStartReq sceneTryRunTaskStartReq) {
         SceneManageWrapperInput input = SceneTaskOpenConverter.INSTANCE.ofSceneTryRunTaskReq(sceneTryRunTaskStartReq);
+        // 设置用户
+        CloudPluginUtils.fillUserData(input);
+        input.setOperateId(input.getUserId());
+        input.setOperateName(input.getUserName());
         //压测引擎插件需要传入插件id和插件版本 modified by xr.l 20210712
         List<EnginePluginInput> enginePluginInputs = null;
         if (CollectionUtils.isNotEmpty(sceneTryRunTaskStartReq.getEnginePlugins())) {

@@ -79,6 +79,7 @@ import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
+import io.shulie.takin.cloud.biz.service.sla.impl.SlaServiceImpl;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
@@ -256,6 +257,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //流量冻结
         frozenAccountFlow(input, report, sceneData);
 
+        // 清除SLA条件缓存
+        redisClientUtils.hmdelete(SlaServiceImpl.SLA_SCENE_KEY, String.valueOf(input.getSceneId()));
         //设置缓存，用以检查压测场景启动状态
         taskStatusCache.cacheStatus(input.getSceneId(), report.getId(), SceneRunTaskStatusEnum.STARTING);
         //缓存pod数量，上传jmeter日志时判断是否所有文件都上传完成
@@ -281,8 +284,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         if (sceneManage == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "压测场景不存在" + sceneId);
         }
-        if (SceneManageStatusEnum.canStop(sceneManage.getStatus())) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, "场景状态不为压测中:" + sceneManage.getStatus());
+        //压测场景已经关闭，不做处理
+        if (SceneManageStatusEnum.ifFree(sceneManage.getStatus())) {
+            return;
         }
         ReportResult reportResult = reportDao.getReportBySceneId(sceneId);
 
@@ -490,6 +494,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setAssetType(AssetTypeEnum.ACTIVITY_CHECK.getCode());
         sceneTaskStartInput.setResourceId(activityRefInput.getBusinessActivityId());
         sceneTaskStartInput.setResourceName(activityRefInput.getBusinessActivityName());
+        // 设置用户主键
+        sceneTaskStartInput.setOperateId(CloudPluginUtils.getUserId());
         SceneActionOutput sceneActionDTO = startTask(sceneTaskStartInput);
         //返回报告id
         return sceneActionDTO.getData();
@@ -823,6 +829,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         // 初始化
         report.setEnvCode(scene.getEnvCode());
         report.setTenantId(scene.getTenantId());
+        report.setEnvCode(scene.getEnvCode());
         report.setOperateId(input.getOperateId());
         // 解决开始时间 偏移10s
         report.setStartTime(new Date(System.currentTimeMillis() + offsetStartTime * 1000));

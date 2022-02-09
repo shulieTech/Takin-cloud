@@ -95,12 +95,13 @@ public class EntrypointUrl {
     public final static String METHOD_REPORT_WARN_LIST = "listWarn";
     public final static String METHOD_REPORT_UPDATE_CONCLUSION = "updateReportConclusion";
     public final static String METHOD_REPORT_DETAIL = "getReportByReportId";
+    public final static String METHOD_REPORT_STATUS_BY_ID = "getReportStatusById";
     public final static String METHOD_REPORT_DETAIL_TEMP = "tempReportDetail";
     public final static String METHOD_REPORT_ONE_RUNNING = "running";
     public final static String METHOD_REPORT_LIST_RUNNING = "running/list";
     public final static String METHOD_REPORT_LIST_PRESSURING = "pressuring/list";
     public final static String METHOD_REPORT_SCRIPT_NODE_TREE = "nodeTree";
-    public final static String METHOD_REPORT_GET_JTL_DOWNLOAD_URL= "getJtlDownLoadUrl";
+    public final static String METHOD_REPORT_GET_JTL_DOWNLOAD_URL = "getJtlDownLoadUrl";
 
     public final static String METHOD_REPORT_TREND = "queryReportTrend";
     public final static String METHOD_REPORT_TREND_TEMP = "queryTempReportTrend";
@@ -127,6 +128,7 @@ public class EntrypointUrl {
     public final static String METHOD_SCENE_MANAGE_UPDATE = "";
     public final static String METHOD_SCENE_MANAGE_DELETE = "";
     public final static String METHOD_SCENE_MANAGE_DETAIL = "detail";
+    public final static String METHOD_SCENE_MANAGE_DETAIL_NO_AUTH = "detailNoAuth";
     public final static String METHOD_SCENE_MANAGE_LIST = "listSceneManage";
     public final static String METHOD_SCENE_MANAGE_SEARCH = "list";
     public final static String METHOD_SCENE_MANAGE_CALC_FLOW = "flow/calc";

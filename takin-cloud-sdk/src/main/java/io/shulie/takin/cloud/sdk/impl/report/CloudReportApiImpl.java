@@ -28,7 +28,6 @@ import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailByIdReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailBySceneIdReq;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.WarnDetailResponse;
@@ -240,5 +239,12 @@ public class CloudReportApiImpl implements CloudReportApi {
     public String getJtlDownLoadUrl(JtlDownloadReq req) {
         return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_GET_JTL_DOWNLOAD_URL),
             req, new TypeReference<ResponseResult<String>>() {}).getData();
+    }
+
+    @Override
+    public Integer getReportStatusById(ReportDetailByIdReq req) {
+        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_STATUS_BY_ID),
+                req, new TypeReference<ResponseResult<Integer>>() {}).getData();
+
     }
 }

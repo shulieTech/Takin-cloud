@@ -31,6 +31,11 @@ public class ScheduleConstants {
     public static final String ENGINE_SCRIPT_FILE_PATH = "/etc/engine/script/";
 
     /**
+     * 引擎日志文件路径
+     */
+    public static final String ENGINE_LOG_FILE_PATH = "/etc/engine/script/logs";
+
+    /**
      * 引擎插件文件夹路径 add by lipeng
      */
     public static final String ENGINE_PLUGINS_FOLDER_PATH = "/etc/engine/plugins/";

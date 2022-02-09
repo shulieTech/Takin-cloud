@@ -10,7 +10,6 @@ import com.alibaba.fastjson.JSON;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageInfo;
-import io.shulie.takin.cloud.biz.output.statistics.ReportTotalOutput;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
@@ -100,6 +99,20 @@ public class ReportController {
         }
         return ResponseResult.success(result);
     }
+
+    /**
+     *
+     *
+     * @param reportId 报告主键
+     * @return -
+     */
+    @ApiOperation("报告状态查询")
+    @ApiImplicitParam(name = "reportId", value = "报告ID")
+    @GetMapping(value = EntrypointUrl.METHOD_REPORT_STATUS_BY_ID)
+    public ResponseResult<Integer> getReportStatusById(Long reportId) {
+        return ResponseResult.success(reportService.getReportStatusById(reportId));
+    }
+
 
     /**
      * 解析数结构并获取ApplicationIds字段

@@ -42,6 +42,7 @@ import com.pamirs.takin.entity.domain.entity.scene.manage.SceneRef;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
 import com.pamirs.takin.entity.domain.entity.scene.manage.SceneSlaRef;
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.biz.cloudserver.SceneManageDTOConvert;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneBusinessActivityRefInput;
 import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageQueryInput;
@@ -63,16 +64,14 @@ import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.PressureModeEnum;
-import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
-import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
 import io.shulie.takin.cloud.common.enums.TimeUnitEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageErrorEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.pojo.dto.scenemanage.UploadFileDTO;
+import io.shulie.takin.cloud.sdk.model.common.UploadFileDTO;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
-import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.CloudUpdateSceneFileRequest;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.cloud.common.utils.LinuxUtil;
@@ -697,10 +696,12 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public void updateFileByScriptId(UpdateSceneFileRequest request) {
+    public void updateFileByScriptId(CloudUpdateSceneFileRequest request) {
+        // 填充租户信息
+        CloudPluginUtils.fillUserData(request);
         // 查出所有请求租户的所有场景
         log.info("更新脚本对应的文件 --> 求出租户下的所有场景");
-        List<SceneManageEntity> sceneManageList = sceneManageDAO.listFromUpdateScript();
+        List<SceneManageEntity> sceneManageList = sceneManageDAO.listFromUpdateScript(request);
         if (sceneManageList.isEmpty()) {
             return;
         }
@@ -766,7 +767,7 @@ public class SceneManageServiceImpl implements SceneManageService {
      * @param request                请求参数
      * @param newSceneManageEntities 要更新的场景列表
      */
-    private void doUpdateFileByScriptId(UpdateSceneFileRequest request, List<SceneManageEntity> newSceneManageEntities) {
+    private void doUpdateFileByScriptId(CloudUpdateSceneFileRequest request, List<SceneManageEntity> newSceneManageEntities) {
         // 转成需要入参
         List<UploadFileDTO> uploadFiles = request.getUploadFiles();
         List<SceneScriptRefInput> inputList = this.uploadFiles2InputList(uploadFiles);
