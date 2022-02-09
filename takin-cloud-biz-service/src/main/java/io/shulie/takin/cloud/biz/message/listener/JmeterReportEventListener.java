@@ -2,8 +2,11 @@ package io.shulie.takin.cloud.biz.message.listener;
 
 import com.google.common.collect.Lists;
 import io.shulie.jmeter.tool.redis.domain.TkMessage;
+import io.shulie.takin.cloud.biz.message.domain.EngineEvent;
 import io.shulie.takin.cloud.biz.message.domain.EngineEventInfoBo;
+import io.shulie.takin.cloud.biz.service.engine.EngineService;
 import io.shulie.takin.cloud.biz.service.pressure.PressureTaskService;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.cloud.data.model.mysql.PressureTaskEntity;
@@ -22,6 +25,8 @@ import java.util.List;
 public class JmeterReportEventListener extends AbstractJmeterReportListener {
     @Resource
     private PressureTaskService pressureTaskService;
+    @Resource
+    private EngineService engineService;
 
     @Override
     public List<String> getTags() {
@@ -46,6 +51,10 @@ public class JmeterReportEventListener extends AbstractJmeterReportListener {
             if (null == task) {
                 log.warn("任务不存在:message=" + JsonUtil.toJson(message));
                 return true;
+            }
+            if (EngineEvent.START_FAILED == eventInfo.getEvent() || EngineEvent.TEST_END == eventInfo.getEvent()) {
+                String jobName = ScheduleConstants.getJobName(sceneType, eventInfo.getSceneId(), eventInfo.getTaskId(), eventInfo.getCustomerId());
+                engineService.deleteJob(jobName);
             }
             PressureTaskEntity update = new PressureTaskEntity();
             update.setId(eventInfo.getTaskId());

@@ -73,6 +73,7 @@ public class PressureTaskServiceImpl implements PressureTaskService {
         config.setTaskId(taskId);
         config.setCustomerId(tenantId);
         config.setPressureScene(po.getSceneType().getCode());
+        config.setJobName(ScheduleConstants.getJobName(po.getSceneType(), sceneId, taskId, tenantId));
         String consoleUrl = null;
         String callbackUrl = null;
         switch (po.getSceneType()) {

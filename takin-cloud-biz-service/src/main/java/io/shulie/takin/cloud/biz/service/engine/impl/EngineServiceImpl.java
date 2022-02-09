@@ -10,6 +10,7 @@ import io.shulie.takin.cloud.ext.content.enginecall.EngineRunConfig;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -72,12 +73,19 @@ public class EngineServiceImpl implements EngineService {
                 engineCallExtApi.deleteJob(scheduleStopRequest);
             }
 
-            redisTemplate.expire(engineInstanceRedisKey, 10, TimeUnit.MINUTES);
+            if (StringUtils.isNotBlank(engineInstanceRedisKey)) {
+                redisTemplate.expire(engineInstanceRedisKey, 10, TimeUnit.MINUTES);
+            }
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：任务停止失败失败 --> 【deleteJob】处理finished事件异常: {}",
                 TakinCloudExceptionEnum.TASK_STOP_DELETE_TASK_ERROR, e);
             return false;
         }
         return true;
+    }
+
+    @Override
+    public boolean deleteJob(String jobName) {
+        return deleteJob(jobName, null);
     }
 }

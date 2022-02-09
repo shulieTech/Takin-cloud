@@ -21,6 +21,10 @@ public class EngineRunConfig extends AbstractEntry {
     private Long taskId;
     private Long customerId;
     /**
+     * 压测引擎调度任务任务名称
+     */
+    private String jobName;
+    /**
      * 数据上报地址
      */
     private String consoleUrl;

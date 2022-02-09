@@ -21,6 +21,7 @@ import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.redis.RedisClientUtils;
+import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.FileUtils;
 import io.shulie.takin.cloud.ext.content.enginecall.EngineRunConfig;
 import io.shulie.takin.common.beans.response.ResponseResult;
@@ -65,7 +66,6 @@ public class LocalThreadServiceImpl implements EngineCallService {
         Long sceneId = config.getSceneId();
         Long taskId = config.getTaskId();
         Long customerId = config.getCustomerId();
-        Integer sceneType = config.getPressureScene();
 
         //todo 明确这2个参数是干啥的，然后考虑转移出去
         config.setIsLocal(true);
@@ -73,7 +73,7 @@ public class LocalThreadServiceImpl implements EngineCallService {
 
         String configFileName =  ScheduleConstants.getConfigMapName(sceneId, taskId, customerId);
         FileUtils.writeTextFile(JsonHelper.obj2StringPretty(config), taskDir + "/" + configFileName);
-        String jobName = ScheduleConstants.getJobName(sceneType, sceneId, taskId, customerId);
+        String jobName = config.getJobName();
         String result = createJob(jobName, configFileName);
         if (StringUtils.isNotBlank(result)) {
             return ResponseResult.fail(result, "请联系管理员");

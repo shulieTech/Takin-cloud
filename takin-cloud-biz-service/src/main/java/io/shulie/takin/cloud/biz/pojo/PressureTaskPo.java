@@ -177,4 +177,8 @@ public class PressureTaskPo extends AbstractEntry {
      * 最后存活时间，健康监控
      */
     private Date gmtLive;
+    /**
+     * 消息
+     */
+    private String message;
 }

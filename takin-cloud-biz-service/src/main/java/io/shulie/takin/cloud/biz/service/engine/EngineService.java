@@ -26,11 +26,15 @@ public interface EngineService {
      */
     ResponseResult<?> start(EngineRunConfig config);
     /**
-     * 删除引擎jog
+     * 删除引擎job
      *
      * @param jobName                job名称
      * @param engineInstanceRedisKey 引擎实例Redis键
      */
     boolean deleteJob(String jobName, String engineInstanceRedisKey);
 
+    /**
+     * 删除引起job
+     */
+    boolean deleteJob(String jobName);
 }
