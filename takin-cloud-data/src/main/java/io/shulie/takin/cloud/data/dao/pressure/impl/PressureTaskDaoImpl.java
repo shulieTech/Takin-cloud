@@ -97,7 +97,7 @@ public class PressureTaskDaoImpl extends BaseDao implements PressureTaskDao {
         return mapper.selectPage(param, wrapper);
     }
 
-    public int updateStatus(Long id, Integer status) {
+    public int updateStatus(Long id, Integer status, String message) {
         if (null == id) {
             log.error("updateStatus id is null!");
             return 0;
@@ -109,6 +109,7 @@ public class PressureTaskDaoImpl extends BaseDao implements PressureTaskDao {
         PressureTaskEntity entity = new PressureTaskEntity();
         entity.setId(id);
         entity.setStatus(status);
+        entity.setMessage(message);
         if (1 == status) {
             entity.setGmtStart(Calendar.getInstance().getTime());
         } else if (2 == status) {

@@ -181,4 +181,10 @@ public class PressureTaskEntity extends BaseDeleteEntity {
      */
     @TableField(value = "gmt_live")
     private Date gmtLive;
+
+    /**
+     * 消息
+     */
+    @TableField(value = "message")
+    private String message;
 }

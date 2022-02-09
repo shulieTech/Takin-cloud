@@ -36,6 +36,7 @@ public class JmeterReportEventListener extends AbstractJmeterReportListener {
     @Override
     public boolean receive(TkMessage message) {
         try {
+            log.info("event message="+JsonUtil.toJson(message));
             EngineEventInfoBo eventInfo = JsonUtil.parseObject(message.getContent(), EngineEventInfoBo.class);
             if (null == eventInfo) {
                 return true;
@@ -55,11 +56,15 @@ public class JmeterReportEventListener extends AbstractJmeterReportListener {
             if (EngineEvent.START_FAILED == eventInfo.getEvent() || EngineEvent.TEST_END == eventInfo.getEvent()) {
                 String jobName = ScheduleConstants.getJobName(sceneType, eventInfo.getSceneId(), eventInfo.getTaskId(), eventInfo.getCustomerId());
                 engineService.deleteJob(jobName);
+                log.info("delete job: "+jobName);
+            } else if (EngineEvent.TEST_START == eventInfo.getEvent()) {
+                if (task.getStatus() != 0) {
+                    log.warn("任务状态异常：taskId="+eventInfo.getTaskId()+", task.sutatus="+task.getStatus()+", event="+eventInfo.getEvent());
+                    return true;
+                }
             }
-            PressureTaskEntity update = new PressureTaskEntity();
-            update.setId(eventInfo.getTaskId());
-            update.setStatus(eventInfo.getEvent().getCode());
-            pressureTaskService.update(update);
+            pressureTaskService.updateStatus(eventInfo.getTaskId(), eventInfo.getEvent().getStatus(), eventInfo.getMessage());
+            log.info("update task status, taskId="+eventInfo.getTaskId()+", status="+eventInfo.getEvent().getStatus()+", message="+eventInfo.getMessage());
         } catch (Throwable t) {
             log.error("revice message error!message="+JsonUtil.toJson(message));
         }

@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import io.shulie.takin.cloud.biz.cloudserver.SceneManageDTOConvert;
 import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.convertor.PressureTaskConvertor;
+import io.shulie.takin.cloud.biz.enums.PressureTaskStatusEnum;
 import io.shulie.takin.cloud.biz.output.engine.EngineLogPtlConfigOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.pojo.PressureTaskPo;
@@ -295,8 +296,11 @@ public class PressureTaskServiceImpl implements PressureTaskService {
     }
 
     @Override
-    public int updateStatus(Long id, Integer status) {
-        return pressureTaskDao.updateStatus(id, status);
+    public int updateStatus(Long id, PressureTaskStatusEnum status, String message) {
+        if (null == status || null == id) {
+            return 0;
+        }
+        return pressureTaskDao.updateStatus(id, status.getCode(), message);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.biz.service.pressure;
 
+import io.shulie.takin.cloud.biz.enums.PressureTaskStatusEnum;
 import io.shulie.takin.cloud.biz.pojo.PressureTaskPo;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.data.model.mysql.PressureTaskEntity;
@@ -34,7 +35,7 @@ public interface PressureTaskService {
 
     public int update(PressureTaskEntity entity);
 
-    public int updateStatus(Long id, Integer status);
+    public int updateStatus(Long id, PressureTaskStatusEnum status, String message);
 
     public int delete(Long id);
 

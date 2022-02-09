@@ -2,8 +2,11 @@ package io.shulie.takin.cloud.biz.message.listener;
 
 import com.google.common.collect.Lists;
 import io.shulie.jmeter.tool.redis.domain.TkMessage;
+import io.shulie.takin.cloud.biz.enums.PressureTaskStatusEnum;
 import io.shulie.takin.cloud.biz.message.domain.EngineHealthDataBo;
+import io.shulie.takin.cloud.biz.service.engine.EngineService;
 import io.shulie.takin.cloud.biz.service.pressure.PressureTaskService;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.cloud.data.model.mysql.PressureTaskEntity;
@@ -23,6 +26,8 @@ import java.util.List;
 public class JmeterReportHealthListener extends AbstractJmeterReportListener {
     @Resource
     private PressureTaskService pressureTaskService;
+    @Resource
+    private EngineService engineService;
 
     @Override
     public List<String> getTags() {
@@ -49,6 +54,13 @@ public class JmeterReportHealthListener extends AbstractJmeterReportListener {
             update.setId(healthData.getTaskId());
             update.setGmtLive(Calendar.getInstance().getTime());
             pressureTaskService.update(update);
+
+            PressureTaskStatusEnum status = PressureTaskStatusEnum.value(task.getStatus());
+            if (status == PressureTaskStatusEnum.STOPED || status == PressureTaskStatusEnum.FAILED) {
+                String jobName = ScheduleConstants.getJobName(sceneType, healthData.getSceneId(), healthData.getTaskId(), healthData.getCustomerId());
+                engineService.deleteJob(jobName);
+                log.info("delete job: "+jobName);
+            }
         } catch (Throwable t) {
             log.error("revice message error!message="+JsonUtil.toJson(message));
         }

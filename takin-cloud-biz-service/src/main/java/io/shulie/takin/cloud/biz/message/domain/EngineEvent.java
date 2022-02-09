@@ -17,6 +17,7 @@
 
 package io.shulie.takin.cloud.biz.message.domain;
 
+import io.shulie.takin.cloud.biz.enums.PressureTaskStatusEnum;
 import lombok.Getter;
 
 /**
@@ -25,21 +26,22 @@ import lombok.Getter;
  */
 public enum EngineEvent {
     /**
-     * 启动失败
+     * 压测中
      */
-    START_FAILED(3),
-    /**
-     * 启动压测
-     */
-    TEST_START(1),
+    TEST_START(PressureTaskStatusEnum.TESTING),
     /**
      * 停止压测
      */
-    TEST_END(2),
+    TEST_END(PressureTaskStatusEnum.STOPED),
+    /**
+     * 启动失败
+     */
+    START_FAILED(PressureTaskStatusEnum.FAILED),
     ;
     @Getter
-    private int code;
-    EngineEvent(int code) {
-        this.code = code;
+    private PressureTaskStatusEnum status;
+
+    EngineEvent(PressureTaskStatusEnum status) {
+        this.status = status;
     }
 }

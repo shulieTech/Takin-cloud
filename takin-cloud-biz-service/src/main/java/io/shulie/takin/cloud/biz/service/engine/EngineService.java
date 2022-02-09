@@ -34,7 +34,7 @@ public interface EngineService {
     boolean deleteJob(String jobName, String engineInstanceRedisKey);
 
     /**
-     * 删除引起job
+     * 删除引起job,新的巡检走这个逻辑
      */
     boolean deleteJob(String jobName);
 }

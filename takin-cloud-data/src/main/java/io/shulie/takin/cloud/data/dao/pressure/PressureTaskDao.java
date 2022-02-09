@@ -41,5 +41,5 @@ public interface PressureTaskDao {
     /**
      * 更新状态
      */
-    int updateStatus(Long id, Integer status);
+    int updateStatus(Long id, Integer status, String message);
 }
