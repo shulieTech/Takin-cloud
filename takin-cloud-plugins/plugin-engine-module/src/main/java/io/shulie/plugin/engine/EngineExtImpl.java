@@ -2,12 +2,15 @@ package io.shulie.plugin.engine;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import io.shulie.plugin.engine.util.SaxUtil;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.utils.JmxUtil;
 import io.shulie.takin.cloud.ext.api.EngineExtApi;
+import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptUrlExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityExt;
@@ -32,15 +35,15 @@ public class EngineExtImpl implements EngineExtApi {
         if (CollectionUtils.isEmpty(scriptVerityExt.getRequest())) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCRIPT_VERITY_ERROR, "脚本校验业务活动不能为空");
         }
-        ScriptParseExt scriptParseExt;
+        List<String> requestList;
         try {
-            scriptParseExt = SaxUtil.parseJmx(scriptVerityExt.getScriptPath());
+            requestList = getRequestUrls(scriptVerityExt.getScriptPath());
         } catch (Exception e) {
             errorMsgList.add("脚本解析失败:" + e.getMessage());
             return scriptVerityRespExt;
         }
-        List<ScriptUrlExt> requestUrl = scriptParseExt.getRequestUrl();
-        if (CollectionUtils.isEmpty(requestUrl)) {
+
+        if (CollectionUtils.isEmpty(requestList)) {
             errorMsgList.add("脚本中没有获取到请求链接！");
             return scriptVerityRespExt;
         }
@@ -97,6 +100,15 @@ public class EngineExtImpl implements EngineExtApi {
     @Override
     public List<ScriptNode> buildNodeTree(String scriptFile) {
         return JmxUtil.buildNodeTree(scriptFile);
+    }
+
+    private List<String> getRequestUrls(String filePath){
+        List<ScriptNode> scriptNodes = JmxUtil.buildNodeTree(filePath);
+        List<ScriptNode> samplerScriptNodes = JmxUtil.getScriptNodeByType(NodeTypeEnum.SAMPLER, scriptNodes);
+        if (CollectionUtils.isNotEmpty(samplerScriptNodes)){
+            return samplerScriptNodes.stream().map(ScriptNode::getRequestPath).filter(Objects::nonNull).collect(Collectors.toList());
+        }
+        return null;
     }
 
     @Override
