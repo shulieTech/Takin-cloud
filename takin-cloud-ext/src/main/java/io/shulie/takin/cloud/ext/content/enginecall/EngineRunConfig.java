@@ -37,6 +37,10 @@ public class EngineRunConfig extends AbstractEntry {
      */
     private Integer podCount;
     /**
+     * 和cloud消息互通方法：http、message
+     */
+    private String notifyMethod;
+    /**
      * 脚本文件完整路径和文件名
      */
     private String scriptFile;

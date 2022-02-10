@@ -200,6 +200,8 @@ public class EntrypointUrl {
      * 压测
      */
     public final static String MODULE_PRESSURE = "pressure";
+    public final static String METHOD_PRESSURE_STOP = "stop";
     public final static String METHOD_PRESSURE_START = "start";
     public final static String METHOD_PRESSURE_HEALTH = "health";
+    public final static String METHOD_PRESSURE_CHECK = "check";
 }

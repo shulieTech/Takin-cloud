@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.biz.convertor;
 import io.shulie.takin.cloud.biz.pojo.PressureTaskPo;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.cloud.data.model.mysql.PressureTaskEntity;
+import io.shulie.takin.cloud.sdk.model.response.pressure.PressureTaskResp;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -26,4 +27,6 @@ public interface PressureTaskConvertor {
         }
     )
     PressureTaskEntity of(PressureTaskPo po);
+
+    PressureTaskResp toResp(PressureTaskEntity task);
 }

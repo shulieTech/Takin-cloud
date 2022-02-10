@@ -1,12 +1,16 @@
 package io.shulie.takin.cloud.entrypoint.controller.pressure;
 
-import com.squareup.moshi.Json;
 import io.shulie.takin.cloud.biz.config.AppConfig;
+import io.shulie.takin.cloud.biz.convertor.PressureTaskConvertor;
+import io.shulie.takin.cloud.biz.enums.PressureTaskStatusEnum;
+import io.shulie.takin.cloud.biz.message.MessageProducerService;
+import io.shulie.takin.cloud.biz.message.domain.StopEngineMsgBo;
 import io.shulie.takin.cloud.biz.pojo.PressureTaskPo;
 import io.shulie.takin.cloud.biz.service.engine.EngineService;
 import io.shulie.takin.cloud.biz.service.pressure.PressureTaskService;
 import io.shulie.takin.cloud.biz.service.schedule.impl.FileSplitService;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
+import io.shulie.takin.cloud.biz.utils.Executors;
 import io.shulie.takin.cloud.common.constants.FileConstants;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
@@ -21,8 +25,11 @@ import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
 import io.shulie.takin.cloud.ext.helper.CommonHelper;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
+import io.shulie.takin.cloud.sdk.model.request.pressure.CheckEngineReq;
 import io.shulie.takin.cloud.sdk.model.request.pressure.StartEngineReq;
+import io.shulie.takin.cloud.sdk.model.request.pressure.StopEngineReq;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneScriptRefOpen;
+import io.shulie.takin.cloud.sdk.model.response.pressure.PressureTaskResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.swagger.annotations.Api;
@@ -60,6 +67,8 @@ public class PressureController {
     private FileSplitService fileSplitService;
     @Autowired
     private StrategyConfigService strategyConfigService;
+    @Autowired
+    private MessageProducerService messageProducerService;
 
     @ApiOperation(value = "上报健康状态")
     @PostMapping(EntrypointUrl.METHOD_PRESSURE_HEALTH)
@@ -67,6 +76,87 @@ public class PressureController {
         log.info("object="+ JsonUtil.toJson(object));
     }
 
+    @ApiOperation(value = "上报健康状态")
+    @PostMapping(EntrypointUrl.METHOD_PRESSURE_CHECK)
+    public ResponseResult<?> check(@RequestBody CheckEngineReq req) {
+        if (null == req) {
+            return ResponseResult.fail("1", "参数错误！", "请提供必要的参数");
+        }
+        if (null == req.getTaskId() && (null == req.getId() || null == req.getSceneType())) {
+            return ResponseResult.fail("1", "参数错误！", "请传入任务ID或同时传入场景ID和场景类型");
+        }
+        PressureTaskEntity task;
+        if (null != req.getTaskId()) {
+            task = pressureTaskService.getById(req.getTaskId());
+        } else {
+            PressureSceneEnum sceneType = PressureSceneEnum.value(req.getSceneType());
+            if (null == sceneType) {
+                return ResponseResult.fail("1", "场景类型值非法！", "请传入有效的场景类型值！");
+            }
+            task = pressureTaskService.getLastTaskBySceneId(req.getId(), sceneType);
+        }
+        if (null == task) {
+            return ResponseResult.fail("2", "任务不存在！");
+        }
+        PressureTaskResp viewTask = PressureTaskConvertor.INSTANCE.toResp(task);
+        return ResponseResult.success(viewTask);
+    }
+
+    @ApiOperation(value = "停止压测")
+    @PostMapping(EntrypointUrl.METHOD_PRESSURE_STOP)
+    @ResponseBody
+    public ResponseResult<?> stop(@RequestBody StopEngineReq req) {
+        if (null == req) {
+            return ResponseResult.fail("1", "参数错误！", "请提供必要的参数");
+        }
+        if (null == req.getTaskId() && (null == req.getId() || null == req.getSceneType())) {
+            return ResponseResult.fail("1", "参数错误！", "请传入任务ID或同时传入场景ID和场景类型");
+        }
+        PressureTaskEntity task;
+        if (null != req.getTaskId()) {
+            task = pressureTaskService.getById(req.getTaskId());
+        } else {
+            PressureSceneEnum sceneType = PressureSceneEnum.value(req.getSceneType());
+            task = pressureTaskService.getRunningTaskBySceneId(req.getId(), sceneType);
+        }
+        if (null == task) {
+            return ResponseResult.fail("2", "任务不存在！");
+        }
+        Long taskId = task.getId();
+        String jobName = pressureTaskService.getJobName(task);
+        StopEngineMsgBo stopEngine = new StopEngineMsgBo();
+        stopEngine.setTaskId(taskId);
+        stopEngine.setSceneId(task.getSceneId());
+        stopEngine.setTenantId(task.getTenantId());
+        stopEngine.setSceneType(task.getSceneType());
+        stopEngine.setJobName(jobName);
+        //发stop通知
+        boolean sendMsg = messageProducerService.send("stop", stopEngine);
+        if (!sendMsg) {
+            log.warn("消息发送失败:stopEngine="+ JsonUtil.toJson(stopEngine));
+        }
+
+        Runnable runnable = () -> {
+            boolean isDelete = engineService.deleteJob(jobName);
+            if (!isDelete) {
+                log.warn("删除压测调度任务失败！jobName="+jobName);
+            }
+            PressureTaskEntity task1 = pressureTaskService.getById(taskId);
+            if (null == task1) {
+                log.warn("查询任务失败！taskId="+taskId);
+                return;
+            }
+            PressureTaskStatusEnum status = PressureTaskStatusEnum.value(task1.getStatus());
+            if (status == PressureTaskStatusEnum.FAILED || status == PressureTaskStatusEnum.STOPED) {
+                return;
+            }
+            //会自动增加end time
+            pressureTaskService.updateStatus(taskId, PressureTaskStatusEnum.STOPED, "手动停止！");
+        };
+        long delay = CommonUtil.getValue(0L, req, StopEngineReq::getDeleteJobDelay);
+        Executors.schedule(runnable, delay);
+        return ResponseResult.success("操作成功！");
+    }
 
     @ApiOperation(value = "启动压测")
     @PostMapping(EntrypointUrl.METHOD_PRESSURE_START)
@@ -111,7 +201,11 @@ public class PressureController {
         }
         config.setFileSets(files);
 
-        return engineService.start(config);
+        ResponseResult<?> result = engineService.start(config);
+        if (null != result && BooleanUtils.isTrue(result.getSuccess())) {
+            return ResponseResult.success(task.getId());
+        }
+        return result;
     }
 
     /**

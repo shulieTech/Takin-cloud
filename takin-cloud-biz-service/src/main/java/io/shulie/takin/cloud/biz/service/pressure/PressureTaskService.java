@@ -23,6 +23,15 @@ public interface PressureTaskService {
      */
     public PressureTaskPo buildPressureTask(StartEngineReq req);
 
+    public String getJobName(PressureTaskEntity task);
+
+    public String getJobName(PressureTaskPo task);
+
+    /**
+     * 通过场景id获取最新的一条任务
+     */
+    public PressureTaskEntity getLastTaskBySceneId(Long sceneId, PressureSceneEnum sceneType);
+
     /**
      * 通过场景id获取是否有正在运行的压测任务
      */

@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.biz.service.pressure.impl;
 
+import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -74,7 +75,7 @@ public class PressureTaskServiceImpl implements PressureTaskService {
         config.setTaskId(taskId);
         config.setCustomerId(tenantId);
         config.setPressureScene(po.getSceneType().getCode());
-        config.setJobName(ScheduleConstants.getJobName(po.getSceneType(), sceneId, taskId, tenantId));
+        config.setJobName(getJobName(po));
         String consoleUrl = null;
         String callbackUrl = null;
         switch (po.getSceneType()) {
@@ -94,6 +95,7 @@ public class PressureTaskServiceImpl implements PressureTaskService {
         }
         config.setConsoleUrl(consoleUrl);
         config.setCallbackUrl(callbackUrl);
+        config.setNotifyMethod("message");
 
         config.setPodCount(po.getPodNum());
         config.setScriptFile(po.getScriptFile());
@@ -257,6 +259,44 @@ public class PressureTaskServiceImpl implements PressureTaskService {
         }
         po.setTraceSampling(traceSampling);
         return po;
+    }
+
+    public String getJobName(PressureTaskEntity task) {
+        if (null == task) {
+            return null;
+        }
+        if (null == task.getId()) {
+            throw new RuntimeException("任务ID尚未生成");
+        }
+        return ScheduleConstants.getJobName(task.getSceneType(), task.getSceneId(), task.getId(), task.getTenantId());
+    }
+
+    public String getJobName(PressureTaskPo task) {
+        if (null == task) {
+            return null;
+        }
+        if (null == task.getId()) {
+            throw new RuntimeException("任务ID尚未生成");
+        }
+        return ScheduleConstants.getJobName(task.getSceneType(), task.getSceneId(), task.getId(), task.getTenantId());
+    }
+
+    public PressureTaskEntity getLastTaskBySceneId(Long sceneId, PressureSceneEnum sceneType) {
+        if (null == sceneId || null == sceneType) {
+            return null;
+        }
+        PressureTaskQueryParam query = new PressureTaskQueryParam();
+        query.setSceneId(sceneId);
+        query.setSceneType(sceneType);
+        query.setStatuses(Lists.newArrayList(0, 1));
+        query.setCurrent(1L);
+        query.setSize(1L);
+        query.addOrder(OrderItem.desc("id"));
+        Page<PressureTaskEntity> page = pressureTaskDao.query(query);
+        if (null != page && CollectionUtils.isNotEmpty(page.getRecords())) {
+            return page.getRecords().get(0);
+        }
+        return null;
     }
 
     @Override
