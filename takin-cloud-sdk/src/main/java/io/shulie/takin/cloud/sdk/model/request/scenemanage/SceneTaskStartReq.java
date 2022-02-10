@@ -23,6 +23,10 @@ public class SceneTaskStartReq extends ContextExt {
      */
     private String resourceName;
 
+    /**
+     * 使用下面enginePlugins，包含id和版本号
+     */
+    @Deprecated
     private List<Long> enginePluginIds;
 
     private List<SceneTaskStartRequest.EnginePluginInput> enginePlugins;
