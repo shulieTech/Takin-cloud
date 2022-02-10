@@ -62,7 +62,7 @@ public class JmeterReportHealthListener extends AbstractJmeterReportListener {
                 log.info("delete job: "+jobName);
             }
         } catch (Throwable t) {
-            log.error("revice message error!message="+JsonUtil.toJson(message));
+            log.error("revice message error!message="+JsonUtil.toJson(message), t);
         }
         return true;
     }

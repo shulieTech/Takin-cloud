@@ -66,7 +66,7 @@ public class JmeterReportEventListener extends AbstractJmeterReportListener {
             pressureTaskService.updateStatus(eventInfo.getTaskId(), eventInfo.getEvent().getStatus(), eventInfo.getMessage());
             log.info("update task status, taskId="+eventInfo.getTaskId()+", status="+eventInfo.getEvent().getStatus()+", message="+eventInfo.getMessage());
         } catch (Throwable t) {
-            log.error("revice message error!message="+JsonUtil.toJson(message));
+            log.error("revice message error!message="+JsonUtil.toJson(message), t);
         }
         return true;
     }
