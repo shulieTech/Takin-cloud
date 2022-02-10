@@ -131,7 +131,7 @@ public class PressureController {
         stopEngine.setSceneType(task.getSceneType());
         stopEngine.setJobName(jobName);
         //发stop通知
-        boolean sendMsg = messageProducerService.send("stop", stopEngine);
+        boolean sendMsg = messageProducerService.notifyEngine(MessageProducerService.TAG_NOTIFY_ENGINE_STOP, stopEngine);
         if (!sendMsg) {
             log.warn("消息发送失败:stopEngine="+ JsonUtil.toJson(stopEngine));
         }

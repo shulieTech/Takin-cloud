@@ -23,6 +23,10 @@ public class MessageProducerService {
      * 通知压测引擎
      */
     public static final GroupTopicEnum GT_NOTIFY_ENGINE = new GroupTopicEnum("default", "notify_engine");
+    /**
+     * 通知压测引擎停止的tag
+     */
+    public static final String TAG_NOTIFY_ENGINE_STOP = "stop";
 
     @Resource
     private RedisConfig redisConfig;
@@ -32,7 +36,7 @@ public class MessageProducerService {
         messageProducer = MessageProducer.getInstance(redisConfig);
     }
 
-    public boolean send(String tag, AbstractMessageContentBo content) {
+    public boolean notifyEngine(String tag, AbstractMessageContentBo content) {
         TkMessage message = TkMessage.create()
                 .setGroupTopic(GT_NOTIFY_ENGINE)
                 .setTag(tag)
