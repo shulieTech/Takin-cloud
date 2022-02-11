@@ -447,6 +447,9 @@ public class JmxUtil {
         if (null == props) {return;}
         String exchange = props.get("RabbitSampler.Exchange");
         String routingKey = props.get("RabbitSampler.RoutingKey");
+        if (StringUtils.isBlank(routingKey)){
+            routingKey = "*";
+        }
         node.setRequestPath(String.format("%s|%s", routingKey, exchange));
         node.setIdentification(String.format("%s|%s|%s", routingKey, exchange, SamplerTypeEnum.RABBITMQ.getRpcTypeEnum().getValue()));
     }
