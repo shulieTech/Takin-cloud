@@ -445,14 +445,10 @@ public class JmxUtil {
         if (null == node) {return;}
         Map<String, String> props = node.getProps();
         if (null == props) {return;}
-        String queue = props.get("RabbitSampler.Queue");
+        String exchange = props.get("RabbitSampler.Exchange");
         String routingKey = props.get("RabbitSampler.RoutingKey");
-        String requestPath = StringUtils.isBlank(routingKey) ? queue : routingKey;
-        if (StringUtils.isBlank(requestPath) || requestPath.startsWith("$")) {
-            return;
-        }
-        node.setRequestPath(requestPath);
-        node.setIdentification(String.format("%s|%s|%s", routingKey, queue, SamplerTypeEnum.RABBITMQ.getRpcTypeEnum().getValue()));
+        node.setRequestPath(String.format("%s|%s", routingKey, exchange));
+        node.setIdentification(String.format("%s|%s|%s", routingKey, exchange, SamplerTypeEnum.RABBITMQ.getRpcTypeEnum().getValue()));
     }
 
     private static SamplerTypeEnum getJavaSamplerType(ScriptNode node) {
