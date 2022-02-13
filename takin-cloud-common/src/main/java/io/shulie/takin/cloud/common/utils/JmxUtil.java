@@ -386,7 +386,9 @@ public class JmxUtil {
                     //interface + # + method
                     setDubboIdentification(node);
                     node.setSamplerType(SamplerTypeEnum.DUBBO);
-                } else if ("cn.ztc.jmeter.rabbit.RabbitPublisherSampler".equals(name)) {
+                }
+                // TODO: 1.名称常量化。2.名称和解析逻辑的关系从主工程抽离。
+                else if ("io.shulie.jmeter.plugins.rabbit.RabbitPublisherSampler".equals(name)) {
                     node.setProps(buildProps(element));
                     //interface + # + method
                     setRabbitIdentification(node);
