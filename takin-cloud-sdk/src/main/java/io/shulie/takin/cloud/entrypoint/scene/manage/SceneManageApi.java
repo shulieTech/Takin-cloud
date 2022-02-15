@@ -124,4 +124,7 @@ public interface SceneManageApi {
      */
     List<SceneManageWrapperResp> queryByIds(SceneManageQueryByIdsReq req);
 
+
+    List<SceneManageListResp> querySceneByStatus(SceneManageQueryReq req);
+
 }

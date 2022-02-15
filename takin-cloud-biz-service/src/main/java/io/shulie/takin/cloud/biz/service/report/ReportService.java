@@ -20,6 +20,7 @@ import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportActivityResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
 import io.swagger.models.auth.In;
@@ -252,4 +253,13 @@ public interface ReportService {
      * @return -
      */
     Integer getReportStatusById(Long reportId);
+
+
+    /**
+     * 根据场景ID列表获取场景ID
+     *
+     * @param sceneIds
+     * @return
+     */
+    List<ReportActivityResp> getNodeDetailBySceneIds(List<Long> sceneIds);
 }

@@ -144,4 +144,6 @@ public interface SceneManageService {
      * @return 操作结果
      */
     ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update);
+
+    List<SceneManageListOutput> getSceneByStatus(Integer status);
 }

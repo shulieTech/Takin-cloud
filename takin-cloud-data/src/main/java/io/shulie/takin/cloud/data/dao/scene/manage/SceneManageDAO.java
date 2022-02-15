@@ -3,6 +3,8 @@ package io.shulie.takin.cloud.data.dao.scene.manage;
 import java.util.List;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
@@ -97,4 +99,12 @@ public interface SceneManageDAO extends IService<SceneManageEntity> {
      * @return 操作影响行数
      */
     int updateStatus(Long sceneId, Integer status, Integer compareStatus);
+
+    /**
+     * 根据条件查询
+     * @param param
+     * @return
+     */
+    List<SceneManageEntity> queryScene(SceneManageQueryBean param);
+
 }

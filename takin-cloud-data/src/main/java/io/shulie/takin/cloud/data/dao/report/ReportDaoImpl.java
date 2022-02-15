@@ -240,4 +240,20 @@ public class ReportDaoImpl implements ReportDao {
         }
         return null;
     }
+
+
+    @Override
+    public List<ReportEntity> queryReportBySceneIds(List<Long> sceneIds) {
+        if (CollectionUtils.isEmpty(sceneIds)){
+            return null;
+        }
+        return reportMapper.queryBySceneIds(sceneIds);
+    }
+
+    @Override
+    public List<ReportBusinessActivityDetailEntity> getActivityByReportIds(List<Long> reportIds) {
+        LambdaQueryWrapper<ReportBusinessActivityDetailEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(ReportBusinessActivityDetailEntity::getReportId,reportIds);
+        return detailMapper.selectList(wrapper);
+    }
 }

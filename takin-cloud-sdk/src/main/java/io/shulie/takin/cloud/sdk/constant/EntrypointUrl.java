@@ -102,6 +102,7 @@ public class EntrypointUrl {
     public final static String METHOD_REPORT_LIST_PRESSURING = "pressuring/list";
     public final static String METHOD_REPORT_SCRIPT_NODE_TREE = "nodeTree";
     public final static String METHOD_REPORT_GET_JTL_DOWNLOAD_URL = "getJtlDownLoadUrl";
+    public final static String METHOD_REPORT_GET_ACTIVITIES = "activities";
 
     public final static String METHOD_REPORT_TREND = "queryReportTrend";
     public final static String METHOD_REPORT_TREND_TEMP = "queryTempReportTrend";
@@ -135,6 +136,8 @@ public class EntrypointUrl {
     public final static String METHOD_SCENE_MANAGE_GET_IP_NUMBER = "ip_num";
     public final static String METHOD_SCENE_MANAGE_CHECK_AND_UPDATE_SCRIPT = "checkAndUpdate/script";
     public final static String METHOD_SCENE_MANAGE_QUERY_BY_IDS = "query/ids";
+    public static final String METHOD_SCENE_MANAGE_GET_BY_STATUS = "getByStatus";
+
 
     /**
      * 模块 - 场景任务

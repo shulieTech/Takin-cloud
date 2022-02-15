@@ -40,6 +40,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -204,6 +205,19 @@ public class SceneManageController {
         ScriptVerityRespExt scriptVerityRespExt = sceneManageService.checkAndUpdate(req.getRequest(), req.getUploadPath(),
             req.isAbsolutePath(), req.isUpdate());
         return ResponseResult.success(SceneTaskOpenConverter.INSTANCE.ofScriptVerityRespExt(scriptVerityRespExt));
+    }
+
+    @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_GET_BY_STATUS)
+    @ApiOperation(value = "根据是否运行状态查询场景")
+    public ResponseResult<List<SceneManageListResp>> querySceneByStatus(Integer status){
+        List<SceneManageListOutput> sceneManageListOutputs = sceneManageService.getSceneByStatus(status);
+        List<SceneManageListResp> list = sceneManageListOutputs.stream()
+            .map(output -> {
+                SceneManageListResp resp = new SceneManageListResp();
+                BeanUtils.copyProperties(output, resp);
+                return resp;
+            }).collect(Collectors.toList());
+        return ResponseResult.success(list);
     }
 
 }
