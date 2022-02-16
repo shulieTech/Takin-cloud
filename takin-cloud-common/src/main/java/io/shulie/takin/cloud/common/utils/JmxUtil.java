@@ -448,7 +448,7 @@ public class JmxUtil {
         Map<String, String> props = node.getProps();
         if (null == props) {return;}
         String exchange = props.get("RabbitSampler.Exchange");
-        String routingKey = props.get("RabbitSampler.RoutingKey");
+        String routingKey = props.get("RabbitPublisher.MessageRoutingKey");
         if (StringUtils.isBlank(routingKey)){
             routingKey = "*";
         }
