@@ -184,12 +184,13 @@ public class PressureTaskServiceImpl implements PressureTaskService {
         }
         pressureConfig.setFixedTimer(po.getFixTimer());
 
+        PtlLogConfigExt ptlLogConfig = new PtlLogConfigExt();
         EngineLogPtlConfigOutput engineLogPtlConfigOutput = engineConfigService.getEnginePtlConfig();
         if (null != engineLogPtlConfigOutput) {
-            PtlLogConfigExt ptlLogConfig = new PtlLogConfigExt();
             BeanUtils.copyProperties(engineLogPtlConfigOutput, ptlLogConfig);
-            pressureConfig.setPtlLogConfig(ptlLogConfig);
         }
+        ptlLogConfig.setPtlUploadFrom(appConfig.getEngineLogUploadModel());
+        pressureConfig.setPtlLogConfig(ptlLogConfig);
 
         pressureConfig.setZkServers(appConfig.getZkServers());
         pressureConfig.setLogQueueSize(NumberUtil.parseInt(appConfig.getLogQueueSize(), 25000));
@@ -210,7 +211,7 @@ public class PressureTaskServiceImpl implements PressureTaskService {
     }
 
     @Override
-    public PressureTaskPo buildPressureTask(StartEngineReq req) {
+    public PressureTaskPo buildPressureTask(StartEngineReq req, StrategyConfigExt strategyConfig) {
         PressureTaskPo po = new PressureTaskPo();
         po.setTenantId(req.getTenantId());
         po.setEnvCode(req.getEnvCode());
@@ -245,19 +246,25 @@ public class PressureTaskServiceImpl implements PressureTaskService {
 
         //取样率
         int traceSampling = 1;
+        String memSetting;
         switch (po.getSceneType()) {
             case TRY_RUN:
+                memSetting = CommonUtil.getValue(appConfig.getK8sJvmSettings(), strategyConfig, StrategyConfigExt::getK8sJvmSettings);
             case INSPECTION_MODE:
+                memSetting = "-XX:MaxRAMPercentage=90.0 -Xss256K -XX:MaxMetaspaceSize=64m";
                 break;
             case FLOW_DEBUG:
                 po.setLoopsNum(1000L);
                 traceSampling = CommonUtil.getValue(traceSampling, engineConfigService, EngineConfigService::getLogSimpling);
+                memSetting = CommonUtil.getValue(appConfig.getK8sJvmSettings(), strategyConfig, StrategyConfigExt::getK8sJvmSettings);
                 break;
             default:
                 traceSampling = CommonUtil.getValue(traceSampling, engineConfigService, EngineConfigService::getLogSimpling);
+                memSetting = CommonUtil.getValue(appConfig.getK8sJvmSettings(), strategyConfig, StrategyConfigExt::getK8sJvmSettings);
                 break;
         }
         po.setTraceSampling(traceSampling);
+        po.setJvmSettings(memSetting);
         return po;
     }
 

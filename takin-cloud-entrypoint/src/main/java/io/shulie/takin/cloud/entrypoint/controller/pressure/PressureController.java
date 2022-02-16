@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.entrypoint.controller.pressure;
 
+import com.squareup.moshi.Json;
 import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.convertor.PressureTaskConvertor;
 import io.shulie.takin.cloud.biz.enums.PressureTaskStatusEnum;
@@ -73,6 +74,12 @@ public class PressureController {
     @ApiOperation(value = "上报健康状态")
     @PostMapping(EntrypointUrl.METHOD_PRESSURE_HEALTH)
     public void health(@RequestBody Object object) {
+//        log.info("object="+ JsonUtil.toJson(object));
+    }
+
+    @ApiOperation(value = "jmeter请求")
+    @PostMapping("log")
+    public void log(@RequestBody Object object) {
         log.info("object="+ JsonUtil.toJson(object));
     }
 
@@ -170,8 +177,10 @@ public class PressureController {
         if (null != checkResult && BooleanUtils.isNotTrue(checkResult.getSuccess())) {
             return checkResult;
         }
+        //获取配置
+        StrategyConfigExt strategyConfig = strategyConfigService.getCurrentStrategyConfig();
         //构建压测任务
-        PressureTaskPo task = pressureTaskService.buildPressureTask(req);
+        PressureTaskPo task = pressureTaskService.buildPressureTask(req, strategyConfig);
         //资源检测
         int cpuMemoryCheck = engineService.check(task.getPodNum(), task.getRequestCpu(), task.getRequestMemory(), task.getLimitCpu(), task.getLimitMemory());
         if (0 != cpuMemoryCheck) {
@@ -182,8 +191,6 @@ public class PressureController {
             log.error("task="+ JsonUtil.toJson(task));
             return ResponseResult.fail("3", "创建任务失败", "请联系管理员处理");
         }
-        //获取配置
-        StrategyConfigExt strategyConfig = strategyConfigService.getCurrentStrategyConfig();
         //构建压测引擎启动配置
         EngineRunConfig config = pressureTaskService.buildEngineRunConfig(task, strategyConfig);
         String delimiter = CommonUtil.getValue("@—@", strategyConfig, StrategyConfigExt::getDelimiter);

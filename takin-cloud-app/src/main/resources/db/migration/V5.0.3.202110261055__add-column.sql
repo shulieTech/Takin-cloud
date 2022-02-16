@@ -42,8 +42,8 @@ BEGIN
             ADD COLUMN `script_analysis_result` JSON NULL COMMENT '脚本解析结果' AFTER `features`;
     END IF;
 
-    ALTER TABLE `trodb_cloud`.`t_ac_account_balance`
-        MODIFY COLUMN `resource_name` longtext CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT '来源名称。压测报告取场景名称、流量验证取业务活动名称、脚本调试取脚本名称'
+    ALTER TABLE `t_ac_account_balance`
+        MODIFY COLUMN `resource_name` longtext CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT '来源名称。压测报告取场景名称、流量验证取业务活动名称、脚本调试取脚本名称';
 
 END $$
 DELIMITER ;

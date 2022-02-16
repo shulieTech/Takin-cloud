@@ -26,6 +26,7 @@ import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.ext.content.enginecall.EngineRunConfig;
 import io.shulie.takin.cloud.ext.helper.DataConvertHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -118,7 +119,9 @@ public class EngineCallExtImpl implements EngineCallExtApi {
     @Override
     public void deleteJob(ScheduleStopRequestExt scheduleStopRequest) {
         engineCallService.deleteJob(scheduleStopRequest.getJobName(), scheduleStopRequest.getEngineInstanceRedisKey());
-        engineCallService.deleteConfigMap(scheduleStopRequest.getEngineInstanceRedisKey());
+        if (StringUtils.isNotBlank(scheduleStopRequest.getEngineInstanceRedisKey())) {
+            engineCallService.deleteConfigMap(scheduleStopRequest.getEngineInstanceRedisKey());
+        }
     }
 
     @Override

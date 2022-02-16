@@ -155,6 +155,9 @@ public class LocalThreadServiceImpl implements EngineCallService {
 
     @Override
     public void deleteConfigMap(String engineRedisKey) {
+        if (StringUtils.isBlank(engineRedisKey)) {
+            return;
+        }
         Object fileName = redisClientUtils.hmget(engineRedisKey, PressureInstanceRedisKey.SecondRedisKey.CONFIG_NAME);
         String sourceFile = taskDir + "/" + fileName;
         FileUtils.deleteFile(sourceFile);

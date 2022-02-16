@@ -21,7 +21,7 @@ public interface PressureTaskService {
     /**
      * 根据启动参数生成压测任务对象
      */
-    public PressureTaskPo buildPressureTask(StartEngineReq req);
+    public PressureTaskPo buildPressureTask(StartEngineReq req, StrategyConfigExt strategyConfig);
 
     public String getJobName(PressureTaskEntity task);
 
