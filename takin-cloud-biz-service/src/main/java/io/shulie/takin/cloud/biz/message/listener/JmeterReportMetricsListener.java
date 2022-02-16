@@ -69,10 +69,6 @@ public class JmeterReportMetricsListener extends AbstractJmeterReportListener {
                     .collect(Collectors.toList());
             if (responseMetrics.size() > 0) {
                 //todo
-                ResponseMetrics metric = responseMetrics.get(0);
-                if (null != metric) {
-//                    metric.get
-                }
             }
             if (eventMetrics.size() > 0) {
                 //todo
