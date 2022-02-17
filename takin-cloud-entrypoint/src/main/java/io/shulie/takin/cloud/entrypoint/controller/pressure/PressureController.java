@@ -212,6 +212,11 @@ public class PressureController {
         if (null != result && BooleanUtils.isTrue(result.getSuccess())) {
             return ResponseResult.success(task.getId());
         }
+        String message = "启动失败:";
+        if (null != result.getError()) {
+            message += "["+result.getError().getCode()+"]"+result.getError().getMsg();
+        }
+        pressureTaskService.updateStatus(task.getId(), PressureTaskStatusEnum.FAILED, message);
         return result;
     }
 
