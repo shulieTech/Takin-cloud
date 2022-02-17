@@ -23,7 +23,6 @@ import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportActivityResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
-import io.swagger.models.auth.In;
 
 /**
  * @author 数列科技
@@ -258,8 +257,8 @@ public interface ReportService {
     /**
      * 根据场景ID列表获取场景ID
      *
-     * @param sceneIds
-     * @return
+     * @param sceneIds 场景ID列表
+     * @return 查询结果
      */
     List<ReportActivityResp> getNodeDetailBySceneIds(List<Long> sceneIds);
 }

@@ -145,5 +145,10 @@ public interface SceneManageService {
      */
     ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update);
 
+    /**
+     * 根据状态值获取压测场景信息列表
+     * @param status 状态值
+     * @return 场景信息列表
+     */
     List<SceneManageListOutput> getSceneByStatus(Integer status);
 }
