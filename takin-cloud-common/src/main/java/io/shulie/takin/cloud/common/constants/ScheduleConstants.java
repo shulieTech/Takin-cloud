@@ -29,6 +29,11 @@ public class ScheduleConstants {
     public static final String ENGINE_SCRIPT_FILE_PATH = "/etc/engine/script/";
 
     /**
+     * 引擎日志文件路径
+     */
+    public static final String ENGINE_LOG_FILE_PATH = "/etc/engine/script/logs";
+
+    /**
      * 引擎插件文件夹路径 add by lipeng
      */
     public static final String ENGINE_PLUGINS_FOLDER_PATH = "/etc/engine/plugins/";
@@ -161,12 +166,12 @@ public class ScheduleConstants {
     /**
      * pod启动结束事件去重key
      *
-     * @param sceneId
-     * @param reportId
-     * @param customerId
-     * @param podNo
-     * @param eventName
-     * @return
+     * @param sceneId    场景主键
+     * @param reportId   报告主键
+     * @param customerId 客户主键
+     * @param podNo      Pod编号
+     * @param eventName  时间名称
+     * @return Key
      */
     public static String getEnginePodNoStartKey(Long sceneId, Long reportId, Long customerId, String podNo, String eventName) {
         // 兼容原始redis key

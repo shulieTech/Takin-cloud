@@ -12,8 +12,7 @@ import lombok.EqualsAndHashCode;
  * @date 2020/11/4 下午4:49
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class SceneTaskStartInput extends ContextExt {
+public class SceneTaskStartInput {
 
     private Long sceneId;
 

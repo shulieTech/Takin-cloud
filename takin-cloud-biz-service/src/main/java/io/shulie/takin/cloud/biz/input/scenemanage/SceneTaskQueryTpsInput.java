@@ -22,4 +22,8 @@ public class SceneTaskQueryTpsInput extends ContextExt {
     @ApiModelProperty(value = "reportId")
     private Long reportId;
 
+    @NotNull
+    @ApiModelProperty(value = "节点MD5")
+    private String xpathMd5;
+
 }

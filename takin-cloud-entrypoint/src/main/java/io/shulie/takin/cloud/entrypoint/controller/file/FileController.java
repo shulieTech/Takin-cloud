@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -127,7 +128,7 @@ public class FileController {
     }
 
     @ApiOperation("脚本文件下载")
-    @GetMapping(value = "/download", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = EntrypointUrl.METHOD_FILE_DOWNLOAD, produces = MediaType.APPLICATION_JSON_VALUE)
     public void downloadFile(@RequestParam("fileName") String fileName, HttpServletResponse response) {
         try {
             String filePath = scriptPath + SceneManageConstant.FILE_SPLIT + fileName;
@@ -147,26 +148,30 @@ public class FileController {
     }
 
     @ApiOperation("文件下载")
-    @GetMapping(value = EntrypointUrl.METHOD_FILE_DOWNLOAD)
+    @GetMapping(value = EntrypointUrl.METHOD_FILE_DOWNLOAD_BY_PATH)
     public void downloadFileByPath(@RequestParam("filePath") String filePath, HttpServletResponse response) {
-        try {
+        try (OutputStream outputStream = response.getOutputStream()) {
             //反编码
             filePath = URLDecoder.decode(filePath, "utf-8");
             boolean permit = fileStrategy.filePathValidate(filePath);
 
             if (!permit) {
+                response.setContentType("text/plain; charset=utf-8");
+                outputStream.write(("非法下载路径文件，禁止下载：" + filePath).getBytes(StandardCharsets.UTF_8));
                 log.warn("非法下载路径文件，禁止下载：{}", filePath);
                 return;
             }
-
-            if (FileUtil.file(filePath).exists()) {
-                ServletOutputStream outputStream = response.getOutputStream();
+            if (new File(filePath).exists()) {
                 Files.copy(Paths.get(filePath), outputStream);
                 response.setContentType("application/octet-stream");
                 String saveName = filePath.substring(filePath.lastIndexOf("/") + 1);
                 response.setHeader("Content-Disposition",
                     "attachment;filename=" + new String(saveName.getBytes(StandardCharsets.UTF_8),
                         StandardCharsets.ISO_8859_1));
+            } else {
+                response.setContentType("text/plain; charset=utf-8");
+                outputStream.write(("文件不存在：" + filePath).getBytes(StandardCharsets.UTF_8));
+                log.warn("文件不存在：{}", filePath);
             }
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：文件命令执行异常 --> 脚本文件下载异常，异常信息: {}",

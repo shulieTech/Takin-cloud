@@ -49,17 +49,17 @@ public class InfluxUtil {
      */
     public static Point toPoint(String measurement, long time, Object pojo) {
         Point.Builder builder = Point.measurement(measurement)
-            .time(CollectorUtil.getTimeWindowTime(time), TimeUnit.MILLISECONDS)
+            .time(time, TimeUnit.MILLISECONDS)
             //当前类的字段添加到数据库
             .addFieldsFromPOJO(pojo)
             .addField("create_time", System.currentTimeMillis());
-        Class superclass = pojo.getClass().getSuperclass();
+        Class<?> superclass = pojo.getClass().getSuperclass();
         //父类字段添加到数据库
         addSuperClassFieldsFromPOJO(builder, pojo, superclass);
         return builder.build();
     }
 
-    private static void addSuperClassFieldsFromPOJO(Point.Builder builder, Object pojo, Class clazz) {
+    private static void addSuperClassFieldsFromPOJO(Point.Builder builder, Object pojo, Class<?> clazz) {
         for (Field field : clazz.getDeclaredFields()) {
             Column column = field.getAnnotation(Column.class);
             if (column == null) {

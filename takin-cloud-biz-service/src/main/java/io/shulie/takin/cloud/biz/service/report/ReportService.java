@@ -22,6 +22,7 @@ import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
+import io.swagger.models.auth.In;
 
 /**
  * @author 数列科技
@@ -111,6 +112,7 @@ public interface ReportService {
     /**
      * 查询正在生成的报告
      *
+     * @param contextExt 溯源数据
      * @return -
      */
     Long queryRunningReport(ContextExt contextExt);
@@ -232,4 +234,22 @@ public interface ReportService {
      * @return 基础表数据
      */
     ReportResult getReportBaseInfo(Long reportId);
+
+    /**
+     * 下载jtl路径
+     *
+     * @param reportId 报告主键
+     * @param needZip  是否需要打包
+     *                 <p>false代表只进行逻辑校验而不执行打包操作</p>
+     * @return jtl文件的下载路径
+     */
+    String getJtlDownLoadUrl(Long reportId, boolean needZip);
+
+    /**
+     * 根据报告id获取报告详情，之前的报告给页面使用，所以状态不是真实状态
+     *
+     * @param reportId -
+     * @return -
+     */
+    Integer getReportStatusById(Long reportId);
 }

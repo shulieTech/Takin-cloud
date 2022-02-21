@@ -116,7 +116,6 @@ public class CollectorService extends AbstractIndicators {
             .forEach(influxWriter::insert);
     }
 
-
     /**
      * 记录时间
      */
@@ -128,11 +127,11 @@ public class CollectorService extends AbstractIndicators {
         String taskKey = getPressureTaskKey(sceneId, reportId, tenantId);
         for (ResponseMetrics metric : metrics) {
             try {
-                long timeWindow = CollectorUtil.getTimeWindow(metric.getTimestamp()).getTimeInMillis();
+                long timeWindow = CollectorUtil.getTimeWindowTime(metric.getTimestamp());
                 if (validate(timeWindow, sceneId, reportId, tenantId, metrics)) {
                     // 写入redis
                     log.info(StringUtil.format("%s-%s-%s write redis , timestamp-%s,timeWindow-%s", sceneId, reportId, tenantId,
-                            metric.getTimestamp(), timeWindow));
+                        metric.getTimestamp(), timeWindow));
                     String source = metric.getTransaction();
                     String transaction = source;
                     String testName = source;
@@ -215,13 +214,13 @@ public class CollectorService extends AbstractIndicators {
                         cacheTryRunTaskStatus(sceneId, reportId, tenantId, SceneRunTaskStatusEnum.RUNNING);
                     }
                     //如果从cloud上传请求流量明细，则需要启动异步线程去读取ptl文件上传
-                    if (PressureLogUploadConstants.UPLOAD_BY_CLOUD.equals(appConfig.getEngineLogUploadModel())){
+                    if (PressureLogUploadConstants.UPLOAD_BY_CLOUD.equals(appConfig.getEngineLogUploadModel())) {
                         log.info(StringUtil.format("开始异步上传ptl日志，场景ID：%s,报告ID:%s,PodNum:%s", sceneId, reportId,
-                                metric.getPodNo()));
+                            metric.getPodNo()));
                         EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
                         String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_PTL_FILE_NAME_SYSTEM_PROP_KEY);
                         THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, tenantId, logUploadDAO, redisClientUtils,
-                            pushLogService, sceneManageDAO, ptlDir, fileName,engineCallExtApi) {});
+                            pushLogService, sceneManageDAO, ptlDir, fileName, engineCallExtApi) {});
                     }
                 }
                 if (isLast) {
@@ -232,7 +231,7 @@ public class CollectorService extends AbstractIndicators {
                         log.info("本次压测{}-{}-{}:打入结束标识", sceneId, reportId, tenantId);
                         setLast(last(taskKey), ScheduleConstants.LAST_SIGN);
                         setMax(engineName + ScheduleConstants.LAST_SIGN, metric.getTimestamp());
-                        notifyEnd(sceneId, reportId, metric.getTimestamp());
+                        notifyEnd(sceneId, reportId, metric.getTimestamp(), tenantId);
                         return;
                     }
                     // 计数 回传标识数量
@@ -246,7 +245,7 @@ public class CollectorService extends AbstractIndicators {
                         // 删除临时标识
                         redisClientUtils.del(ScheduleConstants.TEMP_LAST_SIGN + engineName);
                         // 压测停止
-                        notifyEnd(sceneId, reportId, metric.getTimestamp());
+                        notifyEnd(sceneId, reportId, metric.getTimestamp(), tenantId);
                     }
                 }
             } catch (Exception e) {
@@ -256,7 +255,6 @@ public class CollectorService extends AbstractIndicators {
         }
 
     }
-
 
     private void cacheTryRunTaskStatus(Long sceneId, Long reportId, Long customerId, SceneRunTaskStatusEnum status) {
         taskStatusCache.cacheStatus(sceneId, reportId, status);
@@ -268,13 +266,20 @@ public class CollectorService extends AbstractIndicators {
         }
     }
 
-    private void notifyStart(Long sceneId, Long reportId, long startTime){
+    private void notifyStart(Long sceneId, Long reportId, long startTime) {
         log.info(StringUtil.format("场景[%s]压测任务开始，更新报告[%s]开始时间[%s]", sceneId, reportId, startTime));
-        reportDao.updateReportStartTime(reportId,new Date(startTime));
+        reportDao.updateReportStartTime(reportId, new Date(startTime));
     }
 
-    private void notifyEnd(Long sceneId, Long reportId, long endTime) {
+    private void notifyEnd(Long sceneId, Long reportId, long endTime, long tenantId) {
         log.info(StringUtil.format("场景[%s]压测任务已完成,更新结束时间%s", sceneId, reportId));
+        // 刷新任务状态的Redis缓存
+        taskStatusCache.cacheStatus(sceneId, reportId, SceneRunTaskStatusEnum.ENDED);
+        // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
+        sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, tenantId)
+            .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
+            .updateEnum(SceneManageStatusEnum.STOP)
+            .build());
         reportDao.updateReportEndTime(reportId, new Date(endTime));
     }
 
@@ -291,7 +296,7 @@ public class CollectorService extends AbstractIndicators {
 
         String windowsTimeKey = String.format("%s:%s", getPressureTaskKey(sceneId, reportId, tenantId),
             "windowsTime");
-        String timeInMillis = String.valueOf(CollectorUtil.getTimeWindow(time).getTimeInMillis());
+        String timeInMillis = String.valueOf(CollectorUtil.getTimeWindowTime(time));
         List<String> ips;
         if (redisTemplate.getExpire(windowsTimeKey) == -2) {
             ips = new ArrayList<>();
@@ -317,7 +322,7 @@ public class CollectorService extends AbstractIndicators {
     private boolean validate(long time, Long sceneId, Long reportId, Long tenantId, List<ResponseMetrics> metrics) {
         if ((System.currentTimeMillis() - time) > CollectorConstants.OVERDUE_TIME) {
             log.info(StringUtil.format("%s-%s-%s数据丢失,超时时间%s，数据原文：%s", sceneId, reportId, tenantId,
-                    System.currentTimeMillis() - time, JsonHelper.bean2Json(metrics)));
+                System.currentTimeMillis() - time, JsonHelper.bean2Json(metrics)));
             return false;
         }
         return true;

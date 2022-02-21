@@ -12,12 +12,12 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
+import cn.hutool.core.bean.BeanUtil;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.sdk.model.common.SlaBean;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.date.DateUtil;
 import com.google.common.collect.Maps;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -156,8 +156,7 @@ public class SlaServiceImpl implements SlaService {
             return;
         }
         slaList.forEach(dto -> {
-            SceneSlaRefInput input = new SceneSlaRefInput();
-            BeanUtils.copyProperties(dto, input);
+            SceneSlaRefInput input = BeanUtil.copyProperties(dto, SceneSlaRefInput.class);
             Map<String, Object> conditionMap = SlaUtil.matchCondition(input, metricsEvent);
             if (!(Boolean)conditionMap.get("result")) {
                 redisClientUtils.hmdelete(SLA_DESTROY_KEY, String.valueOf(dto.getId()));
@@ -218,8 +217,7 @@ public class SlaServiceImpl implements SlaService {
             return;
         }
         slaList.forEach(dto -> {
-            SceneSlaRefInput input = new SceneSlaRefInput();
-            BeanUtils.copyProperties(dto, input);
+            SceneSlaRefInput input = BeanUtil.copyProperties(dto, SceneSlaRefInput.class);
             Map<String, Object> conditionMap = SlaUtil.matchCondition(input, metricsEvent);
             if (!(Boolean)conditionMap.get("result")) {
                 redisClientUtils.hmdelete(SLA_WARN_KEY, String.valueOf(dto.getId()));
@@ -307,8 +305,10 @@ public class SlaServiceImpl implements SlaService {
             return false;
         }
         for (String data : md5s) {
-            if ("-1".equals(data) || ReportConstants.ALL_BUSINESS_ACTIVITY.equals(data) || String.valueOf(bindRef)
-                .equals(data)) {
+            if ("-1".equals(data)
+                || ReportConstants.TEST_PLAN_MD5.equals(data)
+                || ReportConstants.ALL_BUSINESS_ACTIVITY.equals(data)
+                || String.valueOf(bindRef).equals(data)) {
                 return true;
             }
         }

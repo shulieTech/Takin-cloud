@@ -20,7 +20,7 @@ import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
 import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -74,14 +74,18 @@ public class PressureTestLogUploadTask implements Runnable {
 
     private static final Long MAX_PUSH_SIZE = 1024L * 1024L;
 
+    private static final int MAX_WAIT_TIME = 1500;
+
     private void uploadPtlFile() {
         String filePath = String.format(logDir + "/ptl/%s/%s/%s", this.sceneId, this.reportId, fileName);
         log.info("上传压测明细日志--文件路径：{}", filePath);
         //解决报告已完成，但是文件还未生成，上传大小未0
-        while (null == getFile(filePath)) {
+        int waitCount = 0;
+        while (null == getFile(filePath) && waitCount < MAX_WAIT_TIME) {
             try {
                 log.info("上传Jmeter日志--场景ID:{},文件未生成{},休眠等待", this.sceneId, filePath);
                 TimeUnit.SECONDS.sleep(2);
+                waitCount++;
             } catch (InterruptedException e) {
                 cleanCache(this.fileName.replaceAll("\\.", ""));
                 log.warn("上传Jmeter日志--场景ID:{},休眠失败，文件路径【{}】", this.sceneId, filePath);
@@ -207,7 +211,7 @@ public class PressureTestLogUploadTask implements Runnable {
      * @return 是否启用
      */
     private boolean isSceneEnded(Long sceneId) {
-        SceneManageResult manageResult = this.sceneManageDAO.getSceneById(sceneId);
+        SceneManageEntity manageResult = this.sceneManageDAO.getSceneById(sceneId);
         if (Objects.isNull(manageResult) || Objects.isNull(manageResult.getStatus())) {
             log.warn("上传Jmeter日志--场景ID:{},未查询到场景！", sceneId);
             return true;

@@ -11,6 +11,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.data.converter.senemange.SceneManageEntityConverter;
@@ -19,10 +20,8 @@ import io.shulie.takin.cloud.data.mapper.mysql.SceneManageMapper;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
-import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
 import io.shulie.takin.cloud.data.util.MPUtil;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,8 +35,7 @@ public class SceneManageDAOImpl
 
     @Override
     public Long insert(SceneManageCreateOrUpdateParam createParam) {
-        SceneManageEntity entity = new SceneManageEntity();
-        BeanUtils.copyProperties(createParam, entity);
+        SceneManageEntity entity = BeanUtil.copyProperties(createParam, SceneManageEntity.class);
         entity.setUserId(CloudPluginUtils.getContext().getUserId());
         entity.setTenantId(CloudPluginUtils.getContext().getTenantId());
         entity.setEnvCode(CloudPluginUtils.getContext().getEnvCode());
@@ -47,8 +45,7 @@ public class SceneManageDAOImpl
 
     @Override
     public void update(SceneManageCreateOrUpdateParam updateParam) {
-        SceneManageEntity entity = new SceneManageEntity();
-        BeanUtils.copyProperties(updateParam, entity);
+        SceneManageEntity entity = BeanUtil.copyProperties(updateParam, SceneManageEntity.class);
         if (null == updateParam.getUpdateTime()) {
             updateParam.setUpdateTime(Calendar.getInstance().getTime());
         }
@@ -59,10 +56,8 @@ public class SceneManageDAOImpl
     }
 
     @Override
-    public SceneManageResult getSceneById(Long id) {
-        SceneManageEntity entity = this.getById(id);
-        if (entity != null) {return BeanUtil.copyProperties(entity, SceneManageResult.class);}
-        return null;
+    public SceneManageEntity getSceneById(Long id) {
+        return this.getById(id);
     }
 
     @Override
@@ -105,9 +100,13 @@ public class SceneManageDAOImpl
     }
 
     @Override
-    public List<SceneManageEntity> listFromUpdateScript() {
-        return this.list(this.getTenantLQW().select(SceneManageEntity::getId,
-            SceneManageEntity::getTenantId, SceneManageEntity::getFeatures));
+    public List<SceneManageEntity> listFromUpdateScript(ContextExt contextExt) {
+        return this.getBaseMapper()
+            .selectList(new LambdaQueryWrapper<SceneManageEntity>()
+                .eq(SceneManageEntity::getEnvCode, contextExt.getEnvCode())
+                .eq(SceneManageEntity::getTenantId, contextExt.getTenantId())
+                .select(SceneManageEntity::getId, SceneManageEntity::getTenantId, SceneManageEntity::getFeatures)
+            );
     }
 
     @Override

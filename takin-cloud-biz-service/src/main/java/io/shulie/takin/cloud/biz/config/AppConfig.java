@@ -45,6 +45,9 @@ public class AppConfig {
     @Value("${report.data.collector:influxdb}")
     private String collector;
 
+    @Value("${report.data.holdRealThreadNum:true}")
+    private Boolean holdRealThreadNum;
+
     @Value("${spring.redis.host}")
     private String engineRedisAddress;
 
@@ -68,7 +71,7 @@ public class AppConfig {
     @Value("${pressure.engine.backendQueueCapacity:5000}")
     private String pressureEngineBackendQueueCapacity;
 
-    @Value("${pressure.engine.logUpload:engine}")
+    @Value("${pressure.engine.logUpload:cloud}")
     private String engineLogUploadModel;
 
     @Value("${script.path}")

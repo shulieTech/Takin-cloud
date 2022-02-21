@@ -30,7 +30,9 @@ import io.shulie.takin.cloud.entrypoint.convert.SceneBusinessActivityRefRespConv
 import io.shulie.takin.cloud.entrypoint.convert.SceneManageRespConvertor;
 import io.shulie.takin.cloud.entrypoint.convert.SceneScriptRefRespConvertor;
 import io.shulie.takin.cloud.entrypoint.convert.SceneSlaRefRespConvertor;
+import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
+import io.shulie.takin.cloud.sdk.model.common.TimeBean;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivityDetailResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivityDetailResponse;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResponse;
@@ -44,7 +46,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -92,6 +93,17 @@ public class SceneManageDetailController {
         } catch (TakinCloudException exception) {
             return ResponseResult.fail(TakinCloudExceptionEnum.REPORT_GET_ERROR.getErrorCode(), exception.getMessage(), "");
         }
+    }
+
+    /**
+     * 无租户版本
+     */
+    @ApiOperation(value = "压测场景编辑详情-无租户")
+    @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_DETAIL_NO_AUTH)
+    public ResponseResult<SceneManageWrapperResponse> getDetailNoAuth(
+        @ApiParam(name = "id", value = "ID") Long id,
+        @ApiParam(name = "reportId", value = "reportId") Long reportId) {
+        return getDetailForEdit(id, reportId);
     }
 
     public void assembleFeatures2(SceneManageWrapperOutput resp) {
@@ -265,8 +277,7 @@ public class SceneManageDetailController {
     }
 
     private String buildRule(SceneSlaRefResponse slaRefDTO) {
-        SceneSlaRefInput input = new SceneSlaRefInput();
-        BeanUtils.copyProperties(slaRefDTO, input);
+        SceneSlaRefInput input = BeanUtil.copyProperties(slaRefDTO, SceneSlaRefInput.class);
         Map<String, Object> dataMap = SlaUtil.matchCondition(input, new SendMetricsEvent());
         return String.valueOf(dataMap.get("type"))
             + dataMap.get("compare")
@@ -299,6 +310,21 @@ public class SceneManageDetailController {
                 data.setApplicationIds("-1");
             }
         });
+        //旧版
+        if (StringUtils.isBlank(sceneManage.getScriptAnalysisResult())) {
+            Map<String, ThreadGroupConfigExt> map = sceneManage.getThreadGroupConfigMap();
+            if (null != map) {
+                ThreadGroupConfigExt tgConfig = map.get("all");
+                if (null != tgConfig) {
+                    response.setPressureMode(tgConfig.getMode());
+                    if (null != tgConfig.getRampUp()) {
+                        TimeBean time = new TimeBean(tgConfig.getRampUp().longValue(), tgConfig.getRampUpUnit());
+                        response.setIncreasingSecond(time.getSecondTime());
+                        response.setIncreasingTime(time);
+                    }
+                }
+            }
+        }
         return ResponseResult.success(response);
     }
 }

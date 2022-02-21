@@ -15,15 +15,18 @@
 
 package io.shulie.takin.cloud.biz.output.statistics;
 
+import io.shulie.takin.cloud.common.pojo.AbstractEntry;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.influxdb.annotation.Column;
 
 /**
  * @author liyuanba
  * @date 2021/9/23 9:20 下午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class PressureOutput {
+public class PressureOutput extends AbstractEntry {
     @Column(tag = true, name = "transaction")
     private String transaction;
     @Column(name = "test_name")
@@ -52,8 +55,16 @@ public class PressureOutput {
     private Double maxRt;
     @Column(name = "min_rt")
     private Double minRt;
+    /**
+     * 活跃线程数（通过计算所得）
+     */
     @Column(name = "active_threads")
     private Integer activeThreads;
+    /**
+     * 实际活跃线程数:对应metrics表中的activeThreads字段
+     */
+//    @Column(name = "real_active_threads")
+//    private Integer realActiveThreads;
     @Column(name = "avg_tps")
     private Double avgTps;
     @Column(name = "sa_percent")

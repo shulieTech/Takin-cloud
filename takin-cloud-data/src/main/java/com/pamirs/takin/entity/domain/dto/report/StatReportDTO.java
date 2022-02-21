@@ -23,6 +23,11 @@ public class StatReportDTO {
     private Long totalRequest;
 
     /**
+     * 5s请求数
+     */
+    private Long tempRequestCount;
+
+    /**
      * 失败的总次数
      */
     private Long failRequest;
@@ -79,7 +84,7 @@ public class StatReportDTO {
      * @return -
      */
     public BigDecimal getSa() {
-        return BigDecimal.valueOf(NumberUtil.getPercentRate(saCount, getTotalRequest()));
+        return BigDecimal.valueOf(NumberUtil.getPercentRate(saCount, getTempRequestCount()));
     }
 
     /**
@@ -89,13 +94,13 @@ public class StatReportDTO {
      * @return -
      */
     public BigDecimal getSuccessRate() {
-        if (null == getTotalRequest()) {
+        if (null == getTempRequestCount()) {
             return null;
         }
         if (null == getFailRequest()) {
             return BigDecimal.valueOf(100);
         }
-        return BigDecimal.valueOf(NumberUtil.getPercentRate(getTotalRequest() - getFailRequest(), getTotalRequest()));
+        return BigDecimal.valueOf(NumberUtil.getPercentRate(getTempRequestCount() - getFailRequest(), getTempRequestCount()));
         //fixed end
     }
 
