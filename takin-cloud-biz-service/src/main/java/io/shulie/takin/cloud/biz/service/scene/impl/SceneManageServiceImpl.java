@@ -1183,7 +1183,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         map.put(SceneManageConstant.STEP_DURATION_UNIT,
             wrapperVO.getIncreasingTime() != null ? wrapperVO.getIncreasingTime().getUnit() : null);
         map.put(SceneManageConstant.STEP, wrapperVO.getStep());
-        BigDecimal value = new BigDecimal(0);
+        BigDecimal value = BigDecimal.ZERO;
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
             Response<BigDecimal> res = assetExtApi.calcEstimateAmount(BeanUtil.copyProperties(wrapperVO, AssetBillExt.class, ""));

@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.biz.service.schedule.impl;
 
-import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -9,10 +8,11 @@ import javax.annotation.Resource;
 import com.alibaba.fastjson.JSON;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.google.common.collect.Lists;
+
 import com.pamirs.takin.entity.dao.schedule.TScheduleRecordMapper;
 import com.pamirs.takin.entity.domain.entity.schedule.ScheduleRecord;
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
+
 import io.shulie.takin.cloud.biz.config.AppConfig;
 import io.shulie.takin.cloud.biz.output.engine.EngineLogPtlConfigOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
@@ -36,7 +36,6 @@ import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
 import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleInitParamExt;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
 import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
@@ -188,8 +187,6 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public void runSchedule(ScheduleRunRequest request) {
         ScheduleStartRequestExt startRequest = request.getRequest();
-        // 压力机数目记录
-        push(startRequest);
 
         Long sceneId = startRequest.getSceneId();
         Long taskId = startRequest.getTaskId();
@@ -216,27 +213,6 @@ public class ScheduleServiceImpl implements ScheduleService {
             sceneManageService.reportRecord(SceneManageStartRecordVO.build(sceneId, taskId, customerId).success(false)
                 .errorMsg("压测引擎job创建失败，失败原因：" + msg).build());
         }
-    }
-
-    @Override
-    public void initScheduleCallback(ScheduleInitParamExt param) {
-
-    }
-
-    /**
-     * 临时方案：
-     * 拆分文件的索引都存入到redis队列, 避免控制台集群环境下索引获取不正确
-     */
-    private void push(ScheduleStartRequestExt request) {
-        //把数据放入队列
-        String key = ScheduleConstants.getFileSplitQueue(request.getSceneId(), request.getTaskId(), request.getTenantId());
-
-        List<String> numList = Lists.newArrayList();
-        for (int i = 1; i <= request.getTotalIp(); i++) {
-            numList.add(i + "");
-        }
-
-        redisTemplate.opsForList().leftPushAll(key, numList);
     }
 
     /**

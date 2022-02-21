@@ -20,7 +20,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneStartTrialRunInput;
+import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
 import io.shulie.takin.cloud.ext.content.response.Response;
 import lombok.extern.slf4j.Slf4j;
 

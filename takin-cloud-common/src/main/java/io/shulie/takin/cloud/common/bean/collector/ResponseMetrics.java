@@ -17,14 +17,16 @@
 
 package io.shulie.takin.cloud.common.bean.collector;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
+
+import org.influxdb.annotation.Column;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
 import lombok.Data;
-import org.influxdb.annotation.Column;
+import lombok.EqualsAndHashCode;
 
 /**
  * 成功的响应
@@ -33,6 +35,7 @@ import org.influxdb.annotation.Column;
  * create: 2020-10-10
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ResponseMetrics extends AbstractMetrics {
     @Column(name = "time")
     private Long time;
@@ -84,7 +87,7 @@ public class ResponseMetrics extends AbstractMetrics {
     }
 
     @Data
-    class ErrorInfo {
+    static class ErrorInfo {
         private String responseMessage;
         private String responseCode;
     }

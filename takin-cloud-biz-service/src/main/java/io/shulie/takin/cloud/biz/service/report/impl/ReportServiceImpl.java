@@ -390,7 +390,7 @@ public class ReportServiceImpl implements ReportService {
                             setSa(new DataBean("0", ref.getTargetSa()));
                             setTps(new DataBean("0", ref.getTargetTps()));
                             setSuccessRate(new DataBean("0", ref.getTargetSuccessRate()));
-                            setAvgConcurrenceNum(new BigDecimal(0));
+                            setAvgConcurrenceNum(BigDecimal.ZERO);
                             setTempRequestCount(0L);
                             setTotalRequest(0L);
                         }
@@ -744,6 +744,12 @@ public class ReportServiceImpl implements ReportService {
         // 完成报告
         if (reportResult.getStatus() != ReportConstants.FINISH_STATUS) {
             log.info("{}报告触发强制停止", reportId);
+            //先汇总数据，之后再去强制停止
+            TaskResult taskResult = new TaskResult();
+            taskResult.setSceneId(reportResult.getSceneId());
+            taskResult.setTaskId(reportId);
+            taskResult.setTenantId(reportResult.getTenantId());
+            modifyReport(taskResult);
             reportDao.finishReport(reportId);
         }
 
@@ -1251,7 +1257,7 @@ public class ReportServiceImpl implements ReportService {
 
     private boolean isTargetBiggerThanZero(BigDecimal target) {
         if (Objects.nonNull(target)) {
-            return target.compareTo(new BigDecimal(0)) > 0;
+            return target.compareTo(BigDecimal.ZERO) > 0;
         }
         return false;
     }
