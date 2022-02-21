@@ -212,6 +212,11 @@ public interface CloudReportApi {
      */
     Integer getReportStatusById(ReportDetailByIdReq req);
 
+    /**
+     * 根据场景ID列表查询最新的报告
+     * @param req 入参（场景ID列表）
+     * @return 报告列表
+     */
     List<ReportActivityResp> getActivities(ReportDetailByIdsReq req);
 
 }

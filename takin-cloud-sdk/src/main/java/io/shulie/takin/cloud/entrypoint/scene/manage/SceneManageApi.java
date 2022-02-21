@@ -124,7 +124,12 @@ public interface SceneManageApi {
      */
     List<SceneManageWrapperResp> queryByIds(SceneManageQueryByIdsReq req);
 
-
+    /**
+     * 根据状态查询
+     *
+     * @param req 入参（状态）
+     * @return 查询列表
+     */
     List<SceneManageListResp> querySceneByStatus(SceneManageQueryReq req);
 
 }
