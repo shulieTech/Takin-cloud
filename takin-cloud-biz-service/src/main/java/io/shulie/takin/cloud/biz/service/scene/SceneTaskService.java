@@ -13,7 +13,6 @@ import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStartOutput;
 import io.shulie.takin.cloud.biz.output.report.SceneInspectTaskStopOutput;
 import io.shulie.takin.cloud.sdk.model.response.scenetask.SceneActionResp;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneJobStateOutput;
-import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskQueryTpsOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStartCheckOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTaskStopOutput;
 import io.shulie.takin.cloud.biz.output.scenetask.SceneTryRunTaskStartOutput;
@@ -102,7 +101,7 @@ public interface SceneTaskService {
      * @param input 入参
      * @return -
      */
-    SceneTaskQueryTpsOutput queryAdjustTaskTps(SceneTaskQueryTpsInput input);
+    double queryAdjustTaskTps(SceneTaskQueryTpsInput input);
 
     /**
      * 启动流量调试，返回报告id
@@ -134,8 +133,8 @@ public interface SceneTaskService {
      * 强制停止任务，不考虑数据的安全性，数据会丢失
      *
      * @param reportId           报告主键
-     * @param isNeedFinishReport 是否需要生成结束报告
-     * @return 任务停止结果
+     * @param isNeedFinishReport 是否需要强制停止
+     * @return 场景停止结果
      */
     SceneTaskStopOutput forceStopTask(Long reportId, boolean isNeedFinishReport);
 

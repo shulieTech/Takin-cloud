@@ -27,15 +27,6 @@ public class CloudPluginUtils {
     }
 
     /**
-     * 是否带数据溯源模块
-     *
-     * @return true/false
-     */
-    public static Boolean checkUserData() {
-        return userApi != null;
-    }
-
-    /**
      * 返回用户id
      *
      * @return -
@@ -67,6 +58,15 @@ public class CloudPluginUtils {
      */
     public static Long getTenantId() {
         return getContext().getTenantId();
+    }
+
+    /**
+     * 环境编码
+     *
+     * @return -
+     */
+    public static String getEnvCode() {
+        return getContext().getEnvCode();
     }
 
     /**

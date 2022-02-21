@@ -1,10 +1,10 @@
 package io.shulie.takin.cloud.entrypoint.controller.strategy;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * 文件位置管理策略
@@ -15,14 +15,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LocalFileStrategy {
-    @Value("${script.temp.path}")
-    private String tempPath;
-
     @Value("${script.path}")
     private String scriptPath;
-
     @Value("${nfs.file.dir}")
     private String nfsFileDir;
+    @Value("${script.temp.path}")
+    private String scriptTempPath;
+    @Value("${pressure.engine.jtl.path:/nfs_dir/jtl}")
+    private String pressureEngineJtlPath;
 
     /**
      * 文件路径是否管理策略
@@ -44,9 +44,10 @@ public class LocalFileStrategy {
 
     private List<String> init() {
         List<String> arrayList = new ArrayList<>();
-        arrayList.add(tempPath);
         arrayList.add(scriptPath);
         arrayList.add(nfsFileDir);
+        arrayList.add(scriptTempPath);
+        arrayList.add(pressureEngineJtlPath);
         return arrayList;
     }
 }

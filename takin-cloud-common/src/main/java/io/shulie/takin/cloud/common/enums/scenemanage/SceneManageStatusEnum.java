@@ -1,30 +1,36 @@
 package io.shulie.takin.cloud.common.enums.scenemanage;
 
-import java.util.List;
+import java.util.ArrayList;
 
-import com.google.common.collect.Lists;
+import lombok.Getter;
+import lombok.AllArgsConstructor;
 
 /**
  * @author qianshui
  * @date 2020/4/27 上午11:20
  */
+@Getter
+@AllArgsConstructor
 public enum SceneManageStatusEnum {
     /**
      * 待启动
      */
     WAIT(0, "待启动"),
     STARTING(1, "启动中"),
-    PTING(2, "压测中"),
+    PRESSURE_TESTING(2, "压测中"),
     JOB_CREATING(3, "job创建中"),
     PRESSURE_NODE_RUNNING(4, "压力节点工作中"),
     ENGINE_RUNNING(5, "压测引擎已启动"),
     STOP(6, "压测引擎停止压测"),
     //特殊情况
-    FILESPLIT_RUNNING(7, "文件拆分中"),
-    FILESPLIT_END(8, "文件拆分完成"),
+    FILE_SPLIT_RUNNING(7, "文件拆分中"),
+    FILE_SPLIT_END(8, "文件拆分完成"),
     FAILED(9, "压测失败"),
     // 强制停止两个都停止
     FORCE_STOP(10, "强制停止");
+
+    private final Integer value;
+    private final String desc;
 
     /**
      * 待启动
@@ -36,61 +42,61 @@ public enum SceneManageStatusEnum {
     }
 
     /**
-     * 待启动
+     * 获取可归纳为<strong>待启动</strong>的状态
+     * <ul>
+     *     <li> 0:待启动</li>
+     *     <li> 9:压测失败</li>
+     *     <li>10:强制停止</li>
+     * </ul>
      *
-     * @return -
+     * @return 可归纳为<strong>待启动</strong>的状态
      */
-    public static List<SceneManageStatusEnum> getFree() {
-        List<SceneManageStatusEnum> free = Lists.newArrayList();
-        free.add(WAIT);
-        free.add(FAILED);
-        free.add(FORCE_STOP);
-        return free;
+    public static ArrayList<SceneManageStatusEnum> getFree() {
+        return new ArrayList<SceneManageStatusEnum>(3) {{
+            add(WAIT);
+            add(FAILED);
+            add(FORCE_STOP);
+        }};
     }
 
     /**
-     * 启动中
+     * 获取可归纳为<strong>启动中</strong>的状态
+     * <ul>
+     *     <li>0:启动中</li>
+     *     <li>3:job创建中</li>
+     *     <li>4:压力节点工作中</li>
+     *     <li>7:文件拆分中</li>
+     *     <li>8:文件拆分完成</li>
+     * </ul>
      *
-     * @return -
+     * @return 可归纳为<strong>启动中</strong>的状态
      */
-    public static List<SceneManageStatusEnum> getStarting() {
-        List<SceneManageStatusEnum> starting = Lists.newArrayList();
-        starting.add(STARTING);
-        starting.add(JOB_CREATING);
-        starting.add(PRESSURE_NODE_RUNNING);
-        starting.add(FILESPLIT_RUNNING);
-        starting.add(FILESPLIT_END);
-        return starting;
+    public static ArrayList<SceneManageStatusEnum> getStarting() {
+        return new ArrayList<SceneManageStatusEnum>(5) {{
+            add(STARTING);
+            add(JOB_CREATING);
+            add(PRESSURE_NODE_RUNNING);
+            add(FILE_SPLIT_RUNNING);
+            add(FILE_SPLIT_END);
+        }};
     }
 
     /**
-     * 压测中
+     * 获取可归纳为<strong>压测中</strong>的状态
+     * <ul>
+     *     <li>4:压测引擎已启动</li>
+     *     <li>2:压测中</li>
+     *     <li>6:压测引擎停止压测</li>
+     * </ul>
      *
-     * @return -
+     * @return 可归纳为<strong>压测中</strong>的状态
      */
-    public static List<SceneManageStatusEnum> getWorking() {
-        List<SceneManageStatusEnum> working = Lists.newArrayList();
-        working.add(ENGINE_RUNNING);
-        working.add(PTING);
-        working.add(STOP);
-        return working;
-    }
-
-    private Integer value;
-
-    private String desc;
-
-    SceneManageStatusEnum(Integer value, String desc) {
-        this.value = value;
-        this.desc = desc;
-    }
-
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getDesc() {
-        return this.desc;
+    public static ArrayList<SceneManageStatusEnum> getWorking() {
+        return new ArrayList<SceneManageStatusEnum>(3) {{
+            add(ENGINE_RUNNING);
+            add(PRESSURE_TESTING);
+            add(STOP);
+        }};
     }
 
     public static SceneManageStatusEnum getSceneManageStatusEnum(Integer status) {
@@ -110,18 +116,17 @@ public enum SceneManageStatusEnum {
         if (SceneManageStatusEnum.getStarting().contains(statusEnum)) {
             return STARTING.getValue();
         }
-
         if (SceneManageStatusEnum.getWorking().contains(statusEnum)) {
-            return PTING.getValue();
+            return PRESSURE_TESTING.getValue();
         }
-
-        return statusEnum.getValue();
+        return statusEnum == null ? null : statusEnum.getValue();
     }
 
-    public static Boolean ifStop(Integer status) {
+    public static Boolean canStop(Integer status) {
         SceneManageStatusEnum statusEnum = getSceneManageStatusEnum(status);
         return SceneManageStatusEnum.getFree().contains(statusEnum)
-            || SceneManageStatusEnum.getStarting().contains(statusEnum);
+            || SceneManageStatusEnum.getStarting().contains(statusEnum)
+            || PRESSURE_TESTING.equals(statusEnum);
     }
 
     public static Boolean ifFinished(Integer status) {

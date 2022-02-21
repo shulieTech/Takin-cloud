@@ -21,6 +21,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
+import lombok.extern.slf4j.Slf4j;
+
 import cn.hutool.json.JSONUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.bean.BeanUtil;
@@ -33,76 +35,76 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Lists;
 import com.github.pagehelper.PageHelper;
 
-import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.dao.scene.manage.TSceneBusinessActivityRefMapper;
-import com.pamirs.takin.entity.dao.scene.manage.TSceneScriptRefMapper;
-import com.pamirs.takin.entity.dao.scene.manage.TSceneSlaRefMapper;
-import com.pamirs.takin.entity.domain.entity.scene.manage.SceneBusinessActivityRef;
-import com.pamirs.takin.entity.domain.entity.scene.manage.SceneRef;
-import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
-import com.pamirs.takin.entity.domain.entity.scene.manage.SceneSlaRef;
-import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
-import io.shulie.takin.cloud.biz.cloudserver.SceneManageDTOConvert;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneBusinessActivityRefInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageQueryInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
-import io.shulie.takin.cloud.biz.input.scenemanage.SceneScriptRefInput;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneBusinessActivityRefOutput;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneScriptRefOutput;
-import io.shulie.takin.cloud.biz.service.report.ReportService;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.biz.utils.FileTypeBusinessUtil;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
-import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.common.constants.ReportConstants;
-import io.shulie.takin.cloud.common.constants.SceneManageConstant;
-import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.enums.PressureModeEnum;
-import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
-import io.shulie.takin.cloud.common.enums.TimeUnitEnum;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageErrorEnum;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.pojo.dto.scenemanage.UploadFileDTO;
-import io.shulie.takin.cloud.common.request.scenemanage.UpdateSceneFileRequest;
-import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
-import io.shulie.takin.cloud.common.utils.JsonUtil;
-import io.shulie.takin.cloud.common.utils.LinuxUtil;
-import io.shulie.takin.cloud.common.utils.UrlUtil;
-import io.shulie.takin.cloud.data.dao.report.ReportDao;
-import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
-import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
-import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
-import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
-import io.shulie.takin.cloud.ext.api.AssetExtApi;
-import io.shulie.takin.cloud.ext.api.EngineExtApi;
-import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
-import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
-import io.shulie.takin.cloud.ext.content.script.ScriptVerityExt;
-import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
-import io.shulie.takin.cloud.sdk.model.common.RuleBean;
-import io.shulie.takin.cloud.sdk.model.common.TimeBean;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
-import io.shulie.takin.ext.content.enginecall.PtConfigExt;
-import io.shulie.takin.ext.content.enginecall.ThreadGroupConfigExt;
-import io.shulie.takin.plugin.framework.core.PluginManager;
-import io.shulie.takin.utils.file.FileManagerHelper;
 import io.shulie.takin.utils.json.JsonHelper;
 import io.shulie.takin.utils.string.StringUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
+import io.shulie.takin.cloud.ext.api.AssetExtApi;
+import io.shulie.takin.cloud.ext.api.EngineExtApi;
+import io.shulie.takin.cloud.common.utils.UrlUtil;
+import io.shulie.takin.cloud.common.utils.JsonUtil;
+import io.shulie.takin.cloud.common.utils.LinuxUtil;
+import io.shulie.takin.utils.file.FileManagerHelper;
+import io.shulie.takin.cloud.sdk.model.common.RuleBean;
+import io.shulie.takin.cloud.sdk.model.common.TimeBean;
+import io.shulie.takin.cloud.data.dao.report.ReportDao;
+import io.shulie.takin.cloud.common.enums.TimeUnitEnum;
+import com.pamirs.takin.entity.dao.report.TReportMapper;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
+import io.shulie.takin.cloud.ext.content.response.Response;
+import io.shulie.takin.cloud.common.enums.PressureModeEnum;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
+import io.shulie.takin.plugin.framework.core.PluginManager;
+import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
+import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
+import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
+import io.shulie.takin.cloud.biz.utils.FileTypeBusinessUtil;
+import io.shulie.takin.cloud.sdk.model.common.UploadFileDTO;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
+import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptVerityExt;
+import io.shulie.takin.cloud.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
+import io.shulie.takin.cloud.biz.cloudserver.SceneManageDTOConvert;
+import com.pamirs.takin.entity.dao.scene.manage.TSceneSlaRefMapper;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneRef;
+import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
+import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneSlaRef;
+import com.pamirs.takin.entity.dao.scene.manage.TSceneScriptRefMapper;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneScriptRefInput;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageQueryInput;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneScriptRef;
+import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneManageWrapperInput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageErrorEnum;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
+import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
+import com.pamirs.takin.entity.dao.scene.manage.TSceneBusinessActivityRefMapper;
+import io.shulie.takin.cloud.biz.input.scenemanage.SceneBusinessActivityRefInput;
+import com.pamirs.takin.entity.domain.entity.scene.manage.SceneBusinessActivityRef;
+import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.CloudUpdateSceneFileRequest;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneScriptRefOutput;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput.SceneBusinessActivityRefOutput;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -329,8 +331,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     public PageInfo<SceneManageListOutput> queryPageList(SceneManageQueryInput queryVO) {
 
         Page<SceneManageListOutput> page = PageHelper.startPage(queryVO.getPageNumber(), queryVO.getPageSize());
-        SceneManageQueryBean sceneManageQueryBean = new SceneManageQueryBean();
-        BeanUtils.copyProperties(queryVO, sceneManageQueryBean);
+        SceneManageQueryBean sceneManageQueryBean = BeanUtil.copyProperties(queryVO, SceneManageQueryBean.class);
         //默认查询普通类型场景，场景类型目前不透出去
         if (sceneManageQueryBean.getType() == null) {
             sceneManageQueryBean.setType(0);
@@ -698,10 +699,12 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public void updateFileByScriptId(UpdateSceneFileRequest request) {
+    public void updateFileByScriptId(CloudUpdateSceneFileRequest request) {
+        // 填充租户信息
+        CloudPluginUtils.fillUserData(request);
         // 查出所有请求租户的所有场景
         log.info("更新脚本对应的文件 --> 求出租户下的所有场景");
-        List<SceneManageEntity> sceneManageList = sceneManageDao.listFromUpdateScript();
+        List<SceneManageEntity> sceneManageList = sceneManageDao.listFromUpdateScript(request);
         if (sceneManageList.isEmpty()) {
             return;
         }
@@ -767,7 +770,7 @@ public class SceneManageServiceImpl implements SceneManageService {
      * @param request                请求参数
      * @param newSceneManageEntities 要更新的场景列表
      */
-    private void doUpdateFileByScriptId(UpdateSceneFileRequest request, List<SceneManageEntity> newSceneManageEntities) {
+    private void doUpdateFileByScriptId(CloudUpdateSceneFileRequest request, List<SceneManageEntity> newSceneManageEntities) {
         // 转成需要入参
         List<UploadFileDTO> uploadFiles = request.getUploadFiles();
         List<SceneScriptRefInput> inputList = this.uploadFiles2InputList(uploadFiles);
@@ -897,11 +900,8 @@ public class SceneManageServiceImpl implements SceneManageService {
      * @return 入参类列表
      */
     private List<SceneScriptRefInput> uploadFiles2InputList(List<UploadFileDTO> uploadFiles) {
-        return uploadFiles.stream().map(uploadFile -> {
-                SceneScriptRefInput input = new SceneScriptRefInput();
-                BeanUtils.copyProperties(uploadFile, input);
-                return input;
-            })
+        return uploadFiles.stream()
+            .map(t -> BeanUtil.copyProperties(t, SceneScriptRefInput.class))
             .collect(Collectors.toList());
     }
 
@@ -1012,7 +1012,11 @@ public class SceneManageServiceImpl implements SceneManageService {
         // 尝试调用插件
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
-            return assetExtApi.calcEstimateAmount(bills);
+            Response<BigDecimal> res = assetExtApi.calcEstimateAmount(bills);
+            if (null != res && res.isSuccess()) {
+                return res.getData();
+            }
+            return BigDecimal.ZERO;
         }
         // 返回0
         else {
@@ -1029,6 +1033,8 @@ public class SceneManageServiceImpl implements SceneManageService {
 
         // 状态适配
         wrapperOutput.setStatus(SceneManageStatusEnum.getAdaptStatus(sceneManageResult.getStatus()));
+        wrapperOutput.setUserId(sceneManageResult.getUserId());
+        wrapperOutput.setEnvCode(sceneManageResult.getEnvCode());
         wrapperOutput.setTenantId(sceneManageResult.getTenantId());
         wrapperOutput.setUpdateTime(DateUtil.formatDateTime(sceneManageResult.getUpdateTime()));
         wrapperOutput.setLastPtTime(DateUtil.formatDateTime(sceneManageResult.getLastPtTime()));
@@ -1036,10 +1042,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (StringUtils.isBlank(sceneManageResult.getScriptAnalysisResult())) {
             fillPtConfigOld(wrapperOutput, sceneManageResult.getPtConfig());
         } else {
-            PressureSceneEnum type = PressureSceneEnum.of(sceneManageResult.getType());
-            if (null != type) {
-                wrapperOutput.setPressureType(type.getCode());
-            }
+            wrapperOutput.setPressureType(sceneManageResult.getType());
             fillPtConfig(wrapperOutput, sceneManageResult.getPtConfig());
         }
         wrapperOutput.setFeatures(sceneManageResult.getFeatures());
@@ -1056,7 +1059,9 @@ public class SceneManageServiceImpl implements SceneManageService {
                 return;
             }
 
+            Integer ptType = json.getInteger(SceneManageConstant.PT_TYPE);
             ThreadGroupConfigExt tgConfig = new ThreadGroupConfigExt();
+            tgConfig.setType(ptType);
             tgConfig.setThreadNum(json.getInteger(SceneManageConstant.THREAD_NUM));
             PressureModeEnum mode = PressureModeEnum.of(json.getInteger(SceneManageConstant.PT_MODE));
             if (null != mode) {
@@ -1076,9 +1081,9 @@ public class SceneManageServiceImpl implements SceneManageService {
             Map<String, ThreadGroupConfigExt> map = new HashMap<>(1);
             map.put("all", tgConfig);
 
+            wrapperOutput.setConcurrenceNum(tgConfig.getThreadNum());
             wrapperOutput.setIpNum(json.getInteger(SceneManageConstant.HOST_NUM));
-            PressureSceneEnum pressureType = PressureSceneEnum.of(json.getInteger(SceneManageConstant.PT_TYPE));
-            wrapperOutput.setPressureType(null == pressureType ? PressureSceneEnum.DEFAULT.getCode() : pressureType.getCode());
+            wrapperOutput.setPressureType(ptType);
             //压测时长
             TimeBean duration = new TimeBean(json.getLong(SceneManageConstant.PT_DURATION), json.getString(SceneManageConstant.PT_DURATION_UNIT));
             wrapperOutput.setPressureTestTime(duration);
@@ -1181,7 +1186,10 @@ public class SceneManageServiceImpl implements SceneManageService {
         BigDecimal value = new BigDecimal(0);
         AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
         if (assetExtApi != null) {
-            value = assetExtApi.calcEstimateAmount(BeanUtil.copyProperties(wrapperVO, AssetBillExt.class, ""));
+            Response<BigDecimal> res = assetExtApi.calcEstimateAmount(BeanUtil.copyProperties(wrapperVO, AssetBillExt.class, ""));
+            if (null != res && res.isSuccess() && null != res.getData()) {
+                value = res.getData();
+            }
         }
         map.put(SceneManageConstant.ESTIMATE_FLOW, value);
         return JSON.toJSONString(map);

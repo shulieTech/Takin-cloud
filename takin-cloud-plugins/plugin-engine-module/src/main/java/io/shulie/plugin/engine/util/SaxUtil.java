@@ -1,31 +1,37 @@
 package io.shulie.plugin.engine.util;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.ArrayList;
+import java.util.Set;
 import java.util.List;
+import java.util.Random;
+import java.util.HashSet;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.io.StringWriter;
+import java.util.Collections;
 
 import com.alibaba.fastjson.JSON;
 
-import io.shulie.plugin.engine.jmeter.XmlDubboJmxParser;
+import lombok.extern.slf4j.Slf4j;
+
+import io.shulie.takin.utils.file.FileManagerHelper;
 import io.shulie.plugin.engine.jmeter.XmlHttpJmxParser;
 import io.shulie.plugin.engine.jmeter.XmlJdbcJmxParser;
+import io.shulie.plugin.engine.jmeter.XmlDubboJmxParser;
 import io.shulie.plugin.engine.jmeter.XmlKafkaJmxParser;
+import io.shulie.takin.cloud.ext.content.script.ScriptUrlExt;
+import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
-import io.shulie.takin.cloud.ext.content.script.ScriptUrlExt;
-import io.shulie.takin.utils.file.FileManagerHelper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
+
 import org.dom4j.Element;
-import org.dom4j.io.OutputFormat;
+import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.DocumentException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * <ol>
@@ -82,12 +88,25 @@ public class SaxUtil {
         return parser.getEntryContent(document, content, scriptParseExt);
     }
 
-    public static void updateJmx(String path) {
+    /**
+     * 解析并更新xml
+     *
+     * @param path 文件路径
+     */
+    public static void updateJmx(String path) {updateJmx(path, path);}
+
+    /**
+     * 解析并更新xml
+     *
+     * @param inputPath  输入文件路径
+     * @param outputPath 输出文件路径
+     */
+    public static void updateJmx(String inputPath, String outputPath) {
         SAXReader saxReader = new SAXReader();
         try {
-            File file = new File(path);
+            File file = new File(inputPath);
             String content = FileManagerHelper.readFileToString(file, "utf-8");
-            Document document = saxReader.read(new File(path));
+            Document document = saxReader.read(new File(inputPath));
             //去除所有禁用节点和对应的所有子节点
             cleanAllDisableElement(document);
             getScriptUrlFromJmx(new ScriptParseExt(), content, document);
@@ -96,8 +115,8 @@ public class SaxUtil {
             xmlWriter.write(document);
             xmlWriter.close();
             String xmlContent = writer.toString();
-            FileManagerHelper.deleteFilesByPath(path);
-            FileManagerHelper.createFileByPathAndString(path, xmlContent);
+            if (inputPath.equals(outputPath)) {FileManagerHelper.deleteFilesByPath(inputPath);}
+            FileManagerHelper.createFileByPathAndString(outputPath, xmlContent);
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：Parse Jmeter Script Error --> 异常信息: {}",
                 TakinCloudExceptionEnum.XML_PARSE_ERROR, e);
@@ -151,7 +170,57 @@ public class SaxUtil {
         cleanDisableElement(rootElement.elements());
     }
 
-    public static void cleanDisableElement(List elements) {
+    /**
+     * 重置重复的节点名称
+     * <p>重名会添加#??????的后缀</p>
+     * <p>只做控制器和采样器的去重</p>
+     * <p>处理后不会出现空名称，会在空名称的基础上添加后缀</p>
+     *
+     * @param document xml文档
+     */
+    public static void resetRepetitiveName(Document document) {
+        resetRepetitiveName(
+            Collections.singletonList(document.getRootElement()),
+            new HashSet<String>() {{add("");}});
+    }
+
+    /**
+     * 重置重复的节点名称
+     * <p>重名会添加#??????的后缀</p>
+     * <p>只做控制器和采样器的去重</p>
+     *
+     * @param elements  节点列表 - 会遍历且递归{@link Element#elements()}
+     * @param nodeNames 单次操作的名称容器
+     */
+    public static void resetRepetitiveName(List<?> elements, Set<String> nodeNames) {
+        elements.stream().filter(t -> t instanceof Element).map(t -> (Element)t).forEach(t -> {
+            // 节点是否是控制器或采样器
+            String testClass = t.attributeValue("testclass");
+            if (testClass == null || testClass.length() <= 0
+                || (!testClass.contains("Sampler") && !testClass.contains("Controller"))) {} else {
+                // 获取&&处理节点名称
+                String nodeName = t.attributeValue("testname");
+                nodeName = nodeName == null ? "" : nodeName;
+                nodeName = nodeName.trim();
+                // 声明变量以进行处理
+                String newNodeName = nodeName;
+                // 如果有重名情况的话，则给名称添加随机后缀
+                if (!nodeNames.add(newNodeName)) {
+                    // 防止随机数重复
+                    Random random = new Random();
+                    do {
+                        newNodeName = nodeName + "#" + Double.valueOf((1 + random.nextDouble()) * Math.pow(10, 5)).intValue();
+                    } while (!nodeNames.add(newNodeName));
+                }
+                if (!nodeName.equals(newNodeName)) {
+                    t.attribute("testname").setText(newNodeName);
+                }
+            }
+            resetRepetitiveName(t.elements(), nodeNames);
+        });
+    }
+
+    public static void cleanDisableElement(List<?> elements) {
         if (CollectionUtils.isNotEmpty(elements)) {
             for (int i = 0; i < elements.size(); i++) {
                 Element element = (Element)elements.get(i);
@@ -170,8 +239,7 @@ public class SaxUtil {
         }
     }
 
-    public static Element selectElementByEleNameAndAttr(String elementName, String attributeName, String attributeValue,
-        List elements) {
+    public static Element selectElementByEleNameAndAttr(String elementName, String attributeName, String attributeValue, List<?> elements) {
         if (CollectionUtils.isEmpty(elements)) {
             return null;
         }
@@ -189,7 +257,7 @@ public class SaxUtil {
         return null;
     }
 
-    public static void selectElement(String elementName, List elements, List<Element> result) {
+    public static void selectElement(String elementName, List<?> elements, List<Element> result) {
         if (CollectionUtils.isEmpty(elements)) {
             return;
         }
@@ -198,25 +266,9 @@ public class SaxUtil {
             if (element.getName().equals(elementName)) {
                 result.add(element);
             }
-            List childElements = element.elements();
+            List<?> childElements = element.elements();
             selectElement(elementName, childElements, result);
         }
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        String path = "/Users/shulie/Documents/test.jmx";
-        //        SaxUtil.updatePressTestTags(path);
-        File file = new File(path);
-        //因为新增场景脚本是异步的，这里最多等待5分钟
-        int i = 0;
-        while (!file.exists()) {
-            i++;
-            Thread.sleep(100L);
-            if (i > 3000) {
-                return;
-            }
-        }
-        System.out.println("有文件");
     }
 
     /**
@@ -244,6 +296,8 @@ public class SaxUtil {
             Document document = saxReader.read(file);
             //去除所有禁用节点和对应的所有子节点
             cleanAllDisableElement(document);
+            // 防止节点间名称重复
+            resetRepetitiveName(document);
             updateJmxHttpPressTestTags(document);
             updateXmlDubboPressTestTags(document);
 

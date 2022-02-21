@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageInfo;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
@@ -35,8 +36,10 @@ import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.UpdateReportConclusionReq;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.WarnDetailResponse;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -51,10 +54,10 @@ import org.springframework.web.bind.annotation.RestController;
  * @author 莫问
  * @date 2020-04-17
  */
+@Slf4j
 @RestController
-
-@RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_REPORT)
 @Api(tags = "场景报告模块", value = "场景报告")
+@RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_REPORT)
 public class ReportController {
 
     @Resource
@@ -133,8 +136,7 @@ public class ReportController {
         if (detailOutput == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在");
         }
-        ReportDetailResp resp = new ReportDetailResp();
-        BeanUtils.copyProperties(detailOutput, resp);
+        ReportDetailResp resp = BeanUtil.copyProperties(detailOutput, ReportDetailResp.class);
         if (CollectionUtils.isNotEmpty(detailOutput.getStopReasons())) {
             resp.setStopReasons(detailOutput.getStopReasons());
         }
@@ -231,8 +233,7 @@ public class ReportController {
     @ApiOperation("创建告警")
     @PostMapping(EntrypointUrl.METHOD_REPORT_WARN_ADD)
     public ResponseResult<String> addWarn(@RequestBody WarnCreateReq req) {
-        WarnCreateInput input = new WarnCreateInput();
-        BeanUtils.copyProperties(req, input);
+        WarnCreateInput input = BeanUtil.copyProperties(req, WarnCreateInput.class);
         reportService.addWarn(input);
         return ResponseResult.success("创建告警成功");
     }
@@ -249,10 +250,17 @@ public class ReportController {
     @ApiOperation("更新报告-漏数检查使用")
     @PutMapping(EntrypointUrl.METHOD_REPORT_UPDATE_CONCLUSION)
     public ResponseResult<String> updateReportConclusion(@RequestBody UpdateReportConclusionReq req) {
-        UpdateReportConclusionInput input = new UpdateReportConclusionInput();
-        BeanUtils.copyProperties(req, input);
+        UpdateReportConclusionInput input = BeanUtil.copyProperties(req, UpdateReportConclusionInput.class);
         reportService.updateReportConclusion(input);
         return ResponseResult.success("更新成功");
     }
 
+    /**
+     * 获取下载jtl下载路径
+     */
+    @ApiOperation("获取下载jtl下载路径")
+    @RequestMapping(EntrypointUrl.METHOD_REPORT_GET_JTL_DOWNLOAD_URL)
+    public ResponseResult<String> getJtlDownLoadUrl(@ApiParam(name = "reportId", value = "报告id") Long reportId) {
+        return ResponseResult.success(reportService.getJtlDownLoadUrl(reportId, true));
+    }
 }

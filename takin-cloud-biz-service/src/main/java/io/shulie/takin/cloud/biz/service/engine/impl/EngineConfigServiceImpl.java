@@ -3,19 +3,22 @@ package io.shulie.takin.cloud.biz.service.engine.impl;
 import java.util.List;
 import java.util.Objects;
 
-import io.shulie.surge.data.common.utils.IpAddressUtils;
-import io.shulie.surge.data.common.zk.ZkClient;
-import io.shulie.takin.cloud.biz.output.engine.EngineLogPtlConfigOutput;
-import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
-import io.shulie.takin.cloud.common.constants.ZkNodePathConstants;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.utils.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
+
+import io.shulie.surge.data.common.zk.ZkClient;
+import io.shulie.takin.cloud.common.utils.NumberUtil;
+import io.shulie.surge.data.common.utils.IpAddressUtils;
+import io.shulie.takin.cloud.common.constants.ZkNodePathConstants;
+import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.biz.output.engine.EngineLogPtlConfigOutput;
+
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author moriarty
@@ -103,11 +106,11 @@ public class EngineConfigServiceImpl implements EngineConfigService {
         try {
             List<String> servers = zkClient.listChildren(ZkNodePathConstants.AMDB_LOG_UPLOAD_NODE_LIST_PATH);
             if (CollectionUtils.isNotEmpty(servers)) {
-                for (String str : servers) {
-                    if (StringUtils.isNotBlank(str) && !str.equals(failServer)) {
-                        return str;
-                    }
+                servers.remove(failServer);
+                if (CollectionUtils.isEmpty(servers)) {
+                    return failServer;
                 }
+                return servers.get(RandomUtils.nextInt(0, servers.size()));
             }
         } catch (Exception e) {
             log.error("异常代码【{}】,异常内容：推送日志，获取服务和端口异常 --> 异常信息: {}",

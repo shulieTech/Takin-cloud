@@ -1,13 +1,12 @@
-package io.shulie.takin.ext.content.enginecall;
+package io.shulie.takin.cloud.ext.content.enginecall;
 
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import io.shulie.takin.ext.content.AbstractEntry;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.ext.content.AbstractEntry;
 
 /**
  * 压测引擎启动配置
@@ -15,8 +14,8 @@ import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
  * @author liyuanba
  * @date 2021/10/29 2:47 下午
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class EngineRunConfig extends AbstractEntry {
     private Long sceneId;
     private Long taskId;

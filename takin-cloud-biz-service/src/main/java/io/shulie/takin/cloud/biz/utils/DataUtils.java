@@ -16,15 +16,16 @@
 package io.shulie.takin.cloud.biz.utils;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import io.shulie.takin.cloud.biz.output.statistics.RtDataOutput;
-import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+
+import io.shulie.takin.cloud.biz.output.statistics.RtDataOutput;
+import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
 
 /**
  * 压测数据处理工具
@@ -123,8 +124,8 @@ public class DataUtils {
             return null;
         }
         Map<Integer, RtDataOutput> percentMap = new HashMap<>(0);
-        String[] percentDatas = text.split("\\|");
-        for (String s : percentDatas) {
+        String[] percentDataArray = text.split("\\|");
+        for (String s : percentDataArray) {
             if (StringUtils.isBlank(s) || !s.contains(",")) {
                 continue;
             }
@@ -133,8 +134,8 @@ public class DataUtils {
                 continue;
             }
             Integer percent = NumberUtils.toInt(ss[0]);
-            Integer hits = NumberUtils.toInt(ss[1]);
-            Integer time = 0;
+            int hits = NumberUtils.toInt(ss[1]);
+            int time = 0;
             if (StringUtils.isNotBlank(ss[2])) {
                 if (ss[2].contains(".")) {
                     ss[2] = ss[2].substring(0, ss[2].lastIndexOf("."));

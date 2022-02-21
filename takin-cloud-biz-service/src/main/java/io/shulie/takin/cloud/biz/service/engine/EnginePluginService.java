@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.cloud.data.model.mysql.EnginePluginEntity;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginDetailOutput;
-import io.shulie.takin.cloud.biz.output.engine.EnginePluginSimpleInfoOutput;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginWrapperReq;
 
 /**
@@ -22,7 +22,7 @@ public interface EnginePluginService {
      * @param pluginTypes 插件类型
      * @return -
      */
-    Map<String, List<EnginePluginSimpleInfoOutput>> findEngineAvailablePluginsByType(List<String> pluginTypes);
+    Map<String, List<EnginePluginEntity>> findEngineAvailablePluginsByType(List<String> pluginTypes);
 
     /**
      * 根据插件ID获取插件详情信息

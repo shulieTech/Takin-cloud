@@ -1,19 +1,18 @@
 package io.shulie.takin.cloud.data.dao.middleware.impl;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Collections;
 
 import javax.annotation.Resource;
 
+import org.springframework.stereotype.Service;
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
+
+import io.shulie.takin.cloud.data.util.MPUtil;
 import io.shulie.takin.cloud.data.model.mysql.MiddlewareJarEntity;
 import io.shulie.takin.cloud.data.dao.middleware.MiddlewareJarDAO;
 import io.shulie.takin.cloud.data.mapper.mysql.MiddlewareJarMapper;
-import io.shulie.takin.cloud.data.util.MPUtil;
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
 
 /**
  * 中间件包表(MiddlewareJar)表数据库 dao
@@ -29,7 +28,9 @@ public class MiddlewareJarDAOImpl implements MiddlewareJarDAO, MPUtil<Middleware
 
     @Override
     public boolean saveBatch(List<MiddlewareJarEntity> createParams) {
-        if (CollectionUtil.isEmpty(createParams)) {return false;}
+        if (CollectionUtil.isEmpty(createParams)) {
+            return false;
+        }
         return SqlHelper.retBool(middlewareJarMapper.insertBatch(createParams));
     }
 

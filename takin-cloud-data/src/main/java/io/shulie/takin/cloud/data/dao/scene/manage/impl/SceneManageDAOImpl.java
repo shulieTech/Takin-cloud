@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.collection.CollUtil;
 
@@ -24,7 +25,6 @@ import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -39,8 +39,7 @@ public class SceneManageDAOImpl
 
     @Override
     public Long insert(SceneManageCreateOrUpdateParam createParam) {
-        SceneManageEntity entity = new SceneManageEntity();
-        BeanUtils.copyProperties(createParam, entity);
+        SceneManageEntity entity = BeanUtil.copyProperties(createParam, SceneManageEntity.class);
         entity.setUserId(CloudPluginUtils.getContext().getUserId());
         entity.setTenantId(CloudPluginUtils.getContext().getTenantId());
         entity.setEnvCode(CloudPluginUtils.getContext().getEnvCode());
@@ -50,8 +49,7 @@ public class SceneManageDAOImpl
 
     @Override
     public void update(SceneManageCreateOrUpdateParam updateParam) {
-        SceneManageEntity entity = new SceneManageEntity();
-        BeanUtils.copyProperties(updateParam, entity);
+        SceneManageEntity entity = BeanUtil.copyProperties(updateParam, SceneManageEntity.class);
         if (null == updateParam.getUpdateTime()) {
             updateParam.setUpdateTime(Calendar.getInstance().getTime());
         }
@@ -106,9 +104,13 @@ public class SceneManageDAOImpl
     }
 
     @Override
-    public List<SceneManageEntity> listFromUpdateScript() {
-        return this.list(this.getTenantLQW().select(SceneManageEntity::getId,
-            SceneManageEntity::getTenantId, SceneManageEntity::getFeatures));
+    public List<SceneManageEntity> listFromUpdateScript(ContextExt contextExt) {
+        return this.getBaseMapper()
+            .selectList(new LambdaQueryWrapper<SceneManageEntity>()
+                .eq(SceneManageEntity::getEnvCode, contextExt.getEnvCode())
+                .eq(SceneManageEntity::getTenantId, contextExt.getTenantId())
+                .select(SceneManageEntity::getId, SceneManageEntity::getTenantId, SceneManageEntity::getFeatures)
+            );
     }
 
     @Override

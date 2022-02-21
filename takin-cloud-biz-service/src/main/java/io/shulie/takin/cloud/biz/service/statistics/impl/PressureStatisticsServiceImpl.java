@@ -52,10 +52,10 @@ public class PressureStatisticsServiceImpl implements PressureStatisticsService 
                 });
         }
         // 判断下是否有压测中
-        if (totals.stream().noneMatch(total -> total.getType().equals(SceneManageStatusEnum.PTING.getDesc()))) {
+        if (totals.stream().noneMatch(total -> total.getType().equals(SceneManageStatusEnum.PRESSURE_TESTING.getDesc()))) {
             PressurePieTotalResp.PressurePieTotal pieTotal = new PressurePieTotalResp.PressurePieTotal();
             pieTotal.setValue(0);
-            pieTotal.setType(SceneManageStatusEnum.PTING.getDesc());
+            pieTotal.setType(SceneManageStatusEnum.PRESSURE_TESTING.getDesc());
             totals.add(pieTotal);
         }
         // 判断是否有待启动

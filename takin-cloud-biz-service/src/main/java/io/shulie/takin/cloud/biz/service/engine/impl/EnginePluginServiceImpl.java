@@ -2,14 +2,15 @@ package io.shulie.takin.cloud.biz.service.engine.impl;
 
 import java.util.Map;
 import java.util.List;
+import java.util.Date;
 import java.util.Objects;
-import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import com.google.common.collect.Maps;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.data.model.mysql.EnginePluginEntity;
@@ -18,15 +19,11 @@ import io.shulie.takin.cloud.biz.service.engine.EnginePluginService;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginFileOutput;
 import io.shulie.takin.cloud.biz.output.engine.EnginePluginDetailOutput;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginFilesService;
-import io.shulie.takin.cloud.biz.output.engine.EnginePluginSimpleInfoOutput;
-import io.shulie.takin.cloud.biz.cloudserver.EnginePluginSimpleResultConvert;
-import io.shulie.takin.cloud.data.result.engine.EnginePluginSimpleInfoResult;
 import io.shulie.takin.cloud.biz.service.engine.EnginePluginSupportedService;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginWrapperReq;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -41,12 +38,10 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
 
     @Resource
     private EnginePluginMapper enginePluginMapper;
-
-    @Resource
-    private EnginePluginSupportedService enginePluginSupportedService;
-
     @Resource
     private EnginePluginFilesService enginePluginFilesService;
+    @Resource
+    private EnginePluginSupportedService enginePluginSupportedService;
 
     /**
      * 查询引擎支持的插件信息
@@ -55,15 +50,23 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
      * @return -
      */
     @Override
-    public Map<String, List<EnginePluginSimpleInfoOutput>> findEngineAvailablePluginsByType(List<String> pluginTypes) {
-        Map<String, List<EnginePluginSimpleInfoOutput>> result = Maps.newHashMap();
-        List<EnginePluginSimpleInfoResult> infos = enginePluginMapper.selectAvailablePluginsByType(pluginTypes);
-        List<EnginePluginSimpleInfoOutput> outputInfos = EnginePluginSimpleResultConvert.INSTANCE.ofs(infos);
-        if (CollectionUtils.isNotEmpty(outputInfos)) {
-            result = outputInfos.stream().filter(r -> r.getPluginType() != null)
-                .collect(Collectors.groupingBy(EnginePluginSimpleInfoOutput::getPluginType));
-        }
-        return result;
+    public Map<String, List<EnginePluginEntity>> findEngineAvailablePluginsByType(List<String> pluginTypes) {
+        List<EnginePluginEntity> infos = selectAvailablePluginsByType(pluginTypes);
+        return infos.stream().filter(r -> r.getPluginType() != null)
+            .collect(Collectors.groupingBy(EnginePluginEntity::getPluginType));
+    }
+
+    /**
+     * 获取可用的插件列表
+     *
+     * @param pluginTypes 插件类型
+     * @return 可用的插件列表
+     */
+    public List<EnginePluginEntity> selectAvailablePluginsByType(List<String> pluginTypes) {
+        LambdaQueryWrapper<EnginePluginEntity> wrapper = Wrappers.lambdaQuery(EnginePluginEntity.class)
+            .eq(EnginePluginEntity::getStatus, 1)
+            .in(pluginTypes.size() > 0, EnginePluginEntity::getPluginType, pluginTypes);
+        return enginePluginMapper.selectList(wrapper);
     }
 
     /**
@@ -101,9 +104,9 @@ public class EnginePluginServiceImpl extends ServiceImpl<EnginePluginMapper, Eng
         EnginePluginEntity pressureEnginePluginEntity = isEdit
             ? enginePluginMapper.selectById(pluginId) : new EnginePluginEntity();
 
+        Date now = new Date();
         pressureEnginePluginEntity.setPluginName(input.getPluginName());
         pressureEnginePluginEntity.setPluginType(input.getPluginType());
-        LocalDateTime now = LocalDateTime.now();
         //保存引擎插件信息
         if (isEdit) {
             pressureEnginePluginEntity.setGmtUpdate(now);

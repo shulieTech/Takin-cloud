@@ -53,7 +53,6 @@ public class CloudEngineApiImpl implements CloudEngineApi {
     public EnginePluginDetailResp getEnginePluginDetails(EnginePluginDetailsWrapperReq request) {
         return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_ENGINE_PLUGIN, EntrypointUrl.METHOD_ENGINE_PLUGIN_DETAILS),
             request, new TypeReference<ResponseResult<EnginePluginDetailResp>>() {}).getData();
-
     }
 
 }

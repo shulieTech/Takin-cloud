@@ -55,6 +55,12 @@ public class CloudTaskApiImpl implements CloudTaskApi {
     }
 
     @Override
+    public Integer boltStopTask(SceneManageIdReq req) {
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_BOLT_STOP),
+            req, new TypeReference<ResponseResult<Integer>>() {}).getData();
+    }
+
+    @Override
     public SceneActionResp checkTask(SceneManageIdReq req) {
         return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_TASK, EntrypointUrl.METHOD_SCENE_TASK_CHECK_TASK),
             req, new TypeReference<ResponseResult<SceneActionResp>>() {}).getData();

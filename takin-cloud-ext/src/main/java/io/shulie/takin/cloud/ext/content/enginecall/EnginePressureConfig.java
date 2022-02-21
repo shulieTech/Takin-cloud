@@ -1,15 +1,18 @@
-package io.shulie.takin.ext.content.enginecall;
+package io.shulie.takin.cloud.ext.content.enginecall;
 
 import java.util.Map;
 
-import io.shulie.takin.ext.content.AbstractEntry;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import io.shulie.takin.cloud.ext.content.AbstractEntry;
 
 /**
  * @author liyuanba
  * @date 2021/10/29 3:11 下午
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class EnginePressureConfig extends AbstractEntry {
     /**
      * 后端监听器对列长度

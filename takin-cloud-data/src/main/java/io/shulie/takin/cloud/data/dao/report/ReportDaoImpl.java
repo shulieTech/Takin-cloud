@@ -9,18 +9,21 @@ import javax.annotation.Resource;
 
 import java.util.stream.Collectors;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Lists;
-import org.springframework.beans.BeanUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.apache.commons.collections4.CollectionUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
-import io.shulie.takin.ext.content.script.ScriptNode;
-import io.shulie.takin.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.data.mapper.mysql.ReportMapper;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.data.param.report.ReportQueryParam;
@@ -33,6 +36,7 @@ import io.shulie.takin.cloud.data.mapper.mysql.ReportBusinessActivityDetailMappe
  * @author 无涯
  * @date 2020/12/17 3:31 下午
  */
+@Slf4j
 @Service
 public class ReportDaoImpl implements ReportDao {
 
@@ -75,7 +79,16 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public ReportEntity selectById(Long id) {
-        return reportMapper.selectById(id);
+        String envCode = CloudPluginUtils.getContext() == null ? null : CloudPluginUtils.getEnvCode();
+        Long tenantId = CloudPluginUtils.getContext() == null ? null : CloudPluginUtils.getTenantId();
+        List<ReportEntity> entityList = reportMapper.selectList(
+            Wrappers.lambdaQuery(ReportEntity.class)
+                .eq(ReportEntity::getId, id)
+                .eq(envCode != null, ReportEntity::getEnvCode, envCode)
+                .eq(tenantId != null, ReportEntity::getTenantId, tenantId)
+        );
+        if (entityList.size() != 1) {return null;}
+        return entityList.get(0);
     }
 
     /**
@@ -99,15 +112,13 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public void updateReportConclusion(ReportUpdateConclusionParam param) {
-        ReportEntity entity = new ReportEntity();
-        BeanUtils.copyProperties(param, entity);
+        ReportEntity entity = BeanUtil.copyProperties(param, ReportEntity.class);
         reportMapper.updateById(entity);
     }
 
     @Override
     public void updateReport(ReportUpdateParam param) {
-        ReportEntity entity = new ReportEntity();
-        BeanUtils.copyProperties(param, entity);
+        ReportEntity entity = BeanUtil.copyProperties(param, ReportEntity.class);
         if (null == param.getGmtUpdate()) {
             entity.setGmtUpdate(Calendar.getInstance().getTime());
         }
@@ -196,7 +207,9 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public ReportEntity getById(Long resultId) {
-        if (resultId == null) {return null;}
+        if (resultId == null) {
+            return null;
+        }
         return reportMapper.selectById(resultId);
     }
 

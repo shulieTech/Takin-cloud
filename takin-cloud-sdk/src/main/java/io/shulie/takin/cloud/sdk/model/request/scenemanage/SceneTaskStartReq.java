@@ -3,6 +3,8 @@ package io.shulie.takin.cloud.sdk.model.request.scenemanage;
 import java.util.List;
 
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginsRefOpen;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -21,7 +23,13 @@ public class SceneTaskStartReq extends ContextExt {
      */
     private String resourceName;
 
+    /**
+     * 使用下面enginePlugins，包含id和版本号
+     */
+    @Deprecated
     private List<Long> enginePluginIds;
+
+    private List<SceneTaskStartRequest.EnginePluginInput> enginePlugins;
 
     private Boolean leakSqlEnable;
 

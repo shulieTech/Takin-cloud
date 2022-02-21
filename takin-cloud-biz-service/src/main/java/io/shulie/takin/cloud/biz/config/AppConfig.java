@@ -1,10 +1,11 @@
 package io.shulie.takin.cloud.biz.config;
 
-import io.shulie.takin.cloud.common.enums.deployment.DeploymentMethodEnum;
-import io.shulie.takin.cloud.common.utils.CommonUtil;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+
+import io.shulie.takin.cloud.common.utils.CommonUtil;
+import io.shulie.takin.cloud.common.enums.deployment.DeploymentMethodEnum;
 
 /**
  * @author liyuanba
@@ -45,6 +46,9 @@ public class AppConfig {
     @Value("${report.data.collector:influxdb}")
     private String collector;
 
+    @Value("${report.data.holdRealThreadNum:true}")
+    private Boolean holdRealThreadNum;
+
     @Value("${spring.redis.host}")
     private String engineRedisAddress;
 
@@ -68,7 +72,7 @@ public class AppConfig {
     @Value("${pressure.engine.backendQueueCapacity:5000}")
     private String pressureEngineBackendQueueCapacity;
 
-    @Value("${pressure.engine.logUpload:engine}")
+    @Value("${pressure.engine.logUpload:cloud}")
     private String engineLogUploadModel;
 
     @Value("${script.path}")

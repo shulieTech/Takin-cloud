@@ -10,38 +10,43 @@ import javax.annotation.Resource;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.bean.BeanUtil;
+
 import com.google.common.collect.Lists;
-import io.shulie.takin.cloud.biz.cache.DictionaryCache;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.biz.service.report.ReportService;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
+
 import io.shulie.takin.cloud.biz.utils.SlaUtil;
-import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
+import io.shulie.takin.cloud.sdk.model.common.TimeBean;
+import io.shulie.takin.cloud.biz.cache.DictionaryCache;
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
+import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.common.constants.DicKeyConstant;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
+import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
-import io.shulie.takin.cloud.entrypoint.convert.SceneBusinessActivityRefRespConvertor;
+import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
 import io.shulie.takin.cloud.entrypoint.convert.SceneManageRespConvertor;
 import io.shulie.takin.cloud.entrypoint.convert.SceneScriptRefRespConvertor;
-import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivityDetailResp;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivityDetailResponse;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResponse;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResponse.ScriptDetailResponse;
-import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResponse.SlaDetailResponse;
+import io.shulie.takin.cloud.entrypoint.convert.SceneBusinessActivityRefRespConvertor;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivityDetailResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivityDetailResponse;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResponse.SlaDetailResponse;
+import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResponse.ScriptDetailResponse;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResponse.SceneSlaRefResponse;
-import io.shulie.takin.common.beans.response.ResponseResult;
+
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.apache.commons.collections4.CollectionUtils;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -89,6 +94,17 @@ public class SceneManageDetailController {
         } catch (TakinCloudException exception) {
             return ResponseResult.fail(TakinCloudExceptionEnum.REPORT_GET_ERROR.getErrorCode(), exception.getMessage(), "");
         }
+    }
+
+    /**
+     * 无租户版本
+     */
+    @ApiOperation(value = "压测场景编辑详情-无租户")
+    @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_DETAIL_NO_AUTH)
+    public ResponseResult<SceneManageWrapperResponse> getDetailNoAuth(
+        @ApiParam(name = "id", value = "ID") Long id,
+        @ApiParam(name = "reportId", value = "reportId") Long reportId) {
+        return getDetailForEdit(id, reportId);
     }
 
     public void assembleFeatures2(SceneManageWrapperOutput resp) {
@@ -294,6 +310,21 @@ public class SceneManageDetailController {
                 data.setApplicationIds("-1");
             }
         });
+        //旧版
+        if (StringUtils.isBlank(sceneManage.getScriptAnalysisResult())) {
+            Map<String, ThreadGroupConfigExt> map = sceneManage.getThreadGroupConfigMap();
+            if (null != map) {
+                ThreadGroupConfigExt tgConfig = map.get("all");
+                if (null != tgConfig) {
+                    response.setPressureMode(tgConfig.getMode());
+                    if (null != tgConfig.getRampUp()) {
+                        TimeBean time = new TimeBean(tgConfig.getRampUp().longValue(), tgConfig.getRampUpUnit());
+                        response.setIncreasingSecond(time.getSecondTime());
+                        response.setIncreasingTime(time);
+                    }
+                }
+            }
+        }
         return ResponseResult.success(response);
     }
 }

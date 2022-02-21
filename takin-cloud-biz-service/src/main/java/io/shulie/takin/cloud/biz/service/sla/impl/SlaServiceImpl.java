@@ -13,6 +13,7 @@ import javax.annotation.Resource;
 import com.alibaba.fastjson.JSON;
 
 import lombok.extern.slf4j.Slf4j;
+
 import cn.hutool.core.date.DateUtil;
 import com.google.common.collect.Maps;
 import org.springframework.stereotype.Service;
@@ -25,15 +26,15 @@ import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
 
 import io.shulie.takin.cloud.biz.utils.SlaUtil;
 import io.shulie.takin.cloud.biz.event.SlaPublish;
-import io.shulie.takin.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.sdk.model.common.SlaBean;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.biz.service.sla.SlaService;
 import io.shulie.takin.cloud.common.constants.Constants;
 import io.shulie.takin.cloud.common.bean.sla.AchieveModel;
+import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
-import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
@@ -301,8 +302,10 @@ public class SlaServiceImpl implements SlaService {
             return false;
         }
         for (String data : md5s) {
-            if ("-1".equals(data) || ReportConstants.ALL_BUSINESS_ACTIVITY.equals(data) || String.valueOf(bindRef)
-                .equals(data)) {
+            if ("-1".equals(data)
+                || ReportConstants.TEST_PLAN_MD5.equals(data)
+                || ReportConstants.ALL_BUSINESS_ACTIVITY.equals(data)
+                || String.valueOf(bindRef).equals(data)) {
                 return true;
             }
         }

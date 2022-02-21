@@ -1,8 +1,8 @@
-package io.shulie.takin.ext.content.enginecall;
+package io.shulie.takin.cloud.ext.content.enginecall;
 
 import java.util.Map;
 
-import io.shulie.takin.ext.content.AbstractEntry;
+import io.shulie.takin.cloud.ext.content.AbstractEntry;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

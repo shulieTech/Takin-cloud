@@ -7,8 +7,6 @@ import org.influxdb.dto.Point;
 import org.influxdb.BuilderException;
 import org.influxdb.annotation.Column;
 
-import io.shulie.takin.cloud.common.utils.CollectorUtil;
-
 /**
  * @author qianshui
  * @date 2020/7/20 下午4:34
@@ -50,7 +48,7 @@ public class InfluxUtil {
      */
     public static Point toPoint(String measurement, long time, Object pojo) {
         Point.Builder builder = Point.measurement(measurement)
-            .time(CollectorUtil.getTimeWindowTime(time), TimeUnit.MILLISECONDS)
+            .time(time, TimeUnit.MILLISECONDS)
             //当前类的字段添加到数据库
             .addFieldsFromPOJO(pojo)
             .addField("create_time", System.currentTimeMillis());

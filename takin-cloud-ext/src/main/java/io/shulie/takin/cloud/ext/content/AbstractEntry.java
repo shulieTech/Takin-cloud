@@ -1,9 +1,9 @@
-package io.shulie.takin.ext.content;
+package io.shulie.takin.cloud.ext.content;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * @author liyuanba

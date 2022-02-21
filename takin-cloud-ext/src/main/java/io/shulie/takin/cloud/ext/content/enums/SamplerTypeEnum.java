@@ -1,8 +1,13 @@
-package io.shulie.takin.ext.content.enums;
+package io.shulie.takin.cloud.ext.content.enums;
 
 import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
 
+/**
+ * @author 数列科技
+ */
+@Getter
+@AllArgsConstructor
 public enum SamplerTypeEnum {
 
     /**
@@ -17,7 +22,10 @@ public enum SamplerTypeEnum {
     //     * ROCKETMQ请求
     //     */
     //    ROCKETMQ("ROCKETMQ"),
-    //    RABBITMQ("RABBITMQ"),
+    /**
+     * RABBIT 请求
+     */
+    RABBITMQ("RABBITMQ", RpcTypeEnum.MQ),
     /**
      * KAFKA 请求
      */
@@ -32,16 +40,6 @@ public enum SamplerTypeEnum {
      */
     UNKNOWN("UNKNOWN", RpcTypeEnum.UNKNOWN);
 
-    SamplerTypeEnum(String type, RpcTypeEnum rpcTypeEnum) {
-        this.type = type;
-        this.rpcTypeEnum = rpcTypeEnum;
-    }
-
-    @Getter
-    @Setter
-    private String type;
-
-    @Getter
-    @Setter
-    private RpcTypeEnum rpcTypeEnum;
+    private final String type;
+    private final RpcTypeEnum rpcTypeEnum;
 }

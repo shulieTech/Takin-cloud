@@ -51,4 +51,13 @@ public class TaskFlowDebugStartReq extends ContextExt {
 
     @ApiModelProperty(value = "脚本节点信息")
     private String scriptAnalysisResult;
+
+    /**
+     * 操作人
+     */
+    private String operateName;
+
+    private Long operateId;
+
+
 }

@@ -84,34 +84,34 @@ public class CollectorService extends AbstractIndicators {
         new NoLengthBlockingQueue<>(), new ThreadFactoryBuilder()
         .setNameFormat("ptl-log-push-%d").build(), new ThreadPoolExecutor.AbortPolicy());
 
-    public void collectorToInfluxdb(Long sceneId, Long reportId, Long customerId, List<ResponseMetrics> metricses) {
-        if (CollectionUtils.isEmpty(metricses)) {
+    public void collectorToInfluxdb(Long sceneId, Long reportId, Long customerId, List<ResponseMetrics> metrics) {
+        if (CollectionUtils.isEmpty(metrics)) {
             return;
         }
         String measurement = InfluxUtil.getMetricsMeasurement(sceneId, reportId, customerId);
-        metricses.stream().filter(Objects::nonNull)
-            .peek(metrics -> {
+        metrics.stream().filter(Objects::nonNull)
+            .peek(metric -> {
                 //判断有没有MD5值
-                int strPosition = metrics.getTransaction().lastIndexOf(PressureEngineConstants.TRANSACTION_SPLIT_STR);
+                int strPosition = metric.getTransaction().lastIndexOf(PressureEngineConstants.TRANSACTION_SPLIT_STR);
                 if (strPosition > 0) {
-                    String transaction = metrics.getTransaction();
-                    metrics.setTransaction(transaction.substring(strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length()));
-                    metrics.setTestName((transaction.substring(0, strPosition)));
+                    String transaction = metric.getTransaction();
+                    metric.setTransaction(transaction.substring(strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length()));
+                    metric.setTestName((transaction.substring(0, strPosition)));
                 } else {
-                    metrics.setTransaction(metrics.getTransaction());
-                    metrics.setTestName(metrics.getTransaction());
+                    metric.setTransaction(metric.getTransaction());
+                    metric.setTestName(metric.getTransaction());
                 }
             })
-            .peek(metrics -> {
+            .peek(metric -> {
                 //处理时间戳-纳秒转成毫秒，防止插入influxdb报错
-                if (Objects.nonNull(metrics.getTime()) && metrics.getTime() > InfluxUtil.MAX_ACCEPT_TIMESTAMP) {
-                    metrics.setTime(metrics.getTime() / 1000000);
+                if (Objects.nonNull(metric.getTime()) && metric.getTime() > InfluxUtil.MAX_ACCEPT_TIMESTAMP) {
+                    metric.setTime(metric.getTime() / 1000000);
                 }
-                if (metrics.getTimestamp() > InfluxUtil.MAX_ACCEPT_TIMESTAMP) {
-                    metrics.setTimestamp(metrics.getTimestamp() / 1000000);
+                if (metric.getTimestamp() > InfluxUtil.MAX_ACCEPT_TIMESTAMP) {
+                    metric.setTimestamp(metric.getTimestamp() / 1000000);
                 }
             })
-            .map(metrics -> InfluxUtil.toPoint(measurement, metrics.getTimestamp(), metrics))
+            .map(metric -> InfluxUtil.toPoint(measurement, metric.getTimestamp(), metric))
             .forEach(influxWriter::insert);
     }
 
@@ -126,7 +126,7 @@ public class CollectorService extends AbstractIndicators {
         String taskKey = getPressureTaskKey(sceneId, reportId, tenantId);
         for (ResponseMetrics metric : metrics) {
             try {
-                long timeWindow = CollectorUtil.getTimeWindow(metric.getTimestamp()).getTimeInMillis();
+                long timeWindow = CollectorUtil.getTimeWindowTime(metric.getTimestamp());
                 if (validate(timeWindow, sceneId, reportId, tenantId, metrics)) {
                     // 写入redis
                     log.info("{}-{}-{} write redis , timestamp-{},timeWindow-{}", sceneId, reportId, tenantId,
@@ -227,7 +227,7 @@ public class CollectorService extends AbstractIndicators {
                         log.info("本次压测{}-{}-{}:打入结束标识", sceneId, reportId, tenantId);
                         setLast(last(taskKey), ScheduleConstants.LAST_SIGN);
                         setMax(engineName + ScheduleConstants.LAST_SIGN, metric.getTimestamp());
-                        notifyEnd(sceneId, reportId, metric.getTimestamp());
+                        notifyEnd(sceneId, reportId, metric.getTimestamp(), tenantId);
                         return;
                     }
                     // 计数 回传标识数量
@@ -241,7 +241,7 @@ public class CollectorService extends AbstractIndicators {
                         // 删除临时标识
                         redisTemplate.delete(ScheduleConstants.TEMP_LAST_SIGN + engineName);
                         // 压测停止
-                        notifyEnd(sceneId, reportId, metric.getTimestamp());
+                        notifyEnd(sceneId, reportId, metric.getTimestamp(), tenantId);
                     }
                 }
             } catch (Exception e) {
@@ -267,8 +267,15 @@ public class CollectorService extends AbstractIndicators {
         reportDao.updateReportStartTime(reportId, new Date(startTime));
     }
 
-    private void notifyEnd(Long sceneId, Long reportId, long endTime) {
+    private void notifyEnd(Long sceneId, Long reportId, long endTime, Long tenantId) {
         log.info("场景[{}]压测任务已完成,更新结束时间{}", sceneId, reportId);
+        // 刷新任务状态的Redis缓存
+        taskStatusCache.cacheStatus(sceneId, reportId, SceneRunTaskStatusEnum.ENDED);
+        // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
+        sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, tenantId)
+            .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
+            .updateEnum(SceneManageStatusEnum.STOP)
+            .build());
         reportDao.updateReportEndTime(reportId, new Date(endTime));
     }
 
@@ -285,7 +292,7 @@ public class CollectorService extends AbstractIndicators {
 
         String windowsTimeKey = String.format("%s:%s", getPressureTaskKey(sceneId, reportId, tenantId),
             "windowsTime");
-        String timeInMillis = String.valueOf(CollectorUtil.getTimeWindow(time).getTimeInMillis());
+        String timeInMillis = String.valueOf(CollectorUtil.getTimeWindowTime(time));
         List<String> ips;
         if (redisTemplate.getExpire(windowsTimeKey) == -2) {
             ips = new ArrayList<>();

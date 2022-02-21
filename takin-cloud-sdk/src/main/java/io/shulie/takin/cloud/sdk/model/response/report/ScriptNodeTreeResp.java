@@ -1,16 +1,17 @@
 package io.shulie.takin.cloud.sdk.model.response.report;
 
-import java.io.Serializable;
 import java.util.List;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.shulie.takin.cloud.ext.content.AbstractEntry;
 import lombok.Data;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author moriarty
  */
 @Data
-public class ScriptNodeTreeResp implements Serializable {
+public class ScriptNodeTreeResp extends AbstractEntry {
 
     @ApiModelProperty(value = "业务活动ID")
     private Long businessActivityId;
@@ -35,5 +36,11 @@ public class ScriptNodeTreeResp implements Serializable {
 
     @ApiModelProperty(value = "子节点")
     private List<ScriptNodeTreeResp> children;
+    /**
+     * 施压类型
+     * 参考:io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt#type
+     */
+    @ApiModelProperty(value = "施压类型")
+    private Integer pressureType;
 
 }

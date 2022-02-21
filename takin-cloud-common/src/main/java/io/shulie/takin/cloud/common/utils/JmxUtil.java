@@ -1,34 +1,38 @@
 package io.shulie.takin.cloud.common.utils;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Objects;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.stream.Collectors;
+import java.util.function.Function;
+import java.net.MalformedURLException;
+
+import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import com.google.common.collect.Lists;
-import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
+
 import io.shulie.takin.cloud.common.pojo.Pair;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
+import io.shulie.takin.cloud.ext.content.enums.SamplerTypeEnum;
 import io.shulie.takin.cloud.common.pojo.jmeter.ThreadGroupProperty;
-import io.shulie.takin.ext.content.enums.NodeTypeEnum;
-import io.shulie.takin.ext.content.enums.SamplerTypeEnum;
-import io.shulie.takin.ext.content.script.ScriptNode;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
+
 import org.dom4j.Element;
+import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
+import org.dom4j.DocumentException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * @author liyuanba
@@ -385,6 +389,13 @@ public class JmxUtil {
                     //interface + # + method
                     setDubboIdentification(node);
                     node.setSamplerType(SamplerTypeEnum.DUBBO);
+                }
+                // TODO: 1.名称常量化。2.名称和解析逻辑的关系从主工程抽离。
+                else if ("io.shulie.jmeter.plugins.rabbit.RabbitPublisherSampler".equals(name)) {
+                    node.setProps(buildProps(element));
+                    //interface + # + method
+                    setRabbitIdentification(node);
+                    node.setSamplerType(SamplerTypeEnum.RABBITMQ);
                 } else {
                     node.setProps(buildProps(element));
                     node.setSamplerType(SamplerTypeEnum.UNKNOWN);
@@ -433,6 +444,19 @@ public class JmxUtil {
         node.setIdentification(format);
         node.setRequestPath(String.format("%s|%s", fieldDubboMethod, path));
 
+    }
+
+    private static void setRabbitIdentification(ScriptNode node) {
+        if (null == node) {return;}
+        Map<String, String> props = node.getProps();
+        if (null == props) {return;}
+        String exchange = props.get("RabbitSampler.Exchange");
+        String routingKey = props.get("RabbitPublisher.MessageRoutingKey");
+        if (StringUtils.isBlank(routingKey)) {
+            routingKey = "*";
+        }
+        node.setRequestPath(String.format("%s|%s", routingKey, exchange));
+        node.setIdentification(String.format("%s|%s|%s", routingKey, exchange, SamplerTypeEnum.RABBITMQ.getRpcTypeEnum().getValue()));
     }
 
     private static SamplerTypeEnum getJavaSamplerType(ScriptNode node) {
@@ -730,9 +754,8 @@ public class JmxUtil {
             }
             node.setRequestPath(topic);
             node.setIdentification(String.format("%s|%s", topic, SamplerTypeEnum.KAFKA.getRpcTypeEnum().getValue()));
-            return;
         } else {
-            return;
+            log.warn("没有成功解析脚本节点:{}", javaClass);
         }
     }
 
@@ -880,6 +903,23 @@ public class JmxUtil {
                     }
                 } else {
                     scriptNode.setChildren(null);
+                }
+            }
+        }
+        return result;
+    }
+
+    public static List<ScriptNode> getChildNodesByFilterFunc(ScriptNode node, Function<ScriptNode, Boolean> filterFunc) {
+        if (null == node || CollectionUtils.isEmpty(node.getChildren())) {
+            return null;
+        }
+        List<ScriptNode> result = Lists.newArrayList();
+        for (ScriptNode childNode : node.getChildren()) {
+            result.add(childNode);
+            if (filterFunc.apply(childNode)) {
+                List<ScriptNode> subNodes = getChildNodesByFilterFunc(childNode, filterFunc);
+                if (CollectionUtils.isNotEmpty(subNodes)) {
+                    result.addAll(subNodes);
                 }
             }
         }
