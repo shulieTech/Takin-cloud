@@ -51,7 +51,6 @@ import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
 import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
 import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
 import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
-import com.pamirs.takin.entity.domain.dto.report.StatInspectReportDTO;
 import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
 import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
 
@@ -437,6 +436,8 @@ public class ReportServiceImpl implements ReportService {
     private List<StopReasonBean> getStopReasonBean(Long sceneId, Long reportId) {
         List<StopReasonBean> stopReasons = Lists.newArrayList();
 
+        ReportResult reportResult = reportDao.selectById(reportId);
+
         // 查询sla熔断数据
         ReportDetailOutput detailOutput = this.getReportByReportId(reportId);
         if (detailOutput.getSlaMsg() != null) {
@@ -452,18 +453,17 @@ public class ReportServiceImpl implements ReportService {
             SceneTaskRedisConstants.PRESSURE_NODE_START_ERROR);
         if (Objects.nonNull(pressureNodeStartError)) {
             // 组装压力节点异常显示数据
-            StopReasonBean stopReasonBean = new StopReasonBean();
-            stopReasonBean.setType(SceneStopReasonEnum.PRESSURE_NODE.getType());
-            stopReasonBean.setDescription(SceneStopReasonEnum.toDesc(pressureNodeStartError.toString()));
-            stopReasons.add(stopReasonBean);
+            stopReasons.add(new StopReasonBean() {{
+                setType(SceneStopReasonEnum.PRESSURE_NODE.getType());
+                setDescription(SceneStopReasonEnum.toDesc(pressureNodeStartError.toString()));
+            }});
             //  持久化
-            ReportResult reportResult = reportDao.selectById(reportId);
             getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG, pressureNodeStartError.toString());
-            ReportUpdateParam param = new ReportUpdateParam();
-            param.setId(reportId);
-            param.setFeatures(reportResult.getFeatures());
-            param.setGmtUpdate(new Date());
-            reportDao.updateReport(param);
+            reportDao.updateReport(new ReportUpdateParam() {{
+                setId(reportId);
+                setFeatures(reportResult.getFeatures());
+                setGmtUpdate(new Date());
+            }});
         }
 
         // 查询压测引擎是否有异常
@@ -471,18 +471,17 @@ public class ReportServiceImpl implements ReportService {
         Object errorObj = redisClientUtils.hmget(key, SceneTaskRedisConstants.SCENE_RUN_TASK_ERROR);
         if (Objects.nonNull(errorObj)) {
             // 组装压测引擎异常显示数据
-            StopReasonBean engineReasonBean = new StopReasonBean();
-            engineReasonBean.setType(SceneStopReasonEnum.ENGINE.getType());
-            engineReasonBean.setDescription(SceneStopReasonEnum.toEngineDesc(errorObj.toString()));
-            stopReasons.add(engineReasonBean);
+            stopReasons.add(new StopReasonBean() {{
+                setType(SceneStopReasonEnum.ENGINE.getType());
+                setDescription(SceneStopReasonEnum.toEngineDesc(errorObj.toString()));
+            }});
             //  持久化
-            ReportResult reportResult = reportDao.selectById(reportId);
             getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG, errorObj.toString());
-            ReportUpdateParam param = new ReportUpdateParam();
-            param.setId(reportId);
-            param.setFeatures(reportResult.getFeatures());
-            param.setGmtUpdate(new Date());
-            reportDao.updateReport(param);
+            reportDao.updateReport(new ReportUpdateParam() {{
+                setId(reportId);
+                setFeatures(reportResult.getFeatures());
+                setGmtUpdate(new Date());
+            }});
             // 进行中断操作
             log.info("检测到压测引擎异常，触发中断场景【{}】压测,异常原因：{}", sceneId, errorObj);
             sceneTaskService.stop(sceneId);
@@ -701,8 +700,14 @@ public class ReportServiceImpl implements ReportService {
             return false;
         }
         //判断报告是否已经汇总，如果没有汇总，先汇总报告，然后在更新报告状态
-        if (Objects.isNull(reportResult.getEndTime())
-            || (Objects.isNull(reportResult.getTotalRequest()) && Objects.isNull(reportResult.getAvgTps()))) {
+        if (Objects.isNull(reportResult.getEndTime())) {
+            TaskResult taskResult = new TaskResult();
+            taskResult.setSceneId(reportResult.getSceneId());
+            taskResult.setTaskId(reportResult.getId());
+            taskResult.setTenantId(reportResult.getTenantId());
+            modifyReport(taskResult);
+            reportResult = reportDao.selectById(reportId);
+        } else if (Objects.isNull(reportResult.getTotalRequest()) && Objects.isNull(reportResult.getAvgTps())) {
             TaskResult taskResult = new TaskResult();
             taskResult.setSceneId(reportResult.getSceneId());
             taskResult.setTaskId(reportResult.getId());
@@ -766,21 +771,22 @@ public class ReportServiceImpl implements ReportService {
             + " where transaction = '" + transaction + "'"
             + " order by time desc limit 1";
         StatReportDTO statReportDTO = influxWriter.querySingle(influxDbSql, StatReportDTO.class);
-        if (Objects.nonNull(statReportDTO)){
+        if (Objects.nonNull(statReportDTO)) {
             String totalRequestSql = "select sum(count) as totalRequest from "
                 + measurement
                 + " where  transaction = '" + transaction + "'"
                 + " order by time desc limit 1";
             StatReportDTO totalRequestDto = influxWriter.querySingle(totalRequestSql, StatReportDTO.class);
-            if (Objects.nonNull(totalRequestDto) && Objects.nonNull(totalRequestDto.getTotalRequest())){
+            if (Objects.nonNull(totalRequestDto) && Objects.nonNull(totalRequestDto.getTotalRequest())) {
                 statReportDTO.setTotalRequest(totalRequestDto.getTotalRequest());
-            }else {
+            } else {
                 statReportDTO.setTotalRequest(0L);
             }
         }
 
         return statReportDTO;
     }
+
     /**
      * 获取最大并发数
      *
@@ -800,21 +806,6 @@ public class ReportServiceImpl implements ReportService {
             return statReportDTO.getMaxConcurrenceNum();
         }
         return 0;
-    }
-
-    /**
-     * 巡检报告取值
-     */
-    private StatInspectReportDTO statInspectReport(Long sceneId, Long reportId, Long tenantId, String transaction,
-        String startTime, String endTime) {
-        String influxDbSql = "select"
-            + " sum(count) as totalRequest,mean(avg_tps) as avgTps , sum(sum_rt)/sum(count) as avgRt , mean(success_rate) as avgSuccessRate"
-            + " from "
-            + InfluxUtil.getMeasurement(sceneId, reportId, tenantId)
-            + " where transaction = '" + transaction + "'"
-            + " and time >= '" + startTime + "'"
-            + " and time <= '" + endTime + "' tz('Asia/Shanghai')";
-        return influxWriter.querySingle(influxDbSql, StatInspectReportDTO.class);
     }
 
     /**
@@ -977,22 +968,6 @@ public class ReportServiceImpl implements ReportService {
             map.put(errKey, errMsg);
             reportResult.setFeatures(GsonUtil.gsonToString(map));
         }
-        //if (StringUtils.isNotBlank(errMsg)) {
-        //    if (errKey.equals(ReportConstants.SLA_ERROR_MSG) && map.containsKey(ReportConstants.SLA_ERROR_MSG)) {
-        //        return;
-        //    }
-        //    errMsg = StringUtils.trim(errMsg);
-        //    if (!errMsg.startsWith("[") && !errMsg.startsWith("{") && errMsg.length() > 100) {
-        //        errMsg = errMsg.substring(0, 100);
-        //    }
-        //    String existsMsg = map.get(errKey);
-        //    if (StringUtils.isBlank(existsMsg)) {
-        //        map.put(errKey, errMsg);
-        //    } else if (existsMsg.length() < 10000) {
-        //        map.put(errKey, existsMsg + "、" + errMsg);
-        //    }
-        //    reportResult.setFeatures(GsonUtil.gsonToString(map));
-        //}
     }
 
     @Override
@@ -1102,7 +1077,8 @@ public class ReportServiceImpl implements ReportService {
             log.error("not find reportId= {}", reportId);
             return;
         }
-        Boolean updateVersion = true;
+        // 默认为true
+        boolean updateVersion = System.currentTimeMillis() >= 0;
         log.info("ReportId={}, tenantId={}, CompareResult={}", reportId, reportResult.getTenantId(), updateVersion);
 
         String testPlanXpathMd5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
@@ -1137,7 +1113,7 @@ public class ReportServiceImpl implements ReportService {
         }
 
         if (!updateVersion) {
-            log.info("old version finish report ={} updateVersion={} ", reportId, updateVersion);
+            log.info("旧版本-结束报告:{}", reportId);
             UpdateStatusBean reportStatus = new UpdateStatusBean();
             reportStatus.setResultId(reportId);
             reportStatus.setPreStatus(ReportConstants.INIT_STATUS);
@@ -1486,14 +1462,14 @@ public class ReportServiceImpl implements ReportService {
             resultMap.put("successRate", new DataBean(statReport.getSuccessRate(), detail.getTargetSuccessRate()));
             resultMap.put("avgConcurrenceNum", statReport.getAvgConcurrenceNum().toString());
             resultMap.put("totalRequest", statReport.getTotalRequest());
-            resultMap.put("tempRequestCount",statReport.getTempRequestCount());
+            resultMap.put("tempRequestCount", statReport.getTempRequestCount());
         } else {
             resultMap.put("avgRt", new DataBean("0", detail.getTargetRt()));
             resultMap.put("sa", new DataBean("0", detail.getTargetSa()));
             resultMap.put("tps", new DataBean("0", detail.getTargetTps()));
             resultMap.put("successRate", new DataBean("0", detail.getTargetSuccessRate()));
             resultMap.put("avgConcurrenceNum", "0");
-            resultMap.put("tempRequestCount",0L);
+            resultMap.put("tempRequestCount", 0L);
             resultMap.put("totalRequest", 0L);
         }
         return resultMap;
@@ -1596,8 +1572,9 @@ public class ReportServiceImpl implements ReportService {
             return jtlPath + "/" + "Jmeter.zip";
         } else if (needZip) {
             // 开始压缩
-            Boolean result = LinuxHelper.executeLinuxCmd(
-                "sudo zip -r -j " + jtlPath + "/" + "Jmeter.zip " + jtlPath + " " + logPath);
+            String command = StrUtil.format("sudo zip -r -j {0}/Jmeter.zip {0} {1}", jtlPath, logPath);
+            log.info("压测日志打包成文件:{}", command);
+            Boolean result = LinuxHelper.executeLinuxCmd(command);
             if (result) {
                 // 返回成功
                 return jtlPath + "/" + "Jmeter.zip";
