@@ -1,35 +1,37 @@
 package io.shulie.takin.cloud.common.utils;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Objects;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.net.MalformedURLException;
+
+import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import com.google.common.collect.Lists;
-import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
-import io.shulie.takin.cloud.common.pojo.Pair;
-import io.shulie.takin.cloud.common.pojo.jmeter.ThreadGroupProperty;
-import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
-import io.shulie.takin.cloud.ext.content.enums.SamplerTypeEnum;
-import io.shulie.takin.cloud.ext.content.script.ScriptNode;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Element;
+import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
+import org.dom4j.DocumentException;
+
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.collection.CollUtil;
+
+import io.shulie.takin.cloud.common.pojo.Pair;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
+import io.shulie.takin.cloud.ext.content.enums.SamplerTypeEnum;
+import io.shulie.takin.cloud.common.pojo.jmeter.ThreadGroupProperty;
 
 /**
  * @author liyuanba
@@ -40,13 +42,13 @@ public class JmxUtil {
     /**
      * 属性基本元素名称列表
      */
-    private static final List<String> BASE_PROP_ELEMENTS = Lists.newArrayList("stringProp", "boolProp", "intProp", "doubleProp");
+    private static final List<String> BASE_PROP_ELEMENTS = CollUtil.newArrayList("stringProp", "boolProp", "intProp", "doubleProp");
 
     /**
      * 从jmx文件中提取结构树
      */
     public static List<ScriptNode> buildNodeTree(String file) {
-        if (StringUtils.isBlank(file)) {
+        if (StrUtil.isBlank(file)) {
             return null;
         }
         File f = new File(file);
@@ -80,10 +82,10 @@ public class JmxUtil {
     }
 
     public static List<ScriptNode> buildNodeTree(List<Element> elements) {
-        if (CollectionUtils.isEmpty(elements)) {
+        if (CollUtil.isEmpty(elements)) {
             return null;
         }
-        List<ScriptNode> nodes = Lists.newArrayList();
+        List<ScriptNode> nodes = CollUtil.newArrayList();
         for (int i = 0; i < elements.size(); i++) {
             Element e = elements.get(i);
             ScriptNode node = buildNode(e);
@@ -209,10 +211,10 @@ public class JmxUtil {
             }
             JSONArray jsonArray = json.getJSONArray("ultimatethreadgroupdata");
             int duration = 0;
-            List<Map<String, Integer>> shcdules = Lists.newArrayList();
+            List<Map<String, Integer>> shcdules = CollUtil.newArrayList();
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject o = jsonArray.getJSONObject(i);
-                if (null == o || CollectionUtils.isEmpty(o.values())) {
+                if (null == o || CollUtil.isEmpty(o.values())) {
                     continue;
                 }
                 JSONArray arr = o.values().stream().filter(Objects::nonNull)
@@ -393,6 +395,16 @@ public class JmxUtil {
                     //interface + # + method
                     setRabbitIdentification(node);
                     node.setSamplerType(SamplerTypeEnum.RABBITMQ);
+                } else if ("ShulieKafkaDataSetSampler".equals(name)) {
+                    node.setProps(buildProps(element));
+                    Map<String, String> props = node.getProps();
+                    if (null == props) {return;}
+                    String prefix = props.get("prefix");
+                    String suffix = props.get("suffix");
+                    String text = StrUtil.format("{}Kafka数据集采样器{}", prefix, suffix);
+                    node.setRequestPath(text);
+                    node.setIdentification(text);
+                    node.setSamplerType(SamplerTypeEnum.KAFKA);
                 } else {
                     node.setProps(buildProps(element));
                     node.setSamplerType(SamplerTypeEnum.UNKNOWN);
@@ -449,7 +461,7 @@ public class JmxUtil {
         if (null == props) {return;}
         String exchange = props.get("RabbitSampler.Exchange");
         String routingKey = props.get("RabbitPublisher.MessageRoutingKey");
-        if (StringUtils.isBlank(routingKey)){
+        if (StrUtil.isBlank(routingKey)) {
             routingKey = "*";
         }
         node.setRequestPath(String.format("%s|%s", routingKey, exchange));
@@ -465,7 +477,7 @@ public class JmxUtil {
             return SamplerTypeEnum.UNKNOWN;
         }
         String javaClass = props.get("classname");
-        if (StringUtils.isBlank(javaClass)) {
+        if (StrUtil.isBlank(javaClass)) {
             return SamplerTypeEnum.UNKNOWN;
         }
         if ("co.signal.kafkameter.KafkaProducerSampler".equals(javaClass)) {
@@ -490,7 +502,7 @@ public class JmxUtil {
         } else if ("collectionProp".equals(element.getName())) {
             String key = element.attributeValue("name");
             List<Element> elements = elements(element);
-            if (CollectionUtils.isEmpty(elements)) {
+            if (CollUtil.isEmpty(elements)) {
                 return json;
             }
             JSONArray arr = new JSONArray();
@@ -502,7 +514,7 @@ public class JmxUtil {
         } else if ("elementProp".equals(element.getName())) {
             String key = element.attributeValue("name");
             List<Element> elements = elements(element);
-            if (CollectionUtils.isEmpty(elements)) {
+            if (CollUtil.isEmpty(elements)) {
                 return json;
             }
             JSONObject value = new JSONObject();
@@ -533,7 +545,7 @@ public class JmxUtil {
             if (isNotEnabled(e)) {
                 continue;
             }
-            if (StringUtils.isNotBlank(guiClass) && !guiClass.equals(e.attributeValue("guiclass"))) {
+            if (StrUtil.isNotBlank(guiClass) && !guiClass.equals(e.attributeValue("guiclass"))) {
                 continue;
             }
             configElement = e;
@@ -584,7 +596,7 @@ public class JmxUtil {
 
         for (Map.Entry<String, String> entry : p2.entrySet()) {
             String oldValue = p1.get(entry.getKey());
-            if (StringUtils.isBlank(oldValue)) {
+            if (StrUtil.isBlank(oldValue)) {
                 p1.put(entry.getKey(), entry.getValue());
             }
         }
@@ -607,15 +619,15 @@ public class JmxUtil {
             return null;
         }
         List<Element> elements = elements(element);
-        if (CollectionUtils.isEmpty(elements)) {
+        if (CollUtil.isEmpty(elements)) {
             return null;
         }
         return elements.stream().filter(Objects::nonNull)
             .map(e -> JmxUtil.getKeyAndValue(e, propElementNames))
-            .filter(CollectionUtils::isNotEmpty)
+            .filter(CollUtil::isNotEmpty)
             .flatMap(Collection::stream)
             .filter(Objects::nonNull)
-            .filter(p -> StringUtils.isNotBlank(p.getKey()) && Objects.nonNull(p.getValue()))
+            .filter(p -> StrUtil.isNotBlank(p.getKey()) && Objects.nonNull(p.getValue()))
             .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (o1, o2) -> o1));
     }
 
@@ -635,7 +647,7 @@ public class JmxUtil {
             if (null != valeElement) {
                 value = valeElement.getText();
             }
-            if (StringUtils.isNotBlank(key)) {
+            if (StrUtil.isNotBlank(key)) {
                 return new Pair<>(key, value);
             }
         }
@@ -653,7 +665,7 @@ public class JmxUtil {
         if (null == e) {
             return null;
         }
-        List<Pair<String, String>> result = Lists.newArrayList();
+        List<Pair<String, String>> result = CollUtil.newArrayList();
         String name = e.getName();
         if (null != propElementNames && propElementNames.length > 0) {
             boolean contains = Arrays.stream(propElementNames).filter(Objects::nonNull)
@@ -669,7 +681,7 @@ public class JmxUtil {
             }
         } else if ("elementProp".equals(name)) {
             List<Element> elements = elements(e);
-            if (CollectionUtils.isEmpty(elements)) {
+            if (CollUtil.isEmpty(elements)) {
                 return result;
             }
             String key = null;
@@ -680,9 +692,9 @@ public class JmxUtil {
                     result.addAll(props);
                 } else {
                     List<Pair<String, String>> pairs = getKeyAndValue(element, propElementNames);
-                    if (CollectionUtils.isNotEmpty(pairs)) {
+                    if (CollUtil.isNotEmpty(pairs)) {
                         for (Pair<String, String> p : pairs) {
-                            if (StringUtils.isBlank(p.getValue())) {
+                            if (StrUtil.isBlank(p.getValue())) {
                                 continue;
                             }
                             if ("Argument.name".equals(p.getKey())) {
@@ -694,12 +706,12 @@ public class JmxUtil {
                     }
                 }
             }
-            if (StringUtils.isNotBlank(key)) {
+            if (StrUtil.isNotBlank(key)) {
                 result.add(new Pair<>(key, value));
             }
         } else if ("collectionProp".equals(e.getName())) {
             List<Element> elements = elements(e);
-            if (CollectionUtils.isEmpty(elements)) {
+            if (CollUtil.isEmpty(elements)) {
                 return result;
             }
             for (Element element : elements) {
@@ -718,7 +730,7 @@ public class JmxUtil {
         if (null == props) {
             return;
         }
-        String collect = Arrays.stream(keys).filter(StringUtils::isNotBlank)
+        String collect = Arrays.stream(keys).filter(StrUtil::isNotBlank)
             .map(props::get)
             .collect(Collectors.joining("|"));
         node.setIdentification(collect);
@@ -734,19 +746,19 @@ public class JmxUtil {
             return;
         }
         String javaClass = props.get("classname");
-        if (StringUtils.isBlank(javaClass)) {
+        if (StrUtil.isBlank(javaClass)) {
             return;
         }
         if ("co.signal.kafkameter.KafkaProducerSampler".equals(javaClass)) {
             String topic = props.get("kafka_topic");
-            if (StringUtils.isBlank(topic) || topic.startsWith("$")) {
+            if (StrUtil.isBlank(topic) || topic.startsWith("$")) {
                 return;
             }
             node.setRequestPath(topic);
             node.setIdentification(String.format("%s|%s", topic, SamplerTypeEnum.KAFKA.getRpcTypeEnum().getValue()));
         } else if ("com.gslab.pepper.sampler.PepperBoxKafkaSampler".equals(javaClass)) {
             String topic = props.get("kafka.topic.name");
-            if (StringUtils.isBlank(topic) || topic.startsWith("$")) {
+            if (StrUtil.isBlank(topic) || topic.startsWith("$")) {
                 return;
             }
             node.setRequestPath(topic);
@@ -785,7 +797,7 @@ public class JmxUtil {
      * http请求的path部分归一处理
      */
     public static String pathGuiYi(String path) {
-        if (StringUtils.isBlank(path)) {
+        if (StrUtil.isBlank(path)) {
             return path;
         }
         if (path.contains("?")) {
@@ -809,12 +821,12 @@ public class JmxUtil {
     }
 
     public static int getValueFromJsonObject(JSONObject json) {
-        if (null == json || CollectionUtils.isEmpty(json.values())) {
+        if (null == json || CollUtil.isEmpty(json.values())) {
             return 0;
         }
         return json.values().stream().filter(Objects::nonNull)
             .map(o -> (String)o)
-            .filter(StringUtils::isNotBlank)
+            .filter(StrUtil::isNotBlank)
             .map(NumberUtil::parseInt)
             .findFirst()
             .orElse(0);
@@ -828,10 +840,10 @@ public class JmxUtil {
             return null;
         }
         List<?> elements = element.elements();
-        if (CollectionUtils.isEmpty(elements)) {
+        if (CollUtil.isEmpty(elements)) {
             return null;
         }
-        List<Element> list = Lists.newArrayList();
+        List<Element> list = CollUtil.newArrayList();
         for (Object o : elements) {
             if (o instanceof Element) {
                 list.add((Element)o);
@@ -847,14 +859,14 @@ public class JmxUtil {
      * @return 平铺式节点列表
      */
     public static List<ScriptNode> toOneDepthList(List<ScriptNode> nodes) {
-        if (CollectionUtils.isEmpty(nodes)) {
+        if (CollUtil.isEmpty(nodes)) {
             return null;
         }
         List<ScriptNode> list = new ArrayList<>();
         for (ScriptNode node : nodes) {
             list.add(node);
             List<ScriptNode> children = toOneDepthList(node.getChildren());
-            if (CollectionUtils.isNotEmpty(children)) {
+            if (CollUtil.isNotEmpty(children)) {
                 list.addAll(children);
             }
         }
@@ -866,12 +878,12 @@ public class JmxUtil {
      */
     public static int getNodeNumByType(NodeTypeEnum typeEnum, List<ScriptNode> data) {
         int nodeNum = 0;
-        if (CollectionUtils.isNotEmpty(data)) {
+        if (CollUtil.isNotEmpty(data)) {
             for (ScriptNode scriptNode : data) {
                 if (scriptNode.getType() == typeEnum) {
                     nodeNum++;
                 }
-                if (CollectionUtils.isNotEmpty(scriptNode.getChildren())) {
+                if (CollUtil.isNotEmpty(scriptNode.getChildren())) {
                     nodeNum = nodeNum + getNodeNumByType(typeEnum, scriptNode.getChildren());
                 }
             }
@@ -888,14 +900,14 @@ public class JmxUtil {
      */
     public static List<ScriptNode> getScriptNodeByType(NodeTypeEnum typeEnum, List<ScriptNode> data) {
         List<ScriptNode> result = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(data)) {
+        if (CollUtil.isNotEmpty(data)) {
             for (ScriptNode scriptNode : data) {
                 if (scriptNode.getType() == typeEnum) {
                     result.add(scriptNode);
                 }
-                if (CollectionUtils.isNotEmpty(scriptNode.getChildren())) {
+                if (CollUtil.isNotEmpty(scriptNode.getChildren())) {
                     List<ScriptNode> scriptNodeByType = getScriptNodeByType(typeEnum, scriptNode.getChildren());
-                    if (CollectionUtils.isNotEmpty(scriptNodeByType)) {
+                    if (CollUtil.isNotEmpty(scriptNodeByType)) {
                         result.addAll(scriptNodeByType);
                     }
                 } else {
@@ -907,15 +919,15 @@ public class JmxUtil {
     }
 
     public static List<ScriptNode> getChildNodesByFilterFunc(ScriptNode node, Function<ScriptNode, Boolean> filterFunc) {
-        if (null == node || CollectionUtils.isEmpty(node.getChildren())) {
+        if (null == node || CollUtil.isEmpty(node.getChildren())) {
             return null;
         }
-        List<ScriptNode> result = Lists.newArrayList();
+        List<ScriptNode> result = CollUtil.newArrayList();
         for (ScriptNode childNode : node.getChildren()) {
             result.add(childNode);
             if (filterFunc.apply(childNode)) {
                 List<ScriptNode> subNodes = getChildNodesByFilterFunc(childNode, filterFunc);
-                if (CollectionUtils.isNotEmpty(subNodes)) {
+                if (CollUtil.isNotEmpty(subNodes)) {
                     result.addAll(subNodes);
                 }
             }
