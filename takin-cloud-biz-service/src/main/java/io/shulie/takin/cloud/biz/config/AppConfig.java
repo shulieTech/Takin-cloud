@@ -23,11 +23,13 @@ public class AppConfig {
     /**
      * 压测引擎版本
      */
+    @Deprecated
     @Value("${pressure.engine.images}")
     private String pressureEngineImage;
     /**
      * 压测引擎名称
      */
+    @Deprecated
     @Value("${pressure.engine.name}")
     private String pressureEngineImageName;
     /**
@@ -36,6 +38,7 @@ public class AppConfig {
     @Value("${info.app.version}")
     private String cloudVersion;
 
+    @Deprecated
     @Value("${k8s.jvm.settings:-XX:MaxRAMPercentage=90.0 -XX:InitialRAMPercentage=90.0 -XX:MinRAMPercentage=90.0}")
     private String k8sJvmSettings;
 

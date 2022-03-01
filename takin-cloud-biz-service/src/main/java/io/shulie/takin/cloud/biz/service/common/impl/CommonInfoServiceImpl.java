@@ -1,14 +1,17 @@
 package io.shulie.takin.cloud.biz.service.common.impl;
 
+import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Service;
+
 import io.shulie.takin.cloud.biz.config.AppConfig;
+import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.biz.output.common.CommonInfosOutput;
 import io.shulie.takin.cloud.biz.service.common.CommonInfoService;
-import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
-import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
 
 /**
  * 引擎插件文件信息接口
@@ -19,10 +22,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class CommonInfoServiceImpl implements CommonInfoService {
-    @Autowired
+    @Resource
     private AppConfig appConfig;
-
-    @Autowired
+    @Resource
     private StrategyConfigService strategyConfigService;
 
     /**

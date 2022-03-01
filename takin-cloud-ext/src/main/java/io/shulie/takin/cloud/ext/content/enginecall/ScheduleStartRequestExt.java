@@ -19,11 +19,6 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt {
      */
     private String engineType;
 
-    //    /**
-    //     * 施压模式
-    //     */
-    //    private String pressureMode;
-
     /**
      * 脚本文件路径
      */
