@@ -672,7 +672,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean unLockReport(Long reportId) {
         ReportResult reportResult = reportDao.selectById(reportId);
-        if (reportResult.getType() != PressureSceneEnum.DEFAULT.getCode() && ReportConstants.LOCK_STATUS != reportResult.getLock()) {
+        if (!reportResult.getType().equals(PressureSceneEnum.DEFAULT.getCode()) && ReportConstants.LOCK_STATUS != reportResult.getLock()) {
             log.error("异常代码【{}】,异常内容：解锁报告异常 --> 报告{}非锁定状态，不能解锁",
                 TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId);
             return false;
@@ -688,7 +688,7 @@ public class ReportServiceImpl implements ReportService {
         log.info("web -> cloud finish reportId【{}】,starting", reportId);
         ReportResult reportResult = reportDao.selectById(reportId);
         //只有常规模式需要生成报告内容
-        if (reportResult.getPressureType() != PressureSceneEnum.DEFAULT.getCode()) {
+        if (!reportResult.getPressureType().equals(PressureSceneEnum.DEFAULT.getCode())) {
             reportDao.finishReport(reportId);
             sceneManageService.updateSceneLifeCycle(
                 UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getTenantId())
@@ -1572,7 +1572,7 @@ public class ReportServiceImpl implements ReportService {
             return jtlPath + "/" + "Jmeter.zip";
         } else if (needZip) {
             // 开始压缩
-            String command = StrUtil.format("sudo zip -r -j {0}/Jmeter.zip {0} {1}", jtlPath, logPath);
+            String command = StrUtil.indexedFormat("sudo zip -r -j {0}/Jmeter.zip {0} {1}", jtlPath, logPath);
             log.info("压测日志打包成文件:{}", command);
             Boolean result = LinuxHelper.executeLinuxCmd(command);
             if (result) {
