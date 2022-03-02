@@ -19,4 +19,10 @@ public class ScriptVerityExt {
      * 脚本路径
      */
     private String scriptPath;
+    /**
+     * 脚本版本(管理版本)
+     * <p>混合压测前是0</p>
+     * <p>混合压测后是1</p>
+     */
+    private Integer version;
 }
