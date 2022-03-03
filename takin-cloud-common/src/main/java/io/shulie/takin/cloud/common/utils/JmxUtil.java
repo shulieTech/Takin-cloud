@@ -395,7 +395,7 @@ public class JmxUtil {
                     //interface + # + method
                     setRabbitIdentification(node);
                     node.setSamplerType(SamplerTypeEnum.RABBITMQ);
-                } else if ("ShulieKafkaDataSetSampler".equals(name) || "io.shulie.jmeter.plugins.kafka.dataset.DataSet".equals(name)) {
+                } else if ("ShulieKafkaDataSetSampler".equals(name) || "io.shulie.jmeter.plugins.kafka.dataset.Sampler".equals(name)) {
                     node.setProps(buildProps(element));
                     Map<String, String> props = node.getProps();
                     if (null == props) {return;}
