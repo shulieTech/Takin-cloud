@@ -303,7 +303,7 @@ public class FileController {
                     String sourceP = filePath.replaceAll("[/]", "");
                     String sourcePMd5 = MD5Utils.getInstance().getMD5(sourceP);
                     String targetMd5 = redisTemplate.opsForValue().get(CACHE_NAME+sourcePMd5);
-                    if(currentMd5.equals(targetMd5)){
+                    if(StringUtils.isBlank(targetMd5)||currentMd5.equals(targetMd5)){
                         result.put(filePath, FileManagerHelper.readFileToString(new File(filePath), "UTF-8"));
                     }else{
                         result.put(filePath, "文件已被篡改,期望签名:"+targetMd5+";实际签名:"+currentMd5);
