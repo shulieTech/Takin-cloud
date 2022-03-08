@@ -95,6 +95,7 @@ import io.shulie.takin.cloud.sdk.model.common.TimeBean;
 import io.shulie.takin.cloud.ext.content.enginecall.PtConfigExt;
 import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
 import io.shulie.takin.plugin.framework.core.PluginManager;
+import io.shulie.takin.utils.PathFormatForTest;
 import io.shulie.takin.utils.file.FileManagerHelper;
 import io.shulie.takin.utils.json.JsonHelper;
 import io.shulie.takin.utils.string.StringUtil;
@@ -246,15 +247,18 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (StringUtils.isBlank(dest) || StringUtils.isBlank(source)) {
             return;
         }
-
+        source = PathFormatForTest.format(source);
+        dest = PathFormatForTest.format(dest);
         File file = new File(dest.substring(0, dest.lastIndexOf("/")));
         if (!file.exists()) {
             boolean mkdirs = file.mkdirs();
             log.debug("io.shulie.takin.cloud.biz.service.scene.impl.SceneManageServiceImpl#copyFile:mkdirs:{}", mkdirs);
         }
+        String source1 = source;
+        String dest1 = dest;
         new Thread(() -> {
             try {
-                FileManagerHelper.copyFiles(Collections.singletonList(source), dest);
+                FileManagerHelper.copyFiles(Collections.singletonList(source1), dest1);
             } catch (Exception e) {
                 log.error("异常代码【{}】,异常内容：压测场景处理文件异常 --> 文件复制失败: {}",
                     TakinCloudExceptionEnum.SCENE_MANAGE_FILE_COPY_ERROR, e);

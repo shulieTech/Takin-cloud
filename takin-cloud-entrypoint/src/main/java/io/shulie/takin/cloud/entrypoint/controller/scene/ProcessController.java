@@ -14,6 +14,7 @@ import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.ScriptAnalyzeRequest;
 
+import io.shulie.takin.utils.PathFormatForTest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +41,8 @@ public class ProcessController {
     @ApiOperation(value = "脚本解析")
     @PostMapping(EntrypointUrl.METHOD_PROCESS_SCRIPT_ANALYZE)
     public ResponseResult<List<ScriptNode>> scriptAnalyze(@RequestBody ScriptAnalyzeRequest request) {
+        String filePath = PathFormatForTest.format(request.getScriptFile());
+        request.setScriptFile(filePath);
         if (StringUtils.isBlank(request.getScriptFile())) {
             throw new TakinCloudException(TakinCloudExceptionEnum.SCRIPT_ANALYZE_PARAMS_ERROR, "请提供脚本文件完整的路径和名称");
         }

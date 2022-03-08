@@ -11,14 +11,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import cn.hutool.core.date.DateUtil;
@@ -28,6 +27,7 @@ import com.pamirs.takin.entity.domain.dto.file.FileDTO;
 import com.pamirs.takin.entity.domain.vo.file.FileDeleteVO;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.LinuxUtil;
 import io.shulie.takin.cloud.common.utils.Md5Util;
 import io.shulie.takin.cloud.entrypoint.controller.strategy.LocalFileStrategy;
@@ -38,12 +38,15 @@ import io.shulie.takin.cloud.sdk.model.request.filemanage.FileDeleteParamRequest
 import io.shulie.takin.cloud.sdk.model.request.filemanage.FileZipParamRequest;
 import io.shulie.takin.cloud.sdk.model.request.filemanager.FileContentParamReq;
 import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.utils.PathFormatForTest;
 import io.shulie.takin.utils.file.FileManagerHelper;
+import io.shulie.takin.utils.security.MD5Utils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -71,13 +74,22 @@ public class FileController {
     private String scriptPath;
 
     @Resource
+    private RedisTemplate<String, String> redisTemplate;
+
+    public static final String CACHE_NAME = "t:a:c:pressure:filemd5";
+
+    @Resource
     private LocalFileStrategy fileStrategy;
+
 
     @PostMapping(EntrypointUrl.METHOD_FILE_UPLOAD)
     @ApiOperation(value = "文件上传")
-    public ResponseResult<List<FileDTO>> upload(@RequestBody List<MultipartFile> file) {
+    public ResponseResult<List<FileDTO>> upload(@RequestBody List<MultipartFile> file, HttpServletRequest request) {
         List<FileDTO> result = file.stream().map(t -> {
-            String uploadId = UUID.randomUUID().toString();
+            //文件内容签名做父目录
+            String key = MD5Utils.getInstance().getMD5(t.getOriginalFilename());
+            String uploadId = request.getHeader(key);//文件内容签名值
+
             File targetDir = new File(tempPath + SceneManageConstant.FILE_SPLIT + uploadId);
             if (!targetDir.exists()) {
                 boolean mkdirResult = targetDir.mkdirs();
@@ -85,6 +97,11 @@ public class FileController {
             }
             File targetFile = new File(tempPath + SceneManageConstant.FILE_SPLIT
                 + uploadId + SceneManageConstant.FILE_SPLIT + t.getOriginalFilename());
+
+            //临时文件签名，存储缓存，超时设置10分钟
+            String path = targetFile.getAbsolutePath().replaceAll("[/]", "");
+            String pathMd5 = MD5Utils.getInstance().getMD5(path);
+            redisTemplate.opsForValue().set(CACHE_NAME+pathMd5, uploadId,10, TimeUnit.MINUTES); //临时存储10分钟
             FileDTO dto = new FileDTO();
             try {
                 if (StrUtil.isBlank(t.getOriginalFilename())) {
@@ -95,7 +112,7 @@ public class FileController {
 
                 dto.setUploadId(uploadId);
                 setDataCount(targetFile, dto);
-                dto.setMd5(Md5Util.md5File(targetFile));
+                dto.setMd5(uploadId);
                 dto.setFileName(t.getOriginalFilename());
                 dto.setFileType(t.getOriginalFilename().endsWith("jmx") ? 0 : 1);
                 dto.setDownloadUrl(targetDir + SceneManageConstant.FILE_SPLIT + t.getOriginalFilename());
@@ -188,7 +205,27 @@ public class FileController {
     @ApiOperation(value = "复制文件")
     public ResponseResult<Boolean> copyFile(@RequestBody FileCopyParamRequest fileCopyParamDTO) {
         try {
+            List<String> sourceList = fileCopyParamDTO.getSourcePaths();
+            List<String> sourceList2 = new ArrayList<>();
+            for(String temp : sourceList){
+                sourceList2.add(PathFormatForTest.format(temp));
+            }
+            fileCopyParamDTO.setSourcePaths(sourceList2);
+            String targetPath = fileCopyParamDTO.getTargetPath();
+            targetPath = PathFormatForTest.format(targetPath);
+            fileCopyParamDTO.setTargetPath(targetPath);
             FileManagerHelper.copyFiles(fileCopyParamDTO.getSourcePaths(), fileCopyParamDTO.getTargetPath());
+            for(String sourceFilePath:fileCopyParamDTO.getSourcePaths()){
+                File f = new File(sourceFilePath);
+                String targetP = (fileCopyParamDTO.getTargetPath()+"/"+f.getName()).replaceAll("[/]", "");
+                String targetPMd5 = MD5Utils.getInstance().getMD5(targetP);
+
+                //把临时文件缓存的md5，复制至正式文件的md5
+                String sourceP = sourceFilePath.replaceAll("[/]", "");
+                String sourcePMd5 = MD5Utils.getInstance().getMD5(sourceP);
+                String md5 = redisTemplate.opsForValue().get(CACHE_NAME+sourcePMd5);
+                redisTemplate.opsForValue().set(CACHE_NAME+targetPMd5,md5);
+            }
         } catch (IOException e) {
             log.error("异常代码【{}】,异常内容：文件复制异常 --> 异常信息: {}",
                 TakinCloudExceptionEnum.FILE_COPY_ERROR, e);
@@ -260,7 +297,17 @@ public class FileController {
         try {
             for (String filePath : req.getPaths()) {
                 if (new File(filePath).exists()) {
-                    result.put(filePath, FileManagerHelper.readFileToString(new File(filePath), "UTF-8"));
+                    //当前签名
+                    String currentMd5 = MD5Utils.getInstance().getMD5(new File(filePath));
+                    //期望签名
+                    String sourceP = filePath.replaceAll("[/]", "");
+                    String sourcePMd5 = MD5Utils.getInstance().getMD5(sourceP);
+                    String targetMd5 = redisTemplate.opsForValue().get(CACHE_NAME+sourcePMd5);
+                    if(currentMd5.equals(targetMd5)){
+                        result.put(filePath, FileManagerHelper.readFileToString(new File(filePath), "UTF-8"));
+                    }else{
+                        result.put(filePath, "文件已被篡改,期望签名:"+targetMd5+";实际签名:"+currentMd5);
+                    }
                 }
             }
         } catch (IOException e) {
