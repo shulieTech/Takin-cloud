@@ -171,6 +171,11 @@ public enum TakinCloudExceptionEnum implements ExceptionReadable {
     CLOUD_PLATFORM_ADD_ERROR("cloud-010-s0203", "云平台管理新增失败"),
     CLOUD_PLATFORM_QUERY_ERROR("cloud-010-s0204", "云平台管理查询失败"),
     CLOUD_PLATFORM_DELETE_ERROR("cloud-010-s0205", "云平台管理删除失败"),
+
+    /**
+     * 数据签名
+     */
+    DATA_SIGN_ERROR("cloud-010-s0205-s0403","数据签名异常"),
     ;
 
     private final String errorCode;

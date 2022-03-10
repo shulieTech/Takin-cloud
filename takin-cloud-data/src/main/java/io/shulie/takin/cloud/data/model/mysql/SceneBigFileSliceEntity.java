@@ -3,10 +3,8 @@ package io.shulie.takin.cloud.data.model.mysql;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+import io.shulie.takin.cloud.data.annocation.EnableSign;
 import lombok.Data;
 
 /**
@@ -14,6 +12,7 @@ import lombok.Data;
  */
 @Data
 @TableName(value = "t_scene_big_file_slice")
+@EnableSign
 public class SceneBigFileSliceEntity {
     /**
      * 主键ID
@@ -80,4 +79,7 @@ public class SceneBigFileSliceEntity {
      */
     @TableField(value = "update_time")
     private LocalDateTime updateTime;
+
+    @TableField(value = "sign" , fill = FieldFill.INSERT)
+    private String sign;
 }

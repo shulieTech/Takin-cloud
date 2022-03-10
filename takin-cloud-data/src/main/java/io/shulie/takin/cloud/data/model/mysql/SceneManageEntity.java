@@ -2,11 +2,8 @@ package io.shulie.takin.cloud.data.model.mysql;
 
 import java.util.Date;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+import io.shulie.takin.cloud.data.annocation.EnableSign;
 import lombok.Data;
 
 /**
@@ -17,6 +14,7 @@ import lombok.Data;
  */
 @Data
 @TableName(value = "t_scene_manage")
+@EnableSign
 public class SceneManageEntity {
     /**
      * 自增主键
@@ -104,6 +102,9 @@ public class SceneManageEntity {
      */
     @TableField(value = "env_code")
     private String envCode;
+
+    @TableField(value = "sign" , fill = FieldFill.INSERT)
+    private String sign;
 }
 
 
