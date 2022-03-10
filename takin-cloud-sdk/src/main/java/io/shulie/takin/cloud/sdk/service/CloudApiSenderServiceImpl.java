@@ -339,7 +339,7 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
          */
         TreeMap<String,String> treeMap = new TreeMap<>();
         treeMap.putAll(headMap);
-        treeMap.put("url", UrlBuilder.ofHttp(url, CharsetUtil.CHARSET_UTF_8).getPathStr());
+        treeMap.put("url", "/takin-cloud"+url.split("/takin-cloud")[1]);
         treeMap.put("body",new String(body));
 
         String signBodyStr = treeMap.toString().replace("null","");
