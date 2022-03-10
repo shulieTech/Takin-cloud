@@ -44,7 +44,7 @@ public class SecurityInterceptor implements HandlerInterceptor{
         headMap.put(TENANT_CODE, httpRequest.getHeader(TENANT_CODE));
         headMap.put("time", httpRequest.getHeader("time"));
         String clientMd5 = httpRequest.getHeader("md5");
-        String url =httpRequest.getRequestURL().toString();
+        String url =httpRequest.getRequestURI();
         String queryStr = httpRequest.getQueryString();
         if(StringUtils.isNotBlank(queryStr)){
             url += "?"+queryStr;

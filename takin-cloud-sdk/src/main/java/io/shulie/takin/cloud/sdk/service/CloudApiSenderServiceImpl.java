@@ -9,6 +9,8 @@ import java.util.TreeMap;
 
 import cn.hutool.Hutool;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.net.url.UrlBuilder;
+import cn.hutool.core.util.CharsetUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.TypeReference;
@@ -185,6 +187,7 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
                 .contentType(ContentType.JSON.getValue())
                 .headerMap(getDataTrace(context,url,requestBody), true)
                 .body(requestBody);
+
             // 设置超时时间
             if (timeout > 0) {
                 int realTimeout = timeout * (Long.valueOf(DateUnit.SECOND.getMillis()).intValue());
@@ -336,7 +339,7 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
          */
         TreeMap<String,String> treeMap = new TreeMap<>();
         treeMap.putAll(headMap);
-        treeMap.put("url",url);
+        treeMap.put("url", UrlBuilder.ofHttp(url, CharsetUtil.CHARSET_UTF_8).getPathStr());
         treeMap.put("body",new String(body));
 
         String signBodyStr = treeMap.toString().replace("null","");
