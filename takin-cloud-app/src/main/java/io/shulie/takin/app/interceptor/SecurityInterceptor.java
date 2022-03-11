@@ -72,7 +72,7 @@ public class SecurityInterceptor implements HandlerInterceptor{
         if(StringUtils.isNotBlank(clientMd5)&&StringUtils.isNotBlank(serverMd5)&&
                 !clientMd5.equals(serverMd5)){
             log.info("验签失败");
-            checkFlag = true;
+            checkFlag = false;
         }else{
             log.info("验签通过");
             checkFlag = true;
