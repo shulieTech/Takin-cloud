@@ -4,8 +4,6 @@ import com.baomidou.mybatisplus.autoconfigure.ConfigurationCustomizer;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
-import io.shulie.takin.app.conf.mybatis.datasign.MetaSelectSignInterceptor;
-//import io.shulie.takin.app.conf.mybatis.datasign.MetaUpdateSignInterceptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,17 +41,5 @@ public class MyBatisPlusConfig {
             configuration.addInterceptor(new com.github.pagehelper.PageInterceptor());
         };
     }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public MetaSelectSignInterceptor selectSignInterceptor() {
-        return new MetaSelectSignInterceptor();
-    }
-
-//    @Bean
-//    @ConditionalOnMissingBean
-//    public MetaUpdateSignInterceptor updateSignInterceptor() {
-//        return new MetaUpdateSignInterceptor();
-//    }
 }
 
