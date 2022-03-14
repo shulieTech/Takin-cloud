@@ -21,7 +21,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
-import io.shulie.takin.cloud.biz.utils.SignUtils;
 import io.shulie.takin.cloud.ext.content.response.Response;
 import io.shulie.takin.utils.security.MD5Utils;
 import lombok.extern.slf4j.Slf4j;
