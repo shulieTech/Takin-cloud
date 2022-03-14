@@ -397,7 +397,6 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     private Map<String, Object> buildSceneManageRef(SceneManageWrapperInput wrapperRequest) {
         List<SceneScriptRef> scriptList = buildScriptRef(wrapperRequest.getUploadFile(), wrapperRequest.getScriptType());
-        //        List<SceneBusinessActivityRefInput> inputs = SceneManageInputConvertor.INSTANCE.ofListSceneBusinessActivityRefInput(wrapperRequest.getBusinessActivityConfig());
         List<SceneBusinessActivityRef> businessActivityList = buildSceneBusinessActivityRef(wrapperRequest.getBusinessActivityConfig());
         SceneManageCreateOrUpdateParam createParam = buildSceneManage(wrapperRequest);
         List<SceneSlaRef> slaList = Lists.newArrayList();
@@ -959,7 +958,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     }
 
     @Override
-    public ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update) {
+    public ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update, Integer version) {
         String path;
         if (!isAbsolutePath) {
             path = scriptPath + SceneManageConstant.FILE_SPLIT + uploadPath;
@@ -979,6 +978,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         }
         ScriptVerityExt scriptVerityExt = new ScriptVerityExt();
         scriptVerityExt.setRequest(request);
+        scriptVerityExt.setVersion(version);
         scriptVerityExt.setScriptPath(path);
         ScriptVerityRespExt scriptVerityRespExt = engineExtApi.verityScript(scriptVerityExt);
         if (scriptVerityRespExt != null && CollectionUtils.isNotEmpty(scriptVerityRespExt.getErrorMsg())) {

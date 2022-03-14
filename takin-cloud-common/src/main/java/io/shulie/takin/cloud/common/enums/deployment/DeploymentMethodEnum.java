@@ -1,11 +1,12 @@
 package io.shulie.takin.cloud.common.enums.deployment;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
+
+import lombok.Getter;
+import lombok.AllArgsConstructor;
 
 import cn.hutool.core.util.StrUtil;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 /**
  * @author 无涯
@@ -22,14 +23,16 @@ public enum DeploymentMethodEnum {
      * 公开的
      */
     PUBLIC(1, "public");
-    public Integer type;
-    private String desc;
+    public final Integer type;
+    private final String desc;
 
-    private static Map<String, DeploymentMethodEnum> pool = new HashMap<>();
+    private static final Map<String, DeploymentMethodEnum> DESC_INSTANCES = new HashMap<>();
+    private static final Map<Integer, DeploymentMethodEnum> CODE_INSTANCES = new HashMap<>();
 
     static {
         for (DeploymentMethodEnum e : DeploymentMethodEnum.values()) {
-            pool.put(e.getDesc(), e);
+            DESC_INSTANCES.put(e.getDesc(), e);
+            CODE_INSTANCES.put(e.getType(), e);
         }
     }
 
@@ -37,27 +40,12 @@ public enum DeploymentMethodEnum {
         if (StrUtil.isBlank(desc)) {
             return null;
         }
-        return pool.get(desc);
+        return DESC_INSTANCES.get(desc);
     }
 
     public static String getByType(Integer type) {
-        if (type == null) {
-            return DeploymentMethodEnum.PUBLIC.getDesc();
-        }
-        for (DeploymentMethodEnum methodEnum : DeploymentMethodEnum.values()) {
-            if (methodEnum.type.equals(type)) {
-                return methodEnum.getDesc();
-            }
-        }
+        DeploymentMethodEnum methodEnum = CODE_INSTANCES.get(type);
         // 默认私有化
-        return DeploymentMethodEnum.PRIVATE.getDesc();
-    }
-
-    public boolean equals(String desc) {
-        if (StrUtil.isBlank(desc)) {
-            return false;
-        }
-        DeploymentMethodEnum input = DeploymentMethodEnum.valueBy(desc);
-        return this == input;
+        return methodEnum == null ? DeploymentMethodEnum.PRIVATE.getDesc() : methodEnum.getDesc();
     }
 }

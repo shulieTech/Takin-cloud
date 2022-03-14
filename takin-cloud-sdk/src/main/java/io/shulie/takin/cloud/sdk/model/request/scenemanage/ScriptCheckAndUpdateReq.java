@@ -30,4 +30,11 @@ public class ScriptCheckAndUpdateReq extends ContextExt {
      * 是否更新脚本
      */
     private boolean update;
+    /**
+     * 脚本版本(管理版本)
+     * <p>混合压测前是0</p>
+     * <p>混合压测后是1</p>
+     * <p><strong>默认是混合压测后的版本</strong></p>
+     */
+    private Integer version = 1;
 }

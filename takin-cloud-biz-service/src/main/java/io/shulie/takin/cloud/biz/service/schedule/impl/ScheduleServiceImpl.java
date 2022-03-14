@@ -132,7 +132,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         eventRequest.setRequest(request);
         eventRequest.setStrategyConfig(config);
         String memSetting;
-        if (PressureSceneEnum.INSPECTION_MODE.equals(request.getPressureScene())) {
+        if (PressureSceneEnum.INSPECTION_MODE.getCode().equals(request.getPressureScene())) {
             memSetting = "-XX:MaxRAMPercentage=90.0";
         } else {
             memSetting = CommonUtil.getValue(appConfig.getK8sJvmSettings(), config, StrategyConfigExt::getK8sJvmSettings);

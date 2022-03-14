@@ -109,7 +109,7 @@ public class StrategyConfigServiceImpl implements StrategyConfigService {
         PageInfo<StrategyConfigExt> pageInfo = queryPageList(new StrategyConfigQueryVO());
         if (null != pageInfo && CollectionUtils.isNotEmpty(pageInfo.getList())) {
             strategyConfig = pageInfo.getList().stream().filter(Objects::nonNull)
-                .filter(config -> appConfig.getDeploymentMethod().equals(config.getDeploymentMethod()))
+                .filter(config -> appConfig.getDeploymentMethod().getDesc().equals(config.getDeploymentMethod()))
                 .findFirst()
                 .orElse(pageInfo.getList().get(0));
         }

@@ -229,7 +229,7 @@ public class JmxUtil {
                 int startUp = getValueFromJsonObject(arr.getJSONObject(2));
                 int hold = getValueFromJsonObject(arr.getJSONObject(3));
                 int shutDown = getValueFromJsonObject(arr.getJSONObject(4));
-                Map<String, Integer> m = new HashMap<>();
+                Map<String, Integer> m = new HashMap<>(5);
                 m.put("threadNum", threadNum);
                 m.put("initialDelay", initialDelay);
                 m.put("startUp", startUp);
@@ -354,7 +354,7 @@ public class JmxUtil {
                             if (null != childProps) {
                                 Map<String, String> props = node.getProps();
                                 if (null == props) {
-                                    props = new HashMap<>();
+                                    props = new HashMap<>(childProps.size());
                                 }
                                 props.putAll(childProps);
                                 node.setProps(props);
@@ -395,7 +395,7 @@ public class JmxUtil {
                     //interface + # + method
                     setRabbitIdentification(node);
                     node.setSamplerType(SamplerTypeEnum.RABBITMQ);
-                } else if ("ShulieKafkaDataSetSampler".equals(name)) {
+                } else if ("ShulieKafkaDataSetSampler".equals(name) || "io.shulie.jmeter.plugins.kafka.dataset.Sampler".equals(name)) {
                     node.setProps(buildProps(element));
                     Map<String, String> props = node.getProps();
                     if (null == props) {return;}
@@ -866,7 +866,7 @@ public class JmxUtil {
         for (ScriptNode node : nodes) {
             list.add(node);
             List<ScriptNode> children = toOneDepthList(node.getChildren());
-            if (CollUtil.isNotEmpty(children)) {
+            if (children != null && children.size() > 0) {
                 list.addAll(children);
             }
         }

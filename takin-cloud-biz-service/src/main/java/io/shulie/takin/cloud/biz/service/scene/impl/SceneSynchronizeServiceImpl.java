@@ -268,6 +268,11 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
      * @return 匹配结果
      */
     private boolean synchronizeMonitoringGoal(long sceneId, HashSet<String> allNodeMd5) {
+        // 兼容[全部]选项
+        {
+            allNodeMd5.add("all");
+            allNodeMd5.add("0f1a197a2040e645dcdb4dfff8a3f960");
+        }
         Map<Long, List<String>> readyUpdateSla = new HashMap<>(allNodeMd5.size());
         List<SceneRequest.MonitoringGoal> monitoringGoal = sceneService.getMonitoringGoal(sceneId);
         // 遍历SLA
@@ -277,7 +282,7 @@ public class SceneSynchronizeServiceImpl implements SceneSynchronizeService {
             // 遍历目标
             for (String target : itemTarget) {
                 // 筛选匹配
-                if ("all".equals(target) || allNodeMd5.contains(target)) {newItemTarget.add(target);}
+                if (allNodeMd5.contains(target)) {newItemTarget.add(target);}
             }
             // 填充入待更新项
             if (itemTarget.size() != newItemTarget.size()) {readyUpdateSla.put(goal.getId(), newItemTarget);}
