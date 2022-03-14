@@ -112,7 +112,7 @@ public class SceneBigFileSliceDAOImpl extends ServiceImpl<SceneBigFileSliceMappe
                                 return FileSliceStatusEnum.SLICED.getCode();
                             }
                             //更新文件的md5值到数据库
-                            entity.setFileMd5(fileMd5);
+                            //entity.setFileMd5(fileMd5);
                             sceneScriptRefMapper.updateById(entity);
                             return FileSliceStatusEnum.FILE_CHANGED.getCode();
                         }

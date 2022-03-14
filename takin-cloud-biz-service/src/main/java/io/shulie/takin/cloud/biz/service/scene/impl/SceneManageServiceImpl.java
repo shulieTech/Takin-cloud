@@ -1248,6 +1248,7 @@ public class SceneManageServiceImpl implements SceneManageService {
 
             ref.setIsDeleted(data.getIsDeleted());
             ref.setUploadTime(cn.hutool.core.date.DateUtil.parseDateTime(data.getUploadTime()));
+            ref.setFileMd5(data.getFileMd5());
             scriptList.add(ref);
         });
         return scriptList;

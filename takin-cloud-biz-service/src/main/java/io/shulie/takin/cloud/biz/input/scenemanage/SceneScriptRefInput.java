@@ -47,6 +47,9 @@ public class SceneScriptRefInput {
     @ApiModelProperty(value = "文件类型")
     private Integer fileType;
 
+    @ApiModelProperty(value = "文件加签MD5值")
+    private String fileMd5;
+
     private String fileExtend;
 
     /**
