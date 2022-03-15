@@ -110,7 +110,7 @@ public class SignCommonUtil {
                             } else if (value instanceof Boolean) {
                                 value = Boolean.FALSE.equals(value) ? "0" : "1";
                             }
-                            sql = sql.replaceFirst("\\?", "'" + value + "'");
+                            sql = sql.replaceFirst("=\\?", "='" + value + "'");
                         }
                     }
                 }
