@@ -13,7 +13,6 @@ import com.github.pagehelper.PageInfo;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
@@ -45,6 +44,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -65,7 +65,7 @@ public class ReportController {
     @Resource
     private ReportService reportService;
     @Resource
-    private RedisClientUtils redisClientUtils;
+    private StringRedisTemplate stringRedisTemplate;
 
     @ApiOperation("报告列表")
     @GetMapping(EntrypointUrl.METHOD_REPORT_LIST)
@@ -101,8 +101,6 @@ public class ReportController {
     }
 
     /**
-     *
-     *
      * @param reportId 报告主键
      * @return -
      */
@@ -112,7 +110,6 @@ public class ReportController {
     public ResponseResult<Integer> getReportStatusById(Long reportId) {
         return ResponseResult.success(reportService.getReportStatusById(reportId));
     }
-
 
     /**
      * 解析数结构并获取ApplicationIds字段
@@ -142,8 +139,8 @@ public class ReportController {
         try {
             String key = JSON.toJSONString(reportTrendQuery);
             ReportTrendResp data;
-            if (redisClientUtils.hasKey(key)) {
-                data = JSON.parseObject(redisClientUtils.getString(key), ReportTrendResp.class);
+            if (stringRedisTemplate.hasKey(key)) {
+                data = JSON.parseObject(stringRedisTemplate.opsForValue().get(key), ReportTrendResp.class);
                 if (Objects.isNull(data)
                     || CollectionUtils.isEmpty(data.getConcurrent())
                     || CollectionUtils.isEmpty(data.getSa())
@@ -151,11 +148,11 @@ public class ReportController {
                     || CollectionUtils.isEmpty(data.getTps())
                     || CollectionUtils.isEmpty(data.getSuccessRate())) {
                     data = reportService.queryReportTrend(reportTrendQuery);
-                    redisClientUtils.setString(key, JSON.toJSONString(data));
+                    stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(data));
                 }
             } else {
                 data = reportService.queryReportTrend(reportTrendQuery);
-                redisClientUtils.setString(key, JSON.toJSONString(data));
+                stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(data));
             }
             return ResponseResult.success(data);
         } catch (Exception e) {

@@ -18,6 +18,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 
 import com.google.common.collect.Maps;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -32,7 +33,6 @@ import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.biz.service.sla.SlaService;
 import io.shulie.takin.cloud.common.constants.Constants;
 import io.shulie.takin.cloud.common.bean.sla.AchieveModel;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
@@ -70,11 +70,11 @@ public class SlaServiceImpl implements SlaService {
     @Resource
     private ReportService reportService;
     @Resource
-    private RedisClientUtils redisClientUtils;
-    @Resource
     private TWarnDetailMapper tWarnDetailMapper;
     @Resource
     private SceneManageService sceneManageService;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     public Boolean buildWarn(SendMetricsEvent metrics) {
@@ -126,24 +126,24 @@ public class SlaServiceImpl implements SlaService {
 
     @Override
     public void removeMap(Long sceneId) {
-        String scene = (String)redisClientUtils.hmget(SLA_SCENE_KEY, String.valueOf(sceneId));
+        String scene = (String)stringRedisTemplate.opsForHash().get(SLA_SCENE_KEY, String.valueOf(sceneId));
         if (scene == null) {
             return;
         }
         SceneManageWrapperResult dto = JSON.parseObject(scene, SceneManageWrapperResult.class);
 
         dto.getStopCondition().stream().map(SceneSlaRefResult::getId).forEach(
-            id -> redisClientUtils.hmdelete(SLA_DESTROY_KEY, String.valueOf(id)));
+            id -> stringRedisTemplate.opsForHash().delete(SLA_DESTROY_KEY, String.valueOf(id)));
         dto.getWarningCondition().stream().map(SceneSlaRefResult::getId).forEach(
-            id -> redisClientUtils.hmdelete(SLA_WARN_KEY, String.valueOf(id)));
-        redisClientUtils.hmdelete(SLA_SCENE_KEY, String.valueOf(sceneId));
-        redisClientUtils.delete(PREFIX_TASK + sceneId);
+            id -> stringRedisTemplate.opsForHash().delete(SLA_WARN_KEY, String.valueOf(id)));
+        stringRedisTemplate.opsForHash().delete(SLA_SCENE_KEY, String.valueOf(sceneId));
+        stringRedisTemplate.delete(PREFIX_TASK + sceneId);
         log.info("清除SLA分析内存配置成功, sceneId={}", sceneId);
     }
 
     @Override
     public void cacheData(Long sceneId) {
-        redisClientUtils.setString(PREFIX_TASK + sceneId, "on", 7, TimeUnit.DAYS);
+        stringRedisTemplate.opsForValue().set(PREFIX_TASK + sceneId, "on", 7, TimeUnit.DAYS);
     }
 
     private void doDestroy(Long sceneId, SendMetricsEvent metricsEvent,
@@ -156,16 +156,17 @@ public class SlaServiceImpl implements SlaService {
             SceneSlaRefInput input = BeanUtil.copyProperties(dto, SceneSlaRefInput.class);
             Map<String, Object> conditionMap = SlaUtil.matchCondition(input, metricsEvent);
             if (!(Boolean)conditionMap.get("result")) {
-                redisClientUtils.hmdelete(SLA_DESTROY_KEY, String.valueOf(dto.getId()));
+                stringRedisTemplate.opsForHash().delete(SLA_DESTROY_KEY, String.valueOf(dto.getId()));
                 return;
             }
-            String object = (String)redisClientUtils.hmget(SLA_DESTROY_KEY, String.valueOf(dto.getId()));
+            String object = (String)stringRedisTemplate.opsForHash().get(SLA_DESTROY_KEY, String.valueOf(dto.getId()));
             AchieveModel model = (object != null ? JSON.parseObject(object, AchieveModel.class) : null);
             if (!matchContinue(model, metricsEvent.getTimestamp())) {
                 Map<String, Object> dataMap = Maps.newHashMap();
                 dataMap.put(String.valueOf(dto.getId()),
                     JSON.toJSONString(new AchieveModel(1, metricsEvent.getTimestamp())));
-                redisClientUtils.hmset(SLA_DESTROY_KEY, dataMap, EXPIRE_TIME);
+                stringRedisTemplate.opsForHash().putAll(SLA_DESTROY_KEY, dataMap);
+                stringRedisTemplate.expire(SLA_DESTROY_KEY, EXPIRE_TIME, TimeUnit.SECONDS);
                 return;
             }
             model.setTimes(model.getTimes() + 1);
@@ -181,7 +182,7 @@ public class SlaServiceImpl implements SlaService {
                     extendMap.put(Constants.SLA_DESTROY_EXTEND, "SLA发送压测任务终止事件");
                     scheduleStopRequest.setExtend(extendMap);
                     //报告未结束，才通知
-                    if (redisClientUtils.hasKey(PREFIX_TASK + metricsEvent.getSceneId())) {
+                    if (stringRedisTemplate.hasKey(PREFIX_TASK + metricsEvent.getSceneId())) {
                         // 熔断数据也记录到告警明细中
                         WarnDetail warnDetail = buildWarnDetail(conditionMap, businessActivityDTO, metricsEvent, dto);
                         tWarnDetailMapper.insertSelective(warnDetail);
@@ -203,7 +204,7 @@ public class SlaServiceImpl implements SlaService {
                     log.warn("【SLA】发送压测任务终止事件失败:{}", e.getMessage(), e);
                 }
             } else {
-                redisClientUtils.hmset(SLA_DESTROY_KEY, String.valueOf(dto.getId()), JSON.toJSONString(model));
+                stringRedisTemplate.opsForHash().put(SLA_DESTROY_KEY, String.valueOf(dto.getId()), JSON.toJSONString(model));
             }
         });
     }
@@ -217,17 +218,18 @@ public class SlaServiceImpl implements SlaService {
             SceneSlaRefInput input = BeanUtil.copyProperties(dto, SceneSlaRefInput.class);
             Map<String, Object> conditionMap = SlaUtil.matchCondition(input, metricsEvent);
             if (!(Boolean)conditionMap.get("result")) {
-                redisClientUtils.hmdelete(SLA_WARN_KEY, String.valueOf(dto.getId()));
+                stringRedisTemplate.opsForHash().delete(SLA_WARN_KEY, String.valueOf(dto.getId()));
                 return;
             }
 
-            String object = (String)redisClientUtils.hmget(SLA_WARN_KEY, String.valueOf(dto.getId()));
+            String object = (String)stringRedisTemplate.opsForHash().get(SLA_WARN_KEY, String.valueOf(dto.getId()));
             AchieveModel model = (object != null ? JSON.parseObject(object, AchieveModel.class) : null);
             if (!matchContinue(model, metricsEvent.getTimestamp())) {
                 Map<String, Object> dataMap = Maps.newHashMap();
                 dataMap.put(String.valueOf(dto.getId()),
                     JSON.toJSONString(new AchieveModel(1, metricsEvent.getTimestamp())));
-                redisClientUtils.hmset(SLA_WARN_KEY, dataMap, EXPIRE_TIME);
+                stringRedisTemplate.opsForHash().putAll(SLA_WARN_KEY, dataMap);
+                stringRedisTemplate.expire(SLA_WARN_KEY, EXPIRE_TIME, TimeUnit.SECONDS);
                 return;
             }
             model.setTimes(model.getTimes() + 1);
@@ -235,11 +237,11 @@ public class SlaServiceImpl implements SlaService {
             if (model.getTimes() >= dto.getRule().getTimes()) {
                 WarnDetail warnDetail = buildWarnDetail(conditionMap, businessActivityDTO, metricsEvent, dto);
                 //报告未结束，才insert
-                if (redisClientUtils.hasKey(PREFIX_TASK + metricsEvent.getSceneId())) {
+                if (stringRedisTemplate.hasKey(PREFIX_TASK + metricsEvent.getSceneId())) {
                     tWarnDetailMapper.insertSelective(warnDetail);
                 }
             } else {
-                redisClientUtils.hmset(SLA_WARN_KEY, String.valueOf(dto.getId()), JSON.toJSONString(model));
+                stringRedisTemplate.opsForHash().put(SLA_WARN_KEY, String.valueOf(dto.getId()), JSON.toJSONString(model));
             }
         });
     }
@@ -340,7 +342,7 @@ public class SlaServiceImpl implements SlaService {
      * @return 场景信息
      */
     private SceneManageWrapperOutput getSceneManageWrapperDTO(Long sceneId, Long reportId) {
-        String object = (String)redisClientUtils.hmget(SLA_SCENE_KEY, String.valueOf(sceneId));
+        String object = (String)stringRedisTemplate.opsForHash().get(SLA_SCENE_KEY, String.valueOf(sceneId));
         if (object != null) {
             return JSON.parseObject(object, SceneManageWrapperOutput.class);
         }
@@ -365,7 +367,8 @@ public class SlaServiceImpl implements SlaService {
         }
         Map<String, Object> dataMap = Maps.newHashMap();
         dataMap.put(String.valueOf(sceneId), JSON.toJSONString(dto));
-        redisClientUtils.hmset(SLA_SCENE_KEY, dataMap, EXPIRE_TIME);
+        stringRedisTemplate.opsForHash().putAll(SLA_SCENE_KEY, dataMap);
+        stringRedisTemplate.expire(SLA_SCENE_KEY, EXPIRE_TIME, TimeUnit.SECONDS);
         return dto;
     }
 }

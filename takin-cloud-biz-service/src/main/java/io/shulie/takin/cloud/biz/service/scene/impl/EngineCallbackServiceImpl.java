@@ -1,5 +1,9 @@
 package io.shulie.takin.cloud.biz.service.scene.impl;
 
+import java.util.Arrays;
+
+import javax.annotation.Resource;
+
 import com.pamirs.takin.entity.domain.vo.engine.EngineNotifyParam;
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
@@ -11,11 +15,10 @@ import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.engine.EngineStatusEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.utils.json.JsonHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -26,17 +29,14 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class EngineCallbackServiceImpl implements EngineCallbackService {
 
-    @Autowired
-    private RedisClientUtils redisClientUtils;
-
-    @Autowired
-    private SceneManageService sceneManageService;
-
-    @Autowired
-    private SceneTaskService sceneTaskService;
-
-    @Autowired
+    @Resource
     private ReportService reportService;
+    @Resource
+    private SceneTaskService sceneTaskService;
+    @Resource
+    private SceneManageService sceneManageService;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     public ResponseResult<?> notifyEngineState(EngineNotifyParam notify) {
@@ -54,13 +54,13 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
                     notify.getTenantId(), notify.getMsg(), JsonHelper.bean2Json(notify));
                 // 记录压测引擎 压力引擎 相关错误  这里给出具体哪个 压力节点 调用压力引擎 失败 todo 之后可以指定到具体的压力节点
                 String tempFailSign = ScheduleConstants.TEMP_FAIL_SIGN + engineName;
-                Long startFailCount = redisClientUtils.increment(tempFailSign, 1);
+                Long startFailCount = stringRedisTemplate.opsForValue().increment(tempFailSign, 1);
                 // 记录失败原因，成功则不记录报告中 报告直接完成
                 reportService.updateReportFeatures(notify.getResultId(), ReportConstants.FINISH_STATUS, ReportConstants.PRESSURE_MSG, notify.getMsg());
 
                 // 如果 这个失败等于 压力节点 数量 则 将本次压测至为失败
                 int podTotal = Integer.parseInt(
-                    redisClientUtils.getString(ScheduleConstants.getPressureNodeTotalKey(notify.getSceneId(), notify.getResultId(),
+                    stringRedisTemplate.opsForValue().get(ScheduleConstants.getPressureNodeTotalKey(notify.getSceneId(), notify.getResultId(),
                         notify.getTenantId())));
                 if (podTotal <= startFailCount) {
                     sceneManageService.reportRecord(SceneManageStartRecordVO.build(notify.getSceneId(),
@@ -72,14 +72,16 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
                 break;
             case INTERRUPT:
                 //获取中断状态
-                boolean interruptFlag = Boolean.parseBoolean(redisClientUtils.getString(ScheduleConstants.INTERRUPT_POD + scheduleName));
+                boolean interruptFlag = Boolean.parseBoolean(stringRedisTemplate.opsForValue().get(ScheduleConstants.INTERRUPT_POD + scheduleName));
                 return ResponseResult.success(interruptFlag);
             case INTERRUPT_SUCCESSED:
                 // 中断成功
                 log.info("本次压测{}-{}-{} 中断成功", notify.getSceneId(), notify.getResultId(), notify.getTenantId());
-                Long interruptSuccessCount = redisClientUtils.increment(ScheduleConstants.INTERRUPT_POD_NUM + engineName, 1);
+                Long interruptSuccessCount = stringRedisTemplate.opsForValue().increment(ScheduleConstants.INTERRUPT_POD_NUM + engineName, 1);
                 if (interruptFinish(engineName, interruptSuccessCount)) {
-                    redisClientUtils.del(ScheduleConstants.INTERRUPT_POD_NUM + scheduleName, ScheduleConstants.INTERRUPT_POD + scheduleName);
+                    stringRedisTemplate.delete(
+                        Arrays.asList(ScheduleConstants.INTERRUPT_POD_NUM + scheduleName,
+                            ScheduleConstants.INTERRUPT_POD + scheduleName));
                 }
                 break;
             case INTERRUPT_FAILED:
@@ -92,8 +94,8 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
     }
 
     private boolean interruptFinish(String engineName, Long interruptSuccessCount) {
-        boolean redisNotHasKey = !redisClientUtils.hasKey(engineName);
-        Long redisValue = Long.valueOf(redisClientUtils.getString(engineName));
+        boolean redisNotHasKey = !stringRedisTemplate.hasKey(engineName);
+        Long redisValue = Long.valueOf(stringRedisTemplate.opsForValue().get(engineName));
         // 解决pod 没有发送事件问题
         return redisNotHasKey
             || interruptSuccessCount.equals(redisValue);
@@ -104,9 +106,9 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
             , sceneId, reportId, tenantId, errorMsg);
         String tryRunTaskKey = String
             .format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneId, reportId);
-        redisClientUtils.hmset(tryRunTaskKey,
+        stringRedisTemplate.opsForHash().put(tryRunTaskKey,
             SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY, SceneRunTaskStatusEnum.FAILED.getText());
-        redisClientUtils.hmset(tryRunTaskKey,
+        stringRedisTemplate.opsForHash().put(tryRunTaskKey,
             SceneTaskRedisConstants.SCENE_RUN_TASK_ERROR, errorMsg);
         //试跑失败，停掉pod
         sceneTaskService.stop(sceneId);

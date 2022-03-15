@@ -26,7 +26,6 @@ import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.influxdb.InfluxUtil;
 import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CollectorUtil;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
@@ -39,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -55,9 +55,9 @@ public class CollectorService extends AbstractIndicators {
     @Resource
     private TReportMapper tReportMapper;
     @Resource
-    private RedisClientUtils redisClientUtils;
-    @Resource
     private AsyncService asyncService;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
     @Resource
     private SceneTaskPressureTestLogUploadDAO logUploadDAO;
     @Resource
@@ -185,13 +185,13 @@ public class CollectorService extends AbstractIndicators {
                 //每个pod只会启动或者一次，处理数据重复发送问题
                 String enginePodNoStartKey = ScheduleConstants.getEnginePodNoStartKey(sceneId, reportId, tenantId,
                     metric.getPodNo(), metric.getEventName());
-                Long startPod = redisClientUtils.increment(enginePodNoStartKey, 1);
-                if (startPod > 1) {
+                Long startPod = stringRedisTemplate.opsForValue().increment(enginePodNoStartKey, 1);
+                if (startPod != null && startPod > 1) {
                     continue;
                 }
                 if (isFirst) {
                     // 超时自动检修，强行触发关闭
-                    if (!redisClientUtils.hasKey(forceCloseTime(taskKey))) {
+                    if (!stringRedisTemplate.hasKey(forceCloseTime(taskKey))) {
                         // 获取压测时长
                         log.info("本次压测{}-{}-{}:记录超时自动检修时间-{}", sceneId, reportId, tenantId, metric.getTimestamp());
                         SceneManageWrapperOutput wrapperDTO = sceneManageService.getSceneManage(sceneId, new SceneManageQueryOpitons());
@@ -202,7 +202,7 @@ public class CollectorService extends AbstractIndicators {
                     //多个压力节点 解决方案 只要一个节点 过来，状态就是压测引擎已启动，但是会通过redis计数 数据将归属于报告
                     // 压力节点 running -- > 压测引擎已启动
                     // 计数 压测引擎实际运行个数
-                    Long count = redisClientUtils.increment(engineName, 1);
+                    Long count = stringRedisTemplate.opsForValue().increment(engineName, 1);
 
                     if (count != null && count == 1) {
                         sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, tenantId)
@@ -217,7 +217,7 @@ public class CollectorService extends AbstractIndicators {
                         log.info("开始异步上传ptl日志，场景ID：{},报告ID:{},PodNum:{}", sceneId, reportId, metric.getPodNo());
                         EngineCallExtApi engineCallExtApi = enginePluginUtils.getEngineCallExtApi();
                         String fileName = metric.getTags().get(SceneTaskRedisConstants.CURRENT_PTL_FILE_NAME_SYSTEM_PROP_KEY);
-                        THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, tenantId, logUploadDAO, redisClientUtils,
+                        THREAD_POOL.submit(new PressureTestLogUploadTask(sceneId, reportId, tenantId, logUploadDAO, stringRedisTemplate,
                             pushLogService, sceneManageDAO, ptlDir, fileName, engineCallExtApi) {});
                     }
                 }
@@ -233,7 +233,7 @@ public class CollectorService extends AbstractIndicators {
                         return;
                     }
                     // 计数 回传标识数量
-                    Long tempLastSignCount = redisClientUtils.increment(ScheduleConstants.TEMP_LAST_SIGN + engineName, 1);
+                    Long tempLastSignCount = stringRedisTemplate.opsForValue().increment(ScheduleConstants.TEMP_LAST_SIGN + engineName, 1);
                     // 是否是最后一个结束标识 回传个数 == 压测实际运行个数
                     if (isLastSign(tempLastSignCount, engineName)) {
                         // 标识结束标识
@@ -241,7 +241,7 @@ public class CollectorService extends AbstractIndicators {
                         setLast(last(taskKey), ScheduleConstants.LAST_SIGN);
                         setMax(engineName + ScheduleConstants.LAST_SIGN, metric.getTimestamp());
                         // 删除临时标识
-                        redisClientUtils.del(ScheduleConstants.TEMP_LAST_SIGN + engineName);
+                        stringRedisTemplate.delete(ScheduleConstants.TEMP_LAST_SIGN + engineName);
                         // 压测停止
                         notifyEnd(sceneId, reportId, metric.getTimestamp(), tenantId);
                     }
@@ -282,9 +282,9 @@ public class CollectorService extends AbstractIndicators {
     }
 
     private boolean isLastSign(Long lastSignCount, String engineName) {
+        String redisResult = stringRedisTemplate.opsForValue().get(engineName);
         // redis中有信息 且信息匹配
-        return StringUtils.isNotEmpty(redisClientUtils.getString(engineName))
-            && lastSignCount.equals(Long.valueOf(redisClientUtils.getString(engineName)));
+        return StringUtils.isNotEmpty(redisResult) && lastSignCount.equals(Long.valueOf(redisResult));
     }
 
     /**

@@ -1,15 +1,17 @@
 package io.shulie.takin.cloud.biz.service.schedule.impl;
 
 import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.ArrayList;
+import java.util.stream.IntStream;
+import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.google.common.collect.Lists;
 import com.pamirs.takin.entity.dao.schedule.TScheduleRecordMapper;
 import com.pamirs.takin.entity.domain.entity.schedule.ScheduleRecord;
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
@@ -32,7 +34,6 @@ import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.CommonUtil;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
@@ -50,6 +51,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -70,11 +72,11 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Resource
     private ScheduleRecordEnginePluginService scheduleRecordEnginePluginService;
     @Resource
-    private RedisClientUtils redisClientUtils;
-    @Resource
     private AsyncService asyncService;
     @Resource
-    private RedisTemplate<String, String> redisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
     @Resource
     @Qualifier("stopThreadPool")
     protected ThreadPoolExecutor stopExecutor;
@@ -159,12 +161,12 @@ public class ScheduleServiceImpl implements ScheduleService {
         eventRequest.setPtlLogConfig(ptlLogConfig);
 
         //把数据放入缓存，初始化回调调度需要
-        redisClientUtils.setString(scheduleName, JSON.toJSONString(eventRequest));
+        stringRedisTemplate.opsForValue().set(scheduleName, JSON.toJSONString(eventRequest));
         // 需要将 本次调度 pod数量存入redis,报告中用到
         // 总计 报告生成用到 调度期间出现错误，这份数据只存24小时
-        redisClientUtils.set(
+        stringRedisTemplate.opsForValue().set(
             ScheduleConstants.getPressureNodeTotalKey(request.getSceneId(), request.getTaskId(), request.getTenantId()),
-            request.getTotalIp(), 24 * 60 * 60 * 1000);
+            String.valueOf(request.getTotalIp()), 1, TimeUnit.DAYS);
         //调度初始化
         scheduleEvent.initSchedule(eventRequest);
     }
@@ -176,8 +178,10 @@ public class ScheduleServiceImpl implements ScheduleService {
         if (scheduleRecord != null) {
             // 增加中断
             String scheduleName = ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getTenantId());
-            boolean flag = redisClientUtils.set(ScheduleConstants.INTERRUPT_POD + scheduleName, true, 24 * 60 * 60 * 1000);
-            if (flag && !Boolean.parseBoolean(redisClientUtils.getString(ScheduleConstants.FORCE_STOP_POD + scheduleName))) {
+            stringRedisTemplate.opsForValue().set(
+                ScheduleConstants.INTERRUPT_POD + scheduleName,
+                Boolean.TRUE.toString(), 1, TimeUnit.DAYS);
+            if (!Boolean.parseBoolean(stringRedisTemplate.opsForValue().get(ScheduleConstants.FORCE_STOP_POD + scheduleName))) {
                 // 3分钟没有停止成功 ，将强制停止
                 stopExecutor.execute(new SceneStopThread(request));
             }
@@ -230,13 +234,12 @@ public class ScheduleServiceImpl implements ScheduleService {
     private void push(ScheduleStartRequestExt request) {
         //把数据放入队列
         String key = ScheduleConstants.getFileSplitQueue(request.getSceneId(), request.getTaskId(), request.getTenantId());
-
-        List<String> numList = Lists.newArrayList();
-        for (int i = 1; i <= request.getTotalIp(); i++) {
-            numList.add(i + "");
-        }
-
-        redisClientUtils.leftPushAll(key, numList);
+        // 生成集合
+        List<String> numList = IntStream.rangeClosed(1, request.getTotalIp())
+            .boxed().map(String::valueOf)
+            .collect(Collectors.toCollection(ArrayList::new));
+        // 集合放入Redis
+        redisTemplate.opsForList().leftPushAll(key, numList);
     }
 
     /**
@@ -282,8 +285,10 @@ public class ScheduleServiceImpl implements ScheduleService {
         @Override
         public void run() {
             String scheduleName = ScheduleConstants.getScheduleName(request.getSceneId(), request.getTaskId(), request.getTenantId());
-            boolean flag = redisClientUtils.set(ScheduleConstants.FORCE_STOP_POD + scheduleName, true, 24 * 60 * 60 * 1000);
-            if (flag) {
+            stringRedisTemplate.opsForValue().set(
+                ScheduleConstants.FORCE_STOP_POD + scheduleName,
+                Boolean.TRUE.toString(), 1, TimeUnit.DAYS);
+            {
                 try {
                     Thread.sleep(3 * 60 * 1000L);
                 } catch (InterruptedException e) {

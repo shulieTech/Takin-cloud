@@ -1,24 +1,23 @@
 package io.shulie.takin.cloud.entrypoint.controller.collector;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 import java.util.Objects;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
-import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
 import io.shulie.takin.cloud.common.bean.collector.Constants;
 import io.shulie.takin.cloud.common.bean.collector.EventMetrics;
 import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
+import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
 import io.shulie.takin.cloud.common.constants.PressureEngineConstants;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.GsonUtil;
 import io.shulie.takin.cloud.common.utils.IPUtils;
 import io.shulie.takin.cloud.common.utils.UrlUtil;
@@ -30,6 +29,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,10 +49,9 @@ public class CollectorApplication {
     @Resource
     private CollectorService collectorService;
     @Resource
-    private RedisClientUtils redisClientUtils;
+    private StringRedisTemplate stringRedisTemplate;
     @Resource
     private SceneTaskStatusCache sceneTaskStatusCache;
-
     @Value("${script.pre.match:true}")
     private boolean scriptPreMatch;
 
@@ -115,7 +114,7 @@ public class CollectorApplication {
         //后置匹配处理逻辑，如果是前置匹配，不需要处理
         if (!scriptPreMatch && CollectionUtils.isNotEmpty(responseMetrics)) {
             String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(sceneId, reportId, tenantId);
-            Object activityRefMapObj = redisClientUtils.hmget(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REF_MAP);
+            Object activityRefMapObj = stringRedisTemplate.opsForHash().get(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REF_MAP);
             Map<String, String> activityRefMap = activityRefMapObj == null ? new HashMap<>(0) :
                 JsonHelper.json2Map(activityRefMapObj.toString(), String.class, String.class);
             int oldSize = activityRefMap.size();
@@ -143,13 +142,13 @@ public class CollectorApplication {
 
             //关联关系被补充，设置进map
             if (oldSize != activityRefMap.size()) {
-                redisClientUtils.hmset(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REF_MAP, JsonHelper.bean2Json(activityRefMap));
+                stringRedisTemplate.opsForHash().put(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REF_MAP, JsonHelper.bean2Json(activityRefMap));
             }
         }
     }
 
     private String getActivityRef(String engineInstanceRedisKey, String transaction) {
-        Object activityRefListObj = redisClientUtils.hmget(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REFS);
+        Object activityRefListObj = stringRedisTemplate.opsForHash().get(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REFS);
         if (activityRefListObj != null) {
             List<String> activityRefs = JsonHelper.json2List(activityRefListObj.toString(), String.class);
             //for循环从List取值

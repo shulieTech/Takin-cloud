@@ -20,7 +20,6 @@ import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.utils.FileUtils;
 import io.shulie.takin.utils.json.JsonHelper;
 import io.shulie.takin.utils.linux.LinuxHelper;
@@ -28,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
 public class LocalThreadServiceImpl implements EngineCallService {
 
     @Resource
-    private RedisClientUtils redisClientUtils;
+    private StringRedisTemplate stringRedisTemplate;
 
     private final static ExecutorService THREAD_POOL = new ThreadPoolExecutor(1, 6,
         50L, TimeUnit.MILLISECONDS,
@@ -123,12 +123,12 @@ public class LocalThreadServiceImpl implements EngineCallService {
     public void createConfigMap(Map<String, Object> configMap, String engineRedisKey) {
         String fileName = (String)configMap.get("name");
         FileUtils.writeTextFile(JsonHelper.obj2StringPretty(configMap.get("engine.conf")), taskDir + "/" + fileName);
-        redisClientUtils.hmset(engineRedisKey, PressureInstanceRedisKey.SecondRedisKey.CONFIG_NAME, fileName);
+        stringRedisTemplate.opsForHash().put(engineRedisKey, PressureInstanceRedisKey.SecondRedisKey.CONFIG_NAME, fileName);
     }
 
     @Override
     public void deleteConfigMap(String engineRedisKey) {
-        Object fileName = redisClientUtils.hmget(engineRedisKey, PressureInstanceRedisKey.SecondRedisKey.CONFIG_NAME);
+        Object fileName = stringRedisTemplate.opsForHash().get(engineRedisKey, PressureInstanceRedisKey.SecondRedisKey.CONFIG_NAME);
         String sourceFile = taskDir + "/" + fileName;
         FileUtils.deleteFile(sourceFile);
     }

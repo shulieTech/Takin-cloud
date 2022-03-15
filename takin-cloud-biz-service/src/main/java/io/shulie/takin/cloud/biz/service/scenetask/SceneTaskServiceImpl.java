@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections.MapUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -57,7 +58,6 @@ import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.shulie.takin.cloud.sdk.model.common.TimeBean;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.common.enums.PressureModeEnum;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
@@ -150,8 +150,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     @Resource
     private SceneManageDAO sceneManageDAO;
     @Resource
-    private RedisClientUtils redisClientUtils;
-    @Resource
     private FileSliceService fileSliceService;
     @Resource
     private EnginePluginUtils enginePluginUtils;
@@ -161,6 +159,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     private SceneTaskStatusCache taskStatusCache;
     @Resource
     private SceneManageService sceneManageService;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
     @Resource
     private RedisTemplate<String, String> redisTemplate;
     @Resource
@@ -231,7 +231,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 JSONObject features = JsonUtil.parse(sceneManageEntity.getFeatures());
                 if (null != features) {
                     Long scriptId = features.getLong("scriptId");
-                    redisClientUtils.hmset(String.format(SceneStartCheckConstants.SCENE_KEY, input.getSceneId()),
+                    stringRedisTemplate.opsForHash().put(String.format(SceneStartCheckConstants.SCENE_KEY, input.getSceneId()),
                         SceneStartCheckConstants.SCRIPT_ID_KEY, scriptId);
                 }
             }
@@ -258,7 +258,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         frozenAccountFlow(input, report, sceneData);
 
         // 清除SLA条件缓存
-        redisClientUtils.hmdelete(SlaServiceImpl.SLA_SCENE_KEY, String.valueOf(input.getSceneId()));
+        stringRedisTemplate.opsForHash().delete(SlaServiceImpl.SLA_SCENE_KEY, String.valueOf(input.getSceneId()));
         //设置缓存，用以检查压测场景启动状态
         taskStatusCache.cacheStatus(input.getSceneId(), report.getId(), SceneRunTaskStatusEnum.STARTING);
         //缓存pod数量，上传jmeter日志时判断是否所有文件都上传完成
@@ -270,8 +270,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getBindRef)
             .collect(Collectors.toList());
 
-        redisClientUtils.hmset(engineInstanceRedisKey, PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REFS
-            , JsonHelper.bean2Json(activityRefs));
+        stringRedisTemplate.opsForHash().put(
+            engineInstanceRedisKey,
+            PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REFS,
+            JsonHelper.bean2Json(activityRefs));
         //广播事件
         sceneTaskEventService.callStartEvent(sceneData, report.getId());
 
@@ -565,7 +567,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         //开始试跑就设置一个状态，后面区分试跑任务和正常压测
         String key = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneManageId,
             sceneActionOutput.getData());
-        redisClientUtils.hmset(key, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY,
+        stringRedisTemplate.opsForHash().put(key, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY,
             SceneRunTaskStatusEnum.STARTING.getText());
         return startOutput;
     }
@@ -691,7 +693,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     @Override
     public SceneTryRunTaskStatusOutput checkTaskStatus(Long sceneId, Long reportId) {
         String key = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", sceneId, reportId);
-        Object status = redisClientUtils.hmget(key, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY);
+        Object status = stringRedisTemplate.opsForHash().get(key, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY);
         SceneTryRunTaskStatusOutput output = new SceneTryRunTaskStatusOutput();
         if (Objects.nonNull(status)) {
             SceneRunTaskStatusEnum statusEnum = SceneRunTaskStatusEnum.getTryRunTaskStatusEnumByText(status.toString());
@@ -701,7 +703,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             }
             output.setTaskStatus(statusEnum.getCode());
             if (statusEnum.equals(SceneRunTaskStatusEnum.FAILED)) {
-                Object errorObj = redisClientUtils.hmget(key, SceneTaskRedisConstants.SCENE_RUN_TASK_ERROR);
+                Object errorObj = stringRedisTemplate.opsForHash().get(key, SceneTaskRedisConstants.SCENE_RUN_TASK_ERROR);
                 if (Objects.nonNull(errorObj)) {
                     output.setErrorMsg(errorObj.toString());
                 }
@@ -969,9 +971,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             taskResult.getTenantId());
 
         // cloud集群 redis同步操作，increment 直接拿数据，无需重新获取key的value
-        long num = redisClientUtils.increment(pressureNodeName, 1);
+        Long num = stringRedisTemplate.opsForValue().increment(pressureNodeName, 1);
         log.info("当前启动pod成功数量=【{}】", num);
-        if (num == 1) {
+        if (Long.valueOf(1).equals(num)) {
             // 启动只更新一次
             sceneManageService.updateSceneLifeCycle(
                 UpdateStatusBean.build(taskResult.getSceneId(), taskResult.getTaskId(), taskResult.getTenantId())
@@ -1118,12 +1120,12 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     }
 
     private Boolean compareScript(long sceneId, String scriptId) {
-        Object scriptIdObj = redisClientUtils.hmget(String.format(SceneStartCheckConstants.SCENE_KEY, sceneId), SceneStartCheckConstants.SCRIPT_ID_KEY);
+        Object scriptIdObj = stringRedisTemplate.opsForHash().get(String.format(SceneStartCheckConstants.SCENE_KEY, sceneId), SceneStartCheckConstants.SCRIPT_ID_KEY);
         return scriptIdObj != null && scriptId.equals(scriptIdObj.toString());
     }
 
     private boolean comparePod(long sceneId, int podNum) {
-        Object podObj = redisClientUtils.hmget(ScheduleConstants.SCHEDULE_POD_NUM, String.valueOf(sceneId));
+        Object podObj = stringRedisTemplate.opsForHash().get(ScheduleConstants.SCHEDULE_POD_NUM, String.valueOf(sceneId));
         if (Objects.nonNull(podObj)) {
             int cachedPodNum = Integer.parseInt(podObj.toString());
             return cachedPodNum == podNum;
@@ -1213,7 +1215,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
     @Override
     public void cleanCachedPosition(Long sceneId) {
         String key = String.format(SceneStartCheckConstants.SCENE_KEY, sceneId);
-        redisClientUtils.del(key);
+        stringRedisTemplate.delete(key);
     }
 
     private String getPositionSize(Long position) {
