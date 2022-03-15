@@ -116,10 +116,12 @@ public class SignCommonUtil {
                             } else if (value instanceof Boolean) {
                                 value = Boolean.FALSE.equals(value) ? "0" : "1";
                             }
-                            sql = sql.replaceFirst("=\\?", "='" + value + "'");
+                            String valueSet = String.valueOf(value).replaceAll("\\?", "!@#¥%");
+                            sql = sql.replaceFirst("\\?", "'" + valueSet + "'");
                         }
                     }
                 }
+                sql = sql.replaceAll("!@#¥%", "\\?");
 
                 Update update = (Update) CCJSqlParserUtil.parse(boundSql.getSql());
                 String tableName = update.getTable().getName();
