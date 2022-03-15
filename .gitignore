@@ -22,6 +22,6 @@ logs
 
 *.jar
 
-plugins
+/plugins
 
 application-local.yml
