@@ -3,10 +3,7 @@ package io.shulie.takin.cloud.data.model.mysql;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import io.shulie.takin.cloud.data.annocation.EnableSign;
 import lombok.Data;
 
@@ -179,4 +176,17 @@ public class ReportEntity {
      */
     @TableField(value = "env_code")
     private String envCode;
+
+    @TableField(value = "sign" , fill = FieldFill.INSERT)
+    private String sign;
+    @TableField(value = "custom_id")
+    private Long customId;
+    @TableField(value = "create_uid")
+    private Long createUid;
+    @TableField(value = "customer_id")
+    private Long customerId;
+
+
+
+
 }

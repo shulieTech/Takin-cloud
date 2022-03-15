@@ -103,8 +103,19 @@ public class SceneManageEntity {
     @TableField(value = "env_code")
     private String envCode;
 
+    //数据签名字段补充
     @TableField(value = "sign" , fill = FieldFill.INSERT)
     private String sign;
+    @TableField(value = "custom_id")
+    private Long customId;
+    @TableField(value = "dept_id")
+    private Long deptId;
+    @TableField(value = "create_uid")
+    private Long createUid;
+    @TableField(value = "customer_id")
+    private Long customerId;
+
+
 }
 
 
