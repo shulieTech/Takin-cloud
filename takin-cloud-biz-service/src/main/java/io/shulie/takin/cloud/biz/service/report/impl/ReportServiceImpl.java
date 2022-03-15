@@ -19,20 +19,18 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import cn.hutool.core.bean.BeanUtil;
-import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
-import io.shulie.takin.cloud.sdk.model.common.WarnBean;
-import io.shulie.takin.cloud.sdk.model.response.report.ReportDetailResp;
 import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import org.influxdb.impl.TimeUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.DateUnit;
+
+import org.influxdb.impl.TimeUtil;
 import com.jayway.jsonpath.JsonPath;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Maps;
@@ -69,6 +67,7 @@ import io.shulie.takin.cloud.common.utils.TestTimeUtil;
 import io.shulie.takin.cloud.common.utils.JsonPathUtil;
 import io.shulie.takin.cloud.data.dao.report.ReportDao;
 import io.shulie.takin.cloud.sdk.model.common.DataBean;
+import io.shulie.takin.cloud.sdk.model.common.WarnBean;
 import io.shulie.takin.cloud.common.influxdb.InfluxUtil;
 import io.shulie.takin.cloud.common.bean.task.TaskResult;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
@@ -110,6 +109,7 @@ import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportDetailResp;
 import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
@@ -121,6 +121,7 @@ import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivitySummaryBean;
 
 /**
@@ -438,6 +439,8 @@ public class ReportServiceImpl implements ReportService {
     private List<StopReasonBean> getStopReasonBean(Long sceneId, Long reportId) {
         List<StopReasonBean> stopReasons = Lists.newArrayList();
 
+        ReportEntity reportResult = reportDao.selectById(reportId);
+
         // 查询sla熔断数据
         ReportDetailResp detailOutput = this.getReportByReportId(reportId);
         if (detailOutput.getSlaMsg() != null) {
@@ -453,18 +456,17 @@ public class ReportServiceImpl implements ReportService {
             SceneTaskRedisConstants.PRESSURE_NODE_START_ERROR);
         if (Objects.nonNull(pressureNodeStartError)) {
             // 组装压力节点异常显示数据
-            StopReasonBean stopReasonBean = new StopReasonBean();
-            stopReasonBean.setType(SceneStopReasonEnum.PRESSURE_NODE.getType());
-            stopReasonBean.setDescription(SceneStopReasonEnum.toDesc(pressureNodeStartError.toString()));
-            stopReasons.add(stopReasonBean);
+            stopReasons.add(new StopReasonBean() {{
+                setType(SceneStopReasonEnum.PRESSURE_NODE.getType());
+                setDescription(SceneStopReasonEnum.toDesc(pressureNodeStartError.toString()));
+            }});
             //  持久化
-            ReportEntity reportResult = reportDao.selectById(reportId);
             getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG, pressureNodeStartError.toString());
-            ReportUpdateParam param = new ReportUpdateParam();
-            param.setId(reportId);
-            param.setFeatures(reportResult.getFeatures());
-            param.setGmtUpdate(new Date());
-            reportDao.updateReport(param);
+            reportDao.updateReport(new ReportUpdateParam() {{
+                setId(reportId);
+                setFeatures(reportResult.getFeatures());
+                setGmtUpdate(new Date());
+            }});
         }
 
         // 查询压测引擎是否有异常
@@ -472,18 +474,17 @@ public class ReportServiceImpl implements ReportService {
         Object errorObj = redisTemplate.opsForHash().get(key, SceneTaskRedisConstants.SCENE_RUN_TASK_ERROR);
         if (Objects.nonNull(errorObj)) {
             // 组装压测引擎异常显示数据
-            StopReasonBean engineReasonBean = new StopReasonBean();
-            engineReasonBean.setType(SceneStopReasonEnum.ENGINE.getType());
-            engineReasonBean.setDescription(SceneStopReasonEnum.toEngineDesc(errorObj.toString()));
-            stopReasons.add(engineReasonBean);
+            stopReasons.add(new StopReasonBean() {{
+                setType(SceneStopReasonEnum.ENGINE.getType());
+                setDescription(SceneStopReasonEnum.toEngineDesc(errorObj.toString()));
+            }});
             //  持久化
-            ReportEntity reportResult = reportDao.selectById(reportId);
             getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG, errorObj.toString());
-            ReportUpdateParam param = new ReportUpdateParam();
-            param.setId(reportId);
-            param.setFeatures(reportResult.getFeatures());
-            param.setGmtUpdate(new Date());
-            reportDao.updateReport(param);
+            reportDao.updateReport(new ReportUpdateParam() {{
+                setId(reportId);
+                setFeatures(reportResult.getFeatures());
+                setGmtUpdate(new Date());
+            }});
             // 进行中断操作
             log.info("检测到压测引擎异常，触发中断场景【{}】压测,异常原因：{}", sceneId, errorObj);
             sceneTaskService.stop(sceneId);
@@ -674,7 +675,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Boolean unLockReport(Long reportId) {
         ReportEntity reportResult = reportDao.selectById(reportId);
-        if (reportResult.getType() != PressureSceneEnum.DEFAULT.getCode() && ReportConstants.LOCK_STATUS != reportResult.getLock()) {
+        if (!reportResult.getType().equals(PressureSceneEnum.DEFAULT.getCode()) && ReportConstants.LOCK_STATUS != reportResult.getLock()) {
             log.error("异常代码【{}】,异常内容：解锁报告异常 --> 报告{}非锁定状态，不能解锁",
                 TakinCloudExceptionEnum.TASK_STOP_VERIFY_ERROR, reportId);
             return false;
@@ -690,7 +691,7 @@ public class ReportServiceImpl implements ReportService {
         log.info("web -> cloud finish reportId【{}】,starting", reportId);
         ReportEntity reportResult = reportDao.selectById(reportId);
         //只有常规模式需要生成报告内容
-        if (reportResult.getPressureType() != PressureSceneEnum.DEFAULT.getCode()) {
+        if (!reportResult.getPressureType().equals(PressureSceneEnum.DEFAULT.getCode())) {
             reportDao.finishReport(reportId);
             sceneManageService.updateSceneLifeCycle(
                 UpdateStatusBean.build(reportResult.getSceneId(), reportResult.getId(), reportResult.getTenantId())
@@ -702,8 +703,14 @@ public class ReportServiceImpl implements ReportService {
             return false;
         }
         //判断报告是否已经汇总，如果没有汇总，先汇总报告，然后在更新报告状态
-        if (Objects.isNull(reportResult.getEndTime())
-            || (Objects.isNull(reportResult.getTotalRequest()) && Objects.isNull(reportResult.getAvgTps()))) {
+        if (Objects.isNull(reportResult.getEndTime())) {
+            TaskResult taskResult = new TaskResult();
+            taskResult.setSceneId(reportResult.getSceneId());
+            taskResult.setTaskId(reportResult.getId());
+            taskResult.setTenantId(reportResult.getTenantId());
+            modifyReport(taskResult);
+            reportResult = reportDao.selectById(reportId);
+        } else if (Objects.isNull(reportResult.getTotalRequest()) && Objects.isNull(reportResult.getAvgTps())) {
             TaskResult taskResult = new TaskResult();
             taskResult.setSceneId(reportResult.getSceneId());
             taskResult.setTaskId(reportResult.getId());
@@ -1081,7 +1088,8 @@ public class ReportServiceImpl implements ReportService {
             log.error("not find reportId= {}", reportId);
             return;
         }
-        Boolean updateVersion = true;
+        // 默认为true
+        boolean updateVersion = System.currentTimeMillis() >= 0;
         log.info("ReportId={}, tenantId={}, CompareResult={}", reportId, reportResult.getTenantId(), updateVersion);
 
         String testPlanXpathMd5 = getTestPlanXpathMd5(reportResult.getScriptNodeTree());
@@ -1116,7 +1124,7 @@ public class ReportServiceImpl implements ReportService {
         }
 
         if (!updateVersion) {
-            log.info("old version finish report ={} updateVersion={} ", reportId, updateVersion);
+            log.info("旧版本-结束报告:{}", reportId);
             UpdateStatusBean reportStatus = new UpdateStatusBean();
             reportStatus.setResultId(reportId);
             reportStatus.setPreStatus(ReportConstants.INIT_STATUS);
@@ -1316,12 +1324,7 @@ public class ReportServiceImpl implements ReportService {
         String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(),
             reportResult.getTenantId());
         Long eTime = Long.valueOf(stringRedisTemplate.opsForValue().get(engineName + ScheduleConstants.LAST_SIGN));
-        Date curDate;
-        if (eTime != null) {
-            curDate = new Date(eTime);
-        } else {
-            curDate = new Date();
-        }
+        Date curDate = new Date(eTime);
         long testRunTime = DateUtil.between(reportResult.getStartTime(), curDate, DateUnit.SECOND);
 
         if (null != statReport) {
@@ -1464,14 +1467,14 @@ public class ReportServiceImpl implements ReportService {
             resultMap.put("successRate", new DataBean(statReport.getSuccessRate(), detail.getTargetSuccessRate()));
             resultMap.put("avgConcurrenceNum", statReport.getAvgConcurrenceNum().toString());
             resultMap.put("totalRequest", statReport.getTotalRequest());
-            resultMap.put("tempRequestCount",statReport.getTempRequestCount());
+            resultMap.put("tempRequestCount", statReport.getTempRequestCount());
         } else {
             resultMap.put("avgRt", new DataBean("0", detail.getTargetRt()));
             resultMap.put("sa", new DataBean("0", detail.getTargetSa()));
             resultMap.put("tps", new DataBean("0", detail.getTargetTps()));
             resultMap.put("successRate", new DataBean("0", detail.getTargetSuccessRate()));
             resultMap.put("avgConcurrenceNum", "0");
-            resultMap.put("tempRequestCount",0L);
+            resultMap.put("tempRequestCount", 0L);
             resultMap.put("totalRequest", 0L);
         }
         return resultMap;
@@ -1574,8 +1577,9 @@ public class ReportServiceImpl implements ReportService {
             return jtlPath + "/" + "Jmeter.zip";
         } else if (needZip) {
             // 开始压缩
-            Boolean result = LinuxHelper.executeLinuxCmd(
-                "sudo zip -r -j " + jtlPath + "/" + "Jmeter.zip " + jtlPath + " " + logPath);
+            String command = StrUtil.indexedFormat("sudo zip -r -j {0}/Jmeter.zip {0} {1}", jtlPath, logPath);
+            log.info("压测日志打包成文件:{}", command);
+            Boolean result = LinuxHelper.executeLinuxCmd(command);
             if (result) {
                 // 返回成功
                 return jtlPath + "/" + "Jmeter.zip";

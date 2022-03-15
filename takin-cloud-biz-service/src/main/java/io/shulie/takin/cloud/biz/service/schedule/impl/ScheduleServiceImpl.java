@@ -1,7 +1,9 @@
 package io.shulie.takin.cloud.biz.service.schedule.impl;
 
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.Resource;
 
@@ -13,42 +15,45 @@ import com.pamirs.takin.entity.dao.schedule.TScheduleRecordMapper;
 import com.pamirs.takin.entity.domain.entity.schedule.ScheduleRecord;
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
 
+import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.cloud.biz.config.AppConfig;
-import io.shulie.takin.cloud.biz.output.engine.EngineLogPtlConfigOutput;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.biz.service.async.AsyncService;
-import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
-import io.shulie.takin.cloud.biz.service.record.ScheduleRecordEnginePluginService;
-import io.shulie.takin.cloud.biz.service.report.ReportService;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.biz.service.schedule.ScheduleEventService;
-import io.shulie.takin.cloud.biz.service.schedule.ScheduleService;
-import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
-import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
-import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.common.bean.task.TaskResult;
-import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
-import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.utils.CommonUtil;
-import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.NumberUtil;
 import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
-import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
-import io.shulie.takin.eventcenter.Event;
 import io.shulie.takin.eventcenter.annotation.IntrestFor;
+import io.shulie.takin.cloud.common.bean.task.TaskResult;
+import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
+import io.shulie.takin.cloud.biz.service.async.AsyncService;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
+import io.shulie.takin.cloud.biz.service.schedule.ScheduleService;
 import io.shulie.takin.cloud.ext.content.enginecall.PtlLogConfigExt;
+import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
+import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
+import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
+import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
+import io.shulie.takin.cloud.biz.service.schedule.ScheduleEventService;
+import io.shulie.takin.cloud.biz.output.engine.EngineLogPtlConfigOutput;
+import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleInitParamExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.biz.service.record.ScheduleRecordEnginePluginService;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -131,7 +136,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         eventRequest.setRequest(request);
         eventRequest.setStrategyConfig(config);
         String memSetting;
-        if (PressureSceneEnum.INSPECTION_MODE.equals(request.getPressureScene())) {
+        if (PressureSceneEnum.INSPECTION_MODE.getCode().equals(request.getPressureScene())) {
             memSetting = "-XX:MaxRAMPercentage=90.0";
         } else {
             memSetting = CommonUtil.getValue(appConfig.getK8sJvmSettings(), config, StrategyConfigExt::getK8sJvmSettings);
@@ -213,6 +218,26 @@ public class ScheduleServiceImpl implements ScheduleService {
             sceneManageService.reportRecord(SceneManageStartRecordVO.build(sceneId, taskId, customerId).success(false)
                 .errorMsg("压测引擎job创建失败，失败原因：" + msg).build());
         }
+    }
+
+    @Override
+    public void initScheduleCallback(ScheduleInitParamExt param) {
+
+    }
+
+    /**
+     * 临时方案：
+     * 拆分文件的索引都存入到redis队列, 避免控制台集群环境下索引获取不正确
+     */
+    private void push(ScheduleStartRequestExt request) {
+        //把数据放入队列
+        String key = ScheduleConstants.getFileSplitQueue(request.getSceneId(), request.getTaskId(), request.getTenantId());
+
+        List<String> numList = new ArrayList<>(request.getTotalIp());
+        for (int i = 1; i <= request.getTotalIp(); i++) {
+            numList.add(i + "");
+        }
+        redisTemplate.opsForList().leftPushAll(key, numList);
     }
 
     /**

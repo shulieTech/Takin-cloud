@@ -958,7 +958,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     }
 
     @Override
-    public ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update) {
+    public ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update, Integer version) {
         String path;
         if (!isAbsolutePath) {
             path = scriptPath + SceneManageConstant.FILE_SPLIT + uploadPath;
@@ -978,6 +978,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         }
         ScriptVerityExt scriptVerityExt = new ScriptVerityExt();
         scriptVerityExt.setRequest(request);
+        scriptVerityExt.setVersion(version);
         scriptVerityExt.setScriptPath(path);
         ScriptVerityRespExt scriptVerityRespExt = engineExtApi.verityScript(scriptVerityExt);
         if (scriptVerityRespExt != null && CollectionUtils.isNotEmpty(scriptVerityRespExt.getErrorMsg())) {

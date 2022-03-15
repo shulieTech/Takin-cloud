@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.common.enums;
 
+import java.util.Map;
 import java.util.HashMap;
 
 import lombok.Getter;
@@ -15,6 +16,7 @@ public enum PressureSceneEnum {
      * 常规模式
      */
     DEFAULT(0, "常规模式"),
+
     /**
      * 流量调试
      */
@@ -28,10 +30,10 @@ public enum PressureSceneEnum {
      */
     TRY_RUN(5, "试跑模式");
 
-    private final int code;
+    private final Integer code;
     private final String description;
 
-    private static final HashMap<Integer, PressureSceneEnum> INSTANCES = new HashMap<>(4);
+    private static final Map<Integer, PressureSceneEnum> INSTANCES = new HashMap<>();
 
     static {
         for (PressureSceneEnum e : PressureSceneEnum.values()) {
@@ -42,18 +44,13 @@ public enum PressureSceneEnum {
         INSTANCES.put(2, DEFAULT);
     }
 
-    public static PressureSceneEnum of(Integer code) {
-        if (null == code) {
-            return null;
-        }
-        return INSTANCES.get(code);
-    }
-
     /**
-     * PressureTypeEnums.equels(code)
+     * 转换
+     *
+     * @param code code
+     * @return 枚举值
      */
-    public boolean equals(Integer code) {
-        PressureSceneEnum pressureType = of(code);
-        return this == pressureType;
+    public static PressureSceneEnum of(Integer code) {
+        return INSTANCES.get(code);
     }
 }

@@ -200,9 +200,10 @@ public class SceneManageController {
 
     @PostMapping(EntrypointUrl.METHOD_SCENE_MANAGE_CHECK_AND_UPDATE_SCRIPT)
     @ApiOperation(value = "解析脚本")
-    public ResponseResult<ScriptCheckResp> checkAndUpdate(@RequestBody ScriptCheckAndUpdateReq req) {
-        ScriptVerityRespExt scriptVerityRespExt = sceneManageService.checkAndUpdate(req.getRequest(), req.getUploadPath(),
-            req.isAbsolutePath(), req.isUpdate());
+    public ResponseResult<ScriptCheckResp> checkAndUpdate(@RequestBody ScriptCheckAndUpdateReq request) {
+        ScriptVerityRespExt scriptVerityRespExt = sceneManageService.checkAndUpdate(
+            request.getRequest(), request.getUploadPath(),
+            request.isAbsolutePath(), request.isUpdate(), request.getVersion());
         return ResponseResult.success(SceneTaskOpenConverter.INSTANCE.ofScriptVerityRespExt(scriptVerityRespExt));
     }
 
