@@ -135,7 +135,7 @@ public class SignCommonUtil {
                     String updateSql = "update " + tableName + "  SET sign = " + "\'" + sign + "\'" + " where id = " + map.get("id").toString();
                     sqlList.add(updateSql);
                 }
-                rs.last();
+                //rs.last();
                 Connection connection = statement.getConnection();
                 Statement st = connection.createStatement();
                 for (String s : sqlList) {
