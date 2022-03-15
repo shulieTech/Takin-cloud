@@ -198,7 +198,7 @@ public class SignCommonUtil {
             }
 
             if (!valid) {
-                throw new TakinCloudException(TakinCloudExceptionEnum.DATA_SIGN_ERROR,"数据异常,请联系管理员!");
+                throw new TakinCloudException(TakinCloudExceptionEnum.DATA_SIGN_ERROR,"数据签名异常,请联系管理员!");
             }
 
         }
