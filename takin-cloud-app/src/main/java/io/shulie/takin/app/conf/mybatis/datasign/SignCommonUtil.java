@@ -81,8 +81,8 @@ public class SignCommonUtil {
                 String sign = MD5Utils.getInstance().getMD5(MapUtil.sort(map).toString());
                 String updateSql = "update " + tableName + "  SET sign = " + "\'" + sign + "\'" + " where id = " + id;
 
-                log.info("set sign info1:"+tableName+"."+id+"/"+sign);
-                log.info("set sign info2:"+MapUtil.sort(map).toString());
+                log.info("insert set sign info1:"+tableName+"."+id+"/"+sign);
+                log.info("insert set sign info2:"+MapUtil.sort(map).toString());
 
                 Connection connection = statement.getConnection();
                 PreparedStatement ps1 = connection.prepareStatement(updateSql, PreparedStatement.RETURN_GENERATED_KEYS);
@@ -150,6 +150,11 @@ public class SignCommonUtil {
                     map.remove("CREATE_TIME");
                     String sign = MD5Utils.getInstance().getMD5(MapUtil.sort(map).toString());
                     String updateSql = "update " + tableName + "  SET sign = " + "\'" + sign + "\'" + " where id = " + map.get("id").toString();
+
+                    log.info("update set sign info1:"+tableName+"."+map.get("id").toString()+"/"+sign);
+                    log.info("update set sign info2:"+MapUtil.sort(map).toString());
+
+
                     sqlList.add(updateSql);
                 }
                 //rs.last();
@@ -196,8 +201,8 @@ public class SignCommonUtil {
 
                 String sign = MD5Utils.getInstance().getMD5(MapUtil.sort(map).toString());
                 if (!oldSign.equals(sign)) {
-                    log.info("valid sign info1:"+MapUtil.sort(map).toString());
-                    log.info("valid sign info2:"+oldSign);
+                    log.info("select sign info1:"+MapUtil.sort(map).toString());
+                    log.info("select sign info2:"+oldSign);
                     valid = false;
                     break;
                 }
