@@ -80,6 +80,10 @@ public class SignCommonUtil {
 
                 String sign = MD5Utils.getInstance().getMD5(MapUtil.sort(map).toString());
                 String updateSql = "update " + tableName + "  SET sign = " + "\'" + sign + "\'" + " where id = " + id;
+
+                log.info("set sign info1:"+tableName+"."+id+"/"+sign);
+                log.info("set sign info2:"+MapUtil.sort(map).toString());
+
                 Connection connection = statement.getConnection();
                 PreparedStatement ps1 = connection.prepareStatement(updateSql, PreparedStatement.RETURN_GENERATED_KEYS);
                 ps1.execute();
@@ -192,6 +196,8 @@ public class SignCommonUtil {
 
                 String sign = MD5Utils.getInstance().getMD5(MapUtil.sort(map).toString());
                 if (!oldSign.equals(sign)) {
+                    log.info("valid sign info1:"+MapUtil.sort(map).toString());
+                    log.info("valid sign info2:"+oldSign);
                     valid = false;
                     break;
                 }
