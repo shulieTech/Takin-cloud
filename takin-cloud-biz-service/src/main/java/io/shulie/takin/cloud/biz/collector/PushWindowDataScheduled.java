@@ -21,6 +21,8 @@ import java.nio.charset.StandardCharsets;
 import javax.annotation.Resource;
 
 import cn.hutool.core.date.DateUnit;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
+import io.shulie.takin.cloud.data.param.report.ReportQueryParam.PressureTypeRelation;
 import lombok.extern.slf4j.Slf4j;
 
 import com.google.common.collect.Maps;
@@ -885,6 +887,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         ReportQueryParam param = new ReportQueryParam();
         param.setStatus(0);
         param.setIsDel(0);
+        param.setPressureTypeRelation(new PressureTypeRelation(PressureSceneEnum.INSPECTION_MODE.getCode(), false));
         List<ReportResult> results = reportDao.queryReportList(param);
         if (CollectionUtils.isEmpty(results)) {
             log.debug("没有需要统计的报告！");

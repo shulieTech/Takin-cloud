@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Lists;
+import io.shulie.takin.cloud.data.param.report.ReportQueryParam.PressureTypeRelation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -73,6 +74,16 @@ public class ReportDaoImpl implements ReportDao {
         if (null != param.getIsDel()) {
             wrapper.eq(ReportEntity::getIsDeleted, param.getIsDel());
         }
+
+        if(Objects.nonNull(param.getPressureTypeRelation())){
+            PressureTypeRelation relation = param.getPressureTypeRelation();
+            if(relation.getHave()){
+                wrapper.eq(ReportEntity::getPressureType, relation.getPressureType());
+            }else{
+                wrapper.ne(ReportEntity::getPressureType, relation.getPressureType());
+            }
+        }
+
         List<ReportEntity> entities = reportMapper.selectList(wrapper);
         if (entities != null && entities.size() > 0) {
             return entities.stream()

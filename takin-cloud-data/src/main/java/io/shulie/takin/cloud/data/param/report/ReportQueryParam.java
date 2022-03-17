@@ -17,4 +17,32 @@ public class ReportQueryParam {
      * 是否已删除：0正常，1已删除
      */
     private Integer isDel;
+
+    /**
+     * 压测类型
+     */
+    private PressureTypeRelation pressureTypeRelation;
+
+    @Data
+    public static class PressureTypeRelation {
+        private Integer pressureType;
+        private Boolean have;//关系 包含=true 不包含=false
+
+        private PressureTypeRelation() {
+
+        }
+
+        private PressureTypeRelation(Integer pressureType) {
+            this.pressureType = pressureType;
+        }
+
+        private PressureTypeRelation(Boolean have) {
+            this.have = have;
+        }
+
+        public PressureTypeRelation(Integer pressureType, Boolean have) {
+            this.pressureType = pressureType;
+            this.have = have;
+        }
+    }
 }
