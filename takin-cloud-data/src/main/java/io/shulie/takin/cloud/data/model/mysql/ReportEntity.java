@@ -176,14 +176,14 @@ public class ReportEntity {
     @TableField(value = "env_code")
     private String envCode;
 
-    @TableField(value = "sign" , fill = FieldFill.INSERT)
-    private String sign;
-    @TableField(value = "custom_id")
-    private Long customId;
-    @TableField(value = "create_uid")
-    private Long createUid;
-    @TableField(value = "customer_id")
-    private Long customerId;
+//    @TableField(value = "sign" , fill = FieldFill.INSERT)
+//    private String sign;
+//    @TableField(value = "custom_id")
+//    private Long customId;
+//    @TableField(value = "create_uid")
+//    private Long createUid;
+//    @TableField(value = "customer_id")
+//    private Long customerId;
 
 
 
