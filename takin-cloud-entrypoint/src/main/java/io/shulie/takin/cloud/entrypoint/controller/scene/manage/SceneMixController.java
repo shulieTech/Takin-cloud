@@ -12,8 +12,11 @@ import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneRequest;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SynchronizeRequest;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailV2Response;
 
+import io.shulie.takin.utils.security.MD5Utils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,16 +38,20 @@ public class SceneMixController {
     SceneService sceneService;
     @Resource
     SceneSynchronizeService sceneSynchronizeService;
+    @Resource
+    private RedisTemplate<String, String> redisTemplate;
 
     @PostMapping(EntrypointUrl.METHOD_SCENE_MIX_CREATE)
     @ApiOperation(value = "新增压测场景")
     public ResponseResult<Long> create(@RequestBody @Valid SceneRequest request) {
+        buildSceneRequest(request);
         return ResponseResult.success(sceneService.create(request));
     }
 
     @PostMapping(EntrypointUrl.METHOD_SCENE_MIX_UPDATE)
     @ApiOperation(value = "更新压测场景")
     public ResponseResult<Boolean> update(@RequestBody @Valid SceneRequest request) {
+        buildSceneRequest(request);
         return ResponseResult.success(sceneService.update(request));
     }
 
@@ -61,6 +68,16 @@ public class SceneMixController {
     @ApiOperation(value = "同步场景信息")
     public ResponseResult<String> update(@RequestBody @Valid SynchronizeRequest request) {
         return ResponseResult.success(sceneSynchronizeService.synchronize(request));
+    }
+
+    public static final String CACHE_NAME = "t:a:c:pressure:filemd5";
+    private void buildSceneRequest(SceneRequest request) {
+        for(SceneRequest.File file:request.getFile()){
+            String filePath = file.getPath().replaceAll("[/]", "");
+            String sourcePMd5 = MD5Utils.getInstance().getMD5(filePath);
+            String md5 = redisTemplate.opsForValue().get(CACHE_NAME+sourcePMd5);
+            file.setSign(StringUtils.isNotBlank(md5)?md5:"");
+        }
     }
 
 }
