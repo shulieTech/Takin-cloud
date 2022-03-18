@@ -294,8 +294,8 @@ public class SceneTaskController {
 
     /**
      * 恢复压测中的场景状态
-     * update t_scene_manage set `status`=0 where id=？;
-     * update t_report set `status`=2 where scene_id=？;
+     * <p></[>update t_scene_manage set `status`=0 where id=？;</p>
+     * <p>update t_report set `status`=2 where scene_id=？;</p>
      *
      * @param paramMap 参数
      * @return -
