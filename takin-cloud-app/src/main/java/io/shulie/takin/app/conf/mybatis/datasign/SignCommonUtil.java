@@ -175,6 +175,10 @@ public class SignCommonUtil {
 
 
     public void validSign(MappedStatement mappedStatement, PreparedStatement ps) throws SQLException {
+        List<ResultMap> resultMaps = mappedStatement.getResultMaps();
+        if(resultMaps.size() == 0){
+            return;
+        }
         Class<?> clz = mappedStatement.getResultMaps().get(0).getType();
         boolean isSign = clz.isAnnotationPresent(EnableSign.class);
         boolean valid = true;
