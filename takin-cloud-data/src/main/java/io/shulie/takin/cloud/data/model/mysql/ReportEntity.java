@@ -12,7 +12,6 @@ import lombok.Data;
  */
 @Data
 @TableName(value = "t_report")
-@EnableSign
 public class ReportEntity {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
