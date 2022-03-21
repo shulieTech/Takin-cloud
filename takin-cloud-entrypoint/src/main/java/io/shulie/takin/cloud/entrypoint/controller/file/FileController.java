@@ -28,6 +28,7 @@ import com.pamirs.takin.entity.domain.vo.file.FileDeleteVO;
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.utils.CommonUtil;
+import io.shulie.takin.cloud.common.utils.FileUtils;
 import io.shulie.takin.cloud.common.utils.LinuxUtil;
 import io.shulie.takin.cloud.common.utils.Md5Util;
 import io.shulie.takin.cloud.entrypoint.controller.strategy.LocalFileStrategy;
@@ -99,9 +100,9 @@ public class FileController {
                 + uploadId + SceneManageConstant.FILE_SPLIT + t.getOriginalFilename());
 
             //临时文件签名，存储缓存，超时设置10分钟
-            String path = targetFile.getAbsolutePath().replaceAll("[/]", "");
-            String pathMd5 = MD5Utils.getInstance().getMD5(path);
-            redisTemplate.opsForValue().set(CACHE_NAME+pathMd5, uploadId,10, TimeUnit.MINUTES); //临时存储10分钟
+            //String path = targetFile.getAbsolutePath().replaceAll("[/]", "");
+            //String pathMd5 = MD5Utils.getInstance().getMD5(path);
+            //redisTemplate.opsForValue().set(CACHE_NAME+pathMd5, uploadId,10, TimeUnit.MINUTES); //临时存储10分钟
             FileDTO dto = new FileDTO();
             try {
                 if (StrUtil.isBlank(t.getOriginalFilename())) {
@@ -221,10 +222,11 @@ public class FileController {
                 String targetPMd5 = MD5Utils.getInstance().getMD5(targetP);
 
                 //把临时文件缓存的md5，复制至正式文件的md5
-                String sourceP = sourceFilePath.replaceAll("[/]", "");
-                String sourcePMd5 = MD5Utils.getInstance().getMD5(sourceP);
-                String md5 = redisTemplate.opsForValue().get(CACHE_NAME+sourcePMd5);
-                redisTemplate.opsForValue().set(CACHE_NAME+targetPMd5,md5);
+                //String sourceP = sourceFilePath.replaceAll("[/]", "");
+                //String sourcePMd5 = MD5Utils.getInstance().getMD5(sourceP);
+                //String md5 = redisTemplate.opsForValue().get(CACHE_NAME+sourcePMd5);
+
+                redisTemplate.opsForValue().set(CACHE_NAME+targetPMd5, Md5Util.md5File(f));
             }
         } catch (IOException e) {
             log.error("异常代码【{}】,异常内容：文件复制异常 --> 异常信息: {}",
