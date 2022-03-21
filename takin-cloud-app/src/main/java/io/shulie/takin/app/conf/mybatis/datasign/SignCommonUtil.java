@@ -147,7 +147,8 @@ public class SignCommonUtil {
                 String tableName = update.getTable().getName();
                 String whereStr = " where" + sql.split("WHERE")[1];
                 String querySql = "select * from " + tableName + whereStr;
-                ResultSet rs = statement.executeQuery(querySql);
+
+                ResultSet rs = statement.getConnection().createStatement().executeQuery(querySql);
                 ResultSetMetaData md = rs.getMetaData();
                 Map<String, Object> map = new HashMap<>();
                 List<String> sqlList = new ArrayList<>();
