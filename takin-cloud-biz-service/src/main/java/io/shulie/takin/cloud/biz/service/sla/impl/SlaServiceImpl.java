@@ -182,7 +182,7 @@ public class SlaServiceImpl implements SlaService {
                     extendMap.put(Constants.SLA_DESTROY_EXTEND, "SLA发送压测任务终止事件");
                     scheduleStopRequest.setExtend(extendMap);
                     //报告未结束，才通知
-                    if (stringRedisTemplate.hasKey(PREFIX_TASK + metricsEvent.getSceneId())) {
+                    if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(PREFIX_TASK + metricsEvent.getSceneId()))) {
                         // 熔断数据也记录到告警明细中
                         WarnDetail warnDetail = buildWarnDetail(conditionMap, businessActivityDTO, metricsEvent, dto);
                         tWarnDetailMapper.insertSelective(warnDetail);
@@ -237,7 +237,7 @@ public class SlaServiceImpl implements SlaService {
             if (model.getTimes() >= dto.getRule().getTimes()) {
                 WarnDetail warnDetail = buildWarnDetail(conditionMap, businessActivityDTO, metricsEvent, dto);
                 //报告未结束，才insert
-                if (stringRedisTemplate.hasKey(PREFIX_TASK + metricsEvent.getSceneId())) {
+                if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(PREFIX_TASK + metricsEvent.getSceneId()))) {
                     tWarnDetailMapper.insertSelective(warnDetail);
                 }
             } else {
@@ -365,7 +365,7 @@ public class SlaServiceImpl implements SlaService {
             refOutput.setTargetTPS(detailEntity.getTargetTps().intValue());
             dto.getBusinessActivityConfig().add(refOutput);
         }
-        Map<String, Object> dataMap = Maps.newHashMap();
+        Map<String, String> dataMap = new HashMap<>(1);
         dataMap.put(String.valueOf(sceneId), JSON.toJSONString(dto));
         stringRedisTemplate.opsForHash().putAll(SLA_SCENE_KEY, dataMap);
         stringRedisTemplate.expire(SLA_SCENE_KEY, EXPIRE_TIME, TimeUnit.SECONDS);

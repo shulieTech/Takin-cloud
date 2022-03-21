@@ -232,7 +232,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 if (null != features) {
                     Long scriptId = features.getLong("scriptId");
                     stringRedisTemplate.opsForHash().put(String.format(SceneStartCheckConstants.SCENE_KEY, input.getSceneId()),
-                        SceneStartCheckConstants.SCRIPT_ID_KEY, scriptId);
+                        SceneStartCheckConstants.SCRIPT_ID_KEY, String.valueOf(scriptId));
                 }
             }
         }
@@ -365,20 +365,20 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         if (reportResult != null) {
 
             // 记录错误信息
-            List<String> errorMsgs = Lists.newArrayList();
+            List<String> errorMessageList = Lists.newArrayList();
             // 检查压测引擎返回内容
             SceneRunTaskStatusOutput status = taskStatusCache.getStatus(sceneId, reportResult.getId());
             if (Objects.nonNull(status) && Objects.nonNull(status.getTaskStatus())
                 && status.getTaskStatus() == SceneRunTaskStatusEnum.FAILED.getCode()) {
-                errorMsgs.add(SceneStopReasonEnum.ENGINE.getType() + ":" + status.getErrorMsg());
+                errorMessageList.add(SceneStopReasonEnum.ENGINE.getType() + ":" + status.getErrorMsg());
             }
             scene.setReportId(reportResult.getId());
             if (StringUtils.isNotEmpty(reportResult.getFeatures())) {
                 JSONObject jb = JSON.parseObject(reportResult.getFeatures());
-                errorMsgs.add(jb.getString(ReportConstants.FEATURES_ERROR_MSG));
+                errorMessageList.add(jb.getString(ReportConstants.FEATURES_ERROR_MSG));
             }
-            if (CollectionUtils.isNotEmpty(errorMsgs)) {
-                scene.setMsg(errorMsgs);
+            if (CollectionUtils.isNotEmpty(errorMessageList)) {
+                scene.setMsg(errorMessageList);
                 //  前端只有等于0,才会显示错误
                 scene.setData(0L);
             }
@@ -445,10 +445,6 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     @Override
     public Long startFlowDebugTask(SceneManageWrapperInput input, List<EnginePluginInput> enginePlugins) {
-        //获取web传过来的操作人
-        Long operateId = input.getUserId();
-        String operateName = input.getUserName();
-
         Long sceneManageId;
         CloudPluginUtils.fillUserData(input);
         //首先根据脚本实例id构建压测场景名称

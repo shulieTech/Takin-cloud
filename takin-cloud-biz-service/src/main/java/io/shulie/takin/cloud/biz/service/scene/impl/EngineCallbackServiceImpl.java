@@ -59,13 +59,13 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
                 reportService.updateReportFeatures(notify.getResultId(), ReportConstants.FINISH_STATUS, ReportConstants.PRESSURE_MSG, notify.getMsg());
 
                 // 如果 这个失败等于 压力节点 数量 则 将本次压测至为失败
-                int podTotal = Integer.parseInt(
-                    stringRedisTemplate.opsForValue().get(ScheduleConstants.getPressureNodeTotalKey(notify.getSceneId(), notify.getResultId(),
-                        notify.getTenantId())));
+                String pressureNodeTotalKey = ScheduleConstants.getPressureNodeTotalKey(notify.getSceneId(), notify.getResultId(), notify.getTenantId());
+                int podTotal = Integer.parseInt(stringRedisTemplate.opsForValue().get(pressureNodeTotalKey));
                 if (podTotal <= startFailCount) {
-                    sceneManageService.reportRecord(SceneManageStartRecordVO.build(notify.getSceneId(),
-                        notify.getResultId(),
-                        notify.getTenantId()).success(false).errorMsg("").build());
+                    sceneManageService.reportRecord(
+                        SceneManageStartRecordVO
+                            .build(notify.getSceneId(), notify.getResultId(), notify.getTenantId())
+                            .success(false).errorMsg("").build());
                 }
                 //修改缓存压测启动状态为失败
                 setTryRunTaskInfo(notify.getSceneId(), notify.getResultId(), notify.getTenantId(), notify.getMsg());
@@ -94,8 +94,9 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
     }
 
     private boolean interruptFinish(String engineName, Long interruptSuccessCount) {
-        boolean redisNotHasKey = !stringRedisTemplate.hasKey(engineName);
-        Long redisValue = Long.valueOf(stringRedisTemplate.opsForValue().get(engineName));
+        boolean redisNotHasKey = !Boolean.TRUE.equals(stringRedisTemplate.hasKey(engineName));
+        String cacheData = stringRedisTemplate.opsForValue().get(engineName);
+        Long redisValue = cacheData == null ? null : Long.parseLong(cacheData);
         // 解决pod 没有发送事件问题
         return redisNotHasKey
             || interruptSuccessCount.equals(redisValue);

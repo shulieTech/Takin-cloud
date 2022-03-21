@@ -239,7 +239,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             .boxed().map(String::valueOf)
             .collect(Collectors.toCollection(ArrayList::new));
         // 集合放入Redis
-        redisTemplate.opsForList().leftPushAll(key, numList);
+        stringRedisTemplate.opsForList().leftPushAll(key, numList);
     }
 
     /**

@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.biz.collector.collector;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -84,12 +85,12 @@ public class CollectorService extends AbstractIndicators {
         new NoLengthBlockingQueue<>(), new ThreadFactoryBuilder()
         .setNameFormat("ptl-log-push-%d").build(), new ThreadPoolExecutor.AbortPolicy());
 
-    public void collectorToInfluxdb(Long sceneId, Long reportId, Long customerId, List<ResponseMetrics> metricses) {
-        if (CollectionUtils.isEmpty(metricses)) {
+    public void collectorToInfluxdb(Long sceneId, Long reportId, Long customerId, List<ResponseMetrics> metricsList) {
+        if (CollectionUtils.isEmpty(metricsList)) {
             return;
         }
         String measurement = InfluxUtil.getMetricsMeasurement(sceneId, reportId, customerId);
-        metricses.stream().filter(Objects::nonNull)
+        metricsList.stream().filter(Objects::nonNull)
             .peek(metrics -> {
                 //判断有没有MD5值
                 int strPosition = metrics.getTransaction().lastIndexOf(PressureEngineConstants.TRANSACTION_SPLIT_STR);
@@ -160,9 +161,6 @@ public class CollectorService extends AbstractIndicators {
                         metric.getSaCount());
 
                     longSaveRedisMap(rtKey(taskKey, transaction, timeWindow), timePod, metric.getSumRt());
-
-                    //doubleSaveRedisMap(rtKey(taskKey, transaction, timeWindow),
-                    //    CollectorUtil.getTimestampPodNum(metric.getTimestamp(),metric.getPodNum()), metric.getRt() * metric.getCount());
                     Double maxRt = DataUtils.getMaxRt(metric);
                     mostValue(maxRtKey(taskKey, transaction, timeWindow), maxRt, 0);
                     mostValue(minRtKey(taskKey, transaction, timeWindow), metric.getMinRt(), 1);
@@ -191,7 +189,7 @@ public class CollectorService extends AbstractIndicators {
                 }
                 if (isFirst) {
                     // 超时自动检修，强行触发关闭
-                    if (!stringRedisTemplate.hasKey(forceCloseTime(taskKey))) {
+                    if (!Boolean.TRUE.equals(stringRedisTemplate.hasKey(forceCloseTime(taskKey)))) {
                         // 获取压测时长
                         log.info("本次压测{}-{}-{}:记录超时自动检修时间-{}", sceneId, reportId, tenantId, metric.getTimestamp());
                         SceneManageWrapperOutput wrapperDTO = sceneManageService.getSceneManage(sceneId, new SceneManageQueryOpitons());
@@ -257,8 +255,8 @@ public class CollectorService extends AbstractIndicators {
     private void cacheTryRunTaskStatus(Long sceneId, Long reportId, Long customerId, SceneRunTaskStatusEnum status) {
         taskStatusCache.cacheStatus(sceneId, reportId, status);
         Report report = tReportMapper.selectByPrimaryKey(reportId);
-        if (Objects.nonNull(report) && report.getPressureType() != PressureSceneEnum.FLOW_DEBUG.getCode()
-            && report.getPressureType() != PressureSceneEnum.INSPECTION_MODE.getCode()
+        if (Objects.nonNull(report) && !report.getPressureType().equals(PressureSceneEnum.FLOW_DEBUG.getCode())
+            && !report.getPressureType().equals(PressureSceneEnum.INSPECTION_MODE.getCode())
             && status.getCode() == SceneRunTaskStatusEnum.RUNNING.getCode()) {
             asyncService.updateSceneRunningStatus(sceneId, reportId, customerId);
         }
@@ -296,17 +294,22 @@ public class CollectorService extends AbstractIndicators {
             "windowsTime");
         String timeInMillis = String.valueOf(CollectorUtil.getTimeWindowTime(time));
         List<String> ips;
-        if (redisTemplate.getExpire(windowsTimeKey) == -2) {
+        Long windowsTimeValue = redisTemplate.getExpire(windowsTimeKey);
+        if (Long.valueOf(-2L).equals(windowsTimeValue)) {
             ips = new ArrayList<>();
             ips.add(ip);
             redisTemplate.opsForHash().put(windowsTimeKey, timeInMillis, ips);
             redisTemplate.expire(windowsTimeKey, 60 * 60 * 2, TimeUnit.SECONDS);
         } else {
-            ips = (List<String>)redisTemplate.opsForHash().get(windowsTimeKey, timeInMillis);
-            if (null == ips) {
-                ips = new ArrayList<>();
+            Object cacheData = redisTemplate.opsForHash().get(windowsTimeKey, timeInMillis);
+            if (cacheData instanceof List) {
+                ips = ((List<?>)cacheData).stream()
+                    .filter(t -> t instanceof String)
+                    .map(Object::toString)
+                    .collect(Collectors.toList());
+            } else {
+                ips = new ArrayList<>(0);
             }
-            ips.add(ip);
             redisTemplate.opsForHash().put(windowsTimeKey, timeInMillis, ips);
         }
 

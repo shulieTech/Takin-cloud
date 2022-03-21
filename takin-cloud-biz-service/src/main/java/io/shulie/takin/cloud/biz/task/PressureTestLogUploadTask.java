@@ -1,25 +1,26 @@
 package io.shulie.takin.cloud.biz.task;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Date;
 import java.util.Objects;
+import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.concurrent.TimeUnit;
 
-import io.shulie.takin.cloud.biz.service.log.PushLogService;
 import io.shulie.takin.cloud.biz.utils.FileFetcher;
-import io.shulie.takin.cloud.common.constants.SceneManageConstant;
-import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
+import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
+import io.shulie.takin.cloud.biz.service.log.PushLogService;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
+import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
-import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
 import io.shulie.takin.cloud.data.model.mysql.ScenePressureTestLogUploadEntity;
-import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
+import io.shulie.takin.cloud.data.dao.scene.task.SceneTaskPressureTestLogUploadDAO;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -34,25 +35,30 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 public class PressureTestLogUploadTask implements Runnable {
 
     private Long sceneId;
-
     private Long reportId;
-
     private Long tenantId;
-
+    private String logDir;
+    private String fileName;
+    private PushLogService pushLogService;
+    private SceneManageDAO sceneManageDAO;
+    private EngineCallExtApi engineCallExtApi;
+    private StringRedisTemplate stringRedisTemplate;
     private SceneTaskPressureTestLogUploadDAO logUploadDAO;
 
-    private StringRedisTemplate stringRedisTemplate;
-
-    private PushLogService pushLogService;
-
-    private SceneManageDAO sceneManageDAO;
-
-    private String logDir;
-
-    private String fileName;
-
-    private EngineCallExtApi engineCallExtApi;
-
+    /**
+     * 构造函数
+     *
+     * @param sceneId             场景主键
+     * @param reportId            报告主键
+     * @param tenantId            租户主键
+     * @param logUploadDAO        日志上传DAO
+     * @param stringRedisTemplate redis操作类
+     * @param pushLogService      日志上传服务
+     * @param sceneManageDAO      场景管理DAO
+     * @param logDir              日志目录
+     * @param fileName            文件名称
+     * @param engineCallExtApi    引擎插件
+     */
     public PressureTestLogUploadTask(Long sceneId, Long reportId, Long tenantId,
         SceneTaskPressureTestLogUploadDAO logUploadDAO, StringRedisTemplate stringRedisTemplate,
         PushLogService pushLogService, SceneManageDAO sceneManageDAO,
@@ -75,6 +81,9 @@ public class PressureTestLogUploadTask implements Runnable {
 
     private static final int MAX_WAIT_TIME = 1500;
 
+    /**
+     * 上传PTL文件
+     */
     private void uploadPtlFile() {
         String filePath = String.format(logDir + "/ptl/%s/%s/%s", this.sceneId, this.reportId, fileName);
         log.info("上传压测明细日志--文件路径：{}", filePath);
@@ -160,6 +169,11 @@ public class PressureTestLogUploadTask implements Runnable {
         }
     }
 
+    /**
+     * 清除缓存
+     *
+     * @param fileName 文件名称
+     */
     private void cleanCache(String fileName) {
         String statusKey = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", this.sceneId,
             this.reportId);
@@ -171,32 +185,40 @@ public class PressureTestLogUploadTask implements Runnable {
     }
 
     /**
-     * 记录上传的行数
+     * 缓存记录上传的行数
      *
-     * @param fileName -
-     * @param position -
+     * @param fileName 文件名称
+     * @param position 点位
      */
     private void cacheFileUploadedPosition(String fileName, Long position) {
         stringRedisTemplate.opsForHash().put(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
             String.format("%s_%s_%s", this.sceneId, this.reportId, fileName),
-            position);
+            String.valueOf(position));
     }
 
     /**
-     * 获取上传的位置
+     * 获取文件位点
      *
-     * @param fileName -
+     * @param fileName 文件名称
      * @return -
      */
     private Long getPosition(String fileName) {
-        Object position = stringRedisTemplate.opsForHash().get(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
-            String.format("%s_%s_%s", this.sceneId, this.reportId, fileName));
+        Object position = stringRedisTemplate.opsForHash()
+            .get(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
+                String.format("%s_%s_%s", this.sceneId, this.reportId, fileName));
         if (Objects.isNull(position)) {
             return 0L;
         } else {
             return Long.parseLong(position.toString());
         }
     }
+
+    /**
+     * 获取文件大小
+     *
+     * @param file 文件路径
+     * @return 除非文件存在且是一个文件(不是文件夹), 否则返回0
+     */
 
     private long getFileSize(File file) {
         if (file.exists() && file.isFile()) {
@@ -206,8 +228,10 @@ public class PressureTestLogUploadTask implements Runnable {
     }
 
     /**
+     * 场景是否结束
+     *
      * @param sceneId 场景主键
-     * @return 是否启用
+     * @return true/false
      */
     private boolean isSceneEnded(Long sceneId) {
         SceneManageEntity manageResult = this.sceneManageDAO.getSceneById(sceneId);
@@ -221,10 +245,10 @@ public class PressureTestLogUploadTask implements Runnable {
     /**
      * 从指定定行数开始，读取文件的剩余内容
      *
-     * @param position -
-     * @param filePath -
+     * @param position 点位信息
+     * @param filePath 文件路径
      * @return -
-     * @throws IOException -
+     * @throws IOException IO异常
      */
     private byte[] readFile(File file, String subFileName, Long position, String filePath, FileFetcher fileFetcher,
         long pushSize)
@@ -247,8 +271,8 @@ public class PressureTestLogUploadTask implements Runnable {
     /**
      * 创建上传记录
      *
-     * @param fileName -
-     * @param fileSize -
+     * @param fileName 文件名称
+     * @param fileSize 文件大小
      */
     private void createUploadRecord(Long sceneId, Long reportId, Long tenantId, String fileName, Long fileSize) {
         log.info("上传压测明细日志--文件【{}】上传完成，创建上传记录", fileName);
@@ -271,6 +295,12 @@ public class PressureTestLogUploadTask implements Runnable {
         }
     }
 
+    /**
+     * 获取文件
+     *
+     * @param filePath 文件路径
+     * @return 除非文件存在且是一个文件(不是文件夹), 否则返回null
+     */
     private File getFile(String filePath) {
         File file = new File(filePath);
         if (file.exists() && file.isFile()) {
@@ -279,6 +309,9 @@ public class PressureTestLogUploadTask implements Runnable {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void run() {
         long beginTime = System.currentTimeMillis();
