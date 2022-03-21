@@ -226,7 +226,7 @@ public class FileController {
                 //String sourcePMd5 = MD5Utils.getInstance().getMD5(sourceP);
                 //String md5 = redisTemplate.opsForValue().get(CACHE_NAME+sourcePMd5);
 
-                redisTemplate.opsForValue().set(CACHE_NAME+targetPMd5, Md5Util.md5File(f));
+                redisTemplate.opsForValue().set(CACHE_NAME+targetPMd5, MD5Utils.getInstance().getMD5(f));
             }
         } catch (IOException e) {
             log.error("异常代码【{}】,异常内容：文件复制异常 --> 异常信息: {}",
