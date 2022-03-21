@@ -32,6 +32,22 @@ import java.util.Date;
 public class SignCommonUtil {
 
 
+    private static SignCommonUtil instance;
+
+    private SignCommonUtil() {
+    }
+
+    public static SignCommonUtil getInstance() {
+        if (instance == null) {
+            synchronized(SignCommonUtil.class) {
+                if (instance == null) {
+                    instance = new SignCommonUtil();
+                }
+            }
+        }
+        return instance;
+    }
+
     public void setSign(MappedStatement mappedStatement, Object parameterObject, Statement statement, BoundSql boundSql) throws IllegalAccessException, SQLException, JSQLParserException {
 
 
