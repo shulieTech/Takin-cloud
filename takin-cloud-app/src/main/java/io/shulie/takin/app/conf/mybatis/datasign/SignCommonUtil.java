@@ -12,6 +12,7 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.update.Update;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.TypeHandlerRegistry;
@@ -137,7 +138,7 @@ public class SignCommonUtil {
                                 value = Boolean.FALSE.equals(value) ? "0" : "1";
                             }
                             String valueSet = String.valueOf(value).replaceAll("\\?", "!@#¥%");
-                            sql = sql.replaceFirst("\\?", "'" + valueSet + "'");
+                            sql= StringUtils.replaceOnce(sql,"?","'" + valueSet + "'");
                         }
                     }
                 }
