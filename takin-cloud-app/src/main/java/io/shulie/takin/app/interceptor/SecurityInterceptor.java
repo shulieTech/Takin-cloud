@@ -83,7 +83,7 @@ public class SecurityInterceptor implements HandlerInterceptor{
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
-        logger.info("api securityHandle:" +request.getRequestURI());
+//        logger.info("api securityHandle:" +request.getRequestURI());
         if(request.getRequestURI().contains("/api/")){
             if(checkSign(request)) {
                 return true;
