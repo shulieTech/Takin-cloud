@@ -316,9 +316,18 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             nodes.stream().filter(Objects::nonNull)
                 .forEach(n -> countPressure(n, pressureMap, results));
         }
-        //如果是老版本的，统计ALL
+        //如果是老版本的，统计ALL的saCount
         else {
-            //todo 排除事务控制器的数据，如何判断是否为事务控制器
+            int allSaCount = results.stream().filter(Objects::nonNull)
+                .filter(item -> !ReportConstants.ALL_BUSINESS_ACTIVITY.equalsIgnoreCase(item.getTransaction()))
+                .map(PressureOutput::getSaCount)
+                .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+                .sum();
+            results.stream().filter(Objects::nonNull)
+                .filter(item -> ReportConstants.ALL_BUSINESS_ACTIVITY.equalsIgnoreCase(item.getTransaction()))
+                .forEach(item ->{
+                    item.setSaCount(allSaCount);
+                });
         }
         results.stream().filter(Objects::nonNull)
             .map(p -> InfluxUtil.toPoint(measurement, time, p))
@@ -435,7 +444,6 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         double sa = NumberUtil.getPercentRate(saCount, count);
         double successRate = NumberUtil.getPercentRate(Math.max(0, count - failCount), count);
         double avgRt = NumberUtil.getRate(sumRt, count);
-
         PressureOutput output = new PressureOutput();
         output.setTime(time);
         output.setTransaction(node.getXpathMd5());

@@ -3,7 +3,6 @@ package io.shulie.takin.cloud.common.influxdb;
 import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
 
-import io.shulie.takin.cloud.common.utils.CollectorUtil;
 import org.influxdb.BuilderException;
 import org.influxdb.annotation.Column;
 import org.influxdb.dto.Point;

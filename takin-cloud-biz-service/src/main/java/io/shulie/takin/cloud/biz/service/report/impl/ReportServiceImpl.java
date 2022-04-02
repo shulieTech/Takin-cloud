@@ -598,6 +598,7 @@ public class ReportServiceImpl implements ReportService {
                 bean.setDistribute(getDistributes(detail.getRtDistribute()));
                 bean.setApplicationIds(detail.getApplicationIds());
                 bean.setActivityId(detail.getBusinessActivityId());
+                bean.setSa(new DataBean(detail.getSa(),detail.getTargetSa()));
                 return bean;
             }).collect(Collectors.toList());
     }

@@ -139,7 +139,7 @@ public class ReportController {
         try {
             String key = JSON.toJSONString(reportTrendQuery);
             ReportTrendResp data;
-            if (stringRedisTemplate.hasKey(key)) {
+            if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
                 data = JSON.parseObject(stringRedisTemplate.opsForValue().get(key), ReportTrendResp.class);
                 if (Objects.isNull(data)
                     || CollectionUtils.isEmpty(data.getConcurrent())
