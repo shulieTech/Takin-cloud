@@ -1318,7 +1318,8 @@ public class ReportServiceImpl implements ReportService {
 
         String engineName = ScheduleConstants.getEngineName(reportResult.getSceneId(), reportResult.getId(),
             reportResult.getTenantId());
-        Long eTime = Long.valueOf(stringRedisTemplate.opsForValue().get(engineName + ScheduleConstants.LAST_SIGN));
+        String cacheString = stringRedisTemplate.opsForValue().get(engineName + ScheduleConstants.LAST_SIGN);
+        Long eTime = cacheString == null ? null : Long.valueOf(cacheString);
         Date curDate;
         if (eTime != null) {
             curDate = new Date(eTime);
