@@ -3,6 +3,7 @@ package io.shulie.takin.app.conf.mybatis.datasign;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.ReflectUtil;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.utils.security.MD5Utils;
@@ -61,17 +62,9 @@ public class SignCommonUtil {
 
             if (SqlCommandType.INSERT.equals(mappedStatement.getSqlCommandType())) {
                 //新增方法获取id
-                Field[] fields = clz.getDeclaredFields();
-                Long id = null;
-                for (Field field : fields) {
-                    if (!field.isAccessible()) {
-                        field.setAccessible(true);
-                    }
-
-                    if (field.getName().equals("id")) {
-                        id = Long.valueOf(field.get(parameterObject).toString());
-                    }
-                }
+                Field idField = ReflectUtil.getField(clz, "id");
+                idField.setAccessible(true);
+                long id = Long.parseLong(idField.get(parameterObject).toString());
                 Insert insert = (Insert) CCJSqlParserUtil.parse(boundSql.getSql());
                 String tableName = insert.getTable().getName();
                 String whereStr = " where id = " + id;
