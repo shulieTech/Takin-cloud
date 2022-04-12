@@ -80,7 +80,7 @@ public class PreparedStatementHandler extends BaseStatementHandler {
         PreparedStatement ps = (PreparedStatement) statement;
         ps.execute();
         SignCommonUtil signCommonUtil = SignCommonUtil.getInstance();
-        signCommonUtil.validSign(mappedStatement,ps);
+        signCommonUtil.validSign(mappedStatement,ps,boundSql);
         ps.execute();
         return resultSetHandler.handleResultSets(ps);
     }

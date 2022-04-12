@@ -4,6 +4,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ReflectUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
@@ -257,18 +258,14 @@ public class SignCommonUtil {
                 map.remove("CREATE_TIME");
                 String sign = MD5Utils.getInstance().getMD5(MapUtil.sort(map).toString());
                 if (!oldSign.equals(sign)) {
-                    valid = false;
-                    break;
+                    log.error("【数据签名异常】-【pre-update-check】 sql:{}",querySql);
+                    throw new TakinCloudException(TakinCloudExceptionEnum.DATA_SIGN_ERROR, "数据签名异常,请联系管理员!");
                 }
-            }
-
-            if (!valid) {
-                throw new TakinCloudException(TakinCloudExceptionEnum.DATA_SIGN_ERROR, "数据签名异常,请联系管理员!");
             }
         }
     }
 
-    public void validSign(MappedStatement mappedStatement, PreparedStatement ps) throws SQLException {
+    public void validSign(MappedStatement mappedStatement, PreparedStatement ps,BoundSql boundSql) throws SQLException {
         List<ResultMap> resultMaps = mappedStatement.getResultMaps();
         if(resultMaps.size() == 0){
             return;
@@ -299,17 +296,11 @@ public class SignCommonUtil {
 
                 String sign = MD5Utils.getInstance().getMD5(MapUtil.sort(map).toString());
                 if (!oldSign.equals(sign)) {
-                    log.info("select sign info1:"+MapUtil.sort(map).toString());
-                    log.info("select sign info2:"+oldSign);
-                    valid = false;
-                    break;
+                    log.error("【数据签名异常】-【select】 map:{} , sql:{}", JSON.toJSONString(map),boundSql.getSql());
+                    throw new TakinCloudException(TakinCloudExceptionEnum.DATA_SIGN_ERROR, "数据签名异常,请联系管理员!");
+
                 }
             }
-
-            if (!valid) {
-                throw new TakinCloudException(TakinCloudExceptionEnum.DATA_SIGN_ERROR,"数据签名异常,请联系管理员!");
-            }
-
         }
     }
 
