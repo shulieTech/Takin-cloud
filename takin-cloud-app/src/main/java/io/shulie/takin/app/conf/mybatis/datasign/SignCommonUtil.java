@@ -89,6 +89,7 @@ public class SignCommonUtil {
                 map.remove("gmt_create");
                 map.remove("gmt_modified");
                 map.remove("gmt_update");
+                map.remove("upload_time");
                 map.remove("create_time");
                 map.remove("update_time");
                 map.remove("UPDATE_TIME");
@@ -159,6 +160,7 @@ public class SignCommonUtil {
                     map.remove("create_time");
                     map.remove("update_time");
                     map.remove("UPDATE_TIME");
+                    map.remove("upload_time");
                     map.remove("CREATE_TIME");
                     String sign = MD5Utils.getInstance().getMD5(MapUtil.sort(map).toString());
                     String id;
@@ -252,6 +254,7 @@ public class SignCommonUtil {
                 map.remove("gmt_create");
                 map.remove("gmt_modified");
                 map.remove("gmt_update");
+                map.remove("upload_time");
                 map.remove("create_time");
                 map.remove("update_time");
                 map.remove("UPDATE_TIME");
@@ -292,6 +295,7 @@ public class SignCommonUtil {
                 map.remove("create_time");
                 map.remove("update_time");
                 map.remove("UPDATE_TIME");
+                map.remove("upload_time");
                 map.remove("CREATE_TIME");
 
                 String sign = MD5Utils.getInstance().getMD5(MapUtil.sort(map).toString());
