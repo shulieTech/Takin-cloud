@@ -66,7 +66,7 @@ public interface TReportMapper {
      * @param updateStatus 报告状态
      * @return 操作结果
      */
-    int updateReportStatus(@Param("param") UpdateStatusBean updateStatus);
+    int updateReportStatus(UpdateStatusBean updateStatus);
 
     /**
      * 更新报告锁信息
