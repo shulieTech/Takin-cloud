@@ -58,6 +58,8 @@
         <module>takin-cloud-entrypoint</module>
         <module>takin-cloud-ext</module>
         <module>takin-cloud-plugins</module>
+        <module>build</module>
+
     </modules>
 
 
