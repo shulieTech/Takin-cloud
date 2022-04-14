@@ -4,12 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import javax.annotation.Resource;
+
 import io.shulie.takin.cloud.common.constants.SceneManageConstant;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,8 +21,8 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class FileWriteService {
-    @Autowired
-    private RedisClientUtils redisClientUtils;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Value("${script.path}")
     private String filePath;
@@ -35,11 +36,9 @@ public class FileWriteService {
      */
     public synchronized Long calculateStartPos(String fileSceneUniqueKey, long requirePos) {
         //每次获取新位置
-        Object dbPos = redisClientUtils.getObject(fileSceneUniqueKey);
+        String dbPos = stringRedisTemplate.opsForValue().get(fileSceneUniqueKey);
         long startPos = 0L;
-        if (dbPos != null) {
-            startPos = Long.parseLong(dbPos.toString());
-        }
+        if (dbPos != null) {startPos = Long.parseLong(dbPos);}
         return startPos;
 
     }
@@ -61,7 +60,7 @@ public class FileWriteService {
         /*
          * 抢占字节数组占用的位置
          */
-        redisClientUtils.incrementAndNotExpire(builder.toString(), bytes.length);
+        stringRedisTemplate.opsForValue().increment(builder.toString(), bytes.length);
         String path = filePath + SceneManageConstant.FILE_SPLIT + sceneId + SceneManageConstant.FILE_SPLIT + filename;
 
         if (!exitFile(path)) {

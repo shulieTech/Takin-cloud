@@ -5,7 +5,6 @@ import java.util.Arrays;
 import javax.annotation.Resource;
 
 import io.shulie.takin.app.Application;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.data.mapper.mysql.MiddlewareJarMapper;
 import io.shulie.takin.cloud.data.param.middleware.CreateMiddleWareJarParam;
 import lombok.extern.slf4j.Slf4j;
@@ -22,25 +21,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class MiddlewareJarServiceTest {
-    @Resource(type = RedisClientUtils.class)
-    private RedisClientUtils redisClientUtils;
     @Resource(type = MiddlewareJarMapper.class)
     private MiddlewareJarMapper middlewareJarMapper;
-
-    @Test
-    public void testRedis() {
-        //Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent(
-        //    String.format(TryRunConstants.UPLOAD_TASK_STATUS + "_%d_%d_%s", 2L, 1L, "test"), 1L,
-        //    TryRunConstants.DEFAULT_EXPIRE_TIME,
-        //    TimeUnit.MINUTES);
-        //log.info(ifAbsent);
-    }
-
-    @Test
-    public void testSetString() {
-        redisClientUtils.setString("a", "b");
-        redisClientUtils.delete("a");
-    }
 
     @Test
     public void testByDeleteByAvgListBatch() {

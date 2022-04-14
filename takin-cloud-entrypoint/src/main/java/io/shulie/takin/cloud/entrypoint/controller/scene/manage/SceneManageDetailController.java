@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.entrypoint.controller.scene.manage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -33,6 +34,7 @@ import io.shulie.takin.cloud.entrypoint.convert.SceneSlaRefRespConvertor;
 import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.sdk.model.common.TimeBean;
+import io.shulie.takin.cloud.sdk.model.common.TimeUnitEnum;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivityDetailResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivityDetailResponse;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneDetailResponse;
@@ -317,10 +319,13 @@ public class SceneManageDetailController {
                 ThreadGroupConfigExt tgConfig = map.get("all");
                 if (null != tgConfig) {
                     response.setPressureMode(tgConfig.getMode());
+                    response.setStep(tgConfig.getSteps());
                     if (null != tgConfig.getRampUp()) {
-                        TimeBean time = new TimeBean(tgConfig.getRampUp().longValue(), tgConfig.getRampUpUnit());
-                        response.setIncreasingSecond(time.getSecondTime());
-                        response.setIncreasingTime(time);
+                        long time = TimeUnit.MINUTES.convert(tgConfig.getRampUp().longValue(),
+                            TimeUnitEnum.value(tgConfig.getRampUpUnit()).getUnit());
+                        TimeBean increasingTime = new TimeBean(time, TimeUnitEnum.MINUTE.getValue());
+                        response.setIncreasingSecond(increasingTime.getSecondTime());
+                        response.setIncreasingTime(increasingTime);
                     }
                 }
             }

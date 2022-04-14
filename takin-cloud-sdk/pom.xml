@@ -6,13 +6,13 @@
     <parent>
         <groupId>io.shulie.takin</groupId>
         <artifactId>takin-cloud</artifactId>
-        <version>5.2.3</version>
+        <version>5.2.5</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <name>takin-cloud-sdk</name>
     <artifactId>takin-cloud-sdk</artifactId>
-    <version>5.2.3</version>
+    <version>5.2.5</version>
 
     <dependencies>
         <dependency>

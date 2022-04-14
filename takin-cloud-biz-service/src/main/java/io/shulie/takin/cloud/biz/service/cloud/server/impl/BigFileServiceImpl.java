@@ -52,7 +52,7 @@ public class BigFileServiceImpl implements BigFileService {
     private TSceneScriptRefMapper tSceneScriptRefMapper;
 
     @Resource
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Value("${script.temp.path}")
     private String tempPath;
@@ -230,9 +230,11 @@ public class BigFileServiceImpl implements BigFileService {
         String parentPath) {
         try {
             //进行文件块校验
-            Map<String, Part> entries = redisTemplate.opsForHash().entries(getKey(part.getUuid()));
-            for (String key : entries.keySet()) {
-                Part cachePart = entries.get(key);
+            Map<Object, Object> entries = redisTemplate.opsForHash().entries(getKey(part.getUuid()));
+            for (Object key : entries.keySet()) {
+                Object cacheData = entries.get(key);
+                Part cachePart = cacheData instanceof Part ? (Part)cacheData : null;
+                if (cachePart == null) {throw new RuntimeException("类型转换失败");}
                 String fileName = cachePart.getFileName();
                 File targetFile = new File(parentPath.concat("/").concat(fileName));
                 FileInputStream fileInputStream = new FileInputStream(targetFile);
@@ -244,9 +246,7 @@ public class BigFileServiceImpl implements BigFileService {
                 byte[] array = allocate.array();
                 String md5 = SecureUtil.md5().digestHex(array);
                 boolean result = cachePart.getMd5().equals(md5);
-                if (!result) {
-                    errors.add(cachePart);
-                }
+                if (!result) {errors.add(cachePart);}
             }
         } catch (Exception e) {
             throw new TakinCloudException(TakinCloudExceptionEnum.BIGFILE_UPLOAD_VERIFY_ERROR, "validator file exception", e);
@@ -295,7 +295,8 @@ public class BigFileServiceImpl implements BigFileService {
         updateParam.setUploadPath(filePath);
         setFileExt(part, updateParam);
         tSceneScriptRefMapper.updateByPrimaryKeySelective(updateParam);
-        //新方案：顺丰使用多块磁盘，提供对外接口进行文件拆分 lxr 2021.06.21
+        // lxr 2021.06.21
+        // 新方案：顺丰使用多块磁盘，提供对外接口进行文件拆分
         //fileSliceService.bigFileSlice(new BigFileSliceRequest(){{
         //    setRefId(dbData.getId());
         //    setFilePath(filePath);
@@ -341,7 +342,8 @@ public class BigFileServiceImpl implements BigFileService {
         setFileExt(part, insertParam);
         try {
             Long refId = tSceneScriptRefMapper.insertSelective(insertParam);
-            //新方案：顺丰使用多块磁盘，提供对外接口进行文件拆分 lxr 2021.06.21
+            // lxr 2021.06.21
+            // 新方案：顺丰使用多块磁盘，提供对外接口进行文件拆分
             //fileSliceService.bigFileSlice(new BigFileSliceRequest(){{
             //    setRefId(refId);
             //    setFilePath(filePath);

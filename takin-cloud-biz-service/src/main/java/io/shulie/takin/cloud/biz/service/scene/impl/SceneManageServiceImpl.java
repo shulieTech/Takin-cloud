@@ -70,7 +70,6 @@ import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.sdk.model.common.UploadFileDTO;
-import io.shulie.takin.cloud.common.redis.RedisClientUtils;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.CloudUpdateSceneFileRequest;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
@@ -104,6 +103,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -127,13 +127,13 @@ public class SceneManageServiceImpl implements SceneManageService {
     @Resource
     private SceneManageDAO sceneManageDAO;
     @Resource
-    private RedisClientUtils redisClientUtils;
-    @Resource
     private EnginePluginUtils enginePluginUtils;
     @Resource
     private TSceneManageMapper tSceneManageMapper;
     @Resource
     private TSceneSlaRefMapper tSceneSlaRefMapper;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
     @Resource
     private TSceneScriptRefMapper tSceneScriptRefMapper;
     @Resource
@@ -544,11 +544,11 @@ public class SceneManageServiceImpl implements SceneManageService {
                         bigFileStartPos.append(sceneScriptRef.getSceneId());
                         bigFileStartPos.append("-");
                         bigFileStartPos.append(sceneScriptRef.getFileName());
-                        redisClientUtils.delete(bigFileStartPos.toString());
+                        stringRedisTemplate.delete(bigFileStartPos.toString());
 
                         //删除总行数
                         bigFileStartPos.append("-NUM");
-                        redisClientUtils.delete(bigFileStartPos.toString());
+                        stringRedisTemplate.delete(bigFileStartPos.toString());
                     }
                 } catch (Exception e) {
                     log.error("异常代码【{}】,异常内容：大文件上传异常 --> 大文件删除对应的缓存异常: {}",
@@ -613,7 +613,7 @@ public class SceneManageServiceImpl implements SceneManageService {
                 {
                     // 1.从REDIS中取
                     String redisKey = engineName + ScheduleConstants.FIRST_SIGN;
-                    String dateTimeString = redisClientUtils.getString(redisKey);
+                    String dateTimeString = stringRedisTemplate.opsForValue().get(redisKey);
                     if (StrUtil.isNotBlank(dateTimeString)) {startTime = new Date(Long.parseLong(dateTimeString));}
                     // 2.设定为当前时间
                     else {startTime = new Date();}

@@ -1,11 +1,9 @@
 package io.shulie.takin.cloud.biz.collector.collector;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
@@ -51,15 +49,15 @@ public abstract class AbstractIndicators {
         //                    "   return 0\n" +
         "end";
     @Autowired
-    protected RedisTemplate redisTemplate;
+    protected SceneManageService sceneManageService;
     @Autowired
     protected EventCenterTemplate eventCenterTemplate;
-    @Autowired
-    protected SceneManageService sceneManageService;
+    @Resource
+    protected RedisTemplate<String, Object> redisTemplate;
     private DefaultRedisScript<Void> minRedisScript;
     private DefaultRedisScript<Void> maxRedisScript;
     private DefaultRedisScript<Void> unlockRedisScript;
-    private Expiration expiration = Expiration.seconds((int)CollectorConstants.REDIS_KEY_TIMEOUT);
+    private final Expiration expiration = Expiration.seconds((int)CollectorConstants.REDIS_KEY_TIMEOUT);
 
     /**
      * 压测场景强行关闭预留时间
@@ -83,12 +81,10 @@ public abstract class AbstractIndicators {
         return String.format("COLLECTOR:TASK:%s:%s:%S", sceneId, reportId, tenantId);
     }
 
-    public boolean lock(String key, String value) {
-
-        return (boolean)redisTemplate.execute((RedisCallback<Boolean>)connection -> {
+    public Boolean lock(String key, String value) {
+        return redisTemplate.execute((RedisCallback<Boolean>)connection -> {
             Boolean bl = connection.set(getLockPrefix(key).getBytes(), value.getBytes(), expiration,
                 RedisStringCommands.SetOption.SET_IF_ABSENT);
-            //connection.expire(key.getBytes(), EXPIREMSECS * 1000);
             return null != bl && bl;
         });
     }
@@ -119,18 +115,6 @@ public abstract class AbstractIndicators {
             return String.format("%s_%s", sceneId, reportId);
         }
         return String.format("%s_%s_%s", sceneId, reportId, tenantId);
-    }
-
-    public static String getRedisTpsLimitKey(Long sceneId, Long reportId, Long tenantId) {
-        return String.format("__REDIS_TPS_LIMIT_KEY_%s_%s_%s__", sceneId, reportId, tenantId);
-    }
-
-    public static String getRedisTpsAllLimitKey(Long sceneId, Long reportId, Long tenantId) {
-        return String.format("__REDIS_TPS_ALL_LIMIT_KEY_%s_%s_%s__", sceneId, reportId, tenantId);
-    }
-
-    public static String getRedisTpsPodNumKey(Long sceneId, Long reportId, Long tenantId) {
-        return String.format("__REDIS_TPS_POD_NUM_KEY_%s_%s_%s__", sceneId, reportId, tenantId);
     }
 
     /**
@@ -210,17 +194,9 @@ public abstract class AbstractIndicators {
         setTtl(key);
     }
 
-    protected void doubleSaveRedisMap(String key, String timestampPodNum, Double value) {
-        // 归纳
-        redisTemplate.opsForHash().put(key, timestampPodNum, value);
-        //redisTemplate.opsForValue().increment(key, value);
-        setTtl(key);
-    }
-
     protected void longSaveRedisMap(String key, String timestampPodNum, Long value) {
         // 归纳
         redisTemplate.opsForHash().put(key, timestampPodNum, value);
-        //redisTemplate.opsForValue().increment(key, value);
         setTtl(key);
     }
 
@@ -245,27 +221,20 @@ public abstract class AbstractIndicators {
         log.info("redis key:{} 超时时间:{} ", key, forceTime);
     }
 
-    protected void longCumulative(String key, Long value) {
-        redisTemplate.opsForValue().increment(key, value);
-        setTtl(key);
-    }
-
     protected void intSaveRedisMap(String key, String timestampPodNum, Integer value) {
         // 归纳 数据
-        redisTemplate.opsForHash().put(key, timestampPodNum, value);
-        // 计算 数据
-        //redisTemplate.opsForValue().increment(key, value);
         setTtl(key);
+        log.debug("无用的入参[value:{}]", value);
+        log.debug("无用的入参[timestampPodNum:{}]", timestampPodNum);
     }
 
     protected void setError(String key, String timestampPodNum, String value) {
         redisTemplate.opsForHash().put(key, timestampPodNum, value);
-        //redisTemplate.opsForValue().set(key, value);
         setTtl(key);
     }
 
     protected void setMax(String key, Long value) {
-        if (redisTemplate.hasKey(key)) {
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
             long temp = getEventTimeStrap(key);
             if (value > temp) {
                 redisTemplate.opsForValue().set(key, value);
@@ -276,7 +245,7 @@ public abstract class AbstractIndicators {
     }
 
     protected void setMin(String key, Long value) {
-        if (redisTemplate.hasKey(key)) {
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
             long temp = getEventTimeStrap(key);
             if (value < temp) {
                 redisTemplate.opsForValue().set(key, value);
@@ -299,26 +268,6 @@ public abstract class AbstractIndicators {
         redisTemplate.expire(key, CollectorConstants.REDIS_KEY_TIMEOUT, TimeUnit.SECONDS);
     }
 
-    protected Integer getIntValue(String key) {
-        // 数据进行集合
-        if (redisTemplate.hasKey(key) && redisTemplate.opsForHash().size(key) > 0) {
-            Map<String, Integer> map = redisTemplate.opsForHash().entries(key);
-            // 数据聚合
-            return map.values().stream().reduce(Integer::sum).orElse(0);
-        }
-        return null;
-    }
-
-    protected List<String> getStringValue(String key) {
-        // 数据进行集合
-        if (redisTemplate.hasKey(key) && redisTemplate.opsForHash().size(key) > 0) {
-            Map<String, String> map = redisTemplate.opsForHash().entries(key);
-            // 数据聚合
-            return new ArrayList<>(map.values());
-        }
-        return null;
-    }
-
     /**
      * 获取时间搓，取time 求min max
      *
@@ -329,24 +278,6 @@ public abstract class AbstractIndicators {
         Object object = redisTemplate.opsForValue().get(key);
         if (null != object) {
             return (long)object;
-        }
-        return null;
-    }
-
-    protected Long getLongValueFromMap(String key) {
-        if (redisTemplate.hasKey(key) && redisTemplate.opsForHash().size(key) > 0) {
-            Map<String, Object> map = redisTemplate.opsForHash().entries(key);
-            // 数据聚合
-            return map.values().stream().map(String::valueOf)
-                .map(Long::valueOf).reduce(Long::sum).orElse(0L);
-        }
-        return null;
-    }
-
-    protected Double getDoubleValue(String key) {
-        Object object = redisTemplate.opsForValue().get(key);
-        if (null != object) {
-            return Double.valueOf(String.valueOf(object));
         }
         return null;
     }

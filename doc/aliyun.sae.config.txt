@@ -1,4 +1,0 @@
-#微服务类型，目前支持k8s 或者aliyun-sae
-micro.type: k8s
-#压测引擎的空间名称
-pressure.engine.namespace: dev

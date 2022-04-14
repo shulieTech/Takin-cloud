@@ -1,11 +1,14 @@
 package io.shulie.takin.cloud.sdk.impl.file;
 
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 
 import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
+
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.collection.CollUtil;
 
 import org.springframework.stereotype.Service;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
@@ -24,7 +27,6 @@ import io.shulie.takin.cloud.sdk.model.request.filemanager.FileCreateByStringPar
 /**
  * @author shiyajian
  * @author 张天赐
- * create: 2020-10-19
  */
 @Service
 public class CloudFileApiImpl implements CloudFileApi {
@@ -77,8 +79,17 @@ public class CloudFileApiImpl implements CloudFileApi {
      */
     @Override
     public List<UploadResponse> upload(UploadRequest req) {
+        if (req == null) {
+            throw new RuntimeException("调用SDK进行文件上传时,请求不能为空");
+        }
+        if (StrUtil.isBlank(req.getFieldName())) {
+            throw new RuntimeException("调用SDK进行文件上传时,form表单名称不能为空");
+        }
+        if (CollUtil.isEmpty(req.getFileList())) {
+            throw new RuntimeException("调用SDK进行文件上传时,文件不能为空");
+        }
         return cloudApiSenderService.uploadFile(EntrypointUrl.join(EntrypointUrl.MODULE_FILE, EntrypointUrl.METHOD_FILE_UPLOAD),
-            req, "file", req.getFileList(), new TypeReference<ResponseResult<List<UploadResponse>>>() {}).getData();
+            req, req.getFieldName(), req.getFileList(), new TypeReference<ResponseResult<List<UploadResponse>>>() {}).getData();
     }
 
 }
