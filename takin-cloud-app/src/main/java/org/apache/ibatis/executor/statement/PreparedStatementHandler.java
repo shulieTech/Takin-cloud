@@ -1,17 +1,17 @@
 /**
- *    Copyright 2009-2018 the original author or authors.
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2009-2018 the original author or authors.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.ibatis.executor.statement;
 
@@ -29,19 +29,22 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.stereotype.Component;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 /**
- * @author  iaoyz
+ * @author iaoyz
  * 重写PreparedStatementHandler类，织入签名逻辑
  */
 @Component
 public class PreparedStatementHandler extends BaseStatementHandler {
 
 
-
-    public static void init(){
+    public static void init() {
     }
 
     public PreparedStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
@@ -52,14 +55,13 @@ public class PreparedStatementHandler extends BaseStatementHandler {
     @Override
     public int update(Statement statement) throws SQLException {
         PreparedStatement ps = (PreparedStatement) statement;
+        SignCommonUtil.getInstance().preCheckData(mappedStatement, boundSql.getParameterObject(), statement, boundSql);
         ps.execute();
         int rows = ps.getUpdateCount();
         Object parameterObject = boundSql.getParameterObject();
-
         KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
         keyGenerator.processAfter(executor, mappedStatement, ps, parameterObject);
-        SignCommonUtil signCommonUtil = SignCommonUtil.getInstance();
-        signCommonUtil.setSign(mappedStatement,parameterObject,statement,boundSql);
+        SignCommonUtil.getInstance().setSign(mappedStatement, parameterObject, statement, boundSql);
         return rows;
     }
 
@@ -71,7 +73,7 @@ public class PreparedStatementHandler extends BaseStatementHandler {
         Statement s1 = statement.getConnection().createStatement();
         List<BatchResult> batchResults = executor.flushStatements();
         List<Object> parameterObjects = batchResults.get(0).getParameterObjects();
-        SignCommonUtil.getInstance().setSign(mappedStatement,parameterObjects.get(0),s1,boundSql);
+        SignCommonUtil.getInstance().setSign(mappedStatement, parameterObjects.get(0), s1, boundSql);
     }
 
     @SneakyThrows
@@ -79,8 +81,7 @@ public class PreparedStatementHandler extends BaseStatementHandler {
     public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {
         PreparedStatement ps = (PreparedStatement) statement;
         ps.execute();
-        SignCommonUtil signCommonUtil = SignCommonUtil.getInstance();
-        signCommonUtil.validSign(mappedStatement,ps,boundSql);
+        SignCommonUtil.getInstance().validSign(mappedStatement, ps,boundSql);
         ps.execute();
         return resultSetHandler.handleResultSets(ps);
     }
