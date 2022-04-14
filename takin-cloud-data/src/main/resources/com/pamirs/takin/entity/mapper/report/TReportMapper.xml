@@ -252,12 +252,12 @@
         where id = #{id,jdbcType=BIGINT}
     </update>
 
-    <update id="updateReportStatus" parameterType="io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean" >
+    <update id="updateReportStatus">
         update t_report
-        set status = #{param.afterStatus,jdbcType=INTEGER}
-        where id = #{param.resultId,jdbcType=BIGINT}
+        set status = #{afterStatus,jdbcType=INTEGER}
+        where id = #{resultId,jdbcType=BIGINT}
         <if test="preStatus != null">
-            and status = #{param.preStatus,jdbcType=INTEGER}
+            and status = #{preStatus,jdbcType=INTEGER}
         </if>
     </update>
 
