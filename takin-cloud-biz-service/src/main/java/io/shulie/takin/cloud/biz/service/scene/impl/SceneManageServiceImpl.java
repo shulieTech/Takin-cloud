@@ -614,10 +614,7 @@ public class SceneManageServiceImpl implements SceneManageService {
                     // 2.设定为当前时间
                     else {startTime = new Date();}
                 }
-                reportMapper.updateById(new ReportEntity() {{
-                    setId(statusVO.getResultId());
-                    setStartTime(startTime);
-                }});
+                reportDao.updateReportStartTime(statusVO.getResultId(), startTime);
             }
 
             ReportResult recentlyReport = reportDao.getRecentlyReport(statusVO.getSceneId());

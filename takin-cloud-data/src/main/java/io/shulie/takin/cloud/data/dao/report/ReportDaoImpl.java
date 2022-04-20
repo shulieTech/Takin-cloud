@@ -192,10 +192,11 @@ public class ReportDaoImpl implements ReportDao {
     @Override
     public void updateReportStartTime(Long reportId, Date startTime) {
         ReportEntity entity = new ReportEntity();
-        entity.setId(reportId);
         entity.setStartTime(startTime);
         entity.setGmtUpdate(new Date());
-        reportMapper.updateById(entity);
+        reportMapper.update(entity, new LambdaQueryWrapper<ReportEntity>()
+            .eq(ReportEntity::getId, reportId)
+            .eq(ReportEntity::getStatus, 0));
     }
 
     /**
