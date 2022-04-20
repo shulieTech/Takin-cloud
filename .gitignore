@@ -1,27 +1,3 @@
-### Eclipse ###
-.externalToolBuilders
-.project
-.classpath
-.settings
-
-### IntelliJ IDEA ###
 .idea
 *.iml
-*.factorypath
-
-### Jrebel File ###
-*rebel.xml.bak
-*rebel.xml
-
-### Common ###
 **/target
-
-logs
-*/nullfake_table-eqbm0ohq06muhc7/
-**/static/*.*
-
-*.jar
-
-/plugins
-
-application-local.yml
