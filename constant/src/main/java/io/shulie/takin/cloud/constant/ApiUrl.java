@@ -30,4 +30,13 @@ public class ApiUrl {
      * 操作/事件 回调
      */
     public static final String CALLBACK = "/" + Terminology.CALLBACK;
+
+    /**
+     * 应用程序健康状态
+     */
+    public static final String HEALTH = "/" + "health";
+    /**
+     * 应用程序健康状态 - 健康检查
+     */
+    public static final String HEALTH_CHECKUP = HEALTH + "/checkUp";
 }
