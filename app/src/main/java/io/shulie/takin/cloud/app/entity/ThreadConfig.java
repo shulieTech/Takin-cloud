@@ -1,51 +1,43 @@
 package io.shulie.takin.cloud.app.entity;
 
+import java.util.HashMap;
+
 import lombok.Data;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 
 /**
- * 数据库实体隐射 - 任务
+ * 数据库实体隐射 - 线程组配置
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
-@TableName("t_job")
-public class Job {
+@TableName("t_thread_config")
+public class ThreadConfig {
     /**
      * 数据主键
      */
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 任务名称
+     * 任务主键
      */
-    private String name;
+    private Long jobId;
     /**
-     * 资源主键
+     * 关键字
      */
-    private Long resourceId;
+    private String ref;
     /**
-     * 任务持续时长
-     */
-    private Long duration;
-    /**
-     * 采样率
-     */
-    private Integer simpling;
-    /**
-     * 任务的运行模式
+     * 关键字
      */
     private Integer mode;
     /**
-     * 状态回调路径
+     * 配置内容
      */
-    private String callbackUrl;
-    /**
-     * 资源实例数量
-     */
-    private Integer resourceExampleNumber;
-
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private HashMap<String, Object> context;
 }

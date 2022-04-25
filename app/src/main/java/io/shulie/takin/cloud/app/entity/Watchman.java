@@ -7,28 +7,24 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 /**
- * 数据库实体隐射 - 任务实例
+ * 数据库实体隐射 - 调度器
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
-@TableName("t_job_example")
-public class JobExample {
+@TableName("t_watchman")
+public class Watchman {
     /**
      * 数据主键
      */
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 任务主键
+     * 关键词
      */
-    private Long jobId;
+    private String ref;
     /**
-     * 资源实例主键
+     * 关键词签名
      */
-    private Long resourceExampleId;
-    /**
-     * 任务持续时长
-     */
-    private Long duration;
+    private String refSign;
 }

@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.app.entity;
 
+import java.util.Date;
+
 import lombok.Data;
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -7,45 +9,44 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 /**
- * 数据库实体隐射 - 任务
+ * 数据库实体隐射 - 回调日志
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
-@TableName("t_job")
-public class Job {
+@TableName("t_callback_log")
+public class CallbackLog {
     /**
      * 数据主键
      */
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 任务名称
+     * 回调主键
      */
-    private String name;
+    private Long callbackId;
     /**
-     * 资源主键
+     * 请求路径
      */
-    private Long resourceId;
+    private String requesturl;
     /**
-     * 任务持续时长
+     * 请求数据
      */
-    private Long duration;
+    private byte[] requestData;
     /**
-     * 采样率
+     * 请求时间
      */
-    private Integer simpling;
+    private Date requestTime;
     /**
-     * 任务的运行模式
+     * 响应数据
      */
-    private Integer mode;
+    private byte[] responseData;
     /**
-     * 状态回调路径
+     * 响应时间
      */
-    private String callbackUrl;
+    private Date responseTime;
     /**
-     * 资源实例数量
+     * 是否完成
      */
-    private Integer resourceExampleNumber;
-
+    private Boolean complete;
 }

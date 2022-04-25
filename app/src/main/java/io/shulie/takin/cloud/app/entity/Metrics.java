@@ -1,19 +1,23 @@
 package io.shulie.takin.cloud.app.entity;
 
+import java.util.HashMap;
+
 import lombok.Data;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 
 /**
- * 数据库实体隐射 - 任务实例
+ * 数据库实体隐射 - 指标配置
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
-@TableName("t_job_example")
-public class JobExample {
+@TableName("t_metrics_config")
+public class Metrics {
     /**
      * 数据主键
      */
@@ -24,11 +28,12 @@ public class JobExample {
      */
     private Long jobId;
     /**
-     * 资源实例主键
+     * 关键词
      */
-    private Long resourceExampleId;
+    private String ref;
     /**
-     * 任务持续时长
+     * 配置内容
      */
-    private Long duration;
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private HashMap<String, Object> context;
 }
