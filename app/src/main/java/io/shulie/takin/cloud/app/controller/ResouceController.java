@@ -1,34 +1,25 @@
 package io.shulie.takin.cloud.app.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 
 import javax.annotation.Resource;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.Page;
-import com.github.pagehelper.PageInfo;
-import com.github.pagehelper.PageHelper;
 
-import io.shulie.takin.cloud.app.entity.ResourceExample;
-import io.shulie.takin.cloud.app.entity.ResourceExampleEvent;
-import io.shulie.takin.cloud.app.entity.WatchmanEvent;
-import io.shulie.takin.cloud.app.mapper.ResourceExampleEventMapper;
-import io.shulie.takin.cloud.app.mapper.ResourceExampleMapper;
-import io.shulie.takin.cloud.app.mapper.WatchmanEventMapper;
-import io.shulie.takin.cloud.app.mapper.WatchmanMapper;
+import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.service.ResourceService;
-import lombok.extern.slf4j.Slf4j;
+import io.shulie.takin.cloud.app.service.WatchmanService;
+import io.shulie.takin.cloud.app.model.response.ApiResult;
+import io.shulie.takin.cloud.app.model.request.ApplyResourceRequest;
 
-import io.shulie.takin.cloud.app.entity.Watchman;
-import io.shulie.takin.cloud.app.mapper.JobMapper;
+import lombok.extern.slf4j.Slf4j;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiOperation;
 
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,72 +35,49 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/resource")
 public class ResouceController {
     @Resource
-    JobMapper jobMapper;
-    @Resource
-    WatchmanMapper watchmanMapper;
-    @Resource
-    WatchmanEventMapper watchmanEventMapper;
-
-    @Resource
     ResourceService resourceService;
     @Resource
-    ResourceExampleEventMapper resourceExampleEventMapper;
+    WatchmanService watchmanService;
 
     @ApiOperation("调度器列表")
     @RequestMapping(value = "watchman/list", method = {RequestMethod.GET})
-    public Page<Watchman> watchmanList(@ApiParam("分页页码") Integer pageNumber, @ApiParam("分页容量") Integer pageSize) {
-        try (Page<Object> pageHelper = PageHelper.startPage(pageNumber, pageSize)) {
-            Page<Watchman> watchmanList = pageHelper.doSelectPage(() -> watchmanMapper.selectList(null));
-            PageInfo<Watchman> pageInfo = new PageInfo<>(watchmanList);
-            log.info("总数:{}", pageInfo);
-            return watchmanList;
+    public ApiResult watchmanList(
+        @ApiParam(value = "分页页码", required = true) Integer pageNumber,
+        @ApiParam(value = "分页容量", required = true) Integer pageSize) {
+        try (Page<Object> list = watchmanService.list(pageNumber, pageSize)) {
+            return ApiResult.success(list.getResult(), list.getTotal());
         }
     }
 
     @ApiOperation("调度器资源")
     @RequestMapping(value = "watchman/resource", method = {RequestMethod.GET})
-    public Object watchmanResource(@ApiParam("调度主键") Long watchmanId) {
-        // 找到最后一次上报的数据
-        try (Page<Object> pageHelper = PageHelper.startPage(1, 1)) {
-            // 查询条件 - 资源类型的上报
-            Wrapper<WatchmanEvent> wrapper = new LambdaQueryWrapper<WatchmanEvent>()
-                .orderByDesc(WatchmanEvent::getTime)
-                .eq(WatchmanEvent::getType, "")
-                .eq(WatchmanEvent::getWatchmanId, watchmanId);
-            // 执行SQL
-            Page<WatchmanEvent> watchmanEventList = pageHelper.doSelectPage(() -> watchmanEventMapper.selectList(wrapper));
-            if (watchmanEventList.size() > 0) {
-                // 组装返回数据
-                HashMap<String, Object> eventContext = watchmanEventList.get(0).getContext();
-                return eventContext.get("data");
-            }
-        }
-        return null;
+    public ApiResult watchmanResource(@ApiParam(value = "调度主键", required = true) Long watchmanId) {
+        return ApiResult.success(watchmanService.getResourceList(watchmanId));
     }
 
     @ApiOperation("压力机明细")
     @RequestMapping(value = "watchman/resource/example", method = {RequestMethod.GET})
-    public List<Object> watchmanResourceExample(@ApiParam("资源主键") Long resourceId) {
-        List<ResourceExample> resourceExamples = resourceService.listExample(resourceId);
-        List<Object> result = new ArrayList<>(resourceExamples.size());
-        resourceExamples.forEach(t -> {
-            // 找到最后一次上报的数据
-            try (Page<Object> pageHelper = PageHelper.startPage(1, 1)) {
-                // 查询条件 - 资源类型的上报
-                Wrapper<ResourceExampleEvent> wrapper = new LambdaQueryWrapper<ResourceExampleEvent>()
-                    .orderByDesc(ResourceExampleEvent::getTime)
-                    .eq(ResourceExampleEvent::getType, "")
-                    .eq(ResourceExampleEvent::getResourceExampleId, t.getId());
-                // 执行SQL
-                Page<WatchmanEvent> watchmanEventList = pageHelper.doSelectPage(() -> resourceExampleEventMapper.selectList(wrapper));
-                if (watchmanEventList.size() > 0) {
-                    // 组装返回数据
-                    HashMap<String, Object> eventContext = watchmanEventList.get(0).getContext();
-                    result.add(eventContext.get("data"));
-                }
-            }
-        });
-        return result;
+    public ApiResult watchmanResourceExample(@ApiParam("资源主键") Long resourceId) {
+        List<ResourceExampleEntity> resourceExampleList = resourceService.listExample(resourceId);
+        List<Object> result = new ArrayList<>(resourceExampleList.size());
+        resourceExampleList.forEach(t -> result.add(watchmanService.exampleOverview(t.getId())));
+        return ApiResult.success(result);
     }
 
+    @ApiOperation("资源校验")
+    @RequestMapping(value = "check", method = {RequestMethod.POST})
+    public ApiResult check(ApplyResourceRequest apply) {
+        return ApiResult.success(resourceService.check(apply));
+    }
+
+    @ApiOperation("资源锁定")
+    @RequestMapping(value = "lock", method = {RequestMethod.POST})
+    public ApiResult lock(@RequestBody ApplyResourceRequest apply,
+        @ApiParam(value = "回调地址", required = true) String callbackUrl) {
+        String resourceId = resourceService.lock(apply, callbackUrl);
+        // 预检失败，直接返回失败信息
+        if (resourceId == null) {return ApiResult.fail("[预检]资源不足");}
+        // 预检通过，直接返回资源主键。剩余的步骤通过异步回调处理
+        else {return ApiResult.success(resourceId);}
+    }
 }

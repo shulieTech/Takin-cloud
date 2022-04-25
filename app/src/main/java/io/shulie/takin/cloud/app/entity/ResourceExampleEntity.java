@@ -15,7 +15,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
  */
 @Data
 @TableName("t_resource_example")
-public class ResourceExample {
+public class ResourceExampleEntity {
     /**
      * 数据主键
      */

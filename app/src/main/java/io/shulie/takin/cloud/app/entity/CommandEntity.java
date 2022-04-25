@@ -17,8 +17,8 @@ import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
-@TableName("t_resource")
-public class Command {
+@TableName("t_command")
+public class CommandEntity {
     /**
      * 数据主键
      */

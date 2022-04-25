@@ -24,30 +24,9 @@ import static springfox.documentation.schema.AlternateTypeRules.newRule;
 public class Swagger {
 
     @Bean
-    public Docket jobApi() {
-        return new Docket(DocumentationType.OAS_30)
-            .apiInfo(jobApiInfo())
-            .groupName("资源")
-            .select()
-            .apis(RequestHandlerSelectors.basePackage("io.shulie.takin.cloud.app.controller"))
-            .paths(PathSelectors.ant("/job/**"))
-            .build();
-    }
-
-    public ApiInfo jobApiInfo() {
-        return new ApiInfo(
-            "Cloud-Api", "Cloud-新版-API", "5.6.0",
-            "https://www.shulie.io/",
-            new Contact("数列科技", "https://www.shulie.io/", "zhangtianci@shulie.io"),
-            "null", "https://www.shulie.io/",
-            new ArrayList<>(0)
-        );
-    }
-
-    @Bean
     public Docket commonApi() {
         return new Docket(DocumentationType.OAS_30)
-            .apiInfo(commonApiInfo())
+            .apiInfo(emptyInfo("通用模块"))
             .groupName("通用")
             .select()
             .apis(RequestHandlerSelectors.basePackage("io.shulie.takin.cloud.app.controller"))
@@ -55,12 +34,31 @@ public class Swagger {
             .build();
     }
 
-    public ApiInfo commonApiInfo() {
-        return new ApiInfo(
-            "Cloud-Api", "Cloud-新版-API", "5.6.0",
-            "https://www.shulie.io/",
-            new Contact("数列科技", "https://www.shulie.io/", "zhangtianci@shulie.io"),
-            "null", "https://www.shulie.io/",
+    @Bean
+    public Docket resourceApi() {
+        return new Docket(DocumentationType.OAS_30)
+            .apiInfo(emptyInfo("资源模块"))
+            .groupName("资源")
+            .select()
+            .apis(RequestHandlerSelectors.basePackage("io.shulie.takin.cloud.app.controller"))
+            .paths(PathSelectors.ant("/resource/**"))
+            .build();
+    }
+
+    @Bean
+    public Docket jobApi() {
+        return new Docket(DocumentationType.OAS_30)
+            .apiInfo(emptyInfo("任务模块"))
+            .groupName("任务")
+            .select()
+            .apis(RequestHandlerSelectors.basePackage("io.shulie.takin.cloud.app.controller"))
+            .paths(PathSelectors.ant("/job/**"))
+            .build();
+    }
+
+    public ApiInfo emptyInfo(String title) {
+        return new ApiInfo(title, "", "", "",
+            new Contact("", "", ""), "", "",
             new ArrayList<>(0)
         );
     }
