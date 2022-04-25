@@ -1,14 +1,12 @@
 package io.shulie.takin.cloud.app.controller;
 
-import java.util.HashMap;
-
-import io.shulie.takin.cloud.constant.ApiUrl;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import io.shulie.takin.cloud.app.model.response.ApiResult;
 
 /**
  * 健康检查接口
@@ -22,9 +20,7 @@ public class CommonController {
 
     @ApiOperation("健康检查")
     @RequestMapping(value = "health/checkup", method = {RequestMethod.GET})
-    public HashMap<String, Object> checkUp() {
-        return new HashMap<String, Object>(1) {{
-            put("time", System.currentTimeMillis());
-        }};
+    public ApiResult checkUp() {
+        return ApiResult.success(System.currentTimeMillis());
     }
 }
