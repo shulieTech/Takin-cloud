@@ -29,6 +29,8 @@
         <module>app</module>
         <module>sdk</module>
         <module>constant</module>
+        <!--    build放在最后    -->
+        <module>build</module>
     </modules>
     <dependencyManagement>
         <dependencies>
