@@ -19,6 +19,7 @@
         <lombok.version>1.18.22</lombok.version>
         <my-sql.version>8.0.28</my-sql.version>
         <swagger.version>3.0.0</swagger.version>
+        <pagehelper.version>5.3.0</pagehelper.version>
         <spring.boot.version>2.6.6</spring.boot.version>
         <mybatis-plus.version>3.5.1</mybatis-plus.version>
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
@@ -45,6 +46,11 @@
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${my-sql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.pagehelper</groupId>
+                <artifactId>pagehelper</artifactId>
+                <version>${pagehelper.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.baomidou</groupId>
