@@ -20,10 +20,9 @@ import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
 import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportActivityResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
 import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
-import io.swagger.models.auth.In;
-import io.shulie.takin.cloud.open.resp.report.ReportActivityResp;
 
 /**
  * @author 数列科技

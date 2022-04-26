@@ -151,7 +151,5 @@ public interface SceneManageService {
     ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update,
         Integer version);
 
-    ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update);
-
     List<SceneManageListOutput> getSceneByStatus(Integer status);
 }
