@@ -4,19 +4,21 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.springframework.stereotype.Service;
+
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+
 import io.shulie.takin.cloud.app.entity.JobEntity;
+import io.shulie.takin.cloud.app.mapper.JobMapper;
+import io.shulie.takin.cloud.app.service.JobService;
+import io.shulie.takin.cloud.app.service.CommandService;
+import io.shulie.takin.cloud.app.mapper.JobExampleMapper;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
+import io.shulie.takin.cloud.app.service.ResourceService;
+import io.shulie.takin.cloud.app.model.response.JobConfig;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
-import io.shulie.takin.cloud.app.mapper.JobExampleMapper;
-import io.shulie.takin.cloud.app.mapper.JobMapper;
-import io.shulie.takin.cloud.app.model.response.JobConfig;
-import io.shulie.takin.cloud.app.service.CommandService;
-import io.shulie.takin.cloud.app.service.JobService;
-import io.shulie.takin.cloud.app.service.ResourceService;
-import org.springframework.stereotype.Service;
 
 /**
  * 任务服务 - 实例
@@ -75,9 +77,8 @@ public class JobServiceImpl implements JobService {
      */
     @Override
     public void modifyConfig(long jobId, JobConfig context) {
-        long modifThreadConfigExampleId = jobId;
         // 1. 找到要修改的配置项
-        ThreadConfigExampleEntity threadConfigExampleEntity = jobConfigService.threadExampleItem(modifThreadConfigExampleId, context.getRef());
+        ThreadConfigExampleEntity threadConfigExampleEntity = jobConfigService.threadExampleItem(jobId, context.getRef());
         // 2. 如果没有则新增
         if (threadConfigExampleEntity == null) {
             ThreadConfigExampleEntity newThreadConfigExampleEntity = new ThreadConfigExampleEntity() {{
@@ -88,13 +89,22 @@ public class JobServiceImpl implements JobService {
             }};
             // 2.1 创建任务配置实例项
             jobConfigService.createThreadExample(newThreadConfigExampleEntity);
-            modifThreadConfigExampleId = newThreadConfigExampleEntity.getId();
-        } else {
+        }
+        // 存在即修改
+        else {
             // 2.1 更新任务配置实例项
-            jobConfigService.modifThreadConfigExample(modifThreadConfigExampleId, context.getMode(), context.getContext());
+            jobConfigService.modifThreadConfigExample(threadConfigExampleEntity.getId(), context.getMode(), context.getContext());
             // 2.2 下发命令
         }
         commandService.updateConfig(jobId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public JobEntity jobEntity(long jobId) {
+        return jobMapper.selectById(jobId);
     }
 
 }
