@@ -1,21 +1,29 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
 
 import cn.hutool.core.util.StrUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.shulie.takin.cloud.app.model.resource.Resource;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageInfo;
+import com.github.pagehelper.PageHelper;
 import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.mapper.ResourceMapper;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
+import io.shulie.takin.cloud.app.model.resource.Resource;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.WatchmanService;
+import io.shulie.takin.cloud.app.entity.ResourceExampleEvent;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleMapper;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.app.mapper.ResourceExampleEventMapper;
 import io.shulie.takin.cloud.app.model.request.ApplyResourceRequest;
 
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +46,9 @@ public class ResourceServiceImpl implements ResourceService {
     WatchmanService watchmanService;
     @javax.annotation.Resource
     ResourceExampleMapper resourceExampleMapper;
+    @javax.annotation.Resource
+    ResourceExampleEventMapper resourceExampleEventMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * {@inheritDoc}
@@ -127,6 +138,31 @@ public class ResourceServiceImpl implements ResourceService {
         }
         // end 预检失败则直接返回 NULL
         else {return null;}
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object exampleOverview(Long resourceExampleId) throws JsonProcessingException {
+        // 找到最后一次上报的数据
+        try (Page<Object> pageHelper = PageHelper.startPage(1, 1)) {
+            // 查询条件 - 资源类型的上报
+            Wrapper<ResourceExampleEvent> wrapper = new LambdaQueryWrapper<ResourceExampleEvent>()
+                .orderByDesc(ResourceExampleEvent::getTime)
+                .eq(ResourceExampleEvent::getType, "")
+                .eq(ResourceExampleEvent::getResourceExampleId, resourceExampleId);
+            // 执行SQL
+            PageInfo<ResourceExampleEvent> watchmanEventList = new PageInfo<>(resourceExampleEventMapper.selectList(wrapper));
+            if (watchmanEventList.getList().size() > 0) {
+                // 组装返回数据
+                // 组装返回数据
+                String eventContextString = watchmanEventList.getList().get(0).getContext();
+                HashMap<String, String> eventContext = objectMapper.readValue(eventContextString, new TypeReference<HashMap<String, String>>() {});
+                return eventContext.get("data");
+            }
+        }
+        return null;
     }
 
     /**

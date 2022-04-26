@@ -43,6 +43,7 @@ public interface JobService {
      *
      * @param taskId  任务主键
      * @param context 配置内容
+     * @throws JsonProcessingException JSON异常
      */
     void modifyConfig(long taskId, JobConfig context) throws JsonProcessingException;
 

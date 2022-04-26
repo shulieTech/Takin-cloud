@@ -1,15 +1,12 @@
 package io.shulie.takin.cloud.app.entity;
 
 import java.util.Date;
-import java.util.HashMap;
 
 import lombok.Data;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 
 /**
  * 数据库实体隐射 - 调度器事件
@@ -18,7 +15,7 @@ import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
  */
 @Data
 @TableName("t_watchman_event")
-public class WatchmanEvent {
+public class WatchmanEventEntity {
     /**
      * 数据主键
      */

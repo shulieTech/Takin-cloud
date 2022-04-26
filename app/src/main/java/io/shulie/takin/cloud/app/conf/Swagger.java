@@ -34,4 +34,13 @@ public class Swagger {
             .pathsToMatch("/job/**")
             .build();
     }
+
+    @Bean
+    public GroupedOpenApi watchmanApi() {
+        return GroupedOpenApi.builder()
+            .group("调度器模块")
+            .pathsToMatch("/watchman/**")
+            .build();
+    }
+
 }

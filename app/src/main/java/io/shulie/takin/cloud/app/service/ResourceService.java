@@ -26,6 +26,7 @@ public interface ResourceService {
      *
      * @param apply 资源申请信息
      * @return true/false
+     * @throws JsonProcessingException JSON异常
      */
     boolean check(ApplyResourceRequest apply) throws JsonProcessingException;
 
@@ -35,8 +36,18 @@ public interface ResourceService {
      * @param apply       资源申请信息
      * @param callbackUrl 资源状态变更的回调地址
      * @return true/false
+     * @throws JsonProcessingException JSON异常
      */
     String lock(ApplyResourceRequest apply, String callbackUrl) throws JsonProcessingException;
+
+    /**
+     * 资源实例概览
+     *
+     * @param resourceExampleId 资源实例主键
+     * @return 概览信息
+     * @throws JsonProcessingException JSON异常
+     */
+    Object exampleOverview(Long resourceExampleId) throws JsonProcessingException;
 
     /**
      * 获取数据对象 - 资源

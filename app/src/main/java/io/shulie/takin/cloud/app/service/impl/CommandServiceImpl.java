@@ -79,6 +79,7 @@ public class CommandServiceImpl implements CommandService {
      * @param type    命令类型
      * @param context 命令类容
      * @return 命令主键
+     * @throws JsonProcessingException JSON异常
      */
     private long create(Integer type, HashMap<String, Object> context) throws JsonProcessingException {
         CommandEntity commandEntity = new CommandEntity() {{

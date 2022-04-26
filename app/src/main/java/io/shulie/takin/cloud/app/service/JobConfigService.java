@@ -45,6 +45,7 @@ public interface JobConfigService {
      *
      * @param threadConfigExampleId 线程组配置实例主键
      * @param context               修改内容
+     * @throws JsonProcessingException JSON异常
      */
     void modifThreadConfigExample(long threadConfigExampleId, Integer mode, String context) throws JsonProcessingException;
 
