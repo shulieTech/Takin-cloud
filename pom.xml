@@ -15,9 +15,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!--    version    -->
+        <druid.version>1.1.17</druid.version>
         <hutool.version>5.7.22</hutool.version>
-        <lombok.version>1.18.22</lombok.version>
         <my-sql.version>8.0.28</my-sql.version>
+        <lombok.version>1.18.22</lombok.version>
         <redisson.version>3.17.0</redisson.version>
         <spring.doc.version>1.6.8</spring.doc.version>
         <pagehelper.version>5.3.0</pagehelper.version>
@@ -65,6 +66,11 @@
                 <artifactId>junit-jupiter</artifactId>
                 <version>${junit-jupiter.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springdoc</groupId>

@@ -1,18 +1,18 @@
 package io.shulie.takin.cloud.app.controller;
 
-import java.util.List;
-
 import javax.annotation.Resource;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import io.shulie.takin.cloud.app.entity.Job;
-import io.shulie.takin.cloud.app.mapper.JobMapper;
+import io.shulie.takin.cloud.app.service.JobService;
+import io.shulie.takin.cloud.app.model.response.ApiResult;
 
 /**
  * 任务
@@ -24,11 +24,32 @@ import io.shulie.takin.cloud.app.mapper.JobMapper;
 @RequestMapping("/job")
 public class JobController {
     @Resource
-    JobMapper jobMapper;
+    JobService jobService;
 
-    @Operation(summary = "任务列表")
-    @RequestMapping(value = "list", method = {RequestMethod.POST})
-    public List<Job> listAll() {
-        return jobMapper.selectList(null);
+    @Operation(summary = "启动任务")
+    @RequestMapping(value = "start", method = {RequestMethod.POST})
+    public ApiResult<String> start(@RequestBody Object info) {
+        return ApiResult.success(jobService.start(info));
+    }
+
+    @Operation(summary = "停止任务")
+    @RequestMapping(value = "stop", method = {RequestMethod.GET})
+    public ApiResult<?> stop(@Parameter(name = "任务主键") Long taskId) {
+        jobService.stop(taskId);
+        return ApiResult.success();
+    }
+
+    @Operation(summary = "查看配置")
+    @RequestMapping(value = "config/get", method = {RequestMethod.GET})
+    public ApiResult<Object> getConfig(@Parameter(name = "任务主键") Long taskId) {
+        return ApiResult.success(jobService.getConfig(taskId));
+    }
+
+    @Operation(summary = "修改配置")
+    @RequestMapping(value = "config/modify", method = {RequestMethod.POST})
+    public ApiResult<?> modifyConfig(@Parameter(name = "任务主键") Long taskId,
+        @RequestBody Object info) {
+        jobService.modifyConfig(taskId, info);
+        return ApiResult.success();
     }
 }

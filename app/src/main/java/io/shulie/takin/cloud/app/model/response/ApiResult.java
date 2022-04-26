@@ -3,6 +3,8 @@ package io.shulie.takin.cloud.app.model.response;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Api结果
  *
@@ -10,13 +12,18 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@SuppressWarnings("unused")
-public class ApiResult {
+@Schema(name = "Api结果")
+@SuppressWarnings({"unused", "rawtypes", "unchecked"})
+public class ApiResult<T> {
     private static final String SUCCESS_MESSAGE = "SUCCESS";
 
-    private Long total = null;
+    @Schema(name = "数据")
+    private T data = null;
+    @Schema(name = "描述")
     private String msg = null;
-    private Object data = null;
+    @Schema(name = "数据总数")
+    private Long total = null;
+    @Schema(name = "业务成功标识")
     private boolean success = false;
 
     /**
@@ -24,11 +31,8 @@ public class ApiResult {
      *
      * @return 成功的API结果
      */
-    public static ApiResult success() {
-        return new ApiResult() {{
-            setSuccess(true);
-            setMsg(SUCCESS_MESSAGE);
-        }};
+    public static <T> ApiResult<T> success() {
+        return success(null);
     }
 
     /**
@@ -37,8 +41,12 @@ public class ApiResult {
      * @param data 数据体
      * @return 成功的API结果
      */
-    public static ApiResult success(Object data) {
-        return success().setData(data);
+    public static <T> ApiResult<T> success(T data) {
+        return new ApiResult() {{
+            setData(data);
+            setSuccess(true);
+            setMsg(SUCCESS_MESSAGE);
+        }};
     }
 
     /**
@@ -48,7 +56,7 @@ public class ApiResult {
      * @param total 数据总条数
      * @return 成功的API结果
      */
-    public static ApiResult success(Object data, Long total) {
+    public static <T> ApiResult<T> success(T data, Long total) {
         return success(data).setTotal(total);
     }
 
@@ -59,8 +67,8 @@ public class ApiResult {
      * @param msg  成功信息
      * @return 成功的API结果
      */
-    public static ApiResult success(Object data, String msg) {
-        return success().setData(data).setMsg(msg);
+    public static <T> ApiResult<T> success(T data, String msg) {
+        return success(data).setMsg(msg);
     }
 
     /**
@@ -71,7 +79,7 @@ public class ApiResult {
      * @param msg   成功信息
      * @return 成功的API结果
      */
-    public static ApiResult success(Object data, Long total, String msg) {
+    public static <T> ApiResult<T> success(T data, Long total, String msg) {
         return success(data, total).setMsg(msg);
     }
 
