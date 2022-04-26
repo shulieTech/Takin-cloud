@@ -1,15 +1,17 @@
 package io.shulie.takin.cloud.sdk.model.response.report;
 
-import java.io.Serializable;
 import java.util.List;
 
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author moriarty
  */
 @Data
-public class ReportActivityResp implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class ReportActivityResp extends ContextExt {
 
     private Long sceneId;
 

@@ -8,6 +8,8 @@ import javax.annotation.Resource;
 import com.alibaba.fastjson.TypeReference;
 
 import io.shulie.takin.cloud.sdk.model.request.report.JtlDownloadReq;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailByIdsReq;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportActivityResp;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
@@ -246,5 +248,11 @@ public class CloudReportApiImpl implements CloudReportApi {
         return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_STATUS_BY_ID),
                 req, new TypeReference<ResponseResult<Integer>>() {}).getData();
 
+    }
+
+    @Override
+    public List<ReportActivityResp> getActivities(ReportDetailByIdsReq req) {
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_ACTIVITY_REPORT_IDS),
+            req, new TypeReference<ResponseResult<List<ReportActivityResp>>>() {}).getData();
     }
 }
