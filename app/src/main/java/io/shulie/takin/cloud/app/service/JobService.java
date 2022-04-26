@@ -1,5 +1,10 @@
 package io.shulie.takin.cloud.app.service;
 
+import java.util.List;
+
+import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
+import io.shulie.takin.cloud.app.model.response.JobConfig;
+
 /**
  * 任务服务
  *
@@ -28,7 +33,7 @@ public interface JobService {
      * @param taskId 任务主键
      * @return 配置内容
      */
-    Object getConfig(long taskId);
+    List<ThreadConfigExampleEntity> getConfig(long taskId);
 
     /**
      * 修改配置
@@ -36,5 +41,5 @@ public interface JobService {
      * @param taskId  任务主键
      * @param context 配置内容
      */
-    void modifyConfig(long taskId, Object context);
+    void modifyConfig(long taskId,  JobConfig context);
 }

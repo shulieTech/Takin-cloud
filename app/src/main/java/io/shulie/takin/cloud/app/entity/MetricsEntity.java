@@ -17,7 +17,7 @@ import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
  */
 @Data
 @TableName("t_metrics_config")
-public class Metrics {
+public class MetricsEntity {
     /**
      * 数据主键
      */

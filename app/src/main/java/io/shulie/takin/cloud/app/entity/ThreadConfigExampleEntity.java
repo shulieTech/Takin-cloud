@@ -17,7 +17,7 @@ import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
  */
 @Data
 @TableName("t_thread_config_example")
-public class ThreadConfigExample {
+public class ThreadConfigExampleEntity {
     /**
      * 数据主键
      */

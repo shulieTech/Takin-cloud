@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.app.mapper;
 
-import io.shulie.takin.cloud.app.entity.Job;
+import io.shulie.takin.cloud.app.entity.JobEntity;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
@@ -9,5 +9,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
-public interface JobMapper extends BaseMapper<Job> {
+public interface JobMapper extends BaseMapper<JobEntity> {
 }

@@ -8,14 +8,14 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
-import io.shulie.takin.cloud.app.entity.ResourceEntity;
-import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.mapper.ResourceMapper;
-import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.app.entity.ResourceEntity;
+import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleMapper;
+import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.model.request.ApplyResourceRequest;
 
 import org.springframework.stereotype.Service;
@@ -115,12 +115,26 @@ public class ResourceServiceImpl implements ResourceService {
                 }};
                 resourceExampleMapper.insert(resourceExampleEntity);
                 // 3. 下发命令
-                commandService.graspResource(resourceExampleEntity);
+                commandService.graspResource(resourceExampleEntity.getId());
             }
             // end 返回资源主键
             return resourceEntity.getId().toString();
         }
         // end 预检失败则直接返回 NULL
         else {return null;}
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ResourceEntity entity(long id) {
+        return resourceMapper.selectById(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ResourceExampleEntity exampleEntity(long id) {
+        return resourceExampleMapper.selectById(id);
     }
 }

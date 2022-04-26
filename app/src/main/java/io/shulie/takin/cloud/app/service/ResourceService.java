@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.app.service;
 
 import java.util.List;
 
+import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.model.request.ApplyResourceRequest;
 
@@ -35,4 +36,20 @@ public interface ResourceService {
      * @return true/false
      */
     String lock(ApplyResourceRequest apply, String callbackUrl);
+
+    /**
+     * 获取数据对象 - 资源
+     *
+     * @param id 数据主键
+     * @return Entity
+     */
+    ResourceEntity entity(long id);
+
+    /**
+     * 获取数据对象 - 资源实例
+     *
+     * @param id 数据主键
+     * @return Entity
+     */
+    ResourceExampleEntity exampleEntity(long id);
 }

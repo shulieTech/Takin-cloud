@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.app.controller;
 
 import javax.annotation.Resource;
 
+import io.shulie.takin.cloud.app.model.response.JobConfig;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.model.response.ApiResult;
+import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
 
 /**
  * 任务
@@ -48,7 +50,7 @@ public class JobController {
     @Operation(summary = "修改配置")
     @RequestMapping(value = "config/modify", method = {RequestMethod.POST})
     public ApiResult<?> modifyConfig(@Parameter(name = "任务主键") Long taskId,
-        @RequestBody Object info) {
+        @RequestBody JobConfig info) {
         jobService.modifyConfig(taskId, info);
         return ApiResult.success();
     }

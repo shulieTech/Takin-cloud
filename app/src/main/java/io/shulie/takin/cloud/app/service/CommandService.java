@@ -13,22 +13,36 @@ public interface CommandService {
     /**
      * 创建资源实例
      *
-     * @param entity 参数
+     * @param resourceExampleId 资源实例主键
      */
-    void graspResource(ResourceExampleEntity entity);
+    void graspResource(long resourceExampleId);
 
     /**
      * 释放资源实例
      *
-     * @param entity 参数
+     * @param resourceExampleId 资源实例主键
      */
-    void releaseResource(ResourceExampleEntity entity);
+    void releaseResource(long resourceExampleId);
 
     /**
      * 启动应用程序
      *
-     * @param obj 启动参数
+     * @param jobExampleId 任务实例主键
      */
-    void startApplication(Object obj);
+    void startApplication(long jobExampleId);
+
+    /**
+     * 停止应用程序
+     *
+     * @param jobExampleId 任务实例主键
+     */
+    void stopApplication(long jobExampleId);
+
+    /**
+     * 更新配置
+     *
+     * @param jobId 任务主键
+     */
+    void updateConfig(long jobId);
 
 }

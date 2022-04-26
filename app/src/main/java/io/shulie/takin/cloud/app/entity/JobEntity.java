@@ -13,7 +13,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
  */
 @Data
 @TableName("t_job")
-public class Job {
+public class JobEntity {
     /**
      * 数据主键
      */
