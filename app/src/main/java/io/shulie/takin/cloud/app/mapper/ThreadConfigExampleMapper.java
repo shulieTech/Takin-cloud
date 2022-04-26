@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.app.mapper;
 
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
 
 /**
@@ -8,5 +8,5 @@ import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
-public interface ThreadConfigExampleMapper extends IService<ThreadConfigExampleEntity> {
+public interface ThreadConfigExampleMapper extends BaseMapper<ThreadConfigExampleEntity> {
 }

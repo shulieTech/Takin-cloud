@@ -4,6 +4,8 @@ import java.util.HashMap;
 
 import javax.annotation.Resource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
 
@@ -31,6 +33,8 @@ public class CommandServiceImpl implements CommandService {
     ResourceService resourceService;
     @Resource
     CommandMapper commandMapper;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * {@inheritDoc}
@@ -76,10 +80,10 @@ public class CommandServiceImpl implements CommandService {
      * @param context 命令类容
      * @return 命令主键
      */
-    private long create(Integer type, HashMap<String, Object> context) {
+    private long create(Integer type, HashMap<String, Object> context) throws JsonProcessingException {
         CommandEntity commandEntity = new CommandEntity() {{
             setType(type);
-            setContext(context);
+            setContext(objectMapper.writeValueAsString(context));
         }};
         commandMapper.insert(commandEntity);
         return commandEntity.getId();

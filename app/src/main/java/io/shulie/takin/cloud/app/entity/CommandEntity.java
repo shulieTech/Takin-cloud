@@ -35,8 +35,7 @@ public class CommandEntity {
     /**
      * 命令内容
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
-    private HashMap<String, Object> context;
+    private String context;
     /**
      * ACK时间
      */
@@ -44,6 +43,5 @@ public class CommandEntity {
     /**
      * ACK内容
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
-    private HashMap<String, Object> ackContext;
+    private String ackContext;
 }

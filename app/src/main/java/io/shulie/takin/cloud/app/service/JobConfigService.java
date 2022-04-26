@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Collections;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.shulie.takin.cloud.app.entity.MetricsEntity;
 import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
@@ -45,7 +46,7 @@ public interface JobConfigService {
      * @param threadConfigExampleId 线程组配置实例主键
      * @param context               修改内容
      */
-    void modifThreadConfigExample(long threadConfigExampleId, Integer mode, HashMap<String, Object> context);
+    void modifThreadConfigExample(long threadConfigExampleId, Integer mode, String context) throws JsonProcessingException;
 
     /**
      * 创建指标配置

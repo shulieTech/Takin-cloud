@@ -3,18 +3,18 @@ package io.shulie.takin.cloud.app.service.impl;
 import java.util.List;
 import java.util.HashMap;
 
-import javax.annotation.Resource;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.app.entity.MetricsEntity;
-import io.shulie.takin.cloud.app.mapper.MetricsMapper;
 import io.shulie.takin.cloud.app.service.JobConfigService;
-import io.shulie.takin.cloud.app.mapper.ThreadConfigMapper;
 import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
-import io.shulie.takin.cloud.app.mapper.ThreadConfigExampleMapper;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
+import io.shulie.takin.cloud.app.service.mapper.MetricsMapperService;
+import io.shulie.takin.cloud.app.service.impl.mapper.ThreadConfigMapperServiceImpl;
+import io.shulie.takin.cloud.app.service.impl.mapper.ThreadConfigExampleMapperServiceImpl;
 
 /**
  * 任务配置服务 - 实例
@@ -24,19 +24,21 @@ import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
 @Slf4j
 @Service
 public class JobConfigServiceImpl implements JobConfigService {
-    @Resource
-    MetricsMapper metricsMapper;
-    @Resource
-    ThreadConfigMapper threadConfigMapper;
-    @Resource
-    ThreadConfigExampleMapper threadConfigExampleMapper;
+    @javax.annotation.Resource
+    MetricsMapperService metricsMapperService;
+    @javax.annotation.Resource
+    ThreadConfigMapperServiceImpl threadConfigMapperService;
+    @javax.annotation.Resource
+    ThreadConfigExampleMapperServiceImpl threadConfigExampleMapperService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * {@inheritDoc}
      */
     @Override
     public List<MetricsEntity> metricsList(long jobId) {
-        return metricsMapper.lambdaQuery()
+        return metricsMapperService.lambdaQuery()
             .eq(MetricsEntity::getJobId, jobId)
             .list();
     }
@@ -46,7 +48,7 @@ public class JobConfigServiceImpl implements JobConfigService {
      */
     @Override
     public List<ThreadConfigExampleEntity> threadList(long jobId) {
-        return threadConfigExampleMapper.lambdaQuery()
+        return threadConfigExampleMapperService.lambdaQuery()
             .eq(ThreadConfigExampleEntity::getJobId, jobId)
             .list();
     }
@@ -56,7 +58,7 @@ public class JobConfigServiceImpl implements JobConfigService {
      */
     @Override
     public ThreadConfigExampleEntity threadExampleItem(long jobId, String ref) {
-        return threadConfigExampleMapper.lambdaQuery()
+        return threadConfigExampleMapperService.lambdaQuery()
             .eq(ThreadConfigExampleEntity::getJobId, jobId)
             .eq(ThreadConfigExampleEntity::getRef, ref)
             .one();
@@ -66,11 +68,11 @@ public class JobConfigServiceImpl implements JobConfigService {
      * {@inheritDoc}
      */
     @Override
-    public void modifThreadConfigExample(long threadConfigExampleId,Integer mode, HashMap<String, Object> context) {
-        threadConfigExampleMapper.updateById(new ThreadConfigExampleEntity() {{
+    public void modifThreadConfigExample(long threadConfigExampleId, Integer mode, String context) throws JsonProcessingException {
+        threadConfigExampleMapperService.updateById(new ThreadConfigExampleEntity() {{
             setId(threadConfigExampleId);
             setMode(mode);
-            setContext(getContext());
+            setContext(context);
         }});
     }
 
@@ -79,7 +81,7 @@ public class JobConfigServiceImpl implements JobConfigService {
      */
     @Override
     public void createMetrics(List<MetricsEntity> metricsEntityList) {
-        metricsMapper.saveBatch(metricsEntityList);
+        metricsMapperService.saveBatch(metricsEntityList);
     }
 
     /**
@@ -87,7 +89,7 @@ public class JobConfigServiceImpl implements JobConfigService {
      */
     @Override
     public void createThread(List<ThreadConfigEntity> metricsEntityList) {
-        threadConfigMapper.saveBatch(metricsEntityList);
+        threadConfigMapperService.saveBatch(metricsEntityList);
     }
 
     /**
@@ -95,6 +97,6 @@ public class JobConfigServiceImpl implements JobConfigService {
      */
     @Override
     public void createThreadExample(List<ThreadConfigExampleEntity> threadConfigExampleEntityList) {
-        threadConfigExampleMapper.saveBatch(threadConfigExampleEntityList);
+        threadConfigExampleMapperService.saveBatch(threadConfigExampleEntityList);
     }
 }

@@ -39,6 +39,5 @@ public class WatchmanEvent {
     /**
      * 事件内容
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
-    private HashMap<String, Object> context;
+    private String context;
 }

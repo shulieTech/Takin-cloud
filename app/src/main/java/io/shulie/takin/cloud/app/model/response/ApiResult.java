@@ -12,18 +12,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Data
 @Accessors(chain = true)
-@Schema(name = "Api结果")
+@Schema(description = "Api结果")
 @SuppressWarnings({"unused", "rawtypes", "unchecked"})
 public class ApiResult<T> {
     private static final String SUCCESS_MESSAGE = "SUCCESS";
 
-    @Schema(name = "数据")
+    @Schema(description = "数据")
     private T data = null;
-    @Schema(name = "描述")
+    @Schema(description = "描述")
     private String msg = null;
-    @Schema(name = "数据总数")
+    @Schema(description = "数据总数")
     private Long total = null;
-    @Schema(name = "业务成功标识")
+    @Schema(description = "业务成功标识")
     private boolean success = false;
 
     /**

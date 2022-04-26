@@ -30,5 +30,5 @@ public class JobExampleEntity {
     /**
      * 任务持续时长
      */
-    private Long duration;
+    private Integer duration;
 }

@@ -1,20 +1,20 @@
 singleServerConfig:
-# 超时配置
+  # 超时配置
   timeout: 3000
   retryAttempts: 3
   retryInterval: 1500
   connectTimeout: 5000
   idleConnectionTimeout: 10000
-# 连接信息配置
+  # 连接信息配置
   database: 0
   clientName: null
   password: pamirs@2020
   address: "redis://192.168.1.129:6379"
-# 连接池配置
-  connectionPoolSize: 10
+  # 连接池配置
+  connectionPoolSize: 2
   dnsMonitoringInterval: 5000
-  connectionMinimumIdleSize: 5
-# 订阅配置
+  connectionMinimumIdleSize: 1
+  # 订阅配置
   subscriptionsPerConnection: 0
   subscriptionConnectionPoolSize: 0
   subscriptionConnectionMinimumIdleSize: 0

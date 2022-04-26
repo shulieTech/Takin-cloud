@@ -2,12 +2,12 @@ package io.shulie.takin.cloud.app.service.impl;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.shulie.takin.cloud.app.model.resource.Resource;
 import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.mapper.ResourceMapper;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
@@ -18,6 +18,7 @@ import io.shulie.takin.cloud.app.mapper.ResourceExampleMapper;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.model.request.ApplyResourceRequest;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,16 +26,17 @@ import org.springframework.stereotype.Service;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
+@Slf4j
 @Service
 public class ResourceServiceImpl implements ResourceService {
 
-    @Resource
+    @javax.annotation.Resource
     ResourceMapper resourceMapper;
-    @Resource
+    @javax.annotation.Resource
     CommandService commandService;
-    @Resource
+    @javax.annotation.Resource
     WatchmanService watchmanService;
-    @Resource
+    @javax.annotation.Resource
     ResourceExampleMapper resourceExampleMapper;
 
     /**
@@ -53,21 +55,24 @@ public class ResourceServiceImpl implements ResourceService {
      * {@inheritDoc}
      */
     @Override
-    public boolean check(ApplyResourceRequest apply) {
+    public boolean check(ApplyResourceRequest apply) throws JsonProcessingException {
         // 1. 声明需要的资源
         int number = apply.getNumber();
         Double requestCpu = ResourceUtil.convertCpu(apply.getCpu());
-        Integer requestMemory = ResourceUtil.convertMemory(apply.getCpu());
-        if (requestCpu == null || requestMemory == null) {return false;}
+        Long requestMemory = ResourceUtil.convertMemory(apply.getMemory());
+        if (requestCpu == null || requestMemory == null) {
+            log.warn("请求的资源值无法解析.({},{})", apply.getCpu(), apply.getMemory());
+            return false;
+        }
         // 2. 获取调度所属的资源列表
-        List<Object> resourceList = watchmanService.getResourceList(apply.getWatchmanId());
+        List<Resource> resourceList = watchmanService.getResourceList(apply.getWatchmanId());
         // 3. 循环判断每一个资源
         for (int i = 0; i < resourceList.size() && number > 0; i++) {
-            Object resource = resourceList.get(i);
+            Resource resource = resourceList.get(i);
             if (resource != null) {
                 // 4. 声明每个资源拥有的量化资源
-                Double spareCpu = ResourceUtil.convertCpu(resource.toString());
-                Integer spareMemory = ResourceUtil.convertMemory(resource.toString());
+                Double spareCpu = ResourceUtil.convertCpu(resource.getCpu().toString());
+                Long spareMemory = ResourceUtil.convertMemory(resource.getMemory().toString());
                 // 空值校验
                 if (spareCpu != null && spareMemory != null) {
                     // 5. 递减资源余量和申请的数量
@@ -87,7 +92,7 @@ public class ResourceServiceImpl implements ResourceService {
      * {@inheritDoc}
      */
     @Override
-    public String lock(ApplyResourceRequest apply, String callbackUrl) {
+    public String lock(ApplyResourceRequest apply, String callbackUrl) throws JsonProcessingException {
         // 0. 预检
         if (this.check(apply)) {
             // 1. 保存任务信息

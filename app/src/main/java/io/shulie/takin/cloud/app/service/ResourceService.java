@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.app.service;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.model.request.ApplyResourceRequest;
@@ -26,7 +27,7 @@ public interface ResourceService {
      * @param apply 资源申请信息
      * @return true/false
      */
-    boolean check(ApplyResourceRequest apply);
+    boolean check(ApplyResourceRequest apply) throws JsonProcessingException;
 
     /**
      * 校验资源
@@ -35,7 +36,7 @@ public interface ResourceService {
      * @param callbackUrl 资源状态变更的回调地址
      * @return true/false
      */
-    String lock(ApplyResourceRequest apply, String callbackUrl);
+    String lock(ApplyResourceRequest apply, String callbackUrl) throws JsonProcessingException;
 
     /**
      * 获取数据对象 - 资源

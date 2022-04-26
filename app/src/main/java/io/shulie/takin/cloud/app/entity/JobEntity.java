@@ -30,7 +30,7 @@ public class JobEntity {
     /**
      * 任务持续时长
      */
-    private Long duration;
+    private Integer duration;
     /**
      * 采样率
      */

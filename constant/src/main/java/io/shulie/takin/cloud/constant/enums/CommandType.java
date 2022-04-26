@@ -1,4 +1,4 @@
-package io.shulie.takin.cloud.constant;
+package io.shulie.takin.cloud.constant.enums;
 
 import lombok.Getter;
 

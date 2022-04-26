@@ -38,6 +38,5 @@ public class ThreadConfigEntity {
     /**
      * 配置内容
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
-    private HashMap<String, Object> context;
+        private String context;
 }

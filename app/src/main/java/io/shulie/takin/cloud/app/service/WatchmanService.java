@@ -2,9 +2,12 @@ package io.shulie.takin.cloud.app.service;
 
 import java.util.List;
 
-import com.github.pagehelper.Page;
-import io.shulie.takin.cloud.app.model.request.ApplyResourceRequest;
-import org.springframework.stereotype.Service;
+import com.github.pagehelper.PageInfo;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import io.shulie.takin.cloud.app.entity.Watchman;
+import io.shulie.takin.cloud.app.model.resource.Resource;
 
 /**
  * 调度服务
@@ -19,7 +22,7 @@ public interface WatchmanService {
      * @param pageSize   分页容量
      * @return 分页列表
      */
-    Page<Object> list(int pageNumber, int pageSize);
+    PageInfo<Watchman> list(int pageNumber, int pageSize);
 
     /**
      * 获取调度所属的资源列表
@@ -27,7 +30,7 @@ public interface WatchmanService {
      * @param watchmanId 调度主键
      * @return 资源列表
      */
-    List<Object> getResourceList(Long watchmanId);
+    List<Resource> getResourceList(Long watchmanId) throws JsonProcessingException;
 
     /**
      * 资源实例概览
@@ -35,6 +38,6 @@ public interface WatchmanService {
      * @param resourceExampleId 资源实例主键
      * @return 概览信息
      */
-    Object exampleOverview(Long resourceExampleId);
+    Object exampleOverview(Long resourceExampleId) throws JsonProcessingException;
 
 }

@@ -35,5 +35,5 @@ public class MetricsEntity {
      * 配置内容
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private HashMap<String, Object> context;
+    String context;
 }

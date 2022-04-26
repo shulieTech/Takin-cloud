@@ -12,6 +12,7 @@ public class ResourceUtil {
     private static final String CPU_UNIT_M = "m";
     private static final String MEMORY_UNIT_M = "M";
     private static final String MEMORY_UNIT_MI = "Mi";
+    private static final String MEMORY_UNIT_G = "G";
 
     /**
      * 转换CPU
@@ -23,11 +24,11 @@ public class ResourceUtil {
         if (NumberUtil.isNumber(cpu)) {
             return NumberUtil.parseDouble(cpu);
         } else if (cpu.endsWith(CPU_UNIT_C)) {
-            Double value = convertCpu(cpu.substring(0, cpu.length() - (CPU_UNIT_C.length() + 1)));
+            Double value = convertCpu(cpu.substring(0, cpu.length() - (CPU_UNIT_C.length())));
             if (value == null) {return null;}
             return value * 1000;
         } else if (cpu.endsWith(CPU_UNIT_M)) {
-            return convertCpu(cpu.substring(0, cpu.length() - (CPU_UNIT_M.length() + 1)));
+            return convertCpu(cpu.substring(0, cpu.length() - (CPU_UNIT_M.length())));
         } else {return null;}
     }
 
@@ -37,17 +38,21 @@ public class ResourceUtil {
      * @param memory 入参
      * @return 可量化的数值
      */
-    public static Integer convertMemory(String memory) {
-        if (NumberUtil.isInteger(memory)) {
-            return NumberUtil.parseInt(memory);
+    public static Long convertMemory(String memory) {
+        if (NumberUtil.isLong(memory)) {
+            return NumberUtil.parseLong(memory);
         } else if (memory.endsWith(MEMORY_UNIT_MI)) {
-            Integer value = convertMemory(memory.substring(0, memory.length() - (MEMORY_UNIT_MI.length() + 1)));
+            Long value = convertMemory(memory.substring(0, memory.length() - (MEMORY_UNIT_MI.length())));
             if (value == null) {return null;}
             return value * 1024 * 1024;
         } else if (memory.endsWith(MEMORY_UNIT_M)) {
-            Integer value = convertMemory(memory.substring(0, memory.length() - (MEMORY_UNIT_M.length() + 1)));
+            Long value = convertMemory(memory.substring(0, memory.length() - (MEMORY_UNIT_M.length())));
             if (value == null) {return null;}
             return value * 1000 * 1000;
+        } else if (memory.endsWith(MEMORY_UNIT_G)) {
+            Long value = convertMemory(memory.substring(0, memory.length() - (MEMORY_UNIT_G.length())) + "M");
+            if (value == null) {return null;}
+            return value * 1024;
         } else {return null;}
     }
 }

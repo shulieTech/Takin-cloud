@@ -1,8 +1,7 @@
 package io.shulie.takin.cloud.app.mapper;
 
-import io.shulie.takin.cloud.app.entity.JobExampleEntity;
-
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 
 /**
  * 任务实例 - MyBatisPlus
