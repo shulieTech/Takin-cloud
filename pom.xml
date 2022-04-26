@@ -18,9 +18,10 @@
         <hutool.version>5.7.22</hutool.version>
         <lombok.version>1.18.22</lombok.version>
         <my-sql.version>8.0.28</my-sql.version>
-        <swagger.version>3.0.0</swagger.version>
+        <redisson.version>3.17.0</redisson.version>
+        <spring.doc.version>1.6.8</spring.doc.version>
         <pagehelper.version>5.3.0</pagehelper.version>
-        <spring.boot.version>2.6.6</spring.boot.version>
+        <spring.boot.version>2.6.7</spring.boot.version>
         <mybatis-plus.version>3.5.1</mybatis-plus.version>
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
     </properties>
@@ -66,9 +67,21 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-boot-starter</artifactId>
-                <version>${swagger.version}</version>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-ui</artifactId>
+                <version>${spring.doc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-boot-starter</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
