@@ -1,4 +1,4 @@
-package io.shulie.takin.cloud.common.utils.redis;
+package io.shulie.takin.cloud.common.redis;
 
 import java.util.List;
 import java.util.Map;
