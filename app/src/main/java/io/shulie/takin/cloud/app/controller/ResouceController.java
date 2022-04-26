@@ -68,7 +68,7 @@ public class ResouceController {
 
     @Operation(summary = "资源校验")
     @RequestMapping(value = "check", method = {RequestMethod.POST})
-    public ApiResult<Boolean> check(ApplyResourceRequest apply) throws JsonProcessingException {
+    public ApiResult<Boolean> check(@RequestBody ApplyResourceRequest apply) throws JsonProcessingException {
         return ApiResult.success(resourceService.check(apply));
     }
 
