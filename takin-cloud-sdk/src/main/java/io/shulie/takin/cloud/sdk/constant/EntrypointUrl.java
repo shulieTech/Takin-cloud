@@ -136,6 +136,7 @@ public class EntrypointUrl {
     public final static String METHOD_SCENE_MANAGE_GET_IP_NUMBER = "ip_num";
     public final static String METHOD_SCENE_MANAGE_CHECK_AND_UPDATE_SCRIPT = "checkAndUpdate/script";
     public final static String METHOD_SCENE_MANAGE_QUERY_BY_IDS = "query/ids";
+    public final static String METHOD_SCENE_MANAGE_QUERY_BY_STATUS = "query/status";
 
     /**
      * 模块 - 场景任务
