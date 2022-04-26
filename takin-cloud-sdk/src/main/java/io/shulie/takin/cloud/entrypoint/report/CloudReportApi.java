@@ -212,5 +212,5 @@ public interface CloudReportApi {
      */
     Integer getReportStatusById(ReportDetailByIdReq req);
 
-    List<ReportActivityResp> getActivities(ReportDetailByIdsReq req);
+    ResponseResult<List<ReportActivityResp>> getActivities(ReportDetailByIdsReq req);
 }
