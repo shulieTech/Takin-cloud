@@ -1600,4 +1600,42 @@ public class ReportServiceImpl implements ReportService {
         return report.getStatus();
     }
 
+
+    @Override
+    public List<ReportActivityResp> getNodeDetailBySceneIds(List<Long> sceneIds) {
+        if (CollectionUtils.isEmpty(sceneIds)){
+            return null;
+        }
+        List<ReportEntity> reportEntities = reportDao.queryReportBySceneIds(sceneIds);
+        if (CollectionUtils.isNotEmpty(reportEntities)){
+            List<Long> reportIds = CommonUtil.getList(reportEntities,ReportEntity::getId);
+            List<ReportBusinessActivityDetailEntity> activities = reportDao.getActivityByReportIds(reportIds);
+            if (CollectionUtils.isNotEmpty(activities)){
+                Map<Long, List<ReportBusinessActivityDetailEntity>> activityMap = activities.stream().filter(
+                    Objects::nonNull)
+                    .collect(Collectors.groupingBy(ReportBusinessActivityDetailEntity::getReportId));
+                return reportEntities.stream().filter(Objects::nonNull)
+                    .map(entity ->{
+                        ReportActivityResp resp = new ReportActivityResp();
+                        resp.setSceneId(entity.getSceneId());
+                        resp.setReportId(entity.getId());
+                        resp.setSceneName(entity.getSceneName());
+                        List<ReportBusinessActivityDetailEntity> details = activityMap.get(entity.getId());
+                        if (CollectionUtils.isNotEmpty(details)){
+                            List<BusinessActivity> activityList = details.stream().filter(Objects::nonNull)
+                                .filter(detail -> detail.getBusinessActivityId() > 0)
+                                .map(detail -> {
+                                    BusinessActivity activity = new BusinessActivity();
+                                    activity.setActivityName(detail.getBusinessActivityName());
+                                    activity.setBindRef(detail.getBindRef());
+                                    return activity;
+                                }).collect(Collectors.toList());
+                            resp.setBusinessActivityList(activityList);
+                        }
+                        return resp;
+                    }).collect(Collectors.toList());
+            }
+        }
+        return null;
+    }
 }

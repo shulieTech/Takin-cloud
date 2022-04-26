@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.data.dao.report;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Calendar;
 
@@ -12,6 +13,9 @@ import java.util.stream.Collectors;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Lists;
+import io.shulie.takin.cloud.common.utils.CommonUtil;
+import io.shulie.takin.cloud.data.param.report.ReportInsertParam;
+import org.springframework.beans.BeanUtils;
 import io.shulie.takin.cloud.data.param.report.ReportQueryParam.PressureTypeRelation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -251,5 +255,20 @@ public class ReportDaoImpl implements ReportDao {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<ReportEntity> queryReportBySceneIds(List<Long> sceneIds) {
+        if (CollectionUtils.isEmpty(sceneIds)){
+            return null;
+        }
+        return reportMapper.queryBySceneIds(sceneIds);
+    }
+
+    @Override
+    public List<ReportBusinessActivityDetailEntity> getActivityByReportIds(List<Long> reportIds) {
+        LambdaQueryWrapper<ReportBusinessActivityDetailEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(ReportBusinessActivityDetailEntity::getReportId,reportIds);
+        return detailMapper.selectList(wrapper);
     }
 }

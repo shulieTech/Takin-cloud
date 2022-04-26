@@ -67,6 +67,7 @@ import io.shulie.takin.cloud.common.enums.PressureModeEnum;
 import io.shulie.takin.cloud.common.enums.TimeUnitEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageErrorEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneQueryStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.sdk.model.common.UploadFileDTO;
@@ -982,6 +983,34 @@ public class SceneManageServiceImpl implements SceneManageService {
         }
         return null;
 
+    }
+
+    @Override
+    public List<SceneManageListOutput> getSceneByStatus(Integer status) {
+        if (Objects.isNull(status)){
+           return querySceneManageList();
+        }
+        SceneQueryStatusEnum statusByCode = SceneQueryStatusEnum.getStatusByCode(status);
+        if (statusByCode == SceneQueryStatusEnum.RUNNING){
+            List<SceneManageStatusEnum> working = SceneManageStatusEnum.getWorking();
+            List<Integer> statusCodeList = working.stream().map(SceneManageStatusEnum::getValue).collect(Collectors.toList());
+            SceneManageQueryBean queryBean = new SceneManageQueryBean();
+            queryBean.setStatusList(statusCodeList);
+            List<SceneManageEntity> sceneManageEntities = sceneManageDAO.queryScene(queryBean);
+            if (CollectionUtils.isNotEmpty(sceneManageEntities)){
+               return sceneManageEntities.stream().filter(Objects::nonNull)
+                    .map(entity ->{
+                        SceneManageListOutput output = new SceneManageListOutput();
+                        output.setId(entity.getId());
+                        output.setSceneName(entity.getSceneName());
+                        output.setStatus(entity.getStatus());
+                        return output;
+                    }).collect(Collectors.toList());
+            }else {
+                return null;
+            }
+        }
+        return null;
     }
 
     private SceneManageEntity getSceneManage(Long id) {
