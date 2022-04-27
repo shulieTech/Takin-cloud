@@ -1007,10 +1007,10 @@ public class SceneManageServiceImpl implements SceneManageService {
                         return output;
                     }).collect(Collectors.toList());
             }else {
-                return null;
+                return Lists.newArrayList();
             }
         }
-        return null;
+        return Lists.newArrayList();
     }
 
     private SceneManageEntity getSceneManage(Long id) {
