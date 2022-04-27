@@ -1,4 +1,4 @@
-package io.shulie.takin.cloud.app.model.callback;
+package io.shulie.takin.cloud.app.model.notify;
 
 import java.util.List;
 

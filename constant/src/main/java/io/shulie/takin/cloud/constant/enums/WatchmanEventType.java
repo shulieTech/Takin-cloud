@@ -23,5 +23,5 @@ public enum WatchmanEventType {
     ;
 
     private final Integer code;
-    private final String name;
+    private final String description;
 }

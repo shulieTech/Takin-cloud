@@ -25,7 +25,7 @@ import io.shulie.takin.cloud.app.model.resource.Resource;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.app.mapper.WatchmanEventMapper;
 import io.shulie.takin.cloud.app.entity.WatchmanEventEntity;
-import io.shulie.takin.cloud.app.model.callback.ResourceUpload;
+import io.shulie.takin.cloud.app.model.notify.ResourceUpload;
 import io.shulie.takin.cloud.app.service.mapper.WatchmanMapperService;
 
 /**

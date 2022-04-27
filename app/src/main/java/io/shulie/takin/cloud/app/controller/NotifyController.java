@@ -14,7 +14,7 @@ import io.shulie.takin.cloud.constant.enums.EventType;
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.shulie.takin.cloud.app.model.callback.ResourceUpload;
+import io.shulie.takin.cloud.app.model.notify.ResourceUpload;
 
 /**
  * 上报控制器

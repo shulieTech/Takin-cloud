@@ -1,6 +1,8 @@
-package io.shulie.takin.cloud.app.model.callback;
+package io.shulie.takin.cloud.app.model.callback.basic;
 
 import lombok.Data;
+
+import io.shulie.takin.cloud.constant.enums.CallbackType;
 
 /**
  * 基类
@@ -8,7 +10,7 @@ import lombok.Data;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
-public class Basic<T> {
+public abstract class Basic<T> {
     /**
      * 事件发生的时间
      */
@@ -25,4 +27,11 @@ public class Basic<T> {
      * 数据
      */
     private T data;
+
+    /**
+     * 上报类型
+     *
+     * @return 上报类型
+     */
+    public abstract CallbackType getType();
 }

@@ -8,6 +8,7 @@ import org.springframework.boot.Banner.Mode;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.system.ApplicationPid;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
@@ -16,6 +17,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Slf4j
+@EnableScheduling
 @SpringBootApplication
 @MapperScan("io.shulie.takin.cloud.app.mapper")
 public class Application {
