@@ -31,7 +31,7 @@ public class JobController {
 
     @Operation(summary = "启动任务")
     @RequestMapping(value = "start", method = {RequestMethod.POST})
-    public ApiResult<String> start(@RequestBody StartRequest info) {
+    public ApiResult<String> start(@RequestBody StartRequest info) throws JsonProcessingException {
         return ApiResult.success(jobService.start(info));
     }
 

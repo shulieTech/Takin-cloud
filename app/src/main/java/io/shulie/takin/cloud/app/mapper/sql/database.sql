@@ -1,4 +1,4 @@
-create table t_callback
+create table if not exists t_callback
 (
     id bigint auto_increment comment '主键'
         primary key,
@@ -9,7 +9,7 @@ create table t_callback
 )
     comment '回调表';
 
-create table t_callback_log
+create table if not exists t_callback_log
 (
     id bigint not null comment '主键',
     callback_id bigint not null comment '回调主键',
@@ -24,7 +24,7 @@ create table t_callback_log
 )
     comment '回调日志';
 
-create table t_command
+create table if not exists t_command
 (
     id bigint auto_increment comment '主键'
         primary key,
@@ -36,16 +36,18 @@ create table t_command
 )
     comment '命令表';
 
-create table t_watchman
+create table if not exists t_watchman
 (
     id bigint auto_increment comment '主键'
         primary key,
     ref varchar(512) charset utf8 not null comment '关键词',
-    ref_sign varchar(255) charset utf8 not null comment '关键词签名'
+    ref_sign varchar(255) charset utf8 not null comment '关键词签名',
+    constraint t_watchman_ref_sign_uindex
+        unique (ref_sign)
 )
     comment '调度器' auto_increment = 2;
 
-create table t_resource
+create table if not exists t_resource
 (
     id bigint auto_increment comment '主键'
         primary key,
@@ -60,9 +62,9 @@ create table t_resource
     constraint t_resource_t_watchman_id_fk
         foreign key (watchman_id) references t_watchman (id)
 )
-    comment '资源表' auto_increment = 5;
+    comment '资源表' auto_increment = 2;
 
-create table t_job
+create table if not exists t_job
 (
     id bigint auto_increment comment '主键'
         primary key,
@@ -71,14 +73,14 @@ create table t_job
     duration bigint not null comment '持续时间',
     sampling int not null comment '采样率',
     mode int not null comment '任务的运行模式',
-    callback_url int not null comment '状态回调接口路径',
+    callback_url varchar(1000) charset utf8 not null comment '状态回调接口路径',
     resource_example_number int not null comment '资源实例数量',
     constraint t_job_t_resource_id_fk
         foreign key (resource_id) references t_resource (id)
 )
-    comment '任务' auto_increment = 2;
+    comment '任务';
 
-create table t_metrics_config
+create table if not exists t_metrics_config
 (
     id bigint auto_increment comment '主键'
         primary key,
@@ -90,7 +92,7 @@ create table t_metrics_config
 )
     comment '指标信息';
 
-create table t_resource_example
+create table if not exists t_resource_example
 (
     id bigint auto_increment comment '主键'
         primary key,
@@ -104,14 +106,15 @@ create table t_resource_example
     constraint t_resource_example_t_resource_id_fk
         foreign key (resource_id) references t_resource (id)
 )
-    comment '资源实例表' auto_increment = 7;
+    comment '资源实例表' auto_increment = 2;
 
-create table t_job_example
+create table if not exists t_job_example
 (
     id bigint auto_increment comment '主键'
         primary key,
     job_id bigint not null comment '任务主键',
     resource_example_id bigint not null comment '资源实例主键',
+    name varchar(255) charset utf8 not null comment '名称',
     duration bigint not null comment '持续时长(毫秒)',
     constraint t_job_example_t_job_id_fk
         foreign key (job_id) references t_job (id),
@@ -120,7 +123,7 @@ create table t_job_example
 )
     comment '任务实例';
 
-create table t_resource_example_event
+create table if not exists t_resource_example_event
 (
     id bigint auto_increment comment '主键'
         primary key,
@@ -133,7 +136,7 @@ create table t_resource_example_event
 )
     comment '资源实例事件';
 
-create table t_thread_config
+create table if not exists t_thread_config
 (
     id bigint auto_increment comment '主键'
         primary key,
@@ -146,21 +149,23 @@ create table t_thread_config
 )
     comment '线程配置';
 
-create table t_thread_config_example
+create table if not exists t_thread_config_example
 (
     id bigint auto_increment comment '主键'
         primary key,
-    job_id bigint not null comment '任务实例主键',
+    serial_number int default 0 not null,
+    job_id int not null comment '任务主键',
+    job_example_id bigint not null comment '任务实例主键',
     ref varchar(255) charset utf8 not null comment '关键字',
-    model int not null comment '模式',
+    type int not null comment '类型',
     context json not null comment '线程配置',
     update_time timestamp null on update CURRENT_TIMESTAMP comment '修改时间',
-    constraint t_thread_config_example_t_job_id_fk
-        foreign key (job_id) references t_job (id)
+    constraint t_thread_config_example_t_job_example_id_fk
+        foreign key (job_example_id) references t_job_example (id)
 )
     comment '线程配置实例';
 
-create table t_watchman_event
+create table if not exists t_watchman_event
 (
     id int auto_increment comment '主键'
         primary key,

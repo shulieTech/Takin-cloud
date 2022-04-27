@@ -28,6 +28,10 @@ public class JobExampleEntity {
      */
     private Long resourceExampleId;
     /**
+     * 名称
+     */
+    private String name;
+    /**
      * 任务持续时长
      */
     private Integer duration;

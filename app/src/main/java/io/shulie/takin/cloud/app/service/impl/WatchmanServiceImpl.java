@@ -1,29 +1,32 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.Page;
+import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.PageHelper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
-import io.shulie.takin.cloud.app.service.mapper.WatchmanMapperService;
 import lombok.extern.slf4j.Slf4j;
-import com.github.pagehelper.PageInfo;
 import org.springframework.stereotype.Service;
 
+import io.shulie.takin.cloud.app.util.ResourceUtil;
+import io.shulie.takin.cloud.constant.enums.EventType;
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.model.resource.Resource;
 import io.shulie.takin.cloud.app.service.WatchmanService;
-import io.shulie.takin.cloud.app.entity.WatchmanEventEntity;
 import io.shulie.takin.cloud.app.mapper.WatchmanEventMapper;
-import io.shulie.takin.cloud.constant.enums.WatchmanEventType;
+import io.shulie.takin.cloud.app.entity.WatchmanEventEntity;
+import io.shulie.takin.cloud.app.model.callback.ResourceUpload;
+import io.shulie.takin.cloud.app.service.mapper.WatchmanMapperService;
 
 /**
  * 调度服务 - 实例
@@ -60,7 +63,7 @@ public class WatchmanServiceImpl implements WatchmanService {
             // 查询条件 - 资源类型的上报
             Wrapper<WatchmanEventEntity> wrapper = new LambdaQueryWrapper<WatchmanEventEntity>()
                 .orderByDesc(WatchmanEventEntity::getTime)
-                .eq(WatchmanEventEntity::getType, WatchmanEventType.RESOURCE.getCode())
+                .eq(WatchmanEventEntity::getType, EventType.WATCHMAN_UPLOAD.getCode())
                 .eq(WatchmanEventEntity::getWatchmanId, watchmanId);
             // 执行SQL
             PageInfo<WatchmanEventEntity> watchmanEventList = new PageInfo<>(watchmanEventMapper.selectList(wrapper));
@@ -93,13 +96,46 @@ public class WatchmanServiceImpl implements WatchmanService {
      */
     @Override
     public boolean register(String ref, String refSign) {
-        // TODO 签名校验
-        Long count = watchmanMapperService.lambdaQuery().eq(WatchmanEntity::getRefSign, refSign).count();
         // 已存在返回TRUE
-        if (count > 0) {return true;}
+        if (ofRefSign(refSign) != null) {return true;}
         return watchmanMapperService.save(new WatchmanEntity() {{
             setRef(ref);
             setRefSign(refSign);
+        }});
+    }
+
+    @Override
+    public WatchmanEntity ofRefSign(String refSign) {
+        // TODO 签名校验
+        return watchmanMapperService.lambdaQuery().eq(WatchmanEntity::getRefSign, refSign).one();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void upload(long watchmanId, ResourceUpload content) throws JsonProcessingException {
+        // resource -> 转换
+        List<String> errorMessage = new ArrayList<>(2);
+        List<Resource> resourceList = content.getData().stream().map(t -> new Resource() {{
+            Double cpu = ResourceUtil.convertCpu(t.getCpu());
+            Long memory = ResourceUtil.convertMemory(t.getMemory());
+            if (cpu == null) {errorMessage.add("无法解析的CPU值:" + t.getCpu());}
+            if (memory == null) {errorMessage.add("无法解析的内存值:" + t.getMemory());}
+            setCpu(cpu);
+            setMemory(memory);
+        }}).collect(Collectors.toList());
+        // 转换校验
+        if (errorMessage.size() > 0) {throw new RuntimeException(String.join(",", errorMessage));}
+        // 组装入库数据
+        HashMap<String, String> context = new HashMap<>(2);
+        context.put("time", content.getTime().toString());
+        context.put("data", objectMapper.writeValueAsString(resourceList));
+        // 插入数据库
+        watchmanEventMapper.insert(new WatchmanEventEntity() {{
+            setWatchmanId(watchmanId);
+            setType(EventType.WATCHMAN_UPLOAD.getCode());
+            setContext(objectMapper.writeValueAsString(context));
         }});
     }
 }

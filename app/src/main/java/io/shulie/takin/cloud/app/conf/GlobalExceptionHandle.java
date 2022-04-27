@@ -19,6 +19,10 @@ public class GlobalExceptionHandle {
         ApiResult<?> apiResult = ApiResult.fail(e.getMessage());
         if (e instanceof NullPointerException) {
             apiResult = ApiResult.fail("空指针");
+        } else if (e instanceof org.springframework.web.bind.MissingServletRequestParameterException) {
+            org.springframework.web.bind.MissingServletRequestParameterException exception = (org.springframework.web.bind.MissingServletRequestParameterException)e;
+            apiResult = ApiResult.fail("参数缺失-(" + exception.getParameterName() + ":" + exception.getParameterType() + ")");
+
         }
         return apiResult;
     }

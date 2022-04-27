@@ -1,7 +1,6 @@
 package io.shulie.takin.cloud.app.service.impl;
 
 import java.util.List;
-import java.util.HashMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,10 +67,10 @@ public class JobConfigServiceImpl implements JobConfigService {
      * {@inheritDoc}
      */
     @Override
-    public void modifThreadConfigExample(long threadConfigExampleId, Integer mode, String context) throws JsonProcessingException {
+    public void modifThreadConfigExample(long threadConfigExampleId, Integer type, String context) {
         threadConfigExampleMapperService.updateById(new ThreadConfigExampleEntity() {{
             setId(threadConfigExampleId);
-            setMode(mode);
+            setType(type);
             setContext(context);
         }});
     }

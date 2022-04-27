@@ -2,12 +2,12 @@ package io.shulie.takin.cloud.app.model.request;
 
 import java.util.List;
 
-import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 import lombok.Data;
 
-import io.shulie.takin.cloud.constant.enums.JobType;
-
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import io.shulie.takin.cloud.constant.enums.JobType;
+import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 
 /**
  * 请求体 - 启动
@@ -27,6 +27,8 @@ public class StartRequest {
     private Integer sampling;
     @Schema(description = "任务类型")
     private JobType type;
+    @Schema(description = "任务名称")
+    private String name;
     @Schema(description = "脚本文件(jmx)")
     private FileInfo scriptFile;
     @Schema(description = "运行时依赖文件(插件)")
@@ -68,12 +70,17 @@ public class StartRequest {
     @Data
     @Schema(description = "线程组配置")
     public static class ThreadConfigInfo {
-        @Schema(description = "持续时长")
-        private Integer duration;
         @Schema(description = "关键词")
         private String ref;
         @Schema(description = "线程组类型")
         private ThreadGroupType type;
+        // 附加参数
+        @Schema(description = "持续时长")
+        private Integer duration;
+        @Schema(description = "线程数")
+        private Integer number;
+        @Schema(description = "TPS值")
+        private Integer tps;
         @Schema(description = "增长时长")
         private Integer growthTime;
         @Schema(description = "增长步骤")

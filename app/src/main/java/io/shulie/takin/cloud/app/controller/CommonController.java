@@ -21,7 +21,7 @@ public class CommonController {
 
     @Operation(summary = "健康检查")
     @RequestMapping(value = "health/checkup", method = {RequestMethod.GET})
-    public ApiResult checkUp() {
+    public ApiResult<Long> checkUp() {
         return ApiResult.success(System.currentTimeMillis());
     }
 }

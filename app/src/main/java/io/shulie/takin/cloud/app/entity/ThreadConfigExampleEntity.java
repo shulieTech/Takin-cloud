@@ -1,14 +1,12 @@
 package io.shulie.takin.cloud.app.entity;
 
-import java.util.HashMap;
+import java.util.Date;
 
 import lombok.Data;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 
 /**
  * 数据库实体隐射 - 线程组配置实例
@@ -24,9 +22,17 @@ public class ThreadConfigExampleEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
+     * 分隔索引
+     */
+    private Integer serialNumber;
+    /**
      * 任务主键
      */
     private Long jobId;
+    /**
+     * 任务实例主键
+     */
+    private Long jobExampleId;
     /**
      * 关键字
      */
@@ -34,9 +40,13 @@ public class ThreadConfigExampleEntity {
     /**
      * 关键字
      */
-    private Integer mode;
+    private Integer type;
     /**
      * 配置内容
      */
     private String context;
+    /**
+     * 修改时间
+     */
+    private Date updateTime;
 }

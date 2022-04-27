@@ -7,6 +7,8 @@ import com.github.pagehelper.PageInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
+import io.shulie.takin.cloud.app.entity.WatchmanEventEntity;
+import io.shulie.takin.cloud.app.model.callback.ResourceUpload;
 import io.shulie.takin.cloud.app.model.resource.Resource;
 
 /**
@@ -42,4 +44,20 @@ public interface WatchmanService {
      */
     boolean register(String ref, String refSign);
 
+    /**
+     * 根据refSign获取调度信息
+     *
+     * @param refSign {@link WatchmanEntity#getRef}
+     * @return 调度信息 | null
+     */
+    WatchmanEntity ofRefSign(String refSign);
+
+    /**
+     * 资源上报
+     *
+     * @param watchmanId 调度主键
+     * @param context    上报内容
+     * @throws JsonProcessingException JSON异常
+     */
+    void upload(long watchmanId, ResourceUpload context) throws JsonProcessingException;
 }

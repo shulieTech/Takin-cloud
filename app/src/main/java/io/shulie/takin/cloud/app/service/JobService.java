@@ -20,8 +20,9 @@ public interface JobService {
      *
      * @param jobInfo 任务信息
      * @return 任务主键
+     * @throws JsonProcessingException JSON异常
      */
-    String start(StartRequest jobInfo);
+    String start(StartRequest jobInfo) throws JsonProcessingException;
 
     /**
      * 停止
