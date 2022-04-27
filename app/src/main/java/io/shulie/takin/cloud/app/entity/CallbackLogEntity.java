@@ -15,7 +15,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
  */
 @Data
 @TableName("t_callback_log")
-public class CallbackLog {
+public class CallbackLogEntity {
     /**
      * 数据主键
      */
@@ -28,7 +28,7 @@ public class CallbackLog {
     /**
      * 请求路径
      */
-    private String requesturl;
+    private String requestUrl;
     /**
      * 请求数据
      */

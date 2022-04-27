@@ -15,7 +15,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
  */
 @Data
 @TableName("t_callback")
-public class Callback {
+public class CallbackEntity {
     /**
      * 数据主键
      */
