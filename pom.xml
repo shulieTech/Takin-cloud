@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.shulie.takin</groupId>
     <artifactId>takin-cloud</artifactId>
-    <version>5.2.6</version>
+    <version>5.2.7</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
@@ -17,7 +17,7 @@
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssa</maven.build.timestamp.format>
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
         <!-- biz version -->
-        <takin.cloud.version>5.2.6</takin.cloud.version>
+        <takin.cloud.version>5.2.7</takin.cloud.version>
         <takin.common.version>common-2.0.0-SNAPSHOT</takin.common.version>
 
         <pardar.log.protocol.version>2.0.4</pardar.log.protocol.version>
@@ -219,6 +219,18 @@
         <developerConnection>https://github.com/shulieTech/Takin-cloud.git</developerConnection>
         <url>https://github.com/shulieTech/Takin-cloud.git</url>
     </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>rdc-releases</id>
+            <url>https://packages.aliyun.com/maven/repository/2101190-release-xxuvBf/</url>
+        </repository>
+        <snapshotRepository>
+            <id>rdc-snapshots</id>
+            <url>https://packages.aliyun.com/maven/repository/2101190-snapshot-EQD7pQ/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
 
     <build>
         <plugins>
