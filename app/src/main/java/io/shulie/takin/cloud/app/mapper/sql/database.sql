@@ -7,22 +7,23 @@ create table if not exists t_callback
     create_time timestamp default CURRENT_TIMESTAMP not null comment '创建时间',
     completed tinyint(1) default 0 not null comment '是否完成'
 )
-    comment '回调表';
+    comment '回调表' auto_increment = 2;
 
 create table if not exists t_callback_log
 (
-    id bigint not null comment '主键',
+    id bigint auto_increment comment '主键'
+        primary key,
     callback_id bigint not null comment '回调主键',
     request_url varchar(1000) charset utf8 not null comment '请求路径',
     request_data blob not null comment '请求数据',
     request_time timestamp default CURRENT_TIMESTAMP not null comment '请求时间',
     response_data blob null comment '响应数据',
-    response_time datetime not null comment '响应时间',
+    response_time datetime null comment '响应时间',
     completed tinyint(1) default 0 not null comment '是否完成',
     constraint t_callback_log_t_callback_id_fk
         foreign key (callback_id) references t_callback (id)
 )
-    comment '回调日志';
+    comment '回调日志' auto_increment = 3249;
 
 create table if not exists t_command
 (
@@ -45,7 +46,7 @@ create table if not exists t_watchman
     constraint t_watchman_ref_sign_uindex
         unique (ref_sign)
 )
-    comment '调度器' auto_increment = 2;
+    comment '调度器' auto_increment = 4;
 
 create table if not exists t_resource
 (
@@ -123,6 +124,19 @@ create table if not exists t_job_example
 )
     comment '任务实例';
 
+create table if not exists t_job_example_event
+(
+    id bigint auto_increment comment '主键'
+        primary key,
+    job_example_id bigint not null comment '任务实例主键',
+    type int not null comment '事件类型',
+    context json not null comment '事件内容',
+    time timestamp default CURRENT_TIMESTAMP not null comment '时间',
+    constraint t_resource_example_event_t_job_example_id_fk
+        foreign key (job_example_id) references t_job_example (id)
+)
+    comment '任务实例事件';
+
 create table if not exists t_resource_example_event
 (
     id bigint auto_increment comment '主键'
@@ -135,6 +149,33 @@ create table if not exists t_resource_example_event
         foreign key (resource_example_id) references t_resource_example (id)
 )
     comment '资源实例事件';
+
+create table if not exists t_sla
+(
+    id bigint auto_increment comment '任务实例'
+        primary key,
+    ref varchar(255) charset utf8 not null comment '关键词',
+    jobId bigint not null comment '任务主键',
+    formula_target int null comment '算式目标(RT、TPS、SA、成功率)',
+    formula_symbol int null comment '算式符号(>=、>、=、<=、<)',
+    formula_number double not null comment '算式数值(用户输入)',
+    constraint t_sla_t_job_id_fk
+        foreign key (jobId) references t_job (id)
+)
+    comment 'Service Level Agreement(服务等级协议)';
+
+create table if not exists t_sla_event
+(
+    id bigint auto_increment comment '任务实例'
+        primary key,
+    sla_id bigint not null comment 'sla主键',
+    formula_target int null comment '算式目标(RT、TPS、SA、成功率)',
+    formula_symbol int null comment '算式符号(>=、>、=、<=、<)',
+    formula_number double not null comment '算式数值(用户输入)',
+    constraint t_sla_event_t_sla_id_fk
+        foreign key (sla_id) references t_sla (id)
+)
+    comment 'sla触发记录';
 
 create table if not exists t_thread_config
 (
@@ -176,5 +217,8 @@ create table if not exists t_watchman_event
     constraint t_watchman_event_t_watchman_id_fk
         foreign key (watchman_id) references t_watchman (id)
 )
-    comment '调度器事件' auto_increment = 2;
+    comment '调度器事件' auto_increment = 9;
+
+create index t_watchman_event_time_index
+    on t_watchman_event (time);
 
