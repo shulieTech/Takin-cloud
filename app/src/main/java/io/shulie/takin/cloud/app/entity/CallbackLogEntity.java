@@ -48,5 +48,5 @@ public class CallbackLogEntity {
     /**
      * 是否完成
      */
-    private Boolean complete;
+    private Boolean completed;
 }

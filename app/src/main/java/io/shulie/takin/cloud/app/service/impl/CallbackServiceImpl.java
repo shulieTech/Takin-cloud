@@ -35,7 +35,7 @@ public class CallbackServiceImpl implements CallbackService {
     public PageInfo<CallbackEntity> list(int pageNumber, int pageSize, boolean isCompleted) {
         try (Page<Object> ignored = PageHelper.startPage(pageNumber, pageSize)) {
             List<CallbackEntity> sourceList = callbackMapperService.lambdaQuery()
-                .eq(CallbackEntity::getComplete, isCompleted)
+                .eq(CallbackEntity::getCompleted, isCompleted)
                 .list();
             return new PageInfo<>(sourceList);
         }
@@ -64,12 +64,12 @@ public class CallbackServiceImpl implements CallbackService {
             callbackLogMapper.updateById(new CallbackLogEntity() {{
                 setId(callbackLogId);
                 setResponseData(data);
-                setComplete(completed);
+                setCompleted(completed);
                 setResponseTime(new Date());
             }});
             // 更新回调的状态
             if (completed) {
-                callbackMapperService.lambdaUpdate().set(CallbackEntity::getComplete, true)
+                callbackMapperService.lambdaUpdate().set(CallbackEntity::getCompleted, true)
                     .eq(CallbackEntity::getId, callbackLogEntity.getCallbackId())
                     .update();
             }

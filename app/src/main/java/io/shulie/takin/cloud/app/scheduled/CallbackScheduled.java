@@ -53,8 +53,8 @@ public class CallbackScheduled {
             log.info("开始调度.共{}条,本地计划调度{}条", ready.getTotal(), ready.getSize());
             for (int i = 0; i < ready.getSize(); i++) {
                 CallbackEntity entity = ready.getList().get(i);
-                // 缓存校验
-                if (!cacheData.containsKey(entity.getId()) || !cacheData.get(entity.getId())) {
+                // 缓存校验 存在 并且是 False
+                if (cacheData.containsKey(entity.getId()) && Boolean.FALSE.equals(cacheData.get(entity.getId()))) {
                     log.warn("第{}条在缓存中了.\n{}", (i + 1), entity);
                     continue;
                 }
@@ -62,7 +62,8 @@ public class CallbackScheduled {
                 Exec exec = new Exec(entity, callbackService, cacheData);
                 // 提交到线程池运行
                 try {
-                    threadpool.submit(exec);
+                    //threadpool.submit(exec);
+                    exec.run();
                 } catch (RejectedExecutionException ex) {
                     log.warn("第{}条被线程池拒绝", (i + 1));
                 }
@@ -92,24 +93,29 @@ public class CallbackScheduled {
         public void run() {
             cache.put(entity.getId(), null);
             // 预插入Log
-            Long callbackLogId = service.createLog(entity.getId(), entity.getUrl(), entity.getContext());
-            if (callbackLogId == null) {log.warn("预创建回调日志失败.\n{}", entity);}
+            Long callbackLogId;
+            try {
+                callbackLogId = service.createLog(entity.getId(), entity.getUrl(), entity.getContext());
+            } catch (Exception e) {
+                log.warn("预创建回调日志失败.\n{}", entity);
+                cache.remove(entity.getId());
+                return;
+            }
             // 开始执行回调
-            else {
-                byte[] response;
-                try {
-                    response = HttpUtil
-                        .createPost(entity.getUrl())
-                        .body(entity.getContext())
-                        .execute()
-                        .bodyBytes();
-                    service.fillLog(callbackLogId, response);
-                    cache.put(entity.getId(), true);
-                } catch (Exception e) {
-                    cache.put(entity.getId(), false);
-                    log.error("单次过程失败.\n", e);
-                    service.fillLog(callbackLogId, ("Exception:\n" + e.getMessage()).getBytes(StandardCharsets.UTF_8));
-                }
+            byte[] response;
+            try {
+                response = HttpUtil
+                    .createPost(entity.getUrl())
+                    .setConnectionTimeout(3000)
+                    .body(entity.getContext())
+                    .execute()
+                    .bodyBytes();
+                service.fillLog(callbackLogId, response);
+                cache.put(entity.getId(), true);
+            } catch (Exception e) {
+                cache.put(entity.getId(), false);
+                log.error("单次过程失败.\n", e);
+                service.fillLog(callbackLogId, ("Exception:\n" + e.getMessage()).getBytes(StandardCharsets.UTF_8));
             }
         }
     }
