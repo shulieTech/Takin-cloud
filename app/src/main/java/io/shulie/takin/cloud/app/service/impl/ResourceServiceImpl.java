@@ -3,16 +3,18 @@ package io.shulie.takin.cloud.app.service.impl;
 import java.util.HashMap;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
+import com.github.pagehelper.Page;
 import cn.hutool.core.util.StrUtil;
+import com.github.pagehelper.PageInfo;
+import com.github.pagehelper.PageHelper;
+import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageInfo;
-import com.github.pagehelper.PageHelper;
 import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.mapper.ResourceMapper;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
@@ -20,14 +22,11 @@ import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.app.model.resource.Resource;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.WatchmanService;
-import io.shulie.takin.cloud.app.entity.ResourceExampleEvent;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleMapper;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.app.entity.ResourceExampleEventEntity;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleEventMapper;
 import io.shulie.takin.cloud.app.model.request.ApplyResourceRequest;
-
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 /**
  * 资源服务 - 实例
@@ -146,14 +145,14 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Object exampleOverview(Long resourceExampleId) throws JsonProcessingException {
         // 找到最后一次上报的数据
-        try (Page<Object> pageHelper = PageHelper.startPage(1, 1)) {
+        try (Page<Object> ignored = PageHelper.startPage(1, 1)) {
             // 查询条件 - 资源类型的上报
-            Wrapper<ResourceExampleEvent> wrapper = new LambdaQueryWrapper<ResourceExampleEvent>()
-                .orderByDesc(ResourceExampleEvent::getTime)
-                .eq(ResourceExampleEvent::getType, "")
-                .eq(ResourceExampleEvent::getResourceExampleId, resourceExampleId);
+            Wrapper<ResourceExampleEventEntity> wrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
+                .orderByDesc(ResourceExampleEventEntity::getTime)
+                .eq(ResourceExampleEventEntity::getType, "")
+                .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
             // 执行SQL
-            PageInfo<ResourceExampleEvent> watchmanEventList = new PageInfo<>(resourceExampleEventMapper.selectList(wrapper));
+            PageInfo<ResourceExampleEventEntity> watchmanEventList = new PageInfo<>(resourceExampleEventMapper.selectList(wrapper));
             if (watchmanEventList.getList().size() > 0) {
                 // 组装返回数据
                 // 组装返回数据
@@ -178,4 +177,5 @@ public class ResourceServiceImpl implements ResourceService {
     public ResourceExampleEntity exampleEntity(long id) {
         return resourceExampleMapper.selectById(id);
     }
+
 }

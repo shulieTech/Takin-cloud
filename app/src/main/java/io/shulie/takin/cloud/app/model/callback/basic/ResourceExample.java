@@ -8,7 +8,7 @@ import lombok.Data;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
-public class Jmeter {
+public class ResourceExample {
     /**
      * 任务主键
      */
@@ -18,11 +18,11 @@ public class Jmeter {
      */
     private long resourceId;
     /**
-     * 资源实例主键
-     */
-    private long resourceExampleId;
-    /**
      * 任务实例主键
      */
     private long jobExampleId;
+    /**
+     * 资源实例主键
+     */
+    private long resourceExampleId;
 }

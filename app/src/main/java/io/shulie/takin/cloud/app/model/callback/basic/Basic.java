@@ -11,6 +11,12 @@ import io.shulie.takin.cloud.constant.enums.CallbackType;
  */
 @Data
 public abstract class Basic<T> {
+    public Basic() {
+        setSign("");
+        setTime(System.currentTimeMillis());
+        setCallbackTime(getTime());
+    }
+
     /**
      * 事件发生的时间
      */

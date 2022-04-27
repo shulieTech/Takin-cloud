@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.app.service;
 
 import com.github.pagehelper.PageInfo;
+
 import io.shulie.takin.cloud.app.entity.CallbackEntity;
 
 /**
@@ -31,6 +32,14 @@ public interface CallbackService {
     }
 
     /**
+     * 创建回调
+     *
+     * @param url     回调路径
+     * @param content 回调内容
+     */
+    void create(String url, byte[] content);
+
+    /**
      * 预创建回调日志
      *
      * @param callbackId 回调主键
@@ -45,6 +54,7 @@ public interface CallbackService {
      *
      * @param callbackLogId 回调日志主键
      * @param data          响应内容
+     * @return true/false
      */
-    void fillLog(long callbackLogId, byte[] data);
+    boolean fillLog(long callbackLogId, byte[] data);
 }

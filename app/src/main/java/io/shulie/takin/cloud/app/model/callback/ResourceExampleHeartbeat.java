@@ -1,11 +1,11 @@
 package io.shulie.takin.cloud.app.model.callback;
 
-import io.shulie.takin.cloud.app.model.callback.basic.Basic;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import io.shulie.takin.cloud.constant.enums.CallbackType;
-import io.shulie.takin.cloud.app.model.callback.basic.ReportExample;
+import io.shulie.takin.cloud.app.model.callback.basic.Basic;
+import io.shulie.takin.cloud.app.model.callback.basic.ResourceExample;
 
 /**
  * 资源实例心跳
@@ -14,7 +14,7 @@ import io.shulie.takin.cloud.app.model.callback.basic.ReportExample;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ReportExampleHeartbeat extends Basic<ReportExample> {
+public class ResourceExampleHeartbeat extends Basic<ResourceExample> {
 
     private final CallbackType type = CallbackType.RESOURCE_EXAMPLE_HEARTBEAT;
 

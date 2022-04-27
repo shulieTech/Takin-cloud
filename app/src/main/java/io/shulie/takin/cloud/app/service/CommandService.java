@@ -1,7 +1,5 @@
 package io.shulie.takin.cloud.app.service;
 
-import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
-
 /**
  * 命令服务
  * <p>用于下发命令</p>
@@ -45,4 +43,12 @@ public interface CommandService {
      */
     void updateConfig(long jobId);
 
+    /**
+     * 命令确认
+     *
+     * @param id      命令主键
+     * @param context ack内容
+     * @return true/false
+     */
+    boolean ack(long id, String context);
 }

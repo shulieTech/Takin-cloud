@@ -1,33 +1,29 @@
 package io.shulie.takin.cloud.app.entity;
 
 import java.util.Date;
-import java.util.HashMap;
-
-import lombok.Data;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import lombok.Data;
 
 /**
- * 数据库实体隐射 - 资源实例事件
+ * 数据库实体隐射 - 任务实例事件
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
-@TableName("t_resource_example_event")
-public class ResourceExampleEvent {
+@TableName("t_job_example_event")
+public class JobExampleEventEntity {
     /**
      * 数据主键
      */
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 资源实例主键
+     * 任务实例主键
      */
-    private Long resourceExampleId;
+    private Long jobExampleId;
     /**
      * 事件上报时间
      */

@@ -59,4 +59,11 @@ public interface WatchmanService {
      * @throws JsonProcessingException JSON异常
      */
     void upload(long watchmanId, ResourceUpload context) throws JsonProcessingException;
+
+    /**
+     * 心跳
+     *
+     * @param watchmanId 调度器主键
+     */
+    void onHeartbeat(long watchmanId);
 }

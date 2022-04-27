@@ -138,4 +138,14 @@ public class WatchmanServiceImpl implements WatchmanService {
             setContext(objectMapper.writeValueAsString(context));
         }});
     }
+
+    @Override
+    public void onHeartbeat(long watchmanId) {
+        watchmanEventMapper.insert(new WatchmanEventEntity() {{
+            setContext("{}");
+            setWatchmanId(watchmanId);
+            setType(EventType.WATCHMAN_HEARTBEAT.getCode());
+        }});
+    }
+
 }

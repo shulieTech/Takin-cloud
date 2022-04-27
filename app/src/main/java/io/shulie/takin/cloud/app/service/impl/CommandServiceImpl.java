@@ -4,18 +4,19 @@ import java.util.HashMap;
 
 import javax.annotation.Resource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.entity.CommandEntity;
-import io.shulie.takin.cloud.app.mapper.CommandMapper;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.app.service.mapper.CommandMapperService;
 
 /**
  * 命令服务 - 实例
@@ -32,7 +33,7 @@ public class CommandServiceImpl implements CommandService {
     @Resource
     ResourceService resourceService;
     @Resource
-    CommandMapper commandMapper;
+    CommandMapperService commandMapperService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -86,7 +87,20 @@ public class CommandServiceImpl implements CommandService {
             setType(type);
             setContext(objectMapper.writeValueAsString(context));
         }};
-        commandMapper.insert(commandEntity);
+        commandMapperService.save(commandEntity);
         return commandEntity.getId();
+    }
+
+    /**
+     * 命令确认
+     *
+     * @param id      命令主键
+     * @param context ack内容
+     */
+    public boolean ack(long id, String context) {
+        return commandMapperService.lambdaUpdate()
+            .set(CommandEntity::getAckContext, context)
+            .eq(CommandEntity::getId, id)
+            .update();
     }
 }

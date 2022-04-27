@@ -12,6 +12,7 @@ import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.PageHelper;
 import org.springframework.stereotype.Service;
 
+import io.shulie.takin.cloud.app.mapper.CallbackMapper;
 import io.shulie.takin.cloud.app.entity.CallbackEntity;
 import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.app.entity.CallbackLogEntity;
@@ -26,6 +27,8 @@ import io.shulie.takin.cloud.app.service.mapper.CallbackMapperService;
 @Service
 @Slf4j(topic = "callback")
 public class CallbackServiceImpl implements CallbackService {
+    @Resource
+    CallbackMapper callbackMapper;
     @Resource
     CallbackLogMapper callbackLogMapper;
     @Resource
@@ -42,6 +45,14 @@ public class CallbackServiceImpl implements CallbackService {
     }
 
     @Override
+    public void create(String url, byte[] content) {
+        callbackMapper.insert(new CallbackEntity() {{
+            setUrl(url);
+            setContext(content);
+        }});
+    }
+
+    @Override
     public Long createLog(long callbackId, String url, byte[] data) {
         CallbackLogEntity callbackLogEntity = new CallbackLogEntity() {{
             setRequestUrl(url);
@@ -54,10 +65,11 @@ public class CallbackServiceImpl implements CallbackService {
     }
 
     @Override
-    public void fillLog(long callbackLogId, byte[] data) {
+    public boolean fillLog(long callbackLogId, byte[] data) {
         CallbackLogEntity callbackLogEntity = callbackLogMapper.selectById(callbackLogId);
         if (callbackLogEntity == null) {
             log.warn("{}对应的数据库记录未找到", callbackLogId);
+            return false;
         } else {
             boolean completed = "SUCCESS".equals(StrUtil.utf8Str(data));
             // 填充日志信息
@@ -73,6 +85,7 @@ public class CallbackServiceImpl implements CallbackService {
                     .eq(CallbackEntity::getId, callbackLogEntity.getCallbackId())
                     .update();
             }
+            return completed;
         }
     }
 }

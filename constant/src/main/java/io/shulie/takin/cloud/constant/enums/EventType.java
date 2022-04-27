@@ -19,10 +19,15 @@ public enum EventType {
      */
     WATCHMAN_HEARTBEAT(100, "调度心跳上报"),
     WATCHMAN_UPLOAD(101, "调度资源上报"),
-    RESOUECE_EXAMPLE_HEARTBEAT(200, "工作空间心跳上报"),
-    RESOUECE_EXAMPLE_START(201, "工作空间启动上报"),
-    RESOUECE_EXAMPLE_STOP(202, "工作空间停止上报"),
-    COMMAND_ACK(300, "命令确认")
+    RESOUECE_EXAMPLE_HEARTBEAT(200, "资源实例心跳"),
+    RESOUECE_EXAMPLE_START(201, "资源实例启动"),
+    RESOUECE_EXAMPLE_STOP(202, "资源实例停止"),
+    RESOUECE_EXAMPLE_ERROR(203, "资源实例发生异常"),
+    JOB_EXAMPLE_HEARTBEAT(300, "JMeter心跳"),
+    JOB_EXAMPLE_START(301, "JMeter启动"),
+    JOB_EXAMPLE_STOP(302, "JMeter停止"),
+    JOB_EXAMPLE_ERROR(303, "JMeter发生异常"),
+    COMMAND_ACK(400, "命令确认")
     // 格式化用
     ;
     @Getter

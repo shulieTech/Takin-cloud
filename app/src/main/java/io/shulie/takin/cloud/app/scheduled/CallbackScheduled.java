@@ -12,8 +12,8 @@ import javax.annotation.PostConstruct;
 
 import cn.hutool.http.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
-
 import com.github.pagehelper.PageInfo;
+
 import io.shulie.takin.cloud.app.entity.CallbackEntity;
 import io.shulie.takin.cloud.app.service.CallbackService;
 
@@ -54,7 +54,7 @@ public class CallbackScheduled {
             for (int i = 0; i < ready.getSize(); i++) {
                 CallbackEntity entity = ready.getList().get(i);
                 // 缓存校验 存在 并且是 False
-                if (cacheData.containsKey(entity.getId()) && Boolean.FALSE.equals(cacheData.get(entity.getId()))) {
+                if (cacheData.containsKey(entity.getId()) && !Boolean.FALSE.equals(cacheData.get(entity.getId()))) {
                     log.warn("第{}条在缓存中了.\n{}", (i + 1), entity);
                     continue;
                 }
@@ -62,8 +62,8 @@ public class CallbackScheduled {
                 Exec exec = new Exec(entity, callbackService, cacheData);
                 // 提交到线程池运行
                 try {
-                    //threadpool.submit(exec);
-                    exec.run();
+                    threadpool.submit(exec);
+                    //exec.run();
                 } catch (RejectedExecutionException ex) {
                     log.warn("第{}条被线程池拒绝", (i + 1));
                 }
@@ -110,12 +110,12 @@ public class CallbackScheduled {
                     .body(entity.getContext())
                     .execute()
                     .bodyBytes();
-                service.fillLog(callbackLogId, response);
-                cache.put(entity.getId(), true);
+                boolean completed = service.fillLog(callbackLogId, response);
+                cache.put(entity.getId(), completed);
             } catch (Exception e) {
-                cache.put(entity.getId(), false);
                 log.error("单次过程失败.\n", e);
                 service.fillLog(callbackLogId, ("Exception:\n" + e.getMessage()).getBytes(StandardCharsets.UTF_8));
+                cache.put(entity.getId(), false);
             }
         }
     }
