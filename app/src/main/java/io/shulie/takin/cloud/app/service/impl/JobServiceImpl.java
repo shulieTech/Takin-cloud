@@ -57,7 +57,7 @@ public class JobServiceImpl implements JobService {
                 .map(ThreadConfigInfo::getDuration)
                 .max(Comparator.naturalOrder())
                 .orElse(0));
-            setSimpling(jobInfo.getSampling());
+            setSampling(jobInfo.getSampling());
             setMode(jobInfo.getType().getCode());
             setCallbackUrl(jobInfo.getCallbackUrl());
             setResourceExampleNumber(resourceEntity.getNumber());

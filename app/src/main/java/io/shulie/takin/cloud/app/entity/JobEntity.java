@@ -34,7 +34,7 @@ public class JobEntity {
     /**
      * 采样率
      */
-    private Integer simpling;
+    private Integer sampling;
     /**
      * 任务的运行模式
      */
