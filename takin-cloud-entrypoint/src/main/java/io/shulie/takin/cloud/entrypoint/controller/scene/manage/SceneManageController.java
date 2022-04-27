@@ -110,7 +110,8 @@ public class SceneManageController {
         @ApiParam(name = "status", value = "压测状态") Integer status,
         @ApiParam(name = "sceneIds", value = "场景ids，逗号分割") String sceneIds,
         @ApiParam(name = "lastPtStartTime", value = "压测结束时间") String lastPtStartTime,
-        @ApiParam(name = "lastPtEndTime", value = "压测结束时间") String lastPtEndTime
+        @ApiParam(name = "lastPtEndTime", value = "压测结束时间") String lastPtEndTime,
+        @ApiParam(name = "isDeleted", value = "删除标志") Integer isDeleted
     ) {
 
         /*
@@ -134,6 +135,7 @@ public class SceneManageController {
         queryVO.setSceneIds(sceneIdList);
         queryVO.setLastPtStartTime(lastPtStartTime);
         queryVO.setLastPtEndTime(lastPtEndTime);
+        queryVO.setIsDeleted(isDeleted == null?0:isDeleted);
         PageInfo<SceneManageListOutput> pageInfo = sceneManageService.queryPageList(queryVO);
         // 转换
         List<SceneManageListResp> list = pageInfo.getList().stream()
@@ -205,6 +207,13 @@ public class SceneManageController {
             request.getRequest(), request.getUploadPath(),
             request.isAbsolutePath(), request.isUpdate(), request.getVersion());
         return ResponseResult.success(SceneTaskOpenConverter.INSTANCE.ofScriptVerityRespExt(scriptVerityRespExt));
+    }
+
+    @PutMapping(value = EntrypointUrl.METHOD_SCENE_MANAGE_RECOVERY)
+    @ApiOperation(value = "恢复压测场景")
+    public ResponseResult<String> recovery(@RequestBody SceneManageDeleteReq deleteReq) {
+        sceneManageService.recovery(deleteReq.getId());
+        return ResponseResult.success("恢复成功");
     }
 
 }

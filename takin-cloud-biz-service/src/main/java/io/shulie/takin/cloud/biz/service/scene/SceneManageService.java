@@ -148,4 +148,10 @@ public interface SceneManageService {
      * @return 操作结果
      */
     ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update, Integer version);
+
+    /**
+     * 恢复
+     * @param id
+     */
+    void recovery(Long id);
 }
