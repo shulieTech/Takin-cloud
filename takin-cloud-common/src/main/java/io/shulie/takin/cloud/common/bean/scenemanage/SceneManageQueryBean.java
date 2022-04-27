@@ -35,4 +35,6 @@ public class SceneManageQueryBean extends ContextExt {
     private String lastPtStartTime;
 
     private String lastPtEndTime;
+
+    private Integer isDeleted;
 }

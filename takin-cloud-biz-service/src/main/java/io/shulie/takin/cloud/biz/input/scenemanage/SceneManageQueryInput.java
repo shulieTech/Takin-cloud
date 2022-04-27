@@ -30,4 +30,6 @@ public class SceneManageQueryInput extends PagingContextExt {
     private String lastPtStartTime;
 
     private String lastPtEndTime;
+
+    private Integer isDeleted;
 }

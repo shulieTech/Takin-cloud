@@ -113,4 +113,10 @@ public class SceneManageApiImpl implements SceneManageApi {
             req, new TypeReference<ResponseResult<List<SceneManageWrapperResp>>>() {}).getData();
     }
 
+    @Override
+    public String recovery(SceneManageDeleteReq req) {
+        return cloudApiSenderService.put(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_MANAGE, EntrypointUrl.METHOD_SCENE_MANAGE_RECOVERY),
+                req, new TypeReference<ResponseResult<String>>() {}).getData();
+    }
+
 }

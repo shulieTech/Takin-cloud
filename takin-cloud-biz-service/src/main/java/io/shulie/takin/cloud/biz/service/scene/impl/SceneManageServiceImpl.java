@@ -1326,4 +1326,12 @@ public class SceneManageServiceImpl implements SceneManageService {
                 + file)
         );
     }
+
+    @Override
+    public void recovery(Long id) {
+        SceneManageEntity entity = new SceneManageEntity();
+        entity.setId(id);
+        entity.setIsDeleted(0);
+        sceneManageDAO.updateById(entity);
+    }
 }

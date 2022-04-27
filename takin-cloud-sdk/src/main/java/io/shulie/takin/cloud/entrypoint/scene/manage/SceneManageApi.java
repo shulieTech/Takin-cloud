@@ -124,4 +124,11 @@ public interface SceneManageApi {
      */
     List<SceneManageWrapperResp> queryByIds(SceneManageQueryByIdsReq req);
 
+    /**
+     * 恢复
+     * @param req
+     * @return
+     */
+    String recovery(SceneManageDeleteReq req);
+
 }
