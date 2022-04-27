@@ -17,13 +17,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.shulie.takin.cloud.app.model.callback.ResourceUpload;
 
 /**
- * 回调控制器
+ * 上报控制器
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Slf4j
 @RestController
-public class CallbackController {
+public class NotifyController {
 
     @javax.annotation.Resource
     WatchmanService watchmanService;
@@ -35,7 +35,7 @@ public class CallbackController {
      *
      * @return 回调响应
      */
-    @PostMapping("/callback")
+    @PostMapping("/notify")
     public ApiResult<?> index(
         @Parameter(description = "类型", required = true) @RequestParam Integer type,
         @Parameter(description = "关键词签名", required = true) @RequestParam String refSign,

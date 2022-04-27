@@ -8,7 +8,7 @@ import lombok.Data;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
-public class Basic {
+public class Basic<T> {
     /**
      * 事件发生的时间
      */
@@ -21,4 +21,8 @@ public class Basic {
      * 签名
      */
     private String sign;
+    /**
+     * 数据
+     */
+    private T data;
 }

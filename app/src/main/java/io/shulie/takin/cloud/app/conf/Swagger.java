@@ -43,4 +43,12 @@ public class Swagger {
             .build();
     }
 
+    @Bean
+    public GroupedOpenApi notityApi() {
+        return GroupedOpenApi.builder()
+            .group("上报模块")
+            .pathsToMatch("/notify/**")
+            .build();
+    }
+
 }

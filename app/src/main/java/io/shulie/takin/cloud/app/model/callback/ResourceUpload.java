@@ -14,6 +14,5 @@ import io.shulie.takin.cloud.app.model.resource.ResourceSource;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ResourceUpload extends Basic {
-    List<ResourceSource> data;
+public class ResourceUpload extends Basic<List<ResourceSource>> {
 }
