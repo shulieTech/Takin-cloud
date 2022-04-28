@@ -909,6 +909,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     public void delete(Long id) {
         SceneManageEntity entity = new SceneManageEntity();
         entity.setIsDeleted(1);
+        entity.setStatus(-1);
         entity.setId(id);
         sceneManageDAO.updateById(entity);
     }
@@ -1334,6 +1335,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     public void recovery(Long id) {
         SceneManageEntity entity = new SceneManageEntity();
         entity.setId(id);
+        entity.setStatus(0);
         entity.setIsDeleted(0);
         sceneManageDAO.updateById(entity);
     }
