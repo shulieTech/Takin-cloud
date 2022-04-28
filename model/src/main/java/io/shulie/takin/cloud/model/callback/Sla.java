@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.model.callback;
 
+import java.util.List;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -14,7 +16,7 @@ import io.shulie.takin.cloud.constant.enums.CallbackType;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Sla extends Basic<SlaInfo> {
+public class Sla extends Basic<List<SlaInfo>> {
 
     private final CallbackType type = CallbackType.SLA;
 

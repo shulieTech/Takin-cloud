@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.app.controller;
 
+import io.shulie.takin.cloud.app.service.MetricsService;
+import io.shulie.takin.cloud.model.notify.Metrics;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.Parameter;
 
@@ -39,6 +41,8 @@ public class NotifyController {
 
     @javax.annotation.Resource
     CommandService commandService;
+    @javax.annotation.Resource
+    MetricsService metricsService;
     @javax.annotation.Resource
     WatchmanService watchmanService;
     @javax.annotation.Resource
@@ -110,6 +114,11 @@ public class NotifyController {
                 case JOB_EXAMPLE_ERROR: {
                     JobExampleError context = objectMapper.readValue(content, JobExampleError.class);
                     jobExampleServer.onError(context.getData(), context.getMessage());
+                    break;
+                }
+                case METRICS: {
+                    Metrics context = objectMapper.readValue(content, Metrics.class);
+                    metricsService.upload(context.getJobExampleId(), context.getData());
                     break;
                 }
                 case COMMAND_ACK: {

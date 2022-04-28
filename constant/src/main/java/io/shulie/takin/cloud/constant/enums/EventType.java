@@ -27,7 +27,8 @@ public enum EventType {
     JOB_EXAMPLE_START(301, "JMeter启动"),
     JOB_EXAMPLE_STOP(302, "JMeter停止"),
     JOB_EXAMPLE_ERROR(303, "JMeter发生异常"),
-    COMMAND_ACK(400, "命令确认")
+    METRICS(400, "指标数据上报"),
+    COMMAND_ACK(500, "命令确认")
     // 格式化用
     ;
     @Getter

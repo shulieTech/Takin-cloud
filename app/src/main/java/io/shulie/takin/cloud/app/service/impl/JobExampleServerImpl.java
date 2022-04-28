@@ -109,8 +109,8 @@ public class JobExampleServerImpl implements JobExampleServer {
             setType(EventType.JOB_EXAMPLE_ERROR.getCode());
         }});
     }
-
-    private JobExample getCallbackData(long jobExampleId, StringBuffer callbackUrl) {
+    @Override
+    public JobExample getCallbackData(long jobExampleId, StringBuffer callbackUrl) {
         JobExampleEntity jobExampleEntity = jobExampleMapperService.getById(jobExampleId);
         JobEntity jobEntity = jobMapper.selectById(jobExampleEntity.getJobId());
         callbackUrl.append(jobEntity.getCallbackUrl());

@@ -30,7 +30,8 @@ public interface ResourceExampleService {
     /**
      * 异常事件
      *
-     * @param id 资源实例主键
+     * @param id        资源实例主键
+     * @param errorInfo 错误信息
      */
     void onError(long id, String errorInfo);
 }
