@@ -102,12 +102,12 @@ public class ResourceServiceImpl implements ResourceService {
      * {@inheritDoc}
      */
     @Override
-    public String lock(ApplyResourceRequest apply, String callbackUrl) throws JsonProcessingException {
+    public String lock(ApplyResourceRequest apply) throws JsonProcessingException {
         // 0. 预检
         if (this.check(apply)) {
             // 1. 保存任务信息
             ResourceEntity resourceEntity = new ResourceEntity() {{
-                setCallbackUrl(callbackUrl);
+                setCallbackUrl(apply.getCallbackUrl());
                 setNumber(apply.getNumber());
                 setWatchmanId(apply.getWatchmanId());
                 // 创建时间由数据库维护

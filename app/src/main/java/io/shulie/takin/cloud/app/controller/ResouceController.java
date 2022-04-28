@@ -53,9 +53,8 @@ public class ResouceController {
 
     @Operation(summary = "资源锁定")
     @RequestMapping(value = "lock", method = {RequestMethod.POST})
-    public ApiResult<?> lock(@RequestBody ApplyResourceRequest apply,
-        @Parameter(description = "回调地址", required = true) @RequestParam String callbackUrl) throws JsonProcessingException {
-        String resourceId = resourceService.lock(apply, callbackUrl);
+    public ApiResult<?> lock(@RequestBody ApplyResourceRequest apply) throws JsonProcessingException {
+        String resourceId = resourceService.lock(apply);
         // 预检失败，直接返回失败信息
         if (resourceId == null) {return ApiResult.fail("[预检]资源不足");}
         // 预检通过，直接返回资源主键。剩余的步骤通过异步回调处理

@@ -41,4 +41,9 @@ public class ApplyResourceRequest {
      */
     @Schema(description = "限制的内存")
     private String limitMemory;
+    /**
+     * 状态回调地址
+     */
+    @Schema(description = "状态回调地址")
+    String callbackUrl;
 }
