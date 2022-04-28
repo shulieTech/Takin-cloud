@@ -19,6 +19,8 @@ public enum EventType {
      */
     WATCHMAN_HEARTBEAT(100, "调度心跳上报"),
     WATCHMAN_UPLOAD(101, "调度资源上报"),
+    WATCHMAN_NORMAL(102, "调度正常"),
+    WATCHMAN_ABNORMAL(103, "调度异常"),
     RESOUECE_EXAMPLE_HEARTBEAT(200, "资源实例心跳"),
     RESOUECE_EXAMPLE_START(201, "资源实例启动"),
     RESOUECE_EXAMPLE_STOP(202, "资源实例停止"),

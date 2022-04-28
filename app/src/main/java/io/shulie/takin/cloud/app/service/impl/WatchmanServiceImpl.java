@@ -10,7 +10,9 @@ import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.PageHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -19,13 +21,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.app.util.ResourceUtil;
+import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.constant.enums.EventType;
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
-import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.app.service.WatchmanService;
+import io.shulie.takin.cloud.model.notify.ResourceUpload;
+import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 import io.shulie.takin.cloud.app.mapper.WatchmanEventMapper;
 import io.shulie.takin.cloud.app.entity.WatchmanEventEntity;
-import io.shulie.takin.cloud.model.notify.ResourceUpload;
 import io.shulie.takin.cloud.app.service.mapper.WatchmanMapperService;
 
 /**
@@ -110,6 +113,39 @@ public class WatchmanServiceImpl implements WatchmanService {
         return watchmanMapperService.lambdaQuery().eq(WatchmanEntity::getRefSign, refSign).one();
     }
 
+    @Override
+    public WatchmanStatusResponse status(Long watchmanId) throws JsonProcessingException {
+        try (Page<?> ignore = PageHelper.startPage(1, 1)) {
+            Wrapper<WatchmanEventEntity> statusWrapper = new LambdaQueryWrapper<WatchmanEventEntity>()
+                .orderByDesc(WatchmanEventEntity::getTime)
+                .in(WatchmanEventEntity::getType, EventType.WATCHMAN_NORMAL.getCode(), EventType.WATCHMAN_ABNORMAL.getCode());
+            Wrapper<WatchmanEventEntity> heartbeatWrapper = new LambdaQueryWrapper<WatchmanEventEntity>()
+                .orderByDesc(WatchmanEventEntity::getTime)
+                .eq(WatchmanEventEntity::getType, EventType.WATCHMAN_HEARTBEAT.getCode());
+            // 是否有(异常/恢复)事件
+            {
+                List<WatchmanEventEntity> statusList = watchmanEventMapper.selectList(statusWrapper);
+                if (statusList.size() > 0 && EventType.WATCHMAN_ABNORMAL.getCode().equals(statusList.get(0).getType())) {
+                    WatchmanEventEntity status = statusList.get(0);
+                    HashMap<String, String> eventContext = objectMapper.readValue(status.getContext(),
+                        new TypeReference<HashMap<String, String>>() {});
+                    String message = eventContext.get("message");
+                    return new WatchmanStatusResponse(status.getTime().getTime(), message);
+                }
+            }
+            // 返回心跳时间
+            {
+                List<WatchmanEventEntity> heartbeatList = watchmanEventMapper.selectList(heartbeatWrapper);
+                if (heartbeatList.size() > 0) {
+                    WatchmanEventEntity heartbeat = heartbeatList.get(0);
+                    return new WatchmanStatusResponse(heartbeat.getTime().getTime(), null);
+                } else {
+                    return null;
+                }
+            }
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -139,12 +175,41 @@ public class WatchmanServiceImpl implements WatchmanService {
         }});
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onHeartbeat(long watchmanId) {
         watchmanEventMapper.insert(new WatchmanEventEntity() {{
             setContext("{}");
             setWatchmanId(watchmanId);
             setType(EventType.WATCHMAN_HEARTBEAT.getCode());
+        }});
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onNormal(long watchmanId) {
+        watchmanEventMapper.insert(new WatchmanEventEntity() {{
+            setContext("{}");
+            setWatchmanId(watchmanId);
+            setType(EventType.WATCHMAN_NORMAL.getCode());
+        }});
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAbnormal(long watchmanId, String message) {
+        ObjectNode content = JsonNodeFactory.instance.objectNode();
+        content.put("message", message);
+        watchmanEventMapper.insert(new WatchmanEventEntity() {{
+            setWatchmanId(watchmanId);
+            setContext(content.toPrettyString());
+            setType(EventType.WATCHMAN_NORMAL.getCode());
         }});
     }
 

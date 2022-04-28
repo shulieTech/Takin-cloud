@@ -2,6 +2,8 @@ package io.shulie.takin.cloud.model.callback.basic;
 
 import lombok.Data;
 
+import java.util.Date;
+
 import io.shulie.takin.cloud.constant.enums.CallbackType;
 
 /**
@@ -13,18 +15,18 @@ import io.shulie.takin.cloud.constant.enums.CallbackType;
 public abstract class Basic<T> {
     public Basic() {
         setSign("");
-        setTime(System.currentTimeMillis());
+        setTime(new Date());
         setCallbackTime(getTime());
     }
 
     /**
      * 事件发生的时间
      */
-    private Long time;
+    private Date time;
     /**
      * 发起回调的时间
      */
-    private Long callbackTime;
+    private Date callbackTime;
     /**
      * 签名
      */

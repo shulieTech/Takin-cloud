@@ -5,7 +5,7 @@ import java.util.HashMap;
 import lombok.Data;
 
 /**
- * TODO
+ * 任务配置
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */

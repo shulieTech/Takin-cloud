@@ -80,6 +80,14 @@ public class NotifyController {
                     watchmanService.onHeartbeat(watchmanId);
                     break;
                 }
+                case WATCHMAN_NORMAL: {
+                    watchmanService.onHeartbeat(watchmanId);
+                    break;
+                }
+                case WATCHMAN_ABNORMAL: {
+                    watchmanService.onHeartbeat(watchmanId);
+                    break;
+                }
                 case RESOUECE_EXAMPLE_HEARTBEAT: {
                     ResourceExampleHeartbeat context = objectMapper.readValue(content, ResourceExampleHeartbeat.class);
                     resourceExampleService.onHeartbeat(context.getData());

@@ -6,9 +6,10 @@ import com.github.pagehelper.PageInfo;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
 import io.shulie.takin.cloud.model.notify.ResourceUpload;
-import io.shulie.takin.cloud.model.resource.Resource;
+import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 
 /**
  * 调度服务
@@ -52,6 +53,15 @@ public interface WatchmanService {
     WatchmanEntity ofRefSign(String refSign);
 
     /**
+     * 获取调度机状态
+     *
+     * @param watchmanId 调度主键
+     * @return 状态
+     * @throws JsonProcessingException JSON异常
+     */
+    WatchmanStatusResponse status(Long watchmanId) throws JsonProcessingException;
+
+    /**
      * 资源上报
      *
      * @param watchmanId 调度主键
@@ -66,4 +76,19 @@ public interface WatchmanService {
      * @param watchmanId 调度器主键
      */
     void onHeartbeat(long watchmanId);
+
+    /**
+     * 恢复正常事件
+     *
+     * @param watchmanId 调度主键
+     */
+    void onNormal(long watchmanId);
+
+    /**
+     * 异常事件
+     *
+     * @param watchmanId 调度主键
+     * @param message    异常内容
+     */
+    void onAbnormal(long watchmanId, String message);
 }

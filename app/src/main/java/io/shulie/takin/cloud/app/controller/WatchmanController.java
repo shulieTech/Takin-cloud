@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.app.controller;
 
 import java.util.List;
 
+import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import com.github.pagehelper.PageInfo;
@@ -54,6 +55,12 @@ public class WatchmanController {
         @Parameter(description = "关键词") String ref,
         @Parameter(description = "关键词签名") String refSign) {
         return ApiResult.success(watchmanService.register(ref, refSign));
+    }
+
+    @Operation(summary = "状态")
+    @RequestMapping(value = "status", method = {RequestMethod.GET})
+    public ApiResult<WatchmanStatusResponse> status(@Parameter(description = "调度主键", required = true) Long watchmanId) throws JsonProcessingException {
+        return ApiResult.success(watchmanService.status(watchmanId));
     }
 
 }
