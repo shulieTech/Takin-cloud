@@ -907,7 +907,10 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     @Override
     public void delete(Long id) {
-        sceneManageDAO.removeById(id);
+        SceneManageEntity entity = new SceneManageEntity();
+        entity.setIsDeleted(1);
+        entity.setId(id);
+        sceneManageDAO.updateById(entity);
     }
 
     @Override
