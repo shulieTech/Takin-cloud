@@ -16,5 +16,5 @@ public interface MetricsService {
      * @param jobExampleId 任务实例主键
      * @param metricsList  数据集合
      */
-    void upload(Long jobExampleId, List<MetricsInfo> metricsList);
+    void upload(Long jobExampleId, List<MetricsInfo> metricsList,String ip);
 }

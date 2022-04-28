@@ -1,6 +1,9 @@
 package io.shulie.takin.cloud.app.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import io.shulie.takin.cloud.app.service.MetricsService;
+import io.shulie.takin.cloud.app.util.IpUtils;
 import io.shulie.takin.cloud.model.notify.Metrics;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -61,7 +64,8 @@ public class NotifyController {
     public ApiResult<?> index(
         @Parameter(description = "类型", required = true) @RequestParam Integer type,
         @Parameter(description = "关键词签名", required = true) @RequestParam String refSign,
-        @RequestBody String content) {
+        @RequestBody String content,
+        HttpServletRequest request) {
         try {
             WatchmanEntity entity = watchmanService.ofRefSign(refSign);
             if (entity == null) {return ApiResult.fail("调度机未上报");}
@@ -118,7 +122,7 @@ public class NotifyController {
                 }
                 case METRICS: {
                     Metrics context = objectMapper.readValue(content, Metrics.class);
-                    metricsService.upload(context.getJobExampleId(), context.getData());
+                    metricsService.upload(context.getJobExampleId(), context.getData(), IpUtils.getIp(request));
                     break;
                 }
                 case COMMAND_ACK: {

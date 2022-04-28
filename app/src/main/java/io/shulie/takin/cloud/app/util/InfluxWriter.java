@@ -1,10 +1,15 @@
 package io.shulie.takin.cloud.app.util;
 
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.core.collection.CollUtil;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Point;
@@ -25,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
  */
 @Slf4j
 @Component
+@SuppressWarnings("unused")
 public class InfluxWriter {
 
     /**
@@ -155,20 +161,18 @@ public class InfluxWriter {
                         jsonData.putAll(tags);
                     }
                     for (int j = 0; j < colums.size(); ++j) {
-                        jsonData.put(colums.get(j), value.get(j));
+                        jsonData.set(colums.get(j), value.get(j));
                     }
                     resultArr.add(jsonData);
                 }
             }
         }
-        return JSONObject.parseArray(resultArr.toJSONString(), clazz);
+        return JSONUtil.toList(resultArr.toJSONString(2), clazz);
     }
 
     public <T> T querySingle(String command, Class<T> clazz) {
         List<T> data = query(command, clazz);
-        if (CollectionUtils.isNotEmpty(data)) {
-            return data.get(0);
-        }
+        if (CollUtil.isNotEmpty(data)) {return data.get(0);}
         return null;
     }
 

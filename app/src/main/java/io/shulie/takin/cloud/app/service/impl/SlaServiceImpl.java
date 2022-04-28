@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
+import io.shulie.takin.cloud.app.service.mapper.SlaEventMapperService;
+import io.shulie.takin.cloud.model.notify.Metrics.MetricsInfo;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.app.mapper.SlaMapper;
@@ -24,7 +26,7 @@ public class SlaServiceImpl implements SlaService {
     @javax.annotation.Resource
     SlaMapper slaMapper;
     @javax.annotation.Resource
-    SlaEventMapper slaEventMapper;
+    SlaEventMapperService slaEventMapperService;
 
     /**
      * {@inheritDoc}
@@ -52,14 +54,14 @@ public class SlaServiceImpl implements SlaService {
      * {@inheritDoc}
      */
     @Override
-    public void event(long slaId, long jobExampleId, String ref, FormulaTarget target, FormulaSymbol symbol, double number) {
-        slaEventMapper.insert(new SlaEventEntity() {{
-            setSlaId(slaId);
-            setFormulaNumber(number);
-            setJobExampleId(jobExampleId);
-            setFormulaTarget(target.getCode());
-            setFormulaSymbol(symbol.getCode());
-        }});
+    public void event(List<SlaEventEntity> slaEventEntityList) {
+        slaEventMapperService.saveBatch(slaEventEntityList);
         // TODO 数据通知
+    }
+
+    @Override
+    public List<SlaEventEntity> check(List<MetricsInfo> metricsInfoList) {
+        // TODO 进行校验
+        return null;
     }
 }
