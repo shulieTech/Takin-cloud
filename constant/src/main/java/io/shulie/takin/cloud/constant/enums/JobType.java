@@ -34,8 +34,8 @@ public enum JobType {
     @JsonValue
     private final Integer code;
     @Getter
-    private final String name;
+    private final String description;
 
     @Override
-    public String toString() {return code + ":" + name;}
+    public String toString() {return code + ":" + description;}
 }

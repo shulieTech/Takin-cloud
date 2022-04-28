@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.app.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import io.shulie.takin.cloud.model.notify.ResourceExampleInfo;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.Parameter;
 
@@ -107,6 +108,11 @@ public class NotifyController {
                 case RESOUECE_EXAMPLE_ERROR: {
                     ResourceExampleError context = jsonService.readValue(content, ResourceExampleError.class);
                     resourceExampleService.onError(context.getData(), context.getMessage());
+                    break;
+                }
+                case RESOUECE_EXAMPLE_INFO: {
+                    ResourceExampleInfo context = jsonService.readValue(content, ResourceExampleInfo.class);
+                    resourceExampleService.onInfo(context.getData(), context.getInfo());
                     break;
                 }
                 case JOB_EXAMPLE_HEARTBEAT: {

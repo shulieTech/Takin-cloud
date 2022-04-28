@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.app.service.impl;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 
 import org.springframework.stereotype.Service;
 
@@ -111,7 +112,19 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
             objectNode.put("message", errorMessage);
             setResourceExampleId(id);
             setContext(objectNode.toPrettyString());
-            setType(EventType.JOB_EXAMPLE_ERROR.getCode());
+            setType(EventType.RESOUECE_EXAMPLE_ERROR.getCode());
+        }});
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onInfo(long id, HashMap<String, Object> info) {
+        resourceExampleEventMapper.insert(new ResourceExampleEventEntity() {{
+            setResourceExampleId(id);
+            setType(EventType.RESOUECE_EXAMPLE_INFO.getCode());
+            setContext(jsonService.writeValueAsString(info));
         }});
     }
 

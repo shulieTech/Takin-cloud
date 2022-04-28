@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.app.controller;
 import java.util.List;
 import java.util.ArrayList;
 
+import io.shulie.takin.cloud.model.resource.ResourceExampleOverview;
 import lombok.extern.slf4j.Slf4j;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -36,9 +37,11 @@ public class ResouceController {
 
     @Operation(summary = "资源实例明细(压力机明细)")
     @RequestMapping(value = "example/list", method = {RequestMethod.GET})
-    public ApiResult<List<Object>> watchmanResourceExample(@Parameter(description = "资源主键") Long resourceId) throws JsonProcessingException {
-        List<ResourceExampleEntity> resourceExampleList = resourceService.listExample(resourceId);
-        List<Object> result = new ArrayList<>(resourceExampleList.size());
+    public ApiResult<List<ResourceExampleOverview>> watchmanResourceExample(
+        @Parameter(description = "资源主键") Long resourceId,
+        @Parameter(description = "任务主键") Long jobId) throws JsonProcessingException {
+        List<ResourceExampleEntity> resourceExampleList = resourceService.listExample(resourceId, jobId);
+        List<ResourceExampleOverview> result = new ArrayList<>(resourceExampleList.size());
         for (ResourceExampleEntity t : resourceExampleList) {
             result.add(resourceService.exampleOverview(t.getId()));
         }

@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.app.service;
 
+import java.util.HashMap;
+
 /**
  * 资源实例服务
  *
@@ -34,4 +36,13 @@ public interface ResourceExampleService {
      * @param errorInfo 错误信息
      */
     void onError(long id, String errorInfo);
+
+    /**
+     * 信息事件
+     * <p>不需要回调</p>
+     *
+     * @param id   资源实例主键
+     * @param info 资源实例信息
+     */
+    void onInfo(long id, HashMap<String, Object> info);
 }

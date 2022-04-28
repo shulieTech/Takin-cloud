@@ -6,6 +6,7 @@ import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
+import io.shulie.takin.cloud.model.resource.ResourceExampleOverview;
 
 /**
  * 资源服务
@@ -17,9 +18,20 @@ public interface ResourceService {
      * 列出资源实例
      *
      * @param resourceId 资源主键
+     * @param jobId      任务主键
      * @return 资源实例列表
      */
-    List<ResourceExampleEntity> listExample(Long resourceId);
+    List<ResourceExampleEntity> listExample(Long resourceId, Long jobId);
+
+    /**
+     * 列出资源实例
+     *
+     * @param resourceId 资源主键
+     * @return 资源实例列表
+     */
+    default List<ResourceExampleEntity> listExample(long resourceId) {
+        return listExample(resourceId, null);
+    }
 
     /**
      * 校验资源
@@ -46,7 +58,7 @@ public interface ResourceService {
      * @return 概览信息
      * @throws JsonProcessingException JSON异常
      */
-    Object exampleOverview(Long resourceExampleId) throws JsonProcessingException;
+    ResourceExampleOverview exampleOverview(Long resourceExampleId) throws JsonProcessingException;
 
     /**
      * 获取数据对象 - 资源

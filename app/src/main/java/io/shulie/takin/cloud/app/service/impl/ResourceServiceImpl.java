@@ -1,13 +1,19 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 
+import io.shulie.takin.cloud.app.entity.JobEntity;
+import io.shulie.takin.cloud.app.service.JobService;
+import io.shulie.takin.cloud.constant.enums.EventType;
+import io.shulie.takin.cloud.constant.enums.ResourceExampleStatus;
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
 import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.PageHelper;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -27,6 +33,7 @@ import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEventEntity;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleEventMapper;
+import io.shulie.takin.cloud.model.resource.ResourceExampleOverview;
 
 /**
  * 资源服务 - 实例
@@ -36,6 +43,9 @@ import io.shulie.takin.cloud.app.mapper.ResourceExampleEventMapper;
 @Slf4j
 @Service
 public class ResourceServiceImpl implements ResourceService {
+    @Lazy
+    @javax.annotation.Resource
+    JobService jobService;
     @javax.annotation.Resource
     JsonService jsonService;
     @javax.annotation.Resource
@@ -53,7 +63,12 @@ public class ResourceServiceImpl implements ResourceService {
      * {@inheritDoc}
      */
     @Override
-    public List<ResourceExampleEntity> listExample(Long resourceId) {
+    public List<ResourceExampleEntity> listExample(Long resourceId, Long jobId) {
+        if (resourceId == null && jobId != null) {
+            JobEntity jobEntity = jobService.jobEntity(jobId);
+            resourceId = jobEntity == null ? null : jobEntity.getResourceId();
+        }
+        if (resourceId == null) {return new ArrayList<>(0);}
         // 查询条件
         Wrapper<ResourceExampleEntity> wrapper = new LambdaQueryWrapper<ResourceExampleEntity>()
             .eq(ResourceExampleEntity::getResourceId, resourceId);
@@ -143,25 +158,64 @@ public class ResourceServiceImpl implements ResourceService {
      * {@inheritDoc}
      */
     @Override
-    public Object exampleOverview(Long resourceExampleId) throws JsonProcessingException {
+    public ResourceExampleOverview exampleOverview(Long resourceExampleId) throws JsonProcessingException {
+        ResourceExampleEntity resourceExampleEntity = resourceExampleMapper.selectById(resourceExampleId);
+        // 设置初始值
+        ResourceExampleOverview result = new ResourceExampleOverview() {{
+            setStatus(ResourceExampleStatus.PENDING);
+            setStartTime(resourceExampleEntity.getCreateTime().getTime());
+        }};
         // 找到最后一次上报的数据
         try (Page<Object> ignored = PageHelper.startPage(1, 1)) {
-            // 查询条件 - 资源类型的上报
-            Wrapper<ResourceExampleEventEntity> wrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
+            // 查询条件 - 状态类型
+            Wrapper<ResourceExampleEventEntity> statusWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
                 .orderByDesc(ResourceExampleEventEntity::getTime)
-                .eq(ResourceExampleEventEntity::getType, "")
+                .notIn(ResourceExampleEventEntity::getType,
+                    EventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode(), EventType.RESOUECE_EXAMPLE_INFO.getCode())
                 .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
             // 执行SQL
-            PageInfo<ResourceExampleEventEntity> watchmanEventList = new PageInfo<>(resourceExampleEventMapper.selectList(wrapper));
-            if (watchmanEventList.getList().size() > 0) {
-                // 组装返回数据
-                // 组装返回数据
-                String eventContextString = watchmanEventList.getList().get(0).getContext();
-                HashMap<String, String> eventContext = jsonService.readValue(eventContextString, new TypeReference<HashMap<String, String>>() {});
-                return eventContext.get("data");
+            PageInfo<ResourceExampleEventEntity> statusList = new PageInfo<>(resourceExampleEventMapper.selectList(statusWrapper));
+            if (statusList.getList().size() > 0) {
+                String contextString = statusList.getList().get(0).getContext();
+                Integer type = statusList.getList().get(0).getType();
+                result.setStatusTime(statusList.getList().get(0).getTime().getTime());
+                if (EventType.RESOUECE_EXAMPLE_START.getCode().equals(type)) {
+                    result.setStatus(ResourceExampleStatus.STARTED);
+                } else if (EventType.RESOUECE_EXAMPLE_STOP.getCode().equals(type)) {
+                    result.setStatus(ResourceExampleStatus.STOPED);
+                } else if (EventType.RESOUECE_EXAMPLE_ERROR.getCode().equals(type)) {
+                    result.setStatus(ResourceExampleStatus.ABNORMAL);
+                }
+                HashMap<String, String> context = jsonService.readValue(contextString, new TypeReference<HashMap<String, String>>() {});
+                result.setStatusMessage(context.get("message"));
+            }
+            // 设置资源实例信息
+            Wrapper<ResourceExampleEventEntity> infoWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
+                .orderByDesc(ResourceExampleEventEntity::getTime)
+                .eq(ResourceExampleEventEntity::getType, EventType.RESOUECE_EXAMPLE_INFO.getCode())
+                .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
+            PageInfo<ResourceExampleEventEntity> infoList = new PageInfo<>(resourceExampleEventMapper.selectList(infoWrapper));
+            if (infoList.getSize() > 0) {
+                String contextString = infoList.getList().get(0).getContext();
+                HashMap<String, String> context = jsonService.readValue(contextString, new TypeReference<HashMap<String, String>>() {});
+                result.setIp(context.get("ip"));
+                result.setName(context.get("name"));
+                result.setHostIp(context.get("hostIp"));
+                result.setStatusTime(infoList.getList().get(0).getTime().getTime());
+            }
+            // 设置心跳接口时间
+            else {
+                Wrapper<ResourceExampleEventEntity> heartbeatWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
+                    .orderByDesc(ResourceExampleEventEntity::getTime)
+                    .eq(ResourceExampleEventEntity::getType, EventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode())
+                    .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
+                PageInfo<ResourceExampleEventEntity> heartbeatList = new PageInfo<>(resourceExampleEventMapper.selectList(heartbeatWrapper));
+                if (heartbeatList.getSize() > 0) {
+                    result.setStatusTime(heartbeatList.getList().get(0).getTime().getTime());
+                }
             }
         }
-        return null;
+        return result;
     }
 
     /**

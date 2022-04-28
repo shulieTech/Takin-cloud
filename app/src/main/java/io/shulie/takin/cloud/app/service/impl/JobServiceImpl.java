@@ -44,6 +44,8 @@ public class JobServiceImpl implements JobService {
     @Resource
     JobMapper jobMapper;
     @Resource
+    JsonService jsonService;
+    @Resource
     CommandService commandService;
     @Resource
     ResourceService resourceService;
@@ -55,14 +57,12 @@ public class JobServiceImpl implements JobService {
     ThreadConfigMapperService threadConfigMapperService;
     @Resource
     ThreadConfigExampleMapperService threadConfigExampleMapperService;
-    @Resource
-    JsonService jsonService;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String start(StartRequest jobInfo) throws JsonProcessingException {
+    public String start(StartRequest jobInfo) {
         ResourceEntity resourceEntity = resourceService.entity(jobInfo.getResourceId());
         List<ResourceExampleEntity> resourceExampleEntityList = resourceService.listExample(resourceEntity.getId());
         JobEntity jobEntity = new JobEntity() {{
