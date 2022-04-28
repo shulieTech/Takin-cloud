@@ -27,9 +27,21 @@ public class Sla extends Basic<List<SlaInfo>> {
          */
         private String ref;
         /**
+         * 任务主键
+         */
+        private long jobId;
+        /**
          * 任务实例主键
          */
         private long jobExampleId;
+        /**
+         * 资源主键
+         */
+        private long resourceId;
+        /**
+         * 资源实例主键
+         */
+        private long resourceExampleId;
         /**
          * 算式目标
          * <p>(RT、TPS、SA、成功率)</p>
