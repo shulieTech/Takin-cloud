@@ -10,6 +10,6 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Ack extends Basic<String> {
-    private long commandId;
+public class Ack extends Basic<Long> {
+    private String content;
 }

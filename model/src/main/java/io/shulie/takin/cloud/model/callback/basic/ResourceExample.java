@@ -12,7 +12,7 @@ public class ResourceExample {
     /**
      * 任务主键
      */
-    private long jobId;
+    private Long jobId;
     /**
      * 资源主键
      */
@@ -20,7 +20,7 @@ public class ResourceExample {
     /**
      * 任务实例主键
      */
-    private long jobExampleId;
+    private Long jobExampleId;
     /**
      * 资源实例主键
      */

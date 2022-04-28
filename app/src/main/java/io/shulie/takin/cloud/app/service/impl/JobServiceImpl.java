@@ -8,18 +8,17 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.collection.CollUtil;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.app.mapper.JobMapper;
 import io.shulie.takin.cloud.app.service.JobService;
+import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.response.JobConfig;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
@@ -56,7 +55,8 @@ public class JobServiceImpl implements JobService {
     ThreadConfigMapperService threadConfigMapperService;
     @Resource
     ThreadConfigExampleMapperService threadConfigExampleMapperService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Resource
+    JsonService jsonService;
 
     /**
      * {@inheritDoc}
@@ -105,7 +105,7 @@ public class JobServiceImpl implements JobService {
                     put("growthTime", threadConfigInfo.getGrowthTime());
                     put("step", threadConfigInfo.getGrowthStep());
                 }};
-                setContext(objectMapper.writeValueAsString(context));
+                setContext(jsonService.writeValueAsString(context));
             }});
         }
         threadConfigMapperService.saveBatch(threadConfigEntityList);
@@ -133,7 +133,7 @@ public class JobServiceImpl implements JobService {
                         put("growthTime", t.getGrowthTime());
                         put("step", t.getGrowthStep());
                     }};
-                    setContext(objectMapper.writeValueAsString(context));
+                    setContext(jsonService.writeValueAsString(context));
                 }});
             }
         }
@@ -170,7 +170,7 @@ public class JobServiceImpl implements JobService {
         return threadConfigExampleEntity.stream().map(t -> {
             HashMap<String, Object> context = null;
             try {
-                context = objectMapper.readValue(t.getContext(), new TypeReference<HashMap<String, Object>>() {});
+                context = jsonService.readValue(t.getContext(), new TypeReference<HashMap<String, Object>>() {});
             } catch (JsonProcessingException e) {
                 log.warn("线程组配置实例context解析失败");
             }
@@ -192,7 +192,7 @@ public class JobServiceImpl implements JobService {
     public void modifyConfig(long jobId, JobConfig context) throws JsonProcessingException {
         // 1. 找到要修改的配置项
         List<ThreadConfigExampleEntity> threadConfigExampleEntity = jobConfigService.threadExampleItem(jobId, context.getRef());
-        String contextString = objectMapper.writeValueAsString(context.getContext());
+        String contextString = jsonService.writeValueAsString(context.getContext());
         // 2. 如果没有抛出异常
         if (CollUtil.isEmpty(threadConfigExampleEntity)) {
             throw new RuntimeException("未找到可修改的配置");

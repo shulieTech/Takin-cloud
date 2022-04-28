@@ -5,7 +5,6 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 
 import io.shulie.takin.cloud.app.entity.MetricsEntity;

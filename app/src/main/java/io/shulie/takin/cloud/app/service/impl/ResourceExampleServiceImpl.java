@@ -53,7 +53,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleHeartbeat context = new ResourceExampleHeartbeat() {{setData(getCallbackData(id, callbackUrl));}};
         // 创建回调
         callbackService.create(callbackUrl.toString(),
-            jsonService.formatString(context).getBytes(StandardCharsets.UTF_8));
+            jsonService.writeValueAsString(context).getBytes(StandardCharsets.UTF_8));
         // 记录事件
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity() {{
             setContext("{}");
@@ -69,7 +69,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleStart context = new ResourceExampleStart() {{setData(getCallbackData(id, callbackUrl));}};
         // 创建回调
         callbackService.create(callbackUrl.toString(),
-            jsonService.formatString(context).getBytes(StandardCharsets.UTF_8));
+            jsonService.writeValueAsString(context).getBytes(StandardCharsets.UTF_8));
         // 记录事件
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity() {{
             setContext("{}");
@@ -85,7 +85,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleStop context = new ResourceExampleStop() {{setData(getCallbackData(id, callbackUrl));}};
         // 创建回调
         callbackService.create(callbackUrl.toString(),
-            jsonService.formatString(context).getBytes(StandardCharsets.UTF_8));
+            jsonService.writeValueAsString(context).getBytes(StandardCharsets.UTF_8));
         // 记录事件
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity() {{
             setContext("{}");
@@ -104,7 +104,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         }};
         // 创建回调
         callbackService.create(callbackUrl.toString(),
-            jsonService.formatString(context).getBytes(StandardCharsets.UTF_8));
+            jsonService.writeValueAsString(context).getBytes(StandardCharsets.UTF_8));
         // 记录事件
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity() {{
             ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
@@ -116,16 +116,19 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
     }
 
     private ResourceExample getCallbackData(long resourceExampleId, StringBuffer callbackUrl) {
+        // 获取资源实例
         ResourceExampleEntity resourceExampleEntity = resourceExampleMapper.selectById(resourceExampleId);
+        // 获取资源
         ResourceEntity resourceEntity = resourceMapper.selectById(resourceExampleEntity.getResourceId());
+        // 根据资源实例主键，获取任务实例主键
         JobExampleEntity jobExampleEntity = jobExampleMapperService.lambdaQuery()
             .eq(JobExampleEntity::getResourceExampleId, resourceExampleId).one();
         callbackUrl.append(resourceEntity.getCallbackUrl());
         return new ResourceExample() {{
-            setJobId(jobExampleEntity.getJobId());
-            setJobExampleId(jobExampleEntity.getId());
+            setJobId(jobExampleEntity == null ? null : jobExampleEntity.getJobId());
+            setJobExampleId(jobExampleEntity == null ? null : jobExampleEntity.getId());
             setResourceId(resourceExampleEntity.getResourceId());
-            setResourceExampleId(jobExampleEntity.getResourceExampleId());
+            setResourceExampleId(resourceExampleEntity.getId());
         }};
     }
 }

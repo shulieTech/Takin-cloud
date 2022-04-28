@@ -1,7 +1,7 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.HashMap;
 
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
@@ -9,24 +9,24 @@ import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.PageHelper;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import io.shulie.takin.cloud.app.util.ResourceUtil;
+import io.shulie.takin.cloud.app.service.JsonService;
+import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.app.mapper.ResourceMapper;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
-import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleMapper;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEventEntity;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleEventMapper;
-import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
 
 /**
  * 资源服务 - 实例
@@ -36,7 +36,8 @@ import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
 @Slf4j
 @Service
 public class ResourceServiceImpl implements ResourceService {
-
+    @javax.annotation.Resource
+    JsonService jsonService;
     @javax.annotation.Resource
     ResourceMapper resourceMapper;
     @javax.annotation.Resource
@@ -47,7 +48,6 @@ public class ResourceServiceImpl implements ResourceService {
     ResourceExampleMapper resourceExampleMapper;
     @javax.annotation.Resource
     ResourceExampleEventMapper resourceExampleEventMapper;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * {@inheritDoc}
@@ -157,7 +157,7 @@ public class ResourceServiceImpl implements ResourceService {
                 // 组装返回数据
                 // 组装返回数据
                 String eventContextString = watchmanEventList.getList().get(0).getContext();
-                HashMap<String, String> eventContext = objectMapper.readValue(eventContextString, new TypeReference<HashMap<String, String>>() {});
+                HashMap<String, String> eventContext = jsonService.readValue(eventContextString, new TypeReference<HashMap<String, String>>() {});
                 return eventContext.get("data");
             }
         }

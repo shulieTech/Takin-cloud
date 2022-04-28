@@ -1,9 +1,13 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.shulie.takin.cloud.app.service.JsonService;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+
+import io.shulie.takin.cloud.app.service.JsonService;
 
 /**
  * Json服务 - 实例
@@ -12,14 +16,26 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class JsonServiceImpl implements JsonService {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper() {{
+        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }};
 
     @Override
-    public String formatString(Object obj) {
+    public String writeValueAsString(Object obj) {
         try {
             return objectMapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("JSON序列化失败");
         }
+    }
+
+    @Override
+    public <T> T readValue(String jsonString, Class<T> valueType) throws JsonProcessingException {
+        return objectMapper.readValue(jsonString, valueType);
+    }
+
+    @Override
+    public <T> T readValue(String jsonString, TypeReference<T> valueTypeRef) throws JsonProcessingException {
+        return objectMapper.readValue(jsonString, valueTypeRef);
     }
 }

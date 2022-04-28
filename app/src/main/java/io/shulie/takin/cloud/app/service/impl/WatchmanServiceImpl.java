@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.PageHelper;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.app.util.ResourceUtil;
+import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.constant.enums.EventType;
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
@@ -40,10 +40,11 @@ import io.shulie.takin.cloud.app.service.mapper.WatchmanMapperService;
 @Service
 public class WatchmanServiceImpl implements WatchmanService {
     @javax.annotation.Resource
+    JsonService jsonService;
+    @javax.annotation.Resource
     WatchmanEventMapper watchmanEventMapper;
     @javax.annotation.Resource
     WatchmanMapperService watchmanMapperService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * {@inheritDoc}
@@ -74,7 +75,7 @@ public class WatchmanServiceImpl implements WatchmanService {
             if (watchmanEventList.getList().size() > 0) {
                 // 组装返回数据
                 String eventContextString = watchmanEventList.getList().get(0).getContext();
-                HashMap<String, String> eventContext = objectMapper.readValue(eventContextString, new TypeReference<HashMap<String, String>>() {});
+                HashMap<String, String> eventContext = jsonService.readValue(eventContextString, new TypeReference<HashMap<String, String>>() {});
                 {
                     long resourceTime = Long.parseLong(String.valueOf(eventContext.get("time")));
                     // TODO 要校验时效
@@ -82,7 +83,7 @@ public class WatchmanServiceImpl implements WatchmanService {
                         log.warn("调度资源获取:最后一次上报的资源时效了");
                     }
                     String resourceListString = eventContext.get("data");
-                    List<Resource> resourceList = objectMapper.readValue(resourceListString, new TypeReference<List<Resource>>() {});
+                    List<Resource> resourceList = jsonService.readValue(resourceListString, new TypeReference<List<Resource>>() {});
                     // 处理数据
                     result.addAll(resourceList);
                 }
@@ -127,7 +128,7 @@ public class WatchmanServiceImpl implements WatchmanService {
                 List<WatchmanEventEntity> statusList = watchmanEventMapper.selectList(statusWrapper);
                 if (statusList.size() > 0 && EventType.WATCHMAN_ABNORMAL.getCode().equals(statusList.get(0).getType())) {
                     WatchmanEventEntity status = statusList.get(0);
-                    HashMap<String, String> eventContext = objectMapper.readValue(status.getContext(),
+                    HashMap<String, String> eventContext = jsonService.readValue(status.getContext(),
                         new TypeReference<HashMap<String, String>>() {});
                     String message = eventContext.get("message");
                     return new WatchmanStatusResponse(status.getTime().getTime(), message);
@@ -166,12 +167,12 @@ public class WatchmanServiceImpl implements WatchmanService {
         // 组装入库数据
         HashMap<String, String> context = new HashMap<>(2);
         context.put("time", content.getTime().toString());
-        context.put("data", objectMapper.writeValueAsString(resourceList));
+        context.put("data", jsonService.writeValueAsString(resourceList));
         // 插入数据库
         watchmanEventMapper.insert(new WatchmanEventEntity() {{
             setWatchmanId(watchmanId);
             setType(EventType.WATCHMAN_UPLOAD.getCode());
-            setContext(objectMapper.writeValueAsString(context));
+            setContext(jsonService.writeValueAsString(context));
         }});
     }
 

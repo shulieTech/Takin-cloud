@@ -48,7 +48,7 @@ public class JobExampleServerImpl implements JobExampleServer {
         JobExampleHeartbeat context = new JobExampleHeartbeat() {{setData(getCallbackData(id, callbackUrl));}};
         // 创建回调
         callbackService.create(callbackUrl.toString(),
-            jsonService.formatString(context).getBytes(StandardCharsets.UTF_8));
+            jsonService.writeValueAsString(context).getBytes(StandardCharsets.UTF_8));
         // 记录事件
         jobExampleEventMapper.insert(new JobExampleEventEntity() {{
             setContext("{}");
@@ -64,7 +64,7 @@ public class JobExampleServerImpl implements JobExampleServer {
         JobExampleStart context = new JobExampleStart() {{setData(getCallbackData(id, callbackUrl));}};
         // 创建回调
         callbackService.create(callbackUrl.toString(),
-            jsonService.formatString(context).getBytes(StandardCharsets.UTF_8));
+            jsonService.writeValueAsString(context).getBytes(StandardCharsets.UTF_8));
         // 记录事件
         jobExampleEventMapper.insert(new JobExampleEventEntity() {{
             setContext("{}");
@@ -80,7 +80,7 @@ public class JobExampleServerImpl implements JobExampleServer {
         JobExampleStop context = new JobExampleStop() {{setData(getCallbackData(id, callbackUrl));}};
         // 创建回调
         callbackService.create(callbackUrl.toString(),
-            jsonService.formatString(context).getBytes(StandardCharsets.UTF_8));
+            jsonService.writeValueAsString(context).getBytes(StandardCharsets.UTF_8));
         // 记录事件
         jobExampleEventMapper.insert(new JobExampleEventEntity() {{
             setContext("{}");
@@ -99,7 +99,7 @@ public class JobExampleServerImpl implements JobExampleServer {
         }};
         // 创建回调
         callbackService.create(callbackUrl.toString(),
-            jsonService.formatString(context).getBytes(StandardCharsets.UTF_8));
+            jsonService.writeValueAsString(context).getBytes(StandardCharsets.UTF_8));
         // 记录事件
         jobExampleEventMapper.insert(new JobExampleEventEntity() {{
             ObjectNode objectNode = JsonNodeFactory.instance.objectNode();

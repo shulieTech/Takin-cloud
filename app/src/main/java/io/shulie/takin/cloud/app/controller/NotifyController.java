@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.Parameter;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.shulie.takin.cloud.app.util.IpUtils;
 import io.shulie.takin.cloud.model.notify.Ack;
 import io.shulie.takin.cloud.model.notify.Metrics;
+import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.constant.enums.EventType;
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
@@ -52,8 +52,8 @@ public class NotifyController {
     JobExampleServer jobExampleServer;
     @javax.annotation.Resource
     ResourceExampleService resourceExampleService;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @javax.annotation.Resource
+    JsonService jsonService;
 
     /**
      * 所有事件全部回调到这里
@@ -61,6 +61,7 @@ public class NotifyController {
      * @return 回调响应
      */
     @PostMapping("/notify")
+    @SuppressWarnings("AlibabaMethodTooLong")
     public ApiResult<?> index(
         @Parameter(description = "类型", required = true) @RequestParam Integer type,
         @Parameter(description = "关键词签名", required = true) @RequestParam String refSign,
@@ -73,7 +74,7 @@ public class NotifyController {
             EventType typeEnum = EventType.of(type);
             switch (typeEnum) {
                 case WATCHMAN_UPLOAD: {
-                    watchmanService.upload(watchmanId, objectMapper.readValue(content, ResourceUpload.class));
+                    watchmanService.upload(watchmanId, jsonService.readValue(content, ResourceUpload.class));
                     break;
                 }
                 case WATCHMAN_HEARTBEAT: {
@@ -89,53 +90,53 @@ public class NotifyController {
                     break;
                 }
                 case RESOUECE_EXAMPLE_HEARTBEAT: {
-                    ResourceExampleHeartbeat context = objectMapper.readValue(content, ResourceExampleHeartbeat.class);
+                    ResourceExampleHeartbeat context = jsonService.readValue(content, ResourceExampleHeartbeat.class);
                     resourceExampleService.onHeartbeat(context.getData());
                     break;
                 }
                 case RESOUECE_EXAMPLE_START: {
-                    ResourceExampleStart context = objectMapper.readValue(content, ResourceExampleStart.class);
+                    ResourceExampleStart context = jsonService.readValue(content, ResourceExampleStart.class);
                     resourceExampleService.onStart(context.getData());
                     break;
                 }
                 case RESOUECE_EXAMPLE_STOP: {
-                    ResourceExampleStop context = objectMapper.readValue(content, ResourceExampleStop.class);
+                    ResourceExampleStop context = jsonService.readValue(content, ResourceExampleStop.class);
                     resourceExampleService.onStop(context.getData());
                     break;
                 }
                 case RESOUECE_EXAMPLE_ERROR: {
-                    ResourceExampleError context = objectMapper.readValue(content, ResourceExampleError.class);
+                    ResourceExampleError context = jsonService.readValue(content, ResourceExampleError.class);
                     resourceExampleService.onError(context.getData(), context.getMessage());
                     break;
                 }
                 case JOB_EXAMPLE_HEARTBEAT: {
-                    JobExampleHeartbeat context = objectMapper.readValue(content, JobExampleHeartbeat.class);
+                    JobExampleHeartbeat context = jsonService.readValue(content, JobExampleHeartbeat.class);
                     jobExampleServer.onHeartbeat(context.getData());
                     break;
                 }
                 case JOB_EXAMPLE_START: {
-                    JobExampleStart context = objectMapper.readValue(content, JobExampleStart.class);
+                    JobExampleStart context = jsonService.readValue(content, JobExampleStart.class);
                     jobExampleServer.onStart(context.getData());
                     break;
                 }
                 case JOB_EXAMPLE_STOP: {
-                    JobExampleStop context = objectMapper.readValue(content, JobExampleStop.class);
+                    JobExampleStop context = jsonService.readValue(content, JobExampleStop.class);
                     jobExampleServer.onStop(context.getData());
                     break;
                 }
                 case JOB_EXAMPLE_ERROR: {
-                    JobExampleError context = objectMapper.readValue(content, JobExampleError.class);
+                    JobExampleError context = jsonService.readValue(content, JobExampleError.class);
                     jobExampleServer.onError(context.getData(), context.getMessage());
                     break;
                 }
                 case METRICS: {
-                    Metrics context = objectMapper.readValue(content, Metrics.class);
+                    Metrics context = jsonService.readValue(content, Metrics.class);
                     metricsService.upload(context.getJobExampleId(), context.getData(), IpUtils.getIp(request));
                     break;
                 }
                 case COMMAND_ACK: {
-                    Ack ack = objectMapper.readValue(content, Ack.class);
-                    commandService.ack(ack.getCommandId(), ack.getData());
+                    Ack ack = jsonService.readValue(content, Ack.class);
+                    commandService.ack(ack.getData(), ack.getContent());
                     break;
                 }
                 default: {

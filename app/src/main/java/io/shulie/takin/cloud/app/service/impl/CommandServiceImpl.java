@@ -7,11 +7,11 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.app.service.JobService;
+import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.entity.CommandEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.app.service.ResourceService;
@@ -29,13 +29,13 @@ public class CommandServiceImpl implements CommandService {
     @Lazy
     @Resource
     JobService jobService;
+    @Resource
+    JsonService jsonService;
     @Lazy
     @Resource
     ResourceService resourceService;
     @Resource
     CommandMapperService commandMapperService;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * {@inheritDoc}
@@ -85,7 +85,7 @@ public class CommandServiceImpl implements CommandService {
     private long create(Integer type, HashMap<String, Object> context) throws JsonProcessingException {
         CommandEntity commandEntity = new CommandEntity() {{
             setType(type);
-            setContext(objectMapper.writeValueAsString(context));
+            setContext(jsonService.writeValueAsString(context));
         }};
         commandMapperService.save(commandEntity);
         return commandEntity.getId();
