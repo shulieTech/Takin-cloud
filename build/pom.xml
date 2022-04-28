@@ -10,6 +10,10 @@
     <groupId>io.shulie.takin.cloud</groupId>
     <artifactId>build</artifactId>
 
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+    
     <build>
         <plugins>
             <plugin>

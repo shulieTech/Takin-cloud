@@ -209,7 +209,7 @@ public class WatchmanServiceImpl implements WatchmanService {
         watchmanEventMapper.insert(new WatchmanEventEntity() {{
             setWatchmanId(watchmanId);
             setContext(content.toPrettyString());
-            setType(EventType.WATCHMAN_NORMAL.getCode());
+            setType(EventType.WATCHMAN_ABNORMAL.getCode());
         }});
     }
 

@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.model.request;
 
+import java.util.HashMap;
 import java.util.List;
 
 import lombok.Data;
@@ -7,6 +8,8 @@ import lombok.Data;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import io.shulie.takin.cloud.constant.enums.JobType;
+import io.shulie.takin.cloud.constant.enums.FormulaSymbol;
+import io.shulie.takin.cloud.constant.enums.FormulaTarget;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 
 /**
@@ -31,12 +34,18 @@ public class StartRequest {
     private String name;
     @Schema(description = "脚本文件(jmx)")
     private FileInfo scriptFile;
-    @Schema(description = "运行时依赖文件(插件)")
+    @Schema(description = "运行时依赖文件(附件)")
     private List<FileInfo> dependency;
     @Schema(description = "数据文件(csv)")
     private List<FileInfo> data;
     @Schema(description = "线程配置")
     private List<ThreadConfigInfo> threadConfig;
+    @Schema(description = "SLA配置")
+    private List<SlaInfo> slaConfig;
+    /**
+     * 拓展属性
+     */
+    private HashMap<String, String> ext;
 
     @Data
     @Schema(description = "文件信息")
@@ -85,5 +94,29 @@ public class StartRequest {
         private Integer growthTime;
         @Schema(description = "增长步骤")
         private Integer growthStep;
+    }
+
+    @Data
+    @Schema(description = "SLA配置")
+    public static class SlaInfo {
+        /**
+         * 关键词
+         */
+        private String ref;
+        /**
+         * 算式目标
+         * <p>(RT、TPS、SA、成功率)</p>
+         */
+        private FormulaTarget formulaTarget;
+        /**
+         * 算式符号
+         * <p>(>=、>、=、<=、<)</p>
+         */
+        private FormulaSymbol formulaSymbol;
+        /**
+         * 算式数值
+         * <p>(用户输入)</p>
+         */
+        private Double formulaNumber;
     }
 }

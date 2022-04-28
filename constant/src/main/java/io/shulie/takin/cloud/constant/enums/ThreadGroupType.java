@@ -1,5 +1,8 @@
 package io.shulie.takin.cloud.constant.enums;
 
+import java.util.Arrays;
+import java.util.HashMap;
+
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,7 +33,7 @@ public enum ThreadGroupType {
     /**
      * TPS
      */
-    DIY(300, "TPS模式", 2, 0),
+    DIY(300, "自定义", 2, 0),
     // 格式化用
     ;
     @Getter
@@ -45,4 +48,14 @@ public enum ThreadGroupType {
 
     @Override
     public String toString() {return code + ":" + name + "(" + type + "," + model + ")";}
+
+    private final static HashMap<Integer, ThreadGroupType> EXAMPLE_MAP = new HashMap<>(6);
+
+    static {
+        Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));
+    }
+
+    public static ThreadGroupType of(Integer code) {
+        return EXAMPLE_MAP.get(code);
+    }
 }

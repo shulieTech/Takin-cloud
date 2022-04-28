@@ -34,10 +34,11 @@ public interface JobService {
     /**
      * 查看配置
      *
-     * @param taskId 任务主键
+     * @param jobId 任务主键
+     * @param ref   关键词
      * @return 配置内容
      */
-    List<ThreadConfigExampleEntity> getConfig(long taskId);
+    List<JobConfig> getConfig(long jobId, String ref);
 
     /**
      * 修改配置

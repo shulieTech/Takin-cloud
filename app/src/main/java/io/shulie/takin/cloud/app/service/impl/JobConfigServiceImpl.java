@@ -2,10 +2,11 @@ package io.shulie.takin.cloud.app.service.impl;
 
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import cn.hutool.core.util.StrUtil;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 
 import io.shulie.takin.cloud.app.entity.MetricsEntity;
 import io.shulie.takin.cloud.app.service.JobConfigService;
@@ -29,8 +30,6 @@ public class JobConfigServiceImpl implements JobConfigService {
     ThreadConfigMapperServiceImpl threadConfigMapperService;
     @javax.annotation.Resource
     ThreadConfigExampleMapperServiceImpl threadConfigExampleMapperService;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * {@inheritDoc}
@@ -56,18 +55,18 @@ public class JobConfigServiceImpl implements JobConfigService {
      * {@inheritDoc}
      */
     @Override
-    public ThreadConfigExampleEntity threadExampleItem(long jobId, String ref) {
+    public List<ThreadConfigExampleEntity> threadExampleItem(long jobId, String ref) {
         return threadConfigExampleMapperService.lambdaQuery()
             .eq(ThreadConfigExampleEntity::getJobId, jobId)
-            .eq(ThreadConfigExampleEntity::getRef, ref)
-            .one();
+            .eq(StrUtil.isNotBlank(ref), ThreadConfigExampleEntity::getRef, ref)
+            .list();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void modifThreadConfigExample(long threadConfigExampleId, Integer type, String context) {
+    public void modifThreadConfigExample(long threadConfigExampleId, ThreadGroupType type, String context) {
         threadConfigExampleMapperService.updateById(new ThreadConfigExampleEntity() {{
             setId(threadConfigExampleId);
             setType(type);

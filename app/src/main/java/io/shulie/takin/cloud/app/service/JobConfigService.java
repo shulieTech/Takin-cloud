@@ -1,12 +1,12 @@
 package io.shulie.takin.cloud.app.service;
 
 import java.util.List;
-import java.util.HashMap;
 import java.util.Collections;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.shulie.takin.cloud.app.entity.MetricsEntity;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
+import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
 
 /**
@@ -38,7 +38,7 @@ public interface JobConfigService {
      * @param ref   关键词
      * @return 线程组配置
      */
-    ThreadConfigExampleEntity threadExampleItem(long jobId, String ref);
+    List<ThreadConfigExampleEntity> threadExampleItem(long jobId, String ref);
 
     /**
      * 修改线程组
@@ -48,7 +48,7 @@ public interface JobConfigService {
      * @param context               修改内容
      * @throws JsonProcessingException JSON异常
      */
-    void modifThreadConfigExample(long threadConfigExampleId, Integer type, String context) throws JsonProcessingException;
+    void modifThreadConfigExample(long threadConfigExampleId, ThreadGroupType type, String context) throws JsonProcessingException;
 
     /**
      * 创建指标配置

@@ -2,35 +2,35 @@ package io.shulie.takin.cloud.app.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
-import io.shulie.takin.cloud.app.service.MetricsService;
-import io.shulie.takin.cloud.app.util.IpUtils;
-import io.shulie.takin.cloud.model.notify.Metrics;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.Parameter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.shulie.takin.cloud.app.util.IpUtils;
 import io.shulie.takin.cloud.model.notify.Ack;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.shulie.takin.cloud.model.notify.Metrics;
 import io.shulie.takin.cloud.constant.enums.EventType;
+import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
+import io.shulie.takin.cloud.app.service.MetricsService;
 import io.shulie.takin.cloud.app.service.WatchmanService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.shulie.takin.cloud.app.service.JobExampleServer;
-import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.model.notify.JobExampleStop;
 import io.shulie.takin.cloud.model.notify.ResourceUpload;
+import io.shulie.takin.cloud.app.service.JobExampleServer;
 import io.shulie.takin.cloud.model.notify.JobExampleError;
 import io.shulie.takin.cloud.model.notify.JobExampleStart;
-import io.shulie.takin.cloud.app.service.ResourceExampleService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.shulie.takin.cloud.model.notify.JobExampleHeartbeat;
 import io.shulie.takin.cloud.model.notify.ResourceExampleStop;
 import io.shulie.takin.cloud.model.notify.ResourceExampleError;
 import io.shulie.takin.cloud.model.notify.ResourceExampleStart;
+import io.shulie.takin.cloud.app.service.ResourceExampleService;
 import io.shulie.takin.cloud.model.notify.ResourceExampleHeartbeat;
 
 /**
@@ -81,11 +81,11 @@ public class NotifyController {
                     break;
                 }
                 case WATCHMAN_NORMAL: {
-                    watchmanService.onHeartbeat(watchmanId);
+                    watchmanService.onNormal(watchmanId);
                     break;
                 }
                 case WATCHMAN_ABNORMAL: {
-                    watchmanService.onHeartbeat(watchmanId);
+                    watchmanService.onAbnormal(watchmanId, content);
                     break;
                 }
                 case RESOUECE_EXAMPLE_HEARTBEAT: {

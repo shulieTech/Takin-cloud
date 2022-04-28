@@ -1,7 +1,9 @@
 package io.shulie.takin.cloud.constant.enums;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.AllArgsConstructor;
+
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * 算式目标
@@ -22,6 +24,7 @@ public enum FormulaTarget {
     // 格式化用
     ;
     @Getter
+    @JsonValue
     private final Integer code;
     private final String description;
 }

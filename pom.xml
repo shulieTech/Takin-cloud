@@ -7,7 +7,6 @@
     <groupId>io.shulie.takin.cloud</groupId>
     <artifactId>takin-cloud</artifactId>
     <version>5.3.0</version>
-
     <properties>
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>

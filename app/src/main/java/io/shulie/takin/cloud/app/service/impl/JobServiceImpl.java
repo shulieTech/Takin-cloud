@@ -1,32 +1,37 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
+import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.collection.CollUtil;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.app.mapper.JobMapper;
 import io.shulie.takin.cloud.app.service.JobService;
+import io.shulie.takin.cloud.model.response.JobConfig;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
+import io.shulie.takin.cloud.model.request.StartRequest;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.ResourceService;
-import io.shulie.takin.cloud.model.response.JobConfig;
 import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
-import io.shulie.takin.cloud.model.request.StartRequest;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
 import io.shulie.takin.cloud.app.service.mapper.JobExampleMapperService;
-import io.shulie.takin.cloud.app.service.mapper.ThreadConfigMapperService;
 import io.shulie.takin.cloud.model.request.StartRequest.ThreadConfigInfo;
+import io.shulie.takin.cloud.app.service.mapper.ThreadConfigMapperService;
 import io.shulie.takin.cloud.app.service.mapper.ThreadConfigExampleMapperService;
 
 /**
@@ -34,6 +39,7 @@ import io.shulie.takin.cloud.app.service.mapper.ThreadConfigExampleMapperService
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
+@Slf4j
 @Service
 public class JobServiceImpl implements JobService {
     @Resource
@@ -116,9 +122,9 @@ public class JobServiceImpl implements JobService {
                 int finalJ = j;
                 threadConfigExampleEntityList.add(new ThreadConfigExampleEntity() {{
                     setRef(t.getRef());
+                    setType(t.getType());
                     setSerialNumber(finalJ);
                     setJobId(jobEntity.getId());
-                    setType(t.getType().getCode());
                     setJobExampleId(jobExampleEntity.getId());
                     HashMap<String, Object> context = new HashMap<String, Object>(5) {{
                         put("number", t.getNumber());
@@ -159,8 +165,24 @@ public class JobServiceImpl implements JobService {
      * {@inheritDoc}
      */
     @Override
-    public List<ThreadConfigExampleEntity> getConfig(long taskId) {
-        return null;
+    public List<JobConfig> getConfig(long jobId, String ref) {
+        List<ThreadConfigExampleEntity> threadConfigExampleEntity = jobConfigService.threadExampleItem(jobId, ref);
+        return threadConfigExampleEntity.stream().map(t -> {
+            HashMap<String, Object> context = null;
+            try {
+                context = objectMapper.readValue(t.getContext(), new TypeReference<HashMap<String, Object>>() {});
+            } catch (JsonProcessingException e) {
+                log.warn("线程组配置实例context解析失败");
+            }
+            HashMap<String, Object> finalContext = context;
+            return new JobConfig() {{
+                setType(t.getType());
+                setJobId(t.getJobId());
+                setContext(finalContext);
+                setRef(t.getRef());
+            }};
+        }).collect(Collectors.toList());
+
     }
 
     /**
@@ -169,16 +191,16 @@ public class JobServiceImpl implements JobService {
     @Override
     public void modifyConfig(long jobId, JobConfig context) throws JsonProcessingException {
         // 1. 找到要修改的配置项
-        ThreadConfigExampleEntity threadConfigExampleEntity = jobConfigService.threadExampleItem(jobId, context.getRef());
+        List<ThreadConfigExampleEntity> threadConfigExampleEntity = jobConfigService.threadExampleItem(jobId, context.getRef());
         String contextString = objectMapper.writeValueAsString(context.getContext());
         // 2. 如果没有抛出异常
-        if (threadConfigExampleEntity == null) {
+        if (CollUtil.isEmpty(threadConfigExampleEntity)) {
             throw new RuntimeException("未找到可修改的配置");
         }
         // 存在即修改
         else {
             // 2.1 更新任务配置实例项
-            jobConfigService.modifThreadConfigExample(threadConfigExampleEntity.getId(), context.getMode(), contextString);
+            jobConfigService.modifThreadConfigExample(threadConfigExampleEntity.get(0).getId(), context.getType(), contextString);
             // 2.2 下发命令
         }
         commandService.updateConfig(jobId);

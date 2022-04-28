@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.constant.enums;
 
 import lombok.Getter;
 import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * 算数符号
@@ -23,6 +24,7 @@ public enum FormulaSymbol {
     // 格式化用
     ;
     @Getter
+    @JsonValue
     private final Integer code;
     private final String symbol;
     private final String description;
