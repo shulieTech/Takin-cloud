@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
+import org.springframework.stereotype.Service;
+
 import io.shulie.takin.cloud.app.mapper.SlaMapper;
 import io.shulie.takin.cloud.app.entity.SlaEntity;
 import io.shulie.takin.cloud.app.service.SlaService;
@@ -17,6 +19,7 @@ import io.shulie.takin.cloud.constant.enums.FormulaTarget;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
+@Service
 public class SlaServiceImpl implements SlaService {
     @javax.annotation.Resource
     SlaMapper slaMapper;

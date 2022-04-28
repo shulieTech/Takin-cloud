@@ -22,6 +22,7 @@ public enum CallbackType {
     JMETER_START(201, "JMeter启动"),
     JMETER_STOP(202, "JMeter停止"),
     JMETER_ERROR(203, "JMeter异常"),
+    SLA(301, "触发SLA"),
     // 格式化用
     ;
 

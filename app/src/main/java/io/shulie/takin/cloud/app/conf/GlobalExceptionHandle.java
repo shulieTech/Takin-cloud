@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.app.conf;
 
-import io.shulie.takin.cloud.app.model.response.ApiResult;
+import io.shulie.takin.cloud.model.response.ApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

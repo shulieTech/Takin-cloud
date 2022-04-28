@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.shulie.takin.cloud.app.service.ResourceService;
-import io.shulie.takin.cloud.app.model.response.ApiResult;
+import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
-import io.shulie.takin.cloud.app.model.request.ApplyResourceRequest;
+import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
 
 /**
  * 资源

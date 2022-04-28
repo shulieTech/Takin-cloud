@@ -7,8 +7,8 @@ import com.github.pagehelper.PageInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
-import io.shulie.takin.cloud.app.model.notify.ResourceUpload;
-import io.shulie.takin.cloud.app.model.resource.Resource;
+import io.shulie.takin.cloud.model.notify.ResourceUpload;
+import io.shulie.takin.cloud.model.resource.Resource;
 
 /**
  * 调度服务

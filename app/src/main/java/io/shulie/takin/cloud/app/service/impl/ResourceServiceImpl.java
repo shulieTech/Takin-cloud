@@ -19,14 +19,14 @@ import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.mapper.ResourceMapper;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
-import io.shulie.takin.cloud.app.model.resource.Resource;
+import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleMapper;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEventEntity;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleEventMapper;
-import io.shulie.takin.cloud.app.model.request.ApplyResourceRequest;
+import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
 
 /**
  * 资源服务 - 实例

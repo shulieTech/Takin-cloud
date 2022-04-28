@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
-import io.shulie.takin.cloud.app.model.callback.*;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.constant.enums.EventType;
 import io.shulie.takin.cloud.app.mapper.ResourceMapper;
@@ -17,11 +16,14 @@ import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleMapper;
 import io.shulie.takin.cloud.app.service.ResourceExampleService;
-import io.shulie.takin.cloud.app.entity.ResourceExampleEventEntity;
+import io.shulie.takin.cloud.model.callback.ResourceExampleStop;
+import io.shulie.takin.cloud.model.callback.ResourceExampleError;
+import io.shulie.takin.cloud.model.callback.ResourceExampleStart;
+import io.shulie.takin.cloud.model.callback.basic.ResourceExample;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleEventMapper;
-import io.shulie.takin.cloud.app.model.callback.basic.ResourceExample;
+import io.shulie.takin.cloud.app.entity.ResourceExampleEventEntity;
+import io.shulie.takin.cloud.model.callback.ResourceExampleHeartbeat;
 import io.shulie.takin.cloud.app.service.mapper.JobExampleMapperService;
-import io.shulie.takin.cloud.app.model.callback.ResourceExampleHeartbeat;
 
 /**
  * 资源实例服务 - 实例

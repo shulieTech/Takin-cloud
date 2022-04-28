@@ -42,4 +42,9 @@ public class SlaEventEntity {
      * <p>(用户输入)</p>
      */
     private Double formulaNumber;
+    /**
+     * 比较的值
+     * <p>(实际变化的值)</p>
+     */
+    private Double number;
 }

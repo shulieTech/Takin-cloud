@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
-import io.shulie.takin.cloud.app.model.resource.Resource;
+import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.app.service.WatchmanService;
-import io.shulie.takin.cloud.app.model.response.ApiResult;
+import io.shulie.takin.cloud.model.response.ApiResult;
 
 /**
  * 资源

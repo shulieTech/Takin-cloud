@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
-import io.shulie.takin.cloud.app.model.callback.*;
 import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.app.mapper.JobMapper;
 import io.shulie.takin.cloud.app.service.JsonService;
@@ -15,9 +14,13 @@ import io.shulie.takin.cloud.constant.enums.EventType;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.app.service.JobExampleServer;
+import io.shulie.takin.cloud.model.callback.JobExampleStop;
+import io.shulie.takin.cloud.model.callback.JobExampleError;
+import io.shulie.takin.cloud.model.callback.JobExampleStart;
+import io.shulie.takin.cloud.model.callback.basic.JobExample;
 import io.shulie.takin.cloud.app.entity.JobExampleEventEntity;
 import io.shulie.takin.cloud.app.mapper.JobExampleEventMapper;
-import io.shulie.takin.cloud.app.model.callback.basic.JobExample;
+import io.shulie.takin.cloud.model.callback.JobExampleHeartbeat;
 import io.shulie.takin.cloud.app.service.mapper.JobExampleMapperService;
 
 /**

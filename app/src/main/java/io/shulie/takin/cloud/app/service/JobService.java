@@ -5,8 +5,8 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
-import io.shulie.takin.cloud.app.model.request.StartRequest;
-import io.shulie.takin.cloud.app.model.response.JobConfig;
+import io.shulie.takin.cloud.model.request.StartRequest;
+import io.shulie.takin.cloud.model.response.JobConfig;
 
 /**
  * 任务服务

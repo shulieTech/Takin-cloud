@@ -19,14 +19,14 @@ import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.ResourceService;
-import io.shulie.takin.cloud.app.model.response.JobConfig;
+import io.shulie.takin.cloud.model.response.JobConfig;
 import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
-import io.shulie.takin.cloud.app.model.request.StartRequest;
+import io.shulie.takin.cloud.model.request.StartRequest;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
 import io.shulie.takin.cloud.app.service.mapper.JobExampleMapperService;
 import io.shulie.takin.cloud.app.service.mapper.ThreadConfigMapperService;
-import io.shulie.takin.cloud.app.model.request.StartRequest.ThreadConfigInfo;
+import io.shulie.takin.cloud.model.request.StartRequest.ThreadConfigInfo;
 import io.shulie.takin.cloud.app.service.mapper.ThreadConfigExampleMapperService;
 
 /**

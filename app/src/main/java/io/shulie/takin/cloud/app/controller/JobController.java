@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.shulie.takin.cloud.app.service.JobService;
-import io.shulie.takin.cloud.app.model.response.ApiResult;
-import io.shulie.takin.cloud.app.model.response.JobConfig;
-import io.shulie.takin.cloud.app.model.request.StartRequest;
+import io.shulie.takin.cloud.model.response.ApiResult;
+import io.shulie.takin.cloud.model.response.JobConfig;
+import io.shulie.takin.cloud.model.request.StartRequest;
 
 /**
  * 任务

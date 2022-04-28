@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.shulie.takin.cloud.app.model.notify.Ack;
+import io.shulie.takin.cloud.model.notify.Ack;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.shulie.takin.cloud.constant.enums.EventType;
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
@@ -16,17 +16,17 @@ import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.shulie.takin.cloud.app.service.JobExampleServer;
-import io.shulie.takin.cloud.app.model.response.ApiResult;
-import io.shulie.takin.cloud.app.model.notify.JobExampleStop;
-import io.shulie.takin.cloud.app.model.notify.ResourceUpload;
-import io.shulie.takin.cloud.app.model.notify.JobExampleError;
-import io.shulie.takin.cloud.app.model.notify.JobExampleStart;
+import io.shulie.takin.cloud.model.response.ApiResult;
+import io.shulie.takin.cloud.model.notify.JobExampleStop;
+import io.shulie.takin.cloud.model.notify.ResourceUpload;
+import io.shulie.takin.cloud.model.notify.JobExampleError;
+import io.shulie.takin.cloud.model.notify.JobExampleStart;
 import io.shulie.takin.cloud.app.service.ResourceExampleService;
-import io.shulie.takin.cloud.app.model.notify.JobExampleHeartbeat;
-import io.shulie.takin.cloud.app.model.notify.ResourceExampleStop;
-import io.shulie.takin.cloud.app.model.notify.ResourceExampleError;
-import io.shulie.takin.cloud.app.model.notify.ResourceExampleStart;
-import io.shulie.takin.cloud.app.model.notify.ResourceExampleHeartbeat;
+import io.shulie.takin.cloud.model.notify.JobExampleHeartbeat;
+import io.shulie.takin.cloud.model.notify.ResourceExampleStop;
+import io.shulie.takin.cloud.model.notify.ResourceExampleError;
+import io.shulie.takin.cloud.model.notify.ResourceExampleStart;
+import io.shulie.takin.cloud.model.notify.ResourceExampleHeartbeat;
 
 /**
  * 上报控制器

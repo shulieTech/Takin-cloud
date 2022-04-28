@@ -21,11 +21,11 @@ import org.springframework.stereotype.Service;
 import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.constant.enums.EventType;
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
-import io.shulie.takin.cloud.app.model.resource.Resource;
+import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.app.mapper.WatchmanEventMapper;
 import io.shulie.takin.cloud.app.entity.WatchmanEventEntity;
-import io.shulie.takin.cloud.app.model.notify.ResourceUpload;
+import io.shulie.takin.cloud.model.notify.ResourceUpload;
 import io.shulie.takin.cloud.app.service.mapper.WatchmanMapperService;
 
 /**
