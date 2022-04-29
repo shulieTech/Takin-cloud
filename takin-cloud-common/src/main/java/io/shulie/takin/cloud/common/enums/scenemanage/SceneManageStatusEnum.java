@@ -16,6 +16,7 @@ public enum SceneManageStatusEnum {
      * 待启动
      */
     WAIT(0, "待启动"),
+    RECYCLE(-1, "已回收"),
     STARTING(1, "启动中"),
     PRESSURE_TESTING(2, "压测中"),
     JOB_CREATING(3, "job创建中"),
@@ -28,6 +29,7 @@ public enum SceneManageStatusEnum {
     FAILED(9, "压测失败"),
     // 强制停止两个都停止
     FORCE_STOP(10, "强制停止");
+
 
     private final Integer value;
     private final String desc;
