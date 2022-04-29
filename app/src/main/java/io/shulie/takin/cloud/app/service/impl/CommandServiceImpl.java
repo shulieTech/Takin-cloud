@@ -2,8 +2,6 @@ package io.shulie.takin.cloud.app.service.impl;
 
 import java.util.HashMap;
 
-import javax.annotation.Resource;
-
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
 
@@ -27,14 +25,14 @@ import io.shulie.takin.cloud.app.service.mapper.CommandMapperService;
 @SuppressWarnings("unused")
 public class CommandServiceImpl implements CommandService {
     @Lazy
-    @Resource
+    @javax.annotation.Resource
     JobService jobService;
-    @Resource
+    @javax.annotation.Resource
     JsonService jsonService;
     @Lazy
-    @Resource
+    @javax.annotation.Resource
     ResourceService resourceService;
-    @Resource
+    @javax.annotation.Resource
     CommandMapperService commandMapperService;
 
     /**

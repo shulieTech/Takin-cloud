@@ -3,8 +3,6 @@ package io.shulie.takin.cloud.app.service.impl;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
 import cn.hutool.core.util.StrUtil;
@@ -27,11 +25,11 @@ import io.shulie.takin.cloud.app.service.mapper.CallbackMapperService;
 @Service
 @Slf4j(topic = "callback")
 public class CallbackServiceImpl implements CallbackService {
-    @Resource
+    @javax.annotation.Resource
     CallbackMapper callbackMapper;
-    @Resource
+    @javax.annotation.Resource
     CallbackLogMapper callbackLogMapper;
-    @Resource
+    @javax.annotation.Resource
     CallbackMapperService callbackMapperService;
 
     @Override

@@ -2,8 +2,6 @@ package io.shulie.takin.cloud.app.controller;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,7 +27,7 @@ import io.shulie.takin.cloud.model.request.StartRequest;
 @RestController
 @RequestMapping("/job")
 public class JobController {
-    @Resource
+    @javax.annotation.Resource
     JobService jobService;
 
     @Operation(summary = "启动任务")

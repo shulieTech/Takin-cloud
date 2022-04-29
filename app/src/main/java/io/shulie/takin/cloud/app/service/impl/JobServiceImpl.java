@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -51,27 +49,27 @@ import io.shulie.takin.cloud.app.service.mapper.ThreadConfigExampleMapperService
 @Slf4j
 @Service
 public class JobServiceImpl implements JobService {
-    @Resource
+    @javax.annotation.Resource
     JobMapper jobMapper;
-    @Resource
+    @javax.annotation.Resource
     JsonService jsonService;
-    @Resource
+    @javax.annotation.Resource
     CommandService commandService;
-    @Resource
+    @javax.annotation.Resource
     ResourceService resourceService;
-    @Resource
+    @javax.annotation.Resource
     SlaMapperService slaMapperService;
-    @Resource
+    @javax.annotation.Resource
     JobConfigServiceImpl jobConfigService;
-    @Resource
+    @javax.annotation.Resource
     JobFileMapperService jobFileMapperService;
-    @Resource
+    @javax.annotation.Resource
     MetricsMapperService metricsMapperService;
-    @Resource
+    @javax.annotation.Resource
     JobExampleMapperService jobExampleMapperService;
-    @Resource
+    @javax.annotation.Resource
     ThreadConfigMapperService threadConfigMapperService;
-    @Resource
+    @javax.annotation.Resource
     ThreadConfigExampleMapperService threadConfigExampleMapperService;
 
     /**
@@ -283,7 +281,7 @@ public class JobServiceImpl implements JobService {
      * {@inheritDoc}
      */
     @Override
-    public void modifyConfig(long jobId, JobConfig context)   {
+    public void modifyConfig(long jobId, JobConfig context) {
         // 1. 找到要修改的配置项
         List<ThreadConfigExampleEntity> threadConfigExampleEntity = jobConfigService.threadExampleItem(jobId, context.getRef());
         // 2. 如果没有抛出异常

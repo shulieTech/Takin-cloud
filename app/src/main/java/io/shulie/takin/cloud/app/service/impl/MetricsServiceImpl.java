@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Resource;
-
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.collection.CollUtil;
 import org.springframework.stereotype.Service;
@@ -33,11 +31,11 @@ import io.shulie.takin.cloud.constant.PressureEngineConstants;
 public class MetricsServiceImpl implements MetricsService {
     @javax.annotation.Resource
     SlaService slaService;
-    @Resource
+    @javax.annotation.Resource
     private InfluxWriter influxWriter;
     @javax.annotation.Resource
     JobExampleServer jobExampleServer;
-    @Resource
+    @javax.annotation.Resource
     RedisTemplate<String, String> stringRedisTemplate;
 
     /**

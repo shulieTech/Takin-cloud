@@ -7,7 +7,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 
-import javax.annotation.Resource;
 import javax.annotation.PostConstruct;
 
 import cn.hutool.http.HttpUtil;
@@ -32,7 +31,7 @@ public class CallbackScheduled {
     @Value("${callback.thread.pool.size:10}")
     Integer threadPoolSize;
     private ThreadPoolExecutor threadpool;
-    @Resource
+    @javax.annotation.Resource
     private CallbackService callbackService;
     private final LinkedHashMap<Long, Boolean> cacheData = new LinkedHashMap<>();
 
