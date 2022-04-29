@@ -113,7 +113,7 @@ public class JobServiceImpl implements JobService {
                 setMode(threadConfigInfo.getType().getCode());
                 setRef(threadConfigInfo.getRef());
                 HashMap<String, Object> context = threadConfigInfo(threadConfigInfo);
-                context.putAll(jobInfo.getExt());
+                if (jobInfo.getExt() != null) {context.putAll(jobInfo.getExt());}
                 setContext(jsonService.writeValueAsString(context));
             }});
         }
@@ -135,7 +135,7 @@ public class JobServiceImpl implements JobService {
                     setJobId(jobEntity.getId());
                     setJobExampleId(jobExampleEntity.getId());
                     HashMap<String, Object> context = threadConfigInfo(t);
-                    context.putAll(jobInfo.getExt());
+                    if (jobInfo.getExt() != null) {context.putAll(jobInfo.getExt());}
                     setContext(jsonService.writeValueAsString(context));
                 }});
             }
