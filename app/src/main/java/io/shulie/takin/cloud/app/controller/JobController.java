@@ -54,7 +54,7 @@ public class JobController {
 
     @Operation(summary = "修改配置")
     @RequestMapping(value = "config/modify", method = {RequestMethod.POST})
-    public ApiResult<?> modifyConfig(@RequestBody ModifyConfig info) throws JsonProcessingException {
+    public ApiResult<?> modifyConfig(@RequestBody ModifyConfig info) {
         jobService.modifyConfig(info.getJobId(), info);
         return ApiResult.success();
     }

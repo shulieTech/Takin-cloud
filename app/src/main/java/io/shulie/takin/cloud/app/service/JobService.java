@@ -2,11 +2,10 @@ package io.shulie.takin.cloud.app.service;
 
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.shulie.takin.cloud.app.entity.JobEntity;
-import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
-import io.shulie.takin.cloud.model.request.StartRequest;
 import io.shulie.takin.cloud.model.response.JobConfig;
+import io.shulie.takin.cloud.model.request.StartRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * 任务服务
@@ -43,11 +42,10 @@ public interface JobService {
     /**
      * 修改配置
      *
-     * @param jobId  任务主键
+     * @param jobId   任务主键
      * @param context 配置内容
-     * @throws JsonProcessingException JSON异常
      */
-    void modifyConfig(long jobId, JobConfig context) throws JsonProcessingException;
+    void modifyConfig(long jobId, JobConfig context);
 
     /**
      * 获取数据对象 - 任务

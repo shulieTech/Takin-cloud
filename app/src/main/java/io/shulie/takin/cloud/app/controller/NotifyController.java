@@ -142,8 +142,7 @@ public class NotifyController {
                 }
                 case COMMAND_ACK: {
                     Ack ack = jsonService.readValue(content, Ack.class);
-                    commandService.ack(ack.getData(), ack.getContent());
-                    break;
+                    return ApiResult.success(commandService.ack(ack.getData(), ack.getContent()));
                 }
                 default: {
                     return ApiResult.fail("未识别的事件类型");

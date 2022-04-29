@@ -199,11 +199,11 @@ public class JobServiceImpl implements JobService {
             MetricsInfo metricsInfo = jobInfo.getMetricsConfig().get(i);
             String context = null;
             try {
-                context = jsonService.writeValueAsString(new HashMap<String, Object>() {{
-                    put("tps", metricsInfo.getTps());
-                    put("rt", metricsInfo.getRt());
-                    put("successRate", metricsInfo.getSuccessRate());
+                context = jsonService.writeValueAsString(new HashMap<String, Object>(4) {{
                     put("sa", metricsInfo.getSa());
+                    put("rt", metricsInfo.getRt());
+                    put("tps", metricsInfo.getTps());
+                    put("successRate", metricsInfo.getSuccessRate());
                 }});
             } catch (Exception e) {
                 log.warn("JSON序列化失败");
@@ -262,13 +262,13 @@ public class JobServiceImpl implements JobService {
     public List<JobConfig> getConfig(long jobId, String ref) {
         List<ThreadConfigExampleEntity> threadConfigExampleEntity = jobConfigService.threadExampleItem(jobId, ref);
         return threadConfigExampleEntity.stream().map(t -> {
-            HashMap<String, Object> context = null;
+            ThreadConfigInfo context = null;
             try {
-                context = jsonService.readValue(t.getContext(), new TypeReference<HashMap<String, Object>>() {});
+                context = jsonService.readValue(t.getContext(), new TypeReference<ThreadConfigInfo>() {});
             } catch (JsonProcessingException e) {
                 log.warn("线程组配置实例context解析失败");
             }
-            HashMap<String, Object> finalContext = context;
+            ThreadConfigInfo finalContext = context;
             return new JobConfig() {{
                 setRef(t.getRef());
                 setJobId(t.getJobId());
@@ -283,20 +283,28 @@ public class JobServiceImpl implements JobService {
      * {@inheritDoc}
      */
     @Override
-    public void modifyConfig(long jobId, JobConfig context) throws JsonProcessingException {
+    public void modifyConfig(long jobId, JobConfig context)   {
         // 1. 找到要修改的配置项
         List<ThreadConfigExampleEntity> threadConfigExampleEntity = jobConfigService.threadExampleItem(jobId, context.getRef());
-        String contextString = jsonService.writeValueAsString(context.getContext());
         // 2. 如果没有抛出异常
         if (CollUtil.isEmpty(threadConfigExampleEntity)) {
             throw new RuntimeException("未找到可修改的配置");
         }
         // 存在即修改
         else {
-            // 2.1 更新任务配置实例项
-            jobConfigService.modifThreadConfigExample(threadConfigExampleEntity.get(0).getId(), context.getType(), contextString);
-            // 2.2 下发命令
+            // TOOD 重新切分
+            List<List<ThreadConfigInfo>> splitThreadConfig =
+                splitThreadConfig(CollUtil.toList(context.getContext()), threadConfigExampleEntity.size());
+            for (int i = 0; i < splitThreadConfig.get(0).size(); i++) {
+                String contextString = jsonService.writeValueAsString(splitThreadConfig.get(i));
+                // 2.1 更新任务配置实例项
+                jobConfigService.modifThreadConfigExample(
+                    threadConfigExampleEntity.get(i).getId(),
+                    context.getType(),
+                    contextString);
+            }
         }
+        // 2.2 下发命令
         commandService.updateConfig(jobId);
     }
 

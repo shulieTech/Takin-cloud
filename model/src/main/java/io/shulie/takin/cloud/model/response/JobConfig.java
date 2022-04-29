@@ -1,11 +1,10 @@
 package io.shulie.takin.cloud.model.response;
 
-import java.util.HashMap;
-
 import lombok.Data;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
+import io.shulie.takin.cloud.model.request.StartRequest.ThreadConfigInfo;
 
 /**
  * 任务配置
@@ -33,5 +32,5 @@ public class JobConfig {
      * 配置内容
      */
     @Schema(description = "配置内容")
-    private HashMap<String, Object> context;
+    private ThreadConfigInfo context;
 }
