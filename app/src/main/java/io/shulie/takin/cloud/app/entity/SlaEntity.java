@@ -12,7 +12,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
-@TableName("t_resource_example")
+@TableName("t_sla")
 public class SlaEntity {
     /**
      * 数据主键

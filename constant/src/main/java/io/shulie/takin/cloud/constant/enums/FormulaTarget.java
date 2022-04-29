@@ -27,4 +27,7 @@ public enum FormulaTarget {
     @JsonValue
     private final Integer code;
     private final String description;
+
+    @Override
+    public String toString() {return code + ":" + description;}
 }

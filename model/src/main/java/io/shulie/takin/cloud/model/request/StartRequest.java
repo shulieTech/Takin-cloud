@@ -35,9 +35,9 @@ public class StartRequest {
     @Schema(description = "脚本文件(jmx)")
     private FileInfo scriptFile;
     @Schema(description = "运行时依赖文件(附件)")
-    private List<FileInfo> dependency;
+    private List<FileInfo> dependencyFile;
     @Schema(description = "数据文件(csv)")
-    private List<FileInfo> data;
+    private List<FileInfo> dataFile;
     @Schema(description = "线程配置")
     private List<ThreadConfigInfo> threadConfig;
     @Schema(description = "SLA配置")

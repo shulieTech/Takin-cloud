@@ -3,9 +3,10 @@ package io.shulie.takin.cloud.constant.enums;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.AllArgsConstructor;
+
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * 线程组类型

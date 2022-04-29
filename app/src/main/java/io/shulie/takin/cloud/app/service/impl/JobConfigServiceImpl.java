@@ -5,11 +5,11 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.stereotype.Service;
-import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 
 import io.shulie.takin.cloud.app.entity.MetricsEntity;
 import io.shulie.takin.cloud.app.service.JobConfigService;
 import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
+import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
 import io.shulie.takin.cloud.app.service.mapper.MetricsMapperService;
 import io.shulie.takin.cloud.app.service.impl.mapper.ThreadConfigMapperServiceImpl;
@@ -68,7 +68,7 @@ public class JobConfigServiceImpl implements JobConfigService {
     public void modifThreadConfigExample(long threadConfigExampleId, ThreadGroupType type, String context) {
         threadConfigExampleMapperService.updateById(new ThreadConfigExampleEntity() {{
             setId(threadConfigExampleId);
-            setType(type);
+            setType(type.getCode());
             setContext(context);
         }});
     }

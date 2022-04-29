@@ -40,16 +40,16 @@ public class JobController {
 
     @Operation(summary = "停止任务")
     @RequestMapping(value = "stop", method = {RequestMethod.GET})
-    public ApiResult<?> stop(@Parameter(description = "任务主键") Long taskId) {
-        jobService.stop(taskId);
+    public ApiResult<?> stop(@Parameter(description = "任务主键") Long jobId) {
+        jobService.stop(jobId);
         return ApiResult.success();
     }
 
     @Operation(summary = "查看配置")
     @RequestMapping(value = "config/get", method = {RequestMethod.GET})
-    public ApiResult<List<JobConfig>> getConfig(@Parameter(description = "任务主键") Long taskId,
+    public ApiResult<List<JobConfig>> getConfig(@Parameter(description = "任务主键") Long jobId,
         @Parameter(description = "ref(可以不传)") String ref) {
-        return ApiResult.success(jobService.getConfig(taskId, ref));
+        return ApiResult.success(jobService.getConfig(jobId, ref));
     }
 
     @Operation(summary = "修改配置")

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 /**
- * Mapper - IService - Impl - 调度
+ * Mapper - IService - Impl - SLA事件
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */

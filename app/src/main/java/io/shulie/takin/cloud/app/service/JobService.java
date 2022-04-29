@@ -27,9 +27,9 @@ public interface JobService {
     /**
      * 停止
      *
-     * @param taskId 任务主键
+     * @param jobId 任务主键
      */
-    void stop(long taskId);
+    void stop(long jobId);
 
     /**
      * 查看配置
@@ -43,11 +43,11 @@ public interface JobService {
     /**
      * 修改配置
      *
-     * @param taskId  任务主键
+     * @param jobId  任务主键
      * @param context 配置内容
      * @throws JsonProcessingException JSON异常
      */
-    void modifyConfig(long taskId, JobConfig context) throws JsonProcessingException;
+    void modifyConfig(long jobId, JobConfig context) throws JsonProcessingException;
 
     /**
      * 获取数据对象 - 任务

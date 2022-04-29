@@ -8,8 +8,6 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
-import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
-
 /**
  * 数据库实体隐射 - 线程组配置实例
  *
@@ -42,7 +40,7 @@ public class ThreadConfigExampleEntity {
     /**
      * 类型
      */
-    private ThreadGroupType type;
+    private Integer type;
     /**
      * 配置内容
      */

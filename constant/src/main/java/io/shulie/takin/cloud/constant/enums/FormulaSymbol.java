@@ -16,11 +16,11 @@ public enum FormulaSymbol {
     /**
      * 消除警告
      */
-    GREATER_THAN_OR_EQUAL_TO(10, ">=", "大于等于"),
-    GREATER_THAN(10, ">", "大于"),
-    EQUAL(10, "=", "等于"),
+    GREATER_THAN_OR_EQUAL_TO(20, ">=", "大于等于"),
+    GREATER_THAN(21, ">", "大于"),
+    EQUAL(0, "=", "等于"),
     LESS_THAN_OR_EQUAL_TO(10, "<=", "小于等于"),
-    LESS_THAN(10, ">", "大于"),
+    LESS_THAN(11, ">", "小于"),
     // 格式化用
     ;
     @Getter
@@ -28,4 +28,7 @@ public enum FormulaSymbol {
     private final Integer code;
     private final String symbol;
     private final String description;
+
+    @Override
+    public String toString() {return code + ":" + description;}
 }

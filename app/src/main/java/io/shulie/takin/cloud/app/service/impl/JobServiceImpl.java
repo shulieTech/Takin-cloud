@@ -15,19 +15,26 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import io.shulie.takin.cloud.app.entity.SlaEntity;
 import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.app.mapper.JobMapper;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.response.JobConfig;
+import io.shulie.takin.cloud.app.entity.JobFileEntity;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.model.request.StartRequest;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
+import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.model.request.StartRequest.SlaInfo;
+import io.shulie.takin.cloud.model.request.StartRequest.FileInfo;
+import io.shulie.takin.cloud.app.service.mapper.SlaMapperService;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
+import io.shulie.takin.cloud.app.service.mapper.JobFileMapperService;
 import io.shulie.takin.cloud.app.service.mapper.JobExampleMapperService;
 import io.shulie.takin.cloud.model.request.StartRequest.ThreadConfigInfo;
 import io.shulie.takin.cloud.app.service.mapper.ThreadConfigMapperService;
@@ -50,7 +57,11 @@ public class JobServiceImpl implements JobService {
     @Resource
     ResourceService resourceService;
     @Resource
+    SlaMapperService slaMapperService;
+    @Resource
     JobConfigServiceImpl jobConfigService;
+    @Resource
+    JobFileMapperService jobFileMapperService;
     @Resource
     JobExampleMapperService jobExampleMapperService;
     @Resource
@@ -109,7 +120,6 @@ public class JobServiceImpl implements JobService {
             }});
         }
         threadConfigMapperService.saveBatch(threadConfigEntityList);
-
         // 切分线程配置
         List<List<ThreadConfigInfo>> threadExampleList = splitThreadConfig(jobInfo.getThreadConfig(), resourceEntity.getNumber());
         // 填充线程配置实例
@@ -122,7 +132,7 @@ public class JobServiceImpl implements JobService {
                 int finalJ = j;
                 threadConfigExampleEntityList.add(new ThreadConfigExampleEntity() {{
                     setRef(t.getRef());
-                    setType(t.getType());
+                    setType(t.getType().getCode());
                     setSerialNumber(finalJ);
                     setJobId(jobEntity.getId());
                     setJobExampleId(jobExampleEntity.getId());
@@ -131,13 +141,63 @@ public class JobServiceImpl implements JobService {
                         put("tps", t.getTps());
                         put("duration", t.getDuration());
                         put("growthTime", t.getGrowthTime());
-                        put("step", t.getGrowthStep());
+                        put("growthStep", t.getGrowthStep());
                     }};
                     setContext(jsonService.writeValueAsString(context));
                 }});
             }
         }
         threadConfigExampleMapperService.saveBatch(threadConfigExampleEntityList);
+        // 填充SLA配置
+        List<SlaEntity> slaEntityList = new ArrayList<>(jobInfo.getSlaConfig().size());
+        for (int i = 0; i < jobInfo.getSlaConfig().size(); i++) {
+            SlaInfo slaInfo = jobInfo.getSlaConfig().get(i);
+            SlaEntity slaEntity = new SlaEntity() {{
+                setRef(slaInfo.getRef());
+                setJobId(jobEntity.getId());
+                setFormulaNumber(slaInfo.getFormulaNumber());
+                setFormulaTarget(slaInfo.getFormulaTarget().getCode());
+                setFormulaSymbol(slaInfo.getFormulaSymbol().getCode());
+            }};
+            slaEntityList.add(slaEntity);
+        }
+        slaMapperService.saveBatch(slaEntityList);
+        // 切分、填充任务文件
+        List<JobFileEntity> jobFileEntityList = new ArrayList<>();
+        for (int i = 0; i < jobExampleEntityList.size(); i++) {
+            JobExampleEntity jobExampleEntity = jobExampleEntityList.get(i);
+            FileInfo scriptFile = jobInfo.getScriptFile();
+            {
+                jobFileEntityList.add(new JobFileEntity() {{
+                    setJobExampleId(jobExampleEntity.getId());
+                    setUri(scriptFile.getUri());
+                    setStartPoint(-1L);
+                    setEndPoint(-1L);
+                }});
+            }
+            List<FileInfo> dataFile = jobInfo.getDataFile();
+            for (int j = 0; j < dataFile.size(); j++) {
+                int finalI = i;
+                int finalJ = j;
+                jobFileEntityList.add(new JobFileEntity() {{
+                    setJobExampleId(jobExampleEntity.getId());
+                    setUri(dataFile.get(finalJ).getUri());
+                    setStartPoint(dataFile.get(finalJ).getSplitList().get(finalI).getStart());
+                    setEndPoint(dataFile.get(finalJ).getSplitList().get(finalI).getEnd());
+                }});
+            }
+            List<FileInfo> dependencyFile = jobInfo.getDependencyFile();
+            for (int j = 0; j < dependencyFile.size(); j++) {
+                int finalJ = j;
+                jobFileEntityList.add(new JobFileEntity() {{
+                    setJobExampleId(jobExampleEntity.getId());
+                    setUri(dependencyFile.get(finalJ).getUri());
+                    setStartPoint(-1L);
+                    setEndPoint(-1L);
+                }});
+            }
+        }
+        jobFileMapperService.saveBatch(jobFileEntityList);
         // 下发启动命令
         jobExampleEntityList.forEach(t -> commandService.startApplication(t.getId()));
         return jobEntity.getId() + "";
@@ -176,10 +236,10 @@ public class JobServiceImpl implements JobService {
             }
             HashMap<String, Object> finalContext = context;
             return new JobConfig() {{
-                setType(t.getType());
+                setRef(t.getRef());
                 setJobId(t.getJobId());
                 setContext(finalContext);
-                setRef(t.getRef());
+                setType(ThreadGroupType.of(t.getType()));
             }};
         }).collect(Collectors.toList());
 
@@ -224,8 +284,8 @@ public class JobServiceImpl implements JobService {
         List<List<ThreadConfigInfo>> result = new ArrayList<>(threadConfigInfoList.size());
         for (ThreadConfigInfo t : threadConfigInfoList) {
             List<ThreadConfigInfo> itemResult = new ArrayList<>(size);
-            List<Integer> tpsList = splitInteger(t.getTps(), size);
             List<Integer> numberList = splitInteger(t.getNumber(), size);
+            List<Integer> tpsList = splitInteger(t.getTps() == null ? 0 : t.getTps(), size);
             for (int j = 0; j < size; j++) {
                 int finalJ = j;
                 itemResult.add(new ThreadConfigInfo() {{
