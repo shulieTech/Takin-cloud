@@ -1,5 +1,8 @@
 package io.shulie.takin.cloud.constant.enums;
 
+import java.util.Arrays;
+import java.util.HashMap;
+
 import lombok.Getter;
 import lombok.AllArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -31,4 +34,15 @@ public enum FormulaSymbol {
 
     @Override
     public String toString() {return code + ":" + description;}
+
+    private final static HashMap<Integer, FormulaSymbol> EXAMPLE_MAP = new HashMap<>(6);
+
+    static {
+        Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));
+    }
+
+    public static FormulaSymbol of(Integer code) {
+        return EXAMPLE_MAP.get(code);
+    }
+
 }

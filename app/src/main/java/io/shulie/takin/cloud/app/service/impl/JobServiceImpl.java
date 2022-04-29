@@ -148,6 +148,7 @@ public class JobServiceImpl implements JobService {
             SlaEntity slaEntity = new SlaEntity() {{
                 setRef(slaInfo.getRef());
                 setJobId(jobEntity.getId());
+                setAttach(slaInfo.getAttach());
                 setFormulaNumber(slaInfo.getFormulaNumber());
                 setFormulaTarget(slaInfo.getFormulaTarget().getCode());
                 setFormulaSymbol(slaInfo.getFormulaSymbol().getCode());
@@ -312,6 +313,11 @@ public class JobServiceImpl implements JobService {
     @Override
     public JobEntity jobEntity(long jobId) {
         return jobMapper.selectById(jobId);
+    }
+
+    @Override
+    public JobExampleEntity jobExampleEntity(long jobExampleId) {
+        return jobExampleMapperService.getById(jobExampleId);
     }
 
     /**

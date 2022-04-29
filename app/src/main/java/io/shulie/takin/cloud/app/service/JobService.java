@@ -5,6 +5,7 @@ import java.util.List;
 import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.model.response.JobConfig;
 import io.shulie.takin.cloud.model.request.StartRequest;
+import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
@@ -54,4 +55,12 @@ public interface JobService {
      * @return Entity
      */
     JobEntity jobEntity(long jobId);
+
+    /**
+     * 获取数据对象 - 任务实例
+     *
+     * @param jobExampleId 任务实例主键
+     * @return Entity
+     */
+    JobExampleEntity jobExampleEntity(long jobExampleId);
 }

@@ -27,6 +27,11 @@ public class Sla extends Basic<List<SlaInfo>> {
          */
         private String ref;
         /**
+         * 附加数据
+         * <p>原样返回</p>
+         */
+        private String attach;
+        /**
          * 任务主键
          */
         private long jobId;

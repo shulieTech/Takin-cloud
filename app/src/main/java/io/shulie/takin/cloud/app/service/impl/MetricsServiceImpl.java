@@ -15,6 +15,7 @@ import io.shulie.takin.cloud.app.util.InfluxUtil;
 import io.shulie.takin.cloud.app.util.InfluxWriter;
 import io.shulie.takin.cloud.app.util.CollectorUtil;
 import io.shulie.takin.cloud.app.service.SlaService;
+import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.entity.SlaEventEntity;
 import io.shulie.takin.cloud.app.service.MetricsService;
 import io.shulie.takin.cloud.app.service.JobExampleServer;
@@ -32,38 +33,40 @@ public class MetricsServiceImpl implements MetricsService {
     @javax.annotation.Resource
     SlaService slaService;
     @javax.annotation.Resource
+    JsonService jsonService;
+    @javax.annotation.Resource
     private InfluxWriter influxWriter;
     @javax.annotation.Resource
     JobExampleServer jobExampleServer;
     @javax.annotation.Resource
-    RedisTemplate<String, String> stringRedisTemplate;
+    RedisTemplate<String, Object> stringRedisTemplate;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void upload(Long jobExampleId, List<MetricsInfo> metricsList, String ip) {
+    public void upload(Long jobId, Long jobExampleId, List<MetricsInfo> metricsList, String ip) {
         long timestamp = metricsList.get(0).getTimestamp();
-        log.debug("Metrics-Upload({}):接受到的数据:{}", jobExampleId, metricsList);
-        log.info("Metrics-Upload({}): 接收到的数据:{}条,时间范围:{},延时:{}",
-            jobExampleId, metricsList.size(), timestamp, (System.currentTimeMillis() - timestamp));
+        log.debug("Metrics-Upload({}-{}):接受到的数据:{}", jobId, jobExampleId, metricsList);
+        log.info("Metrics-Upload({}-{}): 接收到的数据:{}条,时间范围:{},延时:{}", jobId, jobExampleId,
+            metricsList.size(), timestamp, (System.currentTimeMillis() - timestamp));
         // 回调数据
         jobExampleServer.onHeartbeat(jobExampleId);
         // 写入InfluxDB
-        collectorToInfluxdb(jobExampleId, metricsList);
+        collectorToInfluxdb(jobId, metricsList);
         // 统计每个时间窗口pod调用数量
-        statisticalIp(jobExampleId, timestamp, ip);
+        statisticalIp(jobId, timestamp, ip);
         // SLA检查
-        List<SlaEventEntity> check = slaService.check(metricsList);
-        // 触发则进行通知
-        if (CollUtil.isNotEmpty(check)) {slaService.event(check);}
+        List<SlaEventEntity> check = slaService.check(jobId, jobExampleId, metricsList);
+        // 进行通知
+        slaService.event(jobId,  jobExampleId, check);
     }
 
-    public void collectorToInfluxdb(Long jobExampleId, List<MetricsInfo> metricsList) {
+    public void collectorToInfluxdb(Long jobId, List<MetricsInfo> metricsList) {
         if (CollUtil.isEmpty(metricsList)) {
             return;
         }
-        String measurement = InfluxUtil.getMetricsMeasurement(jobExampleId);
+        String measurement = InfluxUtil.getMetricsMeasurement(jobId);
         metricsList.stream().filter(Objects::nonNull)
             .peek(metrics -> {
                 //判断有没有MD5值
@@ -71,16 +74,18 @@ public class MetricsServiceImpl implements MetricsService {
                 if (strPosition > 0) {
                     String transaction = metrics.getTransaction();
                     metrics.setTransaction(transaction.substring(strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length()));
+                    metrics.setTestName((transaction.substring(0, strPosition)));
                 } else {
                     metrics.setTransaction(metrics.getTransaction());
+                    metrics.setTestName(metrics.getTransaction());
                 }
             })
             .peek(metrics -> {
                 //处理时间戳-纳秒转成毫秒，防止插入influxdb报错
-                if (Objects.nonNull(metrics.getTimestamp()) && metrics.getTimestamp() > InfluxUtil.MAX_ACCEPT_TIMESTAMP) {
+                if (Objects.nonNull(metrics.getTime()) && metrics.getTime() > InfluxUtil.MAX_ACCEPT_TIMESTAMP) {
                     metrics.setTimestamp(metrics.getTimestamp() / 1000000);
                 }
-                if (metrics.getTimestamp() > InfluxUtil.MAX_ACCEPT_TIMESTAMP) {
+                if (Objects.nonNull(metrics.getTimestamp()) && metrics.getTimestamp() > InfluxUtil.MAX_ACCEPT_TIMESTAMP) {
                     metrics.setTimestamp(metrics.getTimestamp() / 1000000);
                 }
             })
@@ -92,34 +97,35 @@ public class MetricsServiceImpl implements MetricsService {
      * 统计每个时间窗口pod调用数量
      */
     public void statisticalIp(Long jobExampleId, long time, String ip) {
-
-        String windowsTimeKey = String.format("%s:%s", getPressureTaskKey(jobExampleId),
-            "windowsTime");
-        String timeInMillis = String.valueOf(CollectorUtil.getTimeWindowTime(time));
-        List<String> ips;
-        Long windowsTimeValue = stringRedisTemplate.getExpire(windowsTimeKey);
-        if (Long.valueOf(-2L).equals(windowsTimeValue)) {
-            ips = new ArrayList<>();
-            ips.add(ip);
-            stringRedisTemplate.opsForHash().put(windowsTimeKey, timeInMillis, ips);
-            stringRedisTemplate.expire(windowsTimeKey, 60 * 60 * 2, TimeUnit.SECONDS);
+        // 时间窗口缓存Key
+        String redisKey = String.format("%s:%s", getJobKey(jobExampleId), "windowsTime");
+        //  获取当前时间窗口
+        String hashKey = String.valueOf(CollectorUtil.getTimeWindowTime(time));
+        // 声明IP列表
+        List<String> ipList = new ArrayList<>();
+        // 如果缓存不存在
+        if (!Boolean.TRUE.equals(stringRedisTemplate.hasKey(redisKey))) {
+            ipList.add(ip);
+            stringRedisTemplate.opsForHash().put(redisKey, hashKey, jsonService.writeValueAsString(ipList));
+            stringRedisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
         } else {
-            Object cacheData = stringRedisTemplate.opsForHash().get(windowsTimeKey, timeInMillis);
+            Object cacheData = stringRedisTemplate.opsForHash().get(redisKey, hashKey);
             if (cacheData instanceof List) {
-                ips = ((List<?>)cacheData).stream()
-                    .filter(t -> t instanceof String)
-                    .map(Object::toString)
-                    .collect(Collectors.toList());
-            } else {
-                ips = new ArrayList<>(0);
+                ipList = ((List<?>)cacheData).stream().filter(t -> t instanceof String)
+                    .map(Object::toString).collect(Collectors.toList());
             }
-            stringRedisTemplate.opsForHash().put(windowsTimeKey, timeInMillis, ips);
+            stringRedisTemplate.opsForHash().put(redisKey, hashKey, jsonService.writeValueAsString(ipList));
         }
-
     }
 
-    protected String getPressureTaskKey(Long jobExampleId) {
-        return String.format("COLLECTOR:TASK:%s", jobExampleId);
+    /**
+     * 获取任务对应的Redis的Key
+     *
+     * @param jobId 任务主键
+     * @return Redis的Key
+     */
+    protected String getJobKey(Long jobId) {
+        return String.format("COLLECTOR:TASK:%s", jobId);
     }
 
 }

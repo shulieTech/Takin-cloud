@@ -28,6 +28,10 @@ public class SlaEntity {
      */
     private String ref;
     /**
+     * 附加数据
+     */
+    private String attach;
+    /**
      * 算式目标
      * <p>(RT、TPS、SA、成功率)</p>
      */

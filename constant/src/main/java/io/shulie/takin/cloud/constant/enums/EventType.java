@@ -31,7 +31,8 @@ public enum EventType {
     JOB_EXAMPLE_STOP(302, "任务实例停止"),
     JOB_EXAMPLE_ERROR(303, "任务实例发生异常"),
     METRICS(400, "指标数据上报"),
-    COMMAND_ACK(500, "命令确认")
+    COMMAND_ACK(500, "命令确认"),
+    SLA(600, "触发SLA")
     // 格式化用
     ;
     @Getter

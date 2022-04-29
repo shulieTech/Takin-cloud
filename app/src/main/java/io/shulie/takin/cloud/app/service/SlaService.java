@@ -37,15 +37,19 @@ public interface SlaService {
      * 创建SLA触发记录
      * <p>入库、回调</p>
      *
+     * @param jobId              任务主键
+     * @param jobExampleId       任务实例主键
      * @param slaEventEntityList 触发了SLA的记录
      */
-    void event(List<SlaEventEntity> slaEventEntityList);
+    void event(Long jobId, Long jobExampleId, List<SlaEventEntity> slaEventEntityList);
 
     /**
      * 检出触发SAL的指标数据
      *
+     * @param jobId           任务主键
+     * @param jobExampleId    任务实例主键
      * @param metricsInfoList 指标数据
      * @return 触发了SLA的指标
      */
-    List<SlaEventEntity> check(List<MetricsInfo> metricsInfoList);
+    List<SlaEventEntity> check(Long jobId, Long jobExampleId, List<MetricsInfo> metricsInfoList);
 }

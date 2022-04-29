@@ -2,7 +2,6 @@ package io.shulie.takin.cloud.app.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
-import io.shulie.takin.cloud.model.notify.ResourceExampleInfo;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.Parameter;
 
@@ -27,6 +26,7 @@ import io.shulie.takin.cloud.app.service.JobExampleServer;
 import io.shulie.takin.cloud.model.notify.JobExampleError;
 import io.shulie.takin.cloud.model.notify.JobExampleStart;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.shulie.takin.cloud.model.notify.ResourceExampleInfo;
 import io.shulie.takin.cloud.model.notify.JobExampleHeartbeat;
 import io.shulie.takin.cloud.model.notify.ResourceExampleStop;
 import io.shulie.takin.cloud.model.notify.ResourceExampleError;
@@ -137,7 +137,7 @@ public class NotifyController {
                 }
                 case METRICS: {
                     Metrics context = jsonService.readValue(content, Metrics.class);
-                    metricsService.upload(context.getJobExampleId(), context.getData(), IpUtils.getIp(request));
+                    metricsService.upload(context.getJobId(), context.getJobExampleId(), context.getData(), IpUtils.getIp(request));
                     break;
                 }
                 case COMMAND_ACK: {

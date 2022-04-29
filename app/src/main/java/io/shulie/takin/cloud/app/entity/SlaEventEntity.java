@@ -20,13 +20,25 @@ public class SlaEventEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
+     * 任务主键
+     */
+    private Long jobId;
+    /**
      * SLA主键
      */
     private Long slaId;
     /**
-     * 触发的任务实例
+     * 任务实例主键
      */
     private Long jobExampleId;
+    /**
+     * 关键词
+     */
+    private String ref;
+    /**
+     * 附加数据
+     */
+    private String attach;
     /**
      * 算式目标
      * <p>(RT、TPS、SA、成功率)</p>
