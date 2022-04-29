@@ -1,28 +1,27 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
+import java.util.ArrayList;
 
-import io.shulie.takin.cloud.app.entity.JobEntity;
-import io.shulie.takin.cloud.app.service.JobService;
-import io.shulie.takin.cloud.constant.enums.EventType;
-import io.shulie.takin.cloud.constant.enums.ResourceExampleStatus;
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
 import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.PageHelper;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Lazy;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
+import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.app.util.ResourceUtil;
+import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.resource.Resource;
+import io.shulie.takin.cloud.constant.enums.EventType;
 import io.shulie.takin.cloud.app.mapper.ResourceMapper;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
@@ -31,6 +30,7 @@ import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleMapper;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
+import io.shulie.takin.cloud.constant.enums.ResourceExampleStatus;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEventEntity;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleEventMapper;
 import io.shulie.takin.cloud.model.resource.ResourceExampleOverview;
@@ -122,25 +122,23 @@ public class ResourceServiceImpl implements ResourceService {
         if (this.check(apply)) {
             // 1. 保存任务信息
             ResourceEntity resourceEntity = new ResourceEntity() {{
-                setCallbackUrl(apply.getCallbackUrl());
+                setCpu(apply.getCpu());
+                setMemory(apply.getMemory());
                 setNumber(apply.getNumber());
                 setWatchmanId(apply.getWatchmanId());
-                // 创建时间由数据库维护
-                setCpu(apply.getCpu());
+                setCallbackUrl(apply.getCallbackUrl());
                 setLimitCpu(StrUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu());
-                setMemory(apply.getMemory());
                 setLimitMemory(StrUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
             }};
             resourceMapper.insert(resourceEntity);
             // 2. 创建任务实例
             for (int i = 0; i < apply.getNumber(); i++) {
                 ResourceExampleEntity resourceExampleEntity = new ResourceExampleEntity() {{
+                    setCpu(apply.getCpu());
+                    setMemory(apply.getMemory());
                     setResourceId(resourceEntity.getId());
                     setWatchmanId(resourceEntity.getWatchmanId());
-                    // 创建时间由数据库维护
-                    setCpu(apply.getCpu());
                     setLimitCpu(StrUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu());
-                    setMemory(apply.getMemory());
                     setLimitMemory(StrUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
                 }};
                 resourceExampleMapper.insert(resourceExampleEntity);
@@ -152,6 +150,15 @@ public class ResourceServiceImpl implements ResourceService {
         }
         // end 预检失败则直接返回 NULL
         else {return null;}
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void unlock(long resourceId) {
+        List<ResourceExampleEntity> resourceExampleEntityList = listExample(resourceId);
+        resourceExampleEntityList.forEach(t -> commandService.releaseResource(t.getId()));
     }
 
     /**

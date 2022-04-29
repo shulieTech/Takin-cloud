@@ -3,24 +3,24 @@ package io.shulie.takin.cloud.app.controller;
 import java.util.List;
 import java.util.ArrayList;
 
-import io.shulie.takin.cloud.model.resource.ResourceExampleOverview;
 import lombok.extern.slf4j.Slf4j;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.model.response.ApiResult;
+import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
+import io.shulie.takin.cloud.model.resource.ResourceExampleOverview;
 
 /**
  * 资源
@@ -62,5 +62,12 @@ public class ResouceController {
         if (resourceId == null) {return ApiResult.fail("[预检]资源不足");}
         // 预检通过，直接返回资源主键。剩余的步骤通过异步回调处理
         else {return ApiResult.success(resourceId);}
+    }
+
+    @Operation(summary = "资源释放")
+    @RequestMapping(value = "unlock", method = {RequestMethod.GET})
+    public ApiResult<?> unlock(@Parameter(description = "资源主键") @RequestParam Long resourceId) {
+        resourceService.unlock(resourceId);
+        return ApiResult.success(resourceId);
     }
 }

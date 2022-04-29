@@ -43,13 +43,20 @@ public interface ResourceService {
     boolean check(ApplyResourceRequest apply) throws JsonProcessingException;
 
     /**
-     * 校验资源
+     * 锁定资源
      *
      * @param apply 资源申请信息
      * @return true/false
      * @throws JsonProcessingException JSON异常
      */
     String lock(ApplyResourceRequest apply) throws JsonProcessingException;
+
+    /**
+     * 释放资源
+     *
+     * @param resourceId 资源主键
+     */
+    void unlock(long resourceId);
 
     /**
      * 资源实例概览
