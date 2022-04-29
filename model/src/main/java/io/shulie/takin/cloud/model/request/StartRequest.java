@@ -1,7 +1,7 @@
 package io.shulie.takin.cloud.model.request;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.HashMap;
 
 import lombok.Data;
 
@@ -42,10 +42,12 @@ public class StartRequest {
     private List<ThreadConfigInfo> threadConfig;
     @Schema(description = "SLA配置")
     private List<SlaInfo> slaConfig;
+    @Schema(description = "指标目标配置")
+    private List<MetricsInfo> metricsConfig;
     /**
      * 拓展属性
      */
-    private HashMap<String, String> ext;
+    private HashMap<String, Object> ext;
 
     @Data
     @Schema(description = "文件信息")
@@ -118,5 +120,30 @@ public class StartRequest {
          * <p>(用户输入)</p>
          */
         private Double formulaNumber;
+    }
+
+    @Data
+    @Schema(description = "指标信息")
+    public static class MetricsInfo {
+        /**
+         * 关键词
+         */
+        private String ref;
+        /**
+         * 每秒吞吐量
+         */
+        private Double tps;
+        /**
+         * 接口响应时间
+         */
+        private Double rt;
+        /**
+         * 成功率
+         */
+        private Double successRate;
+        /**
+         *
+         */
+        private Double sa;
     }
 }

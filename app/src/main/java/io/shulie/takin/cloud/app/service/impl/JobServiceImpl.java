@@ -22,6 +22,7 @@ import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.response.JobConfig;
 import io.shulie.takin.cloud.app.entity.JobFileEntity;
+import io.shulie.takin.cloud.app.entity.MetricsEntity;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.model.request.StartRequest;
@@ -34,6 +35,8 @@ import io.shulie.takin.cloud.model.request.StartRequest.SlaInfo;
 import io.shulie.takin.cloud.model.request.StartRequest.FileInfo;
 import io.shulie.takin.cloud.app.service.mapper.SlaMapperService;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
+import io.shulie.takin.cloud.model.request.StartRequest.MetricsInfo;
+import io.shulie.takin.cloud.app.service.mapper.MetricsMapperService;
 import io.shulie.takin.cloud.app.service.mapper.JobFileMapperService;
 import io.shulie.takin.cloud.app.service.mapper.JobExampleMapperService;
 import io.shulie.takin.cloud.model.request.StartRequest.ThreadConfigInfo;
@@ -63,6 +66,8 @@ public class JobServiceImpl implements JobService {
     @Resource
     JobFileMapperService jobFileMapperService;
     @Resource
+    MetricsMapperService metricsMapperService;
+    @Resource
     JobExampleMapperService jobExampleMapperService;
     @Resource
     ThreadConfigMapperService threadConfigMapperService;
@@ -85,7 +90,7 @@ public class JobServiceImpl implements JobService {
                 .max(Comparator.naturalOrder())
                 .orElse(0));
             setSampling(jobInfo.getSampling());
-            setMode(jobInfo.getType().getCode());
+            setType(jobInfo.getType().getCode());
             setCallbackUrl(jobInfo.getCallbackUrl());
             setResourceExampleNumber(resourceEntity.getNumber());
         }};
@@ -109,13 +114,8 @@ public class JobServiceImpl implements JobService {
                 setJobId(jobEntity.getId());
                 setMode(threadConfigInfo.getType().getCode());
                 setRef(threadConfigInfo.getRef());
-                HashMap<String, Object> context = new HashMap<String, Object>(5) {{
-                    put("number", threadConfigInfo.getNumber());
-                    put("tps", threadConfigInfo.getTps());
-                    put("duration", threadConfigInfo.getDuration());
-                    put("growthTime", threadConfigInfo.getGrowthTime());
-                    put("step", threadConfigInfo.getGrowthStep());
-                }};
+                HashMap<String, Object> context = threadConfigInfo(threadConfigInfo);
+                context.putAll(jobInfo.getExt());
                 setContext(jsonService.writeValueAsString(context));
             }});
         }
@@ -136,13 +136,8 @@ public class JobServiceImpl implements JobService {
                     setSerialNumber(finalJ);
                     setJobId(jobEntity.getId());
                     setJobExampleId(jobExampleEntity.getId());
-                    HashMap<String, Object> context = new HashMap<String, Object>(5) {{
-                        put("number", t.getNumber());
-                        put("tps", t.getTps());
-                        put("duration", t.getDuration());
-                        put("growthTime", t.getGrowthTime());
-                        put("growthStep", t.getGrowthStep());
-                    }};
+                    HashMap<String, Object> context = threadConfigInfo(t);
+                    context.putAll(jobInfo.getExt());
                     setContext(jsonService.writeValueAsString(context));
                 }});
             }
@@ -198,9 +193,48 @@ public class JobServiceImpl implements JobService {
             }
         }
         jobFileMapperService.saveBatch(jobFileEntityList);
+        // 指标目标
+        List<MetricsEntity> metricsEntityList = new ArrayList<>();
+        for (int i = 0; i < jobInfo.getMetricsConfig().size(); i++) {
+            MetricsInfo metricsInfo = jobInfo.getMetricsConfig().get(i);
+            String context = null;
+            try {
+                context = jsonService.writeValueAsString(new HashMap<String, Object>() {{
+                    put("tps", metricsInfo.getTps());
+                    put("rt", metricsInfo.getRt());
+                    put("successRate", metricsInfo.getSuccessRate());
+                    put("sa", metricsInfo.getSa());
+                }});
+            } catch (Exception e) {
+                log.warn("JSON序列化失败");
+            }
+            String finalContext = context;
+            metricsEntityList.add(new MetricsEntity() {{
+                setJobId(jobEntity.getId());
+                setRef(metricsInfo.getRef());
+                setContext(finalContext);
+            }});
+        }
+        metricsMapperService.saveBatch(metricsEntityList);
         // 下发启动命令
         jobExampleEntityList.forEach(t -> commandService.startApplication(t.getId()));
         return jobEntity.getId() + "";
+    }
+
+    /**
+     * 转换线程配置信息
+     *
+     * @param threadConfigInfo 线程配置信息
+     * @return 转换后的Map
+     */
+    private HashMap<String, Object> threadConfigInfo(ThreadConfigInfo threadConfigInfo) {
+        return new HashMap<String, Object>(5) {{
+            put("number", threadConfigInfo.getNumber());
+            put("tps", threadConfigInfo.getTps());
+            put("duration", threadConfigInfo.getDuration());
+            put("growthTime", threadConfigInfo.getGrowthTime());
+            put("step", threadConfigInfo.getGrowthStep());
+        }};
     }
 
     /**

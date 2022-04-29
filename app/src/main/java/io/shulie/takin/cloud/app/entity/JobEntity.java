@@ -38,7 +38,7 @@ public class JobEntity {
     /**
      * 任务的运行模式
      */
-    private Integer mode;
+    private Integer type;
     /**
      * 状态回调路径
      */
