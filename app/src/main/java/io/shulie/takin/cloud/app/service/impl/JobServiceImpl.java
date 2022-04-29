@@ -170,22 +170,24 @@ public class JobServiceImpl implements JobService {
                 }});
             }
             List<FileInfo> dataFile = jobInfo.getDataFile();
-            for (int j = 0; j < dataFile.size(); j++) {
+            final List<FileInfo> finalDataFile = dataFile == null ? new ArrayList<>() : dataFile;
+            for (int j = 0; j < finalDataFile.size(); j++) {
                 int finalI = i;
                 int finalJ = j;
                 jobFileEntityList.add(new JobFileEntity() {{
                     setJobExampleId(jobExampleEntity.getId());
-                    setUri(dataFile.get(finalJ).getUri());
-                    setStartPoint(dataFile.get(finalJ).getSplitList().get(finalI).getStart());
-                    setEndPoint(dataFile.get(finalJ).getSplitList().get(finalI).getEnd());
+                    setUri(finalDataFile.get(finalJ).getUri());
+                    setStartPoint(finalDataFile.get(finalJ).getSplitList().get(finalI).getStart());
+                    setEndPoint(finalDataFile.get(finalJ).getSplitList().get(finalI).getEnd());
                 }});
             }
             List<FileInfo> dependencyFile = jobInfo.getDependencyFile();
-            for (int j = 0; j < dependencyFile.size(); j++) {
+            final List<FileInfo> finalDependencyFile = dependencyFile == null ? new ArrayList<>(0) : dependencyFile;
+            for (int j = 0; j < finalDependencyFile.size(); j++) {
                 int finalJ = j;
                 jobFileEntityList.add(new JobFileEntity() {{
                     setJobExampleId(jobExampleEntity.getId());
-                    setUri(dependencyFile.get(finalJ).getUri());
+                    setUri(finalDependencyFile.get(finalJ).getUri());
                     setStartPoint(-1L);
                     setEndPoint(-1L);
                 }});
