@@ -30,7 +30,7 @@ public enum ThreadGroupType {
     /**
      * TPS
      */
-    TPS(200, "TPS模式", 1, 0),
+    TPS(200, "TPS模式", 1, 1),
     /**
      * TPS
      */
