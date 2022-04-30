@@ -3,6 +3,8 @@ package io.shulie.takin.cloud.constant.enums;
 import lombok.Getter;
 import lombok.AllArgsConstructor;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * 回调类型
  *
@@ -25,7 +27,7 @@ public enum CallbackType {
     SLA(301, "触发SLA"),
     // 格式化用
     ;
-
+    @JsonValue
     private final Integer code;
     private final String description;
 }

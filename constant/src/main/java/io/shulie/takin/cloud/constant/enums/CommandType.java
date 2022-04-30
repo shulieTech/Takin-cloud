@@ -2,6 +2,8 @@ package io.shulie.takin.cloud.constant.enums;
 
 import lombok.Getter;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * 命令类型
  *
@@ -35,6 +37,7 @@ public enum CommandType {
     // 格式化用
     ;
     @Getter
+    @JsonValue
     private final int value;
 
     CommandType(int value) {
