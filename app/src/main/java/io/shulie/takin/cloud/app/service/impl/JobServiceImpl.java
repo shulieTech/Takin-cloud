@@ -96,13 +96,12 @@ public class JobServiceImpl implements JobService {
         // 填充job实例
         List<JobExampleEntity> jobExampleEntityList = new ArrayList<>(resourceEntity.getNumber());
         for (int i = 0; i < resourceEntity.getNumber(); i++) {
-            int finalI = i;
-            jobExampleEntityList.add(new JobExampleEntity() {{
-                setJobId(jobEntity.getId());
-                setDuration(jobEntity.getDuration());
-                setResourceExampleId(resourceExampleEntityList.get(finalI).getId());
-                setName(jobEntity.getName() + "-" + finalI);
-            }});
+            jobExampleEntityList.add(new JobExampleEntity()
+                .setJobId(jobEntity.getId())
+                .setDuration(jobEntity.getDuration())
+                .setName(jobEntity.getName() + "-" + i)
+                .setResourceExampleId(resourceExampleEntityList.get(i).getId())
+            );
         }
         jobExampleMapperService.saveBatch(jobExampleEntityList);
         // 填充线程组配置
@@ -127,17 +126,16 @@ public class JobServiceImpl implements JobService {
             List<ThreadConfigInfo> threadConfigInfoList = threadExampleList.get(i);
             for (int j = 0; j < threadConfigInfoList.size(); j++) {
                 ThreadConfigInfo t = threadConfigInfoList.get(j);
-                int finalJ = j;
-                threadConfigExampleEntityList.add(new ThreadConfigExampleEntity() {{
-                    setRef(t.getRef());
-                    setType(t.getType().getCode());
-                    setSerialNumber(finalJ);
-                    setJobId(jobEntity.getId());
-                    setJobExampleId(jobExampleEntity.getId());
-                    HashMap<String, Object> context = threadConfigInfo(t);
-                    if (jobInfo.getExt() != null) {context.putAll(jobInfo.getExt());}
-                    setContext(jsonService.writeValueAsString(context));
-                }});
+                HashMap<String, Object> context = threadConfigInfo(t);
+                if (jobInfo.getExt() != null) {context.putAll(jobInfo.getExt());}
+                threadConfigExampleEntityList.add(new ThreadConfigExampleEntity()
+                    .setRef(t.getRef())
+                    .setSerialNumber(j)
+                    .setJobId(jobEntity.getId())
+                    .setType(t.getType().getCode())
+                    .setJobExampleId(jobExampleEntity.getId())
+                    .setContext(jsonService.writeValueAsString(context))
+                );
             }
         }
         threadConfigExampleMapperService.saveBatch(threadConfigExampleEntityList);
@@ -171,26 +169,23 @@ public class JobServiceImpl implements JobService {
             }
             List<FileInfo> dataFile = jobInfo.getDataFile();
             final List<FileInfo> finalDataFile = dataFile == null ? new ArrayList<>() : dataFile;
-            for (int j = 0; j < finalDataFile.size(); j++) {
-                int finalI = i;
-                int finalJ = j;
-                jobFileEntityList.add(new JobFileEntity() {{
-                    setJobExampleId(jobExampleEntity.getId());
-                    setUri(finalDataFile.get(finalJ).getUri());
-                    setStartPoint(finalDataFile.get(finalJ).getSplitList().get(finalI).getStart());
-                    setEndPoint(finalDataFile.get(finalJ).getSplitList().get(finalI).getEnd());
-                }});
+            for (FileInfo info : finalDataFile) {
+                jobFileEntityList.add(new JobFileEntity()
+                    .setJobExampleId(jobExampleEntity.getId())
+                    .setUri(info.getUri())
+                    .setEndPoint(info.getSplitList().get(i).getEnd())
+                    .setStartPoint(info.getSplitList().get(i).getStart())
+                );
             }
             List<FileInfo> dependencyFile = jobInfo.getDependencyFile();
             final List<FileInfo> finalDependencyFile = dependencyFile == null ? new ArrayList<>(0) : dependencyFile;
-            for (int j = 0; j < finalDependencyFile.size(); j++) {
-                int finalJ = j;
-                jobFileEntityList.add(new JobFileEntity() {{
-                    setJobExampleId(jobExampleEntity.getId());
-                    setUri(finalDependencyFile.get(finalJ).getUri());
-                    setStartPoint(-1L);
-                    setEndPoint(-1L);
-                }});
+            for (FileInfo fileInfo : finalDependencyFile) {
+                jobFileEntityList.add(new JobFileEntity()
+                    .setEndPoint(-1L)
+                    .setStartPoint(-1L)
+                    .setJobExampleId(jobExampleEntity.getId())
+                    .setUri(fileInfo.getUri())
+                );
             }
         }
         jobFileMapperService.saveBatch(jobFileEntityList);
@@ -332,19 +327,18 @@ public class JobServiceImpl implements JobService {
         List<List<ThreadConfigInfo>> result = new ArrayList<>(threadConfigInfoList.size());
         for (ThreadConfigInfo t : threadConfigInfoList) {
             List<ThreadConfigInfo> itemResult = new ArrayList<>(size);
-            List<Integer> numberList = splitInteger(t.getNumber(), size);
             List<Integer> tpsList = splitInteger(t.getTps() == null ? 0 : t.getTps(), size);
+            List<Integer> numberList = splitInteger(t.getNumber() == null ? 0 : t.getNumber(), size);
             for (int j = 0; j < size; j++) {
-                int finalJ = j;
-                itemResult.add(new ThreadConfigInfo() {{
-                    setDuration(t.getDuration());
-                    setGrowthStep(t.getGrowthStep());
-                    setGrowthTime(t.getGrowthTime());
-                    setType(t.getType());
-                    setRef(t.getRef());
-                    setTps(tpsList.get(finalJ));
-                    setNumber(numberList.get(finalJ));
-                }});
+                itemResult.add(new ThreadConfigInfo()
+                    .setRef(t.getRef())
+                    .setType(t.getType())
+                    .setTps(tpsList.get(j))
+                    .setDuration(t.getDuration())
+                    .setNumber(numberList.get(j))
+                    .setGrowthStep(t.getGrowthStep())
+                    .setGrowthTime(t.getGrowthTime())
+                );
             }
             result.add(itemResult);
         }

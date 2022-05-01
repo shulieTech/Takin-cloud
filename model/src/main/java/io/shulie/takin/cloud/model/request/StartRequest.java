@@ -11,6 +11,7 @@ import io.shulie.takin.cloud.constant.enums.JobType;
 import io.shulie.takin.cloud.constant.enums.FormulaSymbol;
 import io.shulie.takin.cloud.constant.enums.FormulaTarget;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
+import lombok.experimental.Accessors;
 
 /**
  * 请求体 - 启动
@@ -79,6 +80,7 @@ public class StartRequest {
     }
 
     @Data
+    @Accessors(chain = true)
     @Schema(description = "线程组配置")
     public static class ThreadConfigInfo {
         @Schema(description = "关键词")
