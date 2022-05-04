@@ -112,14 +112,12 @@ public class SlaServiceImpl implements SlaService {
         List<SlaEntity> slaEntityList = slaMapper.selectList(new LambdaQueryWrapper<SlaEntity>()
             .eq(SlaEntity::getJobId, jobId));
         // 逐个数据判断
-        for (int i = 0; i < metricsInfoList.size(); i++) {
-            MetricsInfo metricsInfo = metricsInfoList.get(i);
+        for (MetricsInfo metricsInfo : metricsInfoList) {
             // 对应的条件列表
             List<SlaEntity> conditionList = slaEntityList.stream()
                 .filter(t -> t.getRef().equals(metricsInfo.getTransaction())).collect(Collectors.toList());
             // 逐个条件判断
-            for (int j = 0; j < conditionList.size(); j++) {
-                SlaEntity condition = conditionList.get(j);
+            for (SlaEntity condition : conditionList) {
                 FormulaSymbol formulaSymbol = FormulaSymbol.of(condition.getFormulaSymbol());
                 FormulaTarget formulaTarget = FormulaTarget.of(condition.getFormulaTarget());
                 Double compareResult = compare(metricsInfo, formulaTarget, formulaSymbol, condition.getFormulaNumber());

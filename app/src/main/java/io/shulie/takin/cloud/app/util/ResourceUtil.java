@@ -5,6 +5,8 @@ import cn.hutool.core.util.NumberUtil;
 /**
  * 资源工具
  *
+ * <a href="https://kubernetes.io/zh/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes">K8s文档</a>
+ *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 public class ResourceUtil {
@@ -24,11 +26,11 @@ public class ResourceUtil {
         if (NumberUtil.isNumber(cpu)) {
             return NumberUtil.parseDouble(cpu);
         } else if (cpu.endsWith(CPU_UNIT_C)) {
-            Double value = convertCpu(cpu.substring(0, cpu.length() - (CPU_UNIT_C.length())));
-            if (value == null) {return null;}
-            return value * 1000;
+            return convertCpu(cpu.substring(0, cpu.length() - (CPU_UNIT_C.length())));
         } else if (cpu.endsWith(CPU_UNIT_M)) {
-            return convertCpu(cpu.substring(0, cpu.length() - (CPU_UNIT_M.length())));
+            Double value = convertCpu(cpu.substring(0, cpu.length() - (CPU_UNIT_M.length())));
+            if (value == null) {return null;}
+            return value / 1000;
         } else {return null;}
     }
 
