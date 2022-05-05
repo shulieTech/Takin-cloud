@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.app.controller.notify;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
@@ -22,6 +23,7 @@ import io.shulie.takin.cloud.model.resource.ResourceSource;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
+@Tag(name = "调度器上报")
 @RequestMapping("/notify/watchman")
 @RestController("NotiftWatchmanController")
 public class WatchmanController {
@@ -50,8 +52,8 @@ public class WatchmanController {
      * @return -
      */
 
-    @Operation(summary = "心跳")
     @GetMapping("heartbeat")
+    @Operation(summary = "心跳")
     public ApiResult<?> heartbeat(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign) {
         WatchmanEntity entity = watchmanService.ofRefSign(refSign);
         watchmanService.onHeartbeat(entity.getId());
@@ -66,7 +68,9 @@ public class WatchmanController {
      * @return -
      */
     @PostMapping("abnormal")
-    public ApiResult<?> abnormal(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign, @RequestBody String content) {
+    @Operation(summary = "发生异常")
+    public ApiResult<?> abnormal(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign,
+        @Parameter(description = "异常信息", required = true) @RequestBody String content) {
         WatchmanEntity entity = watchmanService.ofRefSign(refSign);
         watchmanService.onAbnormal(entity.getId(), content);
         return ApiResult.success();
@@ -79,6 +83,7 @@ public class WatchmanController {
      * @return -
      */
     @GetMapping("normal")
+    @Operation(summary = "恢复正常")
     public ApiResult<?> normal(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign) {
         WatchmanEntity entity = watchmanService.ofRefSign(refSign);
         watchmanService.onNormal(entity.getId());
@@ -93,7 +98,9 @@ public class WatchmanController {
      * @return -
      */
     @PostMapping("upload")
-    public ApiResult<?> upload(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign, @RequestBody List<ResourceSource> content) {
+    @Operation(summary = "上报资源")
+    public ApiResult<?> upload(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign,
+        @Parameter(description = "资源列表", required = true) @RequestBody List<ResourceSource> content) {
         WatchmanEntity entity = watchmanService.ofRefSign(refSign);
         watchmanService.upload(entity.getId(), content);
         return ApiResult.success();

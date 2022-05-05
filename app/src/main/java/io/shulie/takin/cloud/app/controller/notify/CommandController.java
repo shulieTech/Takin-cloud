@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.app.controller.notify;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +18,7 @@ import io.shulie.takin.cloud.app.service.CommandService;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
+@Tag(name = "指令确认上报")
 @RequestMapping("/notify/command")
 @RestController("NotiftCommandController")
 public class CommandController {
@@ -30,7 +33,9 @@ public class CommandController {
      * @return -
      */
     @PostMapping("ack")
-    public ApiResult<?> ack(@Parameter(description = "命令主键", required = true) @RequestParam Long id, @RequestBody String content) {
+    @Operation(summary = "指令确认")
+    public ApiResult<?> ack(@Parameter(description = "命令主键", required = true) @RequestParam Long id,
+        @Parameter(description = "指令确认内容", required = true) @RequestBody String content) {
         return ApiResult.success(commandService.ack(id, content));
     }
 }

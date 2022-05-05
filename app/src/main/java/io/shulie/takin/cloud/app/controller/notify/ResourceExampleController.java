@@ -2,6 +2,8 @@ package io.shulie.takin.cloud.app.controller.notify;
 
 import java.util.HashMap;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +21,7 @@ import io.shulie.takin.cloud.app.service.ResourceExampleService;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
+@Tag(name = "资源实例上报")
 @RequestMapping("/notify/resource_example")
 @RestController("NotiftResourceExampleController")
 public class ResourceExampleController {
@@ -32,6 +35,7 @@ public class ResourceExampleController {
      * @return -
      */
     @GetMapping("heartbeat")
+    @Operation(summary = "心跳")
     public ApiResult<?> heartbeat(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id) {
         resourceExampleService.onHeartbeat(id);
         return ApiResult.success();
@@ -44,6 +48,7 @@ public class ResourceExampleController {
      * @return -
      */
     @GetMapping("start")
+    @Operation(summary = "启动")
     public ApiResult<?> start(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id) {
         resourceExampleService.onStart(id);
         return ApiResult.success();
@@ -56,20 +61,23 @@ public class ResourceExampleController {
      * @return -
      */
     @GetMapping("stop")
+    @Operation(summary = "停止")
     public ApiResult<?> stop(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id) {
         resourceExampleService.onStop(id);
         return ApiResult.success();
     }
 
     /**
-     * 资源实例异常
+     * 资源实例发生异常
      *
      * @param id      资源实例主键
      * @param content 错误信息(字符串)
      * @return -
      */
     @PostMapping("error")
-    public ApiResult<?> error(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id, @RequestBody String content) {
+    @Operation(summary = "发生异常")
+    public ApiResult<?> error(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id,
+        @Parameter(description = "异常信息", required = true) @RequestBody String content) {
         resourceExampleService.onError(id, content);
         return ApiResult.success();
     }
@@ -82,7 +90,9 @@ public class ResourceExampleController {
      * @return -
      */
     @PostMapping("info")
-    public ApiResult<?> info(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id, @RequestBody HashMap<String, Object> content) {
+    @Operation(summary = "信息上报")
+    public ApiResult<?> info(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id,
+        @Parameter(description = "资源实例信息", required = true) @RequestBody HashMap<String, Object> content) {
         resourceExampleService.onInfo(id, content);
         return ApiResult.success();
     }

@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.app.controller.notify;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,7 @@ import io.shulie.takin.cloud.app.service.JobExampleServer;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
+@Tag(name = "任务实例上报")
 @RequestMapping("/notify/job_example")
 @RestController("NotiftJobExampleController")
 public class JobExampleController {
@@ -30,44 +33,49 @@ public class JobExampleController {
      * @return -
      */
     @GetMapping("heartbeat")
+    @Operation(summary = "心跳")
     public ApiResult<?> heartbeat(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id) {
         jobExampleServer.onHeartbeat(id);
         return ApiResult.success();
     }
 
     /**
-     * 心跳
+     * 启动
      *
      * @param id 资源实例主键
      * @return -
      */
     @GetMapping("start")
+    @Operation(summary = "启动")
     public ApiResult<?> start(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id) {
         jobExampleServer.onStart(id);
         return ApiResult.success();
     }
 
     /**
-     * 心跳
+     * 停止
      *
      * @param id 资源实例主键
      * @return -
      */
     @GetMapping("stop")
+    @Operation(summary = "停止")
     public ApiResult<?> stop(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id) {
         jobExampleServer.onStop(id);
         return ApiResult.success();
     }
 
     /**
-     * 心跳
+     * 发生异常
      *
      * @param id      资源实例主键
-     * @param content 错误信息(字符串)
+     * @param content 异常信息(字符串)
      * @return -
      */
     @PostMapping("error")
-    public ApiResult<?> error(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id, @RequestBody String content) {
+    @Operation(summary = "发生异常")
+    public ApiResult<?> error(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id,
+        @Parameter(description = "异常信息", required = true) @RequestBody String content) {
         jobExampleServer.onError(id, content);
         return ApiResult.success();
     }
