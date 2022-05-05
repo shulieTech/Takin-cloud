@@ -1,15 +1,20 @@
 package io.shulie.takin.cloud.app.service.impl;
 
 import java.util.Map;
+import java.util.Date;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import com.github.pagehelper.Page;
 import cn.hutool.core.util.NumberUtil;
+import com.github.pagehelper.PageInfo;
+import com.github.pagehelper.PageHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
@@ -191,12 +196,31 @@ public class CommandServiceImpl implements CommandService {
      * 命令确认
      *
      * @param id      命令主键
-     * @param content ack内容
+     * @param message ack内容
      */
-    public boolean ack(long id, String content) {
+    public boolean ack(long id, String type, String message) {
+        HashMap<String, String> content = new HashMap<String, String>(2) {{
+            put("type", type);
+            put("message", message);
+        }};
         return commandMapperService.lambdaUpdate()
-            .set(CommandEntity::getAckContent, content)
+            .set(CommandEntity::getAckContent, jsonService.writeValueAsString(content))
+            .set(CommandEntity::getAckTime, new Date())
             .eq(CommandEntity::getId, id)
             .update();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PageInfo<CommandEntity> range(long watchmanId, int number) {
+        try (Page<?> ignored = PageHelper.startPage(1, number)) {
+            List<CommandEntity> list = commandMapperService.lambdaQuery()
+                .eq(CommandEntity::getWatchmanId, watchmanId)
+                .isNull(CommandEntity::getAckTime)
+                .list();
+            return new PageInfo<>(list);
+        }
     }
 }

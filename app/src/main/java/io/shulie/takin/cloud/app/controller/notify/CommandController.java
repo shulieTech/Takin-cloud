@@ -1,5 +1,11 @@
 package io.shulie.takin.cloud.app.controller.notify;
 
+import java.util.HashMap;
+
+import cn.hutool.core.date.DateUtil;
+import com.github.pagehelper.PageInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,8 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import io.shulie.takin.cloud.app.service.JsonService;
+import io.shulie.takin.cloud.app.entity.CommandEntity;
 import io.shulie.takin.cloud.model.response.ApiResult;
+import io.shulie.takin.cloud.app.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
+import io.shulie.takin.cloud.app.service.WatchmanService;
 
 /**
  * 命令
@@ -23,19 +33,37 @@ import io.shulie.takin.cloud.app.service.CommandService;
 @RestController("NotiftCommandController")
 public class CommandController {
     @javax.annotation.Resource
+    JsonService jsonService;
+    @javax.annotation.Resource
     CommandService commandService;
+    @javax.annotation.Resource
+    WatchmanService watchmanService;
 
-    /**
-     * 命令ack
-     *
-     * @param id      命令主键
-     * @param content ack内容
-     * @return -
-     */
     @PostMapping("ack")
     @Operation(summary = "指令确认")
     public ApiResult<?> ack(@Parameter(description = "命令主键", required = true) @RequestParam Long id,
         @Parameter(description = "指令确认内容", required = true) @RequestBody String content) {
-        return ApiResult.success(commandService.ack(id, content));
+        return ApiResult.success(commandService.ack(id, "callback", content));
+    }
+
+    @PostMapping("pop")
+    @Operation(summary = "弹出一条命令")
+    public ApiResult<?> ack(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign) throws JsonProcessingException {
+        WatchmanEntity entity = watchmanService.ofRefSign(refSign);
+        PageInfo<CommandEntity> range = commandService.range(entity.getId(), 1);
+        // 没有命令则返回 null
+        if (range.getSize() == 0) {return ApiResult.success();}
+        // 有命令则返回命令内容
+        CommandEntity commandEntity = range.getList().get(0);
+        // pop模式要自动完成
+        commandService.ack(commandEntity.getId(), "pop", DateUtil.now() + "(pop-ack)");
+        Object content = jsonService.readValue(commandEntity.getContent(), Object.class);
+        // 返回命令内容
+        return ApiResult.success(new HashMap<String, Object>(4) {{
+            put("content", content);
+            put("id", commandEntity.getId());
+            put("type", commandEntity.getType());
+            put("createTime", commandEntity.getCreateTime().getTime());
+        }});
     }
 }

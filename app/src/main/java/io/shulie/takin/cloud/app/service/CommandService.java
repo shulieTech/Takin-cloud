@@ -1,5 +1,9 @@
 package io.shulie.takin.cloud.app.service;
 
+import com.github.pagehelper.PageInfo;
+
+import io.shulie.takin.cloud.app.entity.CommandEntity;
+
 /**
  * 命令服务
  * <p>用于下发命令</p>
@@ -47,8 +51,18 @@ public interface CommandService {
      * 命令确认
      *
      * @param id      命令主键
-     * @param context ack内容
+     * @param type    ack类型
+     * @param message ack内容
      * @return true/false
      */
-    boolean ack(long id, String context);
+    boolean ack(long id, String type, String message);
+
+    /**
+     * 取出一定数量的命令
+     *
+     * @param watchmanId 调度主键
+     * @param number     需要取出的数量
+     * @return 命令集合
+     */
+    PageInfo<CommandEntity> range(long watchmanId, int number);
 }
