@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 
 import cn.hutool.http.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
+import cn.hutool.http.ContentType;
 import com.github.pagehelper.PageInfo;
 
 import io.shulie.takin.cloud.app.entity.CallbackEntity;
@@ -62,7 +63,6 @@ public class CallbackScheduled {
                 // 提交到线程池运行
                 try {
                     threadpool.submit(exec);
-                    //exec.run();
                 } catch (RejectedExecutionException ex) {
                     log.warn("第{}条被线程池拒绝", (i + 1));
                 }
@@ -105,6 +105,7 @@ public class CallbackScheduled {
             try {
                 response = HttpUtil
                     .createPost(entity.getUrl())
+                    .contentType(ContentType.JSON.getValue())
                     .setConnectionTimeout(3000)
                     .body(entity.getContext())
                     .execute()

@@ -69,7 +69,8 @@ public class CallbackServiceImpl implements CallbackService {
             log.warn("{}对应的数据库记录未找到", callbackLogId);
             return false;
         } else {
-            boolean completed = "SUCCESS".equals(StrUtil.utf8Str(data));
+            String successFlag = "{\"error\":null,\"data\":\"SUCCESS\",\"totalNum\":null,\"success\":true}";
+            boolean completed = successFlag.equals(StrUtil.utf8Str(data));
             // 填充日志信息
             callbackLogMapper.updateById(new CallbackLogEntity() {{
                 setId(callbackLogId);
