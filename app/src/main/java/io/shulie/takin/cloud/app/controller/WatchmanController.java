@@ -2,7 +2,6 @@ package io.shulie.takin.cloud.app.controller;
 
 import java.util.List;
 
-import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import com.github.pagehelper.PageInfo;
@@ -16,10 +15,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import io.shulie.takin.cloud.app.entity.WatchmanEntity;
 import io.shulie.takin.cloud.model.resource.Resource;
-import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.model.response.ApiResult;
+import io.shulie.takin.cloud.app.entity.WatchmanEntity;
+import io.shulie.takin.cloud.app.service.WatchmanService;
+import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 
 /**
  * 资源
@@ -34,7 +34,13 @@ public class WatchmanController {
     @javax.annotation.Resource
     WatchmanService watchmanService;
 
-    @Operation(summary = "列表")
+    @Operation(summary = "状态")
+    @RequestMapping(value = "status", method = {RequestMethod.GET})
+    public ApiResult<WatchmanStatusResponse> status(@Parameter(description = "调度主键", required = true) Long watchmanId) throws JsonProcessingException {
+        return ApiResult.success(watchmanService.status(watchmanId));
+    }
+
+    @Operation(summary = "调度器列表")
     @RequestMapping(value = "list", method = {RequestMethod.GET})
     public ApiResult<List<WatchmanEntity>> list(
         @Parameter(description = "分页页码", required = true) Integer pageNumber,
@@ -43,24 +49,10 @@ public class WatchmanController {
         return ApiResult.success(list.getList(), list.getTotal());
     }
 
-    @Operation(summary = "资源列表")
+    @Operation(summary = "资源容量列表")
     @RequestMapping(value = "resource", method = {RequestMethod.GET})
     public ApiResult<List<Resource>> resourceList(@Parameter(description = "调度主键", required = true) Long watchmanId) throws JsonProcessingException {
         return ApiResult.success(watchmanService.getResourceList(watchmanId));
-    }
-
-    @Operation(summary = "注册")
-    @RequestMapping(value = "register", method = {RequestMethod.GET})
-    public ApiResult<Boolean> register(
-        @Parameter(description = "关键词") String ref,
-        @Parameter(description = "关键词签名") String refSign) {
-        return ApiResult.success(watchmanService.register(ref, refSign));
-    }
-
-    @Operation(summary = "状态")
-    @RequestMapping(value = "status", method = {RequestMethod.GET})
-    public ApiResult<WatchmanStatusResponse> status(@Parameter(description = "调度主键", required = true) Long watchmanId) throws JsonProcessingException {
-        return ApiResult.success(watchmanService.status(watchmanId));
     }
 
 }

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
-import io.shulie.takin.cloud.model.notify.ResourceUpload;
+import io.shulie.takin.cloud.model.resource.ResourceSource;
 import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 
 /**
@@ -66,9 +66,8 @@ public interface WatchmanService {
      *
      * @param watchmanId 调度主键
      * @param context    上报内容
-     * @throws JsonProcessingException JSON异常
      */
-    void upload(long watchmanId, ResourceUpload context) throws JsonProcessingException;
+    void upload(long watchmanId, List<ResourceSource> context);
 
     /**
      * 心跳

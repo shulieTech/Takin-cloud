@@ -25,10 +25,10 @@ import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.constant.enums.EventType;
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.WatchmanService;
-import io.shulie.takin.cloud.model.notify.ResourceUpload;
-import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
+import io.shulie.takin.cloud.model.resource.ResourceSource;
 import io.shulie.takin.cloud.app.mapper.WatchmanEventMapper;
 import io.shulie.takin.cloud.app.entity.WatchmanEventEntity;
+import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 import io.shulie.takin.cloud.app.service.mapper.WatchmanMapperService;
 
 /**
@@ -111,7 +111,9 @@ public class WatchmanServiceImpl implements WatchmanService {
     @Override
     public WatchmanEntity ofRefSign(String refSign) {
         // TODO 签名校验
-        return watchmanMapperService.lambdaQuery().eq(WatchmanEntity::getRefSign, refSign).one();
+        WatchmanEntity entity = watchmanMapperService.lambdaQuery().eq(WatchmanEntity::getRefSign, refSign).one();
+        if (entity == null) {throw new RuntimeException("调度机未上报");}
+        return entity;
     }
 
     @Override
@@ -151,10 +153,10 @@ public class WatchmanServiceImpl implements WatchmanService {
      * {@inheritDoc}
      */
     @Override
-    public void upload(long watchmanId, ResourceUpload content) throws JsonProcessingException {
+    public void upload(long watchmanId, List<ResourceSource> content) {
         // resource -> 转换
         List<String> errorMessage = new ArrayList<>(2);
-        List<Resource> resourceList = content.getData().stream().map(t -> new Resource() {{
+        List<Resource> resourceList = content.stream().map(t -> new Resource() {{
             Double cpu = ResourceUtil.convertCpu(t.getCpu());
             Long memory = ResourceUtil.convertMemory(t.getMemory());
             if (cpu == null) {errorMessage.add("无法解析的CPU值:" + t.getCpu());}
@@ -166,7 +168,7 @@ public class WatchmanServiceImpl implements WatchmanService {
         if (errorMessage.size() > 0) {throw new RuntimeException(String.join(",", errorMessage));}
         // 组装入库数据
         HashMap<String, String> context = new HashMap<>(2);
-        context.put("time", content.getTime().toString());
+        context.put("time", String.valueOf(System.currentTimeMillis()));
         context.put("data", jsonService.writeValueAsString(resourceList));
         // 插入数据库
         watchmanEventMapper.insert(new WatchmanEventEntity() {{

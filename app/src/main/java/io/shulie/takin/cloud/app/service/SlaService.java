@@ -3,10 +3,10 @@ package io.shulie.takin.cloud.app.service;
 import java.util.List;
 
 import io.shulie.takin.cloud.app.entity.SlaEntity;
+import io.shulie.takin.cloud.model.request.MetricsInfo;
 import io.shulie.takin.cloud.app.entity.SlaEventEntity;
 import io.shulie.takin.cloud.constant.enums.FormulaSymbol;
 import io.shulie.takin.cloud.constant.enums.FormulaTarget;
-import io.shulie.takin.cloud.model.notify.Metrics.MetricsInfo;
 
 /**
  * SLA服务

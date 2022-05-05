@@ -15,7 +15,7 @@ import lombok.Data;
 public class ResourceSource {
     /**
      * CPU
-     * <p>1000代表一个逻辑核</p>
+     * <p>1代表一个逻辑核</p>
      */
     String cpu;
     /**

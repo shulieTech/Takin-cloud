@@ -17,9 +17,9 @@ import io.shulie.takin.cloud.app.util.CollectorUtil;
 import io.shulie.takin.cloud.app.service.SlaService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.entity.SlaEventEntity;
+import io.shulie.takin.cloud.model.request.MetricsInfo;
 import io.shulie.takin.cloud.app.service.MetricsService;
 import io.shulie.takin.cloud.app.service.JobExampleServer;
-import io.shulie.takin.cloud.model.notify.Metrics.MetricsInfo;
 import io.shulie.takin.cloud.constant.PressureEngineConstants;
 
 /**

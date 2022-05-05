@@ -1,0 +1,102 @@
+package io.shulie.takin.cloud.app.controller.notify;
+
+import java.util.List;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.shulie.takin.cloud.model.response.ApiResult;
+import io.shulie.takin.cloud.app.entity.WatchmanEntity;
+import io.shulie.takin.cloud.app.service.WatchmanService;
+import io.shulie.takin.cloud.model.resource.ResourceSource;
+
+/**
+ * 调度器上报
+ *
+ * @author <a href="mailto:472546172@qq.com">张天赐</a>
+ */
+@RequestMapping("/notify/watchman")
+@RestController("NotiftWatchmanController")
+public class WatchmanController {
+    @javax.annotation.Resource
+    WatchmanService watchmanService;
+
+    /**
+     * 注册
+     *
+     * @param ref     关键词
+     * @param refSign 关键词签名
+     * @return true/false
+     */
+    @Operation(summary = "注册")
+    @GetMapping(value = "register")
+    public ApiResult<Boolean> register(
+        @Parameter(description = "关键词") String ref,
+        @Parameter(description = "关键词签名") String refSign) {
+        return ApiResult.success(watchmanService.register(ref, refSign));
+    }
+
+    /**
+     * 心跳
+     *
+     * @param refSign 签名
+     * @return -
+     */
+
+    @Operation(summary = "心跳")
+    @GetMapping("heartbeat")
+    public ApiResult<?> heartbeat(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign) {
+        WatchmanEntity entity = watchmanService.ofRefSign(refSign);
+        watchmanService.onHeartbeat(entity.getId());
+        return ApiResult.success();
+    }
+
+    /**
+     * 发生异常
+     *
+     * @param refSign 签名
+     * @param content 异常内容(字符串)
+     * @return -
+     */
+    @PostMapping("abnormal")
+    public ApiResult<?> abnormal(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign, @RequestBody String content) {
+        WatchmanEntity entity = watchmanService.ofRefSign(refSign);
+        watchmanService.onAbnormal(entity.getId(), content);
+        return ApiResult.success();
+    }
+
+    /**
+     * 恢复正常
+     *
+     * @param refSign 签名
+     * @return -
+     */
+    @GetMapping("normal")
+    public ApiResult<?> normal(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign) {
+        WatchmanEntity entity = watchmanService.ofRefSign(refSign);
+        watchmanService.onNormal(entity.getId());
+        return ApiResult.success();
+    }
+
+    /**
+     * 上报资源
+     *
+     * @param refSign 签名
+     * @param content 资源信息(Json字符串)
+     * @return -
+     */
+    @PostMapping("upload")
+    public ApiResult<?> upload(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign, @RequestBody List<ResourceSource> content) {
+        WatchmanEntity entity = watchmanService.ofRefSign(refSign);
+        watchmanService.upload(entity.getId(), content);
+        return ApiResult.success();
+    }
+
+}

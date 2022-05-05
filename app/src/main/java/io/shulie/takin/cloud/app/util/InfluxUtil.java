@@ -51,11 +51,11 @@ public class InfluxUtil {
             .addField("create_time", System.currentTimeMillis());
         Class<?> superclass = pojo.getClass().getSuperclass();
         //父类字段添加到数据库
-        addSuperClassFieldsFromPOJO(builder, pojo, superclass);
+        addSuperClassFieldsFromPojo(builder, pojo, superclass);
         return builder.build();
     }
 
-    private static void addSuperClassFieldsFromPOJO(Point.Builder builder, Object pojo, Class clazz) {
+    private static void addSuperClassFieldsFromPojo(Point.Builder builder, Object pojo, Class<?> clazz) {
         for (Field field : clazz.getDeclaredFields()) {
             Column column = field.getAnnotation(Column.class);
             if (column == null) {
@@ -66,7 +66,7 @@ public class InfluxUtil {
             addFieldByAttribute(builder, pojo, field, column, fieldName);
         }
         if (clazz != Object.class) {
-            addSuperClassFieldsFromPOJO(builder, pojo, clazz.getSuperclass());
+            addSuperClassFieldsFromPojo(builder, pojo, clazz.getSuperclass());
         }
     }
 
