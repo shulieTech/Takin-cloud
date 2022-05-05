@@ -11,30 +11,30 @@ public interface CommandService {
     /**
      * 创建资源实例
      *
-     * @param resourceExampleId 资源实例主键
+     * @param resourceId 资源主键
      */
-    void graspResource(long resourceExampleId);
+    void graspResource(long resourceId);
 
     /**
      * 释放资源实例
      *
-     * @param resourceExampleId 资源实例主键
+     * @param resourceId 资源主键
      */
-    void releaseResource(long resourceExampleId);
+    void releaseResource(long resourceId);
 
     /**
      * 启动应用程序
      *
-     * @param jobExampleId 任务实例主键
+     * @param jobId 任务主键
      */
-    void startApplication(long jobExampleId);
+    void startApplication(long jobId);
 
     /**
      * 停止应用程序
      *
-     * @param jobExampleId 任务实例主键
+     * @param jobId 任务主键
      */
-    void stopApplication(long jobExampleId);
+    void stopApplication(long jobId);
 
     /**
      * 更新配置

@@ -22,6 +22,10 @@ public class CommandEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
+     * 调度主键
+     */
+    private Long watchmanId;
+    /**
      * 创建时间
      */
     private Date createTime;
@@ -32,7 +36,7 @@ public class CommandEntity {
     /**
      * 命令内容
      */
-    private String context;
+    private String content;
     /**
      * ACK时间
      */
@@ -40,5 +44,5 @@ public class CommandEntity {
     /**
      * ACK内容
      */
-    private String ackContext;
+    private String ackContent;
 }

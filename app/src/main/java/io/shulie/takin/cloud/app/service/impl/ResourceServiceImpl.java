@@ -142,9 +142,9 @@ public class ResourceServiceImpl implements ResourceService {
                     setLimitMemory(StrUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
                 }};
                 resourceExampleMapper.insert(resourceExampleEntity);
-                // 3. 下发命令
-                commandService.graspResource(resourceExampleEntity.getId());
             }
+            // 3. 下发命令
+            commandService.graspResource(resourceEntity.getId());
             // end 返回资源主键
             return resourceEntity.getId().toString();
         }
@@ -157,8 +157,8 @@ public class ResourceServiceImpl implements ResourceService {
      */
     @Override
     public void unlock(long resourceId) {
-        List<ResourceExampleEntity> resourceExampleEntityList = listExample(resourceId);
-        resourceExampleEntityList.forEach(t -> commandService.releaseResource(t.getId()));
+        ResourceEntity resourceEntity = entity(resourceId);
+        commandService.releaseResource(resourceEntity.getId());
     }
 
     /**

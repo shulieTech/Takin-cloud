@@ -213,7 +213,7 @@ public class JobServiceImpl implements JobService {
         }
         metricsMapperService.saveBatch(metricsEntityList);
         // 下发启动命令
-        jobExampleEntityList.forEach(t -> commandService.startApplication(t.getId()));
+        commandService.startApplication(jobEntity.getId());
         return jobEntity.getId() + "";
     }
 
@@ -240,15 +240,11 @@ public class JobServiceImpl implements JobService {
     public void stop(long jobId) {
         // 获取任务
         JobEntity jobEntity = jobMapper.selectById(jobId);
-        // 获取任务实例
-        List<JobExampleEntity> jobExampleEntityList = jobExampleMapperService.lambdaQuery()
-            .eq(JobExampleEntity::getJobId, jobEntity.getId()).list();
-        // 逐个停止
-        jobExampleEntityList.forEach(t -> {
-            ResourceExampleEntity exampleEntity = resourceService.exampleEntity(t.getResourceExampleId());
-            commandService.stopApplication(t.getId());
-            commandService.releaseResource(exampleEntity.getId());
-        });
+        if (jobEntity == null) {throw new RuntimeException("未找到任务:" + jobId);}
+        // 释放资源
+        commandService.releaseResource(jobEntity.getResourceId());
+        // 停止任务
+        commandService.stopApplication(jobEntity.getId());
     }
 
     /**
@@ -292,7 +288,7 @@ public class JobServiceImpl implements JobService {
             List<List<ThreadConfigInfo>> splitThreadConfig =
                 splitThreadConfig(CollUtil.toList(context.getContext()), threadConfigExampleEntity.size());
             for (int i = 0; i < splitThreadConfig.get(0).size(); i++) {
-                String contextString = jsonService.writeValueAsString(splitThreadConfig.get(i));
+                String contextString = jsonService.writeValueAsString(splitThreadConfig.get(0).get(i));
                 // 2.1 更新任务配置实例项
                 jobConfigService.modifThreadConfigExample(
                     threadConfigExampleEntity.get(i).getId(),
