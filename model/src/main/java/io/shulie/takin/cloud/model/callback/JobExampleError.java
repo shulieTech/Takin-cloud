@@ -17,7 +17,7 @@ import io.shulie.takin.cloud.model.callback.JobExampleError.JobExampleErrorInfo;
 @EqualsAndHashCode(callSuper = true)
 public class JobExampleError extends Basic<JobExampleErrorInfo> {
 
-    private final CallbackType type = CallbackType.JMETER_ERROR;
+    private final CallbackType type = CallbackType.JOB_EXAMPLE_ERROR;
 
     @Data
     @EqualsAndHashCode(callSuper = true)

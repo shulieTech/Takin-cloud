@@ -16,5 +16,5 @@ import io.shulie.takin.cloud.model.callback.basic.JobExample;
 @EqualsAndHashCode(callSuper = true)
 public class JobExampleStart extends Basic<JobExample> {
 
-    private final CallbackType type = CallbackType.JMETER_START;
+    private final CallbackType type = CallbackType.JOB_EXAMPLE_START;
 }

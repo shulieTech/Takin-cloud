@@ -1,12 +1,11 @@
 package io.shulie.takin.cloud.app.util;
 
 import java.lang.reflect.Field;
-
-import org.influxdb.BuilderException;
-import org.influxdb.dto.Point;
-import org.influxdb.annotation.Column;
-
 import java.util.concurrent.TimeUnit;
+
+import org.influxdb.dto.Point;
+import org.influxdb.BuilderException;
+import org.influxdb.annotation.Column;
 
 /**
  * Influx工具类
@@ -22,12 +21,13 @@ public class InfluxUtil {
     /**
      * 实时统计数据表
      */
+    @SuppressWarnings("unused")
     public static String getMeasurement(Long jobExampleId) {
         return getMeasurement("pressure", jobExampleId);
     }
 
     /**
-     * jmeter上报的数据表
+     * 指标数据上报的数据表
      */
     public static String getMetricsMeasurement(Long jobExampleId) {
         return getMeasurement("metrics", jobExampleId);
@@ -70,6 +70,7 @@ public class InfluxUtil {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private static void addFieldByAttribute(final Point.Builder builder, final Object pojo, final Field field, final Column column, final String fieldName) {
         try {
             Object fieldValue = field.get(pojo);
