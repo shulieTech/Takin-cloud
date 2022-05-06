@@ -17,8 +17,6 @@ import com.github.pagehelper.PageHelper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
-import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
@@ -34,6 +32,8 @@ import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.constant.enums.CommandType;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.ResourceService;
+import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
+import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
 import io.shulie.takin.cloud.app.service.mapper.MetricsMapperService;
@@ -83,8 +83,9 @@ public class CommandServiceImpl implements CommandService {
         List<ResourceExampleEntity> resourceExampleEntityList = resourceService.listExample(resourceEntity.getId());
         // 组装命令内容
         List<HashMap<String, Object>> exampleList = resourceExampleEntityList.stream()
-            .map(t -> new HashMap<String, Object>(8) {{
+            .map(t -> new HashMap<String, Object>(16) {{
                 put("type", 1);
+                put("id", t.getId());
                 put("cpu", t.getCpu());
                 put("memory", t.getMemory());
                 put("limitCpu", t.getLimitCpu());
@@ -94,10 +95,18 @@ public class CommandServiceImpl implements CommandService {
                 put("image", watchmanConfig.getContainerImage());
             }})
             .collect(Collectors.toList());
+        // 补充index
+        long minId = resourceExampleEntityList.stream().mapToLong(ResourceExampleEntity::getId).min().orElse(1);
+        for (HashMap<String, Object> item : exampleList) {
+            long id = Long.parseLong(item.get("id").toString());
+            item.put("indexNumber", (id - minId) + 1);
+        }
+        // 组装数据
         HashMap<String, Object> content = new HashMap<String, Object>(2) {{
             put("example", exampleList);
             put("resourceId", resourceId);
         }};
+        // 生成命令
         long commandId = create(resourceEntity.getWatchmanId(), CommandType.GRASP_RESOURCE, jsonService.writeValueAsString(content));
         log.info("下发命令:生成资源实例:{},命令主键{}.", resourceId, commandId);
     }
@@ -174,7 +183,7 @@ public class CommandServiceImpl implements CommandService {
             // TPS数
             double tpsSum = contextList.stream().mapToDouble(t -> NumberUtil.parseDouble(t.getOrDefault("tps", "0.0"))).sum();
             // 组装对象
-            HashMap<String, Object> contentItem = new HashMap<String, Object>() {{
+            HashMap<String, Object> contentItem = new HashMap<String, Object>(3) {{
                 put("ref", k);
                 put("tps", tpsSum);
                 put("number", numberSum);
@@ -238,12 +247,18 @@ public class CommandServiceImpl implements CommandService {
         }
     }
 
+    /**
+     * 打包启动任务参数
+     *
+     * @param jobId 任务主键
+     * @return 启动任务参数
+     */
+    @SuppressWarnings("AlibabaMethodTooLong")
     public String packageStartJob(long jobId) {
         // 任务
         JobEntity jobEntity = jobService.jobEntity(jobId);
         // 任务实例集合
-        List<JobExampleEntity> jobExampleEntityList =
-            jobService.jobExampleEntityList(jobId);
+        List<JobExampleEntity> jobExampleEntityList = jobService.jobExampleEntityList(jobId);
         // 线程组配置
         List<ThreadConfigEntity> threadConfigEntityList =
             threadConfigMapperService.lambdaQuery()
