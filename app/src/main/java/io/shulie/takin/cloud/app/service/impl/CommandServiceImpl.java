@@ -324,10 +324,8 @@ public class CommandServiceImpl implements CommandService {
         }};
         // 填充文件
         {
-            List<Long> jobExampleIdList = jobExampleEntityList.stream().map(JobExampleEntity::getId).collect(Collectors.toList());
-            List<JobFileEntity> jobFileEntityList = jobFileMapperService.lambdaQuery()
-                .in(JobFileEntity::getJobExampleId, jobExampleIdList)
-                .list();
+            // 获取所有文件
+            List<JobFileEntity> jobFileEntityList = jobFileMapperService.lambdaQuery().eq(JobFileEntity::getJobId, jobEntity.getId()).list();
             Map<String, List<JobFileEntity>> fileInfo = jobFileEntityList.stream().collect(Collectors.groupingBy(JobFileEntity::getUri));
             List<HashMap<String, Object>> dataFileList = new ArrayList<>();
             fileInfo.forEach((k, v) -> {
