@@ -2,6 +2,8 @@ package io.shulie.takin.cloud.app.controller.notify;
 
 import java.util.HashMap;
 
+import cn.hutool.core.util.StrUtil;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -94,6 +96,28 @@ public class ResourceExampleController {
     public ApiResult<?> info(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id,
         @Parameter(description = "资源实例信息", required = true) @RequestBody HashMap<String, Object> content) {
         resourceExampleService.onInfo(id, content);
+        return ApiResult.success();
+    }
+
+    /**
+     * 资源实例信息和异常上报
+     *
+     * @param id      资源实例主键
+     * @param content 上报的信息内容
+     * @return -
+     */
+    @PostMapping("infoAndError")
+    @Operation(summary = "信息和异常上报")
+    public ApiResult<?> infoAndError(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id,
+        @Parameter(description = "资源实例信息", required = true) @RequestBody HashMap<String, Object> content) {
+        // 提取错误信息
+        final String errorFlag = "error";
+        String errorMessage = content.getOrDefault(errorFlag, "").toString();
+        content.remove(errorFlag);
+        // 上报信息
+        resourceExampleService.onInfo(id, content);
+        // 上报异常
+        if (StrUtil.isNotBlank(errorMessage)) {error(id, errorMessage.trim());}
         return ApiResult.success();
     }
 }
