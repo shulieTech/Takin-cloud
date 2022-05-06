@@ -8,13 +8,17 @@ import java.util.Objects;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.Page;
 import cn.hutool.core.util.NumberUtil;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.PageHelper;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
+import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
+import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
@@ -24,13 +28,17 @@ import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.conf.WatchmanConfig;
 import io.shulie.takin.cloud.app.entity.CommandEntity;
+import io.shulie.takin.cloud.app.entity.MetricsEntity;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.constant.enums.CommandType;
+import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
+import io.shulie.takin.cloud.app.service.mapper.MetricsMapperService;
 import io.shulie.takin.cloud.app.service.mapper.CommandMapperService;
+import io.shulie.takin.cloud.app.service.mapper.ThreadConfigMapperService;
 import io.shulie.takin.cloud.app.service.mapper.ThreadConfigExampleMapperService;
 
 /**
@@ -48,6 +56,9 @@ public class CommandServiceImpl implements CommandService {
     @Lazy
     @javax.annotation.Resource
     ResourceService resourceService;
+    @Lazy
+    @javax.annotation.Resource
+    MetricsMapperService metricsMapperService;
 
     @javax.annotation.Resource
     JsonService jsonService;
@@ -56,6 +67,8 @@ public class CommandServiceImpl implements CommandService {
 
     @javax.annotation.Resource
     CommandMapperService commandMapperService;
+    @javax.annotation.Resource
+    ThreadConfigMapperService threadConfigMapperService;
     @javax.annotation.Resource
     ThreadConfigExampleMapperService threadConfigExampleMapperService;
 
@@ -214,13 +227,116 @@ public class CommandServiceImpl implements CommandService {
      * {@inheritDoc}
      */
     @Override
-    public PageInfo<CommandEntity> range(long watchmanId, int number) {
+    public PageInfo<CommandEntity> range(long watchmanId, int number, CommandType type) {
         try (Page<?> ignored = PageHelper.startPage(1, number)) {
             List<CommandEntity> list = commandMapperService.lambdaQuery()
+                .eq(type != null, CommandEntity::getType, type == null ? null : type.getValue())
                 .eq(CommandEntity::getWatchmanId, watchmanId)
                 .isNull(CommandEntity::getAckTime)
                 .list();
             return new PageInfo<>(list);
         }
+    }
+
+    public String packageStartJob(long jobId) {
+        // 任务
+        JobEntity jobEntity = jobService.jobEntity(jobId);
+        // 任务实例集合
+        List<JobExampleEntity> jobExampleEntityList =
+            jobService.jobExampleEntityList(jobId);
+        // 线程组配置
+        List<ThreadConfigEntity> threadConfigEntityList =
+            threadConfigMapperService.lambdaQuery()
+                .eq(ThreadConfigEntity::getJobId, jobId).list();
+        // 压测指标配置
+        List<MetricsEntity> metricsEntityList = metricsMapperService.lambdaQuery()
+            .eq(MetricsEntity::getJobId, jobId).list();
+        HashMap<String, Object> basicConfig = new HashMap<String, Object>(22) {{
+            put("taskId", jobId);
+            put("pressureType", jobEntity.getType());
+            put("resourceId", jobEntity.getResourceId());
+            put("continuedTime", jobEntity.getDuration());
+            put("traceSampling", jobEntity.getSampling());
+            put("zkServers", watchmanConfig.getZkAddress());
+            put("memSetting", watchmanConfig.getJavaOptions());
+            put("logQueueSize", watchmanConfig.getLogQueueSize());
+            put("backendQueueCapacity", watchmanConfig.getBackendQueueCapacity());
+            put("tpsTargetLevelFactor", watchmanConfig.getTpsTargetLevelFactor());
+            put("businessMap", "");
+            put("ptlLogConfig", "");
+            put("dataFileList", null);
+            put("threadGroupConfigMap", "");
+            put("loopsNum", null);
+            put("maxThreadNum", null);
+            put("tpsThreadMode", null);
+            put("bindByXpathMd5", null);
+            put("tpsTargetLevel", null);
+            put("expectThroughput", null);
+            // 下面的应该不用填
+            put("consoleUrl", null);
+            put("customerId", null);
+        }};
+        // 压测指标配置
+        {
+            List<String> businessMap = new ArrayList<>();
+            String template = FileUtil.readUtf8String("classpath:template/businessMap.json");
+            metricsEntityList.forEach(t -> {
+                HashMap<String, String> metrics = new HashMap<>(5);
+                try {
+                    HashMap<String, String> context = jsonService.readValue(t.getContext(), new TypeReference<HashMap<String, String>>() {});
+                    metrics.putAll(context);
+                    metrics.put("ref", context.get(t.getRef()));
+                    metrics.put("rate", context.get("successRate"));
+                    metrics.put("activityName", context.get(t.getRef()));
+                } catch (JsonProcessingException e) {
+                    log.error("JSON反序列化失败", e);
+                }
+                businessMap.add(StrUtil.format("\"{}\":{}", t.getRef(), StrUtil.format(template, metrics)));
+            });
+            basicConfig.put("businessMap", StrUtil.format("\\{{}\\}", String.join(",\n", businessMap)));
+        }
+        // 压测日志配置
+        {
+            String template = FileUtil.readUtf8String("classpath:template/ptlLogConfig.json");
+            HashMap<String, Object> logConfig = new HashMap<String, Object>(6) {{
+                put("logCutOff", watchmanConfig.getLogCutOff());
+                put("ptlFileEnable", watchmanConfig.getPtlFileEnable());
+                put("ptlUploadFrom", watchmanConfig.getPtlUploadFrom());
+                put("ptlFileErrorOnly", watchmanConfig.getPtlFileErrorOnly());
+                put("timeoutThreshold", watchmanConfig.getTimeoutThreshold());
+                put("ptlFileTimeoutOnly", watchmanConfig.getPtlFileTimeoutOnly());
+            }};
+            basicConfig.put("ptlLogConfig", StrUtil.format(template, logConfig));
+        }
+        // 线程组配置
+        {
+            List<String> threadGroupConfigMap = new ArrayList<>();
+
+            String template = FileUtil.readUtf8String("classpath:template/threadGroupConfigMap.json");
+
+            threadConfigEntityList.forEach(t -> {
+                try {
+                    HashMap<String, String> context = jsonService.readValue(t.getContext(), new TypeReference<HashMap<String, String>>() {});
+                    ThreadGroupType threadGroupType = ThreadGroupType.of(t.getMode());
+                    HashMap<String, Object> threadConfig = new HashMap<String, Object>(6) {{
+                        put("rampUpUnit", "s");
+                        put("estimateFlow", null);
+                        put("steps", context.get("step"));
+                        put("type", threadGroupType.getType());
+                        put("mode", threadGroupType.getModel());
+                        put("threadNum", context.get("number"));
+                        put("rampUp", context.get("growthTime"));
+                    }};
+                    threadGroupConfigMap.add(StrUtil.format("\"{}\":{}", t.getRef(), StrUtil.format(template, threadConfig)));
+                } catch (JsonProcessingException e) {
+                    log.error("JSON反序列化失败", e);
+                }
+            });
+            basicConfig.put("threadGroupConfigMap", StrUtil.format("\\{{}\\}", String.join(",\n", threadGroupConfigMap)));
+        }
+
+        // 全部拼装
+        String template = FileUtil.readUtf8String("classpath:template/basic.json");
+        return StrUtil.format(template, basicConfig);
     }
 }

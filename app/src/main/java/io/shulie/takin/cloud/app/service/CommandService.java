@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.app.service;
 import com.github.pagehelper.PageInfo;
 
 import io.shulie.takin.cloud.app.entity.CommandEntity;
+import io.shulie.takin.cloud.constant.enums.CommandType;
 
 /**
  * 命令服务
@@ -62,7 +63,8 @@ public interface CommandService {
      *
      * @param watchmanId 调度主键
      * @param number     需要取出的数量
+     * @param type       根据命令类型筛选
      * @return 命令集合
      */
-    PageInfo<CommandEntity> range(long watchmanId, int number);
+    PageInfo<CommandEntity> range(long watchmanId, int number, CommandType type);
 }

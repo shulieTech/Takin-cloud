@@ -63,4 +63,13 @@ public interface JobService {
      * @return Entity
      */
     JobExampleEntity jobExampleEntity(long jobExampleId);
+
+    /**
+     * 获取数据对象 - 任务实例
+     * <p>根据任务主键查询任务实例列表</p>
+     *
+     * @param jobId 任务主键
+     * @return 任务实例列表
+     */
+    List<JobExampleEntity> jobExampleEntityList(long jobId);
 }

@@ -1,0 +1,11 @@
+{
+  "name": "${name}",
+  "path": "${path}",
+  "type": "${type}",
+  "split": "${split}",
+  "refId": "${refId}",
+  "ordered":"${ordered}",
+  "fileMd5": "${fileMd5}",
+  "isBigFile": "${isBigFile}",
+  "startEndPositions": "${startEndPositions}"
+}

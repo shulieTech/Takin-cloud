@@ -38,8 +38,8 @@ public class ResouceController {
     @Operation(summary = "资源实例明细(压力机明细)")
     @RequestMapping(value = "example/list", method = {RequestMethod.GET})
     public ApiResult<List<ResourceExampleOverview>> watchmanResourceExample(
-        @Parameter(description = "资源主键") Long resourceId,
-        @Parameter(description = "任务主键") Long jobId) throws JsonProcessingException {
+        @Parameter(description = "资源主键") @RequestParam(required = true) Long resourceId,
+        @Parameter(description = "任务主键") @RequestParam(required = false) Long jobId) throws JsonProcessingException {
         List<ResourceExampleEntity> resourceExampleList = resourceService.listExample(resourceId, jobId);
         List<ResourceExampleOverview> result = new ArrayList<>(resourceExampleList.size());
         for (ResourceExampleEntity t : resourceExampleList) {

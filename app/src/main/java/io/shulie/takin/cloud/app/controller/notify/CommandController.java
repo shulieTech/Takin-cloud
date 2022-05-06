@@ -6,10 +6,12 @@ import cn.hutool.core.date.DateUtil;
 import com.github.pagehelper.PageInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import io.shulie.takin.cloud.constant.enums.CommandType;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,11 +48,15 @@ public class CommandController {
         return ApiResult.success(commandService.ack(id, "callback", content));
     }
 
-    @PostMapping("pop")
+    @GetMapping("pop")
     @Operation(summary = "弹出一条命令")
-    public ApiResult<?> ack(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign) throws JsonProcessingException {
+    public ApiResult<?> ack(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign,
+        @Parameter(description = "命令类型", required = true) @RequestParam Integer type) throws JsonProcessingException {
+        // 兑换命令类型
+        CommandType commandType = CommandType.of(type);
+        if (commandType == null) {throw new RuntimeException("错误的命令类型:" + type);}
         WatchmanEntity entity = watchmanService.ofRefSign(refSign);
-        PageInfo<CommandEntity> range = commandService.range(entity.getId(), 1);
+        PageInfo<CommandEntity> range = commandService.range(entity.getId(), 1, commandType);
         // 没有命令则返回 null
         if (range.getSize() == 0) {return ApiResult.success();}
         // 有命令则返回命令内容

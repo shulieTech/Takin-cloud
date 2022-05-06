@@ -1,0 +1,9 @@
+{
+  "type": "${type}",
+  "mode": "${mode}",
+  "steps": "${steps}",
+  "rampUp": "${rampUp}",
+  "threadNum": "${threadNum}",
+  "rampUpUnit": "${rampUpUnit}",
+  "estimateFlow": "${estimateFlow}"
+}

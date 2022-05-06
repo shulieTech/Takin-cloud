@@ -1,5 +1,8 @@
 package io.shulie.takin.cloud.constant.enums;
 
+import java.util.Arrays;
+import java.util.HashMap;
+
 import lombok.Getter;
 
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -43,4 +46,15 @@ public enum CommandType {
     CommandType(int value) {
         this.value = value;
     }
+
+    private final static HashMap<Integer, CommandType> EXAMPLE_MAP = new HashMap<>(6);
+
+    static {
+        Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getValue(), t));
+    }
+
+    public static CommandType of(Integer code) {
+        return EXAMPLE_MAP.get(code);
+    }
+
 }

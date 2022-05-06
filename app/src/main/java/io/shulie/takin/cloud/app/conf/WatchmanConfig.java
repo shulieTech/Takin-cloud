@@ -32,4 +32,53 @@ public class WatchmanConfig {
      */
     @Value("${nfs.directory}")
     private String nfsDirectory;
+    /**
+     * zooKeeper连接地址
+     */
+    @Value("${zk.address}")
+    private String zkAddress;
+    /**
+     * ptl日志上传途径
+     */
+    @Value("${ptl.upload.from}")
+    private String ptlUploadFrom;
+    /**
+     * 是否启用ptl日志文件
+     */
+    @Value("${ptl.file.enable}")
+    private Boolean ptlFileEnable;
+    /**
+     * ptl文件中，是否只输出错误信息
+     */
+    @Value("${ptl.file.error.only}")
+    private Boolean ptlFileErrorOnly;
+    /**
+     * ptl文件中，是否只输出连接超时信息
+     */
+    @Value("${ptl.file.timeout.only}")
+    private Boolean ptlFileTimeoutOnly;
+    /**
+     * 超时阈值
+     */
+    @Value("${timeout.threshold}")
+    private Long timeoutThreshold;
+    /**
+     * 日志是否阶段
+     */
+    @Value("${log.cut.off}")
+    private Boolean logCutOff;
+    /**
+     * 日志队列大小
+     */
+    @Value("${log.queue.size}")
+    private Long logQueueSize;
+    @Value("${backend.queue.capacity}")
+    private Long backendQueueCapacity;
+    /**
+     * jvm启动参数
+     */
+    @Value("${java.options}")
+    private String javaOptions;
+    @Value("${tps.target.level.factor}")
+    private Double tpsTargetLevelFactor;
 }

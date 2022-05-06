@@ -308,9 +308,22 @@ public class JobServiceImpl implements JobService {
         return jobMapper.selectById(jobId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public JobExampleEntity jobExampleEntity(long jobExampleId) {
         return jobExampleMapperService.getById(jobExampleId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<JobExampleEntity> jobExampleEntityList(long jobId) {
+        return jobExampleMapperService.lambdaQuery()
+            .eq(JobExampleEntity::getJobId, jobId)
+            .list();
     }
 
     /**
