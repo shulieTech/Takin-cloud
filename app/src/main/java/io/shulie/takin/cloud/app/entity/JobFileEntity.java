@@ -28,6 +28,10 @@ public class JobFileEntity {
      */
     private Long jobExampleId;
     /**
+     * 文件类型
+     */
+    private Integer type;
+    /**
      * 统一资源标识符
      */
     private String uri;

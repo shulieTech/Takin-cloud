@@ -1,7 +1,0 @@
-{
-  "rt": "${rt}",
-  "tps": "${tps}",
-  "rate": "${rate}",
-  "bindRef": "${bindRef}",
-  "activityName": "${activityName}"
-}

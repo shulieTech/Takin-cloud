@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.Page;
 import cn.hutool.core.util.NumberUtil;
 import com.github.pagehelper.PageInfo;
@@ -27,6 +26,7 @@ import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.conf.WatchmanConfig;
 import io.shulie.takin.cloud.app.entity.CommandEntity;
 import io.shulie.takin.cloud.app.entity.MetricsEntity;
+import io.shulie.takin.cloud.app.entity.JobFileEntity;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.constant.enums.CommandType;
@@ -36,6 +36,7 @@ import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
+import io.shulie.takin.cloud.app.service.mapper.JobFileMapperService;
 import io.shulie.takin.cloud.app.service.mapper.MetricsMapperService;
 import io.shulie.takin.cloud.app.service.mapper.CommandMapperService;
 import io.shulie.takin.cloud.app.service.mapper.ThreadConfigMapperService;
@@ -68,6 +69,8 @@ public class CommandServiceImpl implements CommandService {
     @javax.annotation.Resource
     CommandMapperService commandMapperService;
     @javax.annotation.Resource
+    JobFileMapperService jobFileMapperService;
+    @javax.annotation.Resource
     ThreadConfigMapperService threadConfigMapperService;
     @javax.annotation.Resource
     ThreadConfigExampleMapperService threadConfigExampleMapperService;
@@ -79,12 +82,12 @@ public class CommandServiceImpl implements CommandService {
     public void graspResource(long resourceId) {
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(resourceId);
+        if (resourceEntity == null) {throw new RuntimeException("未找到资源:" + resourceId);}
         // 获取资源实例
         List<ResourceExampleEntity> resourceExampleEntityList = resourceService.listExample(resourceEntity.getId());
         // 组装命令内容
         List<HashMap<String, Object>> exampleList = resourceExampleEntityList.stream()
-            .map(t -> new HashMap<String, Object>(16) {{
-                put("type", 1);
+            .map(t -> new HashMap<String, Object>(8) {{
                 put("id", t.getId());
                 put("cpu", t.getCpu());
                 put("memory", t.getMemory());
@@ -102,7 +105,8 @@ public class CommandServiceImpl implements CommandService {
             item.put("indexNumber", (id - minId) + 1);
         }
         // 组装数据
-        HashMap<String, Object> content = new HashMap<String, Object>(2) {{
+        HashMap<String, Object> content = new HashMap<String, Object>(4) {{
+            put("type", 1);
             put("example", exampleList);
             put("resourceId", resourceId);
         }};
@@ -118,6 +122,7 @@ public class CommandServiceImpl implements CommandService {
     public void releaseResource(long resourceId) {
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(resourceId);
+        if (resourceEntity == null) {throw new RuntimeException("未找到资源:" + resourceId);}
         HashMap<String, Object> content = new HashMap<String, Object>(1) {{
             put("resourceId", resourceEntity.getId());
         }};
@@ -130,8 +135,14 @@ public class CommandServiceImpl implements CommandService {
      */
     @Override
     public void startApplication(long jobId) {
-        // TODO 实现
-        // 不切分下发
+        // 获取任务
+        JobEntity jobEntity = jobService.jobEntity(jobId);
+        if (jobEntity == null) {throw new RuntimeException("未找到任务:" + jobId);}
+        // 获取资源
+        ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
+        // 下发命令
+        long commandId = create(resourceEntity.getWatchmanId(), CommandType.START_APPLICATION, packageStartJob(jobId));
+        log.info("下发命令:启动任务:{},命令主键{}.", jobId, commandId);
     }
 
     /**
@@ -141,6 +152,7 @@ public class CommandServiceImpl implements CommandService {
     public void stopApplication(long jobId) {
         // 获取任务
         JobEntity jobEntity = jobService.jobEntity(jobId);
+        if (jobEntity == null) {throw new RuntimeException("未找到任务:" + jobId);}
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
         HashMap<String, Object> content = new HashMap<String, Object>(1) {{
@@ -266,7 +278,7 @@ public class CommandServiceImpl implements CommandService {
         // 压测指标配置
         List<MetricsEntity> metricsEntityList = metricsMapperService.lambdaQuery()
             .eq(MetricsEntity::getJobId, jobId).list();
-        HashMap<String, Object> basicConfig = new HashMap<String, Object>(22) {{
+        HashMap<String, Object> basicConfig = new HashMap<String, Object>(32) {{
             put("taskId", jobId);
             put("pressureType", jobEntity.getType());
             put("resourceId", jobEntity.getResourceId());
@@ -277,42 +289,85 @@ public class CommandServiceImpl implements CommandService {
             put("logQueueSize", watchmanConfig.getLogQueueSize());
             put("backendQueueCapacity", watchmanConfig.getBackendQueueCapacity());
             put("tpsTargetLevelFactor", watchmanConfig.getTpsTargetLevelFactor());
-            put("businessMap", "");
-            put("ptlLogConfig", "");
-            put("dataFileList", null);
-            put("threadGroupConfigMap", "");
+            put("businessMap", "后续填充");
+            put("ptlLogConfig", "后续填充");
+            put("dataFileList", "后续填充");
+            put("threadGroupConfigMap", "后续填充");
+            // 调试模式下,需要取调试次数
             put("loopsNum", null);
+            // 最大线程数 (以前是直接传null的，韵达改了一个版本，传入具体值， 但是有问题，所以还是传null)
             put("maxThreadNum", null);
-            put("tpsThreadMode", null);
-            put("bindByXpathMd5", null);
+            // 固定是0的
+            put("tpsThreadMode", 0);
+            // 现在没有办法区分版本
+            put("bindByXpathMd5", true);
+            // 以前的文件里面没有用到
             put("tpsTargetLevel", null);
+            // 并发模式下为并发数 TPS模式下为tps (原来的配置中没传，暂时为空)
             put("expectThroughput", null);
             // 下面的应该不用填
             put("consoleUrl", null);
             put("customerId", null);
         }};
+        // 填充文件
+        {
+            List<Long> jobExampleIdList = jobExampleEntityList.stream().map(JobExampleEntity::getId).collect(Collectors.toList());
+            List<JobFileEntity> jobFileEntityList = jobFileMapperService.lambdaQuery()
+                .in(JobFileEntity::getJobExampleId, jobExampleIdList)
+                .list();
+            Map<String, List<JobFileEntity>> fileInfo = jobFileEntityList.stream().collect(Collectors.groupingBy(JobFileEntity::getUri));
+            List<HashMap<String, Object>> dataFileList = new ArrayList<>();
+            fileInfo.forEach((k, v) -> {
+                JobFileEntity info = v.get(0);
+                boolean split = !new Long(-1).equals(info.getStartPoint()) && !new Long(-1).equals(info.getEndPoint());
+                List<HashMap<String, Object>> splitInfo = new ArrayList<>(v.size());
+                if (split) {
+                    for (int i = 0, vSize = v.size(); i < vSize; i++) {
+                        int finalI = i;
+                        JobFileEntity t = v.get(i);
+                        HashMap<String, Object> config = new HashMap<String, Object>(4) {{
+                            put("partition", finalI);
+                            put("end", t.getEndPoint());
+                            put("start", t.getStartPoint());
+                        }};
+                        splitInfo.add(config);
+                    }
+                }
+                HashMap<String, Object> config = new HashMap<String, Object>(16) {{
+                    put("split", split);
+                    put("refId", null);
+                    put("ordered", null);
+                    put("fileMd5", null);
+                    put("isBigFile", null);
+                    put("path", info.getUri());
+                    put("type", info.getType());
+                    put("startEndPositions", splitInfo);
+                    put("name", FileUtil.getName(info.getUri()));
+                }};
+                dataFileList.add(config);
+            });
+            basicConfig.put("dataFileList", dataFileList);
+        }
         // 压测指标配置
         {
-            List<String> businessMap = new ArrayList<>();
-            String template = FileUtil.readUtf8String("classpath:template/businessMap.json");
+            HashMap<String, HashMap<String, Object>> businessMap = new HashMap<>();
             metricsEntityList.forEach(t -> {
-                HashMap<String, String> metrics = new HashMap<>(5);
+                HashMap<String, Object> metrics = new HashMap<>(5);
                 try {
                     HashMap<String, String> context = jsonService.readValue(t.getContext(), new TypeReference<HashMap<String, String>>() {});
                     metrics.putAll(context);
-                    metrics.put("ref", context.get(t.getRef()));
+                    metrics.put("bindRef", t.getRef());
+                    metrics.put("activityName", t.getRef());
                     metrics.put("rate", context.get("successRate"));
-                    metrics.put("activityName", context.get(t.getRef()));
                 } catch (JsonProcessingException e) {
                     log.error("JSON反序列化失败", e);
                 }
-                businessMap.add(StrUtil.format("\"{}\":{}", t.getRef(), StrUtil.format(template, metrics)));
+                businessMap.put(t.getRef(), metrics);
             });
-            basicConfig.put("businessMap", StrUtil.format("\\{{}\\}", String.join(",\n", businessMap)));
+            basicConfig.put("businessMap", businessMap);
         }
         // 压测日志配置
         {
-            String template = FileUtil.readUtf8String("classpath:template/ptlLogConfig.json");
             HashMap<String, Object> logConfig = new HashMap<String, Object>(6) {{
                 put("logCutOff", watchmanConfig.getLogCutOff());
                 put("ptlFileEnable", watchmanConfig.getPtlFileEnable());
@@ -321,14 +376,11 @@ public class CommandServiceImpl implements CommandService {
                 put("timeoutThreshold", watchmanConfig.getTimeoutThreshold());
                 put("ptlFileTimeoutOnly", watchmanConfig.getPtlFileTimeoutOnly());
             }};
-            basicConfig.put("ptlLogConfig", StrUtil.format(template, logConfig));
+            basicConfig.put("ptlLogConfig", logConfig);
         }
         // 线程组配置
         {
-            List<String> threadGroupConfigMap = new ArrayList<>();
-
-            String template = FileUtil.readUtf8String("classpath:template/threadGroupConfigMap.json");
-
+            HashMap<String, HashMap<String, Object>> threadGroupConfigMap = new HashMap<>(threadConfigEntityList.size());
             threadConfigEntityList.forEach(t -> {
                 try {
                     HashMap<String, String> context = jsonService.readValue(t.getContext(), new TypeReference<HashMap<String, String>>() {});
@@ -342,16 +394,13 @@ public class CommandServiceImpl implements CommandService {
                         put("threadNum", context.get("number"));
                         put("rampUp", context.get("growthTime"));
                     }};
-                    threadGroupConfigMap.add(StrUtil.format("\"{}\":{}", t.getRef(), StrUtil.format(template, threadConfig)));
+                    threadGroupConfigMap.put(t.getRef(), threadConfig);
                 } catch (JsonProcessingException e) {
                     log.error("JSON反序列化失败", e);
                 }
             });
-            basicConfig.put("threadGroupConfigMap", StrUtil.format("\\{{}\\}", String.join(",\n", threadGroupConfigMap)));
+            basicConfig.put("threadGroupConfigMap", threadGroupConfigMap);
         }
-
-        // 全部拼装
-        String template = FileUtil.readUtf8String("classpath:template/basic.json");
-        return StrUtil.format(template, basicConfig);
+        return jsonService.writeValueAsString(basicConfig);
     }
 }

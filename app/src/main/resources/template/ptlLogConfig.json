@@ -1,8 +1,0 @@
-{
-  "logCutOff": "${logCutOff}",
-  "ptlFileEnable": "${ptlFileEnable}",
-  "ptlUploadFrom": "${ptlUploadFrom}",
-  "ptlFileErrorOnly": "${ptlFileErrorOnly}",
-  "timeoutThreshold": "${timeoutThreshold}",
-  "ptlFileTimeoutOnly": "${ptlFileTimeoutOnly}"
-}

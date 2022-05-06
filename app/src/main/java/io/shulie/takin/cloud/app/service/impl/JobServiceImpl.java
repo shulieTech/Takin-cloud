@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
+import io.shulie.takin.cloud.constant.enums.FileType;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -160,31 +161,34 @@ public class JobServiceImpl implements JobService {
             JobExampleEntity jobExampleEntity = jobExampleEntityList.get(i);
             FileInfo scriptFile = jobInfo.getScriptFile();
             {
-                jobFileEntityList.add(new JobFileEntity() {{
-                    setJobExampleId(jobExampleEntity.getId());
-                    setUri(scriptFile.getUri());
-                    setStartPoint(-1L);
-                    setEndPoint(-1L);
-                }});
+                jobFileEntityList.add(new JobFileEntity()
+                    .setJobExampleId(jobExampleEntity.getId())
+                    .setType(FileType.SCRIPT.getCode())
+                    .setUri(scriptFile.getUri())
+                    .setStartPoint(-1L)
+                    .setEndPoint(-1L)
+                );
             }
             List<FileInfo> dataFile = jobInfo.getDataFile();
             final List<FileInfo> finalDataFile = dataFile == null ? new ArrayList<>() : dataFile;
             for (FileInfo info : finalDataFile) {
                 jobFileEntityList.add(new JobFileEntity()
-                    .setJobExampleId(jobExampleEntity.getId())
-                    .setUri(info.getUri())
-                    .setEndPoint(info.getSplitList().get(i).getEnd())
                     .setStartPoint(info.getSplitList().get(i).getStart())
+                    .setEndPoint(info.getSplitList().get(i).getEnd())
+                    .setJobExampleId(jobExampleEntity.getId())
+                    .setType(FileType.DATA.getCode())
+                    .setUri(info.getUri())
                 );
             }
             List<FileInfo> dependencyFile = jobInfo.getDependencyFile();
             final List<FileInfo> finalDependencyFile = dependencyFile == null ? new ArrayList<>(0) : dependencyFile;
             for (FileInfo fileInfo : finalDependencyFile) {
                 jobFileEntityList.add(new JobFileEntity()
-                    .setEndPoint(-1L)
-                    .setStartPoint(-1L)
                     .setJobExampleId(jobExampleEntity.getId())
+                    .setType(FileType.ATTACHMENT.getCode())
                     .setUri(fileInfo.getUri())
+                    .setStartPoint(-1L)
+                    .setEndPoint(-1L)
                 );
             }
         }

@@ -23,7 +23,7 @@ public class JsonServiceImpl implements JsonService {
     @Override
     public String writeValueAsString(Object obj) {
         try {
-            return objectMapper.writeValueAsString(obj);
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("JSON序列化失败");
         }
