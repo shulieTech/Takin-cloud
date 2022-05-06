@@ -26,6 +26,7 @@ import io.shulie.takin.cloud.app.entity.MetricsEntity;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.model.request.StartRequest;
+import io.shulie.takin.cloud.model.request.ModifyConfig;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
@@ -99,9 +100,9 @@ public class JobServiceImpl implements JobService {
         List<JobExampleEntity> jobExampleEntityList = new ArrayList<>(resourceEntity.getNumber());
         for (int i = 0; i < resourceEntity.getNumber(); i++) {
             jobExampleEntityList.add(new JobExampleEntity()
+                .setNumber(i + 1)
                 .setJobId(jobEntity.getId())
                 .setDuration(jobEntity.getDuration())
-                .setName(jobEntity.getName() + "-" + i)
                 .setResourceExampleId(resourceExampleEntityList.get(i).getId())
             );
         }
@@ -283,7 +284,7 @@ public class JobServiceImpl implements JobService {
      * {@inheritDoc}
      */
     @Override
-    public void modifyConfig(long jobId, JobConfig context) {
+    public void modifyConfig(long jobId, ModifyConfig context) {
         // 1. 找到要修改的配置项
         List<ThreadConfigExampleEntity> threadConfigExampleEntity = jobConfigService.threadExampleItem(jobId, context.getRef());
         // 2. 如果没有抛出异常

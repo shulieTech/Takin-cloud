@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.app.mapper.JobMapper;
 import io.shulie.takin.cloud.app.service.JsonService;
-import io.shulie.takin.cloud.constant.enums.EventType;
+import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.app.service.JobExampleServer;
@@ -52,7 +52,7 @@ public class JobExampleServerImpl implements JobExampleServer {
         // 记录事件
         jobExampleEventMapper.insert(new JobExampleEventEntity() {{
             setContext("{}");
-            setType(EventType.JOB_EXAMPLE_HEARTBEAT.getCode());
+            setType(NotifyEventType.JOB_EXAMPLE_HEARTBEAT.getCode());
             setJobExampleId(id);
         }});
     }
@@ -69,7 +69,7 @@ public class JobExampleServerImpl implements JobExampleServer {
         jobExampleEventMapper.insert(new JobExampleEventEntity() {{
             setContext("{}");
             setJobExampleId(id);
-            setType(EventType.JOB_EXAMPLE_START.getCode());
+            setType(NotifyEventType.JOB_EXAMPLE_START.getCode());
         }});
     }
 
@@ -85,7 +85,7 @@ public class JobExampleServerImpl implements JobExampleServer {
         jobExampleEventMapper.insert(new JobExampleEventEntity() {{
             setContext("{}");
             setJobExampleId(id);
-            setType(EventType.JOB_EXAMPLE_STOP.getCode());
+            setType(NotifyEventType.JOB_EXAMPLE_STOP.getCode());
         }});
     }
 
@@ -106,7 +106,7 @@ public class JobExampleServerImpl implements JobExampleServer {
             objectNode.put("message", errorMessage);
             setJobExampleId(id);
             setContext(objectNode.toPrettyString());
-            setType(EventType.JOB_EXAMPLE_ERROR.getCode());
+            setType(NotifyEventType.JOB_EXAMPLE_ERROR.getCode());
         }});
     }
     @Override

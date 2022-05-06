@@ -3,17 +3,17 @@ package io.shulie.takin.cloud.constant.enums;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.AllArgsConstructor;
 
 /**
- * TODO
+ * 通知事件类型
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Getter
 @AllArgsConstructor
-public enum EventType {
+public enum NotifyEventType {
     /**
      * 消除警告
      */
@@ -30,21 +30,18 @@ public enum EventType {
     JOB_EXAMPLE_START(301, "任务实例启动"),
     JOB_EXAMPLE_STOP(302, "任务实例停止"),
     JOB_EXAMPLE_ERROR(303, "任务实例发生异常"),
-    METRICS(400, "指标数据上报"),
-    COMMAND_ACK(500, "命令确认"),
-    SLA(600, "触发SLA")
     // 格式化用
     ;
     @Getter
     private final Integer code;
     private final String description;
-    private final static HashMap<Integer, EventType> EXAMPLE_MAP = new HashMap<>(6);
+    private final static HashMap<Integer, NotifyEventType> EXAMPLE_MAP = new HashMap<>(6);
 
     static {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));
     }
 
-    public static EventType of(Integer code) {
+    public static NotifyEventType of(Integer code) {
         return EXAMPLE_MAP.get(code);
     }
 

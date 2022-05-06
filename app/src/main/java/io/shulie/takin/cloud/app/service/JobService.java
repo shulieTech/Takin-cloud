@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.model.response.JobConfig;
 import io.shulie.takin.cloud.model.request.StartRequest;
+import io.shulie.takin.cloud.model.request.ModifyConfig;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 
 /**
@@ -47,7 +48,7 @@ public interface JobService {
      * @param jobId   任务主键
      * @param context 配置内容
      */
-    void modifyConfig(long jobId, JobConfig context);
+    void modifyConfig(long jobId, ModifyConfig context);
 
     /**
      * 获取数据对象 - 任务

@@ -18,6 +18,9 @@ public class MetricsInfo {
      */
     @Column(tag = true, name = "transaction")
     private String transaction;
+    /**
+     * 业务活动名称
+     */
     @Column(name = "test_name")
     private String testName;
     /**

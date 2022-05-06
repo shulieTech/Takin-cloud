@@ -15,7 +15,8 @@ import lombok.Data;
 public class Resource {
     /**
      * CPU
-     * <p>1000代表一个逻辑核</p>
+     * <p>1代表一个逻辑核</p>
+     * <p>0.1代表100微核</p>
      */
     Double cpu;
     /**

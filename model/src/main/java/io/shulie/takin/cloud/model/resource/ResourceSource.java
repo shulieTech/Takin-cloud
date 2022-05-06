@@ -18,7 +18,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class ResourceSource {
     /**
      * CPU
-     * <p>1代表一个逻辑核</p>
+     * <p>1/1C代表一个逻辑核</p>
+     * <p>0.1/100m代表100微核</p>
      */
     @Schema(description = "CPU")
     String cpu;

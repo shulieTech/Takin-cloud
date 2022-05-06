@@ -273,6 +273,8 @@ public class CommandServiceImpl implements CommandService {
     public String packageStartJob(long jobId) {
         // 任务
         JobEntity jobEntity = jobService.jobEntity(jobId);
+        // 资源
+        ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
         // 任务实例集合
         List<JobExampleEntity> jobExampleEntityList = jobService.jobExampleEntityList(jobId);
         // 线程组配置
@@ -331,17 +333,21 @@ public class CommandServiceImpl implements CommandService {
             fileInfo.forEach((k, v) -> {
                 JobFileEntity info = v.get(0);
                 boolean split = !new Long(-1).equals(info.getStartPoint()) && !new Long(-1).equals(info.getEndPoint());
-                List<HashMap<String, Object>> splitInfo = new ArrayList<>(v.size());
+                Map<String, List<HashMap<String, Object>>> splitInfo = new HashMap<>(resourceEntity.getNumber());
                 if (split) {
-                    for (int i = 0, vSize = v.size(); i < vSize; i++) {
-                        int finalI = i;
-                        JobFileEntity t = v.get(i);
-                        HashMap<String, Object> config = new HashMap<String, Object>(4) {{
-                            put("partition", finalI);
-                            put("end", t.getEndPoint());
-                            put("start", t.getStartPoint());
-                        }};
-                        splitInfo.add(config);
+                    for (int i = 0; i < resourceEntity.getNumber(); i++) {
+                        List<HashMap<String, Object>> itemSplitInfo = new ArrayList<>(v.size());
+                        for (int j = 0, vSize = v.size(); j < vSize; j++) {
+                            int finalJ = j;
+                            JobFileEntity t = v.get(j);
+                            HashMap<String, Object> config = new HashMap<String, Object>(4) {{
+                                put("partition", finalJ);
+                                put("end", t.getEndPoint());
+                                put("start", t.getStartPoint());
+                            }};
+                            itemSplitInfo.add(config);
+                        }
+                        splitInfo.put(String.valueOf(i), itemSplitInfo);
                     }
                 }
                 HashMap<String, Object> config = new HashMap<String, Object>(16) {{

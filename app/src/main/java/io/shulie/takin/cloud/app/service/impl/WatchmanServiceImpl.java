@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.resource.Resource;
-import io.shulie.takin.cloud.constant.enums.EventType;
+import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.model.resource.ResourceSource;
@@ -67,7 +67,7 @@ public class WatchmanServiceImpl implements WatchmanService {
             // 查询条件 - 资源类型的上报
             Wrapper<WatchmanEventEntity> wrapper = new LambdaQueryWrapper<WatchmanEventEntity>()
                 .orderByDesc(WatchmanEventEntity::getTime)
-                .eq(WatchmanEventEntity::getType, EventType.WATCHMAN_UPLOAD.getCode())
+                .eq(WatchmanEventEntity::getType, NotifyEventType.WATCHMAN_UPLOAD.getCode())
                 .eq(WatchmanEventEntity::getWatchmanId, watchmanId);
             // 执行SQL
             PageInfo<WatchmanEventEntity> watchmanEventList = new PageInfo<>(watchmanEventMapper.selectList(wrapper));
@@ -121,14 +121,14 @@ public class WatchmanServiceImpl implements WatchmanService {
         try (Page<?> ignore = PageHelper.startPage(1, 1)) {
             Wrapper<WatchmanEventEntity> statusWrapper = new LambdaQueryWrapper<WatchmanEventEntity>()
                 .orderByDesc(WatchmanEventEntity::getTime)
-                .in(WatchmanEventEntity::getType, EventType.WATCHMAN_NORMAL.getCode(), EventType.WATCHMAN_ABNORMAL.getCode());
+                .in(WatchmanEventEntity::getType, NotifyEventType.WATCHMAN_NORMAL.getCode(), NotifyEventType.WATCHMAN_ABNORMAL.getCode());
             Wrapper<WatchmanEventEntity> heartbeatWrapper = new LambdaQueryWrapper<WatchmanEventEntity>()
                 .orderByDesc(WatchmanEventEntity::getTime)
-                .eq(WatchmanEventEntity::getType, EventType.WATCHMAN_HEARTBEAT.getCode());
+                .eq(WatchmanEventEntity::getType, NotifyEventType.WATCHMAN_HEARTBEAT.getCode());
             // 是否有(异常/恢复)事件
             {
                 List<WatchmanEventEntity> statusList = watchmanEventMapper.selectList(statusWrapper);
-                if (statusList.size() > 0 && EventType.WATCHMAN_ABNORMAL.getCode().equals(statusList.get(0).getType())) {
+                if (statusList.size() > 0 && NotifyEventType.WATCHMAN_ABNORMAL.getCode().equals(statusList.get(0).getType())) {
                     WatchmanEventEntity status = statusList.get(0);
                     HashMap<String, String> eventContext = jsonService.readValue(status.getContext(),
                         new TypeReference<HashMap<String, String>>() {});
@@ -173,7 +173,7 @@ public class WatchmanServiceImpl implements WatchmanService {
         // 插入数据库
         watchmanEventMapper.insert(new WatchmanEventEntity() {{
             setWatchmanId(watchmanId);
-            setType(EventType.WATCHMAN_UPLOAD.getCode());
+            setType(NotifyEventType.WATCHMAN_UPLOAD.getCode());
             setContext(jsonService.writeValueAsString(context));
         }});
     }
@@ -186,7 +186,7 @@ public class WatchmanServiceImpl implements WatchmanService {
         watchmanEventMapper.insert(new WatchmanEventEntity() {{
             setContext("{}");
             setWatchmanId(watchmanId);
-            setType(EventType.WATCHMAN_HEARTBEAT.getCode());
+            setType(NotifyEventType.WATCHMAN_HEARTBEAT.getCode());
         }});
     }
 
@@ -198,7 +198,7 @@ public class WatchmanServiceImpl implements WatchmanService {
         watchmanEventMapper.insert(new WatchmanEventEntity() {{
             setContext("{}");
             setWatchmanId(watchmanId);
-            setType(EventType.WATCHMAN_NORMAL.getCode());
+            setType(NotifyEventType.WATCHMAN_NORMAL.getCode());
         }});
     }
 
@@ -212,7 +212,7 @@ public class WatchmanServiceImpl implements WatchmanService {
         watchmanEventMapper.insert(new WatchmanEventEntity() {{
             setWatchmanId(watchmanId);
             setContext(content.toPrettyString());
-            setType(EventType.WATCHMAN_ABNORMAL.getCode());
+            setType(NotifyEventType.WATCHMAN_ABNORMAL.getCode());
         }});
     }
 

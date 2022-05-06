@@ -1,6 +1,8 @@
 package io.shulie.takin.cloud.model.watchman;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import lombok.experimental.Accessors;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
@@ -16,9 +18,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
+@Slf4j
+@Accessors(chain = true)
 public class Register {
     private Header header;
-    private Header body;
+    private Body body;
 
     private String ref;
     private String refSign;
@@ -64,19 +68,22 @@ public class Register {
         ObjectMapper objectMapper = new ObjectMapper();
         String headerString = objectMapper.writeValueAsString(header);
         String bodyString = objectMapper.writeValueAsString(body);
-        System.out.println("header" + headerString);
-        System.out.println("body" + bodyString);
         String base64HeaderString = Base64.encodeUrlSafe(headerString);
         String base64BodyString = Base64.encodeUrlSafe(bodyString);
         String secret = "shulie@2022";
-        System.out.println("head " + base64HeaderString);
-        System.out.println("body " + base64BodyString);
-        System.out.println("secret " + secret);
+        log.info("head(base64) " + base64HeaderString);
+        log.info("body(base64)" + base64BodyString);
+        log.info("secret " + secret);
         HMac hMac = SecureUtil.hmacSha256(secret);
         String verifySignature = hMac.digestBase64(StrUtil.format("{}.{}", base64HeaderString, base64BodyString), true);
         String ref = StrUtil.format("{}.{}.{}", base64HeaderString, base64BodyString, verifySignature);
         String refSign = SecureUtil.md5(ref);
-        System.out.println(ref);
-        System.out.println(refSign);
+
+        Register register = new Register()
+            .setRefSign(refSign)
+            .setHeader(header)
+            .setBody(body)
+            .setRef(ref);
+        log.info("{}", register);
     }
 }

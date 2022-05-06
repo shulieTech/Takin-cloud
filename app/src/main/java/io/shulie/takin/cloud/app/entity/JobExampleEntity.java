@@ -30,9 +30,9 @@ public class JobExampleEntity {
      */
     private Long resourceExampleId;
     /**
-     * 名称
+     * 序列号
      */
-    private String name;
+    private Integer number;
     /**
      * 任务持续时长
      */

@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import io.shulie.takin.cloud.app.service.JsonService;
-import io.shulie.takin.cloud.constant.enums.EventType;
+import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.app.mapper.ResourceMapper;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
@@ -58,7 +58,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         // 记录事件
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity() {{
             setContext("{}");
-            setType(EventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode());
+            setType(NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode());
             setResourceExampleId(id);
         }});
     }
@@ -74,7 +74,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         // 记录事件
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity() {{
             setContext("{}");
-            setType(EventType.RESOUECE_EXAMPLE_START.getCode());
+            setType(NotifyEventType.RESOUECE_EXAMPLE_START.getCode());
             setResourceExampleId(id);
         }});
     }
@@ -90,7 +90,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         // 记录事件
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity() {{
             setContext("{}");
-            setType(EventType.RESOUECE_EXAMPLE_STOP.getCode());
+            setType(NotifyEventType.RESOUECE_EXAMPLE_STOP.getCode());
             setResourceExampleId(id);
         }});
     }
@@ -112,7 +112,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
             objectNode.put("message", errorMessage);
             setResourceExampleId(id);
             setContext(objectNode.toPrettyString());
-            setType(EventType.RESOUECE_EXAMPLE_ERROR.getCode());
+            setType(NotifyEventType.RESOUECE_EXAMPLE_ERROR.getCode());
         }});
     }
 
@@ -123,7 +123,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
     public void onInfo(long id, HashMap<String, Object> info) {
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity() {{
             setResourceExampleId(id);
-            setType(EventType.RESOUECE_EXAMPLE_INFO.getCode());
+            setType(NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode());
             setContext(jsonService.writeValueAsString(info));
         }});
     }

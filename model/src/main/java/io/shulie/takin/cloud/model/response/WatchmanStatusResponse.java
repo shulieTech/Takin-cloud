@@ -20,7 +20,6 @@ public class WatchmanStatusResponse {
      * 时间
      * <p>用于时效校验</p>
      */
-
     @Schema(description = "时间(用于时效校验)")
     long time;
     /**

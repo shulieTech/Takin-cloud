@@ -21,7 +21,7 @@ import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.resource.Resource;
-import io.shulie.takin.cloud.constant.enums.EventType;
+import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.app.mapper.ResourceMapper;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
@@ -178,7 +178,7 @@ public class ResourceServiceImpl implements ResourceService {
             Wrapper<ResourceExampleEventEntity> statusWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
                 .orderByDesc(ResourceExampleEventEntity::getTime)
                 .notIn(ResourceExampleEventEntity::getType,
-                    EventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode(), EventType.RESOUECE_EXAMPLE_INFO.getCode())
+                    NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode(), NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode())
                 .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
             // 执行SQL
             PageInfo<ResourceExampleEventEntity> statusList = new PageInfo<>(resourceExampleEventMapper.selectList(statusWrapper));
@@ -186,11 +186,11 @@ public class ResourceServiceImpl implements ResourceService {
                 String contextString = statusList.getList().get(0).getContext();
                 Integer type = statusList.getList().get(0).getType();
                 result.setStatusTime(statusList.getList().get(0).getTime().getTime());
-                if (EventType.RESOUECE_EXAMPLE_START.getCode().equals(type)) {
+                if (NotifyEventType.RESOUECE_EXAMPLE_START.getCode().equals(type)) {
                     result.setStatus(ResourceExampleStatus.STARTED);
-                } else if (EventType.RESOUECE_EXAMPLE_STOP.getCode().equals(type)) {
+                } else if (NotifyEventType.RESOUECE_EXAMPLE_STOP.getCode().equals(type)) {
                     result.setStatus(ResourceExampleStatus.STOPED);
-                } else if (EventType.RESOUECE_EXAMPLE_ERROR.getCode().equals(type)) {
+                } else if (NotifyEventType.RESOUECE_EXAMPLE_ERROR.getCode().equals(type)) {
                     result.setStatus(ResourceExampleStatus.ABNORMAL);
                 }
                 HashMap<String, String> context = jsonService.readValue(contextString, new TypeReference<HashMap<String, String>>() {});
@@ -199,7 +199,7 @@ public class ResourceServiceImpl implements ResourceService {
             // 设置资源实例信息
             Wrapper<ResourceExampleEventEntity> infoWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
                 .orderByDesc(ResourceExampleEventEntity::getTime)
-                .eq(ResourceExampleEventEntity::getType, EventType.RESOUECE_EXAMPLE_INFO.getCode())
+                .eq(ResourceExampleEventEntity::getType, NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode())
                 .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
             PageInfo<ResourceExampleEventEntity> infoList = new PageInfo<>(resourceExampleEventMapper.selectList(infoWrapper));
             if (infoList.getSize() > 0) {
@@ -214,7 +214,7 @@ public class ResourceServiceImpl implements ResourceService {
             else {
                 Wrapper<ResourceExampleEventEntity> heartbeatWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
                     .orderByDesc(ResourceExampleEventEntity::getTime)
-                    .eq(ResourceExampleEventEntity::getType, EventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode())
+                    .eq(ResourceExampleEventEntity::getType, NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode())
                     .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
                 PageInfo<ResourceExampleEventEntity> heartbeatList = new PageInfo<>(resourceExampleEventMapper.selectList(heartbeatWrapper));
                 if (heartbeatList.getSize() > 0) {
