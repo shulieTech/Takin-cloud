@@ -164,6 +164,7 @@ public class JobServiceImpl implements JobService {
                 jobFileEntityList.add(new JobFileEntity()
                     .setJobExampleId(jobExampleEntity.getId())
                     .setType(FileType.SCRIPT.getCode())
+                    .setJobId(jobEntity.getId())
                     .setUri(scriptFile.getUri())
                     .setStartPoint(-1L)
                     .setEndPoint(-1L)
@@ -177,6 +178,7 @@ public class JobServiceImpl implements JobService {
                     .setEndPoint(info.getSplitList().get(i).getEnd())
                     .setJobExampleId(jobExampleEntity.getId())
                     .setType(FileType.DATA.getCode())
+                    .setJobId(jobEntity.getId())
                     .setUri(info.getUri())
                 );
             }
@@ -186,6 +188,7 @@ public class JobServiceImpl implements JobService {
                 jobFileEntityList.add(new JobFileEntity()
                     .setJobExampleId(jobExampleEntity.getId())
                     .setType(FileType.ATTACHMENT.getCode())
+                    .setJobId(jobEntity.getId())
                     .setUri(fileInfo.getUri())
                     .setStartPoint(-1L)
                     .setEndPoint(-1L)

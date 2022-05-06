@@ -179,17 +179,20 @@ public class CommandServiceImpl implements CommandService {
         List<ThreadConfigExampleEntity> threadConfigExampleEntityList = threadConfigExampleMapperService.lambdaQuery()
             .eq(ThreadConfigExampleEntity::getJobId, jobEntity.getId()).list();
         // 根据ref进行分组
-        Map<String, List<ThreadConfigExampleEntity>> groupByRef = threadConfigExampleEntityList.stream().collect(Collectors.groupingBy(ThreadConfigExampleEntity::getRef));
+        Map<String, List<ThreadConfigExampleEntity>> groupByRef = threadConfigExampleEntityList
+            .stream().collect(Collectors.groupingBy(ThreadConfigExampleEntity::getRef));
         // 根据分组聚合数值
         groupByRef.forEach((k, v) -> {
             // 列出所有的项
-            List<HashMap<String, String>> contextList = v.stream().map(t -> {
-                try {
-                    return jsonService.readValue(t.getContext(), new TypeReference<HashMap<String, String>>() {});
-                } catch (JsonProcessingException e) {
-                    return null;
-                }
-            }).filter(Objects::nonNull).collect(Collectors.toList());
+            List<HashMap<String, String>> contextList = v.stream()
+                .map(t -> {
+                    try {
+                        return jsonService.readValue(t.getContext(), new TypeReference<HashMap<String, String>>() {});
+                    } catch (JsonProcessingException e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull).collect(Collectors.toList());
             // 线程数
             int numberSum = contextList.stream().mapToInt(t -> NumberUtil.parseInt(t.getOrDefault("number", "0"))).sum();
             // TPS数
@@ -289,8 +292,15 @@ public class CommandServiceImpl implements CommandService {
             put("logQueueSize", watchmanConfig.getLogQueueSize());
             put("backendQueueCapacity", watchmanConfig.getBackendQueueCapacity());
             put("tpsTargetLevelFactor", watchmanConfig.getTpsTargetLevelFactor());
+            put("ptlLogConfig", new HashMap<String, Object>(6) {{
+                put("logCutOff", watchmanConfig.getLogCutOff());
+                put("ptlFileEnable", watchmanConfig.getPtlFileEnable());
+                put("ptlUploadFrom", watchmanConfig.getPtlUploadFrom());
+                put("ptlFileErrorOnly", watchmanConfig.getPtlFileErrorOnly());
+                put("timeoutThreshold", watchmanConfig.getTimeoutThreshold());
+                put("ptlFileTimeoutOnly", watchmanConfig.getPtlFileTimeoutOnly());
+            }});
             put("businessMap", "后续填充");
-            put("ptlLogConfig", "后续填充");
             put("dataFileList", "后续填充");
             put("threadGroupConfigMap", "后续填充");
             // 调试模式下,需要取调试次数
@@ -350,7 +360,7 @@ public class CommandServiceImpl implements CommandService {
         }
         // 压测指标配置
         {
-            HashMap<String, HashMap<String, Object>> businessMap = new HashMap<>();
+            HashMap<String, HashMap<String, Object>> businessMap = new HashMap<>(metricsEntityList.size());
             metricsEntityList.forEach(t -> {
                 HashMap<String, Object> metrics = new HashMap<>(5);
                 try {
@@ -365,18 +375,6 @@ public class CommandServiceImpl implements CommandService {
                 businessMap.put(t.getRef(), metrics);
             });
             basicConfig.put("businessMap", businessMap);
-        }
-        // 压测日志配置
-        {
-            HashMap<String, Object> logConfig = new HashMap<String, Object>(6) {{
-                put("logCutOff", watchmanConfig.getLogCutOff());
-                put("ptlFileEnable", watchmanConfig.getPtlFileEnable());
-                put("ptlUploadFrom", watchmanConfig.getPtlUploadFrom());
-                put("ptlFileErrorOnly", watchmanConfig.getPtlFileErrorOnly());
-                put("timeoutThreshold", watchmanConfig.getTimeoutThreshold());
-                put("ptlFileTimeoutOnly", watchmanConfig.getPtlFileTimeoutOnly());
-            }};
-            basicConfig.put("ptlLogConfig", logConfig);
         }
         // 线程组配置
         {

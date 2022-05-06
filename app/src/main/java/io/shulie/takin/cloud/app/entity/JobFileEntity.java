@@ -24,7 +24,11 @@ public class JobFileEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 资源主键
+     * 任务主键
+     */
+    private Long jobId;
+    /**
+     * 任务实例主键
      */
     private Long jobExampleId;
     /**
