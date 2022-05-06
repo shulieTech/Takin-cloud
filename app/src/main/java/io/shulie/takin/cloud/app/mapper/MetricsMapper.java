@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.app.mapper;
 
 import io.shulie.takin.cloud.app.entity.MetricsEntity;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.app.service.mapper;
 
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
+
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.model.response;
 
 import lombok.Data;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;

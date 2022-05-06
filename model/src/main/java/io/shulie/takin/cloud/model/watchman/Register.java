@@ -1,13 +1,14 @@
 package io.shulie.takin.cloud.model.watchman;
 
-import cn.hutool.core.codec.Base64;
-import cn.hutool.core.util.CharsetUtil;
+import lombok.Data;
+
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.core.codec.Base64;
 import cn.hutool.crypto.digest.HMac;
-import com.fasterxml.jackson.core.JsonProcessingException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Data;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * 注册

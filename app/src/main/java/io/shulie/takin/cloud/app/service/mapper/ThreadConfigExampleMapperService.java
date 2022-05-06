@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.app.service.mapper;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
 
 /**

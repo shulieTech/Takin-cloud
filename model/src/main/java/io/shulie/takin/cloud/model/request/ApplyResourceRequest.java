@@ -1,7 +1,8 @@
 package io.shulie.takin.cloud.model.request;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * 申请资源

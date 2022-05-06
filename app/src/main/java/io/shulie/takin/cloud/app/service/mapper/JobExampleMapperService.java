@@ -1,8 +1,8 @@
 package io.shulie.takin.cloud.app.service.mapper;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
-import io.shulie.takin.cloud.app.entity.MetricsEntity;
+
+import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * Mapper - IService - 任务实例

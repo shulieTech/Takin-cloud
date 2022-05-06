@@ -1,9 +1,10 @@
 package io.shulie.takin.cloud.model.response;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * 监听器状态

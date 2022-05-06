@@ -1,7 +1,8 @@
 package io.shulie.takin.cloud.app.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
  * 资源 - MyBatisPlus

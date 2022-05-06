@@ -5,13 +5,14 @@ import java.util.HashMap;
 
 import lombok.Data;
 
+import lombok.experimental.Accessors;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import io.shulie.takin.cloud.constant.enums.JobType;
 import io.shulie.takin.cloud.constant.enums.FormulaSymbol;
 import io.shulie.takin.cloud.constant.enums.FormulaTarget;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
-import lombok.experimental.Accessors;
 
 /**
  * 请求体 - 启动
