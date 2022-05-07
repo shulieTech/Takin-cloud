@@ -115,7 +115,7 @@ public class ResourceExampleController {
         String errorMessage = content.getOrDefault(errorFlag, "").toString();
         content.remove(errorFlag);
         // 上报信息
-        resourceExampleService.onInfo(id, content);
+        info(id, content);
         // 上报异常
         if (StrUtil.isNotBlank(errorMessage)) {error(id, errorMessage.trim());}
         return ApiResult.success();
