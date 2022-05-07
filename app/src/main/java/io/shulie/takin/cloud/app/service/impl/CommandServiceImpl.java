@@ -158,6 +158,7 @@ public class CommandServiceImpl implements CommandService {
         ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
         HashMap<String, Object> content = new HashMap<String, Object>(1) {{
             put("jobId", jobEntity.getId());
+            put("taskId", jobEntity.getId());
             put("resourceId", jobEntity.getResourceId());
         }};
         long commandId = create(resourceEntity.getWatchmanId(), CommandType.STOP_APPLICATION, jsonService.writeValueAsString(content));
@@ -206,8 +207,13 @@ public class CommandServiceImpl implements CommandService {
             }};
             content.add(contentItem);
         });
+        HashMap<String, Object> result = new HashMap<String, Object>(3) {{
+            put("content", content);
+            put("jobId", jobEntity.getId());
+            put("taskId", jobEntity.getId());
+        }};
         // 下发命令
-        long commandId = create(resourceEntity.getWatchmanId(), CommandType.MODIFY_THREAD_CONFIG, jsonService.writeValueAsString(content));
+        long commandId = create(resourceEntity.getWatchmanId(), CommandType.MODIFY_THREAD_CONFIG, jsonService.writeValueAsString(result));
         // 输出日志
         log.info("下发命令:更新线程组配置:{},命令主键{}.", jobId, commandId);
     }
