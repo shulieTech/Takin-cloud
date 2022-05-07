@@ -204,10 +204,10 @@ public class ResourceServiceImpl implements ResourceService {
             PageInfo<ResourceExampleEventEntity> infoList = new PageInfo<>(resourceExampleEventMapper.selectList(infoWrapper));
             if (infoList.getSize() > 0) {
                 String contextString = infoList.getList().get(0).getContext();
-                HashMap<String, String> context = jsonService.readValue(contextString, new TypeReference<HashMap<String, String>>() {});
-                result.setIp(context.get("ip"));
-                result.setName(context.get("name"));
-                result.setHostIp(context.get("hostIp"));
+                HashMap<String, Object> context = jsonService.readValue(contextString, new TypeReference<HashMap<String, Object>>() {});
+                result.setIp(context.get("ip") == null ? null : context.get("ip").toString());
+                result.setName(context.get("name") == null ? null : context.get("name").toString());
+                result.setHostIp(context.get("hostIp") == null ? null : context.get("hostIp").toString());
                 result.setStatusTime(infoList.getList().get(0).getTime().getTime());
             }
             // 设置心跳接口时间
