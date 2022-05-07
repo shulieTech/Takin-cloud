@@ -22,6 +22,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @MapperScan("io.shulie.takin.cloud.app.mapper")
 public class Application {
     public static void main(String[] args) {
+        System.setProperty("pagehelper.banner", Boolean.FALSE.toString());
         SpringApplication application = new SpringApplication(Application.class);
         application.setBannerMode(Mode.OFF);
         ConfigurableApplicationContext context = application.run(args);

@@ -193,8 +193,8 @@ public class ResourceServiceImpl implements ResourceService {
                 } else if (NotifyEventType.RESOUECE_EXAMPLE_ERROR.getCode().equals(type)) {
                     result.setStatus(ResourceExampleStatus.ABNORMAL);
                 }
-                HashMap<String, String> context = jsonService.readValue(contextString, new TypeReference<HashMap<String, String>>() {});
-                result.setStatusMessage(context.get("message"));
+                HashMap<String, Object> context = jsonService.readValue(contextString, new TypeReference<HashMap<String, Object>>() {});
+                result.setStatusMessage(context.get("message") == null ? null : context.get("message").toString());
             }
             // 设置资源实例信息
             Wrapper<ResourceExampleEventEntity> infoWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()

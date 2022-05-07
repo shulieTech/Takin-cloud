@@ -75,17 +75,19 @@ public class WatchmanServiceImpl implements WatchmanService {
             if (watchmanEventList.getList().size() > 0) {
                 // 组装返回数据
                 String eventContextString = watchmanEventList.getList().get(0).getContext();
-                HashMap<String, String> eventContext = jsonService.readValue(eventContextString, new TypeReference<HashMap<String, String>>() {});
+                HashMap<String, Object> eventContext = jsonService.readValue(eventContextString, new TypeReference<HashMap<String, Object>>() {});
                 {
                     long resourceTime = Long.parseLong(String.valueOf(eventContext.get("time")));
                     // TODO 要校验时效
                     if (resourceTime < 0) {
                         log.warn("调度资源获取:最后一次上报的资源时效了");
                     }
-                    String resourceListString = eventContext.get("data");
-                    List<Resource> resourceList = jsonService.readValue(resourceListString, new TypeReference<List<Resource>>() {});
-                    // 处理数据
-                    result.addAll(resourceList);
+                    Object resourceListObject = eventContext.get("data");
+                    if (resourceListObject instanceof List) {
+                        result.addAll(jsonService.readValue(jsonService.writeValueAsString(resourceListObject), new TypeReference<List<Resource>>() {}));
+                    } else {
+                        result.addAll(jsonService.readValue(resourceListObject.toString(), new TypeReference<List<Resource>>() {}));
+                    }
                 }
             }
         } catch (JsonProcessingException e) {
@@ -130,9 +132,8 @@ public class WatchmanServiceImpl implements WatchmanService {
                 List<WatchmanEventEntity> statusList = watchmanEventMapper.selectList(statusWrapper);
                 if (statusList.size() > 0 && NotifyEventType.WATCHMAN_ABNORMAL.getCode().equals(statusList.get(0).getType())) {
                     WatchmanEventEntity status = statusList.get(0);
-                    HashMap<String, String> eventContext = jsonService.readValue(status.getContext(),
-                        new TypeReference<HashMap<String, String>>() {});
-                    String message = eventContext.get("message");
+                    HashMap<String, Object> eventContext = jsonService.readValue(status.getContext(), new TypeReference<HashMap<String, Object>>() {});
+                    String message = eventContext.get("message") == null ? null : eventContext.get("message").toString();
                     return new WatchmanStatusResponse(status.getTime().getTime(), message);
                 }
             }
@@ -167,9 +168,9 @@ public class WatchmanServiceImpl implements WatchmanService {
         // 转换校验
         if (errorMessage.size() > 0) {throw new RuntimeException(String.join(",", errorMessage));}
         // 组装入库数据
-        HashMap<String, String> context = new HashMap<>(2);
+        HashMap<String, Object> context = new HashMap<>(2);
         context.put("time", String.valueOf(System.currentTimeMillis()));
-        context.put("data", jsonService.writeValueAsString(resourceList));
+        context.put("data", resourceList);
         // 插入数据库
         watchmanEventMapper.insert(new WatchmanEventEntity() {{
             setWatchmanId(watchmanId);
