@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -50,7 +51,7 @@ public class WatchmanController {
 
     @Operation(summary = "资源容量列表")
     @GetMapping("resource")
-    public ApiResult<List<Resource>> resourceList(@Parameter(description = "调度主键", required = true) Long watchmanId) {
+    public ApiResult<List<Resource>> resourceList(@Parameter(description = "调度主键", required = true) @RequestParam Long watchmanId) {
         return ApiResult.success(watchmanService.getResourceList(watchmanId));
     }
 
