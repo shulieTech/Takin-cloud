@@ -20,12 +20,12 @@ import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.resource.Resource;
-import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.app.mapper.ResourceMapper;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.WatchmanService;
+import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleMapper;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
@@ -120,26 +120,26 @@ public class ResourceServiceImpl implements ResourceService {
         // 0. 预检
         if (this.check(apply)) {
             // 1. 保存任务信息
-            ResourceEntity resourceEntity = new ResourceEntity() {{
-                setCpu(apply.getCpu());
-                setMemory(apply.getMemory());
-                setNumber(apply.getNumber());
-                setWatchmanId(apply.getWatchmanId());
-                setCallbackUrl(apply.getCallbackUrl());
-                setLimitCpu(StrUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu());
-                setLimitMemory(StrUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
-            }};
+            ResourceEntity resourceEntity = new ResourceEntity()
+                .setCpu(apply.getCpu())
+                .setImage(apply.getImage())
+                .setMemory(apply.getMemory())
+                .setNumber(apply.getNumber())
+                .setWatchmanId(apply.getWatchmanId())
+                .setCallbackUrl(apply.getCallbackUrl())
+                .setLimitCpu(StrUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu())
+                .setLimitMemory(StrUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
             resourceMapper.insert(resourceEntity);
             // 2. 创建任务实例
             for (int i = 0; i < apply.getNumber(); i++) {
-                ResourceExampleEntity resourceExampleEntity = new ResourceExampleEntity() {{
-                    setCpu(apply.getCpu());
-                    setMemory(apply.getMemory());
-                    setResourceId(resourceEntity.getId());
-                    setWatchmanId(resourceEntity.getWatchmanId());
-                    setLimitCpu(StrUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu());
-                    setLimitMemory(StrUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
-                }};
+                ResourceExampleEntity resourceExampleEntity = new ResourceExampleEntity()
+                    .setCpu(apply.getCpu())
+                    .setImage(apply.getImage())
+                    .setMemory(apply.getMemory())
+                    .setResourceId(resourceEntity.getId())
+                    .setWatchmanId(resourceEntity.getWatchmanId())
+                    .setLimitCpu(StrUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu())
+                    .setLimitMemory(StrUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
                 resourceExampleMapper.insert(resourceExampleEntity);
             }
             // 3. 下发命令
@@ -237,5 +237,4 @@ public class ResourceServiceImpl implements ResourceService {
     public ResourceExampleEntity exampleEntity(long id) {
         return resourceExampleMapper.selectById(id);
     }
-
 }

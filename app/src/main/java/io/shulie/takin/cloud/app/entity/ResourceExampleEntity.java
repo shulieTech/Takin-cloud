@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.app.entity;
 import java.util.Date;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -14,6 +15,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
+@Accessors(chain = true)
 @TableName("t_resource_example")
 public class ResourceExampleEntity {
     /**
@@ -21,6 +23,10 @@ public class ResourceExampleEntity {
      */
     @TableId(type = IdType.AUTO)
     private Long id;
+    /**
+     * 资源镜像
+     */
+    private String image;
     /**
      * 资源主键
      */

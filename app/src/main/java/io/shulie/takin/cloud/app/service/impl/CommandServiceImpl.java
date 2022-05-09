@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Date;
 import java.util.List;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,6 @@ import io.shulie.takin.cloud.app.entity.JobFileEntity;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.constant.enums.CommandType;
-import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
@@ -90,12 +88,12 @@ public class CommandServiceImpl implements CommandService {
             .map(t -> new HashMap<String, Object>(8) {{
                 put("id", t.getId());
                 put("cpu", t.getCpu());
+                put("image", t.getImage());
                 put("memory", t.getMemory());
                 put("limitCpu", t.getLimitCpu());
                 put("limitMemory", t.getLimitMemory());
                 put("nfsDir", watchmanConfig.getNfsDirectory());
                 put("nfsServer", watchmanConfig.getNfsServer());
-                put("image", watchmanConfig.getContainerImage());
             }})
             .collect(Collectors.toList());
         // 补充index
@@ -188,7 +186,7 @@ public class CommandServiceImpl implements CommandService {
             List<HashMap<String, String>> contextList = new ArrayList<>();
             for (ThreadConfigExampleEntity threadConfigExampleEntity : v) {
                 HashMap<String, String> configExampleContent = jsonService.readValue(threadConfigExampleEntity.getContext(), new TypeReference<HashMap<String, String>>() {});
-                if (content != null) {
+                if (configExampleContent != null) {
                     contextList.add(configExampleContent);
                 }
             }

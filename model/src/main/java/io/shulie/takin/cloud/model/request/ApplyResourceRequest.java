@@ -47,4 +47,9 @@ public class ApplyResourceRequest {
      */
     @Schema(description = "状态回调地址")
     String callbackUrl;
+    /**
+     * 资源镜像
+     */
+    @Schema(description = "资源镜像")
+    String image;
 }
