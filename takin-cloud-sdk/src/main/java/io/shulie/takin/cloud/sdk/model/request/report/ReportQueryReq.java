@@ -52,4 +52,15 @@ public class ReportQueryReq extends PagingContextExt {
     @ApiModelProperty(value = "报告类型")
     private Integer type;
 
+    /**
+     * 报告开始时间
+     */
+    @ApiModelProperty(value = "报告开始时间")
+    private String reportStartTime;
+
+    /**
+     * 报告结束时间
+     */
+    @ApiModelProperty(value = "报告结束时间")
+    private String reportEndTime;
 }
