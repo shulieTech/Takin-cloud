@@ -2,8 +2,8 @@ package io.shulie.takin.cloud.app.conf;
 
 import lombok.Data;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 
 /**
@@ -72,6 +72,9 @@ public class WatchmanConfig {
      */
     @Value("${log.queue.size}")
     private Long logQueueSize;
+    /**
+     * 后端监听器队列容量
+     */
     @Value("${backend.queue.capacity}")
     private Long backendQueueCapacity;
     /**
@@ -79,6 +82,14 @@ public class WatchmanConfig {
      */
     @Value("${java.options}")
     private String javaOptions;
+    /**
+     * TPS增长因子
+     */
     @Value("${tps.target.level.factor}")
     private Double tpsTargetLevelFactor;
+    /**
+     * 应用程序版本(cloud版本)
+     */
+    @Value("${application.version}")
+    private String applicationVersion;
 }

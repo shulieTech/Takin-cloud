@@ -1,12 +1,17 @@
 package io.shulie.takin.cloud.app.controller;
 
+import java.util.HashMap;
+
+import javax.annotation.Resource;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import io.shulie.takin.cloud.app.conf.WatchmanConfig;
 import io.shulie.takin.cloud.model.response.ApiResult;
 
 /**
@@ -19,9 +24,21 @@ import io.shulie.takin.cloud.model.response.ApiResult;
 @RequestMapping("/common")
 public class CommonController {
 
+    @Resource
+    WatchmanConfig watchmanConfig;
+
     @Operation(summary = "健康检查")
-    @RequestMapping(value = "health/checkup", method = {RequestMethod.GET})
+    @GetMapping(value = "health/checkup")
     public ApiResult<Long> checkUp() {
         return ApiResult.success(System.currentTimeMillis());
+    }
+
+    @Operation(summary = "版本信息")
+    @GetMapping(value = "version")
+    public ApiResult<HashMap<String, Object>> version() {
+        return ApiResult.success(new HashMap<String, Object>(2) {{
+            put("version", watchmanConfig.getApplicationVersion());
+            put("engineVersion", watchmanConfig.getContainerImage());
+        }});
     }
 }
