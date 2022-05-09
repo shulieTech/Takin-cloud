@@ -79,6 +79,9 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         }});
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onStop(long id) {
         // 基础信息准备

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
+import io.shulie.takin.cloud.app.service.ResourceExampleService;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -70,6 +71,8 @@ public class JobServiceImpl implements JobService {
     JobFileMapperService jobFileMapperService;
     @javax.annotation.Resource
     MetricsMapperService metricsMapperService;
+    @javax.annotation.Resource
+    ResourceExampleService resourceExampleService;
     @javax.annotation.Resource
     JobExampleMapperService jobExampleMapperService;
     @javax.annotation.Resource
@@ -345,7 +348,12 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public void onStop(long id) {
-        jobExampleEntityList(id).forEach(t -> jobExampleService.onStop(t.getId()));
+        jobExampleEntityList(id).forEach(t -> {
+            // 停止任务实例
+            jobExampleService.onStop(t.getId());
+            // 停止任务实例对应的资源实例
+            resourceExampleService.onStop(t.getResourceExampleId());
+        });
     }
 
     /**
