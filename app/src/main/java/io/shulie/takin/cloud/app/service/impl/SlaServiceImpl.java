@@ -170,8 +170,6 @@ public class SlaServiceImpl implements SlaService {
         }
         // 进行数值比较
         int compareResult = targetValue.compareTo(value);
-        // 翻转比较值
-        compareResult = compareResult * -1;
         switch (symbol) {
             case EQUAL:
                 targetValue = compareResult == 0 ? targetValue : null;
