@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.shulie.takin.cloud.model.response.ApiResult;
-import io.shulie.takin.cloud.app.service.JobExampleServer;
+import io.shulie.takin.cloud.app.service.JobExampleService;
 
 /**
  * 任务实例上报
@@ -24,51 +24,51 @@ import io.shulie.takin.cloud.app.service.JobExampleServer;
 @RestController("NotiftJobExampleController")
 public class JobExampleController {
     @javax.annotation.Resource
-    JobExampleServer jobExampleServer;
+    JobExampleService jobExampleService;
 
     /**
      * 心跳
      *
-     * @param id 资源实例主键
+     * @param id 任务实例主键
      * @return -
      */
     @GetMapping("heartbeat")
     @Operation(summary = "心跳")
     public ApiResult<?> heartbeat(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id) {
-        jobExampleServer.onHeartbeat(id);
+        jobExampleService.onHeartbeat(id);
         return ApiResult.success();
     }
 
     /**
      * 启动
      *
-     * @param id 资源实例主键
+     * @param id 任务实例主键
      * @return -
      */
     @GetMapping("start")
     @Operation(summary = "启动")
     public ApiResult<?> start(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id) {
-        jobExampleServer.onStart(id);
+        jobExampleService.onStart(id);
         return ApiResult.success();
     }
 
     /**
      * 停止
      *
-     * @param id 资源实例主键
+     * @param id 任务实例主键
      * @return -
      */
     @GetMapping("stop")
     @Operation(summary = "停止")
     public ApiResult<?> stop(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id) {
-        jobExampleServer.onStop(id);
+        jobExampleService.onStop(id);
         return ApiResult.success();
     }
 
     /**
      * 发生异常
      *
-     * @param id      资源实例主键
+     * @param id      任务实例主键
      * @param content 异常信息(字符串)
      * @return -
      */
@@ -76,7 +76,7 @@ public class JobExampleController {
     @Operation(summary = "发生异常")
     public ApiResult<?> error(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id,
         @Parameter(description = "异常信息", required = true) @RequestBody String content) {
-        jobExampleServer.onError(id, content);
+        jobExampleService.onError(id, content);
         return ApiResult.success();
     }
 }

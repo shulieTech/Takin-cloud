@@ -37,14 +37,14 @@ public class JobController {
     }
 
     @Operation(summary = "停止任务")
-    @GetMapping(value = "stop")
+    @GetMapping("stop")
     public ApiResult<?> stop(@Parameter(description = "任务主键") Long jobId) {
         jobService.stop(jobId);
         return ApiResult.success();
     }
 
     @Operation(summary = "查看配置")
-    @GetMapping(value = "config/get")
+    @GetMapping("config/get")
     public ApiResult<List<JobConfig>> getConfig(@Parameter(description = "任务主键") Long jobId,
         @Parameter(description = "ref(可以不传)") String ref) {
         return ApiResult.success(jobService.getConfig(jobId, ref));

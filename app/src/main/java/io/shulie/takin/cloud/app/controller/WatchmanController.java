@@ -34,13 +34,13 @@ public class WatchmanController {
     WatchmanService watchmanService;
 
     @Operation(summary = "状态")
-    @GetMapping(value = "status")
+    @GetMapping("status")
     public ApiResult<WatchmanStatusResponse> status(@Parameter(description = "调度主键", required = true) Long watchmanId) {
         return ApiResult.success(watchmanService.status(watchmanId));
     }
 
     @Operation(summary = "调度器列表")
-    @GetMapping(value = "list")
+    @GetMapping("list")
     public ApiResult<List<WatchmanEntity>> list(
         @Parameter(description = "分页页码", required = true) Integer pageNumber,
         @Parameter(description = "分页容量", required = true) Integer pageSize) {
@@ -49,7 +49,7 @@ public class WatchmanController {
     }
 
     @Operation(summary = "资源容量列表")
-    @GetMapping(value = "resource")
+    @GetMapping("resource")
     public ApiResult<List<Resource>> resourceList(@Parameter(description = "调度主键", required = true) Long watchmanId) {
         return ApiResult.success(watchmanService.getResourceList(watchmanId));
     }

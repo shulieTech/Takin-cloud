@@ -38,7 +38,7 @@ public class WatchmanController {
      * @return true/false
      */
     @Operation(summary = "注册")
-    @GetMapping(value = "register")
+    @GetMapping("register")
     public ApiResult<Boolean> register(
         @Parameter(description = "关键词") String ref,
         @Parameter(description = "关键词签名") String refSign) {

@@ -13,7 +13,7 @@ import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.CallbackService;
-import io.shulie.takin.cloud.app.service.JobExampleServer;
+import io.shulie.takin.cloud.app.service.JobExampleService;
 import io.shulie.takin.cloud.model.callback.JobExampleStop;
 import io.shulie.takin.cloud.model.callback.JobExampleError;
 import io.shulie.takin.cloud.model.callback.JobExampleStart;
@@ -29,7 +29,7 @@ import io.shulie.takin.cloud.app.service.mapper.JobExampleMapperService;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
-public class JobExampleServerImpl implements JobExampleServer {
+public class JobExampleServiceImpl implements JobExampleService {
     @javax.annotation.Resource
     JobMapper jobMapper;
     @javax.annotation.Resource

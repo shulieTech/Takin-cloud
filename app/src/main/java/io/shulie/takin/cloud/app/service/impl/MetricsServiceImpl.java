@@ -19,7 +19,7 @@ import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.entity.SlaEventEntity;
 import io.shulie.takin.cloud.model.request.MetricsInfo;
 import io.shulie.takin.cloud.app.service.MetricsService;
-import io.shulie.takin.cloud.app.service.JobExampleServer;
+import io.shulie.takin.cloud.app.service.JobExampleService;
 import io.shulie.takin.cloud.constant.PressureEngineConstants;
 
 /**
@@ -37,7 +37,7 @@ public class MetricsServiceImpl implements MetricsService {
     @javax.annotation.Resource
     private InfluxWriter influxWriter;
     @javax.annotation.Resource
-    JobExampleServer jobExampleServer;
+    JobExampleService jobExampleService;
     @javax.annotation.Resource
     RedisTemplate<String, Object> stringRedisTemplate;
 
@@ -51,7 +51,7 @@ public class MetricsServiceImpl implements MetricsService {
         log.info("Metrics-Upload({}-{}): 接收到的数据:{}条,时间范围:{},延时:{}", jobId, jobExampleId,
             metricsList.size(), timestamp, (System.currentTimeMillis() - timestamp));
         // 回调数据
-        jobExampleServer.onHeartbeat(jobExampleId);
+        jobExampleService.onHeartbeat(jobExampleId);
         // 写入InfluxDB
         collectorToInfluxdb(jobId, metricsList);
         // 统计每个时间窗口pod调用数量

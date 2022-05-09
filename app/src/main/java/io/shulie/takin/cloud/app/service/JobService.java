@@ -21,7 +21,7 @@ public interface JobService {
      * @param jobInfo 任务信息
      * @return 任务主键
      */
-    String start(StartRequest jobInfo)  ;
+    String start(StartRequest jobInfo);
 
     /**
      * 停止
@@ -71,4 +71,18 @@ public interface JobService {
      * @return 任务实例列表
      */
     List<JobExampleEntity> jobExampleEntityList(long jobId);
+
+    /**
+     * 启动事件
+     *
+     * @param id 任务主键
+     */
+    void onStart(long id);
+
+    /**
+     * 停止事件
+     *
+     * @param id 任务主键
+     */
+    void onStop(long id);
 }

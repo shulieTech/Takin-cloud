@@ -36,7 +36,7 @@ public class ResouceController {
     ResourceService resourceService;
 
     @Operation(summary = "资源实例明细(压力机明细)")
-    @GetMapping(value = "example/list")
+    @GetMapping("example/list")
     public ApiResult<List<ResourceExampleOverview>> watchmanResourceExample(
         @Parameter(description = "资源主键") @RequestParam Long resourceId,
         @Parameter(description = "任务主键") @RequestParam(required = false) Long jobId) {
@@ -65,7 +65,7 @@ public class ResouceController {
     }
 
     @Operation(summary = "资源释放")
-    @GetMapping(value = "unlock")
+    @GetMapping("unlock")
     public ApiResult<?> unlock(@Parameter(description = "资源主键") @RequestParam Long resourceId) {
         resourceService.unlock(resourceId);
         return ApiResult.success(resourceId);

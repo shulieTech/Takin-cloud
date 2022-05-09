@@ -26,13 +26,13 @@ public class CommonController {
     WatchmanConfig watchmanConfig;
 
     @Operation(summary = "健康检查")
-    @GetMapping(value = "health/checkup")
+    @GetMapping("health/checkup")
     public ApiResult<Long> checkUp() {
         return ApiResult.success(System.currentTimeMillis());
     }
 
     @Operation(summary = "版本信息")
-    @GetMapping(value = "version")
+    @GetMapping("version")
     public ApiResult<HashMap<String, Object>> version() {
         return ApiResult.success(new HashMap<String, Object>(2) {{
             put("version", watchmanConfig.getApplicationVersion());

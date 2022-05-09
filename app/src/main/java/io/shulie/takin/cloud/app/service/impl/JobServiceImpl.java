@@ -29,6 +29,7 @@ import io.shulie.takin.cloud.model.request.ModifyConfig;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
+import io.shulie.takin.cloud.app.service.JobExampleService;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.model.request.StartRequest.SlaInfo;
@@ -61,6 +62,8 @@ public class JobServiceImpl implements JobService {
     ResourceService resourceService;
     @javax.annotation.Resource
     SlaMapperService slaMapperService;
+    @javax.annotation.Resource
+    JobExampleService jobExampleService;
     @javax.annotation.Resource
     JobConfigServiceImpl jobConfigService;
     @javax.annotation.Resource
@@ -333,6 +336,16 @@ public class JobServiceImpl implements JobService {
         return jobExampleMapperService.lambdaQuery()
             .eq(JobExampleEntity::getJobId, jobId)
             .list();
+    }
+
+    @Override
+    public void onStart(long id) {
+        jobExampleEntityList(id).forEach(t -> jobExampleService.onStart(t.getId()));
+    }
+
+    @Override
+    public void onStop(long id) {
+        jobExampleEntityList(id).forEach(t -> jobExampleService.onStop(t.getId()));
     }
 
     /**
