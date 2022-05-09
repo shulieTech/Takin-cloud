@@ -36,7 +36,6 @@ public class CommonController {
     public ApiResult<HashMap<String, Object>> version() {
         return ApiResult.success(new HashMap<String, Object>(2) {{
             put("version", watchmanConfig.getApplicationVersion());
-            put("engineVersion", watchmanConfig.getContainerImage());
         }});
     }
 }
