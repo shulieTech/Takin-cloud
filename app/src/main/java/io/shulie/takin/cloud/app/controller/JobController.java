@@ -6,9 +6,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -31,27 +31,27 @@ public class JobController {
     JobService jobService;
 
     @Operation(summary = "启动任务")
-    @RequestMapping(value = "start", method = {RequestMethod.POST})
-    public ApiResult<String> start(@RequestBody StartRequest info) throws JsonProcessingException {
+    @PostMapping(value = "start")
+    public ApiResult<String> start(@RequestBody StartRequest info) {
         return ApiResult.success(jobService.start(info));
     }
 
     @Operation(summary = "停止任务")
-    @RequestMapping(value = "stop", method = {RequestMethod.GET})
+    @GetMapping(value = "stop")
     public ApiResult<?> stop(@Parameter(description = "任务主键") Long jobId) {
         jobService.stop(jobId);
         return ApiResult.success();
     }
 
     @Operation(summary = "查看配置")
-    @RequestMapping(value = "config/get", method = {RequestMethod.GET})
+    @GetMapping(value = "config/get")
     public ApiResult<List<JobConfig>> getConfig(@Parameter(description = "任务主键") Long jobId,
         @Parameter(description = "ref(可以不传)") String ref) {
         return ApiResult.success(jobService.getConfig(jobId, ref));
     }
 
     @Operation(summary = "修改配置")
-    @RequestMapping(value = "config/modify", method = {RequestMethod.POST})
+    @PostMapping(value = "config/modify")
     public ApiResult<?> modifyConfig(@RequestBody ModifyConfig info) {
         jobService.modifyConfig(info.getJobId(), info);
         return ApiResult.success();

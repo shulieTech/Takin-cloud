@@ -2,8 +2,6 @@ package io.shulie.takin.cloud.app.service;
 
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.model.response.JobConfig;
 import io.shulie.takin.cloud.model.request.StartRequest;
@@ -22,9 +20,8 @@ public interface JobService {
      *
      * @param jobInfo 任务信息
      * @return 任务主键
-     * @throws JsonProcessingException JSON异常
      */
-    String start(StartRequest jobInfo) throws JsonProcessingException;
+    String start(StartRequest jobInfo)  ;
 
     /**
      * 停止

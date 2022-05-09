@@ -11,7 +11,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.collection.CollUtil;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.shulie.takin.cloud.constant.enums.FileType;
 
@@ -79,6 +78,7 @@ public class JobServiceImpl implements JobService {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("AlibabaMethodTooLong")
     public String start(StartRequest jobInfo) {
         ResourceEntity resourceEntity = resourceService.entity(jobInfo.getResourceId());
         List<ResourceExampleEntity> resourceExampleEntityList = resourceService.listExample(resourceEntity.getId());
@@ -266,7 +266,7 @@ public class JobServiceImpl implements JobService {
             ThreadConfigInfo context = null;
             try {
                 context = jsonService.readValue(t.getContext(), new TypeReference<ThreadConfigInfo>() {});
-            } catch (JsonProcessingException e) {
+            } catch (RuntimeException e) {
                 log.warn("线程组配置实例context解析失败");
             }
             ThreadConfigInfo finalContext = context;

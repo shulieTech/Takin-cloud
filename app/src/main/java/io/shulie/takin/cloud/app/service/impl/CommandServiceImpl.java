@@ -15,7 +15,6 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.PageHelper;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -186,15 +185,13 @@ public class CommandServiceImpl implements CommandService {
         // 根据分组聚合数值
         groupByRef.forEach((k, v) -> {
             // 列出所有的项
-            List<HashMap<String, String>> contextList = v.stream()
-                .map(t -> {
-                    try {
-                        return jsonService.readValue(t.getContext(), new TypeReference<HashMap<String, String>>() {});
-                    } catch (JsonProcessingException e) {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull).collect(Collectors.toList());
+            List<HashMap<String, String>> contextList = new ArrayList<>();
+            for (ThreadConfigExampleEntity threadConfigExampleEntity : v) {
+                HashMap<String, String> configExampleContent = jsonService.readValue(threadConfigExampleEntity.getContext(), new TypeReference<HashMap<String, String>>() {});
+                if (content != null) {
+                    contextList.add(configExampleContent);
+                }
+            }
             // 线程数
             int numberSum = contextList.stream().mapToInt(t -> NumberUtil.parseInt(t.getOrDefault("number", "0"))).sum();
             // TPS数
@@ -281,8 +278,6 @@ public class CommandServiceImpl implements CommandService {
         JobEntity jobEntity = jobService.jobEntity(jobId);
         // 资源
         ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
-        // 任务实例集合
-        List<JobExampleEntity> jobExampleEntityList = jobService.jobExampleEntityList(jobId);
         // 线程组配置
         List<ThreadConfigEntity> threadConfigEntityList =
             threadConfigMapperService.lambdaQuery()
@@ -380,7 +375,7 @@ public class CommandServiceImpl implements CommandService {
                     metrics.put("bindRef", t.getRef());
                     metrics.put("activityName", t.getRef());
                     metrics.put("rate", context.get("successRate"));
-                } catch (JsonProcessingException e) {
+                } catch (RuntimeException e) {
                     log.error("JSON反序列化失败", e);
                 }
                 businessMap.put(t.getRef(), metrics);
@@ -404,7 +399,7 @@ public class CommandServiceImpl implements CommandService {
                         put("rampUp", context.get("growthTime"));
                     }};
                     threadGroupConfigMap.put(t.getRef(), threadConfig);
-                } catch (JsonProcessingException e) {
+                } catch (RuntimeException e) {
                     log.error("JSON反序列化失败", e);
                 }
             });

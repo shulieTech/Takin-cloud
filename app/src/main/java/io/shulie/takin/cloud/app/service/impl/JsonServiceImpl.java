@@ -30,12 +30,20 @@ public class JsonServiceImpl implements JsonService {
     }
 
     @Override
-    public <T> T readValue(String jsonString, Class<T> valueType) throws JsonProcessingException {
-        return objectMapper.readValue(jsonString, valueType);
+    public <T> T readValue(String jsonString, Class<T> valueType) {
+        try {
+            return objectMapper.readValue(jsonString, valueType);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public <T> T readValue(String jsonString, TypeReference<T> valueTypeRef) throws JsonProcessingException {
-        return objectMapper.readValue(jsonString, valueTypeRef);
+    public <T> T readValue(String jsonString, TypeReference<T> valueTypeRef) {
+        try {
+            return objectMapper.readValue(jsonString, valueTypeRef);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

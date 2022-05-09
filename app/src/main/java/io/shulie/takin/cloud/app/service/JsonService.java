@@ -1,7 +1,6 @@
 package io.shulie.takin.cloud.app.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * Json服务
@@ -24,9 +23,8 @@ public interface JsonService {
      * @param valueType  解析类型
      * @param <T>        解析类型 - 泛型
      * @return 反序列化结果
-     * @throws JsonProcessingException JSON异常
      */
-    <T> T readValue(String jsonString, Class<T> valueType) throws JsonProcessingException;
+    <T> T readValue(String jsonString, Class<T> valueType);
 
     /**
      * 反序列化
@@ -35,7 +33,6 @@ public interface JsonService {
      * @param valueTypeRef 解析类型
      * @param <T>          解析类型 - 泛型
      * @return 反序列化结果
-     * @throws JsonProcessingException JSON异常
      */
-    <T> T readValue(String jsonString, TypeReference<T> valueTypeRef) throws JsonProcessingException;
+    <T> T readValue(String jsonString, TypeReference<T> valueTypeRef);
 }

@@ -9,10 +9,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -36,10 +36,10 @@ public class ResouceController {
     ResourceService resourceService;
 
     @Operation(summary = "资源实例明细(压力机明细)")
-    @RequestMapping(value = "example/list", method = {RequestMethod.GET})
+    @GetMapping(value = "example/list")
     public ApiResult<List<ResourceExampleOverview>> watchmanResourceExample(
-        @Parameter(description = "资源主键") @RequestParam(required = true) Long resourceId,
-        @Parameter(description = "任务主键") @RequestParam(required = false) Long jobId) throws JsonProcessingException {
+        @Parameter(description = "资源主键") @RequestParam Long resourceId,
+        @Parameter(description = "任务主键") @RequestParam(required = false) Long jobId) {
         List<ResourceExampleEntity> resourceExampleList = resourceService.listExample(resourceId, jobId);
         List<ResourceExampleOverview> result = new ArrayList<>(resourceExampleList.size());
         for (ResourceExampleEntity t : resourceExampleList) {
@@ -49,14 +49,14 @@ public class ResouceController {
     }
 
     @Operation(summary = "资源校验")
-    @RequestMapping(value = "check", method = {RequestMethod.POST})
-    public ApiResult<Boolean> check(@RequestBody ApplyResourceRequest apply) throws JsonProcessingException {
+    @PostMapping(value = "check")
+    public ApiResult<Boolean> check(@RequestBody ApplyResourceRequest apply) {
         return ApiResult.success(resourceService.check(apply));
     }
 
     @Operation(summary = "资源锁定")
-    @RequestMapping(value = "lock", method = {RequestMethod.POST})
-    public ApiResult<?> lock(@RequestBody ApplyResourceRequest apply) throws JsonProcessingException {
+    @PostMapping(value = "lock")
+    public ApiResult<?> lock(@RequestBody ApplyResourceRequest apply) {
         String resourceId = resourceService.lock(apply);
         // 预检失败，直接返回失败信息
         if (resourceId == null) {return ApiResult.fail("[预检]资源不足");}
@@ -65,7 +65,7 @@ public class ResouceController {
     }
 
     @Operation(summary = "资源释放")
-    @RequestMapping(value = "unlock", method = {RequestMethod.GET})
+    @GetMapping(value = "unlock")
     public ApiResult<?> unlock(@Parameter(description = "资源主键") @RequestParam Long resourceId) {
         resourceService.unlock(resourceId);
         return ApiResult.success(resourceId);

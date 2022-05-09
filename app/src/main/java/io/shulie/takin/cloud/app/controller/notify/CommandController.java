@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import cn.hutool.core.date.DateUtil;
 import com.github.pagehelper.PageInfo;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,7 +50,7 @@ public class CommandController {
     @GetMapping("pop")
     @Operation(summary = "弹出一条命令")
     public ApiResult<?> ack(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign,
-        @Parameter(description = "命令类型", required = true) @RequestParam Integer type) throws JsonProcessingException {
+        @Parameter(description = "命令类型", required = true) @RequestParam Integer type) {
         // 兑换命令类型
         CommandType commandType = CommandType.of(type);
         if (commandType == null) {throw new RuntimeException("错误的命令类型:" + type);}

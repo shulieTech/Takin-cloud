@@ -2,8 +2,6 @@ package io.shulie.takin.cloud.app.controller;
 
 import java.util.HashMap;
 
-import javax.annotation.Resource;
-
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -24,7 +22,7 @@ import io.shulie.takin.cloud.model.response.ApiResult;
 @RequestMapping("/common")
 public class CommonController {
 
-    @Resource
+    @javax.annotation.Resource
     WatchmanConfig watchmanConfig;
 
     @Operation(summary = "健康检查")

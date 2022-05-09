@@ -4,8 +4,6 @@ import java.util.List;
 
 import com.github.pagehelper.PageInfo;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.app.entity.WatchmanEntity;
 import io.shulie.takin.cloud.model.resource.ResourceSource;
@@ -31,9 +29,8 @@ public interface WatchmanService {
      *
      * @param watchmanId 调度主键
      * @return 资源列表
-     * @throws JsonProcessingException JSON异常
      */
-    List<Resource> getResourceList(Long watchmanId) throws JsonProcessingException;
+    List<Resource> getResourceList(Long watchmanId);
 
     /**
      * 调度注册
@@ -57,9 +54,8 @@ public interface WatchmanService {
      *
      * @param watchmanId 调度主键
      * @return 状态
-     * @throws JsonProcessingException JSON异常
      */
-    WatchmanStatusResponse status(Long watchmanId) throws JsonProcessingException;
+    WatchmanStatusResponse status(Long watchmanId);
 
     /**
      * 资源上报

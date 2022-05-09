@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import io.shulie.takin.cloud.app.entity.JobEntity;
@@ -80,7 +79,7 @@ public class ResourceServiceImpl implements ResourceService {
      * {@inheritDoc}
      */
     @Override
-    public boolean check(ApplyResourceRequest apply) throws JsonProcessingException {
+    public boolean check(ApplyResourceRequest apply) {
         // 1. 声明需要的资源
         int number = apply.getNumber();
         Double requestCpu = ResourceUtil.convertCpu(apply.getCpu());
@@ -117,7 +116,7 @@ public class ResourceServiceImpl implements ResourceService {
      * {@inheritDoc}
      */
     @Override
-    public String lock(ApplyResourceRequest apply) throws JsonProcessingException {
+    public String lock(ApplyResourceRequest apply) {
         // 0. 预检
         if (this.check(apply)) {
             // 1. 保存任务信息
@@ -165,7 +164,7 @@ public class ResourceServiceImpl implements ResourceService {
      * {@inheritDoc}
      */
     @Override
-    public ResourceExampleOverview exampleOverview(Long resourceExampleId) throws JsonProcessingException {
+    public ResourceExampleOverview exampleOverview(Long resourceExampleId) {
         ResourceExampleEntity resourceExampleEntity = resourceExampleMapper.selectById(resourceExampleId);
         // 设置初始值
         ResourceExampleOverview result = new ResourceExampleOverview() {{

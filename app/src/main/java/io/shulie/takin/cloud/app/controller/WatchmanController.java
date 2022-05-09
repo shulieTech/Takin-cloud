@@ -5,13 +5,12 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 import com.github.pagehelper.PageInfo;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -35,13 +34,13 @@ public class WatchmanController {
     WatchmanService watchmanService;
 
     @Operation(summary = "状态")
-    @RequestMapping(value = "status", method = {RequestMethod.GET})
-    public ApiResult<WatchmanStatusResponse> status(@Parameter(description = "调度主键", required = true) Long watchmanId) throws JsonProcessingException {
+    @GetMapping(value = "status")
+    public ApiResult<WatchmanStatusResponse> status(@Parameter(description = "调度主键", required = true) Long watchmanId) {
         return ApiResult.success(watchmanService.status(watchmanId));
     }
 
     @Operation(summary = "调度器列表")
-    @RequestMapping(value = "list", method = {RequestMethod.GET})
+    @GetMapping(value = "list")
     public ApiResult<List<WatchmanEntity>> list(
         @Parameter(description = "分页页码", required = true) Integer pageNumber,
         @Parameter(description = "分页容量", required = true) Integer pageSize) {
@@ -50,8 +49,8 @@ public class WatchmanController {
     }
 
     @Operation(summary = "资源容量列表")
-    @RequestMapping(value = "resource", method = {RequestMethod.GET})
-    public ApiResult<List<Resource>> resourceList(@Parameter(description = "调度主键", required = true) Long watchmanId) throws JsonProcessingException {
+    @GetMapping(value = "resource")
+    public ApiResult<List<Resource>> resourceList(@Parameter(description = "调度主键", required = true) Long watchmanId) {
         return ApiResult.success(watchmanService.getResourceList(watchmanId));
     }
 

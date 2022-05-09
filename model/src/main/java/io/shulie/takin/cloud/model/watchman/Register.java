@@ -10,7 +10,6 @@ import cn.hutool.core.codec.Base64;
 import cn.hutool.crypto.digest.HMac;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * 注册
@@ -57,33 +56,39 @@ public class Register {
         private Long timeOfValidity;
     }
 
-    public static void main(String[] args) throws JsonProcessingException {
-        Header header = new Header();
-        header.setAlg("HS256");
-        header.setSign("MD5");
-        Body body = new Body();
-        body.setRef("tianci");
-        body.setTimeOfValidity(253402271999999L);
-        body.setTimeOfCreate(System.currentTimeMillis());
-        ObjectMapper objectMapper = new ObjectMapper();
-        String headerString = objectMapper.writeValueAsString(header);
-        String bodyString = objectMapper.writeValueAsString(body);
-        String base64HeaderString = Base64.encodeUrlSafe(headerString);
-        String base64BodyString = Base64.encodeUrlSafe(bodyString);
-        String secret = "shulie@2022";
-        log.info("head(base64) " + base64HeaderString);
-        log.info("body(base64)" + base64BodyString);
-        log.info("secret " + secret);
-        HMac hMac = SecureUtil.hmacSha256(secret);
-        String verifySignature = hMac.digestBase64(StrUtil.format("{}.{}", base64HeaderString, base64BodyString), true);
-        String ref = StrUtil.format("{}.{}.{}", base64HeaderString, base64BodyString, verifySignature);
-        String refSign = SecureUtil.md5(ref);
+    public static void main(String[] args) {
+        try {
+            Header header = new Header();
+            header.setAlg("HS256");
+            header.setSign("MD5");
+            Body body = new Body();
+            body.setRef("tianci");
+            body.setTimeOfValidity(253402271999999L);
+            body.setTimeOfCreate(System.currentTimeMillis());
+            ObjectMapper objectMapper = new ObjectMapper();
+            String headerString = objectMapper.writeValueAsString(header);
+            String bodyString = null;
+            bodyString = objectMapper.writeValueAsString(body);
 
-        Register register = new Register()
-            .setRefSign(refSign)
-            .setHeader(header)
-            .setBody(body)
-            .setRef(ref);
-        log.info("{}", register);
+            String base64HeaderString = Base64.encodeUrlSafe(headerString);
+            String base64BodyString = Base64.encodeUrlSafe(bodyString);
+            String secret = "shulie@2022";
+            log.info("head(base64) " + base64HeaderString);
+            log.info("body(base64)" + base64BodyString);
+            log.info("secret " + secret);
+            HMac hMac = SecureUtil.hmacSha256(secret);
+            String verifySignature = hMac.digestBase64(StrUtil.format("{}.{}", base64HeaderString, base64BodyString), true);
+            String ref = StrUtil.format("{}.{}.{}", base64HeaderString, base64BodyString, verifySignature);
+            String refSign = SecureUtil.md5(ref);
+
+            Register register = new Register()
+                .setRefSign(refSign)
+                .setHeader(header)
+                .setBody(body)
+                .setRef(ref);
+            log.info("{}", register);
+        } catch (Exception e) {
+            log.error("发生错误.\n", e);
+        }
     }
 }

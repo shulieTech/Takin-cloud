@@ -10,7 +10,6 @@ import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.PageHelper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -60,7 +59,7 @@ public class WatchmanServiceImpl implements WatchmanService {
      * {@inheritDoc}
      */
     @Override
-    public List<Resource> getResourceList(Long watchmanId) throws JsonProcessingException {
+    public List<Resource> getResourceList(Long watchmanId) {
         List<Resource> result = new ArrayList<>(0);
         // 找到最后一次上报的数据
         try (Page<Resource> ignored = PageHelper.startPage(1, 1)) {
@@ -90,7 +89,7 @@ public class WatchmanServiceImpl implements WatchmanService {
                     }
                 }
             }
-        } catch (JsonProcessingException e) {
+        } catch (RuntimeException e) {
             log.warn("调度资源获取:JSON解析失败");
             throw e;
         }
@@ -119,7 +118,7 @@ public class WatchmanServiceImpl implements WatchmanService {
     }
 
     @Override
-    public WatchmanStatusResponse status(Long watchmanId) throws JsonProcessingException {
+    public WatchmanStatusResponse status(Long watchmanId) {
         try (Page<?> ignore = PageHelper.startPage(1, 1)) {
             Wrapper<WatchmanEventEntity> statusWrapper = new LambdaQueryWrapper<WatchmanEventEntity>()
                 .orderByDesc(WatchmanEventEntity::getTime)
