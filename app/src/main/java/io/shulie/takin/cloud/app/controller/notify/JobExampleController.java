@@ -21,7 +21,7 @@ import io.shulie.takin.cloud.app.service.JobExampleService;
  */
 @Tag(name = "任务实例上报")
 @RequestMapping("/notify/job_example")
-@RestController("NotiftJobExampleController")
+@RestController("NotiftJobController")
 public class JobExampleController {
     @javax.annotation.Resource
     JobExampleService jobExampleService;
