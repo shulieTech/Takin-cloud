@@ -1,0 +1,6 @@
+rootProject.name = 'takin-cloud'
+// 包含的模块
+include(':constant')
+include(':model')
+include(':sdk')
+include(':app')

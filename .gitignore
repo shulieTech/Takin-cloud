@@ -1,4 +1,8 @@
 .idea
 *.iml
-**/target
+**/build
 /logs
+# gradle
+.gradle
+
+/gradle/wrapper/gradle-wrapper.jar
