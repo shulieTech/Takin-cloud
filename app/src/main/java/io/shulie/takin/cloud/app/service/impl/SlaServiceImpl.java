@@ -115,7 +115,8 @@ public class SlaServiceImpl implements SlaService {
         for (MetricsInfo metricsInfo : metricsInfoList) {
             // 对应的条件列表
             List<SlaEntity> conditionList = slaEntityList.stream()
-                .filter(t -> t.getRef().equals(metricsInfo.getTransaction())).collect(Collectors.toList());
+                .filter(t -> "".equals(t.getRef()) || t.getRef().equals(metricsInfo.getTransaction()))
+                .collect(Collectors.toList());
             // 逐个条件判断
             for (SlaEntity condition : conditionList) {
                 FormulaSymbol formulaSymbol = FormulaSymbol.of(condition.getFormulaSymbol());
