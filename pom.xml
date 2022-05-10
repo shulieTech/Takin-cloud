@@ -29,10 +29,10 @@
     <modules>
         <module>app</module>
         <module>sdk</module>
+        <module>model</module>
         <module>constant</module>
         <!--    build放在最后    -->
         <module>build</module>
-        <module>model</module>
     </modules>
     <dependencyManagement>
         <dependencies>
