@@ -2,10 +2,12 @@ package io.shulie.takin.cloud.app.entity;
 
 import java.util.Date;
 
+import lombok.Data;
+import lombok.experimental.Accessors;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
 
 /**
  * 数据库实体隐射 - 任务实例事件
@@ -13,6 +15,7 @@ import lombok.Data;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
+@Accessors(chain = true)
 @TableName("t_job_example_event")
 public class JobExampleEventEntity {
     /**

@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import io.shulie.takin.cloud.constant.enums.CallbackType;
-import io.shulie.takin.cloud.model.callback.basic.Basic;
+import io.shulie.takin.cloud.model.callback.basic.Base;
 import io.shulie.takin.cloud.model.callback.basic.JobExample;
 
 /**
@@ -14,7 +14,6 @@ import io.shulie.takin.cloud.model.callback.basic.JobExample;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class JobExampleHeartbeat extends Basic<JobExample> {
-
-    private final CallbackType type = CallbackType.JOB_EXAMPLE_HEARTBEAT;
+public class JobExampleHeartbeat extends Base<JobExample> {
+    private CallbackType type = CallbackType.JOB_EXAMPLE_HEARTBEAT;
 }

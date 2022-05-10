@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.app.entity;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -13,6 +14,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
  */
 @Data
 @TableName("t_job")
+@Accessors(chain = true)
 public class JobEntity {
     /**
      * 数据主键

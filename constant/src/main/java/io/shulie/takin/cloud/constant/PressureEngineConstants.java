@@ -7,5 +7,7 @@ package io.shulie.takin.cloud.constant;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 public class PressureEngineConstants {
+    private PressureEngineConstants() {}
+
     public static final String TRANSACTION_SPLIT_STR = "@MD5:";
 }

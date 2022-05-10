@@ -6,20 +6,19 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
-import io.shulie.takin.cloud.app.service.ResourceExampleService;
 import lombok.extern.slf4j.Slf4j;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import io.shulie.takin.cloud.constant.enums.FileType;
-
+import io.shulie.takin.cloud.constant.Message;
 import io.shulie.takin.cloud.app.entity.SlaEntity;
 import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.app.mapper.JobMapper;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.JsonService;
+import io.shulie.takin.cloud.constant.enums.FileType;
 import io.shulie.takin.cloud.model.response.JobConfig;
 import io.shulie.takin.cloud.app.entity.JobFileEntity;
 import io.shulie.takin.cloud.app.entity.MetricsEntity;
@@ -33,6 +32,7 @@ import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
 import io.shulie.takin.cloud.app.service.JobExampleService;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.app.service.ResourceExampleService;
 import io.shulie.takin.cloud.model.request.StartRequest.SlaInfo;
 import io.shulie.takin.cloud.model.request.StartRequest.FileInfo;
 import io.shulie.takin.cloud.app.service.mapper.SlaMapperService;
@@ -84,52 +84,118 @@ public class JobServiceImpl implements JobService {
      * {@inheritDoc}
      */
     @Override
-    @SuppressWarnings("AlibabaMethodTooLong")
     public String start(StartRequest jobInfo) {
         ResourceEntity resourceEntity = resourceService.entity(jobInfo.getResourceId());
-        List<ResourceExampleEntity> resourceExampleEntityList = resourceService.listExample(resourceEntity.getId());
-        JobEntity jobEntity = new JobEntity() {{
-            setResourceId(resourceEntity.getId());
-            setName(jobInfo.getName());
-            // 时长取最大值
-            setDuration(jobInfo.getThreadConfig().stream()
-                .map(ThreadConfigInfo::getDuration)
-                .max(Comparator.naturalOrder())
-                .orElse(0));
-            setSampling(jobInfo.getSampling());
-            setType(jobInfo.getType().getCode());
-            setCallbackUrl(jobInfo.getCallbackUrl());
-            setResourceExampleNumber(resourceEntity.getNumber());
-        }};
+        JobEntity jobEntity = startFillJob(resourceEntity.getId(), resourceEntity.getNumber(), jobInfo);
         jobMapper.insert(jobEntity);
         // 填充job实例
-        List<JobExampleEntity> jobExampleEntityList = new ArrayList<>(resourceEntity.getNumber());
-        for (int i = 0; i < resourceEntity.getNumber(); i++) {
+        List<JobExampleEntity> jobExampleEntityList = startFillJobExample(jobEntity.getId(), jobEntity.getDuration(), resourceEntity.getId(), resourceEntity.getNumber());
+        jobExampleMapperService.saveBatch(jobExampleEntityList);
+        // 填充线程组配置
+        List<ThreadConfigEntity> threadConfigEntityList = startFillThreadConfig(jobInfo, jobEntity);
+        threadConfigMapperService.saveBatch(threadConfigEntityList);
+        // 填充线程配置实例
+        List<ThreadConfigExampleEntity> threadConfigExampleEntityList = startFillThreadConfigExample(jobEntity.getId(), jobEntity.getResourceExampleNumber(), jobInfo, jobExampleEntityList);
+        threadConfigExampleMapperService.saveBatch(threadConfigExampleEntityList);
+        // 填充SLA配置
+        List<SlaEntity> slaEntityList = startFillSla(jobInfo, jobEntity);
+        slaMapperService.saveBatch(slaEntityList);
+        // 切分、填充任务文件
+        List<JobFileEntity> jobFileEntityList = startFillJobFile(jobEntity.getId(), jobInfo, jobExampleEntityList);
+        jobFileMapperService.saveBatch(jobFileEntityList);
+        // 指标目标
+        List<MetricsEntity> metricsEntityList = startFillMetrics(jobEntity.getId(), jobInfo);
+        metricsMapperService.saveBatch(metricsEntityList);
+        // 下发启动命令
+        commandService.startApplication(jobEntity.getId());
+        // 返回任务主键
+        return String.valueOf(jobEntity.getId());
+    }
+
+    /**
+     * 填充任务实体
+     *
+     * @param jobInfo               任务信息
+     * @param resourceId            资源主键
+     * @param resourceExampleNumber 资源实例数量
+     * @return 任务实体
+     */
+    private JobEntity startFillJob(long resourceId, int resourceExampleNumber, StartRequest jobInfo) {
+        // 时长取最大值
+        Integer duration = jobInfo.getThreadConfig()
+            .stream().map(ThreadConfigInfo::getDuration)
+            .max(Comparator.naturalOrder()).orElse(0);
+        return new JobEntity()
+            .setResourceId(resourceId)
+            .setName(jobInfo.getName())
+            .setDuration(duration)
+            .setSampling(jobInfo.getSampling())
+            .setType(jobInfo.getType().getCode())
+            .setCallbackUrl(jobInfo.getCallbackUrl())
+            .setResourceExampleNumber(resourceExampleNumber);
+    }
+
+    /**
+     * 填充任务实例
+     *
+     * @param jobId          任务主键
+     * @param duration       持续时长
+     * @param resourceId     资源主键
+     * @param resourceNumber 资源需要生成的实例数量
+     * @return 任务实例
+     */
+    private List<JobExampleEntity> startFillJobExample(long jobId, int duration, long resourceId, int resourceNumber) {
+        List<JobExampleEntity> jobExampleEntityList = new ArrayList<>(resourceNumber);
+        List<ResourceExampleEntity> resourceExampleEntityList =
+            resourceService.listExample(resourceId);
+        for (int i = 0; i < resourceNumber; i++) {
             jobExampleEntityList.add(new JobExampleEntity()
+                .setJobId(jobId)
                 .setNumber(i + 1)
-                .setJobId(jobEntity.getId())
-                .setDuration(jobEntity.getDuration())
+                .setDuration(duration)
                 .setResourceExampleId(resourceExampleEntityList.get(i).getId())
             );
         }
-        jobExampleMapperService.saveBatch(jobExampleEntityList);
-        // 填充线程组配置
+        return jobExampleEntityList;
+    }
+
+    /**
+     * 填充线程组配置
+     *
+     * @param jobInfo   任务信息
+     * @param jobEntity 任务实体
+     * @return 线程组配置
+     */
+    private List<ThreadConfigEntity> startFillThreadConfig(StartRequest jobInfo, JobEntity jobEntity) {
         List<ThreadConfigEntity> threadConfigEntityList = new ArrayList<>(0);
         for (ThreadConfigInfo threadConfigInfo : jobInfo.getThreadConfig()) {
-            threadConfigEntityList.add(new ThreadConfigEntity() {{
-                setJobId(jobEntity.getId());
-                setMode(threadConfigInfo.getType().getCode());
-                setRef(threadConfigInfo.getRef());
-                HashMap<String, Object> context = threadConfigInfo(threadConfigInfo);
-                if (jobInfo.getExt() != null) {context.putAll(jobInfo.getExt());}
-                setContext(jsonService.writeValueAsString(context));
-            }});
+            ThreadConfigEntity threadConfigEntity = new ThreadConfigEntity()
+                .setJobId(jobEntity.getId())
+                .setMode(threadConfigInfo.getType().getCode())
+                .setRef(threadConfigInfo.getRef());
+            HashMap<String, Object> context = threadConfigInfo(threadConfigInfo);
+            if (jobInfo.getExt() != null) {context.putAll(jobInfo.getExt());}
+            threadConfigEntity.setContext(jsonService.writeValueAsString(context));
+            threadConfigEntityList.add(threadConfigEntity);
         }
-        threadConfigMapperService.saveBatch(threadConfigEntityList);
+        return threadConfigEntityList;
+    }
+
+    /**
+     * 启动任务 - 填充线程配置实例
+     *
+     * @param jobId                任务主键
+     * @param jobInfo              任务信息
+     * @param jobExampleEntityList 任务实例实体
+     * @param number               每个线程组配置对应的实例数量
+     * @return 线程配置实例
+     */
+    private List<ThreadConfigExampleEntity> startFillThreadConfigExample(long jobId, int number, StartRequest jobInfo,
+        List<JobExampleEntity> jobExampleEntityList) {
         // 切分线程配置
-        List<List<ThreadConfigInfo>> threadExampleList = splitThreadConfig(jobInfo.getThreadConfig(), resourceEntity.getNumber());
-        // 填充线程配置实例
-        List<ThreadConfigExampleEntity> threadConfigExampleEntityList = new ArrayList<>(resourceEntity.getNumber());
+        List<List<ThreadConfigInfo>> threadExampleList = splitThreadConfig(jobInfo.getThreadConfig(), number);
+        // 组装返回值
+        List<ThreadConfigExampleEntity> threadConfigExampleEntityList = new ArrayList<>(number);
         for (int i = 0; i < threadExampleList.size(); i++) {
             JobExampleEntity jobExampleEntity = jobExampleEntityList.get(i);
             List<ThreadConfigInfo> threadConfigInfoList = threadExampleList.get(i);
@@ -138,98 +204,115 @@ public class JobServiceImpl implements JobService {
                 HashMap<String, Object> context = threadConfigInfo(t);
                 if (jobInfo.getExt() != null) {context.putAll(jobInfo.getExt());}
                 threadConfigExampleEntityList.add(new ThreadConfigExampleEntity()
+                    .setJobId(jobId)
                     .setRef(t.getRef())
                     .setSerialNumber(j)
-                    .setJobId(jobEntity.getId())
                     .setType(t.getType().getCode())
                     .setJobExampleId(jobExampleEntity.getId())
                     .setContext(jsonService.writeValueAsString(context))
                 );
             }
         }
-        threadConfigExampleMapperService.saveBatch(threadConfigExampleEntityList);
-        // 填充SLA配置
+        return threadConfigExampleEntityList;
+    }
+
+    /**
+     * 填充SLA
+     *
+     * @param jobInfo   任务信息
+     * @param jobEntity 任务实体
+     * @return SLA
+     */
+    private List<SlaEntity> startFillSla(StartRequest jobInfo, JobEntity jobEntity) {
         List<SlaEntity> slaEntityList = new ArrayList<>(jobInfo.getSlaConfig().size());
         for (int i = 0; i < jobInfo.getSlaConfig().size(); i++) {
             SlaInfo slaInfo = jobInfo.getSlaConfig().get(i);
-            SlaEntity slaEntity = new SlaEntity() {{
-                setRef(slaInfo.getRef());
-                setJobId(jobEntity.getId());
-                setAttach(slaInfo.getAttach());
-                setFormulaNumber(slaInfo.getFormulaNumber());
-                setFormulaTarget(slaInfo.getFormulaTarget().getCode());
-                setFormulaSymbol(slaInfo.getFormulaSymbol().getCode());
-            }};
+            SlaEntity slaEntity = new SlaEntity()
+                .setRef(slaInfo.getRef())
+                .setJobId(jobEntity.getId())
+                .setAttach(slaInfo.getAttach())
+                .setFormulaNumber(slaInfo.getFormulaNumber())
+                .setFormulaTarget(slaInfo.getFormulaTarget().getCode())
+                .setFormulaSymbol(slaInfo.getFormulaSymbol().getCode());
             slaEntityList.add(slaEntity);
         }
-        slaMapperService.saveBatch(slaEntityList);
-        // 切分、填充任务文件
+        return slaEntityList;
+    }
+
+    /**
+     * 填充任务文件
+     *
+     * @param jobId                任务主键
+     * @param jobInfo              任务信息
+     * @param jobExampleEntityList 任务实例实体
+     * @return 任务文件
+     */
+    private List<JobFileEntity> startFillJobFile(long jobId, StartRequest jobInfo, List<JobExampleEntity> jobExampleEntityList) {
         List<JobFileEntity> jobFileEntityList = new ArrayList<>();
         for (int i = 0; i < jobExampleEntityList.size(); i++) {
             JobExampleEntity jobExampleEntity = jobExampleEntityList.get(i);
-            FileInfo scriptFile = jobInfo.getScriptFile();
-            {
+            // 脚本文件
+            jobFileEntityList.add(new JobFileEntity()
+                .setJobId(jobId)
+                .setEndPoint(-1L)
+                .setStartPoint(-1L)
+                .setType(FileType.SCRIPT.getCode())
+                .setUri(jobInfo.getScriptFile().getUri())
+                .setJobExampleId(jobExampleEntity.getId()));
+            // 数据文件
+            List<FileInfo> dataFile = jobInfo.getDataFile() == null ? new ArrayList<>() : jobInfo.getDataFile();
+            for (FileInfo fileInfo : dataFile) {
                 jobFileEntityList.add(new JobFileEntity()
-                    .setJobExampleId(jobExampleEntity.getId())
-                    .setType(FileType.SCRIPT.getCode())
-                    .setJobId(jobEntity.getId())
-                    .setUri(scriptFile.getUri())
-                    .setStartPoint(-1L)
-                    .setEndPoint(-1L)
-                );
-            }
-            List<FileInfo> dataFile = jobInfo.getDataFile();
-            final List<FileInfo> finalDataFile = dataFile == null ? new ArrayList<>() : dataFile;
-            for (FileInfo info : finalDataFile) {
-                jobFileEntityList.add(new JobFileEntity()
-                    .setStartPoint(info.getSplitList().get(i).getStart())
-                    .setEndPoint(info.getSplitList().get(i).getEnd())
-                    .setJobExampleId(jobExampleEntity.getId())
-                    .setType(FileType.DATA.getCode())
-                    .setJobId(jobEntity.getId())
-                    .setUri(info.getUri())
-                );
-            }
-            List<FileInfo> dependencyFile = jobInfo.getDependencyFile();
-            final List<FileInfo> finalDependencyFile = dependencyFile == null ? new ArrayList<>(0) : dependencyFile;
-            for (FileInfo fileInfo : finalDependencyFile) {
-                jobFileEntityList.add(new JobFileEntity()
-                    .setJobExampleId(jobExampleEntity.getId())
-                    .setType(FileType.ATTACHMENT.getCode())
-                    .setJobId(jobEntity.getId())
+                    .setJobId(jobId)
                     .setUri(fileInfo.getUri())
-                    .setStartPoint(-1L)
-                    .setEndPoint(-1L)
-                );
+                    .setType(FileType.DATA.getCode())
+                    .setJobExampleId(jobExampleEntity.getId())
+                    .setEndPoint(fileInfo.getSplitList().get(i).getEnd())
+                    .setStartPoint(fileInfo.getSplitList().get(i).getStart()));
             }
+            // 依赖文件
+            List<FileInfo> dependencyFile = (jobInfo.getDependencyFile() == null ? new ArrayList<>(0) : jobInfo.getDependencyFile());
+            dependencyFile.forEach(t -> jobFileEntityList.add(new JobFileEntity()
+                .setJobId(jobId)
+                .setEndPoint(-1L)
+                .setStartPoint(-1L)
+                .setUri(t.getUri())
+                .setType(FileType.ATTACHMENT.getCode())
+                .setJobExampleId(jobExampleEntity.getId())));
         }
-        jobFileMapperService.saveBatch(jobFileEntityList);
-        // 指标目标
+        return jobFileEntityList;
+    }
+
+    /**
+     * 填充指标信息
+     *
+     * @param jobId   任务主键
+     * @param jobInfo 任务信息
+     * @return 指标信息
+     */
+    private List<MetricsEntity> startFillMetrics(long jobId, StartRequest jobInfo) {
         List<MetricsEntity> metricsEntityList = new ArrayList<>();
         for (int i = 0; i < jobInfo.getMetricsConfig().size(); i++) {
             MetricsInfo metricsInfo = jobInfo.getMetricsConfig().get(i);
             String context = null;
             try {
-                context = jsonService.writeValueAsString(new HashMap<String, Object>(4) {{
-                    put("sa", metricsInfo.getSa());
-                    put("rt", metricsInfo.getRt());
-                    put("tps", metricsInfo.getTps());
-                    put("successRate", metricsInfo.getSuccessRate());
-                }});
+                HashMap<String, Object> contextObject = new HashMap<>(4);
+                contextObject.put("sa", metricsInfo.getSa());
+                contextObject.put("rt", metricsInfo.getRt());
+                contextObject.put("tps", metricsInfo.getTps());
+                contextObject.put("successRate", metricsInfo.getSuccessRate());
+                context = jsonService.writeValueAsString(contextObject);
             } catch (Exception e) {
                 log.warn("JSON序列化失败");
             }
             String finalContext = context;
-            metricsEntityList.add(new MetricsEntity() {{
-                setJobId(jobEntity.getId());
-                setRef(metricsInfo.getRef());
-                setContext(finalContext);
-            }});
+            metricsEntityList.add(
+                new MetricsEntity()
+                    .setJobId(jobId)
+                    .setContext(finalContext)
+                    .setRef(metricsInfo.getRef()));
         }
-        metricsMapperService.saveBatch(metricsEntityList);
-        // 下发启动命令
-        commandService.startApplication(jobEntity.getId());
-        return jobEntity.getId() + "";
+        return metricsEntityList;
     }
 
     /**
@@ -239,13 +322,13 @@ public class JobServiceImpl implements JobService {
      * @return 转换后的Map
      */
     private HashMap<String, Object> threadConfigInfo(ThreadConfigInfo threadConfigInfo) {
-        return new HashMap<String, Object>(5) {{
-            put("number", threadConfigInfo.getNumber());
-            put("tps", threadConfigInfo.getTps());
-            put("duration", threadConfigInfo.getDuration());
-            put("growthTime", threadConfigInfo.getGrowthTime());
-            put("step", threadConfigInfo.getGrowthStep());
-        }};
+        HashMap<String, Object> content = new HashMap<>(5);
+        content.put("number", threadConfigInfo.getNumber());
+        content.put("tps", threadConfigInfo.getTps());
+        content.put("duration", threadConfigInfo.getDuration());
+        content.put("growthTime", threadConfigInfo.getGrowthTime());
+        content.put("step", threadConfigInfo.getGrowthStep());
+        return content;
     }
 
     /**
@@ -255,7 +338,9 @@ public class JobServiceImpl implements JobService {
     public void stop(long jobId) {
         // 获取任务
         JobEntity jobEntity = jobMapper.selectById(jobId);
-        if (jobEntity == null) {throw new RuntimeException("未找到任务:" + jobId);}
+        if (jobEntity == null) {
+            throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_JOB, jobId));
+        }
         // 释放资源
         commandService.releaseResource(jobEntity.getResourceId());
         // 停止任务
@@ -276,12 +361,11 @@ public class JobServiceImpl implements JobService {
                 log.warn("线程组配置实例context解析失败");
             }
             ThreadConfigInfo finalContext = context;
-            return new JobConfig() {{
-                setRef(t.getRef());
-                setJobId(t.getJobId());
-                setContext(finalContext);
-                setType(ThreadGroupType.of(t.getType()));
-            }};
+            return new JobConfig()
+                .setRef(t.getRef())
+                .setJobId(t.getJobId())
+                .setContext(finalContext)
+                .setType(ThreadGroupType.of(t.getType()));
         }).collect(Collectors.toList());
 
     }
@@ -295,7 +379,7 @@ public class JobServiceImpl implements JobService {
         List<ThreadConfigExampleEntity> threadConfigExampleEntity = jobConfigService.threadExampleItem(jobId, context.getRef());
         // 2. 如果没有抛出异常
         if (CollUtil.isEmpty(threadConfigExampleEntity)) {
-            throw new RuntimeException("未找到可修改的配置");
+            throw new IllegalArgumentException("未找到可修改的配置");
         }
         // 存在即修改
         else {
@@ -394,9 +478,10 @@ public class JobServiceImpl implements JobService {
      */
     private List<Integer> splitInteger(int value, int size) {
         List<Integer> result = new ArrayList<>(size);
-        int quotient = value / size, remainder = value % size;
+        int quotient = value / size;
+        int remainder = value % size;
         if (quotient == 0 && remainder != 0) {
-            throw new RuntimeException(StrUtil.format("无法把{}分隔成{}份", value, size));
+            throw new NumberFormatException(CharSequenceUtil.format("无法把{}分隔成{}份", value, size));
         }
         // 处理商
         for (int i = 0; i < size; i++) {result.add(quotient);}

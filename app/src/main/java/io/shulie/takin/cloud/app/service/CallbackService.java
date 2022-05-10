@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.app.service;
 
+import java.nio.charset.StandardCharsets;
+
 import com.github.pagehelper.PageInfo;
 
 import io.shulie.takin.cloud.app.entity.CallbackEntity;
@@ -38,6 +40,16 @@ public interface CallbackService {
      * @param content 回调内容
      */
     void create(String url, byte[] content);
+
+    /**
+     * 创建回调
+     *
+     * @param url     回调路径
+     * @param content 回调内容
+     */
+    default void create(String url, String content) {
+        create(url, content.getBytes(StandardCharsets.UTF_8));
+    }
 
     /**
      * 预创建回调日志

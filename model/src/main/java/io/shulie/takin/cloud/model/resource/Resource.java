@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.model.resource;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * 资源
@@ -12,6 +13,7 @@ import lombok.Data;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
+@Accessors(chain = true)
 public class Resource {
     /**
      * CPU

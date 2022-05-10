@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.model.callback.basic;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * 任务实例需要上报的内容
@@ -8,6 +9,7 @@ import lombok.Data;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
+@Accessors(chain = true)
 public class JobExample {
     /**
      * 任务主键

@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import cn.hutool.core.date.DateUtil;
 import com.github.pagehelper.PageInfo;
+import cn.hutool.core.text.CharSequenceUtil;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import io.shulie.takin.cloud.constant.Message;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.entity.CommandEntity;
 import io.shulie.takin.cloud.model.response.ApiResult;
@@ -42,18 +44,18 @@ public class CommandController {
 
     @PostMapping("ack")
     @Operation(summary = "指令确认")
-    public ApiResult<?> ack(@Parameter(description = "命令主键", required = true) @RequestParam Long id,
+    public ApiResult<Object> ack(@Parameter(description = "命令主键", required = true) @RequestParam Long id,
         @Parameter(description = "指令确认内容", required = true) @RequestBody String content) {
         return ApiResult.success(commandService.ack(id, "callback", content));
     }
 
     @GetMapping("pop")
     @Operation(summary = "弹出一条命令")
-    public ApiResult<?> ack(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign,
+    public ApiResult<Object> ack(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign,
         @Parameter(description = "命令类型", required = true) @RequestParam Integer type) {
         // 兑换命令类型
         CommandType commandType = CommandType.of(type);
-        if (commandType == null) {throw new RuntimeException("错误的命令类型:" + type);}
+        if (commandType == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.UNKOWN_COMMAND_TYPE, type));}
         WatchmanEntity entity = watchmanService.ofRefSign(refSign);
         PageInfo<CommandEntity> range = commandService.range(entity.getId(), 1, commandType);
         // 没有命令则返回 null
@@ -64,11 +66,11 @@ public class CommandController {
         commandService.ack(commandEntity.getId(), "pop", DateUtil.now() + "(pop-ack)");
         Object content = jsonService.readValue(commandEntity.getContent(), Object.class);
         // 返回命令内容
-        return ApiResult.success(new HashMap<String, Object>(4) {{
-            put("content", content);
-            put("id", commandEntity.getId());
-            put("type", commandEntity.getType());
-            put("createTime", commandEntity.getCreateTime().getTime());
-        }});
+        HashMap<String, Object> result = new HashMap<>(4);
+        result.put("content", content);
+        result.put("id", commandEntity.getId());
+        result.put("type", commandEntity.getType());
+        result.put("createTime", commandEntity.getCreateTime().getTime());
+        return ApiResult.success(result);
     }
 }

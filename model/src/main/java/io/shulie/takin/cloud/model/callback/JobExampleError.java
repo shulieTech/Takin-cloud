@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import io.shulie.takin.cloud.constant.enums.CallbackType;
-import io.shulie.takin.cloud.model.callback.basic.Basic;
+import io.shulie.takin.cloud.model.callback.basic.Base;
 import io.shulie.takin.cloud.model.callback.JobExampleError.JobExampleErrorInfo;
 
 /**
@@ -15,9 +15,9 @@ import io.shulie.takin.cloud.model.callback.JobExampleError.JobExampleErrorInfo;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class JobExampleError extends Basic<JobExampleErrorInfo> {
+public class JobExampleError extends Base<JobExampleErrorInfo> {
 
-    private final CallbackType type = CallbackType.JOB_EXAMPLE_ERROR;
+    private CallbackType type = CallbackType.JOB_EXAMPLE_ERROR;
 
     @Data
     @EqualsAndHashCode(callSuper = true)

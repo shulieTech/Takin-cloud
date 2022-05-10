@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.app.service;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 资源实例服务
@@ -44,5 +44,5 @@ public interface ResourceExampleService {
      * @param id   资源实例主键
      * @param info 资源实例信息
      */
-    void onInfo(long id, HashMap<String, Object> info);
+    void onInfo(long id, Map<String, Object> info);
 }

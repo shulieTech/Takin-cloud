@@ -59,7 +59,7 @@ public class MetricsServiceImpl implements MetricsService {
         // SLA检查
         List<SlaEventEntity> check = slaService.check(jobId, jobExampleId, metricsList);
         // 进行通知
-        slaService.event(jobId,  jobExampleId, check);
+        slaService.event(jobId, jobExampleId, check);
     }
 
     public void collectorToInfluxdb(Long jobId, List<MetricsInfo> metricsList) {
@@ -67,20 +67,20 @@ public class MetricsServiceImpl implements MetricsService {
             return;
         }
         String measurement = InfluxUtil.getMetricsMeasurement(jobId);
-        metricsList.stream().filter(Objects::nonNull)
-            .peek(metrics -> {
-                //判断有没有MD5值
-                int strPosition = metrics.getTransaction().lastIndexOf(PressureEngineConstants.TRANSACTION_SPLIT_STR);
-                if (strPosition > 0) {
-                    String transaction = metrics.getTransaction();
-                    metrics.setTransaction(transaction.substring(strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length()));
-                    metrics.setTestName((transaction.substring(0, strPosition)));
-                } else {
-                    metrics.setTransaction(metrics.getTransaction());
-                    metrics.setTestName(metrics.getTransaction());
-                }
-            })
-            .peek(metrics -> {
+        List<MetricsInfo> metricsInfoList = metricsList.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        metricsInfoList.forEach(metrics -> {
+            //判断有没有MD5值
+            int strPosition = metrics.getTransaction().lastIndexOf(PressureEngineConstants.TRANSACTION_SPLIT_STR);
+            if (strPosition > 0) {
+                String transaction = metrics.getTransaction();
+                metrics.setTransaction(transaction.substring(strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length()));
+                metrics.setTestName((transaction.substring(0, strPosition)));
+            } else {
+                metrics.setTransaction(metrics.getTransaction());
+                metrics.setTestName(metrics.getTransaction());
+            }
+        });
+        metricsInfoList.stream().map(metrics -> {
                 //处理时间戳-纳秒转成毫秒，防止插入influxdb报错
                 if (Objects.nonNull(metrics.getTime()) && metrics.getTime() > InfluxUtil.MAX_ACCEPT_TIMESTAMP) {
                     metrics.setTimestamp(metrics.getTimestamp() / 1000000);
@@ -88,8 +88,8 @@ public class MetricsServiceImpl implements MetricsService {
                 if (Objects.nonNull(metrics.getTimestamp()) && metrics.getTimestamp() > InfluxUtil.MAX_ACCEPT_TIMESTAMP) {
                     metrics.setTimestamp(metrics.getTimestamp() / 1000000);
                 }
+                return InfluxUtil.toPoint(measurement, metrics.getTimestamp(), metrics);
             })
-            .map(metrics -> InfluxUtil.toPoint(measurement, metrics.getTimestamp(), metrics))
             .forEach(influxWriter::insert);
     }
 
@@ -111,7 +111,7 @@ public class MetricsServiceImpl implements MetricsService {
         } else {
             Object cacheData = stringRedisTemplate.opsForHash().get(redisKey, hashKey);
             if (cacheData instanceof List) {
-                ipList = ((List<?>)cacheData).stream().filter(t -> t instanceof String)
+                ipList = ((List<?>)cacheData).stream().filter(String.class::isInstance)
                     .map(Object::toString).collect(Collectors.toList());
             }
             stringRedisTemplate.opsForHash().put(redisKey, hashKey, jsonService.writeValueAsString(ipList));

@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.model.resource;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -12,6 +13,7 @@ import io.shulie.takin.cloud.constant.enums.ResourceExampleStatus;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
+@Accessors(chain = true)
 @Schema(description = "资源实例概览")
 public class ResourceExampleOverview {
     /**

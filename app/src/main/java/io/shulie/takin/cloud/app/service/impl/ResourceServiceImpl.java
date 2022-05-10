@@ -6,9 +6,9 @@ import java.util.ArrayList;
 
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
-import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageInfo;
-import com.github.pagehelper.PageHelper;
+import cn.hutool.core.text.CharSequenceUtil;
+import com.github.pagehelper.page.PageMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -127,8 +127,8 @@ public class ResourceServiceImpl implements ResourceService {
                 .setNumber(apply.getNumber())
                 .setWatchmanId(apply.getWatchmanId())
                 .setCallbackUrl(apply.getCallbackUrl())
-                .setLimitCpu(StrUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu())
-                .setLimitMemory(StrUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
+                .setLimitCpu(CharSequenceUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu())
+                .setLimitMemory(CharSequenceUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
             resourceMapper.insert(resourceEntity);
             // 2. 创建任务实例
             for (int i = 0; i < apply.getNumber(); i++) {
@@ -138,8 +138,8 @@ public class ResourceServiceImpl implements ResourceService {
                     .setMemory(apply.getMemory())
                     .setResourceId(resourceEntity.getId())
                     .setWatchmanId(resourceEntity.getWatchmanId())
-                    .setLimitCpu(StrUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu())
-                    .setLimitMemory(StrUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
+                    .setLimitCpu(CharSequenceUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu())
+                    .setLimitMemory(CharSequenceUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
                 resourceExampleMapper.insert(resourceExampleEntity);
             }
             // 3. 下发命令
@@ -167,12 +167,11 @@ public class ResourceServiceImpl implements ResourceService {
     public ResourceExampleOverview exampleOverview(Long resourceExampleId) {
         ResourceExampleEntity resourceExampleEntity = resourceExampleMapper.selectById(resourceExampleId);
         // 设置初始值
-        ResourceExampleOverview result = new ResourceExampleOverview() {{
-            setStatus(ResourceExampleStatus.PENDING);
-            setStartTime(resourceExampleEntity.getCreateTime().getTime());
-        }};
+        ResourceExampleOverview result = new ResourceExampleOverview()
+            .setStatus(ResourceExampleStatus.PENDING)
+            .setStartTime(resourceExampleEntity.getCreateTime().getTime());
         // 找到最后一次上报的数据
-        try (Page<Object> ignored = PageHelper.startPage(1, 1)) {
+        try (Page<Object> ignored = PageMethod.startPage(1, 1)) {
             // 查询条件 - 状态类型
             Wrapper<ResourceExampleEventEntity> statusWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
                 .orderByDesc(ResourceExampleEventEntity::getTime)
@@ -181,7 +180,7 @@ public class ResourceServiceImpl implements ResourceService {
                 .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
             // 执行SQL
             PageInfo<ResourceExampleEventEntity> statusList = new PageInfo<>(resourceExampleEventMapper.selectList(statusWrapper));
-            if (statusList.getList().size() > 0) {
+            if (!statusList.getList().isEmpty()) {
                 String contextString = statusList.getList().get(0).getContext();
                 Integer type = statusList.getList().get(0).getType();
                 result.setStatusTime(statusList.getList().get(0).getTime().getTime());
@@ -202,12 +201,8 @@ public class ResourceServiceImpl implements ResourceService {
                 .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
             PageInfo<ResourceExampleEventEntity> infoList = new PageInfo<>(resourceExampleEventMapper.selectList(infoWrapper));
             if (infoList.getSize() > 0) {
-                String contextString = infoList.getList().get(0).getContext();
-                HashMap<String, Object> context = jsonService.readValue(contextString, new TypeReference<HashMap<String, Object>>() {});
-                result.setIp(context.get("ip") == null ? null : context.get("ip").toString());
-                result.setName(context.get("name") == null ? null : context.get("name").toString());
-                result.setHostIp(context.get("hostIp") == null ? null : context.get("hostIp").toString());
-                result.setStatusTime(infoList.getList().get(0).getTime().getTime());
+                ResourceExampleEventEntity first = infoList.getList().get(0);
+                fillResourceExampleOverviewInfo(first, result);
             }
             // 设置心跳接口时间
             else {
@@ -222,6 +217,21 @@ public class ResourceServiceImpl implements ResourceService {
             }
         }
         return result;
+    }
+
+    /**
+     * 填充资源实例的概览信息
+     *
+     * @param entity 资源实例的最后一次信息上报时间
+     * @param result 概览信息
+     */
+    void fillResourceExampleOverviewInfo(ResourceExampleEventEntity entity, ResourceExampleOverview result) {
+        String contextString = entity.getContext();
+        HashMap<String, Object> context = jsonService.readValue(contextString, new TypeReference<HashMap<String, Object>>() {});
+        result.setIp(context.get("ip") == null ? null : context.get("ip").toString());
+        result.setName(context.get("name") == null ? null : context.get("name").toString());
+        result.setHostIp(context.get("hostIp") == null ? null : context.get("hostIp").toString());
+        result.setStatusTime(entity.getTime().getTime());
     }
 
     /**

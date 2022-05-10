@@ -5,7 +5,10 @@ package io.shulie.takin.cloud.constant;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
+@SuppressWarnings("unused")
 public class ApiUrl {
+    private ApiUrl() {}
+
     /**
      * 调度器 - 列表
      */

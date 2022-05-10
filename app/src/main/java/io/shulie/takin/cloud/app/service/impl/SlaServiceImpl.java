@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import org.springframework.stereotype.Service;
@@ -62,13 +62,13 @@ public class SlaServiceImpl implements SlaService {
      */
     @Override
     public void create(long jobId, String ref, FormulaTarget target, FormulaSymbol symbol, double number) {
-        slaMapper.insert(new SlaEntity() {{
-            setRef(ref);
-            setJobId(jobId);
-            setFormulaNumber(number);
-            setFormulaTarget(target.getCode());
-            setFormulaSymbol(symbol.getCode());
-        }});
+        slaMapper.insert(new SlaEntity()
+            .setRef(ref)
+            .setJobId(jobId)
+            .setFormulaNumber(number)
+            .setFormulaTarget(target.getCode())
+            .setFormulaSymbol(symbol.getCode())
+        );
     }
 
     /**
@@ -78,30 +78,27 @@ public class SlaServiceImpl implements SlaService {
     public void event(Long jobId, Long jobExampleId, List<SlaEventEntity> slaEventEntityList) {
         if (CollUtil.isEmpty(slaEventEntityList)) {return;}
         slaEventMapperService.saveBatch(slaEventEntityList);
-        {
-            JobEntity jobEntity = jobService.jobEntity(jobId);
-            JobExampleEntity jobExampleEntity = jobService.jobExampleEntity(jobExampleId);
-            ResourceExampleEntity resourceExampleEntity = resourceService.exampleEntity(jobExampleEntity.getResourceExampleId());
-            List<SlaInfo> slaInfoList = slaEventEntityList.stream().map(t -> new SlaInfo() {{
-                setJobId(jobId);
-                setRef(t.getRef());
-                setNumber(t.getNumber());
-                setAttach(t.getAttach());
-                setJobExampleId(jobExampleId);
-                setFormulaNumber(t.getFormulaNumber());
-                setFormulaSymbol(t.getFormulaSymbol());
-                setFormulaTarget(t.getFormulaTarget());
-                setResourceExampleId(resourceExampleEntity.getId());
-                setResourceId(resourceExampleEntity.getResourceId());
-            }}).collect(Collectors.toList());
-            Sla sla = new Sla() {{
-                setTime(new Date());
-                setData(slaInfoList);
-                setCallbackTime(getTime());
-            }};
-            String slaString = jsonService.writeValueAsString(sla);
-            callbackService.create(jobEntity.getCallbackUrl(), StrUtil.utf8Bytes(slaString));
-        }
+        JobEntity jobEntity = jobService.jobEntity(jobId);
+        JobExampleEntity jobExampleEntity = jobService.jobExampleEntity(jobExampleId);
+        ResourceExampleEntity resourceExampleEntity = resourceService.exampleEntity(jobExampleEntity.getResourceExampleId());
+        List<SlaInfo> slaInfoList = slaEventEntityList.stream().map(t -> new SlaInfo()
+            .setJobId(jobId)
+            .setRef(t.getRef())
+            .setNumber(t.getNumber())
+            .setAttach(t.getAttach())
+            .setJobExampleId(jobExampleId)
+            .setFormulaNumber(t.getFormulaNumber())
+            .setFormulaSymbol(t.getFormulaSymbol())
+            .setFormulaTarget(t.getFormulaTarget())
+            .setResourceExampleId(resourceExampleEntity.getId())
+            .setResourceId(resourceExampleEntity.getResourceId())
+        ).collect(Collectors.toList());
+        Sla sla = new Sla();
+        sla.setTime(new Date());
+        sla.setCallbackTime(new Date());
+        sla.setData(slaInfoList);
+        String slaString = jsonService.writeValueAsString(sla);
+        callbackService.create(jobEntity.getCallbackUrl(), CharSequenceUtil.utf8Bytes(slaString));
     }
 
     @Override
@@ -124,17 +121,16 @@ public class SlaServiceImpl implements SlaService {
                 Double compareResult = compare(metricsInfo, formulaTarget, formulaSymbol, condition.getFormulaNumber());
                 // 符合校验则添加到业务结果里面
                 if (compareResult != null) {
-                    result.add(new SlaEventEntity() {{
-                        setJobId(jobId);
-                        setNumber(compareResult);
-                        setRef(condition.getRef());
-                        setSlaId(condition.getId());
-                        setJobExampleId(jobExampleId);
-                        setAttach(condition.getAttach());
-                        setFormulaNumber(condition.getFormulaNumber());
-                        setFormulaTarget(condition.getFormulaTarget());
-                        setFormulaSymbol(condition.getFormulaSymbol());
-                    }});
+                    result.add(new SlaEventEntity()
+                        .setJobId(jobId)
+                        .setNumber(compareResult)
+                        .setRef(condition.getRef())
+                        .setSlaId(condition.getId())
+                        .setJobExampleId(jobExampleId)
+                        .setAttach(condition.getAttach())
+                        .setFormulaNumber(condition.getFormulaNumber())
+                        .setFormulaTarget(condition.getFormulaTarget())
+                        .setFormulaSymbol(condition.getFormulaSymbol()));
                 }
             }
         }

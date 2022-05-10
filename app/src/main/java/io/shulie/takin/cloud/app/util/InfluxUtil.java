@@ -15,16 +15,9 @@ import org.influxdb.annotation.Column;
  * @date 2020/7/20 下午4:34
  */
 public class InfluxUtil {
+    private InfluxUtil() {}
 
-    public static long MAX_ACCEPT_TIMESTAMP = 9223372036854L;
-
-    /**
-     * 实时统计数据表
-     */
-    @SuppressWarnings("unused")
-    public static String getMeasurement(Long jobExampleId) {
-        return getMeasurement("pressure", jobExampleId);
-    }
+    public static final long MAX_ACCEPT_TIMESTAMP = 9223372036854L;
 
     /**
      * 指标数据上报的数据表

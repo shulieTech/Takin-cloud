@@ -27,7 +27,7 @@ public enum ResourceExampleStatus {
     private final Integer code;
     private final String description;
 
-    private final static HashMap<Integer, ResourceExampleStatus> EXAMPLE_MAP = new HashMap<>(6);
+    private static final HashMap<Integer, ResourceExampleStatus> EXAMPLE_MAP = new HashMap<>(6);
 
     static {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));

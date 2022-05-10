@@ -47,7 +47,7 @@ public enum CommandType {
         this.value = value;
     }
 
-    private final static HashMap<Integer, CommandType> EXAMPLE_MAP = new HashMap<>(6);
+    private static final HashMap<Integer, CommandType> EXAMPLE_MAP = new HashMap<>(6);
 
     static {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getValue(), t));

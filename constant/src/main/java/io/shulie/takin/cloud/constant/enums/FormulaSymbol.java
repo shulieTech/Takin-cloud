@@ -35,7 +35,7 @@ public enum FormulaSymbol {
     @Override
     public String toString() {return code + ":" + description;}
 
-    private final static HashMap<Integer, FormulaSymbol> EXAMPLE_MAP = new HashMap<>(6);
+    private static final HashMap<Integer, FormulaSymbol> EXAMPLE_MAP = new HashMap<>(6);
 
     static {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));

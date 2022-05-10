@@ -34,7 +34,7 @@ public class JobExampleController {
      */
     @GetMapping("heartbeat")
     @Operation(summary = "心跳")
-    public ApiResult<?> heartbeat(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id) {
+    public ApiResult<Object> heartbeat(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id) {
         jobExampleService.onHeartbeat(id);
         return ApiResult.success();
     }
@@ -47,7 +47,7 @@ public class JobExampleController {
      */
     @GetMapping("start")
     @Operation(summary = "启动")
-    public ApiResult<?> start(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id) {
+    public ApiResult<Object> start(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id) {
         jobExampleService.onStart(id);
         return ApiResult.success();
     }
@@ -60,7 +60,7 @@ public class JobExampleController {
      */
     @GetMapping("stop")
     @Operation(summary = "停止")
-    public ApiResult<?> stop(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id) {
+    public ApiResult<Object> stop(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id) {
         jobExampleService.onStop(id);
         return ApiResult.success();
     }
@@ -74,7 +74,7 @@ public class JobExampleController {
      */
     @PostMapping("error")
     @Operation(summary = "发生异常")
-    public ApiResult<?> error(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id,
+    public ApiResult<Object> error(@Parameter(description = "任务实例主键", required = true) @RequestParam Long id,
         @Parameter(description = "异常信息", required = true) @RequestBody String content) {
         jobExampleService.onError(id, content);
         return ApiResult.success();

@@ -3,7 +3,7 @@ package io.shulie.takin.cloud.app.service.impl;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.app.entity.MetricsEntity;
@@ -57,7 +57,7 @@ public class JobConfigServiceImpl implements JobConfigService {
     public List<ThreadConfigExampleEntity> threadExampleItem(long jobId, String ref) {
         return threadConfigExampleMapperService.lambdaQuery()
             .eq(ThreadConfigExampleEntity::getJobId, jobId)
-            .eq(StrUtil.isNotBlank(ref), ThreadConfigExampleEntity::getRef, ref)
+            .eq(CharSequenceUtil.isNotBlank(ref), ThreadConfigExampleEntity::getRef, ref)
             .list();
     }
 
@@ -66,11 +66,11 @@ public class JobConfigServiceImpl implements JobConfigService {
      */
     @Override
     public void modifThreadConfigExample(long threadConfigExampleId, ThreadGroupType type, String context) {
-        threadConfigExampleMapperService.updateById(new ThreadConfigExampleEntity() {{
-            setId(threadConfigExampleId);
-            setType(type.getCode());
-            setContext(context);
-        }});
+        threadConfigExampleMapperService.updateById(new ThreadConfigExampleEntity()
+            .setContext(context)
+            .setType(type.getCode())
+            .setId(threadConfigExampleId)
+        );
     }
 
     /**

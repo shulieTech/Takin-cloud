@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.app.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import cn.hutool.core.util.NumberUtil;
 
 /**
@@ -9,10 +11,12 @@ import cn.hutool.core.util.NumberUtil;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
+@Slf4j
 public class ResourceUtil {
     private static final String CPU_UNIT_C = "C";
     private static final String CPU_UNIT_M = "m";
 
+    private static final char MEMORY_UNIT_M = 'm';
     private static final String MEMORY_UNIT = "EPTGMk";
     private static final long[] MEMORY_NOT_I = new long[] {
         1000L,
@@ -56,7 +60,7 @@ public class ResourceUtil {
         if (NumberUtil.isNumber(memory)) {return NumberUtil.parseNumber(memory).longValue();}
         char[] memoryCharArray = memory.toCharArray();
         // 处理特殊的m单位
-        if (memoryCharArray[memory.length() - 1] == 'm') {
+        if (memoryCharArray[memory.length() - 1] == MEMORY_UNIT_M) {
             String memoryRemoveM = memory.substring(0, memory.length() - 4);
             if (NumberUtil.isNumber(memoryRemoveM)) {return NumberUtil.parseNumber(memoryRemoveM).longValue();}
         }
@@ -108,10 +112,10 @@ public class ResourceUtil {
      * @param args null
      */
     public static void main(String[] args) {
-        System.out.println(convertMemory("128974848"));
-        System.out.println(convertMemory("129E6"));
-        System.out.println(convertMemory("129M"));
-        System.out.println(convertMemory("128974848000m"));
-        System.out.println(convertMemory("123Mi"));
+        log.info("{}", convertMemory("128974848"));
+        log.info("{}", convertMemory("129E6"));
+        log.info("{}", convertMemory("129M"));
+        log.info("{}", convertMemory("128974848000m"));
+        log.info("{}", convertMemory("123Mi"));
     }
 }

@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.model.callback.basic;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.util.Date;
 
@@ -12,8 +13,9 @@ import io.shulie.takin.cloud.constant.enums.CallbackType;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
-public abstract class Basic<T> {
-    public Basic() {
+@Accessors(chain = true)
+public abstract class Base<T> {
+    protected Base() {
         setSign("");
         setTime(new Date());
         setCallbackTime(getTime());

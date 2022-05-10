@@ -7,16 +7,13 @@ package io.shulie.takin.cloud.constant;
  * @date 2020-04-20 15:55
  */
 public class CollectorConstants {
+    private CollectorConstants() {}
 
     /**
      * redis key前缀
      */
     public static final String REDIS_PRESSURE_TASK_KEY = "COLLECTOR:JOB:TASK:%s";
 
-    /**
-     * 窗口大小
-     */
-    public static int[] timeWindow = new int[] {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60};
 
     /**
      * 指标key 超时时间
@@ -29,7 +26,7 @@ public class CollectorConstants {
     /**
      * 10秒过期策略，超时丢弃Metrics 数据，单位：毫秒
      */
-    public static final long OVERDUE_TIME = 2000 * OVERDUE_SECOND;
+    public static final long OVERDUE_TIME = 2000L * OVERDUE_SECOND;
     /**
      * Metrics 统计时间间隔
      */

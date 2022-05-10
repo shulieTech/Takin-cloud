@@ -1,7 +1,6 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -9,11 +8,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import io.shulie.takin.cloud.app.service.JsonService;
-import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.app.mapper.ResourceMapper;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.CallbackService;
+import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleMapper;
 import io.shulie.takin.cloud.app.service.ResourceExampleService;
@@ -25,6 +24,7 @@ import io.shulie.takin.cloud.app.mapper.ResourceExampleEventMapper;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEventEntity;
 import io.shulie.takin.cloud.model.callback.ResourceExampleHeartbeat;
 import io.shulie.takin.cloud.app.service.mapper.JobExampleMapperService;
+import io.shulie.takin.cloud.model.callback.ResourceExampleError.ResourceExampleErrorInfo;
 
 /**
  * 资源实例服务 - 实例
@@ -35,48 +35,47 @@ import io.shulie.takin.cloud.app.service.mapper.JobExampleMapperService;
 public class ResourceExampleServiceImpl implements ResourceExampleService {
 
     @javax.annotation.Resource
+    JsonService jsonService;
+    @javax.annotation.Resource
     ResourceMapper resourceMapper;
+    @javax.annotation.Resource
+    CallbackService callbackService;
     @javax.annotation.Resource
     ResourceExampleMapper resourceExampleMapper;
     @javax.annotation.Resource
     JobExampleMapperService jobExampleMapperService;
     @javax.annotation.Resource
     ResourceExampleEventMapper resourceExampleEventMapper;
-    @javax.annotation.Resource
-    CallbackService callbackService;
-    @javax.annotation.Resource
-    JsonService jsonService;
 
     @Override
     public void onHeartbeat(long id) {
         // 基础信息准备
-        StringBuffer callbackUrl = new StringBuffer();
-        ResourceExampleHeartbeat context = new ResourceExampleHeartbeat() {{setData(getCallbackData(id, callbackUrl));}};
+        StringBuilder callbackUrl = new StringBuilder();
+        ResourceExampleHeartbeat context = new ResourceExampleHeartbeat();
+        context.setData(getCallbackData(id, callbackUrl));
         // 创建回调
-        callbackService.create(callbackUrl.toString(),
-            jsonService.writeValueAsString(context).getBytes(StandardCharsets.UTF_8));
+        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
         // 记录事件
-        resourceExampleEventMapper.insert(new ResourceExampleEventEntity() {{
-            setContext("{}");
-            setType(NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode());
-            setResourceExampleId(id);
-        }});
+        resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
+            .setContext("{}")
+            .setResourceExampleId(id)
+            .setType(NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode()));
     }
 
     @Override
     public void onStart(long id) {
         // 基础信息准备
-        StringBuffer callbackUrl = new StringBuffer();
-        ResourceExampleStart context = new ResourceExampleStart() {{setData(getCallbackData(id, callbackUrl));}};
+        StringBuilder callbackUrl = new StringBuilder();
+        ResourceExampleStart context = new ResourceExampleStart();
+        context.setData(getCallbackData(id, callbackUrl));
         // 创建回调
-        callbackService.create(callbackUrl.toString(),
-            jsonService.writeValueAsString(context).getBytes(StandardCharsets.UTF_8));
+        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
         // 记录事件
-        resourceExampleEventMapper.insert(new ResourceExampleEventEntity() {{
-            setContext("{}");
-            setType(NotifyEventType.RESOUECE_EXAMPLE_START.getCode());
-            setResourceExampleId(id);
-        }});
+        resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
+            .setContext("{}")
+            .setResourceExampleId(id)
+            .setType(NotifyEventType.RESOUECE_EXAMPLE_START.getCode())
+        );
     }
 
     /**
@@ -85,53 +84,50 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
     @Override
     public void onStop(long id) {
         // 基础信息准备
-        StringBuffer callbackUrl = new StringBuffer();
-        ResourceExampleStop context = new ResourceExampleStop() {{setData(getCallbackData(id, callbackUrl));}};
+        StringBuilder callbackUrl = new StringBuilder();
+        ResourceExampleStop context = new ResourceExampleStop();
+        context.setData(getCallbackData(id, callbackUrl));
         // 创建回调
-        callbackService.create(callbackUrl.toString(),
-            jsonService.writeValueAsString(context).getBytes(StandardCharsets.UTF_8));
+        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
         // 记录事件
-        resourceExampleEventMapper.insert(new ResourceExampleEventEntity() {{
-            setContext("{}");
-            setType(NotifyEventType.RESOUECE_EXAMPLE_STOP.getCode());
-            setResourceExampleId(id);
-        }});
+        resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
+            .setContext("{}")
+            .setResourceExampleId(id)
+            .setType(NotifyEventType.RESOUECE_EXAMPLE_STOP.getCode()));
     }
 
     @Override
     public void onError(long id, String errorMessage) {
         // 基础信息准备
-        StringBuffer callbackUrl = new StringBuffer();
+        StringBuilder callbackUrl = new StringBuilder();
         ResourceExample resourceExample = getCallbackData(id, callbackUrl);
-        ResourceExampleError context = new ResourceExampleError() {{
-            setData(new ResourceExampleErrorInfo(resourceExample) {{setErrorMessage(errorMessage);}});
-        }};
+        ResourceExampleErrorInfo errorInfo = new ResourceExampleErrorInfo(resourceExample);
+        errorInfo.setErrorMessage(errorMessage);
+        ResourceExampleError context = new ResourceExampleError();
+        context.setData(errorInfo);
         // 创建回调
-        callbackService.create(callbackUrl.toString(),
-            jsonService.writeValueAsString(context).getBytes(StandardCharsets.UTF_8));
+        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
         // 记录事件
-        resourceExampleEventMapper.insert(new ResourceExampleEventEntity() {{
-            ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
-            objectNode.put("message", errorMessage);
-            setResourceExampleId(id);
-            setContext(objectNode.toPrettyString());
-            setType(NotifyEventType.RESOUECE_EXAMPLE_ERROR.getCode());
-        }});
+        ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
+        objectNode.put("message", errorMessage);
+        resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
+            .setResourceExampleId(id)
+            .setContext(objectNode.toPrettyString())
+            .setType(NotifyEventType.RESOUECE_EXAMPLE_ERROR.getCode()));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void onInfo(long id, HashMap<String, Object> info) {
-        resourceExampleEventMapper.insert(new ResourceExampleEventEntity() {{
-            setResourceExampleId(id);
-            setType(NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode());
-            setContext(jsonService.writeValueAsString(info));
-        }});
+    public void onInfo(long id, Map<String, Object> info) {
+        resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
+            .setResourceExampleId(id)
+            .setType(NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode())
+            .setContext(jsonService.writeValueAsString(info)));
     }
 
-    private ResourceExample getCallbackData(long resourceExampleId, StringBuffer callbackUrl) {
+    private ResourceExample getCallbackData(long resourceExampleId, StringBuilder callbackUrl) {
         // 获取资源实例
         ResourceExampleEntity resourceExampleEntity = resourceExampleMapper.selectById(resourceExampleId);
         // 获取资源
@@ -140,11 +136,10 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         JobExampleEntity jobExampleEntity = jobExampleMapperService.lambdaQuery()
             .eq(JobExampleEntity::getResourceExampleId, resourceExampleId).one();
         callbackUrl.append(resourceEntity.getCallbackUrl());
-        return new ResourceExample() {{
-            setJobId(jobExampleEntity == null ? null : jobExampleEntity.getJobId());
-            setJobExampleId(jobExampleEntity == null ? null : jobExampleEntity.getId());
-            setResourceId(resourceExampleEntity.getResourceId());
-            setResourceExampleId(resourceExampleEntity.getId());
-        }};
+        return new ResourceExample()
+            .setResourceExampleId(resourceExampleEntity.getId())
+            .setResourceId(resourceExampleEntity.getResourceId())
+            .setJobId(jobExampleEntity == null ? null : jobExampleEntity.getJobId())
+            .setJobExampleId(jobExampleEntity == null ? null : jobExampleEntity.getId());
     }
 }

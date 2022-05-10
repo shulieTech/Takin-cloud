@@ -35,7 +35,7 @@ public enum NotifyEventType {
     @Getter
     private final Integer code;
     private final String description;
-    private final static HashMap<Integer, NotifyEventType> EXAMPLE_MAP = new HashMap<>(6);
+    private static final HashMap<Integer, NotifyEventType> EXAMPLE_MAP = new HashMap<>(6);
 
     static {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));

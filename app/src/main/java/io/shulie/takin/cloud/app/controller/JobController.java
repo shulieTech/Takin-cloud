@@ -38,7 +38,7 @@ public class JobController {
 
     @Operation(summary = "停止任务")
     @GetMapping("stop")
-    public ApiResult<?> stop(@Parameter(description = "任务主键") Long jobId) {
+    public ApiResult<Object> stop(@Parameter(description = "任务主键") Long jobId) {
         jobService.stop(jobId);
         return ApiResult.success();
     }
@@ -52,7 +52,7 @@ public class JobController {
 
     @Operation(summary = "修改配置")
     @PostMapping(value = "config/modify")
-    public ApiResult<?> modifyConfig(@RequestBody ModifyConfig info) {
+    public ApiResult<Object> modifyConfig(@RequestBody ModifyConfig info) {
         jobService.modifyConfig(info.getJobId(), info);
         return ApiResult.success();
     }

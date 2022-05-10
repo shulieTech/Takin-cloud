@@ -142,32 +142,30 @@ public class InfluxWriter {
      */
     public <T> List<T> query(String command, Class<T> clazz) {
         List<QueryResult.Result> results = select(command);
-
         JSONArray resultArr = new JSONArray();
         for (QueryResult.Result result : results) {
             List<QueryResult.Series> series = result.getSeries();
-            if (series == null) {
-                continue;
-            }
+            if (series == null) {continue;}
             for (QueryResult.Series serie : series) {
-                List<List<Object>> values = serie.getValues();
                 List<String> colums = serie.getColumns();
                 Map<String, String> tags = serie.getTags();
-
+                List<List<Object>> values = serie.getValues();
                 // 封装查询结果
-                for (List<Object> value : values) {
-                    JSONObject jsonData = new JSONObject();
-                    if (tags != null && tags.keySet().size() > 0) {
-                        jsonData.putAll(tags);
-                    }
-                    for (int j = 0; j < colums.size(); ++j) {
-                        jsonData.set(colums.get(j), value.get(j));
-                    }
-                    resultArr.add(jsonData);
-                }
+                getResult(colums, values, tags, resultArr);
             }
         }
         return JSONUtil.toList(resultArr.toJSONString(2), clazz);
+    }
+
+    public void getResult(List<String> colums, List<List<Object>> values, Map<String, String> tags, JSONArray array) {
+        for (List<Object> value : values) {
+            JSONObject jsonData = new JSONObject();
+            if (tags != null) {jsonData.putAll(tags);}
+            for (int i = 0; i < colums.size(); ++i) {
+                jsonData.set(colums.get(i), value.get(i));
+            }
+            array.add(jsonData);
+        }
     }
 
     public <T> T querySingle(String command, Class<T> clazz) {

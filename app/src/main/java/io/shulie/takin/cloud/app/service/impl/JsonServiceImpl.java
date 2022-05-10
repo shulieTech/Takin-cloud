@@ -16,16 +16,18 @@ import io.shulie.takin.cloud.app.service.JsonService;
  */
 @Service
 public class JsonServiceImpl implements JsonService {
-    private final ObjectMapper objectMapper = new ObjectMapper() {{
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }};
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public JsonServiceImpl() {
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     @Override
     public String writeValueAsString(Object obj) {
         try {
             return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("JSON序列化失败");
+            throw new IllegalArgumentException("JSON序列化失败");
         }
     }
 
@@ -34,7 +36,7 @@ public class JsonServiceImpl implements JsonService {
         try {
             return objectMapper.readValue(jsonString, valueType);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -43,7 +45,7 @@ public class JsonServiceImpl implements JsonService {
         try {
             return objectMapper.readValue(jsonString, valueTypeRef);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 }

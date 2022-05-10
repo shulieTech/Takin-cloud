@@ -2,7 +2,7 @@ package io.shulie.takin.cloud.app.util;
 
 import java.util.Calendar;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.shulie.takin.cloud.constant.CollectorConstants;
 
 /**
@@ -12,6 +12,13 @@ import io.shulie.takin.cloud.constant.CollectorConstants;
 @SuppressWarnings("unused")
 public class CollectorUtil {
 
+    private CollectorUtil() {}
+
+    /**
+     * 窗口大小
+     */
+    private static final int[] TIME_WINDOW = new int[] {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60};
+
     /**
      * 组装时间戳 +  podNum
      *
@@ -20,7 +27,7 @@ public class CollectorUtil {
      * @return -
      */
     public static String getTimestampPodNum(Long timestamp, String podNum) {
-        return timestamp + (StrUtil.isNotBlank(podNum) ? podNum : "null");
+        return timestamp + (CharSequenceUtil.isNotBlank(podNum) ? podNum : "null");
     }
 
     /**
@@ -43,7 +50,7 @@ public class CollectorUtil {
         if (millSecond > 0) {
             second = second + 1;
         }
-        for (int time : CollectorConstants.timeWindow) {
+        for (int time : TIME_WINDOW) {
             if (second <= time) {
                 nowSecond = time;
                 break;

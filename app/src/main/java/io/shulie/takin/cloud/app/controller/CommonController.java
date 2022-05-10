@@ -34,8 +34,8 @@ public class CommonController {
     @Operation(summary = "版本信息")
     @GetMapping("version")
     public ApiResult<HashMap<String, Object>> version() {
-        return ApiResult.success(new HashMap<String, Object>(2) {{
-            put("version", watchmanConfig.getApplicationVersion());
-        }});
+        HashMap<String, Object> result = new HashMap<>(2);
+        result.put("version", watchmanConfig.getApplicationVersion());
+        return ApiResult.success(result);
     }
 }

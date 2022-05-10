@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
 import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageInfo;
-import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.page.PageMethod;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.app.mapper.CallbackMapper;
@@ -34,7 +34,7 @@ public class CallbackServiceImpl implements CallbackService {
 
     @Override
     public PageInfo<CallbackEntity> list(int pageNumber, int pageSize, boolean isCompleted) {
-        try (Page<Object> ignored = PageHelper.startPage(pageNumber, pageSize)) {
+        try (Page<Object> ignored = PageMethod.startPage(pageNumber, pageSize)) {
             List<CallbackEntity> sourceList = callbackMapperService.lambdaQuery()
                 .eq(CallbackEntity::getCompleted, isCompleted)
                 .list();
@@ -44,20 +44,16 @@ public class CallbackServiceImpl implements CallbackService {
 
     @Override
     public void create(String url, byte[] content) {
-        callbackMapper.insert(new CallbackEntity() {{
-            setUrl(url);
-            setContext(content);
-        }});
+        callbackMapper.insert(new CallbackEntity().setUrl(url).setContext(content));
     }
 
     @Override
     public Long createLog(long callbackId, String url, byte[] data) {
-        CallbackLogEntity callbackLogEntity = new CallbackLogEntity() {{
-            setRequestUrl(url);
-            setRequestData(data);
-            setCallbackId(callbackId);
-            setRequestTime(new Date());
-        }};
+        CallbackLogEntity callbackLogEntity = new CallbackLogEntity()
+            .setRequestUrl(url)
+            .setRequestData(data)
+            .setCallbackId(callbackId)
+            .setRequestTime(new Date());
         callbackLogMapper.insert(callbackLogEntity);
         return callbackLogEntity.getId();
     }
@@ -72,12 +68,12 @@ public class CallbackServiceImpl implements CallbackService {
             String successFlag = "{\"error\":null,\"data\":\"SUCCESS\",\"totalNum\":null,\"success\":true}";
             boolean completed = successFlag.equals(StrUtil.utf8Str(data));
             // 填充日志信息
-            callbackLogMapper.updateById(new CallbackLogEntity() {{
-                setId(callbackLogId);
-                setResponseData(data);
-                setCompleted(completed);
-                setResponseTime(new Date());
-            }});
+            callbackLogMapper.updateById(new CallbackLogEntity()
+                .setId(callbackLogId)
+                .setResponseData(data)
+                .setCompleted(completed)
+                .setResponseTime(new Date())
+            );
             // 更新回调的状态
             if (completed) {
                 callbackMapperService.lambdaUpdate().set(CallbackEntity::getCompleted, true)

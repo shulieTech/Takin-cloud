@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.app.entity;
 import java.util.Date;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -15,6 +16,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
  */
 @Data
 @TableName("t_command")
+@Accessors(chain = true)
 public class CommandEntity {
     /**
      * 数据主键

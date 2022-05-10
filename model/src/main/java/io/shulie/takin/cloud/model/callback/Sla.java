@@ -4,9 +4,10 @@ import java.util.List;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
 import io.shulie.takin.cloud.model.callback.Sla.SlaInfo;
-import io.shulie.takin.cloud.model.callback.basic.Basic;
+import io.shulie.takin.cloud.model.callback.basic.Base;
 import io.shulie.takin.cloud.constant.enums.CallbackType;
 
 /**
@@ -15,12 +16,13 @@ import io.shulie.takin.cloud.constant.enums.CallbackType;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
-public class Sla extends Basic<List<SlaInfo>> {
-
-    private final CallbackType type = CallbackType.SLA;
+public class Sla extends Base<List<SlaInfo>> {
+    private CallbackType type = CallbackType.SLA;
 
     @Data
+    @Accessors(chain = true)
     public static class SlaInfo {
         /**
          * 关键词

@@ -44,5 +44,5 @@ public interface JobExampleService {
      * @param callbackUrl  回调地址
      * @return 回调数据
      */
-    JobExample getCallbackData(long jobExampleId, StringBuffer callbackUrl);
+    JobExample getCallbackData(long jobExampleId, StringBuilder callbackUrl);
 }

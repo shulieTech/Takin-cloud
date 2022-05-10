@@ -7,7 +7,8 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 
 import lombok.extern.slf4j.Slf4j;
-import cn.hutool.core.util.StrUtil;
+
+import cn.hutool.core.text.CharSequenceUtil;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -18,9 +19,10 @@ import javax.servlet.http.HttpServletRequest;
  * @version v1.0
  * @date 2018年5月21日
  */
-@SuppressWarnings("unused")
 @Slf4j
 public class IpUtils {
+
+    private IpUtils() {}
 
     /**
      * 获取用户的IP地址
@@ -31,36 +33,39 @@ public class IpUtils {
      * @date 2018年5月21日
      */
     public static String getIp(HttpServletRequest httpServletRequest) {
-        String unknownStr = "unknown";
+
         String ip = httpServletRequest.getHeader("Proxy-Client-IP");
         //这里多个判断条件是相同的，不知道用意何为？？？？
-        if (StrUtil.isBlank(ip) || unknownStr.equalsIgnoreCase(ip)) {
+        if (checkIp(ip)) {
             ip = httpServletRequest.getHeader("Proxy-Client-IP");
         }
-        if (StrUtil.isBlank(ip) || unknownStr.equalsIgnoreCase(ip)) {
+        if (checkIp(ip)) {
             ip = httpServletRequest.getHeader("WL-Proxy-Client-IP");
         }
-        if (StrUtil.isBlank(ip) || unknownStr.equalsIgnoreCase(ip)) {
+        if (checkIp(ip)) {
             ip = httpServletRequest.getHeader("HTTP_CLIENT_IP");
         }
-
-        if (StrUtil.isBlank(ip) || unknownStr.equalsIgnoreCase(ip)) {
+        if (checkIp(ip)) {
             ip = httpServletRequest.getHeader("HTTP_X_FORWARDED_FOR");
         }
-        if (StrUtil.isBlank(ip) || unknownStr.equalsIgnoreCase(ip)) {
+        if (checkIp(ip)) {
             ip = httpServletRequest.getHeader("X-Forwarded-For");
         }
-
-        if (StrUtil.isBlank(ip) || unknownStr.equalsIgnoreCase(ip)) {
+        if (checkIp(ip)) {
             ip = httpServletRequest.getHeader("X-Forwarded-Host");
         }
-        if (StrUtil.isBlank(ip) || unknownStr.equalsIgnoreCase(ip)) {
+        if (checkIp(ip)) {
             ip = httpServletRequest.getRemoteAddr();
         }
-        if (StrUtil.isBlank(ip) && (ip.length() >= 15)) {
-            ip = StrUtil.subBefore(ip, ",", false);
+        if (CharSequenceUtil.isBlank(ip) && (ip.length() >= (((1 + 1) << (1 + 1 + 1)) - 1))) {
+            ip = CharSequenceUtil.subBefore(ip, ",", false);
         }
         return ip;
+    }
+
+    private static boolean checkIp(String ip) {
+        String unknownStr = "unknown";
+        return !CharSequenceUtil.isBlank(ip) && !unknownStr.equalsIgnoreCase(ip);
     }
 
     /**
@@ -96,7 +101,7 @@ public class IpUtils {
      * @date 2017年10月5日 下午2:46:05
      */
     public static boolean isWindowOs() {
-        return StrUtil.containsIgnoreCase(System.getProperty("os.name"), "windows");
+        return CharSequenceUtil.containsIgnoreCase(System.getProperty("os.name"), "windows");
     }
 
     /**

@@ -32,7 +32,7 @@ public class JobController {
      */
     @GetMapping("start")
     @Operation(summary = "启动")
-    public ApiResult<?> startJob(@Parameter(description = "任务主键", required = true) @RequestParam Long id) {
+    public ApiResult<Object> startJob(@Parameter(description = "任务主键", required = true) @RequestParam Long id) {
         jobService.onStart(id);
         return ApiResult.success();
     }
@@ -45,7 +45,7 @@ public class JobController {
      */
     @GetMapping("stop")
     @Operation(summary = "停止")
-    public ApiResult<?> stop(@Parameter(description = "任务主键", required = true) @RequestParam Long id) {
+    public ApiResult<Object> stop(@Parameter(description = "任务主键", required = true) @RequestParam Long id) {
         jobService.onStop(id);
         return ApiResult.success();
     }

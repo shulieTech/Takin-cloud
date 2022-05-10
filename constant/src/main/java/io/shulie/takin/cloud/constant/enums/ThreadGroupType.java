@@ -50,7 +50,7 @@ public enum ThreadGroupType {
     @Override
     public String toString() {return code + ":" + name + "(" + type + "," + model + ")";}
 
-    private final static HashMap<Integer, ThreadGroupType> EXAMPLE_MAP = new HashMap<>(6);
+    private static final HashMap<Integer, ThreadGroupType> EXAMPLE_MAP = new HashMap<>(6);
 
     static {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));

@@ -42,11 +42,7 @@ public class ApiResult<T> {
      * @return 成功的API结果
      */
     public static <T> ApiResult<T> success(T data) {
-        return new ApiResult() {{
-            setData(data);
-            setSuccess(true);
-            setMsg(SUCCESS_MESSAGE);
-        }};
+        return new ApiResult().setData(data).setSuccess(true).setMsg(SUCCESS_MESSAGE);
     }
 
     /**
@@ -89,11 +85,8 @@ public class ApiResult<T> {
      * @param msg 失败信息
      * @return 失败的API结果
      */
-    public static ApiResult fail(String msg) {
-        return new ApiResult() {{
-            setSuccess(false);
-            setMsg(msg);
-        }};
+    public static ApiResult<Object> fail(String msg) {
+        return new ApiResult().setSuccess(false).setMsg(msg);
     }
 
     /**
@@ -103,7 +96,7 @@ public class ApiResult<T> {
      * @param data 数据体
      * @return 失败的API结果
      */
-    public static ApiResult fail(String msg, Object data) {
+    public static ApiResult<Object> fail(String msg, Object data) {
         return fail(msg).setData(data);
     }
 }

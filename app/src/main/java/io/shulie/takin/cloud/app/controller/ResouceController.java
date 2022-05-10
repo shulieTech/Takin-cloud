@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.app.controller;
 import java.util.List;
 import java.util.ArrayList;
 
+import io.shulie.takin.cloud.constant.Message;
 import lombok.extern.slf4j.Slf4j;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -56,17 +57,17 @@ public class ResouceController {
 
     @Operation(summary = "资源锁定")
     @PostMapping(value = "lock")
-    public ApiResult<?> lock(@RequestBody ApplyResourceRequest apply) {
+    public ApiResult<Object> lock(@RequestBody ApplyResourceRequest apply) {
         String resourceId = resourceService.lock(apply);
         // 预检失败，直接返回失败信息
-        if (resourceId == null) {return ApiResult.fail("[预检]资源不足");}
+        if (resourceId == null) {return ApiResult.fail(Message.RESOURCE_SHORTAGE);}
         // 预检通过，直接返回资源主键。剩余的步骤通过异步回调处理
         else {return ApiResult.success(resourceId);}
     }
 
     @Operation(summary = "资源释放")
     @GetMapping("unlock")
-    public ApiResult<?> unlock(@Parameter(description = "资源主键") @RequestParam Long resourceId) {
+    public ApiResult<Object> unlock(@Parameter(description = "资源主键") @RequestParam Long resourceId) {
         resourceService.unlock(resourceId);
         return ApiResult.success(resourceId);
     }

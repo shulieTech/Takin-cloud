@@ -20,8 +20,8 @@ public class GlobalExceptionHandle {
     javax.servlet.http.HttpServletRequest httpServletRequest;
 
     @ExceptionHandler(Exception.class)
-    public ApiResult<?> bindExceptionErrorHandler(Exception e) {
-        ApiResult<?> apiResult = ApiResult.fail(e.getMessage());
+    public ApiResult<Object> bindExceptionErrorHandler(Exception e) {
+        ApiResult<Object> apiResult = ApiResult.fail(e.getMessage());
         if (e instanceof NullPointerException) {
             apiResult = ApiResult.fail("空指针");
             log.error("全局异常捕获-空指针.\n", e);

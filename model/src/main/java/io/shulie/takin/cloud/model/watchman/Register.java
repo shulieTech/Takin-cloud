@@ -4,10 +4,10 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import lombok.experimental.Accessors;
 
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.crypto.digest.HMac;
+import cn.hutool.core.text.CharSequenceUtil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -67,8 +67,7 @@ public class Register {
             body.setTimeOfCreate(System.currentTimeMillis());
             ObjectMapper objectMapper = new ObjectMapper();
             String headerString = objectMapper.writeValueAsString(header);
-            String bodyString = null;
-            bodyString = objectMapper.writeValueAsString(body);
+            String bodyString = objectMapper.writeValueAsString(body);
 
             String base64HeaderString = Base64.encodeUrlSafe(headerString);
             String base64BodyString = Base64.encodeUrlSafe(bodyString);
@@ -77,8 +76,8 @@ public class Register {
             log.info("body(base64)" + base64BodyString);
             log.info("secret " + secret);
             HMac hMac = SecureUtil.hmacSha256(secret);
-            String verifySignature = hMac.digestBase64(StrUtil.format("{}.{}", base64HeaderString, base64BodyString), true);
-            String ref = StrUtil.format("{}.{}.{}", base64HeaderString, base64BodyString, verifySignature);
+            String verifySignature = hMac.digestBase64(CharSequenceUtil.format("{}.{}", base64HeaderString, base64BodyString), true);
+            String ref = CharSequenceUtil.format("{}.{}.{}", base64HeaderString, base64BodyString, verifySignature);
             String refSign = SecureUtil.md5(ref);
 
             Register register = new Register()

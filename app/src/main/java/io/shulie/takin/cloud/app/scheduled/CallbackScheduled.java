@@ -58,18 +58,25 @@ public class CallbackScheduled {
                     log.warn("第{}条在缓存中了.\n{}", (i + 1), entity);
                     continue;
                 }
-                // 初始化Runnable对象
-                Exec exec = new Exec(entity, callbackService, cacheData);
                 // 提交到线程池运行
-                try {
-                    threadpool.submit(exec);
-                } catch (RejectedExecutionException ex) {
-                    log.warn("第{}条被线程池拒绝", (i + 1));
-                }
+                submitToPool(new Exec(entity, callbackService, cacheData), i + 1);
             }
 
         } catch (Exception e) {
             log.error("定时过程失败.\n", e);
+        }
+    }
+
+    /**
+     * 提交到线程池
+     *
+     * @param exec 执行对象
+     */
+    private void submitToPool(Exec exec, int index) {
+        try {
+            threadpool.submit(exec);
+        } catch (RejectedExecutionException ex) {
+            log.warn("第{}条被线程池拒绝", index);
         }
     }
 

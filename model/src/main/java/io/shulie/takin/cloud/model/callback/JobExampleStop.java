@@ -1,11 +1,11 @@
 package io.shulie.takin.cloud.model.callback;
 
-import io.shulie.takin.cloud.model.callback.basic.JobExample;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import io.shulie.takin.cloud.model.callback.basic.Base;
 import io.shulie.takin.cloud.constant.enums.CallbackType;
-import io.shulie.takin.cloud.model.callback.basic.Basic;
+import io.shulie.takin.cloud.model.callback.basic.JobExample;
 
 /**
  * 任务实例停止
@@ -14,6 +14,6 @@ import io.shulie.takin.cloud.model.callback.basic.Basic;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class JobExampleStop extends Basic<JobExample> {
-    private final CallbackType type = CallbackType.JOB_EXAMPLE_STOP;
+public class JobExampleStop extends Base<JobExample> {
+    private CallbackType type = CallbackType.JOB_EXAMPLE_STOP;
 }

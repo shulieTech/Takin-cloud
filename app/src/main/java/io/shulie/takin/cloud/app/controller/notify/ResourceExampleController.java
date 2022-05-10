@@ -1,8 +1,8 @@
 package io.shulie.takin.cloud.app.controller.notify;
 
-import java.util.HashMap;
+import java.util.Map;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,7 +38,7 @@ public class ResourceExampleController {
      */
     @GetMapping("heartbeat")
     @Operation(summary = "心跳")
-    public ApiResult<?> heartbeat(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id) {
+    public ApiResult<Object> heartbeat(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id) {
         resourceExampleService.onHeartbeat(id);
         return ApiResult.success();
     }
@@ -51,7 +51,7 @@ public class ResourceExampleController {
      */
     @GetMapping("start")
     @Operation(summary = "启动")
-    public ApiResult<?> start(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id) {
+    public ApiResult<Object> start(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id) {
         resourceExampleService.onStart(id);
         return ApiResult.success();
     }
@@ -64,7 +64,7 @@ public class ResourceExampleController {
      */
     @GetMapping("stop")
     @Operation(summary = "停止")
-    public ApiResult<?> stop(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id) {
+    public ApiResult<Object> stop(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id) {
         resourceExampleService.onStop(id);
         return ApiResult.success();
     }
@@ -78,7 +78,7 @@ public class ResourceExampleController {
      */
     @PostMapping("error")
     @Operation(summary = "发生异常")
-    public ApiResult<?> error(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id,
+    public ApiResult<Object> error(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id,
         @Parameter(description = "异常信息", required = true) @RequestBody String content) {
         resourceExampleService.onError(id, content);
         return ApiResult.success();
@@ -93,8 +93,8 @@ public class ResourceExampleController {
      */
     @PostMapping("info")
     @Operation(summary = "信息上报")
-    public ApiResult<?> info(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id,
-        @Parameter(description = "资源实例信息", required = true) @RequestBody HashMap<String, Object> content) {
+    public ApiResult<Object> info(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id,
+        @Parameter(description = "资源实例信息", required = true) @RequestBody Map<String, Object> content) {
         resourceExampleService.onInfo(id, content);
         return ApiResult.success();
     }
@@ -108,8 +108,8 @@ public class ResourceExampleController {
      */
     @PostMapping("infoAndError")
     @Operation(summary = "信息和异常上报")
-    public ApiResult<?> infoAndError(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id,
-        @Parameter(description = "资源实例信息", required = true) @RequestBody HashMap<String, Object> content) {
+    public ApiResult<Object> infoAndError(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id,
+        @Parameter(description = "资源实例信息", required = true) @RequestBody Map<String, Object> content) {
         // 提取错误信息
         final String errorFlag = "error";
         String errorMessage = content.getOrDefault(errorFlag, "").toString();
@@ -117,7 +117,7 @@ public class ResourceExampleController {
         // 上报信息
         info(id, content);
         // 上报异常
-        if (StrUtil.isNotBlank(errorMessage)) {error(id, errorMessage.trim());}
+        if (CharSequenceUtil.isNotBlank(errorMessage)) {error(id, errorMessage.trim());}
         return ApiResult.success();
     }
 }
