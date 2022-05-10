@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
+import io.shulie.takin.cloud.constant.Message;
 import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.service.JobService;
@@ -192,7 +193,7 @@ public class ResourceServiceImpl implements ResourceService {
                     result.setStatus(ResourceExampleStatus.ABNORMAL);
                 }
                 HashMap<String, Object> context = jsonService.readValue(contextString, new TypeReference<HashMap<String, Object>>() {});
-                result.setStatusMessage(context.get("message") == null ? null : context.get("message").toString());
+                result.setStatusMessage(context.get(Message.MESSAGE_NAME) == null ? null : context.get(Message.MESSAGE_NAME).toString());
             }
             // 设置资源实例信息
             Wrapper<ResourceExampleEventEntity> infoWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
@@ -231,7 +232,10 @@ public class ResourceServiceImpl implements ResourceService {
         result.setIp(context.get("ip") == null ? null : context.get("ip").toString());
         result.setName(context.get("name") == null ? null : context.get("name").toString());
         result.setHostIp(context.get("hostIp") == null ? null : context.get("hostIp").toString());
-        result.setStatusTime(entity.getTime().getTime());
+        //如果没有设置过时间 - 代替心跳时间
+        if (result.getStartTime() == null) {
+            result.setStatusTime(entity.getTime().getTime());
+        }
     }
 
     /**
