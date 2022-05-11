@@ -12,6 +12,8 @@ import cn.hutool.core.text.CharSequenceUtil;
 
 import javax.servlet.http.HttpServletRequest;
 
+import io.shulie.takin.cloud.constant.Message;
+
 /**
  * IP地址转换工具类
  *
@@ -33,39 +35,43 @@ public class IpUtils {
      * @date 2018年5月21日
      */
     public static String getIp(HttpServletRequest httpServletRequest) {
-
         String ip = httpServletRequest.getHeader("Proxy-Client-IP");
-        //这里多个判断条件是相同的，不知道用意何为？？？？
-        if (checkIp(ip)) {
+        if (!checkIp(ip)) {
             ip = httpServletRequest.getHeader("Proxy-Client-IP");
         }
-        if (checkIp(ip)) {
+        if (!checkIp(ip)) {
             ip = httpServletRequest.getHeader("WL-Proxy-Client-IP");
         }
-        if (checkIp(ip)) {
+        if (!checkIp(ip)) {
             ip = httpServletRequest.getHeader("HTTP_CLIENT_IP");
         }
-        if (checkIp(ip)) {
+        if (!checkIp(ip)) {
             ip = httpServletRequest.getHeader("HTTP_X_FORWARDED_FOR");
         }
-        if (checkIp(ip)) {
+        if (!checkIp(ip)) {
             ip = httpServletRequest.getHeader("X-Forwarded-For");
         }
-        if (checkIp(ip)) {
+        if (!checkIp(ip)) {
             ip = httpServletRequest.getHeader("X-Forwarded-Host");
         }
-        if (checkIp(ip)) {
+        if (!checkIp(ip)) {
             ip = httpServletRequest.getRemoteAddr();
         }
-        if (CharSequenceUtil.isBlank(ip) && (ip.length() >= (((1 + 1) << (1 + 1 + 1)) - 1))) {
+        // 过长需要截取。 不知道为什么。
+        if (checkIp(ip) && (ip.length() >= (((1 + 1) << (1 + 1 + 1)) - 1))) {
             ip = CharSequenceUtil.subBefore(ip, ",", false);
         }
-        return ip;
+        return ip == null ? "" : ip.trim();
     }
 
+    /**
+     * 判定Ip是否有效
+     *
+     * @param ip IP地址
+     * @return true/false
+     */
     private static boolean checkIp(String ip) {
-        String unknownStr = "unknown";
-        return !CharSequenceUtil.isBlank(ip) && !unknownStr.equalsIgnoreCase(ip);
+        return !CharSequenceUtil.isBlank(ip) && !Message.UNKNOWN.equalsIgnoreCase(ip);
     }
 
     /**
