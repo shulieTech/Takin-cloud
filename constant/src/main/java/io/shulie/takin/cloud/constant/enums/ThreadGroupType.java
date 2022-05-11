@@ -35,6 +35,18 @@ public enum ThreadGroupType {
      * TPS
      */
     DIY(300, "自定义", 2, 0),
+    /**
+     * 流量调试
+     */
+    FLOW_DEBUG(403, "流量调试", 3, 0),
+    /**
+     * 巡检模式
+     */
+    INSPECTION_MODE(404, "巡检模式", 4, 0),
+    /**
+     * 试跑模式
+     */
+    TRY_RUN(405, "试跑模式", 5, 0),
     // 格式化用
     ;
     @Getter
