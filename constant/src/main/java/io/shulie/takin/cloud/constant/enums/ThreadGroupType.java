@@ -6,7 +6,10 @@ import java.util.HashMap;
 import lombok.Getter;
 import lombok.AllArgsConstructor;
 
+import cn.hutool.core.text.CharSequenceUtil;
+
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * 线程组类型
@@ -63,12 +66,29 @@ public enum ThreadGroupType {
     public String toString() {return code + ":" + name + "(" + type + "," + model + ")";}
 
     private static final HashMap<Integer, ThreadGroupType> EXAMPLE_MAP = new HashMap<>(6);
+    private static final HashMap<String, ThreadGroupType> TYPE_MODE_EXAMPLE_MAP = new HashMap<>(6);
 
     static {
-        Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));
+        Arrays.stream(values()).forEach(t -> {
+            EXAMPLE_MAP.put(t.getCode(), t);
+            TYPE_MODE_EXAMPLE_MAP.put(CharSequenceUtil.format("{}_{}", t.getType(), t.getModel()), t);
+        });
     }
 
+    @JsonCreator
     public static ThreadGroupType of(Integer code) {
         return EXAMPLE_MAP.get(code);
+    }
+
+    /**
+     * 通过type和mode兑换枚举
+     *
+     * @param type  -
+     * @param mode-
+     * @return -
+     */
+    @SuppressWarnings("unused")
+    public static ThreadGroupType ofTypeMode(Integer type, Integer mode) {
+        return TYPE_MODE_EXAMPLE_MAP.get(CharSequenceUtil.format("{}_{}", type, mode));
     }
 }
