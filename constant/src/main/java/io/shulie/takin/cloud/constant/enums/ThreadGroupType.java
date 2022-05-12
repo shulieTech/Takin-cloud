@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.constant.enums;
 
+import java.util.Map;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -49,7 +50,7 @@ public enum ThreadGroupType {
     /**
      * 试跑模式
      */
-    TRY_RUN(405, "试跑模式", 5, 0),
+    TRY_RUN(405, "试跑模式(脚本调试)", 5, 0),
     // 格式化用
     ;
     @Getter
@@ -65,8 +66,8 @@ public enum ThreadGroupType {
     @Override
     public String toString() {return code + ":" + name + "(" + type + "," + model + ")";}
 
-    private static final HashMap<Integer, ThreadGroupType> EXAMPLE_MAP = new HashMap<>(6);
-    private static final HashMap<String, ThreadGroupType> TYPE_MODE_EXAMPLE_MAP = new HashMap<>(6);
+    private static final Map<Integer, ThreadGroupType> EXAMPLE_MAP = new HashMap<>(6);
+    private static final Map<String, ThreadGroupType> TYPE_MODE_EXAMPLE_MAP = new HashMap<>(6);
 
     static {
         Arrays.stream(values()).forEach(t -> {

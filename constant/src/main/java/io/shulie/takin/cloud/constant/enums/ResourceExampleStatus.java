@@ -1,11 +1,13 @@
 package io.shulie.takin.cloud.constant.enums;
 
+import java.util.Map;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.AllArgsConstructor;
+
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * 任务实例状态
@@ -27,7 +29,7 @@ public enum ResourceExampleStatus {
     private final Integer code;
     private final String description;
 
-    private static final HashMap<Integer, ResourceExampleStatus> EXAMPLE_MAP = new HashMap<>(6);
+    private static final Map<Integer, ResourceExampleStatus> EXAMPLE_MAP = new HashMap<>(6);
 
     static {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));

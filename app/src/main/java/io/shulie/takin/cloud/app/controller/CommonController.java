@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.app.controller;
 
+import java.util.Map;
 import java.util.HashMap;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,8 +34,8 @@ public class CommonController {
 
     @Operation(summary = "版本信息")
     @GetMapping("version")
-    public ApiResult<HashMap<String, Object>> version() {
-        HashMap<String, Object> result = new HashMap<>(2);
+    public ApiResult<Map<String, Object>> version() {
+        Map<String, Object> result = new HashMap<>(2);
         result.put("version", watchmanConfig.getApplicationVersion());
         return ApiResult.success(result);
     }

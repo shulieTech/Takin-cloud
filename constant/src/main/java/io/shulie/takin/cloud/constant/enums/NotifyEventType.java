@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.constant.enums;
 
+import java.util.Map;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -35,7 +36,7 @@ public enum NotifyEventType {
     @Getter
     private final Integer code;
     private final String description;
-    private static final HashMap<Integer, NotifyEventType> EXAMPLE_MAP = new HashMap<>(6);
+    private static final Map<Integer, NotifyEventType> EXAMPLE_MAP = new HashMap<>(6);
 
     static {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));

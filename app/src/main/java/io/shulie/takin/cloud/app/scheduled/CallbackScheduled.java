@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.app.scheduled;
 
+import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.concurrent.TimeUnit;
 import java.nio.charset.StandardCharsets;
@@ -9,6 +10,8 @@ import java.util.concurrent.RejectedExecutionException;
 
 import javax.annotation.PostConstruct;
 
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.http.ContentType;
@@ -86,9 +89,9 @@ public class CallbackScheduled {
     public static class Exec implements Runnable {
         private final CallbackEntity entity;
         private final CallbackService service;
-        private final LinkedHashMap<Long, Boolean> cache;
+        private final Map<Long, Boolean> cache;
 
-        Exec(CallbackEntity callbackEntity, CallbackService callbackService, LinkedHashMap<Long, Boolean> cacheData) {
+        Exec(CallbackEntity callbackEntity, CallbackService callbackService, Map<Long, Boolean> cacheData) {
             this.cache = cacheData;
             this.entity = callbackEntity;
             this.service = callbackService;
@@ -108,16 +111,17 @@ public class CallbackScheduled {
                 return;
             }
             // 开始执行回调
-            byte[] response;
+            byte[] responseData;
             try {
-                response = HttpUtil
+                HttpRequest request = HttpUtil
                     .createPost(entity.getUrl())
                     .contentType(ContentType.JSON.getValue())
                     .setConnectionTimeout(3000)
-                    .body(entity.getContext())
-                    .execute()
-                    .bodyBytes();
-                boolean completed = service.fillLog(callbackLogId, response);
+                    .body(entity.getContext());
+                try (HttpResponse response = request.execute()) {
+                    responseData = response.bodyBytes();
+                }
+                boolean completed = service.fillLog(callbackLogId, responseData);
                 cache.put(entity.getId(), completed);
             } catch (Exception e) {
                 log.error("单次过程失败.\n", e);
