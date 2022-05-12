@@ -1,9 +1,11 @@
 package io.shulie.takin.cloud.constant.enums;
 
+import java.util.Map;
 import java.util.Arrays;
 import java.util.HashMap;
 
 import lombok.Getter;
+import lombok.AllArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -12,6 +14,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
+@Getter
+@AllArgsConstructor
 public enum CommandType {
     /**
      * 锁定资源
@@ -39,15 +43,11 @@ public enum CommandType {
     MODIFY_THREAD_CONFIG(302),
     // 格式化用
     ;
-    @Getter
+
     @JsonValue
     private final int value;
 
-    CommandType(int value) {
-        this.value = value;
-    }
-
-    private static final HashMap<Integer, CommandType> EXAMPLE_MAP = new HashMap<>(6);
+    private static final Map<Integer, CommandType> EXAMPLE_MAP = new HashMap<>(6);
 
     static {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getValue(), t));

@@ -85,9 +85,9 @@ public class CommandServiceImpl implements CommandService {
         // 获取资源实例
         List<ResourceExampleEntity> resourceExampleEntityList = resourceService.listExample(resourceEntity.getId());
         // 组装命令内容
-        List<HashMap<String, Object>> exampleList = resourceExampleEntityList.stream()
+        List<Map<String, Object>> exampleList = resourceExampleEntityList.stream()
             .map(t -> {
-                HashMap<String, Object> data = new HashMap<>(8);
+                Map<String, Object> data = new HashMap<>(8);
                 data.put("id", t.getId());
                 data.put("cpu", t.getCpu());
                 data.put("image", t.getImage());
@@ -101,12 +101,12 @@ public class CommandServiceImpl implements CommandService {
             .collect(Collectors.toList());
         // 补充index
         long minId = resourceExampleEntityList.stream().mapToLong(ResourceExampleEntity::getId).min().orElse(1);
-        for (HashMap<String, Object> item : exampleList) {
+        for (Map<String, Object> item : exampleList) {
             long id = Long.parseLong(item.get("id").toString());
             item.put("indexNumber", (id - minId) + 1);
         }
         // 组装数据
-        HashMap<String, Object> content = new HashMap<>(3);
+        Map<String, Object> content = new HashMap<>(3);
         content.put("type", 1);
         content.put("example", exampleList);
         content.put(Message.RESOURCE_ID, resourceId);
@@ -123,7 +123,7 @@ public class CommandServiceImpl implements CommandService {
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(resourceId);
         if (resourceEntity == null) {throw new IllegalArgumentException("未找到资源:" + resourceId);}
-        HashMap<String, Object> content = new HashMap<>(1);
+        Map<String, Object> content = new HashMap<>(1);
         content.put("resourceId", resourceEntity.getId());
         long commandId = create(resourceEntity.getWatchmanId(), CommandType.RELEASE_RESOURCE, jsonService.writeValueAsString(content));
         log.info("下发命令:释放资源:{},命令主键{}.", resourceId, commandId);
@@ -154,7 +154,7 @@ public class CommandServiceImpl implements CommandService {
         if (jobEntity == null) {throw new IllegalArgumentException("未找到任务:" + jobId);}
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
-        HashMap<String, Object> content = new HashMap<>(3);
+        Map<String, Object> content = new HashMap<>(3);
         content.put("jobId", jobEntity.getId());
         content.put(Message.TASK_ID, jobEntity.getId());
         content.put(Message.RESOURCE_ID, jobEntity.getResourceId());
@@ -173,7 +173,7 @@ public class CommandServiceImpl implements CommandService {
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
         // 声明命令内容
-        List<HashMap<String, Object>> content = new ArrayList<>();
+        List<Map<String, Object>> content = new ArrayList<>();
         // 获取所有的线程配置实例
         List<ThreadConfigExampleEntity> threadConfigExampleEntityList = threadConfigExampleMapperService.lambdaQuery()
             .eq(ThreadConfigExampleEntity::getJobId, jobEntity.getId()).list();
@@ -183,9 +183,9 @@ public class CommandServiceImpl implements CommandService {
         // 根据分组聚合数值
         groupByRef.forEach((k, v) -> {
             // 列出所有的项
-            List<HashMap<String, String>> contextList = new ArrayList<>();
+            List<Map<String, String>> contextList = new ArrayList<>();
             for (ThreadConfigExampleEntity threadConfigExampleEntity : v) {
-                HashMap<String, String> configExampleContent = jsonService.readValue(threadConfigExampleEntity.getContext(), new TypeReference<HashMap<String, String>>() {});
+                Map<String, String> configExampleContent = jsonService.readValue(threadConfigExampleEntity.getContext(), new TypeReference<Map<String, String>>() {});
                 if (configExampleContent != null) {
                     contextList.add(configExampleContent);
                 }
@@ -195,13 +195,13 @@ public class CommandServiceImpl implements CommandService {
             // TPS数
             double tpsSum = contextList.stream().mapToDouble(t -> NumberUtil.parseDouble(t.getOrDefault(Message.TPS_NUMBER, "0.0"))).sum();
             // 组装对象
-            HashMap<String, Object> contentItem = new HashMap<>(3);
+            Map<String, Object> contentItem = new HashMap<>(3);
             contentItem.put("ref", k);
             contentItem.put("tps", tpsSum);
             contentItem.put("number", numberSum);
             content.add(contentItem);
         });
-        HashMap<String, Object> result = new HashMap<>(3);
+        Map<String, Object> result = new HashMap<>(3);
         result.put("content", content);
         result.put("jobId", jobEntity.getId());
         result.put("taskId", jobEntity.getId());
@@ -232,7 +232,7 @@ public class CommandServiceImpl implements CommandService {
      * {@inheritDoc}
      */
     public boolean ack(long id, String type, String message) {
-        HashMap<String, String> content = new HashMap<>(2);
+        Map<String, String> content = new HashMap<>(2);
         content.put("type", type);
         content.put("message", message);
         return commandMapperService.lambdaUpdate()
@@ -266,16 +266,12 @@ public class CommandServiceImpl implements CommandService {
     public String packageStartJob(long jobId) {
         // 任务
         JobEntity jobEntity = jobService.jobEntity(jobId);
-        // 资源
-        ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
         // 线程组配置
         List<ThreadConfigEntity> threadConfigEntityList =
-            threadConfigMapperService.lambdaQuery()
-                .eq(ThreadConfigEntity::getJobId, jobId).list();
+            threadConfigMapperService.lambdaQuery().eq(ThreadConfigEntity::getJobId, jobId).list();
         // 压测指标配置
-        List<MetricsEntity> metricsEntityList = metricsMapperService.lambdaQuery()
-            .eq(MetricsEntity::getJobId, jobId).list();
-        HashMap<String, Object> basicConfig = new HashMap<>(32);
+        List<MetricsEntity> metricsEntityList = metricsMapperService.lambdaQuery().eq(MetricsEntity::getJobId, jobId).list();
+        Map<String, Object> basicConfig = new HashMap<>(32);
         basicConfig.put("taskId", jobId);
         basicConfig.put("pressureType", jobEntity.getType());
         basicConfig.put("resourceId", jobEntity.getResourceId());
@@ -286,7 +282,7 @@ public class CommandServiceImpl implements CommandService {
         basicConfig.put("logQueueSize", watchmanConfig.getLogQueueSize());
         basicConfig.put("backendQueueCapacity", watchmanConfig.getBackendQueueCapacity());
         basicConfig.put("tpsTargetLevelFactor", watchmanConfig.getTpsTargetLevelFactor());
-        HashMap<Object, Object> ptlLogConfig = new HashMap<>(6);
+        Map<Object, Object> ptlLogConfig = new HashMap<>(6);
         ptlLogConfig.put("logCutOff", watchmanConfig.getLogCutOff());
         ptlLogConfig.put("ptlFileEnable", watchmanConfig.getPtlFileEnable());
         ptlLogConfig.put("ptlUploadFrom", watchmanConfig.getPtlUploadFrom());
@@ -297,8 +293,6 @@ public class CommandServiceImpl implements CommandService {
         basicConfig.put("businessMap", "后续填充");
         basicConfig.put("dataFileList", "后续填充");
         basicConfig.put("threadGroupConfigMap", "后续填充");
-        // 调试模式下,需要取调试次数
-        basicConfig.put("loopsNum", null);
         // 最大线程数 (以前是直接传null的，韵达改了一个版本，传入具体值， 但是有问题，所以还是传null)
         basicConfig.put("maxThreadNum", null);
         // 固定是0的
@@ -307,26 +301,44 @@ public class CommandServiceImpl implements CommandService {
         basicConfig.put("bindByXpathMd5", true);
         // 以前的文件里面没有用到
         basicConfig.put("tpsTargetLevel", null);
-        // 并发模式下为并发数 TPS模式下为tps (原来的配置中没传，暂时为空)
-        basicConfig.put("expectThroughput", null);
-        // 下面的应该不用填
-        basicConfig.put("consoleUrl", null);
-        basicConfig.put("customerId", null);
         // 填充文件
         // 获取所有文件
-        List<JobFileEntity> jobFileEntityList = jobFileMapperService.lambdaQuery().eq(JobFileEntity::getJobId, jobEntity.getId()).list();
+        List<Map<String, Object>> dataFileList = packageStartJobWhitJobFile(jobEntity.getId(), jobEntity.getResourceExampleNumber());
+        basicConfig.put("dataFileList", dataFileList);
+        // 压测指标配置
+        Map<String, Map<String, Object>> businessMap = packageStartJobWhitBusinessMap(metricsEntityList);
+        basicConfig.put("businessMap", businessMap);
+        // 线程组配置
+        Map<String, Map<String, Object>> threadGroupConfigMap = packageStartJobWhitThreadGroupConfig(threadConfigEntityList);
+        basicConfig.put("threadGroupConfigMap", threadGroupConfigMap);
+        // 如果是试跑(脚本调试)
+        Map<String, String> ext = packageStartJobTryRun(threadConfigEntityList);
+        if (!ext.isEmpty()) {basicConfig.putAll(ext);}
+        // 输出成JSON
+        return jsonService.writeValueAsString(basicConfig);
+    }
+
+    /**
+     * 组装启动任务命令-文件
+     *
+     * @param jobId  任务主键
+     * @param number 任务实例数
+     * @return 文件信息
+     */
+    private List<Map<String, Object>> packageStartJobWhitJobFile(long jobId, int number) {
+        List<JobFileEntity> jobFileEntityList = jobFileMapperService.lambdaQuery().eq(JobFileEntity::getJobId, jobId).list();
         Map<String, List<JobFileEntity>> fileInfo = jobFileEntityList.stream().collect(Collectors.groupingBy(JobFileEntity::getUri));
-        List<HashMap<String, Object>> dataFileList = new ArrayList<>();
+        List<Map<String, Object>> dataFileList = new ArrayList<>();
         fileInfo.forEach((k, v) -> {
             JobFileEntity info = v.get(0);
             boolean split = !Long.valueOf(-1).equals(info.getStartPoint()) && !Long.valueOf(-1).equals(info.getEndPoint());
-            Map<String, List<HashMap<String, Object>>> splitInfo = new HashMap<>(resourceEntity.getNumber());
+            Map<String, List<Map<String, Object>>> splitInfo = new HashMap<>(number);
             if (split) {
-                for (int i = 0; i < resourceEntity.getNumber(); i++) {
-                    List<HashMap<String, Object>> itemSplitInfo = new ArrayList<>(v.size());
+                for (int i = 0; i < number; i++) {
+                    List<Map<String, Object>> itemSplitInfo = new ArrayList<>(v.size());
                     for (int j = 0, vSize = v.size(); j < vSize; j++) {
                         JobFileEntity t = v.get(j);
-                        HashMap<String, Object> config = new HashMap<>(4);
+                        Map<String, Object> config = new HashMap<>(4);
                         config.put("partition", j);
                         config.put("end", t.getEndPoint());
                         config.put("start", t.getStartPoint());
@@ -335,7 +347,7 @@ public class CommandServiceImpl implements CommandService {
                     splitInfo.put(String.valueOf(i), itemSplitInfo);
                 }
             }
-            HashMap<String, Object> config = new HashMap<>(16);
+            Map<String, Object> config = new HashMap<>(16);
             config.put("split", split);
             config.put("refId", null);
             config.put("ordered", null);
@@ -347,14 +359,21 @@ public class CommandServiceImpl implements CommandService {
             config.put("name", FileUtil.getName(info.getUri()));
             dataFileList.add(config);
         });
-        basicConfig.put("dataFileList", dataFileList);
+        return dataFileList;
+    }
 
-        // 压测指标配置
-        HashMap<String, HashMap<String, Object>> businessMap = new HashMap<>(metricsEntityList.size());
+    /**
+     * 组装启动任务命令-压测指标-目标
+     *
+     * @param metricsEntityList 压测指标-目标实体 集合
+     * @return 压测指标-目标
+     */
+    private Map<String, Map<String, Object>> packageStartJobWhitBusinessMap(List<MetricsEntity> metricsEntityList) {
+        Map<String, Map<String, Object>> businessMap = new HashMap<>(metricsEntityList.size());
         metricsEntityList.forEach(t -> {
-            HashMap<String, Object> metrics = new HashMap<>(5);
+            Map<String, Object> metrics = new HashMap<>(5);
             try {
-                HashMap<String, String> context = jsonService.readValue(t.getContext(), new TypeReference<HashMap<String, String>>() {});
+                Map<String, String> context = jsonService.readValue(t.getContext(), new TypeReference<Map<String, String>>() {});
                 metrics.putAll(context);
                 metrics.put("bindRef", t.getRef());
                 metrics.put("activityName", t.getRef());
@@ -364,14 +383,22 @@ public class CommandServiceImpl implements CommandService {
             }
             businessMap.put(t.getRef(), metrics);
         });
-        basicConfig.put("businessMap", businessMap);
-        // 线程组配置
-        HashMap<String, HashMap<String, Object>> threadGroupConfigMap = new HashMap<>(threadConfigEntityList.size());
+        return businessMap;
+    }
+
+    /**
+     * 组装启动任务命令-线程组配置
+     *
+     * @param threadConfigEntityList 线程组配置实体 集合
+     * @return 线程组配置
+     */
+    private Map<String, Map<String, Object>> packageStartJobWhitThreadGroupConfig(List<ThreadConfigEntity> threadConfigEntityList) {
+        Map<String, Map<String, Object>> threadGroupConfigMap = new HashMap<>(threadConfigEntityList.size());
         threadConfigEntityList.forEach(t -> {
             try {
-                HashMap<String, String> context = jsonService.readValue(t.getContext(), new TypeReference<HashMap<String, String>>() {});
+                Map<String, String> context = jsonService.readValue(t.getContext(), new TypeReference<Map<String, String>>() {});
                 ThreadGroupType threadGroupType = ThreadGroupType.of(t.getMode());
-                HashMap<String, Object> threadConfig = new HashMap<>(6);
+                Map<String, Object> threadConfig = new HashMap<>(6);
                 threadConfig.put("rampUpUnit", "s");
                 threadConfig.put("estimateFlow", null);
                 threadConfig.put("steps", context.get("step"));
@@ -384,7 +411,31 @@ public class CommandServiceImpl implements CommandService {
                 log.error("JSON反序列化失败", e);
             }
         });
-        basicConfig.put("threadGroupConfigMap", threadGroupConfigMap);
-        return jsonService.writeValueAsString(basicConfig);
+        return threadGroupConfigMap;
+    }
+
+    /**
+     * 试跑模式(脚本调试)-试跑模式(脚本调试)拓展
+     *
+     * @param threadConfigEntityList 线程组配置
+     * @return 拓展配置
+     */
+    private Map<String, String> packageStartJobTryRun(List<ThreadConfigEntity> threadConfigEntityList) {
+        Map<String, String> context = new HashMap<>(0);
+        String loopsNum = "loopsNum";
+        String expectThroughput = "expectThroughput";
+        context.put(loopsNum, null);
+        context.put(expectThroughput, null);
+        ThreadConfigEntity firstThreadConfig = threadConfigEntityList.get(0);
+        if (firstThreadConfig != null) {
+            Integer modeCode = firstThreadConfig.getMode();
+            ThreadGroupType threadGroupType = ThreadGroupType.of(modeCode);
+            if (threadGroupType.equals(ThreadGroupType.TRY_RUN)) {
+                Map<String, String> threadConfigContext = jsonService.readValue(firstThreadConfig.getContext(), new TypeReference<Map<String, String>>() {});
+                context.put(loopsNum, threadConfigContext.get(loopsNum));
+                context.put(expectThroughput, threadConfigContext.get(expectThroughput));
+            }
+        }
+        return context;
     }
 }

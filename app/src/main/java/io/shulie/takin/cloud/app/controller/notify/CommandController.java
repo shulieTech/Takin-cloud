@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.app.controller.notify;
 
+import java.util.Map;
 import java.util.HashMap;
 
 import cn.hutool.core.date.DateUtil;
@@ -66,7 +67,7 @@ public class CommandController {
         commandService.ack(commandEntity.getId(), "pop", DateUtil.now() + "(pop-ack)");
         Object content = jsonService.readValue(commandEntity.getContent(), Object.class);
         // 返回命令内容
-        HashMap<String, Object> result = new HashMap<>(4);
+        Map<String, Object> result = new HashMap<>(4);
         result.put("content", content);
         result.put("id", commandEntity.getId());
         result.put("type", commandEntity.getType());

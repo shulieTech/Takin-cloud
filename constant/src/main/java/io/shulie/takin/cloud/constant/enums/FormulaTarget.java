@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.constant.enums;
 
+import java.util.Map;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -34,7 +35,7 @@ public enum FormulaTarget {
     @Override
     public String toString() {return code + ":" + description;}
 
-    private static final HashMap<Integer, FormulaTarget> EXAMPLE_MAP = new HashMap<>(6);
+    private static final Map<Integer, FormulaTarget> EXAMPLE_MAP = new HashMap<>(6);
 
     static {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));

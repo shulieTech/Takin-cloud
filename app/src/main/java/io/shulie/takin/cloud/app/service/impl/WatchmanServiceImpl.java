@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -75,7 +76,7 @@ public class WatchmanServiceImpl implements WatchmanService {
             if (!watchmanEventList.getList().isEmpty()) {
                 // 组装返回数据
                 String eventContextString = watchmanEventList.getList().get(0).getContext();
-                HashMap<String, Object> eventContext = jsonService.readValue(eventContextString, new TypeReference<HashMap<String, Object>>() {});
+                Map<String, Object> eventContext = jsonService.readValue(eventContextString, new TypeReference<Map<String, Object>>() {});
                 long resourceTime = Long.parseLong(String.valueOf(eventContext.get("time")));
                 // TODO 要校验时效
                 if (resourceTime < 0) {
@@ -126,7 +127,7 @@ public class WatchmanServiceImpl implements WatchmanService {
             List<WatchmanEventEntity> statusList = watchmanEventMapper.selectList(statusWrapper);
             if (!statusList.isEmpty() && NotifyEventType.WATCHMAN_ABNORMAL.getCode().equals(statusList.get(0).getType())) {
                 WatchmanEventEntity status = statusList.get(0);
-                HashMap<String, Object> eventContext = jsonService.readValue(status.getContext(), new TypeReference<HashMap<String, Object>>() {});
+                Map<String, Object> eventContext = jsonService.readValue(status.getContext(), new TypeReference<Map<String, Object>>() {});
                 String message = eventContext.get(Message.MESSAGE_NAME) == null ? null : eventContext.get(Message.MESSAGE_NAME).toString();
                 return new WatchmanStatusResponse(status.getTime().getTime(), message);
             }
@@ -158,7 +159,7 @@ public class WatchmanServiceImpl implements WatchmanService {
         // 转换校验
         if (!errorMessage.isEmpty()) {throw new IllegalArgumentException(String.join(Message.COMMA, errorMessage));}
         // 组装入库数据
-        HashMap<String, Object> context = new HashMap<>(2);
+        Map<String, Object> context = new HashMap<>(2);
         context.put("time", String.valueOf(System.currentTimeMillis()));
         context.put("data", resourceList);
         // 插入数据库

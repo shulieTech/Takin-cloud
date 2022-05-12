@@ -1,7 +1,7 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import java.util.Map;
 import java.util.List;
-import java.util.HashMap;
 import java.util.ArrayList;
 
 import lombok.extern.slf4j.Slf4j;
@@ -192,7 +192,7 @@ public class ResourceServiceImpl implements ResourceService {
                 } else if (NotifyEventType.RESOUECE_EXAMPLE_ERROR.getCode().equals(type)) {
                     result.setStatus(ResourceExampleStatus.ABNORMAL);
                 }
-                HashMap<String, Object> context = jsonService.readValue(contextString, new TypeReference<HashMap<String, Object>>() {});
+                Map<String, Object> context = jsonService.readValue(contextString, new TypeReference<Map<String, Object>>() {});
                 result.setStatusMessage(context.get(Message.MESSAGE_NAME) == null ? null : context.get(Message.MESSAGE_NAME).toString());
             }
             // 设置资源实例信息
@@ -228,7 +228,7 @@ public class ResourceServiceImpl implements ResourceService {
      */
     void fillResourceExampleOverviewInfo(ResourceExampleEventEntity entity, ResourceExampleOverview result) {
         String contextString = entity.getContext();
-        HashMap<String, Object> context = jsonService.readValue(contextString, new TypeReference<HashMap<String, Object>>() {});
+        Map<String, Object> context = jsonService.readValue(contextString, new TypeReference<Map<String, Object>>() {});
         result.setIp(context.get("ip") == null ? null : context.get("ip").toString());
         result.setName(context.get("name") == null ? null : context.get("name").toString());
         result.setHostIp(context.get("hostIp") == null ? null : context.get("hostIp").toString());

@@ -1,7 +1,7 @@
 package io.shulie.takin.cloud.model.request;
 
+import java.util.Map;
 import java.util.List;
-import java.util.HashMap;
 
 import lombok.Data;
 
@@ -49,7 +49,7 @@ public class StartRequest {
     /**
      * 拓展属性
      */
-    private HashMap<String, Object> ext;
+    private Map<String, Object> ext;
 
     @Data
     @Schema(description = "文件信息")
