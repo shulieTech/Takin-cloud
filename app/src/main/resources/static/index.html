@@ -1,4 +1,5 @@
 <!doctype html>
+<!--suppress ALL -->
 <html lang="zh-CN">
 <head>
     <title>墓志铭</title>
@@ -11,25 +12,67 @@
     <script src="//cdn.staticfile.org/moment.js/2.24.0/moment.js"></script>
     <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
     <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
-
     <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
     <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
-
     <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
     <script src="//stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
     <style>
         table > tfoot > tr > td {
             text-align: center;
         }
+
+        .limit-row-2 {
+            overflow: hidden;
+            user-select: none;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            text-overflow: ellipsis;
+            -webkit-box-orient: vertical;
+        }
+
+        .limit-row-3 {
+            overflow: hidden;
+            user-select: none;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            text-overflow: ellipsis;
+            -webkit-box-orient: vertical;
+        }
     </style>
     <script>
+        function cacheData() {
+            localStorage.setItem('jobId', $('#jobId').val());
+            localStorage.setItem('resourceId', $('#resourceId').val());
+        }
+
+        function getData() {
+            return {
+                jobId: localStorage.getItem('jobId'),
+                resourceId: localStorage.getItem('resourceId'),
+            }
+        }
+
         $(function () {
+            // 缓存数据
+            let oldData = getData();
+            $('#jobId').val(oldData.jobId);
+            $('#resourceId').val(oldData.resourceId);
+            // 回车键入
+            $(document).keydown(function (event) {
+                if (event.keyCode == 13) {
+                    $('#load').click();
+                } else if (event.keyCode == 27) {
+                    $('div.modal').hide();
+                }
+            });
+            // api查询
             $('#load').click(function () {
+                cacheData();
+                let data = getData();
                 let tbody = $('table tbody');
                 let tfoot = $('table tfoot');
                 tfoot.show()
                 tbody.html('');
-                let data = {jobId: $('#jobId').val(), resourceId: $('#resourceId').val()};
                 $.post('/gravestone/read', data, function (data) {
                     debugger
                     if (!data.success) {
@@ -38,9 +81,30 @@
                         let list = data.data;
                         for (let i = 0; i < list.length; i++) {
                             let time = moment(list[i].time).format('YYYY-MM-DD HH:mm:ss');
-                            tbody.append(
-                                `<tr><td>${time}</td><td>${list[i].type}</td><td>${list[i].content}</td></tr>`
-                            )
+                            let tr = $(`<tr>
+<td style="vertical-align: middle;text-align: center;">${time}</td>
+<td style="vertical-align: middle;text-align: center;">${list[i].type}</td>
+<td>${list[i].content}</td></tr>`);
+                            let typeElement = $(tr.children().get(1));
+                            let contentElement = $(tr.children().get(2));
+                            if (list[i].type.indexOf('创建') >= 0) {
+                                typeElement.addClass('info')
+                            }
+                            if (list[i].type.indexOf('停止') >= 0) {
+                                typeElement.addClass('danger')
+                            }
+                            if (list[i].type == '资源实例信息') {
+                                typeElement.addClass('warning')
+                                let html = contentElement.html()
+                                contentElement.html('')
+                                let temp = $(`<div class="text-muted limit-row-3">${html}</div>`);
+                                temp.click(function () {
+                                    $('div.modal>div.modal-dialog>div.modal-content>div.modal-body>textarea').html(html)
+                                    $('div.modal').show()
+                                });
+                                contentElement.append(temp)
+                            }
+                            tbody.append(tr)
                         }
                     }
                 }).fail(function () {
@@ -54,6 +118,7 @@
 </head>
 <body>
 <div class="container-fluid">
+    <br/>
     <form class="form-inline">
         <div class="form-group">
             <label for="resourceId">资源主键</label>
@@ -65,7 +130,7 @@
         </div>
         <button type="button" class="btn btn-default" id="load">加载</button>
     </form>
-    <table class="table table-bordered table-hover table-condensed table-striped">
+    <table class="table table-bordered table-condensed">
         <thead>
         <tr>
             <td style="width: 144px;">时间</td>
@@ -74,15 +139,30 @@
         </tr>
         </thead>
         <tbody></tbody>
-        <tfoot>
+        <tfoot style="display: none">
         <tr>
             <td colspan="3">加载中</td>
         </tr>
         </tfoot>
     </table>
+    <div class="well well-sm text-center">
+        <samp>✞息止安所✞</samp>
+    </div>
 </div>
-<div class="page-header">
-    <h1>息止安所 <small>信仰永存</small></h1>
+<div class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="$('div.modal').hide()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">事件内容</h4>
+            </div>
+            <div class="modal-body">
+                <textarea style="resize: none;width: 565px; height: 200px;"></textarea>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>
