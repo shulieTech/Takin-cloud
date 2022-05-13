@@ -29,6 +29,7 @@ public class ApiResult<T> {
     /**
      * 成功
      *
+     * @param <T> 数据泛型
      * @return 成功的API结果
      */
     public static <T> ApiResult<T> success() {
@@ -39,6 +40,7 @@ public class ApiResult<T> {
      * 成功
      *
      * @param data 数据体
+     * @param <T>  数据泛型
      * @return 成功的API结果
      */
     public static <T> ApiResult<T> success(T data) {
@@ -50,6 +52,7 @@ public class ApiResult<T> {
      *
      * @param data  数据体
      * @param total 数据总条数
+     * @param <T>   数据泛型
      * @return 成功的API结果
      */
     public static <T> ApiResult<T> success(T data, Long total) {
@@ -61,6 +64,7 @@ public class ApiResult<T> {
      *
      * @param data 数据体
      * @param msg  成功信息
+     * @param <T>  数据泛型
      * @return 成功的API结果
      */
     public static <T> ApiResult<T> success(T data, String msg) {
@@ -73,6 +77,7 @@ public class ApiResult<T> {
      * @param data  数据体
      * @param total 数据总条数
      * @param msg   成功信息
+     * @param <T>   数据泛型
      * @return 成功的API结果
      */
     public static <T> ApiResult<T> success(T data, Long total, String msg) {

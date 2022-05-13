@@ -95,6 +95,10 @@ public class MetricsServiceImpl implements MetricsService {
 
     /**
      * 统计每个时间窗口pod调用数量
+     *
+     * @param jobExampleId 任务实例主键
+     * @param time         时间窗口
+     * @param ip           IP地址
      */
     public void statisticalIp(Long jobExampleId, long time, String ip) {
         // 时间窗口缓存Key

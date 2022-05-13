@@ -12,7 +12,6 @@ import org.influxdb.annotation.Column;
  *
  * @author qianshui
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
- * @date 2020/7/20 下午4:34
  */
 public class InfluxUtil {
     private InfluxUtil() {}
@@ -21,6 +20,9 @@ public class InfluxUtil {
 
     /**
      * 指标数据上报的数据表
+     *
+     * @param jobExampleId 任务实例主键
+     * @return 表名
      */
     public static String getMetricsMeasurement(Long jobExampleId) {
         return getMeasurement("metrics", jobExampleId);
@@ -28,6 +30,10 @@ public class InfluxUtil {
 
     /**
      * 拼装influxdb表名
+     *
+     * @param jobExampleId    任务实例主键
+     * @param measurementName 名称
+     * @return 表名
      */
     public static String getMeasurement(String measurementName, Long jobExampleId) {
         return String.format("%s_%s", measurementName, jobExampleId);
@@ -35,6 +41,11 @@ public class InfluxUtil {
 
     /**
      * 数据转换，将ResponseMetrics转换成influxdb入库对象Point
+     *
+     * @param measurement 表名
+     * @param time        时间
+     * @param pojo        对象
+     * @return point
      */
     public static Point toPoint(String measurement, long time, Object pojo) {
         Point.Builder builder = Point.measurement(measurement)
@@ -48,6 +59,11 @@ public class InfluxUtil {
         return builder.build();
     }
 
+    /**
+     * @param builder -
+     * @param pojo    -
+     * @param clazz   -
+     */
     private static void addSuperClassFieldsFromPojo(Point.Builder builder, Object pojo, Class<?> clazz) {
         for (Field field : clazz.getDeclaredFields()) {
             Column column = field.getAnnotation(Column.class);
@@ -63,6 +79,13 @@ public class InfluxUtil {
         }
     }
 
+    /**
+     * @param builder   -
+     * @param pojo      -
+     * @param field     -
+     * @param column    -
+     * @param fieldName -
+     */
     @SuppressWarnings("deprecation")
     private static void addFieldByAttribute(final Point.Builder builder, final Object pojo, final Field field, final Column column, final String fieldName) {
         try {

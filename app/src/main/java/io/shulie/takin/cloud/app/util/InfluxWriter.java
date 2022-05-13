@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Value;
 /**
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
- * @date 2020-04-20 14:25
  */
 @Slf4j
 @Component
@@ -102,6 +101,9 @@ public class InfluxWriter {
 
     /**
      * 插入数据
+     *
+     * @param point -
+     * @return true/false
      */
     public boolean insert(Point point) {
         try {
@@ -116,6 +118,7 @@ public class InfluxWriter {
     /**
      * 查询数据
      *
+     * @param command 查询命令
      * @return -
      */
     public List<QueryResult.Result> select(String command) {

@@ -7,7 +7,6 @@ import io.shulie.takin.cloud.constant.CollectorConstants;
 
 /**
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
- * @date 2020-04-20 20:38
  */
 @SuppressWarnings("unused")
 public class CollectorUtil {
@@ -33,9 +32,9 @@ public class CollectorUtil {
     /**
      * 时间窗口格式化
      * 取值 5秒以内
-     * >0 - <=5 取值 秒：5
-     * >5 - <=10 取值 秒：10
-     * >55 - <=60 取值 秒：0   分钟：+1
+     * &gt;0 - &lt;=5 取值 秒：5
+     * &gt;5 - &lt;=10 取值 秒：10
+     * &gt;55 - &lt;=60 取值 秒：0   分钟：+1
      *
      * @param timestamp 时间戳
      * @return -
@@ -78,6 +77,8 @@ public class CollectorUtil {
 
     /**
      * 获取当前时间的时间窗口，时间窗口在当前时间搓往前推一个窗口
+     *
+     * @return 前推后的时间窗口
      */
     public static long getNowTimeWindow() {
         Calendar instance = getTimeWindow(System.currentTimeMillis());

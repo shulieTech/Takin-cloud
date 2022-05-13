@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author shulie
  * @version v1.0
- * @date 2018年5月21日
  */
 @Slf4j
 public class IpUtils {
@@ -30,7 +29,6 @@ public class IpUtils {
      * @param httpServletRequest http请求
      * @return 用户的ip地址
      * @author shulie
-     * @date 2018年5月21日
      */
     public static String getIp(HttpServletRequest httpServletRequest) {
 
@@ -76,7 +74,6 @@ public class IpUtils {
      * @param ipString 字符串ip地址
      * @return long型的ip地址
      * @author shulie
-     * @date 2018年5月21日
      */
     public static long ipToLong(String ipString) {
         if (ipString == null || "".equals(ipString)) {
@@ -98,7 +95,6 @@ public class IpUtils {
      *
      * @return -
      * @author shulie
-     * @date 2017年10月5日 下午2:46:05
      */
     public static boolean isWindowOs() {
         return CharSequenceUtil.containsIgnoreCase(System.getProperty("os.name"), "windows");
@@ -109,7 +105,6 @@ public class IpUtils {
      *
      * @return -
      * @author shulie
-     * @date 2017年10月5日 下午2:46:42
      */
     public static InetAddress getInetAddress() {
         try {
