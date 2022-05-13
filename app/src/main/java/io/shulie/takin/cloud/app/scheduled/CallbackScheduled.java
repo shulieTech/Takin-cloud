@@ -10,11 +10,11 @@ import java.util.concurrent.RejectedExecutionException;
 
 import javax.annotation.PostConstruct;
 
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.http.ContentType;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import com.github.pagehelper.PageInfo;
 
 import io.shulie.takin.cloud.app.entity.CallbackEntity;
@@ -113,15 +113,17 @@ public class CallbackScheduled {
             // 开始执行回调
             byte[] responseData;
             try {
-                HttpRequest request = HttpUtil
-                    .createPost(entity.getUrl())
-                    .contentType(ContentType.JSON.getValue())
-                    .setConnectionTimeout(3000)
-                    .body(entity.getContext());
+                // 组装请求
+                HttpRequest request = HttpUtil.createPost(entity.getUrl());
+                request.contentType(ContentType.JSON.getValue());
+                request.setConnectionTimeout(3000).body(entity.getContext());
+                // 接收相应
                 try (HttpResponse response = request.execute()) {
                     responseData = response.bodyBytes();
                 }
+                // 记录日志
                 boolean completed = service.fillLog(callbackLogId, responseData);
+                // 更新缓存
                 cache.put(entity.getId(), completed);
             } catch (Exception e) {
                 log.error("单次过程失败.\n", e);

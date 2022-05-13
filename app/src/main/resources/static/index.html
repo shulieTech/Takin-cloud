@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <title>墓志铭</title>
+    <meta charset="utf-8"/>
+    <link rel="icon" href="./favicon.ico"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <!--  三方库  -->
+    <script src="//code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="//cdn.staticfile.org/moment.js/2.24.0/moment.js"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+    <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="//stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+    <style>
+        table > tfoot > tr > td {
+            text-align: center;
+        }
+    </style>
+    <script>
+        $(function () {
+            $('#load').click(function () {
+                let tbody = $('table tbody');
+                let tfoot = $('table tfoot');
+                tfoot.show()
+                tbody.html('');
+                let data = {jobId: $('#jobId').val(), resourceId: $('#resourceId').val()};
+                $.post('/gravestone/read', data, function (data) {
+                    debugger
+                    if (!data.success) {
+                        alert(data.msg)
+                    } else {
+                        let list = data.data;
+                        for (let i = 0; i < list.length; i++) {
+                            let time = moment(list[i].time).format('YYYY-MM-DD HH:mm:ss');
+                            tbody.append(
+                                `<tr><td>${time}</td><td>${list[i].type}</td><td>${list[i].content}</td></tr>`
+                            )
+                        }
+                    }
+                }).fail(function () {
+                    alert("error");
+                }).always(function () {
+                    tfoot.hide();
+                });
+            });
+        })
+    </script>
+</head>
+<body>
+<div class="container-fluid">
+    <form class="form-inline">
+        <div class="form-group">
+            <label for="resourceId">资源主键</label>
+            <input type="number" class="form-control" id="resourceId" step="1" min="1" placeholder="必填项">
+        </div>
+        <div class="form-group">
+            <label for="jobId">任务主键</label>
+            <input type="number" class="form-control" id="jobId" step="1" min="1" placeholder="非必填">
+        </div>
+        <button type="button" class="btn btn-default" id="load">加载</button>
+    </form>
+    <table class="table table-bordered table-hover table-condensed table-striped">
+        <thead>
+        <tr>
+            <td style="width: 144px;">时间</td>
+            <td style="width: 144px;">类型</td>
+            <td>内容</td>
+        </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+        <tr>
+            <td colspan="3">加载中</td>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+<div class="page-header">
+    <h1>息止安所 <small>信仰永存</small></h1>
+</div>
+</body>
+</html>
