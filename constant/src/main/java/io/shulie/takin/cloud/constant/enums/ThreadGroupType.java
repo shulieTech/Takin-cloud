@@ -84,8 +84,8 @@ public enum ThreadGroupType {
     /**
      * 通过type和mode兑换枚举
      *
-     * @param type  -
-     * @param mode-
+     * @param type -
+     * @param mode -
      * @return -
      */
     @SuppressWarnings("unused")

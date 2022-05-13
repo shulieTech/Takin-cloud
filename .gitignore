@@ -4,5 +4,3 @@
 /logs
 # gradle
 .gradle
-
-/gradle/wrapper/gradle-wrapper.jar
