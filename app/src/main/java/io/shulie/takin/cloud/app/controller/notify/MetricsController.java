@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.app.controller.notify;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,7 +50,8 @@ public class MetricsController {
         @Parameter(description = "任务实例主键", required = true) @RequestParam Long jobExampleId,
         @Parameter(description = "聚合的指标数据", required = true) @RequestBody List<MetricsInfo> data,
         HttpServletRequest request) {
-        metricsService.upload(jobId, jobExampleId, data, IpUtils.getIp(request));
+        List<MetricsInfo> filterData = data.stream().filter(t -> "response".equals(t.getType())).collect(Collectors.toList());
+        metricsService.upload(jobId, jobExampleId, filterData, IpUtils.getIp(request));
         return ApiResult.success();
     }
 
