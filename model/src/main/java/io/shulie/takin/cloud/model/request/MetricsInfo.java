@@ -88,4 +88,8 @@ public class MetricsInfo {
      */
     @Column(tag = true, name = "pod_no")
     private String podNo;
+    /**
+     * 上报的数据类型
+     */
+    private String type;
 }
