@@ -23,7 +23,8 @@ public class Message {
     public static final String UNKOWN_COMMAND_TYPE = "错误的命令类型:{}";
     public static final String EMPTY_METRICS_LIST = "空的指标数据集合";
     public static final String RESOURCE_SHORTAGE = "资源不足";
-    public static final String COMMA=",";
-    public static final String UNKNOWN="unknown";
+    public static final String COMMA = ",";
+    public static final String UNKNOWN = "unknown";
+    public static final String SCHEDULE_LOCK_KEY = "SCHEDULE_LOCK_{}";
 
 }

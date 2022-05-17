@@ -51,4 +51,12 @@ public class Swagger {
             .build();
     }
 
+    @Bean
+    public GroupedOpenApi excessJobApi() {
+        return GroupedOpenApi.builder()
+            .group("额外的任务")
+            .pathsToMatch("/excess/job/**")
+            .build();
+    }
+
 }
