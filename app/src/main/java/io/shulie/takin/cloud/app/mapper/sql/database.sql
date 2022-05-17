@@ -24,6 +24,24 @@ create table if not exists t_callback_log
     constraint t_callback_log_t_callback_id_fk foreign key (callback_id) references t_callback (id)
 )comment '回调日志';
 
+create table if not exists t_excess_job
+(
+    id bigint auto_increment comment '主键' primary key,
+    type int not null comment '任务类型',
+    content varchar(512) charset utf8 not null comment '任务内容',
+    completed tinyint(1) default 0 not null comment '是否完成',
+    create_time timestamp default CURRENT_TIMESTAMP not null comment '创建时间'
+)comment '额外的任务';
+
+create table if not exists t_excess_job_log
+(
+    id bigint auto_increment comment '主键' primary key,
+    schedule_id bigint not null comment '定时任务主键',
+    time timestamp default CURRENT_TIMESTAMP not null comment '时间',
+    content varchar(512) charset utf8 not null comment '执行结果',
+    completed tinyint(1) default 0 not null comment '是否完成'
+)comment '额外的任务-运行记录';
+
 create table if not exists t_watchman
 (
     id bigint auto_increment comment '主键' primary key,
@@ -56,6 +74,7 @@ create table if not exists t_resource
     limit_memory varchar(255) charset utf8 not null comment '限定的内存',
     create_time timestamp default CURRENT_TIMESTAMP not null comment '创建时间',
     callback_url varchar(512) charset utf8 not null comment '状态回调接口路径',
+    image varchar(1024) charset utf8 null comment '资源镜像信息',
     constraint t_resource_t_watchman_id_fk foreign key (watchman_id) references t_watchman (id)
 )comment '资源表';
 
@@ -91,6 +110,7 @@ create table if not exists t_resource_example
     limit_cpu varchar(255) charset utf8 not null comment '限定的CPU',
     limit_memory varchar(255) charset utf8 not null comment '限定的内存',
     create_time timestamp default CURRENT_TIMESTAMP not null comment '创建时间',
+    image varchar(1024) charset utf8 null comment '资源镜像信息',
     constraint t_resource_example_t_resource_id_fk foreign key (resource_id) references t_resource (id)
 )comment '资源实例表';
 
@@ -99,7 +119,7 @@ create table if not exists t_job_example
     id bigint auto_increment comment '主键' primary key,
     job_id bigint not null comment '任务主键',
     resource_example_id bigint not null comment '资源实例主键',
-    name varchar(255) charset utf8 not null comment '名称',
+    number int default 0 not null comment '序列号',
     duration bigint not null comment '持续时长(毫秒)',
     constraint t_job_example_t_job_id_fk foreign key (job_id) references t_job (id),
     constraint t_job_example_t_resource_example_id_fk foreign key (resource_example_id) references t_resource_example (id)
@@ -118,8 +138,10 @@ create table if not exists t_job_example_event
 create table if not exists t_job_file
 (
     id bigint auto_increment comment '主键' primary key,
+    job_id bigint not null comment '任务主键',
     job_example_id bigint not null comment '任务实例主键',
-    uri varchar(1000) charset utf8 not null,
+    uri varchar(1000) charset utf8 not null comment '统一资源描述符',
+    type int not null comment '文件类型',
     start_point bigint not null comment '读取文件的起始点位',
     end_point mediumtext not null comment '读取文件的结束点位',
     create_time timestamp default CURRENT_TIMESTAMP not null comment '创建时间',

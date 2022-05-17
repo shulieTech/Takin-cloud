@@ -1,4 +1,4 @@
-package io.shulie.takin.cloud.app.scheduled;
+package io.shulie.takin.cloud.app.schedule;
 
 import java.util.Map;
 import java.util.LinkedHashMap;
@@ -31,7 +31,7 @@ import org.springframework.scheduling.annotation.Scheduled;
  */
 @Component
 @Slf4j(topic = "CALLBACK")
-public class CallbackScheduled {
+public class Callback {
     @Value("${callback.thread.pool.size:10}")
     Integer threadPoolSize;
     private ThreadPoolExecutor threadpool;
@@ -45,7 +45,7 @@ public class CallbackScheduled {
             threadPoolSize, threadPoolSize,
             0, TimeUnit.DAYS,
             new ArrayBlockingQueue<>(threadPoolSize),
-            t -> new Thread(t, "调度所属线程组"),
+            t -> new Thread(t, "调度所属线程组(回调)"),
             new ThreadPoolExecutor.AbortPolicy());
     }
 
