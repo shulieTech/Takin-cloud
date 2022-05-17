@@ -2,7 +2,7 @@ package io.shulie.takin.cloud.app.controller.notify;
 
 import java.util.Map;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import cn.hutool.core.text.CharSequenceUtil;
+
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.service.ResourceExampleService;
 
@@ -23,6 +25,7 @@ import io.shulie.takin.cloud.app.service.ResourceExampleService;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
+@Slf4j(topic = "NOTIFY")
 @Tag(name = "资源实例上报")
 @RequestMapping("/notify/resource_example")
 @RestController("NotiftResourceExampleController")

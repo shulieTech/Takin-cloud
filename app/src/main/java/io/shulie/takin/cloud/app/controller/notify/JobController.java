@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.app.controller.notify;
 
+import lombok.extern.slf4j.Slf4j;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +20,7 @@ import io.shulie.takin.cloud.model.response.ApiResult;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Tag(name = "任务上报")
+@Slf4j(topic = "NOTIFY")
 @RequestMapping("/notify/job")
 @RestController("NotiftJobExampleController")
 public class JobController {

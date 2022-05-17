@@ -2,6 +2,8 @@ package io.shulie.takin.cloud.app.controller.notify;
 
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,6 +26,7 @@ import io.shulie.takin.cloud.model.resource.ResourceSource;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Tag(name = "调度器上报")
+@Slf4j(topic = "NOTIFY")
 @RequestMapping("/notify/watchman")
 @RestController("NotiftWatchmanController")
 public class WatchmanController {

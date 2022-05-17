@@ -3,6 +3,8 @@ package io.shulie.takin.cloud.app.controller.notify;
 import java.util.Map;
 import java.util.HashMap;
 
+import lombok.extern.slf4j.Slf4j;
+
 import cn.hutool.core.date.DateUtil;
 import com.github.pagehelper.PageInfo;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -32,6 +34,7 @@ import io.shulie.takin.cloud.app.service.WatchmanService;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
+@Slf4j(topic = "NOTIFY")
 @Tag(name = "指令确认上报")
 @RequestMapping("/notify/command")
 @RestController("NotiftCommandController")
