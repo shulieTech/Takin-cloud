@@ -30,7 +30,7 @@ public class ExcessJobController {
     @Operation(summary = "提交对任务的数据校验")
     @GetMapping(value = "dataCalibration")
     public ApiResult<Long> check(@Parameter(description = "任务主键") @RequestParam Long jobId) {
-        return ApiResult.success(excessJobService.create(ExcessJobType.DATA_CALIBRATION.getCode(), String.valueOf(jobId)));
+        return ApiResult.success(excessJobService.create(ExcessJobType.DATA_CALIBRATION.getCode(), jobId, ""));
     }
 
 }
