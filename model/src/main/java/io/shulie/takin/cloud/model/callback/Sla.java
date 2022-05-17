@@ -16,7 +16,6 @@ import io.shulie.takin.cloud.constant.enums.CallbackType;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
-@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 public class Sla extends Base<List<SlaInfo>> {
     private CallbackType type = CallbackType.SLA;
