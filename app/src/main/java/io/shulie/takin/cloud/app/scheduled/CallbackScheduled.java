@@ -29,8 +29,8 @@ import org.springframework.scheduling.annotation.Scheduled;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
-@Slf4j(topic = "callback")
 @Component
+@Slf4j(topic = "CALLBACK")
 public class CallbackScheduled {
     @Value("${callback.thread.pool.size:10}")
     Integer threadPoolSize;
@@ -53,7 +53,7 @@ public class CallbackScheduled {
     public void callback() {
         try {
             PageInfo<CallbackEntity> ready = callbackService.listNotCompleted(1, 10);
-            log.info("开始调度.共{}条,本地计划调度{}条", ready.getTotal(), ready.getSize());
+            log.info("开始调度.共{}条,本次计划调度{}条", ready.getTotal(), ready.getSize());
             for (int i = 0; i < ready.getSize(); i++) {
                 CallbackEntity entity = ready.getList().get(i);
                 // 缓存校验 存在 并且是 False

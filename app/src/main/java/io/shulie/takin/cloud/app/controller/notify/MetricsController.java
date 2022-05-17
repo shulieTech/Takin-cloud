@@ -33,8 +33,8 @@ import io.shulie.takin.cloud.app.entity.JobExampleEntity;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
-@Slf4j
 @Tag(name = "指标数据上报")
+@Slf4j(topic = "METRICS")
 @RequestMapping("/notify/metrics")
 @RestController("NotiftMetricsController")
 public class MetricsController {
