@@ -4,14 +4,20 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.github.pagehelper.page.PageMethod;
 import org.springframework.stereotype.Service;
-import io.shulie.takin.cloud.constant.enums.ExcessJobType;
 
+import io.shulie.takin.cloud.constant.Message;
+import io.shulie.takin.cloud.app.entity.JobEntity;
+import io.shulie.takin.cloud.app.service.JobService;
+import io.shulie.takin.cloud.model.callback.ExcessJob;
 import io.shulie.takin.cloud.app.entity.ExcessJobEntity;
+import io.shulie.takin.cloud.app.service.CallbackService;
+import io.shulie.takin.cloud.constant.enums.ExcessJobType;
 import io.shulie.takin.cloud.app.service.ExcessJobService;
 import io.shulie.takin.cloud.app.entity.ExcessJobLogEntity;
 import io.shulie.takin.cloud.app.service.mapper.ExcessJobMapperService;
@@ -23,7 +29,14 @@ import io.shulie.takin.cloud.app.service.mapper.ExcessJobLogMapperService;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
+@Slf4j(topic = "EXCESS-JOB")
 public class ExcessJobServiceImple implements ExcessJobService {
+    @Resource
+    JobService jobService;
+    @Resource
+    JsonServiceImpl jsonService;
+    @Resource
+    CallbackService callbackService;
     @Resource
     ExcessJobMapperService excessJobMapperService;
     @Resource
@@ -41,9 +54,10 @@ public class ExcessJobServiceImple implements ExcessJobService {
     }
 
     @Override
-    public Long create(int type, String content) {
+    public Long create(int type, long jobId, String content) {
         ExcessJobEntity excessJobEntity = new ExcessJobEntity()
             .setType(type)
+            .setJobId(jobId)
             .setContent(content);
         boolean saveResult = excessJobMapperService.save(excessJobEntity);
         return saveResult ? excessJobEntity.getId() : null;
@@ -71,13 +85,14 @@ public class ExcessJobServiceImple implements ExcessJobService {
     @Override
     public void exec(ExcessJobEntity entity) {
         Integer type = entity.getType();
-        String content = entity.getContent();
         ExcessJobType excessJobType = ExcessJobType.of(type);
         String execContent = "";
+        boolean completed = true;
+
         try {
             switch (excessJobType) {
                 case DATA_CALIBRATION:
-                    execContent = execDataCalibration(content);
+                    execContent = execDataCalibration(entity.getJobId());
                     break;
                 case IGNORE:
                     execContent = "这是一个忽略项";
@@ -86,14 +101,30 @@ public class ExcessJobServiceImple implements ExcessJobService {
                     throw new IllegalArgumentException("未知的调度类型:" + type);
             }
         } catch (Exception ex) {
-            log(entity.getId(), ex.getMessage(), false);
+            completed = false;
+            execContent = ex.getMessage();
+        } finally {
+            // 记录执行信息
+            log(entity.getId(), execContent, completed);
+            // 组装回调信息
+            JobEntity jobEntity = jobService.jobEntity(entity.getJobId());
+            if (jobEntity == null) {
+                log.warn(Message.MISS_JOB, entity.getJobId());
+            } else {
+                ExcessJob excessJob = new ExcessJob()
+                    .setContent(execContent)
+                    .setCompleted(completed)
+                    .setJobType(excessJobType)
+                    .setJobId(jobEntity.getId());
+                excessJob.setData(entity.getId());
+                // 保存回调信息
+                callbackService.create(jobEntity.getCallbackUrl(), jsonService.writeValueAsString(excessJob));
+            }
         }
-        log(entity.getId(), execContent, true);
     }
 
-    private String execDataCalibration(String content) {
+    private String execDataCalibration(long jobId) {
         long startTime = System.nanoTime();
-        Long jobId = Long.valueOf(content);
         // TODO: 校正数据
         return CharSequenceUtil.format("同步任务{}.耗时:{}纳秒", jobId, System.nanoTime() - startTime);
     }

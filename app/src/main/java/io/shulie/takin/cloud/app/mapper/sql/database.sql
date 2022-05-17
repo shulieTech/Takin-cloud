@@ -28,6 +28,7 @@ create table if not exists t_excess_job
 (
     id bigint auto_increment comment '主键' primary key,
     type int not null comment '任务类型',
+    job_id bigint not null comment '(主)任务主键',
     content varchar(512) charset utf8 not null comment '任务内容',
     completed tinyint(1) default 0 not null comment '是否完成',
     create_time timestamp default CURRENT_TIMESTAMP not null comment '创建时间'

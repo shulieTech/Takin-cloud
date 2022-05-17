@@ -22,6 +22,10 @@ public class ExcessJobEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
+     * (主)任务主键
+     */
+    private Long jobId;
+    /**
      * 任务类型
      */
     private Integer type;

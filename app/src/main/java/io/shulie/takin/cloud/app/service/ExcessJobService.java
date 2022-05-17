@@ -28,10 +28,11 @@ public interface ExcessJobService {
      * 创建定时任务
      *
      * @param type    类型
+     * @param jobId   (主)任务主键
      * @param content 内容
      * @return 定时任务
      */
-    Long create(int type, String content);
+    Long create(int type, long jobId, String content);
 
     /**
      * 录入任务记录
