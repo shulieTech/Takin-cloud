@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.AllArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * 定时任务类型
@@ -34,6 +35,7 @@ public enum ExcessJobType {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));
     }
 
+    @JsonCreator
     public static ExcessJobType of(Integer code) {
         return EXAMPLE_MAP.get(code);
     }

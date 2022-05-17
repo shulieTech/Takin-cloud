@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.AllArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * 任务实例状态
@@ -35,6 +36,7 @@ public enum ResourceExampleStatus {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));
     }
 
+    @JsonCreator
     public static ResourceExampleStatus of(Integer code) {
         return EXAMPLE_MAP.get(code);
     }

@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.AllArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * 命令类型
@@ -53,6 +54,7 @@ public enum CommandType {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getValue(), t));
     }
 
+    @JsonCreator
     public static CommandType of(Integer code) {
         return EXAMPLE_MAP.get(code);
     }

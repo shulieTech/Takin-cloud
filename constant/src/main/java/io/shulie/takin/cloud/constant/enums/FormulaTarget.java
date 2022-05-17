@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.AllArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * 算式目标
@@ -40,7 +41,7 @@ public enum FormulaTarget {
     static {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));
     }
-
+    @JsonCreator
     public static FormulaTarget of(Integer code) {
         return EXAMPLE_MAP.get(code);
     }

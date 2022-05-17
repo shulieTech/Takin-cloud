@@ -7,6 +7,9 @@ import java.util.HashMap;
 import lombok.Getter;
 import lombok.AllArgsConstructor;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 /**
  * 通知事件类型
  *
@@ -33,7 +36,8 @@ public enum NotifyEventType {
     JOB_EXAMPLE_ERROR(303, "任务实例发生异常"),
     // 格式化用
     ;
-    @Getter
+
+    @JsonValue
     private final Integer code;
     private final String description;
     private static final Map<Integer, NotifyEventType> EXAMPLE_MAP = new HashMap<>(6);
@@ -42,6 +46,7 @@ public enum NotifyEventType {
         Arrays.stream(values()).forEach(t -> EXAMPLE_MAP.put(t.getCode(), t));
     }
 
+    @JsonCreator
     public static NotifyEventType of(Integer code) {
         return EXAMPLE_MAP.get(code);
     }
