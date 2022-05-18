@@ -30,7 +30,7 @@ public enum CallbackType {
     JOB_EXAMPLE_STOP(202, "任务实例停止"),
     JOB_EXAMPLE_ERROR(203, "任务实例异常"),
     SLA(301, "触发SLA"),
-    SCHEDULE(302, "定时任务"),
+    EXCESS_JOB(302, "额外的任务"),
     // 格式化用
     ;
     @JsonValue

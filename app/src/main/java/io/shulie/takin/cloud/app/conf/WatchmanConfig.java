@@ -21,6 +21,10 @@ public class WatchmanConfig {
      */
     private String containerImage;
     /**
+     * nfs目录
+     */
+    private String nfsPath;
+    /**
      * nfs服务器地址
      */
     private String nfsServer;

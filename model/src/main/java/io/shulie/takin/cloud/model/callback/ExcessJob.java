@@ -20,15 +20,19 @@ public class ExcessJob extends Base<Long> {
     /**
      * 回调类型
      */
-    private CallbackType type = CallbackType.SCHEDULE;
+    private CallbackType type = CallbackType.EXCESS_JOB;
     /**
      * 额外任务
      */
     private ExcessJobType jobType;
     /**
-     * 额外任务
+     * (主)任务主键
      */
     private long jobId;
+    /**
+     * 资源主键
+     */
+    private long resourceId;
     /**
      * 执行结果
      */

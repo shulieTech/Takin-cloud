@@ -1,10 +1,13 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import java.io.File;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
 import lombok.extern.slf4j.Slf4j;
+import cn.hutool.core.io.FileUtil;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 import io.shulie.takin.cloud.constant.Message;
 import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.app.service.JobService;
+import io.shulie.takin.cloud.app.conf.WatchmanConfig;
 import io.shulie.takin.cloud.model.callback.ExcessJob;
 import io.shulie.takin.cloud.app.entity.ExcessJobEntity;
 import io.shulie.takin.cloud.app.service.CallbackService;
@@ -31,6 +35,8 @@ import io.shulie.takin.cloud.app.service.mapper.ExcessJobLogMapperService;
 @Service
 @Slf4j(topic = "EXCESS-JOB")
 public class ExcessJobServiceImple implements ExcessJobService {
+    @Resource
+    WatchmanConfig watchmanConfig;
     @Resource
     JobService jobService;
     @Resource
@@ -115,7 +121,8 @@ public class ExcessJobServiceImple implements ExcessJobService {
                     .setContent(execContent)
                     .setCompleted(completed)
                     .setJobType(excessJobType)
-                    .setJobId(jobEntity.getId());
+                    .setJobId(jobEntity.getId())
+                    .setResourceId(jobEntity.getResourceId());
                 excessJob.setData(entity.getId());
                 // 保存回调信息
                 callbackService.create(jobEntity.getCallbackUrl(), jsonService.writeValueAsString(excessJob));
@@ -125,7 +132,20 @@ public class ExcessJobServiceImple implements ExcessJobService {
 
     private String execDataCalibration(long jobId) {
         long startTime = System.nanoTime();
-        // TODO: 校正数据
+        JobEntity jobEntity = jobService.jobEntity(jobId);
+        File directory = FileUtil.file(watchmanConfig.getNfsPath(),
+            String.valueOf(jobEntity.getResourceId()), String.valueOf(jobEntity.getId()));
+        String[] readyCalibrationFileList = directory.list((dir, name) -> Pattern.matches("^pressure-\\d.metrics.err$", name));
+        if (readyCalibrationFileList == null) {
+            throw new IllegalArgumentException("目录不存在:" + directory);
+        }
+        for (int i = 0; i < readyCalibrationFileList.length; i++) {
+            String filePath = readyCalibrationFileList[i];
+            File file = new File(filePath);
+            // TODO 文件内容入库
+            log.info("当前进度({}/{})", i + 1, readyCalibrationFileList.length);
+            log.info("开始处理文件{}的内容入库", file.getAbsolutePath());
+        }
         return CharSequenceUtil.format("同步任务{}.耗时:{}纳秒", jobId, System.nanoTime() - startTime);
     }
 
