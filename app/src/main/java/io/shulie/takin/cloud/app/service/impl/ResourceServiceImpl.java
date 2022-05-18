@@ -171,7 +171,48 @@ public class ResourceServiceImpl implements ResourceService {
         ResourceExampleOverview result = new ResourceExampleOverview()
             .setStatus(ResourceExampleStatus.PENDING)
             .setStartTime(resourceExampleEntity.getCreateTime().getTime());
-        // 找到最后一次上报的数据
+        // 找到最后一次上报的状态数据(启动、停止、异常)
+        ResourceExampleEventEntity status = lastExampleStatus(resourceExampleId);
+        if (status != null) {
+            String contextString = status.getContext();
+            Integer type = status.getType();
+            result.setStatusTime(status.getTime().getTime());
+            if (NotifyEventType.RESOUECE_EXAMPLE_START.getCode().equals(type)) {
+                result.setStatus(ResourceExampleStatus.STARTED);
+            } else if (NotifyEventType.RESOUECE_EXAMPLE_STOP.getCode().equals(type)) {
+                result.setStatus(ResourceExampleStatus.STOPED);
+            } else if (NotifyEventType.RESOUECE_EXAMPLE_ERROR.getCode().equals(type)) {
+                result.setStatus(ResourceExampleStatus.ABNORMAL);
+            }
+            Map<String, Object> context = jsonService.readValue(contextString, new TypeReference<Map<String, Object>>() {});
+            result.setStatusMessage(context.get(Message.MESSAGE_NAME) == null ? null : context.get(Message.MESSAGE_NAME).toString());
+        }
+        // 设置资源实例信息
+        ResourceExampleEventEntity info = lastExampleInfo(resourceExampleId);
+        if (info != null) {
+            fillResourceExampleOverviewInfo(info, result);
+        }
+        // 设置心跳接口时间
+        else {
+            Wrapper<ResourceExampleEventEntity> heartbeatWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
+                .orderByDesc(ResourceExampleEventEntity::getTime)
+                .eq(ResourceExampleEventEntity::getType, NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode())
+                .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
+            PageInfo<ResourceExampleEventEntity> heartbeatList = new PageInfo<>(resourceExampleEventMapper.selectList(heartbeatWrapper));
+            if (heartbeatList.getSize() > 0) {
+                result.setStatusTime(heartbeatList.getList().get(0).getTime().getTime());
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 最后上报的的资源实例状态
+     *
+     * @param resourceExampleId 资源实例主键
+     * @return 上报的数据
+     */
+    ResourceExampleEventEntity lastExampleStatus(long resourceExampleId) {
         try (Page<Object> ignored = PageMethod.startPage(1, 1)) {
             // 查询条件 - 状态类型
             Wrapper<ResourceExampleEventEntity> statusWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
@@ -180,44 +221,24 @@ public class ResourceServiceImpl implements ResourceService {
                     NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode(), NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode())
                 .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
             // 执行SQL
-            PageInfo<ResourceExampleEventEntity> statusList = new PageInfo<>(resourceExampleEventMapper.selectList(statusWrapper));
-            if (!statusList.getList().isEmpty()) {
-                String contextString = statusList.getList().get(0).getContext();
-                Integer type = statusList.getList().get(0).getType();
-                result.setStatusTime(statusList.getList().get(0).getTime().getTime());
-                if (NotifyEventType.RESOUECE_EXAMPLE_START.getCode().equals(type)) {
-                    result.setStatus(ResourceExampleStatus.STARTED);
-                } else if (NotifyEventType.RESOUECE_EXAMPLE_STOP.getCode().equals(type)) {
-                    result.setStatus(ResourceExampleStatus.STOPED);
-                } else if (NotifyEventType.RESOUECE_EXAMPLE_ERROR.getCode().equals(type)) {
-                    result.setStatus(ResourceExampleStatus.ABNORMAL);
-                }
-                Map<String, Object> context = jsonService.readValue(contextString, new TypeReference<Map<String, Object>>() {});
-                result.setStatusMessage(context.get(Message.MESSAGE_NAME) == null ? null : context.get(Message.MESSAGE_NAME).toString());
-            }
-            // 设置资源实例信息
+            return resourceExampleEventMapper.selectList(statusWrapper).stream().findFirst().orElse(null);
+        }
+    }
+
+    /**
+     * 最后上报的的资源实例信息
+     *
+     * @param resourceExampleId 资源实例主键
+     * @return 上报的数据
+     */
+    ResourceExampleEventEntity lastExampleInfo(long resourceExampleId) {
+        try (Page<Object> ignored = PageMethod.startPage(1, 1)) {
             Wrapper<ResourceExampleEventEntity> infoWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
                 .orderByDesc(ResourceExampleEventEntity::getTime)
                 .eq(ResourceExampleEventEntity::getType, NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode())
                 .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
-            PageInfo<ResourceExampleEventEntity> infoList = new PageInfo<>(resourceExampleEventMapper.selectList(infoWrapper));
-            if (infoList.getSize() > 0) {
-                ResourceExampleEventEntity first = infoList.getList().get(0);
-                fillResourceExampleOverviewInfo(first, result);
-            }
-            // 设置心跳接口时间
-            else {
-                Wrapper<ResourceExampleEventEntity> heartbeatWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
-                    .orderByDesc(ResourceExampleEventEntity::getTime)
-                    .eq(ResourceExampleEventEntity::getType, NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode())
-                    .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
-                PageInfo<ResourceExampleEventEntity> heartbeatList = new PageInfo<>(resourceExampleEventMapper.selectList(heartbeatWrapper));
-                if (heartbeatList.getSize() > 0) {
-                    result.setStatusTime(heartbeatList.getList().get(0).getTime().getTime());
-                }
-            }
+            return resourceExampleEventMapper.selectList(infoWrapper).stream().findFirst().orElse(null);
         }
-        return result;
     }
 
     /**
