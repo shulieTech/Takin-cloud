@@ -1,128 +1,130 @@
 package io.shulie.takin.cloud.biz.service.report.impl;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Date;
-import java.util.List;
-import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Calendar;
-import java.time.Duration;
-import java.util.Optional;
-import java.util.ArrayList;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
-
-import cn.hutool.core.bean.BeanUtil;
-import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import org.influxdb.impl.TimeUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUnit;
-import com.jayway.jsonpath.JsonPath;
-import com.github.pagehelper.PageInfo;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Lists;
-import com.github.pagehelper.PageHelper;
-import com.jayway.jsonpath.DocumentContext;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-import org.apache.commons.collections4.MapUtils;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
-
-import com.pamirs.takin.entity.dao.report.TReportMapper;
-import com.pamirs.takin.entity.domain.dto.report.Metrices;
-import com.pamirs.takin.entity.domain.entity.report.Report;
-import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
-import com.pamirs.takin.entity.domain.dto.report.StatReportDTO;
-import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
-import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
-import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
-import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import com.pamirs.takin.entity.dao.report.TReportBusinessActivityDetailMapper;
+import com.pamirs.takin.entity.dao.report.TReportMapper;
+import com.pamirs.takin.entity.dao.scene.manage.TWarnDetailMapper;
+import com.pamirs.takin.entity.domain.bo.scenemanage.WarnBO;
+import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
+import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
+import com.pamirs.takin.entity.domain.dto.report.Metrices;
+import com.pamirs.takin.entity.domain.dto.report.StatReportDTO;
+import com.pamirs.takin.entity.domain.entity.report.Report;
 import com.pamirs.takin.entity.domain.entity.report.ReportBusinessActivityDetail;
-
-import io.shulie.takin.eventcenter.Event;
-import io.shulie.takin.utils.json.JsonHelper;
-import io.shulie.takin.utils.linux.LinuxHelper;
-import io.shulie.takin.cloud.ext.api.AssetExtApi;
-import io.shulie.takin.cloud.common.utils.GsonUtil;
-import io.shulie.takin.cloud.common.utils.JsonUtil;
-import io.shulie.takin.cloud.common.utils.NumberUtil;
-import io.shulie.takin.cloud.sdk.model.common.SlaBean;
-import io.shulie.takin.cloud.common.utils.TestTimeUtil;
-import io.shulie.takin.cloud.common.utils.JsonPathUtil;
-import io.shulie.takin.cloud.data.dao.report.ReportDao;
-import io.shulie.takin.cloud.sdk.model.common.DataBean;
-import io.shulie.takin.cloud.common.influxdb.InfluxUtil;
-import io.shulie.takin.cloud.common.bean.task.TaskResult;
-import io.shulie.takin.eventcenter.annotation.IntrestFor;
-import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
-import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
-import io.shulie.takin.plugin.framework.core.PluginManager;
-import io.shulie.takin.cloud.ext.content.script.ScriptNode;
-import io.shulie.takin.cloud.ext.content.response.Response;
-import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
-import io.shulie.takin.cloud.biz.output.report.ReportOutput;
-import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
-import io.shulie.takin.cloud.sdk.model.common.DistributeBean;
-import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
-import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
+import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
 import io.shulie.takin.cloud.biz.cloudserver.ReportConverter;
-import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
+import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
+import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
-import io.shulie.takin.cloud.common.constants.ReportConstants;
-import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
-import io.shulie.takin.cloud.sdk.model.request.WarnQueryParam;
-import io.shulie.takin.cloud.biz.service.report.ReportService;
-import io.shulie.takin.cloud.ext.content.asset.AssetInvoiceExt;
-import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
-import io.shulie.takin.cloud.ext.content.enginecall.PtConfigExt;
-import io.shulie.takin.cloud.ext.content.asset.RealAssectBillExt;
-import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import io.shulie.takin.cloud.biz.output.report.ReportDetailOutput;
+import io.shulie.takin.cloud.biz.output.report.ReportOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
+import io.shulie.takin.cloud.biz.service.report.ReportService;
 import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventService;
-import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
-import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
-import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
-import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
-import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
-import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
-import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
-import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
-import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
-import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
+import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
+import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
+import io.shulie.takin.cloud.common.bean.task.TaskResult;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
+import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.common.enums.PressureSceneEnum;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneStopReasonEnum;
+import io.shulie.takin.cloud.common.exception.TakinCloudException;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.influxdb.InfluxUtil;
+import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
+import io.shulie.takin.cloud.common.utils.CommonUtil;
+import io.shulie.takin.cloud.common.utils.GsonUtil;
+import io.shulie.takin.cloud.common.utils.JsonPathUtil;
+import io.shulie.takin.cloud.common.utils.JsonUtil;
+import io.shulie.takin.cloud.common.utils.NumberUtil;
+import io.shulie.takin.cloud.common.utils.TestTimeUtil;
+import io.shulie.takin.cloud.data.dao.report.ReportDao;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
+import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
+import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
+import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
+import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.ext.api.AssetExtApi;
+import io.shulie.takin.cloud.ext.content.asset.AssetInvoiceExt;
+import io.shulie.takin.cloud.ext.content.asset.RealAssectBillExt;
+import io.shulie.takin.cloud.ext.content.enginecall.PtConfigExt;
+import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
+import io.shulie.takin.cloud.ext.content.enums.AssetTypeEnum;
+import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.cloud.ext.content.response.Response;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
+import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
+import io.shulie.takin.cloud.sdk.model.common.DataBean;
+import io.shulie.takin.cloud.sdk.model.common.DistributeBean;
+import io.shulie.takin.cloud.sdk.model.common.SlaBean;
+import io.shulie.takin.cloud.sdk.model.common.StopReasonBean;
+import io.shulie.takin.cloud.sdk.model.request.WarnQueryParam;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
+import io.shulie.takin.cloud.sdk.model.response.report.NodeTreeSummaryResp;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportActivityResp;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportActivityResp.BusinessActivity;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportTrendResp;
+import io.shulie.takin.cloud.sdk.model.response.report.ScriptNodeTreeResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.BusinessActivitySummaryBean;
+import io.shulie.takin.eventcenter.Event;
+import io.shulie.takin.eventcenter.annotation.IntrestFor;
+import io.shulie.takin.plugin.framework.core.PluginManager;
+import io.shulie.takin.utils.json.JsonHelper;
+import io.shulie.takin.utils.linux.LinuxHelper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.influxdb.impl.TimeUtil;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
 
 /**
  * @author 莫问
@@ -1600,4 +1602,42 @@ public class ReportServiceImpl implements ReportService {
         return report.getStatus();
     }
 
+
+    @Override
+    public List<ReportActivityResp> getNodeDetailBySceneIds(List<Long> sceneIds) {
+        if (CollectionUtils.isEmpty(sceneIds)){
+            return null;
+        }
+        List<ReportEntity> reportEntities = reportDao.queryReportBySceneIds(sceneIds);
+        if (CollectionUtils.isNotEmpty(reportEntities)){
+            List<Long> reportIds = CommonUtil.getList(reportEntities,ReportEntity::getId);
+            List<ReportBusinessActivityDetailEntity> activities = reportDao.getActivityByReportIds(reportIds);
+            if (CollectionUtils.isNotEmpty(activities)){
+                Map<Long, List<ReportBusinessActivityDetailEntity>> activityMap = activities.stream().filter(
+                    Objects::nonNull)
+                    .collect(Collectors.groupingBy(ReportBusinessActivityDetailEntity::getReportId));
+                return reportEntities.stream().filter(Objects::nonNull)
+                    .map(entity ->{
+                        ReportActivityResp resp = new ReportActivityResp();
+                        resp.setSceneId(entity.getSceneId());
+                        resp.setReportId(entity.getId());
+                        resp.setSceneName(entity.getSceneName());
+                        List<ReportBusinessActivityDetailEntity> details = activityMap.get(entity.getId());
+                        if (CollectionUtils.isNotEmpty(details)){
+                            List<BusinessActivity> activityList = details.stream().filter(Objects::nonNull)
+                                .filter(detail -> detail.getBusinessActivityId() > 0)
+                                .map(detail -> {
+                                    BusinessActivity activity = new BusinessActivity();
+                                    activity.setActivityName(detail.getBusinessActivityName());
+                                    activity.setBindRef(detail.getBindRef());
+                                    return activity;
+                                }).collect(Collectors.toList());
+                            resp.setBusinessActivityList(activityList);
+                        }
+                        return resp;
+                    }).collect(Collectors.toList());
+            }
+        }
+        return null;
+    }
 }

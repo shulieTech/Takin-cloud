@@ -90,6 +90,7 @@ public class EntrypointUrl {
     public final static String METHOD_REPORT_METRICS = "metrices";
     public final static String METHOD_REPORT_SUMMARY = "businessActivity/summary/list";
     public final static String METHOD_REPORT_ACTIVITY_REPORT_ID = "queryReportActivityByReportId";
+    public final static String METHOD_REPORT_ACTIVITY_REPORT_IDS = "queryReportActivityByReportIds";
     public final static String METHOD_REPORT_ACTIVITY_SCENE_ID = "queryReportActivityBySceneId";
     public final static String METHOD_REPORT_WARN_ADD = "warn";
     public final static String METHOD_REPORT_WARN_LIST = "listWarn";
@@ -136,6 +137,7 @@ public class EntrypointUrl {
     public final static String METHOD_SCENE_MANAGE_CHECK_AND_UPDATE_SCRIPT = "checkAndUpdate/script";
     public final static String METHOD_SCENE_MANAGE_QUERY_BY_IDS = "query/ids";
     public final static String METHOD_SCENE_MANAGE_RECOVERY = "recovery";
+    public final static String METHOD_SCENE_MANAGE_QUERY_BY_STATUS = "query/status";
 
     /**
      * 模块 - 场景任务

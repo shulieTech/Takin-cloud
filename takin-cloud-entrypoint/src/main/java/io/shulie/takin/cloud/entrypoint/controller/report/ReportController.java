@@ -13,6 +13,8 @@ import com.github.pagehelper.PageInfo;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailByIdsReq;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportActivityResp;
 import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.sdk.model.ScriptNodeSummaryBean;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
@@ -299,5 +301,11 @@ public class ReportController {
     @RequestMapping(EntrypointUrl.METHOD_REPORT_GET_JTL_DOWNLOAD_URL)
     public ResponseResult<String> getJtlDownLoadUrl(@ApiParam(name = "reportId", value = "报告id") Long reportId) {
         return ResponseResult.success(reportService.getJtlDownLoadUrl(reportId, true));
+    }
+
+    @ApiOperation("根据场景ID查询正在压测报告的业务活动信息")
+    @PostMapping(EntrypointUrl.METHOD_REPORT_ACTIVITY_REPORT_IDS)
+    public ResponseResult<List<ReportActivityResp>> queryReportActivity(@RequestBody ReportDetailByIdsReq req){
+        return ResponseResult.success(reportService.getNodeDetailBySceneIds(req.getSceneIds()));
     }
 }

@@ -144,10 +144,14 @@ public interface SceneManageService {
      * @param uploadPath     上传地址
      * @param isAbsolutePath 是否绝对路径
      * @param update         是否更新
-     * @param version        版本{@link io.shulie.takin.cloud.sdk.model.request.scenemanage.ScriptCheckAndUpdateReq#getVersion}
+     * @param version        版本
+     * {@link io.shulie.takin.cloud.sdk.model.request.scenemanage.ScriptCheckAndUpdateReq#getVersion}
      * @return 操作结果
      */
-    ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update, Integer version);
+    ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update,
+        Integer version);
+
+    List<SceneManageListOutput> getSceneByStatus(Integer status);
 
     /**
      * 恢复

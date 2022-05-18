@@ -8,6 +8,8 @@ import javax.annotation.Resource;
 import com.alibaba.fastjson.TypeReference;
 
 import io.shulie.takin.cloud.sdk.model.request.report.JtlDownloadReq;
+import io.shulie.takin.cloud.sdk.model.request.report.ReportDetailByIdsReq;
+import io.shulie.takin.cloud.sdk.model.response.report.ReportActivityResp;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
@@ -46,39 +48,45 @@ public class CloudReportApiImpl implements CloudReportApi {
 
     @Override
     public ResponseResult<List<ReportResp>> listReport(ReportQueryReq req) {
-        ResponseResult<List<ReportResp>> result = cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_LIST),
+        ResponseResult<List<ReportResp>> result = cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_LIST),
             req, new TypeReference<ResponseResult<List<ReportResp>>>() {});
         return ResponseResult.success(result.getData(), result.getTotalNum());
     }
 
     @Override
     public ReportDetailResp detail(ReportDetailByIdReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_DETAIL),
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_DETAIL),
             req, new TypeReference<ResponseResult<ReportDetailResp>>() {}).getData();
 
     }
 
     @Override
     public ReportTrendResp trend(ReportTrendQueryReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_TREND),
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_TREND),
             req, new TypeReference<ResponseResult<ReportTrendResp>>() {}).getData();
     }
 
     @Override
     public ReportTrendResp tempTrend(ReportTrendQueryReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_TREND_TEMP),
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_TREND_TEMP),
             req, new TypeReference<ResponseResult<ReportTrendResp>>() {}).getData();
     }
 
     @Override
     public String addWarn(WarnCreateReq req) {
-        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_WARN_ADD),
+        return cloudApiSenderService.post(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_WARN_ADD),
             req, new TypeReference<ResponseResult<String>>() {}).getData();
     }
 
     @Override
     public ResponseResult<List<WarnDetailResponse>> listWarn(WarnQueryReq req) {
-        ResponseResult<List<WarnDetailResponse>> result = cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_WARN_LIST),
+        ResponseResult<List<WarnDetailResponse>> result = cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_WARN_LIST),
             req, new TypeReference<ResponseResult<List<WarnDetailResponse>>>() {});
         return ResponseResult.success(result.getData(), result.getTotalNum());
     }
@@ -91,7 +99,8 @@ public class CloudReportApiImpl implements CloudReportApi {
      */
     @Override
     public List<ActivityResponse> activityByReportId(ReportDetailByIdReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_ACTIVITY_REPORT_ID),
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_ACTIVITY_REPORT_ID),
             req, new TypeReference<ResponseResult<List<ActivityResponse>>>() {}).getData();
     }
 
@@ -103,32 +112,37 @@ public class CloudReportApiImpl implements CloudReportApi {
      */
     @Override
     public List<ActivityResponse> activityBySceneId(ReportDetailBySceneIdReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_ACTIVITY_SCENE_ID),
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_ACTIVITY_SCENE_ID),
             req, new TypeReference<ResponseResult<List<ActivityResponse>>>() {}).getData();
     }
 
     @Override
     public String updateReportConclusion(UpdateReportConclusionReq req) {
-        return cloudApiSenderService.put(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_UPDATE_CONCLUSION),
+        return cloudApiSenderService.put(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_UPDATE_CONCLUSION),
             req, new TypeReference<ResponseResult<String>>() {}).getData();
     }
 
     @Override
     public ReportDetailResp getReportByReportId(ReportDetailByIdReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_DETAIL),
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_DETAIL),
             req, new TypeReference<ResponseResult<ReportDetailResp>>() {}).getData();
 
     }
 
     @Override
     public ReportDetailResp tempReportDetail(ReportDetailBySceneIdReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_DETAIL_TEMP),
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_DETAIL_TEMP),
             req, new TypeReference<ResponseResult<ReportDetailResp>>() {}).getData();
     }
 
     @Override
     public List<Long> queryListRunningReport(CloudCommonInfoWrapperReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_LIST_RUNNING),
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_LIST_RUNNING),
             req, new TypeReference<ResponseResult<List<Long>>>() {}).getData();
     }
 
@@ -140,7 +154,8 @@ public class CloudReportApiImpl implements CloudReportApi {
      */
     @Override
     public NodeTreeSummaryResp summary(ReportDetailByIdReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_SUMMARY),
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_SUMMARY),
             req, new TypeReference<ResponseResult<NodeTreeSummaryResp>>() {}).getData();
     }
 
@@ -152,7 +167,8 @@ public class CloudReportApiImpl implements CloudReportApi {
      */
     @Override
     public Map<String, Object> warnCount(ReportDetailByIdReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_WARN_COUNT),
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_WARN_COUNT),
             req, new TypeReference<ResponseResult<Map<String, Object>>>() {}).getData();
     }
 
@@ -164,7 +180,8 @@ public class CloudReportApiImpl implements CloudReportApi {
      */
     @Override
     public Long listRunning(ContextExt req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_ONE_RUNNING),
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_ONE_RUNNING),
             req, new TypeReference<ResponseResult<Long>>() {}).getData();
     }
 
@@ -176,7 +193,8 @@ public class CloudReportApiImpl implements CloudReportApi {
      */
     @Override
     public Boolean lock(ReportDetailByIdReq req) {
-        return cloudApiSenderService.put(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_LOCK),
+        return cloudApiSenderService.put(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_LOCK),
             req, new TypeReference<ResponseResult<Boolean>>() {}).getData();
     }
 
@@ -188,7 +206,8 @@ public class CloudReportApiImpl implements CloudReportApi {
      */
     @Override
     public Boolean unlock(ReportDetailByIdReq req) {
-        return cloudApiSenderService.put(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_UNLOCK),
+        return cloudApiSenderService.put(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_UNLOCK),
             req, new TypeReference<ResponseResult<Boolean>>() {}).getData();
     }
 
@@ -200,7 +219,8 @@ public class CloudReportApiImpl implements CloudReportApi {
      */
     @Override
     public Boolean finish(ReportDetailByIdReq req) {
-        return cloudApiSenderService.put(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_FINISH),
+        return cloudApiSenderService.put(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_FINISH),
             req, new TypeReference<ResponseResult<Boolean>>() {}).getData();
     }
 
@@ -212,7 +232,8 @@ public class CloudReportApiImpl implements CloudReportApi {
      */
     @Override
     public List<MetricesResponse> metrics(TrendRequest req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_METRICS),
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_METRICS),
             req, new TypeReference<ResponseResult<List<MetricesResponse>>>() {}).getData();
     }
 
@@ -224,7 +245,8 @@ public class CloudReportApiImpl implements CloudReportApi {
      */
     @Override
     public List<ScriptNodeTreeResp> queryNodeTree(ScriptNodeTreeQueryReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_SCRIPT_NODE_TREE),
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_SCRIPT_NODE_TREE),
             req, new TypeReference<ResponseResult<List<ScriptNodeTreeResp>>>() {}).getData();
     }
 
@@ -237,14 +259,24 @@ public class CloudReportApiImpl implements CloudReportApi {
      */
     @Override
     public String getJtlDownLoadUrl(JtlDownloadReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_GET_JTL_DOWNLOAD_URL),
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_GET_JTL_DOWNLOAD_URL),
             req, new TypeReference<ResponseResult<String>>() {}).getData();
     }
 
     @Override
     public Integer getReportStatusById(ReportDetailByIdReq req) {
-        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_STATUS_BY_ID),
-                req, new TypeReference<ResponseResult<Integer>>() {}).getData();
+        return cloudApiSenderService.get(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_STATUS_BY_ID),
+            req, new TypeReference<ResponseResult<Integer>>() {}).getData();
 
+    }
+
+    @Override
+    public ResponseResult<List<ReportActivityResp>> getActivities(ReportDetailByIdsReq req) {
+        ResponseResult<List<ReportActivityResp>> result = cloudApiSenderService.post(
+            EntrypointUrl.join(EntrypointUrl.MODULE_REPORT, EntrypointUrl.METHOD_REPORT_ACTIVITY_REPORT_IDS),
+            req, new TypeReference<ResponseResult<List<ReportActivityResp>>>() {});
+        return ResponseResult.success(result.getData(), result.getTotalNum());
     }
 }

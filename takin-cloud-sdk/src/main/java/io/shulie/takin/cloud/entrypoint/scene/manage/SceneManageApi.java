@@ -131,4 +131,6 @@ public interface SceneManageApi {
      */
     String recovery(SceneManageDeleteReq req);
 
+    ResponseResult<List<SceneManageListResp>> querySceneByStatus(SceneManageQueryReq req);
+
 }

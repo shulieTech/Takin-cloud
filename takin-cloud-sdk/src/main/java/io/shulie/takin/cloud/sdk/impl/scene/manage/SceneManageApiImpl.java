@@ -119,4 +119,12 @@ public class SceneManageApiImpl implements SceneManageApi {
                 req, new TypeReference<ResponseResult<String>>() {}).getData();
     }
 
+    @Override
+    public ResponseResult<List<SceneManageListResp>> querySceneByStatus(SceneManageQueryReq req) {
+        ResponseResult<List<SceneManageListResp>> result =
+            cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_MANAGE, EntrypointUrl.METHOD_SCENE_MANAGE_QUERY_BY_STATUS),
+                req, new TypeReference<ResponseResult<List<SceneManageListResp>>>() {});
+        return ResponseResult.success(result.getData(), result.getTotalNum());
+    }
+
 }

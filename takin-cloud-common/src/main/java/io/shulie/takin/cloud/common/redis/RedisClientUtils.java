@@ -34,7 +34,7 @@ public class RedisClientUtils {
      * lock 超时时间
      */
     private static final int EXPIREMSECS = 30;
-    private static final String UNLOCK_SCRIPT = "if redis.call('exists',KEYS[1]) == 1 then\n" +
+    private static final String unlockScript = "if redis.call('exists',KEYS[1]) == 1 then\n" +
         "   redis.call('del',KEYS[1])\n" +
         "else\n" +
         //                    "   return 0\n" +
@@ -43,13 +43,13 @@ public class RedisClientUtils {
     @Autowired
     private RedisTemplate redisTemplate;
     private DefaultRedisScript<Void> unlockRedisScript;
-    private final Expiration expiration = Expiration.seconds(EXPIREMSECS);
+    private Expiration expiration = Expiration.seconds(EXPIREMSECS);
 
     @PostConstruct
     public void init() {
         unlockRedisScript = new DefaultRedisScript<>();
         unlockRedisScript.setResultType(Void.class);
-        unlockRedisScript.setScriptText(UNLOCK_SCRIPT);
+        unlockRedisScript.setScriptText(unlockScript);
     }
 
     @Autowired
