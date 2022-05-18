@@ -223,4 +223,5 @@ create table if not exists t_watchman_event
 
 create index t_watchman_event_time_index
     on t_watchman_event (time);
-
+create index t_watchman_event_type_index
+    on t_watchman_event (type);

@@ -116,29 +116,50 @@ public class WatchmanServiceImpl implements WatchmanService {
 
     @Override
     public WatchmanStatusResponse status(Long watchmanId) {
+        // 是否有(异常/恢复)事件
+        WatchmanEventEntity status = lastStatusEvent();
+        if (status != null && NotifyEventType.WATCHMAN_ABNORMAL.getCode().equals(status.getType())) {
+            Map<String, Object> eventContext = jsonService.readValue(status.getContext(), new TypeReference<Map<String, Object>>() {});
+            String message = eventContext.get(Message.MESSAGE_NAME) == null ? null : eventContext.get(Message.MESSAGE_NAME).toString();
+            return new WatchmanStatusResponse(status.getTime().getTime(), message);
+        }
+        // 返回心跳时间
+        WatchmanEventEntity heartbeat = lastHeartbeatEvent();
+        if (heartbeat != null) {
+            return new WatchmanStatusResponse(heartbeat.getTime().getTime(), null);
+        }
+        return null;
+    }
+
+    /**
+     * 返回最后一此上报的"状态类型"的事件
+     * <ul>
+     *     <li>调度异常</li>
+     *     <li>调度正常</li>
+     * </ul>
+     *
+     * @return 事件实体
+     */
+    private WatchmanEventEntity lastStatusEvent() {
+        Wrapper<WatchmanEventEntity> statusWrapper = new LambdaQueryWrapper<WatchmanEventEntity>()
+            .orderByDesc(WatchmanEventEntity::getTime)
+            .in(WatchmanEventEntity::getType, NotifyEventType.WATCHMAN_NORMAL.getCode(), NotifyEventType.WATCHMAN_ABNORMAL.getCode());
         try (Page<?> ignore = PageMethod.startPage(1, 1)) {
-            Wrapper<WatchmanEventEntity> statusWrapper = new LambdaQueryWrapper<WatchmanEventEntity>()
-                .orderByDesc(WatchmanEventEntity::getTime)
-                .in(WatchmanEventEntity::getType, NotifyEventType.WATCHMAN_NORMAL.getCode(), NotifyEventType.WATCHMAN_ABNORMAL.getCode());
-            Wrapper<WatchmanEventEntity> heartbeatWrapper = new LambdaQueryWrapper<WatchmanEventEntity>()
-                .orderByDesc(WatchmanEventEntity::getTime)
-                .eq(WatchmanEventEntity::getType, NotifyEventType.WATCHMAN_HEARTBEAT.getCode());
-            // 是否有(异常/恢复)事件
-            List<WatchmanEventEntity> statusList = watchmanEventMapper.selectList(statusWrapper);
-            if (!statusList.isEmpty() && NotifyEventType.WATCHMAN_ABNORMAL.getCode().equals(statusList.get(0).getType())) {
-                WatchmanEventEntity status = statusList.get(0);
-                Map<String, Object> eventContext = jsonService.readValue(status.getContext(), new TypeReference<Map<String, Object>>() {});
-                String message = eventContext.get(Message.MESSAGE_NAME) == null ? null : eventContext.get(Message.MESSAGE_NAME).toString();
-                return new WatchmanStatusResponse(status.getTime().getTime(), message);
-            }
-            // 返回心跳时间
-            List<WatchmanEventEntity> heartbeatList = watchmanEventMapper.selectList(heartbeatWrapper);
-            if (!heartbeatList.isEmpty()) {
-                WatchmanEventEntity heartbeat = heartbeatList.get(0);
-                return new WatchmanStatusResponse(heartbeat.getTime().getTime(), null);
-            } else {
-                return null;
-            }
+            return watchmanEventMapper.selectList(statusWrapper).stream().findFirst().orElse(null);
+        }
+    }
+
+    /**
+     * 返回最后一此上报的"心跳"的事件
+     *
+     * @return 事件实体
+     */
+    private WatchmanEventEntity lastHeartbeatEvent() {
+        Wrapper<WatchmanEventEntity> heartbeatWrapper = new LambdaQueryWrapper<WatchmanEventEntity>()
+            .orderByDesc(WatchmanEventEntity::getTime)
+            .eq(WatchmanEventEntity::getType, NotifyEventType.WATCHMAN_HEARTBEAT.getCode());
+        try (Page<?> ignore = PageMethod.startPage(1, 1)) {
+            return watchmanEventMapper.selectList(heartbeatWrapper).stream().findFirst().orElse(null);
         }
     }
 
