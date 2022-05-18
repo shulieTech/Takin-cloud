@@ -51,7 +51,9 @@ public class MetricsController {
         @Parameter(description = "聚合的指标数据", required = true) @RequestBody List<MetricsInfo> data,
         HttpServletRequest request) {
         List<MetricsInfo> filterData = data.stream().filter(t -> "response".equals(t.getType())).collect(Collectors.toList());
-        metricsService.upload(jobId, jobExampleId, filterData, IpUtils.getIp(request));
+        if (!filterData.isEmpty()) {
+            metricsService.upload(jobId, jobExampleId, filterData, IpUtils.getIp(request));
+        }
         return ApiResult.success();
     }
 
