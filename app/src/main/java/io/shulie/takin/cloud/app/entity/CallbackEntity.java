@@ -36,6 +36,10 @@ public class CallbackEntity {
      */
     private Date createTime;
     /**
+     * 阈值时间
+     */
+    private Date thresholdTime;
+    /**
      * 是否完成
      */
     private Boolean completed;

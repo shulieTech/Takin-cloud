@@ -8,7 +8,8 @@ create table if not exists t_callback
     url varchar(1000) charset utf8 not null comment '回调路径',
     context blob not null comment '回调内容',
     create_time timestamp default CURRENT_TIMESTAMP not null comment '创建时间',
-    completed tinyint(1) default 0 not null comment '是否完成'
+    completed tinyint(1) default 0 not null comment '是否完成',
+    threshold_time timestamp null comment '阈值时间'
 )comment '回调表';
 
 create table if not exists t_callback_log
