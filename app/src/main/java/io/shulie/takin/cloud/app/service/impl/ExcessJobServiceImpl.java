@@ -160,7 +160,7 @@ public class ExcessJobServiceImpl implements ExcessJobService {
         // 获取任务实例
         JobEntity jobEntity = jobService.jobEntity(jobId);
         // 获取工作目录
-        File directory = FileUtil.file(watchmanConfig.getNfsPath(),
+        File directory = FileUtil.file(watchmanConfig.getNfsPath(), "metrics",
             String.valueOf(jobEntity.getResourceId()), String.valueOf(jobEntity.getId()));
         // 获取校正文件
         String[] directoryFileArray = directory.list((dir, name) -> Pattern.matches("^pressure-\\d\\.metrics\\.err$", name));
