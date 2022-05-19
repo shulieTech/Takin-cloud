@@ -7,14 +7,12 @@ import java.util.stream.Collectors;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.model.callback.Sla;
-import io.shulie.takin.cloud.app.entity.JobEntity;
-import io.shulie.takin.cloud.app.mapper.SlaMapper;
 import io.shulie.takin.cloud.app.entity.SlaEntity;
+import io.shulie.takin.cloud.app.entity.JobEntity;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.SlaService;
 import io.shulie.takin.cloud.app.service.JsonService;
@@ -27,6 +25,7 @@ import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.constant.enums.FormulaSymbol;
 import io.shulie.takin.cloud.constant.enums.FormulaTarget;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.app.service.mapper.SlaMapperService;
 import io.shulie.takin.cloud.app.service.mapper.SlaEventMapperService;
 
 /**
@@ -37,8 +36,6 @@ import io.shulie.takin.cloud.app.service.mapper.SlaEventMapperService;
 @Service
 public class SlaServiceImpl implements SlaService {
     @javax.annotation.Resource
-    SlaMapper slaMapper;
-    @javax.annotation.Resource
     JobService jobService;
     @javax.annotation.Resource
     JsonService jsonService;
@@ -47,6 +44,8 @@ public class SlaServiceImpl implements SlaService {
     @javax.annotation.Resource
     CallbackService callbackService;
     @javax.annotation.Resource
+    SlaMapperService slaMapperService;
+    @javax.annotation.Resource
     SlaEventMapperService slaEventMapperService;
 
     /**
@@ -54,7 +53,7 @@ public class SlaServiceImpl implements SlaService {
      */
     @Override
     public List<SlaEntity> list(long jobId) {
-        return slaMapper.selectList(new LambdaQueryWrapper<SlaEntity>().eq(SlaEntity::getJobId, jobId));
+        return slaMapperService.lambdaQuery().eq(SlaEntity::getJobId, jobId).list();
     }
 
     /**
@@ -62,7 +61,7 @@ public class SlaServiceImpl implements SlaService {
      */
     @Override
     public void create(long jobId, String ref, FormulaTarget target, FormulaSymbol symbol, double number) {
-        slaMapper.insert(new SlaEntity()
+        slaMapperService.save(new SlaEntity()
             .setRef(ref)
             .setJobId(jobId)
             .setFormulaNumber(number)
@@ -106,8 +105,7 @@ public class SlaServiceImpl implements SlaService {
         // 业务结果
         List<SlaEventEntity> result = new ArrayList<>();
         // 获取条件
-        List<SlaEntity> slaEntityList = slaMapper.selectList(new LambdaQueryWrapper<SlaEntity>()
-            .eq(SlaEntity::getJobId, jobId));
+        List<SlaEntity> slaEntityList = slaMapperService.lambdaQuery().eq(SlaEntity::getJobId, jobId).list();
         // 逐个数据判断
         for (MetricsInfo metricsInfo : metricsInfoList) {
             // 对应的条件列表

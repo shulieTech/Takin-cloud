@@ -1,21 +1,21 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Arrays;
+import java.io.InputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.nio.file.Files;
+import java.io.OutputStream;
 import java.io.BufferedReader;
 import java.util.regex.Pattern;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.OutputStreamWriter;
 import java.util.stream.Collectors;
+import java.nio.charset.StandardCharsets;
 
 import javax.annotation.Resource;
 
@@ -50,7 +50,7 @@ import io.shulie.takin.cloud.app.service.mapper.ExcessJobLogMapperService;
  */
 @Service
 @Slf4j(topic = "EXCESS-JOB")
-public class ExcessJobServiceImple implements ExcessJobService {
+public class ExcessJobServiceImpl implements ExcessJobService {
     @Resource
     WatchmanConfig watchmanConfig;
     @Resource
@@ -164,7 +164,7 @@ public class ExcessJobServiceImple implements ExcessJobService {
             String.valueOf(jobEntity.getResourceId()), String.valueOf(jobEntity.getId()));
         // 获取校正文件
         String[] directoryFileArray = directory.list((dir, name) -> Pattern.matches("^pressure-\\d\\.metrics\\.err$", name));
-        if (directoryFileArray == null) {throw new IllegalArgumentException("目录不存在:" + directory);}
+        if (directoryFileArray == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_FILE, directory));}
         List<File> readyCalibrationFileList = Arrays.stream(directoryFileArray).map(t -> FileUtil.file(directory, t)).collect(Collectors.toList());
         // 获取回滚文件
         File rollBackFile = getRollBackFile(directory);
@@ -186,11 +186,9 @@ public class ExcessJobServiceImple implements ExcessJobService {
      * @param fifleList    文件列表
      */
     private void initRollBack(long jobId, File rollBackFile, List<File> fifleList) throws Exception {
-        try (FileOutputStream rollBackOutputStream = new FileOutputStream(rollBackFile)) {
-            try (OutputStreamWriter rollBackOutputStreamWriter = new OutputStreamWriter(rollBackOutputStream)) {
-                try (BufferedWriter rollBackBufferedWriter = new BufferedWriter(rollBackOutputStreamWriter)) {
-                    execDataCalibrationFileList(jobId, rollBackBufferedWriter, fifleList);
-                }
+        try (OutputStream rollBackOutputStream = Files.newOutputStream(rollBackFile.toPath())) {
+            try (Writer rollBackWriter = new OutputStreamWriter(rollBackOutputStream)) {
+                execDataCalibrationFileList(jobId, rollBackWriter, fifleList);
             }
         }
     }
@@ -208,8 +206,8 @@ public class ExcessJobServiceImple implements ExcessJobService {
             File file = fileList.get(i);
             log.info("当前进度({}/{})", i + 1, fileLength);
             log.info("开始处理文件{}的内容入库", file.getAbsolutePath());
-            try (FileInputStream in = new FileInputStream(file)) {
-                try (InputStreamReader inReader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+            try (InputStream in = Files.newInputStream(file.toPath())) {
+                try (Reader inReader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
                     try (BufferedReader bufReader = new BufferedReader(inReader)) {
                         String line = "";
                         while (line != null) {
