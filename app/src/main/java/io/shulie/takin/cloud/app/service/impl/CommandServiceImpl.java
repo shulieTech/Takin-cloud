@@ -122,7 +122,7 @@ public class CommandServiceImpl implements CommandService {
     public void releaseResource(long resourceId) {
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(resourceId);
-        if (resourceEntity == null) {throw new IllegalArgumentException("未找到资源:" + resourceId);}
+        if (resourceEntity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_RESOURCE, resourceId));}
         Map<String, Object> content = new HashMap<>(1);
         content.put("resourceId", resourceEntity.getId());
         long commandId = create(resourceEntity.getWatchmanId(), CommandType.RELEASE_RESOURCE, jsonService.writeValueAsString(content));
@@ -151,7 +151,7 @@ public class CommandServiceImpl implements CommandService {
     public void stopApplication(long jobId) {
         // 获取任务
         JobEntity jobEntity = jobService.jobEntity(jobId);
-        if (jobEntity == null) {throw new IllegalArgumentException("未找到任务:" + jobId);}
+        if (jobEntity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_JOB, jobId));}
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
         Map<String, Object> content = new HashMap<>(3);
@@ -314,6 +314,22 @@ public class CommandServiceImpl implements CommandService {
         // 如果是试跑(脚本调试)
         Map<String, String> ext = packageStartJobTryRun(threadConfigEntityList);
         if (!ext.isEmpty()) {basicConfig.putAll(ext);}
+        // 如果是TPS模式
+        boolean isTps = threadConfigEntityList.stream().anyMatch(t -> ThreadGroupType.TPS.getCode().equals(t.getMode()));
+        if (isTps) {
+            int tpsTargetLevel = metricsEntityList.stream()
+                // 解析content
+                .map(t -> jsonService.readValue(t.getContext(), new TypeReference<Map<String, String>>() {}))
+                // 返回tps
+                .map(t -> t.getOrDefault("tps", "0"))
+                // 空值处理
+                .map(t -> t == null ? "0" : t)
+                // 类型转换
+                .mapToInt(Integer::parseInt)
+                // 汇总
+                .sum();
+            basicConfig.put("tpsTargetLevel", tpsTargetLevel);
+        }
         // 输出成JSON
         return jsonService.writeValueAsString(basicConfig);
     }
