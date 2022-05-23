@@ -59,7 +59,6 @@
         <module>takin-cloud-ext</module>
         <module>takin-cloud-plugins</module>
         <module>build</module>
-
     </modules>
 
 
@@ -198,17 +197,6 @@
         </dependencies>
     </dependencyManagement>
 
-
-    <distributionManagement>
-        <repository>
-            <id>rdc-releases</id>
-            <url>https://packages.aliyun.com/maven/repository/2101190-release-xxuvBf/</url>
-        </repository>
-        <snapshotRepository>
-            <id>rdc-snapshots</id>
-            <url>https://packages.aliyun.com/maven/repository/2101190-snapshot-EQD7pQ/</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <url>https://github.com/shulieTech/Takin-cloud.git</url>
     <description>takin-cloud</description>
