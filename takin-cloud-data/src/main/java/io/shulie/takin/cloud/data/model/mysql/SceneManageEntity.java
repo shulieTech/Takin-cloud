@@ -2,9 +2,11 @@ package io.shulie.takin.cloud.data.model.mysql;
 
 import java.util.Date;
 
+import lombok.Data;
+import lombok.experimental.Accessors;
+
 import com.baomidou.mybatisplus.annotation.*;
 import io.shulie.takin.cloud.data.annocation.EnableSign;
-import lombok.Data;
 
 /**
  * 压测场景 - 实体类
@@ -15,6 +17,7 @@ import lombok.Data;
 @Data
 @TableName(value = "t_scene_manage")
 @EnableSign
+@Accessors(chain = true)
 public class SceneManageEntity {
     /**
      * 自增主键
@@ -104,7 +107,7 @@ public class SceneManageEntity {
     private String envCode;
 
     //数据签名字段补充
-    @TableField(value = "sign" , fill = FieldFill.INSERT)
+    @TableField(value = "sign", fill = FieldFill.INSERT)
     private String sign;
     @TableField(value = "custom_id")
     private Long customId;
@@ -114,7 +117,6 @@ public class SceneManageEntity {
     private Long createUid;
     @TableField(value = "customer_id")
     private Long customerId;
-
 
 }
 

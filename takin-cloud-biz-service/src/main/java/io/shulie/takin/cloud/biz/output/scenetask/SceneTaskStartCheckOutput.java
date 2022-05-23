@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.biz.output.scenetask;
 import java.util.List;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * @author moriarty
@@ -13,6 +14,7 @@ public class SceneTaskStartCheckOutput {
     private List<FileReadInfo> fileReadInfos;
 
     @Data
+    @Accessors(chain = true)
     public static class FileReadInfo {
         private String fileName;
         private String fileSize;

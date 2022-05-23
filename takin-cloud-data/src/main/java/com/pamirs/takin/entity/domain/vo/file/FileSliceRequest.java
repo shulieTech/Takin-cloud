@@ -1,12 +1,15 @@
 package com.pamirs.takin.entity.domain.vo.file;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.Accessors;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author moriarty
  */
 @Data
+@Accessors(chain = true)
 public class FileSliceRequest {
     @ApiModelProperty(name = "场景ID")
     private Long sceneId;

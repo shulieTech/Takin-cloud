@@ -101,7 +101,7 @@ public interface SceneTaskService {
      * @param input 入参
      * @return -
      */
-    double queryAdjustTaskTps(SceneTaskQueryTpsInput input);
+    Double queryAdjustTaskTps(SceneTaskQueryTpsInput input);
 
     /**
      * 启动流量调试，返回报告id

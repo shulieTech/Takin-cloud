@@ -103,7 +103,7 @@ public class SceneTaskController {
 
     @GetMapping(EntrypointUrl.METHOD_SCENE_TASK_INIT_CALL_BACK)
     @ApiOperation(value = "调度初始化回调函数")
-    public ResponseResult<?> initCallback(ScheduleInitParamExt param) {
+    public ResponseResult<Object> initCallback(ScheduleInitParamExt param) {
         // 初始化调度
         scheduleService.initScheduleCallback(param);
         return ResponseResult.success();
@@ -111,16 +111,17 @@ public class SceneTaskController {
 
     @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_FILE_CONTACT)
     @ApiModelProperty(value = "大文件关联场景")
-    public ResponseResult<?> preSplitFile(@RequestBody FileSplitResultVO resultVO) {
+    public ResponseResult<Object> preSplitFile(@RequestBody FileSplitResultVO resultVO) {
         try {
-            SceneContactFileOutput output = fileSliceService.contactScene(new SceneBigFileSliceParam() {{
-                setFileName(resultVO.getFileName());
-                setSceneId(resultVO.getSceneId());
-                setIsSplit(resultVO.getIsSplit());
-                setIsOrderSplit(resultVO.getIsOrderSplit());
-            }});
+            SceneContactFileOutput output = fileSliceService.contactScene(new SceneBigFileSliceParam()
+                .setFileName(resultVO.getFileName())
+                .setSceneId(resultVO.getSceneId())
+                .setIsSplit(resultVO.getIsSplit())
+                .setIsOrderSplit(resultVO.getIsOrderSplit())
+            );
             return ResponseResult.success(output);
         } catch (TakinCloudException e) {
+            log.error("关联文件与脚本、场景异常", e);
             return ResponseResult.fail("关联文件与脚本、场景异常", e.getMessage());
         }
     }
@@ -150,10 +151,10 @@ public class SceneTaskController {
         List<EnginePluginInput> enginePluginInputs = null;
         if (CollectionUtils.isNotEmpty(taskFlowDebugStartReq.getEnginePlugins())) {
             List<EnginePluginsRefOpen> enginePlugins = taskFlowDebugStartReq.getEnginePlugins();
-            enginePluginInputs = enginePlugins.stream().map(plugin -> new EnginePluginInput() {{
-                setPluginId(plugin.getPluginId());
-                setPluginVersion(plugin.getVersion());
-            }}).collect(Collectors.toList());
+            enginePluginInputs = enginePlugins.stream().map(plugin -> new EnginePluginInput()
+                .setPluginId(plugin.getPluginId())
+                .setPluginVersion(plugin.getVersion())
+            ).collect(Collectors.toList());
         }
         Long reportId = sceneTaskService.startFlowDebugTask(input, enginePluginInputs);
         return ResponseResult.success(reportId);
@@ -168,10 +169,10 @@ public class SceneTaskController {
         List<EnginePluginInput> enginePluginInputs = null;
         if (CollectionUtils.isNotEmpty(taskFlowDebugStartReq.getEnginePlugins())) {
             List<EnginePluginsRefOpen> enginePlugins = taskFlowDebugStartReq.getEnginePlugins();
-            enginePluginInputs = enginePlugins.stream().map(plugin -> new EnginePluginInput() {{
-                setPluginId(plugin.getPluginId());
-                setPluginVersion(plugin.getVersion());
-            }}).collect(Collectors.toList());
+            enginePluginInputs = enginePlugins.stream().map(plugin -> new EnginePluginInput()
+                .setPluginId(plugin.getPluginId())
+                .setPluginVersion(plugin.getVersion())
+            ).collect(Collectors.toList());
         }
         SceneInspectTaskStartOutput output = sceneTaskService.startInspectTask(input, enginePluginInputs);
         SceneInspectTaskStartResp startResp = BeanUtil.copyProperties(output, SceneInspectTaskStartResp.class);
@@ -215,9 +216,9 @@ public class SceneTaskController {
         input.setSceneId(sceneId);
         input.setReportId(reportId);
         input.setXpathMd5(xpathMd5);
-        double value = sceneTaskService.queryAdjustTaskTps(input);
+        Double value = sceneTaskService.queryAdjustTaskTps(input);
         SceneTaskAdjustTpsResp sceneTaskAdjustTpsResp = new SceneTaskAdjustTpsResp();
-        sceneTaskAdjustTpsResp.setTotalTps(Double.valueOf(value).longValue());
+        sceneTaskAdjustTpsResp.setTotalTps(value.longValue());
         return ResponseResult.success(sceneTaskAdjustTpsResp);
     }
 
@@ -237,7 +238,7 @@ public class SceneTaskController {
     @PostMapping(EntrypointUrl.METHOD_SCENE_TASK_START_TRY_RUN)
     @ApiOperation(value = "启动脚本试跑")
     public ResponseResult<SceneTryRunTaskStartResp> startTryRunTask(@RequestBody
-        SceneTryRunTaskStartReq sceneTryRunTaskStartReq) {
+    SceneTryRunTaskStartReq sceneTryRunTaskStartReq) {
         SceneManageWrapperInput input = SceneTaskOpenConverter.INSTANCE.ofSceneTryRunTaskReq(sceneTryRunTaskStartReq);
         // 设置用户
         CloudPluginUtils.fillUserData(input);
@@ -247,10 +248,10 @@ public class SceneTaskController {
         List<EnginePluginInput> enginePluginInputs = null;
         if (CollectionUtils.isNotEmpty(sceneTryRunTaskStartReq.getEnginePlugins())) {
             List<EnginePluginsRefOpen> enginePlugins = sceneTryRunTaskStartReq.getEnginePlugins();
-            enginePluginInputs = enginePlugins.stream().map(plugin -> new EnginePluginInput() {{
-                setPluginId(plugin.getPluginId());
-                setPluginVersion(plugin.getVersion());
-            }}).collect(Collectors.toList());
+            enginePluginInputs = enginePlugins.stream().map(plugin -> new EnginePluginInput()
+                .setPluginId(plugin.getPluginId())
+                .setPluginVersion(plugin.getVersion())
+            ).collect(Collectors.toList());
         }
         SceneTryRunTaskStartOutput output = sceneTaskService.startTryRun(input, enginePluginInputs);
         SceneTryRunTaskStartResp response = BeanUtil.copyProperties(output, SceneTryRunTaskStartResp.class);
