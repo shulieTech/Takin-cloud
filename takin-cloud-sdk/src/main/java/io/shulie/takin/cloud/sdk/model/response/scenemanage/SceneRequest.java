@@ -165,6 +165,8 @@ public class SceneRequest extends ContextExt {
         @ApiModelProperty(value = "文件名称")
         @NotBlank(message = "文件名称不能为空")
         private String name;
+        @ApiModelProperty(value = "文件签名")
+        private String sign;
         @ApiModelProperty(value = "文件类型")
         @NotNull(message = "文件类型不能为空")
         private Integer type;

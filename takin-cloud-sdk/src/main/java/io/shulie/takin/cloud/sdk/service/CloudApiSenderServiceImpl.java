@@ -5,7 +5,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
+import cn.hutool.Hutool;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.net.url.UrlBuilder;
+import cn.hutool.core.util.CharsetUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.TypeReference;
@@ -20,6 +25,7 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.common.beans.response.ResponseResult;
+import io.shulie.takin.utils.security.MD5Utils;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -179,8 +185,9 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
             HttpRequest request = HttpUtil
                 .createRequest(method, url)
                 .contentType(ContentType.JSON.getValue())
-                .headerMap(getDataTrace(context), true)
+                .headerMap(getDataTrace(context,url,requestBody), true)
                 .body(requestBody);
+
             // 设置超时时间
             if (timeout > 0) {
                 int realTimeout = timeout * (Long.valueOf(DateUnit.SECOND.getMillis()).intValue());
@@ -230,10 +237,21 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
     private <T> T requestApi(ContextExt context, Method method, String url, String fileListName, File[] fileList, TypeReference<T> responseClass) {
         String responseBody = "";
         try {
+            Map<String, String> headMap = getDataTrace(context,url,new byte[0]);
+            for(File file:fileList){
+                try {
+                    headMap.put(
+                            MD5Utils.getInstance().getMD5(file.getName()),
+                            MD5Utils.getInstance().getMD5(file)
+                    );
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
             // 组装HTTP请求对象
             HttpRequest request = HttpUtil
                 .createRequest(method, url)
-                .headerMap(getDataTrace(context), true)
+                .headerMap(headMap, true)
                 .form(fileListName, fileList);
             // 设置超时时间
             if (timeout > 0) {
@@ -301,14 +319,38 @@ public class CloudApiSenderServiceImpl implements CloudApiSenderService {
      *
      * @return 请求头信息
      */
-    private Map<String, String> getDataTrace(ContextExt context) {
-        return new HashMap<String, String>(4) {{
+    private Map<String, String> getDataTrace(ContextExt context,String url,byte[] body) {
+        Map<String,String> headMap =  new HashMap<String, String>(4) {{
             put(ENV_CODE, context.getEnvCode());
             put(FILTER_SQL, context.getFilterSql());
             put(TENANT_CODE, context.getTenantCode());
             put(USER_ID, String.valueOf(context.getUserId()));
             put(TENANT_ID, String.valueOf(context.getTenantId()));
         }};
-    }
 
+        //增加签名相关信息-时间戳
+        headMap.put("time",System.currentTimeMillis()+"");  //增加暴力破解难度
+
+        /**
+         * 计算签名
+         * 字段选取：header中ENV_CODE，FILTER_SQL，TENANT_CODE，USER_ID，TENANT_ID，time，另
+         *          url，body
+         * 结果写入：header
+         */
+        TreeMap<String,String> treeMap = new TreeMap<>();
+        treeMap.putAll(headMap);
+        treeMap.put("url", "/takin-cloud"+url.split("/takin-cloud")[1]);
+        treeMap.put("body",new String(body));
+
+        String signBodyStr = treeMap.toString().replace("null","");
+        String md5 = null;
+        try {
+            md5 = MD5Utils.getInstance().getMD5(signBodyStr);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //签名写入header
+        headMap.put("md5", md5);
+        return headMap;
+    }
 }

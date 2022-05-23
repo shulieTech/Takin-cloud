@@ -34,7 +34,8 @@
     </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
-        id, scene_id, scene_name, start_time, end_time, `status`,`type`, conclusion, total_request,pressure_type,avg_concurrent,
+        id, scene_id, scene_name, start_time, end_time, `status`,`type`, conclusion,
+        total_request,pressure_type,avg_concurrent,
         tps,avg_tps, avg_rt, concurrent, success_rate, sa, operate_id,features, is_deleted, gmt_create,
         gmt_update,customer_id,amount,dept_id,user_id,script_id
     </sql>
@@ -45,7 +46,8 @@
         from t_report
         where id = #{id,jdbcType=BIGINT}
     </select>
-    <select id="selectOneRunningReport" resultMap="BaseResultMap" parameterType="io.shulie.takin.cloud.ext.content.trace.ContextExt">
+    <select id="selectOneRunningReport" resultMap="BaseResultMap"
+            parameterType="io.shulie.takin.cloud.ext.content.trace.ContextExt">
         select id
         from t_report
         <where>
@@ -61,7 +63,8 @@
         order by id
         limit 1
     </select>
-    <select id="selectListRunningReport" resultMap="BaseResultMap" parameterType="io.shulie.takin.cloud.ext.content.trace.ContextExt">
+    <select id="selectListRunningReport" resultMap="BaseResultMap"
+            parameterType="io.shulie.takin.cloud.ext.content.trace.ContextExt">
         select id
         from t_report
         <where>
@@ -94,7 +97,8 @@
     </select>
     <select id="listReport" resultMap="BaseResultMap"
             parameterType="io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq">
-        select id, scene_id,scene_name,start_time,end_time,`status`,`type`,conclusion,concurrent,amount,customer_id,features,dept_id,user_id
+        select id,
+        scene_id,scene_name,start_time,end_time,`status`,`type`,conclusion,concurrent,amount,customer_id,features,dept_id,user_id
         from t_report
         <where>
             <if test="param.reportId != null">
@@ -125,6 +129,12 @@
             <if test="param.envCode != null">
                 and `env_code` = #{param.envCode}
             </if>
+            <if test="param.reportStartTime != null">
+                and end_time  <![CDATA[ >= ]]>  #{param.reportStartTime}
+            </if>
+            <if test="param.reportEndTime != null">
+                and end_time  <![CDATA[ <= ]]> #{param.reportEndTime}
+            </if>
         </where>
         order by id desc
     </select>
@@ -154,8 +164,7 @@
         from t_report
         where scene_id = #{sceneId,jdbcType=BIGINT}
           and `status` = 0
-        order by id desc
-        limit 1
+        order by id desc limit 1
     </select>
 
     <select id="getTempReportBySceneId" resultType="com.pamirs.takin.entity.domain.entity.report.Report">
@@ -174,8 +183,7 @@
         from t_report
         where scene_id = #{sceneId,jdbcType=BIGINT}
           and is_deleted = 0
-        order by id desc
-        limit 1
+        order by id desc limit 1
     </select>
 
     <update id="updateByPrimaryKeySelective" parameterType="com.pamirs.takin.entity.domain.entity.report.Report">

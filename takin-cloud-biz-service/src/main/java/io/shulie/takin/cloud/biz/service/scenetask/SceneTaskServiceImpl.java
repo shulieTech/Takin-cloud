@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.biz.service.scenetask;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +22,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import io.shulie.takin.cloud.ext.content.response.Response;
+import io.shulie.takin.utils.security.MD5Utils;
 import lombok.extern.slf4j.Slf4j;
 
 import cn.hutool.json.JSONUtil;
@@ -1232,16 +1234,10 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     private boolean checkOutJmx(SceneScriptRefOutput uploadFile, Long sceneId) {
         if (Objects.nonNull(uploadFile) && StringUtils.isNotBlank(uploadFile.getUploadPath())) {
-            String fileMd5 = Md5Util.md5File(uploadFile.getUploadPath());
+            String fileMd5 = MD5Utils.getInstance().getMD5(new File(uploadFile.getUploadPath()));
             if (StringUtils.isNotBlank(uploadFile.getFileMd5())) {
                 return uploadFile.getFileMd5().equals(fileMd5);
             } else {
-                //兼容老版本没有md5的情况，更新数据库的文件md5值
-                fileSliceService.updateFileMd5(new SceneBigFileSliceParam() {{
-                    setSceneId(sceneId);
-                    setFileName(uploadFile.getFileName());
-                    setFileMd5(fileMd5);
-                }});
                 return true;
             }
         }

@@ -3,10 +3,8 @@ package io.shulie.takin.cloud.data.model.mysql;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+import io.shulie.takin.cloud.data.annocation.EnableSign;
 import lombok.Data;
 
 /**
@@ -14,6 +12,7 @@ import lombok.Data;
  */
 @Data
 @TableName(value = "t_scene_script_ref")
+@EnableSign
 public class SceneScriptRefEntity {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -88,4 +87,7 @@ public class SceneScriptRefEntity {
 
     @TableField(value = "file_md5")
     private String fileMd5;
+
+    @TableField(value = "sign" , fill = FieldFill.INSERT)
+    private String sign;
 }

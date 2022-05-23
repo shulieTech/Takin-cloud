@@ -529,6 +529,7 @@ public class SceneServiceImpl implements SceneService {
                 sceneScriptRefEntityList.add(new SceneScriptRefEntity() {{
                     setSceneId(sceneId);
                     setFileName(fileName);
+                    setFileMd5(t.getSign());
                     setUploadPath(sceneId + "/" + fileName);
                     setFileType(t.getType());
                     setScriptType(scriptType);

@@ -11,13 +11,17 @@ import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
 import org.apache.ibatis.annotations.Param;
 
 /**
+ * -
+ *
  * @author -
  */
+@SuppressWarnings("AlibabaClassNamingShouldBeCamel")
 public interface TReportMapper {
 
     /**
      * 查询一个运行中的报告
      *
+     * @param contextExt -
      * @return 压测报告
      */
     @DataApartInterceptAnnotation
@@ -26,11 +30,17 @@ public interface TReportMapper {
     /**
      * 查询所有运行中的报告
      *
+     * @param contextExt -
      * @return 压测报告列表
      */
     @DataApartInterceptAnnotation
     List<Report> selectListRunningReport(ContextExt contextExt);
 
+    /**
+     * -
+     *
+     * @return -
+     */
     List<Report> selectListPressuringReport();
 
     /**
@@ -99,6 +109,12 @@ public interface TReportMapper {
      */
     Report getTempReportBySceneId(Long sceneId);
 
+    /**
+     * -
+     *
+     * @param sceneId -
+     * @return -
+     */
     int resumeStatus(Long sceneId);
 
     /**
@@ -110,5 +126,12 @@ public interface TReportMapper {
      */
     int updateStartTime(@Param("id") Long id, @Param("startTime") Date startTime);
 
+    /**
+     * -
+     *
+     * @param id     0
+     * @param userId -
+     * @return -
+     */
     int updateReportUserById(@Param("id") Long id, @Param("userId") Long userId);
 }
