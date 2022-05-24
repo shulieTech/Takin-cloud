@@ -9,6 +9,10 @@ import io.shulie.takin.cloud.app.entity.WatchmanEntity;
 import io.shulie.takin.cloud.model.resource.ResourceSource;
 import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 
+import io.shulie.takin.cloud.model.watchman.Register;
+import io.shulie.takin.cloud.model.watchman.Register.Body;
+import io.shulie.takin.cloud.model.watchman.Register.Header;
+
 /**
  * 调度服务
  *
@@ -86,4 +90,13 @@ public interface WatchmanService {
      * @param message    异常内容
      */
     void onAbnormal(long watchmanId, String message);
+
+    /**
+     * 生成调度机信息
+     *
+     * @param header 头部信息
+     * @param body   主要信息
+     * @return 调度机信息
+     */
+    Register generate(Header header, Body body);
 }

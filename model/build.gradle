@@ -6,10 +6,9 @@ dependencies {
     // 项目内依赖
     api project(':constant')
     // lombok
-    implementation libs.lombok
+    compileOnly libs.lombok
     annotationProcessor libs.lombok
     // 编译依赖项
-    compileOnly libs.hutool
     compileOnly libs.influxdb
     compileOnly libs.spring.doc
 }
