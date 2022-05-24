@@ -3,7 +3,7 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <groupId>io.shulie.takin</groupId>
-    <version>5.5.1.1</version>
+    <version>5.2.8</version>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
 
@@ -11,9 +11,13 @@
     <artifactId>takin-cloud-bom</artifactId>
 
     <properties>
-        <takin.cloud.version>5.5.1.1</takin.cloud.version>
-        <takin.cloud.sdk.version>5.5.1.1</takin.cloud.sdk.version>
+        <takin.cloud.version>5.2.8</takin.cloud.version>
+        <takin.cloud.sdk.version>5.2.8</takin.cloud.sdk.version>
     </properties>
+
+
+    <description>takin-cloud</description>
+    <url>https://github.com/shulieTech/Takin-cloud.git</url>
 
     <dependencyManagement>
         <dependencies>
@@ -50,19 +54,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <distributionManagement>
-        <repository>
-            <id>rdc-releases</id>
-            <url>https://packages.aliyun.com/maven/repository/2101190-release-xxuvBf/</url>
-        </repository>
-        <snapshotRepository>
-            <id>rdc-snapshots</id>
-            <url>https://packages.aliyun.com/maven/repository/2101190-snapshot-EQD7pQ/</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <url>https://github.com/shulieTech/Takin-cloud.git</url>
-    <description>takin-cloud</description>
     <distributionManagement>
         <repository>
             <id>rdc-releases</id>
