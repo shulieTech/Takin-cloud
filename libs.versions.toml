@@ -1,0 +1,37 @@
+# 版本
+[versions]
+hutool = "5.7.22"
+lombok = "1.18.22"
+jackson = "2.13.2"
+influxdb = "2.22"
+# mybatis
+mybatis-plus = "3.5.1"
+mysql-connector = "8.0.28"
+# spring
+spring-doc = "1.6.8"
+spring-boot = "2.6.7"
+spring-druid = "1.1.17"
+spring-pagehelper = "1.4.2"
+spring-boo-redisson = "3.17.0"
+# 单个依赖
+[libraries]
+# lobmok
+lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
+# spring
+spring-doc = { group = "org.springdoc", name = "springdoc-openapi-ui", version.ref = "spring-doc" }
+spring-boot-test = { group = "org.springframework.boot", name = "spring-boot-test", version.ref = "spring-boot" }
+spring-pagehelper = { group = "com.github.pagehelper", name = "pagehelper-spring-boot-starter", version.ref = "spring.pagehelper" }
+spring-boot-redisson = { group = "org.redisson", name = "redisson-spring-boot-starter", version.ref = "spring-boo-redisson" }
+spring-boot-starter-web = { group = "org.springframework.boot", name = "spring-boot-starter-web", version.ref = "spring-boot" }
+spring-boot-configuration-processor = { group = "org.springframework.boot", name = "spring-boot-configuration-processor", version.ref = "spring-boot" }
+# mysql
+mysql = { group = "mysql", name = "mysql-connector-java", version.ref = "mysql-connector" }
+druid = { group = "com.alibaba", name = "druid-spring-boot-starter", version.ref = "spring-druid" }
+mybatis-plus = { group = "com.baomidou", name = "mybatis-plus-boot-starter", version.ref = "mybatis-plus" }
+# 其它
+hutool = { group = "cn.hutool", name = "hutool-all", version.ref = "hutool" }
+influxdb = { group = "org.influxdb", name = "influxdb-java", version.ref = "influxdb" }
+jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
+# 依赖包
+[bundles]
+mysql = ["mysql", "druid", "mybatis.plus", "spring.pagehelper"]

@@ -3,11 +3,11 @@ plugins {
 }
 
 dependencies {
-    implementation 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    implementation libs.lombok
+    annotationProcessor libs.lombok
 
-    implementation 'cn.hutool:hutool-all:5.7.22'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.2'
+    implementation libs.hutool
+    compileOnly libs.jackson.annotations
 }
 
 description = 'constant'
