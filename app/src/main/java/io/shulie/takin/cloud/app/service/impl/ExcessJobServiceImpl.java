@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.app.service.impl;
 import java.io.File;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Date;
 import java.util.List;
 import java.util.Arrays;
 import java.io.InputStream;
@@ -22,6 +23,8 @@ import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.io.FileUtil;
 import com.github.pagehelper.Page;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.DateTime;
 import com.github.pagehelper.PageInfo;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.github.pagehelper.page.PageMethod;
@@ -70,8 +73,15 @@ public class ExcessJobServiceImpl implements ExcessJobService {
     public PageInfo<ExcessJobEntity> list(int pageNumber, int pageSize, Integer type, boolean isCompleted) {
         try (Page<Object> ignore = PageMethod.startPage(pageNumber, pageNumber)) {
             List<ExcessJobEntity> list = excessJobMapperService.lambdaQuery()
-                .eq(ExcessJobEntity::getCompleted, isCompleted)
+                // 类型筛选
                 .eq(type != null, ExcessJobEntity::getType, type)
+                // 未完成
+                .eq(ExcessJobEntity::getCompleted, isCompleted)
+                // 并且
+                .and(t ->
+                    // (阈值时间为空 || 阈值时间小于等于当前时间)
+                    t.isNull(ExcessJobEntity::getThresholdTime)
+                        .or(c -> c.le(ExcessJobEntity::getThresholdTime, new Date())))
                 .list();
             return PageInfo.of(list);
         }
@@ -88,20 +98,21 @@ public class ExcessJobServiceImpl implements ExcessJobService {
     }
 
     @Override
-    public Long log(long scheduleId, String content, boolean isCompleted) {
+    public Long log(long excessJobId, String content, boolean isCompleted) {
         ExcessJobLogEntity excessJobLogEntity = new ExcessJobLogEntity()
-            .setScheduleId(scheduleId)
+            .setExcessJobId(excessJobId)
             .setCompleted(isCompleted)
             .setContent(content);
         boolean saveResult = excessJobLogMapperService.save(excessJobLogEntity);
         if (saveResult && isCompleted) {
             // 更新任务信息
             excessJobMapperService.lambdaUpdate()
-                .eq(ExcessJobEntity::getId, scheduleId)
+                .eq(ExcessJobEntity::getId, excessJobId)
                 .set(ExcessJobEntity::getCompleted, excessJobLogEntity.getCompleted())
                 .update();
             return excessJobLogEntity.getId();
         } else {
+            updateThresholdTime(excessJobId);
             return null;
         }
     }
@@ -127,6 +138,7 @@ public class ExcessJobServiceImpl implements ExcessJobService {
         } catch (Exception ex) {
             completed = false;
             execContent = ex.getMessage();
+            log.error("单次执行失败\n{}\n", entity, ex);
         } finally {
             // 记录执行信息
             log(entity.getId(), execContent, completed);
@@ -279,5 +291,36 @@ public class ExcessJobServiceImpl implements ExcessJobService {
         String[] directoryFileArray = directory.list((dir, name) -> Pattern.matches(regex, name));
         if (directoryFileArray != null) {number += directoryFileArray.length;}
         return FileUtil.file(directory, CharSequenceUtil.format("{}{}{}", prefix, number, suffix));
+    }
+
+    /**
+     * 更新阈值时间
+     *
+     * @param excessJobId 额外任务主键
+     */
+    private void updateThresholdTime(long excessJobId) {
+        try {
+            // 参数校验
+            ExcessJobEntity excessJobEntity = excessJobMapperService.getById(excessJobId);
+            if (excessJobEntity == null) {
+                log.warn(Message.MISS_EXCESS_JOB, excessJobId);
+                return;
+            }
+            // 获取错误次数
+            Long logCount = excessJobLogMapperService.lambdaQuery().eq(ExcessJobLogEntity::getExcessJobId, excessJobEntity.getId()).count();
+            // 限定参与计算的最大错误次数
+            logCount = logCount > 10 ? 10 : logCount;
+            // 限定阈值时间
+            Date baseTime = excessJobEntity.getThresholdTime() == null ? excessJobEntity.getThresholdTime() : excessJobEntity.getCreateTime();
+            // 按秒累增
+            DateTime thresholdTime = DateUtil.offsetSecond(baseTime, (int)(5 * logCount));
+            // 更新数据库
+            excessJobMapperService.lambdaUpdate()
+                .set(ExcessJobEntity::getThresholdTime, thresholdTime)
+                .eq(ExcessJobEntity::getId, excessJobEntity.getId())
+                .update();
+        } catch (Exception e) {
+            log.error("更新阈值时间失败:{}\n", excessJobId, e);
+        }
     }
 }

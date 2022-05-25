@@ -17,6 +17,7 @@ public class Message {
     public static final String WATCHMAN_MISS = "调度机未上报";
     public static final String MISS_JOB = "未找到任务:{}";
     public static final String MISS_FILE = "文件不存在:{}";
+    public static final String MISS_EXCESS_JOB = "未找到额外的任务:{}";
     public static final String MISS_RESOURCE = "未找到资源:{}";
     public static final String MISS_RESOURCE_EXAMPLE = "未找到资源实例";
     public static final String CAN_NOT_CONVERT_CPU = "无法解析的CPU值:{}";

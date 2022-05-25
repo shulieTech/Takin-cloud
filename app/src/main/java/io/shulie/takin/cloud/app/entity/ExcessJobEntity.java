@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.app.entity;
 
+import java.util.Date;
+
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -37,4 +39,12 @@ public class ExcessJobEntity {
      * 是否完成
      */
     private Boolean completed;
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+    /**
+     * 阈值时间
+     */
+    private Date thresholdTime;
 }

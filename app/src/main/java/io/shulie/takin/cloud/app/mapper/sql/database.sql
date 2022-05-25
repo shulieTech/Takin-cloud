@@ -32,13 +32,14 @@ create table if not exists t_excess_job
     job_id bigint not null comment '(主)任务主键',
     content varchar(512) charset utf8 not null comment '任务内容',
     completed tinyint(1) default 0 not null comment '是否完成',
-    create_time timestamp default CURRENT_TIMESTAMP not null comment '创建时间'
+    create_time timestamp default CURRENT_TIMESTAMP not null comment '创建时间',
+    threshold_time timestamp null comment '阈值时间'
 )comment '额外的任务';
 
 create table if not exists t_excess_job_log
 (
     id bigint auto_increment comment '主键' primary key,
-    schedule_id bigint not null comment '定时任务主键',
+    excess_job_id bigint not null comment '额外任务主键',
     time timestamp default CURRENT_TIMESTAMP not null comment '时间',
     content varchar(512) charset utf8 not null comment '执行结果',
     completed tinyint(1) default 0 not null comment '是否完成'
