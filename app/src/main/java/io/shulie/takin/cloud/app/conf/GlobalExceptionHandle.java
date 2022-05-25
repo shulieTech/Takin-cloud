@@ -4,8 +4,18 @@ import lombok.extern.slf4j.Slf4j;
 
 import io.shulie.takin.cloud.model.response.ApiResult;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 异常捕获
@@ -33,5 +43,32 @@ public class GlobalExceptionHandle {
             log.error("全局异常捕获.\n", e);
         }
         return apiResult;
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ApiResult<Object> constraintViolationExceptionHandler(ConstraintViolationException e) {
+        Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
+        List<String> collect = constraintViolations.stream()
+                .map(o -> o.getMessage())
+                .collect(Collectors.toList());
+        return ApiResult.fail(StringUtils.join(collect,","));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ApiResult<Object> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
+        List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
+        List<String> collect = fieldErrors.stream()
+                .map(o -> o.getDefaultMessage())
+                .collect(Collectors.toList());
+        return ApiResult.fail(StringUtils.join(collect,","));
+    }
+
+    @ExceptionHandler(BindException.class)
+    public ApiResult<Object> bindExceptionHandler(BindException e) {
+        List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
+        List<String> collect = fieldErrors.stream()
+                .map(o -> o.getDefaultMessage())
+                .collect(Collectors.toList());
+        return ApiResult.fail(StringUtils.join(collect,","));
     }
 }
