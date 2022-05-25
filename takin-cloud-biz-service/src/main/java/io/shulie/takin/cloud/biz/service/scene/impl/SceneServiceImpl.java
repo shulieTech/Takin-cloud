@@ -525,7 +525,9 @@ public class SceneServiceImpl implements SceneService {
             }
             if (StrUtil.isNotBlank(destPath)) {
                 String filePath = destPath + fileName;
-                FileUtil.copy(t.getPath(), filePath, true);
+                if (!filePath.equals(t.getPath())) {
+                    FileUtil.copy(t.getPath(), filePath, true);
+                }
                 sceneScriptRefEntityList.add(new SceneScriptRefEntity() {{
                     setSceneId(sceneId);
                     setFileName(fileName);
