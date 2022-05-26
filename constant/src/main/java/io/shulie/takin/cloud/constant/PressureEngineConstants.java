@@ -10,4 +10,6 @@ public class PressureEngineConstants {
     private PressureEngineConstants() {}
 
     public static final String TRANSACTION_SPLIT_STR = "@MD5:";
+
+    public static final String THREAD_GROUP_CONCURRENT_NUMBER = "number";
 }

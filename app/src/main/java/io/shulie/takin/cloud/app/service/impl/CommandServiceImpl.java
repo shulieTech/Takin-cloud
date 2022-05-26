@@ -33,6 +33,7 @@ import io.shulie.takin.cloud.constant.enums.CommandType;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
+import io.shulie.takin.cloud.constant.PressureEngineConstants;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
 import io.shulie.takin.cloud.app.service.mapper.JobFileMapperService;
@@ -198,7 +199,7 @@ public class CommandServiceImpl implements CommandService {
             Map<String, Object> contentItem = new HashMap<>(3);
             contentItem.put("ref", k);
             contentItem.put("tps", tpsSum);
-            contentItem.put("number", numberSum);
+            contentItem.put(PressureEngineConstants.THREAD_GROUP_CONCURRENT_NUMBER, numberSum);
             content.add(contentItem);
         });
         Map<String, Object> result = new HashMap<>(3);
@@ -420,7 +421,7 @@ public class CommandServiceImpl implements CommandService {
                 threadConfig.put("steps", context.get("step"));
                 threadConfig.put("type", threadGroupType.getType());
                 threadConfig.put("mode", threadGroupType.getModel());
-                threadConfig.put("threadNum", context.get("number"));
+                threadConfig.put("threadNum", context.get(PressureEngineConstants.THREAD_GROUP_CONCURRENT_NUMBER));
                 threadConfig.put("rampUp", context.get("growthTime"));
                 threadGroupConfigMap.put(t.getRef(), threadConfig);
             } catch (RuntimeException e) {
@@ -442,16 +443,17 @@ public class CommandServiceImpl implements CommandService {
         String expectThroughput = "expectThroughput";
         context.put(loopsNum, null);
         context.put(expectThroughput, null);
-        ThreadConfigEntity firstThreadConfig = threadConfigEntityList.get(0);
-        if (firstThreadConfig != null) {
-            Integer modeCode = firstThreadConfig.getMode();
+        threadConfigEntityList.forEach(t -> {
+            Integer modeCode = t.getMode();
             ThreadGroupType threadGroupType = ThreadGroupType.of(modeCode);
             if (threadGroupType.equals(ThreadGroupType.TRY_RUN)) {
-                Map<String, String> threadConfigContext = jsonService.readValue(firstThreadConfig.getContext(), new TypeReference<Map<String, String>>() {});
+                Map<String, String> threadConfigContext = jsonService.readValue(t.getContext(), new TypeReference<Map<String, String>>() {});
                 context.put(loopsNum, threadConfigContext.get(loopsNum));
+                threadConfigContext.put(PressureEngineConstants.THREAD_GROUP_CONCURRENT_NUMBER, threadConfigContext.get(expectThroughput));
                 context.put(expectThroughput, threadConfigContext.get(expectThroughput));
+                t.setContext(jsonService.writeValueAsString(threadConfigContext));
             }
-        }
+        });
         return context;
     }
 }
