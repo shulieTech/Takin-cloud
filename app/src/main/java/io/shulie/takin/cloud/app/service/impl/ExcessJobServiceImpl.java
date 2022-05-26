@@ -71,7 +71,7 @@ public class ExcessJobServiceImpl implements ExcessJobService {
 
     @Override
     public PageInfo<ExcessJobEntity> list(int pageNumber, int pageSize, Integer type, boolean isCompleted) {
-        try (Page<Object> ignore = PageMethod.startPage(pageNumber, pageNumber)) {
+        try (Page<Object> ignore = PageMethod.startPage(pageNumber, pageSize)) {
             List<ExcessJobEntity> list = excessJobMapperService.lambdaQuery()
                 // 类型筛选
                 .eq(type != null, ExcessJobEntity::getType, type)
@@ -311,7 +311,7 @@ public class ExcessJobServiceImpl implements ExcessJobService {
             // 限定参与计算的最大错误次数
             logCount = logCount > 10 ? 10 : logCount;
             // 限定阈值时间
-            Date baseTime = excessJobEntity.getThresholdTime() == null ? excessJobEntity.getThresholdTime() : excessJobEntity.getCreateTime();
+            Date baseTime = excessJobEntity.getThresholdTime() == null ? excessJobEntity.getCreateTime() : excessJobEntity.getThresholdTime();
             // 按秒累增
             DateTime thresholdTime = DateUtil.offsetSecond(baseTime, (int)(5 * logCount));
             // 更新数据库
