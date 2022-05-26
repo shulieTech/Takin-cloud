@@ -10,8 +10,39 @@ plugins {
     id 'org.springframework.boot' version '2.6.7'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
-bootJar {
-    archiveFileName = 'takin-cloud-app-' + project.version + '.jar'
+jar {
+    enabled = false
+}
+
+String targetPath = "../build"
+String sourcePath = "./build/libs"
+
+def clear = tasks.register('clear-jar') {
+    doFirst {
+        delete(sourcePath)
+        delete(targetPath)
+    }
+}
+def copy = tasks.register('copy-jar') {
+    doLast {
+        copy {
+            println("拷贝文件开始")
+            from(sourcePath)
+            include('*.jar')
+            into(targetPath)
+            rename('^.+$', 'takin-cloud-app-' + project.version + '.jar')
+            println("拷贝文件完成")
+        }
+    }
+}
+
+build.mustRunAfter(clear)
+build.finalizedBy(copy)
+
+processResources {
+    filesMatching('application-watchman.properties') {
+        expand(project.properties)
+    }
 }
 
 dependencies {
@@ -19,24 +50,21 @@ dependencies {
     implementation project(':model')
     implementation project(':constant')
     // lombok
-    implementation 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
     // spring-boot
-    implementation 'org.springframework.boot:spring-boot-test:2.6.7'
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.6.7'
-    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+    implementation libs.spring.boot.test
+    implementation libs.spring.boot.starter.web
+    annotationProcessor libs.spring.boot.configuration.processor
     // redis
-    implementation 'org.redisson:redisson-spring-boot-starter:3.17.0'
+    implementation libs.spring.boot.redisson
     // mysql
-    implementation 'mysql:mysql-connector-java:8.0.28'
-    implementation 'com.alibaba:druid-spring-boot-starter:1.1.17'
-    implementation 'com.baomidou:mybatis-plus-boot-starter:3.5.1'
-    implementation 'com.github.pagehelper:pagehelper-spring-boot-starter:1.4.2'
+    implementation libs.bundles.mysql
     // swagger
-    implementation 'org.springdoc:springdoc-openapi-ui:1.6.8'
+    implementation libs.spring.doc
     // 其它
-    implementation 'cn.hutool:hutool-all:5.7.22'
-    implementation 'org.influxdb:influxdb-java:2.22'
+    implementation libs.hutool
+    implementation libs.influxdb
     implementation 'dom4j:dom4j:1.6.1'
 }
 

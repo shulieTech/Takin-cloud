@@ -39,6 +39,8 @@ public class GlobalExceptionHandle {
             org.springframework.web.bind.MissingServletRequestParameterException exception = (org.springframework.web.bind.MissingServletRequestParameterException)e;
             apiResult = ApiResult.fail("参数缺失-(" + exception.getParameterName() + ":" + exception.getParameterType() + ")");
             log.error("全局异常捕获-参数缺失.\n请求路径-({})", httpServletRequest.getRequestURL().toString());
+        } else if (e instanceof org.springframework.http.converter.HttpMessageNotReadableException) {
+            log.error("全局异常捕获-消息不可读异常.\n请求路径-({})", httpServletRequest.getRequestURL().toString());
         } else {
             log.error("全局异常捕获.\n", e);
         }

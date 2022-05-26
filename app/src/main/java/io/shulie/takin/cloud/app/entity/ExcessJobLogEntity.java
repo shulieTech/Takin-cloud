@@ -22,9 +22,9 @@ public class ExcessJobLogEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 定时任务主键
+     * 额外任务主键
      */
-    private Long scheduleId;
+    private Long excessJobId;
     /**
      * 任务内容
      */

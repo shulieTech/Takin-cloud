@@ -40,10 +40,6 @@ public class ExcessJob {
      * 线程池
      */
     private ThreadPoolExecutor threadpool;
-    /**
-     * 获取任务时的分页增量
-     */
-    private final AtomicInteger pageNumberIncrement = new AtomicInteger(0);
 
     @PostConstruct
     public void init() {
@@ -58,26 +54,19 @@ public class ExcessJob {
     @Scheduled(fixedDelay = 1000)
     public void exec() {
         try {
-            int pageNumber = 10;
-            int pageNumberIncrementValue = pageNumberIncrement.intValue();
-            if (pageNumberIncrementValue > 0) {pageNumber += pageNumberIncrementValue;}
             // 分页查询
-            PageInfo<ExcessJobEntity> ready = excessJobService.listNotCompleted(1, pageNumber, null);
-            // 寻找时机初始化分页增量
-            if (ready.getTotal() == 0) {pageNumberIncrement.set(0);}
-            log.info("开始调度.共{}条,本次计划调度{}条", ready.getTotal(), ready.getSize());
+            PageInfo<ExcessJobEntity> ready = excessJobService.listNotCompleted(1, 10, null);
+            log.info("开始调度.共{}条,本次计划调度{}条\n{}", ready.getTotal(), ready.getSize(), ready);
             for (int i = 0; i < ready.getSize(); i++) {
                 ExcessJobEntity entity = ready.getList().get(i);
                 RLock locker = redissonClient.getLock(CharSequenceUtil.format(Message.SCHEDULE_LOCK_KEY, entity.getId()));
-                // 已锁定 或 锁定失败
-                if (!locker.tryLock()) {
+                //  提交到线程池运行 || 跳过
+                if (locker.tryLock()) {
+                    // 提交到线程池运行
+                    submitToPool(new Exec(entity, excessJobService, locker), i + 1);
+                } else {
                     log.warn("第{}条已经在运行了.\n{}", (i + 1), entity);
-                    pageNumberIncrement.incrementAndGet();
-                    continue;
                 }
-                pageNumberIncrement.decrementAndGet();
-                // 提交到线程池运行
-                submitToPool(new Exec(entity, excessJobService, locker), i + 1);
             }
         } catch (Exception e) {
             log.error("定时过程失败.\n", e);

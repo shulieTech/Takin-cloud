@@ -4,3 +4,11 @@ include(':constant')
 include(':model')
 include(':sdk')
 include(':app')
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            from(files("./libs.versions.toml"))
+        }
+    }
+}

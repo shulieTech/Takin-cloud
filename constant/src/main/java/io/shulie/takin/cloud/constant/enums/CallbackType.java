@@ -31,6 +31,7 @@ public enum CallbackType {
     JOB_EXAMPLE_ERROR(203, "任务实例异常"),
     SLA(301, "触发SLA"),
     EXCESS_JOB(302, "额外的任务"),
+    FILE_USAGE(303, "文件用量"),
     // 格式化用
     ;
     @JsonValue

@@ -318,8 +318,6 @@ public class JobServiceImpl implements JobService {
         if (jobEntity == null) {
             throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_JOB, jobId));
         }
-        // 释放资源
-        commandService.releaseResource(jobEntity.getResourceId());
         // 停止任务
         commandService.stopApplication(jobEntity.getId());
     }
