@@ -107,7 +107,7 @@ public class ExcessJob {
             } catch (Exception e) {
                 log.error("发生异常.\n", e);
             } finally {
-                locker.unlock();
+                locker.forceUnlock();
             }
 
         }
