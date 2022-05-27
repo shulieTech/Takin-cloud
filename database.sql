@@ -50,8 +50,7 @@ create table if not exists t_watchman
     id bigint auto_increment comment '主键' primary key,
     ref varchar(512) charset utf8 not null comment '关键词',
     ref_sign varchar(255) charset utf8 not null comment '关键词签名',
-    constraint t_watchman_ref_sign_uindex
-        unique (ref_sign)
+    constraint t_watchman_ref_sign_uindex unique (ref_sign)
 )comment '调度器';
 
 create table if not exists t_command
@@ -223,7 +222,6 @@ create table if not exists t_watchman_event
     constraint t_watchman_event_t_watchman_id_fk foreign key (watchman_id) references t_watchman (id)
 )comment '调度器事件';
 
-create index t_watchman_event_time_index
-    on t_watchman_event (time);
-create index t_watchman_event_type_index
-    on t_watchman_event (type);
+create index t_watchman_event_time_index on t_watchman_event (time);
+
+create index t_watchman_event_type_index on t_watchman_event (type);
