@@ -276,10 +276,10 @@ public class CommandServiceImpl implements CommandService {
         basicConfig.put("taskId", jobId);
         basicConfig.put("pressureType", jobEntity.getType());
         basicConfig.put("resourceId", jobEntity.getResourceId());
+        basicConfig.put("memSetting", jobEntity.getStartOption());
         basicConfig.put("continuedTime", jobEntity.getDuration());
         basicConfig.put("traceSampling", jobEntity.getSampling());
         basicConfig.put("zkServers", watchmanConfig.getZkAddress());
-        basicConfig.put("memSetting", watchmanConfig.getJavaOptions());
         basicConfig.put("logQueueSize", watchmanConfig.getLogQueueSize());
         basicConfig.put("backendQueueCapacity", watchmanConfig.getBackendQueueCapacity());
         basicConfig.put("tpsTargetLevelFactor", watchmanConfig.getTpsTargetLevelFactor());

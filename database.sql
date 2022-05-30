@@ -88,6 +88,7 @@ create table if not exists t_job
     duration bigint not null comment '持续时间',
     sampling int not null comment '采样率',
     type int not null comment '任务的运行模式',
+    start_option varchar(1024) charset utf8 null comment '启动选项',
     callback_url varchar(1000) charset utf8 not null comment '状态回调接口路径',
     resource_example_number int not null comment '资源实例数量',
     constraint t_job_t_resource_id_fk foreign key (resource_id) references t_resource (id)

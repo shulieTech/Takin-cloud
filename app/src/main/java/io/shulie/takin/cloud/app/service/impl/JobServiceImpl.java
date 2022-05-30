@@ -135,6 +135,7 @@ public class JobServiceImpl implements JobService {
             .setDuration(duration)
             .setSampling(jobInfo.getSampling())
             .setType(jobInfo.getType().getCode())
+            .setStartOption(jobInfo.getJvmOptions())
             .setCallbackUrl(jobInfo.getCallbackUrl())
             .setResourceExampleNumber(resourceExampleNumber);
     }

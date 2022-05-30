@@ -40,7 +40,7 @@ build.mustRunAfter(clear)
 build.finalizedBy(copy)
 
 processResources {
-    filesMatching('application-watchman.properties') {
+    filesMatching('application.properties') {
         expand(project.properties)
     }
 }

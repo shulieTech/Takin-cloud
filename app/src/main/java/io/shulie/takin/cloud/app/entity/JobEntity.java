@@ -49,5 +49,9 @@ public class JobEntity {
      * 资源实例数量
      */
     private Integer resourceExampleNumber;
+    /**
+     * 启动选项
+     */
+    private String startOption;
 
 }
