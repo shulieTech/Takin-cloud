@@ -10,8 +10,6 @@ import javax.annotation.Resource;
 
 import com.pamirs.takin.entity.domain.vo.report.SceneTaskNotifyParam;
 import io.shulie.plugin.enginecall.service.EngineCallService;
-import io.shulie.takin.cloud.biz.config.AppConfig;
-import io.shulie.takin.cloud.biz.service.engine.EngineConfigService;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
@@ -36,28 +34,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 @Extension
 public class EngineCallExtImpl implements EngineCallExtApi {
 
-    //@Value("${spring.redis.host}")
-    //private String engineRedisAddress;
-    //
-    //@Value("${spring.redis.port}")
-    //private String engineRedisPort;
-    //
-    //@Value("${spring.redis.sentinel.nodes:}")
-    //private String engineRedisSentinelNodes;
-    //
-    //@Value("${spring.redis.sentinel.master:}")
-    //private String engineRedisSentinelMaster;
-    //
-    //@Value("${spring.redis.password}")
-    //private String engineRedisPassword;
-    //
-    //@Value("${pradar.zk.servers}")
-    //private String zkServers;
-    //
-    //@Value("${engine.log.queue.size:25000}")
-    //private String logQueueSize;
-    //@Value("${pressure.engine.backendQueueCapacity:5000}")
-    //private String pressureEngineBackendQueueCapacity;
     /**
      * 调度任务路径
      */
@@ -75,11 +51,6 @@ public class EngineCallExtImpl implements EngineCallExtApi {
     @Resource
     private RedisTemplate<String, String> redisTemplate;
 
-    @Resource
-    private EngineConfigService engineConfigService;
-
-    @Resource
-    private AppConfig appConfig;
 
     @Override
     public String buildJob(ScheduleRunRequest request) {
