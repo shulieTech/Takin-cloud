@@ -57,7 +57,7 @@ public class AppConfig {
     @Value("${spring.redis.cluster.nodes:}")
     private String engineRedisClusterAddress;
 
-    @Value("${spring.redis.port}")
+    @Value("${spring.redis.port:}")
     private String engineRedisPort;
 
     @Value("${spring.redis.sentinel.nodes:}")

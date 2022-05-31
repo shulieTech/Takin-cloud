@@ -36,28 +36,28 @@ import org.springframework.data.redis.core.RedisTemplate;
 @Extension
 public class EngineCallExtImpl implements EngineCallExtApi {
 
-    @Value("${spring.redis.host}")
-    private String engineRedisAddress;
-
-    @Value("${spring.redis.port}")
-    private String engineRedisPort;
-
-    @Value("${spring.redis.sentinel.nodes:}")
-    private String engineRedisSentinelNodes;
-
-    @Value("${spring.redis.sentinel.master:}")
-    private String engineRedisSentinelMaster;
-
-    @Value("${spring.redis.password}")
-    private String engineRedisPassword;
-
-    @Value("${pradar.zk.servers}")
-    private String zkServers;
-
-    @Value("${engine.log.queue.size:25000}")
-    private String logQueueSize;
-    @Value("${pressure.engine.backendQueueCapacity:5000}")
-    private String pressureEngineBackendQueueCapacity;
+    //@Value("${spring.redis.host}")
+    //private String engineRedisAddress;
+    //
+    //@Value("${spring.redis.port}")
+    //private String engineRedisPort;
+    //
+    //@Value("${spring.redis.sentinel.nodes:}")
+    //private String engineRedisSentinelNodes;
+    //
+    //@Value("${spring.redis.sentinel.master:}")
+    //private String engineRedisSentinelMaster;
+    //
+    //@Value("${spring.redis.password}")
+    //private String engineRedisPassword;
+    //
+    //@Value("${pradar.zk.servers}")
+    //private String zkServers;
+    //
+    //@Value("${engine.log.queue.size:25000}")
+    //private String logQueueSize;
+    //@Value("${pressure.engine.backendQueueCapacity:5000}")
+    //private String pressureEngineBackendQueueCapacity;
     /**
      * 调度任务路径
      */
