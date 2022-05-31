@@ -111,7 +111,7 @@ public class JobServiceImpl implements JobService {
         List<MetricsEntity> metricsList = startFillMetrics(job.getId(), jobInfo.getMetricsConfig());
         metricsMapperService.saveBatch(metricsList);
         // 下发启动命令
-        commandService.startApplication(job.getId());
+        commandService.startApplication(job.getId(), jobInfo.getBindByXpathMd5());
         // 返回任务主键
         return String.valueOf(job.getId());
     }

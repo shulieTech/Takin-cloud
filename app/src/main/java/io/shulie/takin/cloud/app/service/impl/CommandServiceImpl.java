@@ -1,10 +1,6 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import java.util.Map;
-import java.util.Date;
-import java.util.List;
-import java.util.HashMap;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.io.FileUtil;
@@ -134,14 +130,14 @@ public class CommandServiceImpl implements CommandService {
      * {@inheritDoc}
      */
     @Override
-    public void startApplication(long jobId) {
+    public void startApplication(long jobId, Boolean bindByXpathMd5) {
         // 获取任务
         JobEntity jobEntity = jobService.jobEntity(jobId);
         if (jobEntity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_JOB, jobId));}
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
         // 下发命令
-        long commandId = create(resourceEntity.getWatchmanId(), CommandType.START_APPLICATION, packageStartJob(jobId));
+        long commandId = create(resourceEntity.getWatchmanId(), CommandType.START_APPLICATION, packageStartJob(jobId, bindByXpathMd5));
         log.info("下发命令:启动任务:{},命令主键{}.", jobId, commandId);
     }
 
@@ -264,7 +260,7 @@ public class CommandServiceImpl implements CommandService {
      * @param jobId 任务主键
      * @return 启动任务参数
      */
-    public String packageStartJob(long jobId) {
+    public String packageStartJob(long jobId, Boolean bindByXpathMd5) {
         // 任务
         JobEntity jobEntity = jobService.jobEntity(jobId);
         // 线程组配置
@@ -299,7 +295,7 @@ public class CommandServiceImpl implements CommandService {
         // 固定是0的
         basicConfig.put("tpsThreadMode", 0);
         // 现在没有办法区分版本
-        basicConfig.put("bindByXpathMd5", true);
+        basicConfig.put("bindByXpathMd5", Objects.isNull(bindByXpathMd5) ? Objects.isNull(bindByXpathMd5) : bindByXpathMd5);
         // 以前的文件里面没有用到
         basicConfig.put("tpsTargetLevel", null);
         // 填充文件
