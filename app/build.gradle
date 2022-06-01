@@ -18,10 +18,10 @@ String targetPath = "../build"
 String sourcePath = "./build/libs"
 
 def clear = tasks.register('clear-jar') {
-    doFirst {
-        delete(sourcePath)
-        delete(targetPath)
-    }
+    println("清理文件开始")
+    delete(sourcePath)
+    delete(targetPath)
+    println("清理文件完成")
 }
 def copy = tasks.register('copy-jar') {
     doLast {
@@ -36,7 +36,7 @@ def copy = tasks.register('copy-jar') {
     }
 }
 
-build.mustRunAfter(clear)
+build.dependsOn(clear)
 build.finalizedBy(copy)
 
 processResources {
