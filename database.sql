@@ -50,8 +50,7 @@ create table if not exists t_watchman
     id bigint auto_increment comment '主键' primary key,
     ref varchar(512) charset utf8 not null comment '关键词',
     ref_sign varchar(255) charset utf8 not null comment '关键词签名',
-    constraint t_watchman_ref_sign_uindex
-        unique (ref_sign)
+    constraint t_watchman_ref_sign_uindex unique (ref_sign)
 )comment '调度器';
 
 create table if not exists t_command
@@ -89,6 +88,7 @@ create table if not exists t_job
     duration bigint not null comment '持续时间',
     sampling int not null comment '采样率',
     type int not null comment '任务的运行模式',
+    start_option varchar(1024) charset utf8 null comment '启动选项',
     callback_url varchar(1000) charset utf8 not null comment '状态回调接口路径',
     resource_example_number int not null comment '资源实例数量',
     constraint t_job_t_resource_id_fk foreign key (resource_id) references t_resource (id)
@@ -223,7 +223,6 @@ create table if not exists t_watchman_event
     constraint t_watchman_event_t_watchman_id_fk foreign key (watchman_id) references t_watchman (id)
 )comment '调度器事件';
 
-create index t_watchman_event_time_index
-    on t_watchman_event (time);
-create index t_watchman_event_type_index
-    on t_watchman_event (type);
+create index t_watchman_event_time_index on t_watchman_event (time);
+
+create index t_watchman_event_type_index on t_watchman_event (type);

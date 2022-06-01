@@ -32,7 +32,7 @@ public interface CommandService {
      *
      * @param jobId 任务主键
      */
-    void startApplication(long jobId);
+    void startApplication(long jobId, Boolean bindByXpathMd5);
 
     /**
      * 停止应用程序

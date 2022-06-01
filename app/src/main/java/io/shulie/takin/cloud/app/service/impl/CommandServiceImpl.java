@@ -1,10 +1,6 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import java.util.Map;
-import java.util.Date;
-import java.util.List;
-import java.util.HashMap;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.io.FileUtil;
@@ -33,6 +29,7 @@ import io.shulie.takin.cloud.constant.enums.CommandType;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
+import io.shulie.takin.cloud.constant.PressureEngineConstants;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
 import io.shulie.takin.cloud.app.service.mapper.JobFileMapperService;
@@ -133,14 +130,14 @@ public class CommandServiceImpl implements CommandService {
      * {@inheritDoc}
      */
     @Override
-    public void startApplication(long jobId) {
+    public void startApplication(long jobId, Boolean bindByXpathMd5) {
         // 获取任务
         JobEntity jobEntity = jobService.jobEntity(jobId);
         if (jobEntity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_JOB, jobId));}
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
         // 下发命令
-        long commandId = create(resourceEntity.getWatchmanId(), CommandType.START_APPLICATION, packageStartJob(jobId));
+        long commandId = create(resourceEntity.getWatchmanId(), CommandType.START_APPLICATION, packageStartJob(jobId, bindByXpathMd5));
         log.info("下发命令:启动任务:{},命令主键{}.", jobId, commandId);
     }
 
@@ -198,7 +195,7 @@ public class CommandServiceImpl implements CommandService {
             Map<String, Object> contentItem = new HashMap<>(3);
             contentItem.put("ref", k);
             contentItem.put("tps", tpsSum);
-            contentItem.put("number", numberSum);
+            contentItem.put(PressureEngineConstants.THREAD_GROUP_CONCURRENT_NUMBER, numberSum);
             content.add(contentItem);
         });
         Map<String, Object> result = new HashMap<>(3);
@@ -263,7 +260,7 @@ public class CommandServiceImpl implements CommandService {
      * @param jobId 任务主键
      * @return 启动任务参数
      */
-    public String packageStartJob(long jobId) {
+    public String packageStartJob(long jobId, Boolean bindByXpathMd5) {
         // 任务
         JobEntity jobEntity = jobService.jobEntity(jobId);
         // 线程组配置
@@ -275,10 +272,10 @@ public class CommandServiceImpl implements CommandService {
         basicConfig.put("taskId", jobId);
         basicConfig.put("pressureType", jobEntity.getType());
         basicConfig.put("resourceId", jobEntity.getResourceId());
+        basicConfig.put("memSetting", jobEntity.getStartOption());
         basicConfig.put("continuedTime", jobEntity.getDuration());
         basicConfig.put("traceSampling", jobEntity.getSampling());
         basicConfig.put("zkServers", watchmanConfig.getZkAddress());
-        basicConfig.put("memSetting", watchmanConfig.getJavaOptions());
         basicConfig.put("logQueueSize", watchmanConfig.getLogQueueSize());
         basicConfig.put("backendQueueCapacity", watchmanConfig.getBackendQueueCapacity());
         basicConfig.put("tpsTargetLevelFactor", watchmanConfig.getTpsTargetLevelFactor());
@@ -298,7 +295,7 @@ public class CommandServiceImpl implements CommandService {
         // 固定是0的
         basicConfig.put("tpsThreadMode", 0);
         // 现在没有办法区分版本
-        basicConfig.put("bindByXpathMd5", true);
+        basicConfig.put("bindByXpathMd5", Objects.isNull(bindByXpathMd5) ? Objects.isNull(bindByXpathMd5) : bindByXpathMd5);
         // 以前的文件里面没有用到
         basicConfig.put("tpsTargetLevel", null);
         // 填充文件
@@ -420,7 +417,7 @@ public class CommandServiceImpl implements CommandService {
                 threadConfig.put("steps", context.get("step"));
                 threadConfig.put("type", threadGroupType.getType());
                 threadConfig.put("mode", threadGroupType.getModel());
-                threadConfig.put("threadNum", context.get("number"));
+                threadConfig.put("threadNum", context.get(PressureEngineConstants.THREAD_GROUP_CONCURRENT_NUMBER));
                 threadConfig.put("rampUp", context.get("growthTime"));
                 threadGroupConfigMap.put(t.getRef(), threadConfig);
             } catch (RuntimeException e) {
@@ -442,16 +439,17 @@ public class CommandServiceImpl implements CommandService {
         String expectThroughput = "expectThroughput";
         context.put(loopsNum, null);
         context.put(expectThroughput, null);
-        ThreadConfigEntity firstThreadConfig = threadConfigEntityList.get(0);
-        if (firstThreadConfig != null) {
-            Integer modeCode = firstThreadConfig.getMode();
+        threadConfigEntityList.forEach(t -> {
+            Integer modeCode = t.getMode();
             ThreadGroupType threadGroupType = ThreadGroupType.of(modeCode);
             if (threadGroupType.equals(ThreadGroupType.TRY_RUN)) {
-                Map<String, String> threadConfigContext = jsonService.readValue(firstThreadConfig.getContext(), new TypeReference<Map<String, String>>() {});
+                Map<String, String> threadConfigContext = jsonService.readValue(t.getContext(), new TypeReference<Map<String, String>>() {});
                 context.put(loopsNum, threadConfigContext.get(loopsNum));
+                threadConfigContext.put(PressureEngineConstants.THREAD_GROUP_CONCURRENT_NUMBER, threadConfigContext.get(expectThroughput));
                 context.put(expectThroughput, threadConfigContext.get(expectThroughput));
+                t.setContext(jsonService.writeValueAsString(threadConfigContext));
             }
-        }
+        });
         return context;
     }
 }
