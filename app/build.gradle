@@ -36,7 +36,7 @@ def copy = tasks.register('copy-jar') {
     }
 }
 
-build.mustRunAfter(clear)
+build.dependsOn(clear)
 build.finalizedBy(copy)
 
 processResources {
