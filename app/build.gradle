@@ -18,10 +18,10 @@ String targetPath = "../build"
 String sourcePath = "./build/libs"
 
 def clear = tasks.register('clear-jar') {
-    doFirst {
-        delete(sourcePath)
-        delete(targetPath)
-    }
+    println("清理文件开始")
+    delete(sourcePath)
+    delete(targetPath)
+    println("清理文件完成")
 }
 def copy = tasks.register('copy-jar') {
     doLast {
@@ -63,9 +63,9 @@ dependencies {
     // swagger
     implementation libs.spring.doc
     // 其它
+    implementation libs.dom4j
     implementation libs.hutool
     implementation libs.influxdb
-    implementation 'dom4j:dom4j:1.6.1'
 }
 
 description = 'app'
