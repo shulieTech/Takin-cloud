@@ -2,7 +2,12 @@ package io.shulie.takin.cloud.app.service.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
+import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
 import cn.hutool.core.util.StrUtil;
@@ -10,6 +15,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.DateTime;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.page.PageMethod;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.app.entity.CallbackEntity;
@@ -30,6 +36,8 @@ public class CallbackServiceImpl implements CallbackService {
     CallbackMapperService callbackMapperService;
     @javax.annotation.Resource
     CallbackLogMapperService callbackLogMapperService;
+
+    private static final String RES_SUCCESS_TAG = "SUCCESS";
 
     @Override
     public PageInfo<CallbackEntity> list(int pageNumber, int pageSize, boolean isCompleted) {
@@ -70,23 +78,35 @@ public class CallbackServiceImpl implements CallbackService {
             log.warn("{}对应的数据库记录未找到", callbackLogId);
             return false;
         } else {
-            String successFlag = "{\"error\":null,\"data\":\"SUCCESS\",\"totalNum\":null,\"success\":true}";
-            boolean completed = successFlag.equals(StrUtil.utf8Str(data));
+            String response = StrUtil.utf8Str(data);
+            boolean completed = false;
+            try {
+                JSONObject resJson = JSON.parseObject(response);
+                if (Objects.nonNull(resJson) && resJson.getBoolean("success")
+                        && Objects.equals(resJson.getString("data"), RES_SUCCESS_TAG)) {
+                    completed = true;
+                }
+            }catch (JSONException e){
+               completed =false;
+            }
             // 填充日志信息
             callbackLogMapperService.updateById(new CallbackLogEntity()
-                .setId(callbackLogId)
-                .setResponseData(data)
-                .setCompleted(completed)
-                .setResponseTime(new Date())
+                    .setId(callbackLogId)
+                    .setResponseData(data)
+                    .setCompleted(completed)
+                    .setResponseTime(new Date())
             );
             // 更新回调的状态
             if (completed) {
                 callbackMapperService.lambdaUpdate().set(CallbackEntity::getCompleted, true)
-                    .eq(CallbackEntity::getId, callbackLogEntity.getCallbackId())
-                    .update();
+                        .eq(CallbackEntity::getId, callbackLogEntity.getCallbackId())
+                        .update();
             }
             // 更新阈值时间 - 防止回调堆积
             else {updateThresholdTime(callbackLogEntity.getCallbackId());}
+
+
+
             // 返回结果
             return completed;
         }
