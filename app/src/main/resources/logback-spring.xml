@@ -14,12 +14,14 @@
     <logger name="java.sql.Statement" level="DEBUG"/>
     <logger name="java.sql.Connection" level="DEBUG"/>
     <logger name="java.sql.PreparedStatement" level="DEBUG"/>
+    <!--  输出格式配置  -->
+    <property name="pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} [%X{onlyToken}] - %msg%n"/>
     <!--  额外的任务的日志单独输出  -->
     <appender name="EXCESS-JOB_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${log_path}/excess_job_info.log</file>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n</pattern>
+            <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <maxFileSize>100MB</maxFileSize>
@@ -35,7 +37,7 @@
         <file>${log_path}/excess_job_not_info.log</file>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n</pattern>
+            <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <maxFileSize>100MB</maxFileSize>
@@ -55,7 +57,7 @@
         <file>${log_path}/callback_info.log</file>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n</pattern>
+            <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <maxFileSize>100MB</maxFileSize>
@@ -71,7 +73,7 @@
         <file>${log_path}/callback_not_info.log</file>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n</pattern>
+            <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <maxFileSize>100MB</maxFileSize>
@@ -91,7 +93,7 @@
         <file>${log_path}/notify_info.log</file>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n</pattern>
+            <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <maxFileSize>100MB</maxFileSize>
@@ -107,7 +109,7 @@
         <file>${log_path}/notify_not_info.log</file>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n</pattern>
+            <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <maxFileSize>100MB</maxFileSize>
@@ -127,7 +129,7 @@
         <file>${log_path}/metrics_info.log</file>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n</pattern>
+            <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <maxFileSize>100MB</maxFileSize>
@@ -143,7 +145,7 @@
         <file>${log_path}/metrics_not_info.log</file>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n</pattern>
+            <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <maxFileSize>100MB</maxFileSize>
@@ -163,7 +165,7 @@
         <file>${log_path}/mybatis.log</file>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n</pattern>
+            <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <maxFileSize>100MB</maxFileSize>
@@ -182,7 +184,7 @@
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} [%X{onlyToken}] - %msg%n</pattern>
+            <pattern>${pattern}</pattern>
         </encoder>
     </appender>
     <!--  输出到文件  -->
@@ -190,7 +192,7 @@
         <file>${log_path}/service_info.log</file>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n</pattern>
+            <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <maxFileSize>100MB</maxFileSize>
@@ -206,7 +208,7 @@
         <file>${log_path}/service_not_info.log</file>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n</pattern>
+            <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <maxFileSize>100MB</maxFileSize>

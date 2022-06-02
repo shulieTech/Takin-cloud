@@ -34,6 +34,8 @@ public class StartRequest {
     private JobType type;
     @Schema(description = "任务名称")
     private String name;
+    @Schema(description = "是否老版本")
+    private Boolean bindByXpathMd5;
     @Schema(description = "脚本文件(jmx)")
     private FileInfo scriptFile;
     @Schema(description = "运行时依赖文件(附件)")

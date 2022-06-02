@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 
 import javax.annotation.Resource;
 
+import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.io.FileUtil;
 import com.github.pagehelper.Page;
@@ -71,7 +72,7 @@ public class ExcessJobServiceImpl implements ExcessJobService {
 
     @Override
     public PageInfo<ExcessJobEntity> list(int pageNumber, int pageSize, Integer type, boolean isCompleted) {
-        try (Page<Object> ignore = PageMethod.startPage(pageNumber, pageNumber)) {
+        try (Page<Object> ignore = PageMethod.startPage(pageNumber, pageSize)) {
             List<ExcessJobEntity> list = excessJobMapperService.lambdaQuery()
                 // 类型筛选
                 .eq(type != null, ExcessJobEntity::getType, type)
@@ -173,21 +174,32 @@ public class ExcessJobServiceImpl implements ExcessJobService {
         JobEntity jobEntity = jobService.jobEntity(jobId);
         // 获取工作目录
         File directory = FileUtil.file(watchmanConfig.getNfsPath(), "metrics",
-            String.valueOf(jobEntity.getResourceId()), String.valueOf(jobEntity.getId()));
+                String.valueOf(jobEntity.getResourceId()), String.valueOf(jobEntity.getId()));
         // 获取校正文件
         String[] directoryFileArray = directory.list((dir, name) -> Pattern.matches("^pressure-\\d\\.metrics\\.err$", name));
-        if (directoryFileArray == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_FILE, directory));}
-        List<File> readyCalibrationFileList = Arrays.stream(directoryFileArray).map(t -> FileUtil.file(directory, t)).collect(Collectors.toList());
-        // 获取回滚文件
-        File rollBackFile = getRollBackFile(directory);
-        // 初始化回滚并启动
-        initRollBack(jobId, rollBackFile, readyCalibrationFileList);
-        // 判断回滚文件是否包含数据
-        long rollBackWriteLength = rollBackFile.length();
+        long rollBackWriteLength =0;
+        if (directoryFileArray != null) {
+            List<File> readyCalibrationFileList = Arrays.stream(directoryFileArray).map(t -> FileUtil.file(directory, t)).collect(Collectors.toList());
+            //校验文件大小
+            readyCalibrationFileList = readyCalibrationFileList.stream().filter(file -> FileUtil.size(file) > 0).collect(Collectors.toList());
+            if (CollectionUtil.isNotEmpty(readyCalibrationFileList)) {
+                // 获取回滚文件
+                File rollBackFile = getRollBackFile(directory);
+                // 初始化回滚并启动
+                initRollBack(jobId, rollBackFile, readyCalibrationFileList);
+                // 判断回滚文件是否包含数据
+                rollBackWriteLength = rollBackFile.length();
+            }
+        }
+
         // 记录状态信息
         String message = CharSequenceUtil.format("同步任务{}.耗时:{}纳秒.结果:{}.", jobId, System.nanoTime() - startTime, rollBackWriteLength == 0);
         // 根据情况抛出异常/返回信息
-        if (rollBackWriteLength == 0) {return message;} else {throw new IllegalStateException(message);}
+        if (rollBackWriteLength == 0) {
+            return message;
+        } else {
+            throw new IllegalStateException(message);
+        }
     }
 
     /**
@@ -311,7 +323,7 @@ public class ExcessJobServiceImpl implements ExcessJobService {
             // 限定参与计算的最大错误次数
             logCount = logCount > 10 ? 10 : logCount;
             // 限定阈值时间
-            Date baseTime = excessJobEntity.getThresholdTime() == null ? excessJobEntity.getThresholdTime() : excessJobEntity.getCreateTime();
+            Date baseTime = excessJobEntity.getThresholdTime() == null ? excessJobEntity.getCreateTime() : excessJobEntity.getThresholdTime();
             // 按秒累增
             DateTime thresholdTime = DateUtil.offsetSecond(baseTime, (int)(5 * logCount));
             // 更新数据库

@@ -17,10 +17,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "watchman")
 public class WatchmanConfig {
     /**
-     * 容器拉取镜像的路径
-     */
-    private String containerImage;
-    /**
      * nfs目录
      */
     private String nfsPath;
@@ -68,10 +64,6 @@ public class WatchmanConfig {
      * 后端监听器队列容量
      */
     private Long backendQueueCapacity;
-    /**
-     * jvm启动参数
-     */
-    private String javaOptions;
     /**
      * TPS增长因子
      */
