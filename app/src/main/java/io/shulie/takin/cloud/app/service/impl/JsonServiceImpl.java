@@ -45,7 +45,7 @@ public class JsonServiceImpl implements JsonService {
         try {
             return objectMapper.readValue(jsonString, valueTypeRef);
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException(e);
+            throw new RuntimeException("解析metrics数据异常，不是标准JSON字符串");
         }
     }
 }
