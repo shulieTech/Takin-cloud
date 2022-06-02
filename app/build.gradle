@@ -63,10 +63,10 @@ dependencies {
     // swagger
     implementation libs.spring.doc
     // 其它
+    implementation libs.dom4j
     implementation libs.hutool
     implementation libs.influxdb
     implementation 'com.alibaba:fastjson:1.2.79'
-    implementation 'dom4j:dom4j:1.6.1'
 }
 
 description = 'app'

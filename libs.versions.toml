@@ -4,6 +4,7 @@ hutool = "5.7.22"
 lombok = "1.18.22"
 jackson = "2.13.2"
 influxdb = "2.22"
+dom4j = "1.6.1"
 # mybatis
 mybatis-plus = "3.5.1"
 mysql-connector = "8.0.28"
@@ -29,6 +30,7 @@ mysql = { group = "mysql", name = "mysql-connector-java", version.ref = "mysql-c
 druid = { group = "com.alibaba", name = "druid-spring-boot-starter", version.ref = "spring-druid" }
 mybatis-plus = { group = "com.baomidou", name = "mybatis-plus-boot-starter", version.ref = "mybatis-plus" }
 # 其它
+dom4j = { group = "dom4j", name = "dom4j", version.ref = "dom4j" }
 hutool = { group = "cn.hutool", name = "hutool-all", version.ref = "hutool" }
 influxdb = { group = "org.influxdb", name = "influxdb-java", version.ref = "influxdb" }
 jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
