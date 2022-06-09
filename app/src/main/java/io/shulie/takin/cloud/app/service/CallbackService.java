@@ -69,4 +69,10 @@ public interface CallbackService {
      * @return true/false
      */
     boolean fillLog(long callbackLogId, byte[] data);
+
+    /**
+     * 回调web
+     * @return
+     */
+    boolean callback(Long id, String callbackUrl, String content);
 }

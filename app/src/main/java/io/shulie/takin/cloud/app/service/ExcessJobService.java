@@ -50,4 +50,11 @@ public interface ExcessJobService {
      * @param entity 调度内容
      */
     void exec(ExcessJobEntity entity);
+
+    /**
+     * 数据校准
+     * @param entity
+     * @return
+     */
+    boolean calibration(ExcessJobEntity entity);
 }

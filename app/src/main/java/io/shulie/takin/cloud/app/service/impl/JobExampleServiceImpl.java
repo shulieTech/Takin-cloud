@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -28,6 +29,7 @@ import io.shulie.takin.cloud.model.callback.JobExampleError.JobExampleErrorInfo;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
+@Slf4j
 public class JobExampleServiceImpl implements JobExampleService {
     @javax.annotation.Resource
     JobMapper jobMapper;
@@ -62,8 +64,9 @@ public class JobExampleServiceImpl implements JobExampleService {
         StringBuilder callbackUrl = new StringBuilder();
         JobExampleStart context = new JobExampleStart();
         context.setData(getCallbackData(id, callbackUrl));
-        // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        //回调
+        boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
+        log.info("启动任务：{}, 回调结果: {}", id, complete);
         // 记录事件
         jobExampleEventMapper.insert(new JobExampleEventEntity()
             .setContext("{}")
@@ -79,7 +82,8 @@ public class JobExampleServiceImpl implements JobExampleService {
         JobExampleStop context = new JobExampleStop();
         context.setData(getCallbackData(id, callbackUrl));
         // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
+        log.info("停止任务：{}, 回调结果: {}", id, complete);
         // 记录事件
         jobExampleEventMapper.insert(new JobExampleEventEntity()
             .setContext("{}")
@@ -98,7 +102,8 @@ public class JobExampleServiceImpl implements JobExampleService {
         JobExampleError context = new JobExampleError();
         context.setData(errorInfo);
         // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
+        log.info("任务异常信息回调：{}, 回调结果: {}", id, complete);
         // 记录事件
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
         objectNode.put("message", errorMessage);

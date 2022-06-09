@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.app.service.impl;
 
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -32,6 +33,7 @@ import io.shulie.takin.cloud.model.callback.ResourceExampleError.ResourceExample
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
+@Slf4j
 public class ResourceExampleServiceImpl implements ResourceExampleService {
 
     @javax.annotation.Resource
@@ -69,7 +71,8 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleStart context = new ResourceExampleStart();
         context.setData(getCallbackData(id, callbackUrl));
         // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
+        log.info("锁定资源：{}, 回调结果: {}", id, complete);
         // 记录事件
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
             .setContext("{}")
@@ -88,7 +91,8 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleStop context = new ResourceExampleStop();
         context.setData(getCallbackData(id, callbackUrl));
         // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
+        log.info("释放资源：{}, 回调结果: {}", id, complete);
         // 记录事件
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
             .setContext("{}")
@@ -106,7 +110,8 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleError context = new ResourceExampleError();
         context.setData(errorInfo);
         // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
+        log.info("资源异常信息：{}, 回调结果: {}", id, complete);
         // 记录事件
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
         objectNode.put("message", errorMessage);
