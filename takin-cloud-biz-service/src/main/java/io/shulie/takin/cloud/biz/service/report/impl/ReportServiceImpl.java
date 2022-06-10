@@ -264,7 +264,7 @@ public class ReportServiceImpl implements ReportService {
             return;
         }
         for (ScriptNodeSummaryBean bean : reportNodeDetail) {
-            if (bean.getActivityId() > -1) {
+            if (bean.getActivityId() > 0) {
                 BusinessActivitySummaryBean summaryBean = new BusinessActivitySummaryBean();
                 summaryBean.setBusinessActivityId(bean.getActivityId());
                 summaryBean.setBusinessActivityName(bean.getTestName());
