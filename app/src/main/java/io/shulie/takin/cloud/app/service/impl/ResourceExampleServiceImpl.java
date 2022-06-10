@@ -1,7 +1,9 @@
 package io.shulie.takin.cloud.app.service.impl;
 
 import java.util.Map;
+import java.util.Objects;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -59,9 +61,9 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
         // 记录事件
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
-            .setContext("{}")
-            .setResourceExampleId(id)
-            .setType(NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode()));
+                .setContext("{}")
+                .setResourceExampleId(id)
+                .setType(NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode()));
     }
 
     @Override
@@ -75,9 +77,9 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         log.info("锁定资源：{}, 回调结果: {}", id, complete);
         // 记录事件
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
-            .setContext("{}")
-            .setResourceExampleId(id)
-            .setType(NotifyEventType.RESOUECE_EXAMPLE_START.getCode())
+                .setContext("{}")
+                .setResourceExampleId(id)
+                .setType(NotifyEventType.RESOUECE_EXAMPLE_START.getCode())
         );
     }
 
@@ -95,9 +97,34 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         log.info("释放资源：{}, 回调结果: {}", id, complete);
         // 记录事件
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
-            .setContext("{}")
-            .setResourceExampleId(id)
-            .setType(NotifyEventType.RESOUECE_EXAMPLE_STOP.getCode()));
+                .setContext("{}")
+                .setResourceExampleId(id)
+                .setType(NotifyEventType.RESOUECE_EXAMPLE_STOP.getCode()));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onInfo(long id, Map<String, Object> info) {
+        // 提取错误信息
+        final String errorFlag = "error";
+        String errorMessage = info.getOrDefault(errorFlag, "").toString();
+        info.remove(errorFlag);
+        // 获取资源实例
+        ResourceExampleEntity resourceExampleEntity = resourceExampleMapper.selectById(id);
+        if (Objects.isNull(resourceExampleEntity)) {
+            log.info("上报异常信息异常，资源实例ID[{}]对应的数据不存在:", id);
+            return;
+        }
+        resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
+                .setResourceExampleId(id)
+                .setType(NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode())
+                .setContext(jsonService.writeValueAsString(info)));
+
+        if (CharSequenceUtil.isNotBlank(errorMessage)) {
+            onError(id, errorMessage);
+        }
     }
 
     @Override
@@ -116,20 +143,9 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
         objectNode.put("message", errorMessage);
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
-            .setResourceExampleId(id)
-            .setContext(objectNode.toPrettyString())
-            .setType(NotifyEventType.RESOUECE_EXAMPLE_ERROR.getCode()));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onInfo(long id, Map<String, Object> info) {
-        resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
-            .setResourceExampleId(id)
-            .setType(NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode())
-            .setContext(jsonService.writeValueAsString(info)));
+                .setResourceExampleId(id)
+                .setContext(objectNode.toPrettyString())
+                .setType(NotifyEventType.RESOUECE_EXAMPLE_ERROR.getCode()));
     }
 
     private ResourceExample getCallbackData(long resourceExampleId, StringBuilder callbackUrl) {
@@ -139,12 +155,12 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceEntity resourceEntity = resourceMapper.selectById(resourceExampleEntity.getResourceId());
         // 根据资源实例主键，获取任务实例主键
         JobExampleEntity jobExampleEntity = jobExampleMapperService.lambdaQuery()
-            .eq(JobExampleEntity::getResourceExampleId, resourceExampleId).one();
+                .eq(JobExampleEntity::getResourceExampleId, resourceExampleId).one();
         callbackUrl.append(resourceEntity.getCallbackUrl());
         return new ResourceExample()
-            .setResourceExampleId(resourceExampleEntity.getId())
-            .setResourceId(resourceExampleEntity.getResourceId())
-            .setJobId(jobExampleEntity == null ? null : jobExampleEntity.getJobId())
-            .setJobExampleId(jobExampleEntity == null ? null : jobExampleEntity.getId());
+                .setResourceExampleId(resourceExampleEntity.getId())
+                .setResourceId(resourceExampleEntity.getResourceId())
+                .setJobId(jobExampleEntity == null ? null : jobExampleEntity.getJobId())
+                .setJobExampleId(jobExampleEntity == null ? null : jobExampleEntity.getId());
     }
 }
