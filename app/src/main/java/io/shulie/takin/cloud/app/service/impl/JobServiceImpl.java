@@ -1,10 +1,6 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import java.util.Map;
-import java.util.List;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -127,17 +123,17 @@ public class JobServiceImpl implements JobService {
     private JobEntity startFillJob(long resourceId, int resourceExampleNumber, StartRequest jobInfo) {
         // 时长取最大值
         Integer duration = jobInfo.getThreadConfig()
-            .stream().map(ThreadConfigInfo::getDuration)
-            .max(Comparator.naturalOrder()).orElse(0);
+                .stream().map(ThreadConfigInfo::getDuration)
+                .max(Comparator.naturalOrder()).orElse(0);
         return new JobEntity()
-            .setResourceId(resourceId)
-            .setName(jobInfo.getName())
-            .setDuration(duration)
-            .setSampling(jobInfo.getSampling())
-            .setType(jobInfo.getType().getCode())
-            .setStartOption(jobInfo.getJvmOptions())
-            .setCallbackUrl(jobInfo.getCallbackUrl())
-            .setResourceExampleNumber(resourceExampleNumber);
+                .setResourceId(resourceId)
+                .setName(jobInfo.getName())
+                .setDuration(duration)
+                .setSampling(jobInfo.getSampling())
+                .setType(jobInfo.getType().getCode())
+                .setStartOption(jobInfo.getJvmOptions())
+                .setCallbackUrl(jobInfo.getCallbackUrl())
+                .setResourceExampleNumber(resourceExampleNumber);
     }
 
     /**
@@ -152,10 +148,10 @@ public class JobServiceImpl implements JobService {
     private List<JobExampleEntity> startFillJobExample(long jobId, int duration, long resourceId, int resourceNumber) {
         List<ResourceExampleEntity> resourceExampleEntityList = resourceService.listExample(resourceId);
         return IntStream.range(0, resourceNumber).mapToObj(t -> new JobExampleEntity()
-            .setJobId(jobId)
-            .setNumber(t + 1)
-            .setDuration(duration)
-            .setResourceExampleId(resourceExampleEntityList.get(t).getId())).collect(Collectors.toList());
+                .setJobId(jobId)
+                .setNumber(t + 1)
+                .setDuration(duration)
+                .setResourceExampleId(resourceExampleEntityList.get(t).getId())).collect(Collectors.toList());
     }
 
     /**
@@ -168,12 +164,14 @@ public class JobServiceImpl implements JobService {
     private List<ThreadConfigEntity> startFillThreadConfig(long jobId, StartRequest jobInfo) {
         return jobInfo.getThreadConfig().stream().map(threadConfigInfo -> {
             Map<String, Object> context = threadConfigInfo(threadConfigInfo);
-            if (jobInfo.getExt() != null) {context.putAll(jobInfo.getExt());}
+            if (jobInfo.getExt() != null) {
+                context.putAll(jobInfo.getExt());
+            }
             return new ThreadConfigEntity()
-                .setJobId(jobId)
-                .setRef(threadConfigInfo.getRef())
-                .setMode(threadConfigInfo.getType().getCode())
-                .setContext(jsonService.writeValueAsString(context));
+                    .setJobId(jobId)
+                    .setRef(threadConfigInfo.getRef())
+                    .setMode(threadConfigInfo.getType().getCode())
+                    .setContext(jsonService.writeValueAsString(context));
         }).collect(Collectors.toList());
     }
 
@@ -196,14 +194,16 @@ public class JobServiceImpl implements JobService {
             IntStream.range(0, threadConfigInfoList.size()).mapToObj(c -> {
                 ThreadConfigInfo z = threadConfigInfoList.get(c);
                 Map<String, Object> context = threadConfigInfo(z);
-                if (jobInfo.getExt() != null) {context.putAll(jobInfo.getExt());}
+                if (jobInfo.getExt() != null) {
+                    context.putAll(jobInfo.getExt());
+                }
                 return new ThreadConfigExampleEntity()
-                    .setJobId(jobId)
-                    .setRef(z.getRef())
-                    .setSerialNumber(c)
-                    .setType(z.getType().getCode())
-                    .setJobExampleId(jobExampleEntity.getId())
-                    .setContext(jsonService.writeValueAsString(context));
+                        .setJobId(jobId)
+                        .setRef(z.getRef())
+                        .setSerialNumber(c)
+                        .setType(z.getType().getCode())
+                        .setJobExampleId(jobExampleEntity.getId())
+                        .setContext(jsonService.writeValueAsString(context));
             }).forEach(threadConfigExample::add);
         });
         return threadConfigExample;
@@ -218,12 +218,12 @@ public class JobServiceImpl implements JobService {
      */
     private List<SlaEntity> startFillSla(long jobId, List<SlaInfo> slaInfoList) {
         return slaInfoList.stream().map(t -> new SlaEntity()
-            .setJobId(jobId)
-            .setRef(t.getRef())
-            .setAttach(t.getAttach())
-            .setFormulaNumber(t.getFormulaNumber())
-            .setFormulaTarget(t.getFormulaTarget().getCode())
-            .setFormulaSymbol(t.getFormulaSymbol().getCode())).collect(Collectors.toList());
+                .setJobId(jobId)
+                .setRef(t.getRef())
+                .setAttach(t.getAttach())
+                .setFormulaNumber(t.getFormulaNumber())
+                .setFormulaTarget(t.getFormulaTarget().getCode())
+                .setFormulaSymbol(t.getFormulaSymbol().getCode())).collect(Collectors.toList());
     }
 
     /**
@@ -240,30 +240,35 @@ public class JobServiceImpl implements JobService {
             JobExampleEntity jobExample = jobExampleList.get(t);
             // 脚本文件
             jobFileEntityList.add(new JobFileEntity()
-                .setJobId(jobId)
-                .setEndPoint(-1L)
-                .setStartPoint(-1L)
-                .setType(FileType.SCRIPT.getCode())
-                .setJobExampleId(jobExample.getId())
-                .setUri(jobInfo.getScriptFile().getUri()));
+                    .setJobId(jobId)
+                    .setEndPoint(-1L)
+                    .setStartPoint(-1L)
+                    .setType(FileType.SCRIPT.getCode())
+                    .setJobExampleId(jobExample.getId())
+                    .setUri(jobInfo.getScriptFile().getUri()));
             // 数据文件
             List<FileInfo> dataFile = jobInfo.getDataFile() == null ? new ArrayList<>() : jobInfo.getDataFile();
-            dataFile.stream().map(c -> new JobFileEntity()
-                .setJobId(jobId)
-                .setUri(c.getUri())
-                .setType(FileType.DATA.getCode())
-                .setJobExampleId(jobExample.getId())
-                .setEndPoint(c.getSplitList().get(t).getEnd())
-                .setStartPoint(c.getSplitList().get(t).getStart())).forEach(jobFileEntityList::add);
+            dataFile.stream().map(c -> {
+                JobFileEntity jobFileEntity = new JobFileEntity()
+                        .setJobId(jobId)
+                        .setUri(c.getUri())
+                        .setType(FileType.DATA.getCode())
+                        .setJobExampleId(jobExample.getId());
+                if (Objects.nonNull(c.getSplitList())) {
+                    jobFileEntity.setEndPoint(c.getSplitList().get(t).getEnd())
+                            .setStartPoint(c.getSplitList().get(t).getStart());
+                }
+                return jobFileEntity;
+            }).forEach(jobFileEntityList::add);
             // 依赖文件
             List<FileInfo> dependencyFile = jobInfo.getDependencyFile() == null ? new ArrayList<>(0) : jobInfo.getDependencyFile();
             dependencyFile.stream().map(c -> (new JobFileEntity()
-                .setJobId(jobId)
-                .setEndPoint(-1L)
-                .setUri(c.getUri())
-                .setStartPoint(-1L)
-                .setJobExampleId(jobExample.getId()))
-                .setType(FileType.ATTACHMENT.getCode())).forEach(jobFileEntityList::add);
+                    .setJobId(jobId)
+                    .setEndPoint(-1L)
+                    .setUri(c.getUri())
+                    .setStartPoint(-1L)
+                    .setJobExampleId(jobExample.getId()))
+                    .setType(FileType.ATTACHMENT.getCode())).forEach(jobFileEntityList::add);
         });
         return jobFileEntityList;
     }
@@ -332,16 +337,17 @@ public class JobServiceImpl implements JobService {
         return threadConfigExampleEntity.stream().map(t -> {
             ThreadConfigInfo context = null;
             try {
-                context = jsonService.readValue(t.getContext(), new TypeReference<ThreadConfigInfo>() {});
+                context = jsonService.readValue(t.getContext(), new TypeReference<ThreadConfigInfo>() {
+                });
             } catch (RuntimeException e) {
                 log.warn("线程组配置实例context解析失败");
             }
             ThreadConfigInfo finalContext = context;
             return new JobConfig()
-                .setRef(t.getRef())
-                .setJobId(t.getJobId())
-                .setContext(finalContext)
-                .setType(ThreadGroupType.of(t.getType()));
+                    .setRef(t.getRef())
+                    .setJobId(t.getJobId())
+                    .setContext(finalContext)
+                    .setType(ThreadGroupType.of(t.getType()));
         }).collect(Collectors.toList());
 
     }
@@ -394,8 +400,8 @@ public class JobServiceImpl implements JobService {
     @Override
     public List<JobExampleEntity> jobExampleEntityList(long jobId) {
         return jobExampleMapperService.lambdaQuery()
-            .eq(JobExampleEntity::getJobId, jobId)
-            .list();
+                .eq(JobExampleEntity::getJobId, jobId)
+                .list();
     }
 
     @Override
@@ -425,13 +431,13 @@ public class JobServiceImpl implements JobService {
             List<Integer> tpsList = splitInteger(t.getTps() == null ? 0 : t.getTps(), size);
             List<Integer> numberList = splitInteger(t.getNumber() == null ? 0 : t.getNumber(), size);
             result.add(IntStream.range(0, size).mapToObj(c -> new ThreadConfigInfo()
-                .setRef(t.getRef())
-                .setType(t.getType())
-                .setTps(tpsList.get(c))
-                .setDuration(t.getDuration())
-                .setNumber(numberList.get(c))
-                .setGrowthStep(t.getGrowthStep())
-                .setGrowthTime(t.getGrowthTime())).collect(Collectors.toList()));
+                    .setRef(t.getRef())
+                    .setType(t.getType())
+                    .setTps(tpsList.get(c))
+                    .setDuration(t.getDuration())
+                    .setNumber(numberList.get(c))
+                    .setGrowthStep(t.getGrowthStep())
+                    .setGrowthTime(t.getGrowthTime())).collect(Collectors.toList()));
         });
         return result;
     }
@@ -455,7 +461,9 @@ public class JobServiceImpl implements JobService {
             // 基数为商
             int tempValue = quotient;
             // 附加余数
-            if (remainder > t) {tempValue++;}
+            if (remainder > t) {
+                tempValue++;
+            }
             // 返回单片结果
             return tempValue;
         }).collect(Collectors.toList());
