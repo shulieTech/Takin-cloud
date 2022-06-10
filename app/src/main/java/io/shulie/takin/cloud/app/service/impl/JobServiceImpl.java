@@ -4,9 +4,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -259,6 +261,10 @@ public class JobServiceImpl implements JobService {
                 if (Objects.nonNull(c.getSplitList())) {
                     jobFileEntity.setEndPoint(c.getSplitList().get(t).getEnd())
                             .setStartPoint(c.getSplitList().get(t).getStart());
+                }
+                String name = FileUtil.getName(c.getUri());
+                if(StringUtils.indexOf(name, "jar") != -1){
+                    jobFileEntity.setType(FileType.PLUGIN.getCode());
                 }
                 return jobFileEntity;
             }).forEach(jobFileEntityList::add);
