@@ -253,7 +253,9 @@ public class JobServiceImpl implements JobService {
                         .setJobId(jobId)
                         .setUri(c.getUri())
                         .setType(FileType.DATA.getCode())
-                        .setJobExampleId(jobExample.getId());
+                        .setJobExampleId(jobExample.getId())
+                        .setEndPoint(-1L)
+                        .setStartPoint(-1L);
                 if (Objects.nonNull(c.getSplitList())) {
                     jobFileEntity.setEndPoint(c.getSplitList().get(t).getEnd())
                             .setStartPoint(c.getSplitList().get(t).getStart());
