@@ -82,7 +82,7 @@ public class ResourceExampleController {
     @PostMapping("error")
     @Operation(summary = "发生异常")
     public ApiResult<Object> error(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id,
-        @Parameter(description = "异常信息", required = true) @RequestBody String content) {
+                                   @Parameter(description = "异常信息", required = true) @RequestBody String content) {
         resourceExampleService.onError(id, content);
         return ApiResult.success();
     }
