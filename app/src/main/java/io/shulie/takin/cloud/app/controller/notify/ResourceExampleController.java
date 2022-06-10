@@ -88,21 +88,6 @@ public class ResourceExampleController {
     }
 
     /**
-     * 资源实例信息上报
-     *
-     * @param id      资源实例主键
-     * @param content 上报的信息内容
-     * @return -
-     */
-    @PostMapping("info")
-    @Operation(summary = "信息上报")
-    public ApiResult<Object> info(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id,
-        @Parameter(description = "资源实例信息", required = true) @RequestBody Map<String, Object> content) {
-        resourceExampleService.onInfo(id, content);
-        return ApiResult.success();
-    }
-
-    /**
      * 资源实例信息和异常上报
      *
      * @param id      资源实例主键
@@ -113,14 +98,8 @@ public class ResourceExampleController {
     @Operation(summary = "信息和异常上报")
     public ApiResult<Object> infoAndError(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id,
         @Parameter(description = "资源实例信息", required = true) @RequestBody Map<String, Object> content) {
-        // 提取错误信息
-        final String errorFlag = "error";
-        String errorMessage = content.getOrDefault(errorFlag, "").toString();
-        content.remove(errorFlag);
         // 上报信息
-        info(id, content);
-        // 上报异常
-        if (CharSequenceUtil.isNotBlank(errorMessage)) {error(id, errorMessage.trim());}
+        resourceExampleService.onInfo(id, content);
         return ApiResult.success();
     }
 }
