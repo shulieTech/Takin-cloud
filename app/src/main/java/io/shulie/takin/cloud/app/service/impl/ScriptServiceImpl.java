@@ -126,12 +126,18 @@ public class ScriptServiceImpl implements ScriptService {
         }
         //校验CsvDataSet
         List<String> csvConfigs = new ArrayList<>();
-        if(StringUtils.isNotBlank(scriptCheckRequest.getScriptPath())){
-            csvConfigs = Arrays.asList(scriptCheckRequest.getCsvPaths().split(","));
-            for (String csvPath : csvConfigs) {
+        if (StringUtils.isNotBlank(scriptCheckRequest.getScriptPath())) {
+            String[] temps = scriptCheckRequest.getCsvPaths().split(",");
+            for (String csvPath : temps) {
                 if (StringUtils.startsWith(csvPath, "/")) {
                     return ApiResult.fail("CSV文件路径应该为相对路径");
                 }
+                csvPath = StringUtils.trim(nfsPath + csvPath);
+                File csvFile = new File(csvPath);
+                if (!csvFile.exists()) {
+                    return ApiResult.fail(String.format("CSV文件不存在，请检测CSV文件路径：%s", csvPath));
+                }
+                csvConfigs.add(csvPath);
             }
         }
         boolean csvFlag = chekCsvDataSet(hashTree, csvConfigs);
@@ -186,17 +192,6 @@ public class ScriptServiceImpl implements ScriptService {
             if (CollectionUtil.isEmpty(javas)) {
                 return true;
             }
-
-//            Class<?> aClass = Class.forName("org.apache.jmeter.util.BeanShellInterpreter", false, this.getClass().getClassLoader());
-//            Object o = aClass.getDeclaredConstructor().newInstance();
-//            //环境设置
-//            Method set = aClass.getDeclaredMethod("set", String.class, Object.class);
-//            set.setAccessible(true);
-//            set.invoke(o, "log", log);
-//            set.invoke(o, "vars", new JMeterVariables());
-//
-//            Method eval = aClass.getDeclaredMethod("eval", String.class);
-//            eval.setAccessible(true);
             for (JavaSampler javaSampler : javas) {
                 boolean flag = javaSampler.getProperty("TestElement.enabled").getBooleanValue();
                 if (!flag) {
@@ -222,11 +217,6 @@ public class ScriptServiceImpl implements ScriptService {
             if (CollectionUtil.isEmpty(csvDataSets)) {
                 return true;
             }
-
-            Class<?> aClass = Class.forName("org.apache.jmeter.util.BeanShellInterpreter", false, this.getClass().getClassLoader());
-            Object o = aClass.getDeclaredConstructor().newInstance();
-            Method eval = aClass.getDeclaredMethod("eval", String.class);
-            eval.setAccessible(true);
             for (CSVDataSet csvDataSet : csvDataSets) {
                 boolean flag = csvDataSet.getProperty("TestElement.enabled").getBooleanValue();
                 if (!flag) {
@@ -234,15 +224,15 @@ public class ScriptServiceImpl implements ScriptService {
                 }
                 //提取filename
                 String csvFileName = csvDataSet.getProperty("filename").getStringValue();
-                if(StringUtils.isBlank(csvFileName)){
+                if (StringUtils.isBlank(csvFileName)) {
                     continue;
                 }
                 //校验csvFile
-                if(csvConfigs.isEmpty()){
+                if (csvConfigs.isEmpty()) {
                     return false;
                 }
                 String csvConfig = nameMatch(csvConfigs, csvFileName);
-                if(StringUtils.isBlank(csvConfig)){
+                if (StringUtils.isBlank(csvConfig)) {
                     return false;
                 }
             }
@@ -288,7 +278,7 @@ public class ScriptServiceImpl implements ScriptService {
         return;
     }
 
-    private void installPlugin(List<File> pluginFiles){
+    private void installPlugin(List<File> pluginFiles) {
         jmeterLibClassLoader.loadJars(pluginFiles);
         AppParentClassLoader instance = AppParentClassLoader.getInstance();
         instance.loadJars(pluginFiles);
