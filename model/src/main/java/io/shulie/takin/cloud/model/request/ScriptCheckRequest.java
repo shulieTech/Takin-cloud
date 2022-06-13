@@ -26,4 +26,6 @@ public class ScriptCheckRequest {
     private String pluginPaths;
     @Schema(description = "csv文件路径，多个路径逗号隔开")
     private String csvPaths;
+    @Schema(description = "附件文件路径，多个路径逗号隔开")
+    private String attachments;
 }
