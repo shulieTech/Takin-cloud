@@ -6,8 +6,12 @@ import io.shulie.takin.cloud.app.classloader.JmeterLibClassLoader;
 import io.shulie.takin.cloud.app.service.jmeter.SaveService;
 import org.apache.jmeter.config.CSVDataSet;
 import org.apache.jmeter.modifiers.BeanShellPreProcessor;
+import org.apache.jmeter.threads.JMeterVariables;
+import org.apache.jmeter.util.BeanShellInterpreter;
 import org.apache.jorphan.collections.HashTree;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
@@ -27,7 +31,7 @@ import java.util.Objects;
  */
 @SpringBootTest
 public class ScriptTests {
-
+    private static final Logger log = LoggerFactory.getLogger(ScriptTests.class);
     @Resource
     private JmeterLibClassLoader jmeterLibClassLoader;
     @Resource
@@ -52,16 +56,26 @@ public class ScriptTests {
 //        String jmxFile ="/usr/local/apache-jmeter-5.4.1/jmx/PID2.jmx";
         try {
             HashTree hashTree = SaveService.loadTree(new File(jmxFile));
-            List<CSVDataSet> shells = new ArrayList<>();
-            getHashTreeValue(hashTree, CSVDataSet.class, shells);
-            Class<?> aClass = Class.forName("org.apache.jmeter.util.BeanShellInterpreter", false, this.getClass().getClassLoader());
+            List<BeanShellPreProcessor> shells = new ArrayList<>();
+            getHashTreeValue(hashTree, BeanShellPreProcessor.class, shells);
+            Class<?> aClass = Class.forName("org.apache.jmeter.util.BeanShellInterpreter", false, jmeterLibClassLoader);
             Object o = aClass.getDeclaredConstructor().newInstance();
+
+            Method set = aClass.getDeclaredMethod("set", String.class, Object.class);
+            set.setAccessible(true);
+            set.invoke(o, "log", log);
+            set.invoke(o, "vars", new JMeterVariables());
+            //bshInterpreter.set("vars", vars);
+
             Method eval = aClass.getDeclaredMethod("eval", String.class);
+//            set("log", logger);//$NON-NLS-1$
+            //bshInterpreter.set("vars", vars);
+
             eval.setAccessible(true);
 //            ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
 //            Thread.currentThread().setContextClassLoader(jmeterLibClassLoader);
 
-            Object invoke = eval.invoke(o, "import chkSum.*;\n\n String reqId = HhtSign.createReqId();\n\nString requestTime =  HhtSign.createRequestTime();\n\n");
+            Object invoke = eval.invoke(o, shells.get(0).getProperty("script").toString());
 //            eval.invoke(o, "String str=\"1111\"");
 //            Thread.currentThread().setContextClassLoader(oldClassLoader);
             System.out.println(1);

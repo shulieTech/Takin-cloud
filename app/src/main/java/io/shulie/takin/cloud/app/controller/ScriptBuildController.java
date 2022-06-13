@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.app.controller;
 
 import io.shulie.takin.cloud.app.service.ScriptService;
 import io.shulie.takin.cloud.model.request.ScriptBuildRequest;
+import io.shulie.takin.cloud.model.request.ScriptCheckRequest;
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,5 +32,11 @@ public class ScriptBuildController {
     @PostMapping(value = "build")
     public ApiResult<String> buildScript(@Valid @RequestBody ScriptBuildRequest request) {
         return ApiResult.success(scriptService.buildJmeterScript(request));
+    }
+
+    @Operation(summary = "检测脚本")
+    @PostMapping(value = "check")
+    public ApiResult<Object> checkScript(@Valid @RequestBody ScriptCheckRequest request) {
+        return scriptService.checkJmeterScript(request);
     }
 }
