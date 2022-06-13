@@ -1374,6 +1374,7 @@ public class ReportServiceImpl implements ReportService {
             }
             bill.setAvgThreadNum(avgThreadNum);
             invoice.setData(bill);
+            log.info("计算流量信息，reportId:{}, time:{}, threads:{}", reportResult.getId(), testRunTime, avgThreadNum);
             Response<BigDecimal> paymentRes = assetExtApi.payment(invoice);
             if (null != paymentRes && paymentRes.isSuccess()) {
                 reportResult.setAmount(paymentRes.getData());
