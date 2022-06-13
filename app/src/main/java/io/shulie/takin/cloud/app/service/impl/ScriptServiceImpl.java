@@ -84,10 +84,9 @@ public class ScriptServiceImpl implements ScriptService {
 
     @Override
     public ApiResult<Object> checkJmeterScript(ScriptCheckRequest scriptCheckRequest) {
-//        if (StringUtils.startsWith(scriptCheckRequest.getScriptPath(), "/")) {
-//            return ApiResult.fail("脚本路径应该为相对路径");
-//        }
-        nfsPath ="";
+        if (StringUtils.startsWith(scriptCheckRequest.getScriptPath(), "/")) {
+            return ApiResult.fail("脚本路径应该为相对路径");
+        }
         String path = StringUtils.trim(nfsPath + scriptCheckRequest.getScriptPath());
         //检测压测脚本是否存在
         File jmxFile = new File(path);
@@ -100,9 +99,9 @@ public class ScriptServiceImpl implements ScriptService {
             String[] plugins = scriptCheckRequest.getPluginPaths().split(",");
             List<File> pluginFiles = new ArrayList<>();
             for (String plugin : plugins) {
-//                if (StringUtils.startsWith(plugin, "/")) {
-//                    return ApiResult.fail("插件路径应该为相对路径");
-//                }
+                if (StringUtils.startsWith(plugin, "/")) {
+                    return ApiResult.fail("插件路径应该为相对路径");
+                }
                 String pluginPath = StringUtils.trim(nfsPath + plugin);
                 File pluginFile = new File(pluginPath);
                 if (!pluginFile.exists()) {
@@ -129,6 +128,11 @@ public class ScriptServiceImpl implements ScriptService {
         List<String> csvConfigs = new ArrayList<>();
         if(StringUtils.isNotBlank(scriptCheckRequest.getScriptPath())){
             csvConfigs = Arrays.asList(scriptCheckRequest.getCsvPaths().split(","));
+            for (String csvPath : csvConfigs) {
+                if (StringUtils.startsWith(csvPath, "/")) {
+                    return ApiResult.fail("CSV文件路径应该为相对路径");
+                }
+            }
         }
         boolean csvFlag = chekCsvDataSet(hashTree, csvConfigs);
         if (!csvFlag) {
