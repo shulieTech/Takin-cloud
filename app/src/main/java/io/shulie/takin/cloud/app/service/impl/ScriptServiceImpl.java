@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.CSVDataSet;
 import org.apache.jmeter.modifiers.BeanShellPreProcessor;
+import org.apache.jmeter.protocol.java.sampler.JavaSampler;
 import org.apache.jmeter.threads.JMeterVariables;
 import org.apache.jorphan.collections.HashTree;
 import org.dom4j.Document;
@@ -87,7 +88,7 @@ public class ScriptServiceImpl implements ScriptService {
 //            return ApiResult.fail("脚本路径应该为相对路径");
 //        }
         nfsPath ="";
-        String path = nfsPath + scriptCheckRequest.getScriptPath();
+        String path = StringUtils.trim(nfsPath + scriptCheckRequest.getScriptPath());
         //检测压测脚本是否存在
         File jmxFile = new File(path);
         if (!jmxFile.exists()) {
@@ -102,27 +103,28 @@ public class ScriptServiceImpl implements ScriptService {
 //                if (StringUtils.startsWith(plugin, "/")) {
 //                    return ApiResult.fail("插件路径应该为相对路径");
 //                }
-                File pluginFile = new File(nfsPath + plugin);
+                String pluginPath = StringUtils.trim(nfsPath + plugin);
+                File pluginFile = new File(pluginPath);
                 if (!pluginFile.exists()) {
-                    return ApiResult.fail(String.format("插件不存在，请检测插件路径：%s", path));
+                    return ApiResult.fail(String.format("插件不存在，请检测插件路径：%s", pluginPath));
                 }
                 pluginFiles.add(pluginFile);
             }
-            jmeterLibClassLoader.loadJars(pluginFiles);
-            AppParentClassLoader instance = AppParentClassLoader.getInstance();
-            instance.loadJars(pluginFiles);
-
+            installPlugin(pluginFiles);
         }
         //读取脚本内容&校验基础脚本
         HashTree hashTree = SaveService.loadTree(jmxFile);
         //校验BeanShell
         boolean shellFlag = chekBeanShell(hashTree);
         if (!shellFlag) {
-            return ApiResult.fail("BeanShell校验失败，请检查相关依赖插件是否上传");
+            return ApiResult.fail("BeanShell校验失败，请检查相关依赖的插件是否上传");
         }
 
         //校验JavaSampler
-
+        boolean javaFlag = chekJavaSampler(hashTree);
+        if (!javaFlag) {
+            return ApiResult.fail("JavaSampler校验失败，请检查配置项[classname]依赖的插件是否上传");
+        }
         //校验CsvDataSet
         List<String> csvConfigs = new ArrayList<>();
         if(StringUtils.isNotBlank(scriptCheckRequest.getScriptPath())){
@@ -164,6 +166,42 @@ public class ScriptServiceImpl implements ScriptService {
                 String script = shell.getProperty("script").getStringValue();
                 //校验script
                 eval.invoke(o, script);
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private boolean chekJavaSampler(HashTree hashTree) {
+        try {
+            //提取beanShell
+            List<JavaSampler> javas = new ArrayList<>();
+            getHashTreeValue(hashTree, JavaSampler.class, javas);
+            if (CollectionUtil.isEmpty(javas)) {
+                return true;
+            }
+
+//            Class<?> aClass = Class.forName("org.apache.jmeter.util.BeanShellInterpreter", false, this.getClass().getClassLoader());
+//            Object o = aClass.getDeclaredConstructor().newInstance();
+//            //环境设置
+//            Method set = aClass.getDeclaredMethod("set", String.class, Object.class);
+//            set.setAccessible(true);
+//            set.invoke(o, "log", log);
+//            set.invoke(o, "vars", new JMeterVariables());
+//
+//            Method eval = aClass.getDeclaredMethod("eval", String.class);
+//            eval.setAccessible(true);
+            for (JavaSampler javaSampler : javas) {
+                boolean flag = javaSampler.getProperty("TestElement.enabled").getBooleanValue();
+                if (!flag) {
+                    continue;
+                }
+                //提取class
+                String clazz = javaSampler.getProperty("classname").toString();
+                //校验
+                Class.forName(clazz, false, jmeterLibClassLoader);
             }
             return true;
         } catch (Exception e) {
@@ -244,6 +282,12 @@ public class ScriptServiceImpl implements ScriptService {
             }
         }
         return;
+    }
+
+    private void installPlugin(List<File> pluginFiles){
+        jmeterLibClassLoader.loadJars(pluginFiles);
+        AppParentClassLoader instance = AppParentClassLoader.getInstance();
+        instance.loadJars(pluginFiles);
     }
 
     /**
