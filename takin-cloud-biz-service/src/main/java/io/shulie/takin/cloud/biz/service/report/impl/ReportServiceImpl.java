@@ -1396,28 +1396,6 @@ public class ReportServiceImpl implements ReportService {
         reportDao.updateReport(param);
     }
 
-    public static void main(String[] args) {
-        String startTime ="2022-05-15 15:43:46";
-        String now ="2022-05-15 16:14:03";
-
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        BigDecimal time = null;
-        try {
-            time = new BigDecimal(DateUtil.between(simpleDateFormat.parse(startTime), simpleDateFormat.parse(now), DateUnit.SECOND));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        BigDecimal avgRt = new BigDecimal(2203.49);
-        BigDecimal avgTPS = new BigDecimal(138.85);
-        BigDecimal thread = avgTPS.multiply(avgRt)
-                .divide(new BigDecimal(1000), 10, RoundingMode.HALF_UP);
-        System.out.println(thread);
-
-        thread = new BigDecimal(307);
-        BigDecimal divide = thread.multiply(time).divide(new BigDecimal(60), 0, RoundingMode.UP);
-        System.out.println(divide);
-    }
-
     @Override
     public void addWarn(WarnCreateInput input) {
         WarnDetail warnDetail = BeanUtil.copyProperties(input, WarnDetail.class);
