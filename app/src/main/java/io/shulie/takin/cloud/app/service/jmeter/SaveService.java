@@ -12,6 +12,7 @@ import com.thoughtworks.xstream.security.AnyTypePermission;
 import com.thoughtworks.xstream.security.NoTypePermission;
 import io.shulie.takin.cloud.app.classloader.JmeterLibClassLoader;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jorphan.collections.HashTree;
@@ -174,8 +175,11 @@ public class SaveService {
 
     private static File getSaveServiceFile() throws IOException {
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
-        Resource[] files = resourcePatternResolver.getResources("classpath:jmeter/saveservice.properties");
-        return files[0].getFile();
+        Resource[] resources = resourcePatternResolver.getResources("classpath:jmeter/saveservice.properties");
+        File file= new File("tmp.properties");
+        // 通过流讲文件复制到file中
+        FileUtils.copyToFile(resources[0].getInputStream(), file);
+        return file;
     }
 
     // Helper method to simplify alias creation from properties
