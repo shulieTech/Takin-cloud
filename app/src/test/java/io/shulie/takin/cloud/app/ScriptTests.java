@@ -58,7 +58,7 @@ public class ScriptTests {
             HashTree hashTree = SaveService.loadTree(new File(jmxFile));
             List<BeanShellPreProcessor> shells = new ArrayList<>();
             getHashTreeValue(hashTree, BeanShellPreProcessor.class, shells);
-            Class<?> aClass = Class.forName("org.apache.jmeter.util.BeanShellInterpreter", false, jmeterLibClassLoader);
+            Class<?> aClass = Class.forName("org.apache.jmeter.util.BeanShellInterpreter", false, this.getClass().getClassLoader());
             Object o = aClass.getDeclaredConstructor().newInstance();
 
             Method set = aClass.getDeclaredMethod("set", String.class, Object.class);

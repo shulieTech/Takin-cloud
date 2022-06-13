@@ -87,7 +87,7 @@ public class ScriptServiceImpl implements ScriptService {
         if (StringUtils.startsWith(scriptCheckRequest.getScriptPath(), "/")) {
             return ApiResult.fail("脚本路径应该为相对路径");
         }
-        String path = StringUtils.trim(nfsPath + scriptCheckRequest.getScriptPath());
+        String path = StringUtils.trimToEmpty(new StringBuilder().append(nfsPath).append("/").append(scriptCheckRequest.getScriptPath()).toString());
         //检测压测脚本是否存在
         File jmxFile = new File(path);
         if (!jmxFile.exists()) {
@@ -102,7 +102,7 @@ public class ScriptServiceImpl implements ScriptService {
                 if (StringUtils.startsWith(plugin, "/")) {
                     return ApiResult.fail("插件路径应该为相对路径");
                 }
-                String pluginPath = StringUtils.trim(nfsPath + plugin);
+                String pluginPath = StringUtils.trim(new StringBuilder().append(nfsPath).append("/").append(plugin).toString());
                 File pluginFile = new File(pluginPath);
                 if (!pluginFile.exists()) {
                     return ApiResult.fail(String.format("插件不存在，请检测插件路径：%s", pluginPath));
@@ -132,7 +132,7 @@ public class ScriptServiceImpl implements ScriptService {
                 if (StringUtils.startsWith(csvPath, "/")) {
                     return ApiResult.fail("CSV文件路径应该为相对路径");
                 }
-                csvPath = StringUtils.trim(nfsPath + csvPath);
+                csvPath = StringUtils.trimToEmpty(new StringBuilder().append(nfsPath).append("/").append(csvPath).toString());
                 File csvFile = new File(csvPath);
                 if (!csvFile.exists()) {
                     return ApiResult.fail(String.format("CSV文件不存在，请检测CSV文件路径：%s", csvPath));
