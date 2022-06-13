@@ -1,6 +1,8 @@
 package io.shulie.takin.cloud.biz.service.report.impl;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Date;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import cn.hutool.core.bean.BeanUtil;
+import io.shulie.takin.cloud.biz.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSON;
@@ -1363,6 +1366,9 @@ public class ReportServiceImpl implements ReportService {
             if (null != reportResult.getAvgTps() && null != reportResult.getAvgRt()) {
                 avgThreadNum = reportResult.getAvgTps().multiply(reportResult.getAvgRt())
                     .divide(new BigDecimal(1000), 10, RoundingMode.HALF_UP);
+                if (avgThreadNum.intValue() == 0) {
+                    avgThreadNum = reportResult.getAvgConcurrent();
+                }
             } else {
                 avgThreadNum = reportResult.getAvgConcurrent();
             }
@@ -1388,6 +1394,28 @@ public class ReportServiceImpl implements ReportService {
         // 更新
         ReportUpdateParam param = BeanUtil.copyProperties(reportResult, ReportUpdateParam.class);
         reportDao.updateReport(param);
+    }
+
+    public static void main(String[] args) {
+        String startTime ="2022-05-15 15:43:46";
+        String now ="2022-05-15 16:14:03";
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        BigDecimal time = null;
+        try {
+            time = new BigDecimal(DateUtil.between(simpleDateFormat.parse(startTime), simpleDateFormat.parse(now), DateUnit.SECOND));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        BigDecimal avgRt = new BigDecimal(2203.49);
+        BigDecimal avgTPS = new BigDecimal(138.85);
+        BigDecimal thread = avgTPS.multiply(avgRt)
+                .divide(new BigDecimal(1000), 10, RoundingMode.HALF_UP);
+        System.out.println(thread);
+
+        thread = new BigDecimal(307);
+        BigDecimal divide = thread.multiply(time).divide(new BigDecimal(60), 0, RoundingMode.UP);
+        System.out.println(divide);
     }
 
     @Override
