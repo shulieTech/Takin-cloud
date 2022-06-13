@@ -12,17 +12,21 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum FileType {
     /**
-     * 常规模式
+     * 脚本文件
      */
     SCRIPT(0, "脚本文件"),
     /**
-     * 调试模式
+     * 数据文件
      */
     DATA(1, "数据文件"),
     /**
-     * 巡检模式
+     * 插件文件
      */
-    ATTACHMENT(2, "附件")
+    PLUGIN(2, "插件文件"),
+    /**
+     * 附件
+     */
+    ATTACHMENT(3, "附件")
     // 格式化用
     ;
     @Getter
