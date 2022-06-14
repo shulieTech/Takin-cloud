@@ -287,9 +287,6 @@ public class CommandServiceImpl implements CommandService {
         ptlLogConfig.put("timeoutThreshold", watchmanConfig.getTimeoutThreshold());
         ptlLogConfig.put("ptlFileTimeoutOnly", watchmanConfig.getPtlFileTimeoutOnly());
         basicConfig.put("ptlLogConfig", ptlLogConfig);
-        basicConfig.put("businessMap", "后续填充");
-        basicConfig.put("dataFileList", "后续填充");
-        basicConfig.put("threadGroupConfigMap", "后续填充");
         // 最大线程数 (以前是直接传null的，韵达改了一个版本，传入具体值， 但是有问题，所以还是传null)
         basicConfig.put("maxThreadNum", null);
         // 固定是0的

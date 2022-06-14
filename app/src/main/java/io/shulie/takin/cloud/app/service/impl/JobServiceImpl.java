@@ -190,8 +190,8 @@ public class JobServiceImpl implements JobService {
         List<List<ThreadConfigInfo>> splitResult = splitThreadConfig(jobInfo.getThreadConfig(), jobExample.size());
         // 组装返回值
         List<ThreadConfigExampleEntity> threadConfigExample = new ArrayList<>(jobExample.size());
+        JobExampleEntity jobExampleEntity = jobExample.get(0);
         IntStream.range(0, splitResult.size()).forEach(t -> {
-            JobExampleEntity jobExampleEntity = jobExample.get(t);
             List<ThreadConfigInfo> threadConfigInfoList = splitResult.get(t);
             IntStream.range(0, threadConfigInfoList.size()).mapToObj(c -> {
                 ThreadConfigInfo z = threadConfigInfoList.get(c);
