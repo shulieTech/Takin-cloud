@@ -25,12 +25,12 @@ public class JmeterConfig {
     @PostConstruct
     public void init() {
         SaveService.initProps();
+        afterLoaded();
     }
 
     @Bean
     public JmeterLibClassLoader jmeterLibClassLoader() {
         JmeterLibClassLoader loader = JmeterLibClassLoader.getInstance();
-        afterLoaded();
         return loader;
     }
 

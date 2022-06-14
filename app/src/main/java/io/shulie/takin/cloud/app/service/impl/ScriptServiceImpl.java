@@ -17,6 +17,7 @@ import org.apache.jmeter.modifiers.BeanShellPreProcessor;
 import org.apache.jmeter.protocol.java.sampler.JavaSampler;
 import org.apache.jmeter.threads.JMeterVariables;
 import org.apache.jorphan.collections.HashTree;
+import org.checkerframework.checker.units.qual.A;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.DocumentType;
@@ -111,40 +112,44 @@ public class ScriptServiceImpl implements ScriptService {
             }
             installPlugin(pluginFiles);
         }
-        //读取脚本内容&校验基础脚本
-        HashTree hashTree = SaveService.loadTree(jmxFile);
-        //校验BeanShell
-        boolean shellFlag = chekBeanShell(hashTree);
-        if (!shellFlag) {
-            return ApiResult.fail("BeanShell校验失败，请检查相关依赖的插件是否上传");
-        }
-
-        //校验JavaSampler
-        boolean javaFlag = chekJavaSampler(hashTree);
-        if (!javaFlag) {
-            return ApiResult.fail("JavaSampler校验失败，请检查配置项[classname]依赖的插件是否上传");
-        }
-        //校验CsvDataSet
-        List<String> csvConfigs = new ArrayList<>();
-        if (StringUtils.isNotBlank(scriptCheckRequest.getScriptPath())) {
-            String[] temps = scriptCheckRequest.getCsvPaths().split(",");
-            for (String csvPath : temps) {
-                if (StringUtils.startsWith(csvPath, "/")) {
-                    return ApiResult.fail("CSV文件路径应该为相对路径");
-                }
-                csvPath = StringUtils.trimToEmpty(new StringBuilder().append(nfsPath).append("/").append(csvPath).toString());
-                File csvFile = new File(csvPath);
-                if (!csvFile.exists()) {
-                    return ApiResult.fail(String.format("CSV文件不存在，请检测CSV文件路径：%s", csvPath));
-                }
-                csvConfigs.add(csvPath);
+        try {
+            //读取脚本内容&校验基础脚本
+            HashTree hashTree = SaveService.loadTree(jmxFile);
+            //校验BeanShell
+            boolean shellFlag = chekBeanShell(hashTree);
+            if (!shellFlag) {
+                return ApiResult.fail("BeanShell校验失败，请检查相关依赖的插件是否上传");
             }
+
+            //校验JavaSampler
+            boolean javaFlag = chekJavaSampler(hashTree);
+            if (!javaFlag) {
+                return ApiResult.fail("JavaSampler校验失败，请检查配置项[classname]依赖的插件是否上传");
+            }
+            //校验CsvDataSet
+            List<String> csvConfigs = new ArrayList<>();
+            if (StringUtils.isNotBlank(scriptCheckRequest.getScriptPath())) {
+                String[] temps = scriptCheckRequest.getCsvPaths().split(",");
+                for (String csvPath : temps) {
+                    if (StringUtils.startsWith(csvPath, "/")) {
+                        return ApiResult.fail("CSV文件路径应该为相对路径");
+                    }
+                    csvPath = StringUtils.trimToEmpty(new StringBuilder().append(nfsPath).append("/").append(csvPath).toString());
+                    File csvFile = new File(csvPath);
+                    if (!csvFile.exists()) {
+                        return ApiResult.fail(String.format("CSV文件不存在，请检测CSV文件路径：%s", csvPath));
+                    }
+                    csvConfigs.add(csvPath);
+                }
+            }
+            boolean csvFlag = chekCsvDataSet(hashTree, csvConfigs);
+            if (!csvFlag) {
+                return ApiResult.fail("csv校验失败，请检查相关csv文件是否上传");
+            }
+        }finally {
+            //卸载插件
+            unInstallPlugin();
         }
-        boolean csvFlag = chekCsvDataSet(hashTree, csvConfigs);
-        if (!csvFlag) {
-            return ApiResult.fail("csv校验失败，请检查相关csv文件是否上传");
-        }
-        //卸载插件
         return ApiResult.fail("脚本验证成功");
     }
 
@@ -288,6 +293,7 @@ public class ScriptServiceImpl implements ScriptService {
      * 卸载插件
      */
     private void unInstallPlugin() {
-
+        jmeterLibClassLoader.unload();
+        AppParentClassLoader.getInstance().unload();
     }
 }
