@@ -58,7 +58,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleHeartbeat context = new ResourceExampleHeartbeat();
         context.setData(getCallbackData(id, callbackUrl));
         // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
         // 记录事件
         resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
                 .setContext("{}")

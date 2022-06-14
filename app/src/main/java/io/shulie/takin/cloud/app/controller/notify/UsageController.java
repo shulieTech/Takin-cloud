@@ -58,7 +58,7 @@ public class UsageController {
         // 组装回调
         FileUsage content = new FileUsage();
         content.setData(request);
-        callbackService.create(jobEntity.getCallbackUrl(), jsonService.writeValueAsString(content));
+        callbackService.callback(null, jobEntity.getCallbackUrl(), jsonService.writeValueAsString(content));
         return ApiResult.success();
     }
 }

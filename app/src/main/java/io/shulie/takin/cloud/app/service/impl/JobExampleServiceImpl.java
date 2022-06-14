@@ -49,7 +49,7 @@ public class JobExampleServiceImpl implements JobExampleService {
         JobExampleHeartbeat context = new JobExampleHeartbeat();
         context.setData(getCallbackData(id, callbackUrl));
         // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
         // 记录事件
         jobExampleEventMapper.insert(new JobExampleEventEntity()
             .setContext("{}")

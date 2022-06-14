@@ -163,7 +163,7 @@ public class ExcessJobServiceImpl implements ExcessJobService {
                         .setResourceId(jobEntity.getResourceId());
                 excessJob.setData(entity.getId());
                 // 保存回调信息
-                callbackService.create(jobEntity.getCallbackUrl(), jsonService.writeValueAsString(excessJob));
+                callbackService.callback(null, jobEntity.getCallbackUrl(), jsonService.writeValueAsString(excessJob));
             }
         }
     }
