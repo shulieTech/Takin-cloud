@@ -193,7 +193,7 @@ public class JmeterScriptUtil {
 
             Element ignoreFirstLine = data.addElement("boolProp");
             ignoreFirstLine.addAttribute("name", "ignoreFirstLine");
-            ignoreFirstLine.setText("false");
+            ignoreFirstLine.setText(Objects.isNull(scriptData.getIgnoreFirstLine()) ? "false" : scriptData.getIgnoreFirstLine().toString());
 
             Element delimiter = data.addElement("stringProp");
             delimiter.addAttribute("name", "delimiter");

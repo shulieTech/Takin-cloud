@@ -23,4 +23,6 @@ public class ScriptData {
     @Schema(description = "数据源变量格式")
     @NotBlank(message = "数据源变量格式不能为空")
     private String format;
+    @Schema(description = "是否忽略首行")
+    private Boolean ignoreFirstLine;
 }
