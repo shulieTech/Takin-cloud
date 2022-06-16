@@ -14,7 +14,6 @@ import io.shulie.takin.cloud.app.mapper.ResourceMapper;
 import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.service.ResourceExampleService;
-import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.mapper.JobExampleMapperService;
 import io.shulie.takin.cloud.constant.enums.BusinessStateEnum;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
@@ -26,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 
@@ -63,7 +61,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         // 创建回调
         callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
         // 记录事件
-        resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
+        resourceExampleEventDAO.insert(new ResourceExampleEventEntity()
                 .setContext("{}")
                 .setResourceExampleId(id)
                 .setType(NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode()));
@@ -79,7 +77,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
         log.info("锁定资源：{}, 回调结果: {}", id, complete);
         // 记录事件
-        resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
+        resourceExampleEventDAO.insert(new ResourceExampleEventEntity()
                 .setContext("{}")
                 .setResourceExampleId(id)
                 .setType(NotifyEventType.RESOUECE_EXAMPLE_START.getCode())
@@ -99,7 +97,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
         log.info("释放资源：{}, 回调结果: {}", id, complete);
         // 记录事件
-        resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
+        resourceExampleEventDAO.insert(new ResourceExampleEventEntity()
                 .setContext("{}")
                 .setResourceExampleId(id)
                 .setType(NotifyEventType.RESOUECE_EXAMPLE_STOP.getCode()));
@@ -118,7 +116,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
             log.info("上报异常信息异常，资源实例ID[{}]对应的数据不存在:", id);
             return;
         }
-        resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
+        resourceExampleEventDAO.insert(new ResourceExampleEventEntity()
                 .setResourceExampleId(id)
                 .setType(NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode())
                 .setContext(jsonService.writeValueAsString(info)));
@@ -132,19 +130,19 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         }
     }
 
-    public void onSuccessful(long id){
+    public void onSuccessful(long id) {
         // 基础信息准备
         StringBuilder callbackUrl = new StringBuilder();
         ResourceExampleSuccessful context = new ResourceExampleSuccessful();
         context.setData(getCallbackData(id, callbackUrl));
         List<ResourceExampleEventEntity> byExampleIdAndType = resourceExampleEventDAO.findByExampleIdAndType(id, NotifyEventType.RESOUECE_EXAMPLE_SUCCESSFUL);
-        if(CollectionUtils.isEmpty(byExampleIdAndType)){
+        if (CollectionUtils.isEmpty(byExampleIdAndType)) {
             // 创建回调
             boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
             log.info("任务正常停止信息：{}, 回调结果: {}", id, complete);
             // 记录事件
 
-            resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
+            resourceExampleEventDAO.insert(new ResourceExampleEventEntity()
                     .setContext("{}")
                     .setResourceExampleId(id)
                     .setType(NotifyEventType.RESOUECE_EXAMPLE_SUCCESSFUL.getCode()));
@@ -166,7 +164,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         // 记录事件
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
         objectNode.put("message", errorMessage);
-        resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
+        resourceExampleEventDAO.insert(new ResourceExampleEventEntity()
                 .setResourceExampleId(id)
                 .setContext(objectNode.toPrettyString())
                 .setType(NotifyEventType.RESOUECE_EXAMPLE_ERROR.getCode()));

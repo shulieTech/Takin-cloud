@@ -2,8 +2,6 @@ package io.shulie.takin.cloud.app.dao.impl;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.page.PageMethod;
 import io.shulie.takin.cloud.app.dao.ResourceExampleEventDAO;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEventEntity;
 import io.shulie.takin.cloud.app.mapper.ResourceExampleEventMapper;
@@ -25,12 +23,12 @@ public class ResourceExampleEventDAOImpl implements ResourceExampleEventDAO {
     ResourceExampleEventMapper resourceExampleEventMapper;
 
     @Override
-    public int insert(ResourceExampleEventEntity entity){
+    public int insert(ResourceExampleEventEntity entity) {
         return resourceExampleEventMapper.insert(entity);
     }
 
     @Override
-    public List<ResourceExampleEventEntity> findByExampleIdAndType(Long exampleId, NotifyEventType type){
+    public List<ResourceExampleEventEntity> findByExampleIdAndType(Long exampleId, NotifyEventType type) {
 //        try (Page<Object> ignored = PageMethod.startPage(1, 1)) {
 //
 //        }
@@ -41,5 +39,10 @@ public class ResourceExampleEventDAOImpl implements ResourceExampleEventDAO {
                 .eq(ResourceExampleEventEntity::getType, type.getCode());
         // 执行SQL
         return resourceExampleEventMapper.selectList(statusWrapper);
+    }
+
+    @Override
+    public ResourceExampleEventEntity selectById(Long id) {
+        return resourceExampleEventMapper.selectById(id);
     }
 }

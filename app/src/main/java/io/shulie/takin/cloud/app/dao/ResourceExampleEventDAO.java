@@ -12,9 +12,12 @@ import java.util.List;
  * Datetime:    2022/6/16   11:58
  * Author:   chenhongqiao@shulie.com
  */
-public interface ResourceExampleEventDAO{
+public interface ResourceExampleEventDAO {
 
-    public int insert(ResourceExampleEventEntity entity);
+    int insert(ResourceExampleEventEntity entity);
 
-    public List<ResourceExampleEventEntity> findByExampleIdAndType(Long exampleId, NotifyEventType type);
+    List<ResourceExampleEventEntity> findByExampleIdAndType(Long exampleId, NotifyEventType type);
+
+    ResourceExampleEventEntity selectById(Long id);
+
 }
