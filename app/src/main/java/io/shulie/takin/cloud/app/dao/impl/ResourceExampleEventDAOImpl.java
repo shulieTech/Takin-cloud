@@ -1,0 +1,45 @@
+package io.shulie.takin.cloud.app.dao.impl;
+
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.page.PageMethod;
+import io.shulie.takin.cloud.app.dao.ResourceExampleEventDAO;
+import io.shulie.takin.cloud.app.entity.ResourceExampleEventEntity;
+import io.shulie.takin.cloud.app.mapper.ResourceExampleEventMapper;
+import io.shulie.takin.cloud.constant.enums.NotifyEventType;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+/**
+ * ClassName:    ResourceExampleEventDAO
+ * Package:    io.shulie.takin.cloud.app.dao
+ * Description:
+ * Datetime:    2022/6/16   11:58
+ * Author:   chenhongqiao@shulie.com
+ */
+@Service
+public class ResourceExampleEventDAOImpl implements ResourceExampleEventDAO {
+    @javax.annotation.Resource
+    ResourceExampleEventMapper resourceExampleEventMapper;
+
+    @Override
+    public int insert(ResourceExampleEventEntity entity){
+        return resourceExampleEventMapper.insert(entity);
+    }
+
+    @Override
+    public List<ResourceExampleEventEntity> findByExampleIdAndType(Long exampleId, NotifyEventType type){
+//        try (Page<Object> ignored = PageMethod.startPage(1, 1)) {
+//
+//        }
+
+        // 查询条件 - 状态类型
+        Wrapper<ResourceExampleEventEntity> statusWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
+                .eq(ResourceExampleEventEntity::getResourceExampleId, exampleId)
+                .eq(ResourceExampleEventEntity::getType, type.getCode());
+        // 执行SQL
+        return resourceExampleEventMapper.selectList(statusWrapper);
+    }
+}

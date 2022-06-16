@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.app.service.impl;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.shulie.takin.cloud.app.dao.ResourceExampleEventDAO;
 import io.shulie.takin.cloud.app.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
@@ -13,6 +14,7 @@ import io.shulie.takin.cloud.app.mapper.ResourceMapper;
 import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.service.ResourceExampleService;
+import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.mapper.JobExampleMapperService;
 import io.shulie.takin.cloud.constant.enums.BusinessStateEnum;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
@@ -22,7 +24,10 @@ import io.shulie.takin.cloud.model.callback.basic.ResourceExample;
 import io.shulie.takin.cloud.model.request.ResourceExampleInfoRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -46,6 +51,8 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
     JobExampleMapperService jobExampleMapperService;
     @javax.annotation.Resource
     ResourceExampleEventMapper resourceExampleEventMapper;
+    @javax.annotation.Resource
+    ResourceExampleEventDAO resourceExampleEventDAO;
 
     @Override
     public void onHeartbeat(long id) {
@@ -130,15 +137,18 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         StringBuilder callbackUrl = new StringBuilder();
         ResourceExampleSuccessful context = new ResourceExampleSuccessful();
         context.setData(getCallbackData(id, callbackUrl));
-        // 创建回调
-        boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
-        log.info("任务正常停止信息：{}, 回调结果: {}", id, complete);
-        // 记录事件
-        // 记录事件
-        resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
-                .setContext("{}")
-                .setResourceExampleId(id)
-                .setType(NotifyEventType.RESOUECE_EXAMPLE_SUCCESSFUL.getCode()));
+        List<ResourceExampleEventEntity> byExampleIdAndType = resourceExampleEventDAO.findByExampleIdAndType(id, NotifyEventType.RESOUECE_EXAMPLE_SUCCESSFUL);
+        if(CollectionUtils.isEmpty(byExampleIdAndType)){
+            // 创建回调
+            boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
+            log.info("任务正常停止信息：{}, 回调结果: {}", id, complete);
+            // 记录事件
+
+            resourceExampleEventMapper.insert(new ResourceExampleEventEntity()
+                    .setContext("{}")
+                    .setResourceExampleId(id)
+                    .setType(NotifyEventType.RESOUECE_EXAMPLE_SUCCESSFUL.getCode()));
+        }
     }
 
     @Override
