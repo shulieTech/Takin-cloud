@@ -73,6 +73,8 @@ public class JobExampleServiceImpl implements JobExampleService {
             .setJobExampleId(id)
             .setType(NotifyEventType.JOB_EXAMPLE_START.getCode())
         );
+        //启动后触发心跳 防止超时
+        onHeartbeat(id);
     }
 
     @Override
