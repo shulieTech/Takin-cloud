@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.app.controller.notify;
 
 import java.util.Map;
 
+import io.shulie.takin.cloud.model.request.ResourceExampleInfoRequest;
 import lombok.extern.slf4j.Slf4j;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -91,15 +92,15 @@ public class ResourceExampleController {
      * 资源实例信息和异常上报
      *
      * @param id      资源实例主键
-     * @param content 上报的信息内容
+     * @param request 上报的信息内容
      * @return -
      */
     @PostMapping("infoAndError")
     @Operation(summary = "信息和异常上报")
     public ApiResult<Object> infoAndError(@Parameter(description = "资源实例主键", required = true) @RequestParam Long id,
-        @Parameter(description = "资源实例信息", required = true) @RequestBody Map<String, Object> content) {
+        @Parameter(description = "资源实例信息", required = true) @RequestBody ResourceExampleInfoRequest request) {
         // 上报信息
-        resourceExampleService.onInfo(id, content);
+        resourceExampleService.onInfo(id, request);
         return ApiResult.success();
     }
 }

@@ -29,6 +29,7 @@ public enum CallbackType {
     JOB_EXAMPLE_START(201, "任务实例启动"),
     JOB_EXAMPLE_STOP(202, "任务实例停止"),
     JOB_EXAMPLE_ERROR(203, "任务实例异常"),
+    JOB_EXAMPLE_SUCCESSFUL(204, "任务实例正常停止"),
     SLA(301, "触发SLA"),
     EXCESS_JOB(302, "额外的任务"),
     FILE_USAGE(303, "文件用量"),
