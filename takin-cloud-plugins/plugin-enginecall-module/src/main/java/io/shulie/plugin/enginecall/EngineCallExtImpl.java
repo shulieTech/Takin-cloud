@@ -226,7 +226,17 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         param.put("takinCloudCallbackUrl", console + "/api/engine/callback");
         // 解决 单个pod ,但文件处于需要切割分类状态的bug
         param.put("podCount", scheduleStartRequest.getTotalIp());
-        param.put("fileSets", scheduleStartRequest.getDataFile());
+        //补充csv文件路径
+        List<ScheduleStartRequestExt.DataFile> dataFiles = scheduleStartRequest.getDataFile();
+        if (CollectionUtils.isNotEmpty(dataFiles)) {
+            dataFiles = dataFiles.stream().map(dataFile -> {
+                if(StringUtils.indexOf(dataFile.getPath(), "/") != 0){
+                    dataFile.setPath(scriptPath + "/" + dataFile.getPath());
+                }
+                return dataFile;
+            }).collect(Collectors.toList());
+        }
+        param.put("fileSets", dataFiles);
         param.put("businessMap", GsonUtil.gsonToString(scheduleStartRequest.getBusinessData()));
         param.put("memSetting", pressureEngineMemSetting);
         configMap.put("engine.conf", param.toJSONString());
