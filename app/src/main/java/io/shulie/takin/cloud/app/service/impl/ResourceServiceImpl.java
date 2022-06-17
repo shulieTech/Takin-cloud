@@ -179,7 +179,7 @@ public class ResourceServiceImpl implements ResourceService {
             result.setStatusTime(status.getTime().getTime());
             if (NotifyEventType.RESOUECE_EXAMPLE_START.getCode().equals(type)) {
                 result.setStatus(ResourceExampleStatus.STARTED);
-            } else if (NotifyEventType.RESOUECE_EXAMPLE_STOP.getCode().equals(type)) {
+            } else if (NotifyEventType.RESOUECE_EXAMPLE_STOP.getCode().equals(type) || NotifyEventType.RESOUECE_EXAMPLE_SUCCESSFUL.getCode().equals(type)) {
                 result.setStatus(ResourceExampleStatus.STOPED);
             } else if (NotifyEventType.RESOUECE_EXAMPLE_ERROR.getCode().equals(type)) {
                 result.setStatus(ResourceExampleStatus.ABNORMAL);
