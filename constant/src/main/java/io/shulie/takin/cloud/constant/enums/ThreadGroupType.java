@@ -42,7 +42,7 @@ public enum ThreadGroupType {
     /**
      * 流量调试
      */
-    FLOW_DEBUG(403, "流量调试", 3, 0),
+    FLOW_DEBUG(403, "流量调试", 3, 1),
     /**
      * 巡检模式
      */
