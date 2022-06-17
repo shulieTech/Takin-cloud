@@ -122,7 +122,7 @@ public class SlaServiceImpl implements SlaService {
                     result.add(new SlaEventEntity()
                         .setJobId(jobId)
                         .setNumber(compareResult)
-                        .setRef(condition.getRef())
+                        .setRef(metricsInfo.getTransaction())
                         .setSlaId(condition.getId())
                         .setJobExampleId(jobExampleId)
                         .setAttach(condition.getAttach())
