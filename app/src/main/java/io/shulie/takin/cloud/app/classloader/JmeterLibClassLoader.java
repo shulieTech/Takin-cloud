@@ -113,7 +113,6 @@ public class JmeterLibClassLoader extends URLClassLoader {
             e.printStackTrace();
         }
         loadedClasses.clear();
-        loadedClasses = null;
         INSTANCE = null;
     }
 

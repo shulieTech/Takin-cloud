@@ -114,8 +114,9 @@ public class ScriptServiceImpl implements ScriptService {
             }
         }
         HashTree hashTree;
-        try {
-            synchronized (lockObj) {
+        synchronized (lockObj) {
+            try {
+
                 //加载插件
                 installPlugin(pluginFiles);
                 //读取脚本内容&校验基础脚本
@@ -131,12 +132,12 @@ public class ScriptServiceImpl implements ScriptService {
                 if (!javaFlag) {
                     return ApiResult.fail("JavaSampler校验失败，请检查配置项[classname]依赖的插件是否上传");
                 }
+            } finally {
+                //卸载插件
                 unInstallPlugin();
             }
-        } finally {
-            //卸载插件
-            unInstallPlugin();
         }
+
         //校验CsvDataSet
         List<String> csvConfigs = new ArrayList<>();
         if (StringUtils.isNotBlank(scriptCheckRequest.getScriptPath())) {
@@ -195,7 +196,6 @@ public class ScriptServiceImpl implements ScriptService {
 
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
         }
         return false;
     }
