@@ -101,7 +101,9 @@ public class ScriptServiceImpl implements ScriptService {
             List<File> pluginFiles = new ArrayList<>();
             for (String plugin : plugins) {
                 if (StringUtils.startsWith(plugin, "/")) {
-                    return ApiResult.fail("插件路径应该为相对路径");
+                    //过滤压测引擎里面的插件 这个插件已经传到项目中了
+                    continue;
+//                    return ApiResult.fail("插件路径应该为相对路径");
                 }
                 String pluginPath = StringUtils.trim(new StringBuilder().append(nfsPath).append("/").append(plugin).toString());
                 File pluginFile = new File(pluginPath);
