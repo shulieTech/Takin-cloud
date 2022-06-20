@@ -150,7 +150,7 @@ public class ScriptServiceImpl implements ScriptService {
             //卸载插件
             unInstallPlugin();
         }
-        return ApiResult.fail("脚本验证成功");
+        return ApiResult.success("脚本验证成功");
     }
 
     private boolean chekBeanShell(HashTree hashTree) {
