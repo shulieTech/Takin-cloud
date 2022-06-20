@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.*;
-import java.util.ArrayList;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
@@ -24,8 +24,8 @@ import java.util.jar.JarFile;
 public class AppParentClassLoader extends URLClassLoader {
 
     private static AppParentClassLoader INSTANCE;
-    private static ClassLoader webappClassLoader;
-    private ThreadLocal<List<JarURLConnection>> cachedJarFiles = new ThreadLocal<>();
+    private static ClassLoader webappClassLoader = AppParentClassLoader.class.getClassLoader();
+    private static ClassLoader webParentClassLoader = AppParentClassLoader.class.getClassLoader().getParent();
 
     public AppParentClassLoader() {
         super(new URL[0], AppParentClassLoader.class.getClassLoader().getParent());
@@ -37,8 +37,6 @@ public class AppParentClassLoader extends URLClassLoader {
                 if (INSTANCE == null) { // 二重检查
                     INSTANCE = new AppParentClassLoader();
                     try {
-                        INSTANCE.webappClassLoader = JmeterLibClassLoader.class
-                                .getClassLoader();
                         INSTANCE.addThisToParentClassLoader(INSTANCE.webappClassLoader);
                     } catch (Exception e) {
                         log.error("设置classloader到容器中时出现错误！");
@@ -79,35 +77,8 @@ public class AppParentClassLoader extends URLClassLoader {
         }
     }
 
-    public void unload() {
-        if (Objects.isNull(cachedJarFiles.get())) {
-            return;
-        }
-        try {
-            for (JarURLConnection conn : cachedJarFiles.get()) {
-                conn.getJarFile().close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void addURL(URL url) {
         log.debug("Add '{}'", url);
-        try {
-            // 打开并缓存文件url连接
-            URLConnection uc = url.openConnection();
-            if (uc instanceof JarURLConnection) {
-                uc.setUseCaches(true);
-                ((JarURLConnection) uc).getManifest();
-                if (Objects.isNull(cachedJarFiles.get())) {
-                    cachedJarFiles.set(new ArrayList<>());
-                }
-                cachedJarFiles.get().add((JarURLConnection) uc);
-            }
-        } catch (IOException e) {
-            log.error("classloader add url exception:{}", e.getMessage());
-        }
         super.addURL(url);
     }
 
@@ -118,7 +89,7 @@ public class AppParentClassLoader extends URLClassLoader {
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        Class<?> clazz = findLoadedClass(name);
+        Class<?> clazz = null;
         if (clazz == null) {
             try {
                 clazz = this.getParent().loadClass(name);
@@ -130,6 +101,19 @@ public class AppParentClassLoader extends URLClassLoader {
             }
         }
         return clazz;
+    }
+
+    public void reset() {
+        if (Objects.nonNull(INSTANCE)) {
+            try {
+                Field field = ClassLoader.class.getDeclaredField("parent");
+                field.setAccessible(true);
+                field.set(webappClassLoader, webParentClassLoader);
+            } catch (Exception e) {
+                log.error("设置classloader到容器中时出现错误！");
+            }
+        }
+        INSTANCE = null;
     }
 
     private void addThisToParentClassLoader(ClassLoader classLoader) throws Exception {

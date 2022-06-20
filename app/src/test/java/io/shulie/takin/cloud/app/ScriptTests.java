@@ -4,22 +4,21 @@ import cn.hutool.core.collection.CollectionUtil;
 import io.shulie.takin.cloud.app.classloader.AppParentClassLoader;
 import io.shulie.takin.cloud.app.classloader.JmeterLibClassLoader;
 import io.shulie.takin.cloud.app.service.jmeter.SaveService;
-import org.apache.jmeter.config.CSVDataSet;
+import io.shulie.takin.cloud.constant.JmeterPluginsConstant;
 import org.apache.jmeter.modifiers.BeanShellPreProcessor;
 import org.apache.jmeter.threads.JMeterVariables;
-import org.apache.jmeter.util.BeanShellInterpreter;
 import org.apache.jorphan.collections.HashTree;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -32,27 +31,27 @@ import java.util.Objects;
 @SpringBootTest
 public class ScriptTests {
     private static final Logger log = LoggerFactory.getLogger(ScriptTests.class);
-    @Resource
-    private JmeterLibClassLoader jmeterLibClassLoader;
-    @Resource
-    private JmeterLibClassLoader jmeterParentClassLoader;
 
     @Test
-    public void loadJmeterProperties(){
-
+    public void loadJmeterProperties() {
         ArrayList<File> files = new ArrayList<>();
+        for (Map.Entry<String, File> fileEntry : JmeterPluginsConstant.localPluginFiles.entrySet()) {
+            files.add(fileEntry.getValue());
+        }
         files.add(new File("/Users/phine/data/plugins/jmeter-plugins-height.jar"));
         files.add(new File("/Users/phine/data/plugins/score-plugin.jar"));
         files.add(new File("/Users/phine/data/plugins/plugin-common-1.0-SNAPSHOT.jar"));
-        files.add(new File("/Users/phine/Downloads/生成二维码/chksum.jar"));
+        files.add(new File("/Users/phine/data/nfs_dir/scriptfile/111/chksum.jar"));
 //        files.add(new File("/Users/phine/data/plugins/ApacheJMeter_core.jar"));
 
-        jmeterLibClassLoader.loadJars(files);
+        JmeterLibClassLoader libClassLoader = JmeterLibClassLoader.getInstance();
+        libClassLoader.loadJars(files);
         AppParentClassLoader instance = AppParentClassLoader.getInstance();
         instance.loadJars(files);
 
 
-        String jmxFile ="/Users/phine/Downloads/生成二维码/生成二维码.jmx";
+//        String jmxFile ="/usr/local/apache-jmeter-5.4.1/jmx/kafka2.5.1.jmx";
+        String jmxFile = "/Users/phine/data/nfs_dir/scriptfile/111/生成二维码.jmx";
 //        String jmxFile ="/usr/local/apache-jmeter-5.4.1/jmx/PID2.jmx";
         try {
             HashTree hashTree = SaveService.loadTree(new File(jmxFile));
@@ -92,12 +91,12 @@ public class ScriptTests {
         }
     }
 
-    private <T> void getHashTreeValue(HashTree hashTree, Class<T> t, List<T> objs){
+    private <T> void getHashTreeValue(HashTree hashTree, Class<T> t, List<T> objs) {
         for (Object o : hashTree.keySet()) {
-            if(Objects.equals(o.getClass().getName(), t.getName())){
-                objs.add((T)o);
+            if (Objects.equals(o.getClass().getName(), t.getName())) {
+                objs.add((T) o);
             }
-            if(CollectionUtil.isNotEmpty(hashTree.get(o))) {
+            if (CollectionUtil.isNotEmpty(hashTree.get(o))) {
                 getHashTreeValue(hashTree.get(o), t, objs);
             }
         }

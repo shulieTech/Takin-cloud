@@ -1,12 +1,12 @@
 package io.shulie.takin.cloud.app.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.io.FileUtil;
 import io.shulie.takin.cloud.app.classloader.AppParentClassLoader;
 import io.shulie.takin.cloud.app.classloader.JmeterLibClassLoader;
 import io.shulie.takin.cloud.app.service.ScriptService;
 import io.shulie.takin.cloud.app.service.jmeter.SaveService;
 import io.shulie.takin.cloud.app.util.JmeterScriptUtil;
+import io.shulie.takin.cloud.constant.JmeterPluginsConstant;
 import io.shulie.takin.cloud.model.request.ScriptBuildRequest;
 import io.shulie.takin.cloud.model.request.ScriptCheckRequest;
 import io.shulie.takin.cloud.model.response.ApiResult;
@@ -17,23 +17,21 @@ import org.apache.jmeter.modifiers.BeanShellPreProcessor;
 import org.apache.jmeter.protocol.java.sampler.JavaSampler;
 import org.apache.jmeter.threads.JMeterVariables;
 import org.apache.jorphan.collections.HashTree;
-import org.checkerframework.checker.units.qual.A;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
-import org.dom4j.DocumentType;
 import org.dom4j.Element;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * ClassName:    ScriptServiceImpl
@@ -49,8 +47,7 @@ public class ScriptServiceImpl implements ScriptService {
     @Value("${watchman.nfs-path}")
     private String nfsPath;
 
-    @Resource
-    private JmeterLibClassLoader jmeterLibClassLoader;
+    private static Object lockObj = new Object();
 
     @Override
     public String buildJmeterScript(ScriptBuildRequest scriptRequest) {
@@ -95,62 +92,71 @@ public class ScriptServiceImpl implements ScriptService {
             return ApiResult.fail(String.format("脚本不存在，请检测脚本路径：%s", path));
         }
         //检测是否有插件
+        List<File> pluginFiles = new ArrayList<>();
         if (StringUtils.isNotBlank(scriptCheckRequest.getPluginPaths())) {
             //加载插件
             String[] plugins = scriptCheckRequest.getPluginPaths().split(",");
-            List<File> pluginFiles = new ArrayList<>();
             for (String plugin : plugins) {
+                File pluginFile;
                 if (StringUtils.startsWith(plugin, "/")) {
-                    //过滤压测引擎里面的插件 这个插件已经传到项目中了
-                    continue;
-//                    return ApiResult.fail("插件路径应该为相对路径");
-                }
-                String pluginPath = StringUtils.trim(new StringBuilder().append(nfsPath).append("/").append(plugin).toString());
-                File pluginFile = new File(pluginPath);
-                if (!pluginFile.exists()) {
-                    return ApiResult.fail(String.format("插件不存在，请检测插件路径：%s", pluginPath));
+                    String name = plugin.substring(plugin.lastIndexOf("/") + 1);
+                    pluginFile = JmeterPluginsConstant.localPluginFiles.getOrDefault(name, null);
+                    if (Objects.isNull(pluginFile)) {
+                        continue;
+                    }
+                } else {
+                    String pluginPath = StringUtils.trim(new StringBuilder().append(nfsPath).append("/").append(plugin).toString());
+                    pluginFile = new File(pluginPath);
+                    if (!pluginFile.exists()) {
+                        return ApiResult.fail(String.format("插件不存在，请检测插件路径：%s", pluginPath));
+                    }
                 }
                 pluginFiles.add(pluginFile);
             }
-            installPlugin(pluginFiles);
         }
+        HashTree hashTree;
         try {
-            //读取脚本内容&校验基础脚本
-            HashTree hashTree = SaveService.loadTree(jmxFile);
-            //校验BeanShell
-            boolean shellFlag = chekBeanShell(hashTree);
-            if (!shellFlag) {
-                return ApiResult.fail("BeanShell校验失败，请检查相关依赖的插件是否上传");
-            }
-
-            //校验JavaSampler
-            boolean javaFlag = chekJavaSampler(hashTree);
-            if (!javaFlag) {
-                return ApiResult.fail("JavaSampler校验失败，请检查配置项[classname]依赖的插件是否上传");
-            }
-            //校验CsvDataSet
-            List<String> csvConfigs = new ArrayList<>();
-            if (StringUtils.isNotBlank(scriptCheckRequest.getScriptPath())) {
-                String[] temps = scriptCheckRequest.getCsvPaths().split(",");
-                for (String csvPath : temps) {
-                    if (StringUtils.startsWith(csvPath, "/")) {
-                        return ApiResult.fail("CSV文件路径应该为相对路径");
-                    }
-                    csvPath = StringUtils.trimToEmpty(new StringBuilder().append(nfsPath).append("/").append(csvPath).toString());
-                    File csvFile = new File(csvPath);
-                    if (!csvFile.exists()) {
-                        return ApiResult.fail(String.format("CSV文件不存在，请检测CSV文件路径：%s", csvPath));
-                    }
-                    csvConfigs.add(csvPath);
+            synchronized (lockObj) {
+                //加载插件
+                installPlugin(pluginFiles);
+                //读取脚本内容&校验基础脚本
+                hashTree = SaveService.loadTree(jmxFile);
+                //校验BeanShell
+                boolean shellFlag = chekBeanShell(hashTree);
+                if (!shellFlag) {
+                    return ApiResult.fail("BeanShell校验失败，请检查相关依赖的插件是否上传");
                 }
+
+                //校验JavaSampler
+                boolean javaFlag = chekJavaSampler(hashTree);
+                if (!javaFlag) {
+                    return ApiResult.fail("JavaSampler校验失败，请检查配置项[classname]依赖的插件是否上传");
+                }
+                unInstallPlugin();
             }
-            boolean csvFlag = chekCsvDataSet(hashTree, csvConfigs);
-            if (!csvFlag) {
-                return ApiResult.fail("csv校验失败，请检查相关csv文件是否上传");
-            }
-        }finally {
+        } finally {
             //卸载插件
             unInstallPlugin();
+        }
+        //校验CsvDataSet
+        List<String> csvConfigs = new ArrayList<>();
+        if (StringUtils.isNotBlank(scriptCheckRequest.getScriptPath())) {
+            String[] temps = scriptCheckRequest.getCsvPaths().split(",");
+            for (String csvPath : temps) {
+                if (StringUtils.startsWith(csvPath, "/")) {
+                    return ApiResult.fail("CSV文件路径应该为相对路径");
+                }
+                csvPath = StringUtils.trimToEmpty(new StringBuilder().append(nfsPath).append("/").append(csvPath).toString());
+                File csvFile = new File(csvPath);
+                if (!csvFile.exists()) {
+                    return ApiResult.fail(String.format("CSV文件不存在，请检测CSV文件路径：%s", csvPath));
+                }
+                csvConfigs.add(csvPath);
+            }
+        }
+        boolean csvFlag = chekCsvDataSet(hashTree, csvConfigs);
+        if (!csvFlag) {
+            return ApiResult.fail("csv校验失败，请检查相关csv文件是否上传");
         }
         return ApiResult.success("脚本验证成功");
     }
@@ -184,6 +190,10 @@ public class ScriptServiceImpl implements ScriptService {
                 //校验script
                 eval.invoke(o, script);
             }
+
+            //清除class
+            //bsh.BshClassManager
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -207,7 +217,7 @@ public class ScriptServiceImpl implements ScriptService {
                 //提取class
                 String clazz = javaSampler.getProperty("classname").toString();
                 //校验
-                Class.forName(clazz, false, jmeterLibClassLoader);
+                Class.forName(clazz, false, JmeterLibClassLoader.getInstance());
             }
             return true;
         } catch (Exception e) {
@@ -286,7 +296,8 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     private void installPlugin(List<File> pluginFiles) {
-        jmeterLibClassLoader.loadJars(pluginFiles);
+        if (CollectionUtils.isEmpty(pluginFiles)) return;
+        JmeterLibClassLoader.getInstance().loadJars(pluginFiles);
         AppParentClassLoader instance = AppParentClassLoader.getInstance();
         instance.loadJars(pluginFiles);
     }
@@ -295,7 +306,8 @@ public class ScriptServiceImpl implements ScriptService {
      * 卸载插件
      */
     private void unInstallPlugin() {
-        jmeterLibClassLoader.unload();
-        AppParentClassLoader.getInstance().unload();
+//        jmeterLibClassLoader.unload();
+        JmeterLibClassLoader.getInstance().reset();
+        AppParentClassLoader.getInstance().reset();
     }
 }
