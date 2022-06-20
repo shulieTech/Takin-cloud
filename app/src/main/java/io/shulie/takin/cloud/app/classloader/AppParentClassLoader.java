@@ -106,6 +106,7 @@ public class AppParentClassLoader extends URLClassLoader {
     public void reset() {
         if (Objects.nonNull(INSTANCE)) {
             try {
+                super.close();
                 Field field = ClassLoader.class.getDeclaredField("parent");
                 field.setAccessible(true);
                 field.set(webappClassLoader, webParentClassLoader);

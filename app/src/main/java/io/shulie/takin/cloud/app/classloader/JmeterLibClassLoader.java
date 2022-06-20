@@ -107,6 +107,11 @@ public class JmeterLibClassLoader extends URLClassLoader {
     }
 
     public void reset() {
+        try {
+            super.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         loadedClasses.clear();
         loadedClasses = null;
         INSTANCE = null;

@@ -72,7 +72,7 @@ dependencies {
     implementation 'commons-io:commons-io:2.7'
 
     //JmeterLib
-    implementation 'org.beanshell:bsh-core:2.0b4'
+    implementation 'org.apache-extras.beanshell:bsh:2.0b6'
     implementation 'com.google.guava:guava:30.1-jre'
     implementation fileTree(dir: 'src/main/resources/jmeter/lib', includes: ['*.jar'])
     implementation fileTree(dir: 'src/main/resources/jmeter/lib/ext', includes: ['*.jar'])
