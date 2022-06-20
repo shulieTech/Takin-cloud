@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.model.callback.Sla;
@@ -34,6 +35,7 @@ import io.shulie.takin.cloud.app.service.mapper.SlaEventMapperService;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
+@Slf4j
 public class SlaServiceImpl implements SlaService {
     @javax.annotation.Resource
     JobService jobService;
@@ -97,7 +99,9 @@ public class SlaServiceImpl implements SlaService {
         sla.setCallbackTime(new Date());
         sla.setData(slaInfoList);
         String slaString = jsonService.writeValueAsString(sla);
-        callbackService.create(jobEntity.getCallbackUrl(), CharSequenceUtil.utf8Bytes(slaString));
+        // 创建回调
+        boolean complete = callbackService.callback(null, jobEntity.getCallbackUrl(), slaString);
+        log.info("SLA触发：{}, 回调结果: {}", slaString, complete);
     }
 
     @Override
