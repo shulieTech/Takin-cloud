@@ -140,7 +140,7 @@ public class ScriptServiceImpl implements ScriptService {
 
         //校验CsvDataSet
         List<String> csvConfigs = new ArrayList<>();
-        if (StringUtils.isNotBlank(scriptCheckRequest.getScriptPath())) {
+        if (StringUtils.isNotBlank(scriptCheckRequest.getCsvPaths())) {
             String[] temps = scriptCheckRequest.getCsvPaths().split(",");
             for (String csvPath : temps) {
                 if (StringUtils.startsWith(csvPath, "/")) {
