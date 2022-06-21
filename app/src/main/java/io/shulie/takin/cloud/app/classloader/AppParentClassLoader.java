@@ -89,7 +89,7 @@ public class AppParentClassLoader extends URLClassLoader {
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        Class<?> clazz = null;
+        Class<?> clazz = findLoadedClass(name);
         if (clazz == null) {
             try {
                 clazz = this.getParent().loadClass(name);

@@ -171,7 +171,7 @@ public class ScriptServiceImpl implements ScriptService {
             }
 
             Class<?> aClass = Class.forName("org.apache.jmeter.util.BeanShellInterpreter", false, this.getClass().getClassLoader());
-            Object o = aClass.getDeclaredConstructor().newInstance();
+            Object o = aClass.newInstance();
             //环境设置
             Method set = aClass.getDeclaredMethod("set", String.class, Object.class);
             set.setAccessible(true);
@@ -188,6 +188,7 @@ public class ScriptServiceImpl implements ScriptService {
                 //提取beanShell中的script
                 String script = shell.getProperty("script").getStringValue();
                 //校验script
+                Thread.currentThread().setContextClassLoader(AppParentClassLoader.getInstance());
                 eval.invoke(o, script);
             }
 
@@ -296,7 +297,8 @@ public class ScriptServiceImpl implements ScriptService {
 
     private void installPlugin(List<File> pluginFiles) {
         if (CollectionUtils.isEmpty(pluginFiles)) return;
-        JmeterLibClassLoader.getInstance().loadJars(pluginFiles);
+        JmeterLibClassLoader libClassLoader = JmeterLibClassLoader.getInstance();
+        libClassLoader.loadJars(pluginFiles);
         AppParentClassLoader instance = AppParentClassLoader.getInstance();
         instance.loadJars(pluginFiles);
     }
@@ -305,7 +307,6 @@ public class ScriptServiceImpl implements ScriptService {
      * 卸载插件
      */
     private void unInstallPlugin() {
-//        jmeterLibClassLoader.unload();
         JmeterLibClassLoader.getInstance().reset();
         AppParentClassLoader.getInstance().reset();
     }

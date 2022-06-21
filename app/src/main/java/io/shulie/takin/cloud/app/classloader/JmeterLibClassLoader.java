@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -24,11 +22,12 @@ import java.util.jar.JarFile;
 public class JmeterLibClassLoader extends URLClassLoader {
     private Map<String, Class<?>> loadedClasses;
     private static JmeterLibClassLoader INSTANCE;
-    private static ClassLoader webappClassLoader;
+    private ClassLoader parent;
 
     private JmeterLibClassLoader() {
         super(new URL[0], JmeterLibClassLoader.class.getClassLoader());
         this.loadedClasses = new HashMap<>();
+        this.parent = JmeterLibClassLoader.class.getClassLoader();
     }
 
     public static JmeterLibClassLoader getInstance() {
@@ -36,12 +35,6 @@ public class JmeterLibClassLoader extends URLClassLoader {
             synchronized (JmeterLibClassLoader.class) {
                 if (INSTANCE == null) { // 二重检查
                     INSTANCE = new JmeterLibClassLoader();
-                    try {
-                        webappClassLoader = JmeterLibClassLoader.class
-                                .getClassLoader();
-                    } catch (Exception e) {
-                        log.error("设置classloader到容器中时出现错误！");
-                    }
                 }
             }
         }
@@ -68,7 +61,8 @@ public class JmeterLibClassLoader extends URLClassLoader {
                     if (name.endsWith(".class") && name.indexOf("$") == -1) {//只解析了.class文件，没有解析里面的jar包
                         //默认去系统已经定义的路径查找对象，针对外部jar包不能用
                         try {
-                            this.loadClass(name.replace("/", ".").substring(0, name.length() - 6));//自己定义的loader路径可以找到
+                            String clazzName = name.replace("/", ".").substring(0, name.length() - 6);
+                            this.loadClass(clazzName);//自己定义的loader路径可以找到
                         } catch (Error e) {
 //                            log.error(e.getMessage());
                         } catch (ClassNotFoundException e) {
@@ -94,11 +88,10 @@ public class JmeterLibClassLoader extends URLClassLoader {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
-
         if (loadedClasses.containsKey(name)) {
             return loadedClasses.get(name);
         }
-        Class clazz = null;
+        Class clazz = findLoadedClass(name);
         if (Objects.isNull(clazz)) {
             clazz = super.loadClass(name, resolve);
         }
