@@ -5,6 +5,7 @@ import io.shulie.takin.cloud.app.classloader.AppParentClassLoader;
 import io.shulie.takin.cloud.app.classloader.JmeterLibClassLoader;
 import io.shulie.takin.cloud.app.service.jmeter.SaveService;
 import io.shulie.takin.cloud.constant.JmeterPluginsConstant;
+import org.apache.jmeter.extractor.json.jsonpath.JSONManager;
 import org.apache.jmeter.modifiers.BeanShellPreProcessor;
 import org.apache.jmeter.threads.JMeterVariables;
 import org.apache.jorphan.collections.HashTree;
@@ -34,6 +35,7 @@ public class ScriptTests {
 
     @Test
     public void loadJmeterProperties() {
+        JSONManager
         ArrayList<File> files = new ArrayList<>();
         for (Map.Entry<String, File> fileEntry : JmeterPluginsConstant.localPluginFiles.entrySet()) {
             files.add(fileEntry.getValue());

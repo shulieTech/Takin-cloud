@@ -75,7 +75,7 @@ dependencies {
     implementation 'org.apache-extras.beanshell:bsh:2.0b6'
     implementation 'com.google.guava:guava:30.1-jre'
     implementation fileTree(dir: 'src/main/resources/jmeter/lib', includes: ['*.jar'])
-    implementation fileTree(dir: 'src/main/resources/jmeter/lib/ext', includes: ['*.jar'])
+//    implementation fileTree(dir: 'src/main/resources/jmeter/lib/ext', includes: ['*.jar'])
 //    implementation fileTree(dir: 'src/main/resources/jmeter/lib/plugins', includes: ['*.jar']).exclude {details ->
 //        (!details.file.canonicalPath.contains('slf4j') && !details.file.canonicalPath.contains('gson'))}
 
