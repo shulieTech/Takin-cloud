@@ -35,7 +35,6 @@ public class ScriptTests {
 
     @Test
     public void loadJmeterProperties() {
-        JSONManager
         ArrayList<File> files = new ArrayList<>();
         for (Map.Entry<String, File> fileEntry : JmeterPluginsConstant.localPluginFiles.entrySet()) {
             files.add(fileEntry.getValue());
