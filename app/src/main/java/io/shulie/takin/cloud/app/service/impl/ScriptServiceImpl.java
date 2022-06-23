@@ -188,8 +188,10 @@ public class ScriptServiceImpl implements ScriptService {
                 //提取beanShell中的script
                 String script = shell.getProperty("script").getStringValue();
                 //校验script
+                ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
                 Thread.currentThread().setContextClassLoader(AppParentClassLoader.getInstance());
                 eval.invoke(o, script);
+                Thread.currentThread().setContextClassLoader(contextClassLoader);
             }
 
             //清除class
