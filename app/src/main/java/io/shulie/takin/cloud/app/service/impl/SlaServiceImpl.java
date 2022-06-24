@@ -156,7 +156,7 @@ public class SlaServiceImpl implements SlaService {
                 targetValue = info.getRt();
                 break;
             case SA:
-                targetValue = (info.getSaCount() * 1.0) / info.getCount();
+                targetValue = ((info.getSaCount() * 1.0) / info.getCount()) * 100;
                 break;
             case TPS:
                 targetValue = (info.getCount() * 1.0) / 5;
