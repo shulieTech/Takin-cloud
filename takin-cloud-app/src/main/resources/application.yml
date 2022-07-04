@@ -38,8 +38,10 @@ spring:
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
 
   redis:
-    host: ${resource.redis.host:127.0.0.1}
-    port: ${resource.redis.port:6379}
+    cluster:
+      nodes: 192.168.1.157:6379,192.168.1.157:6380,192.168.1.157:6381,192.168.1.44:6379,192.168.1.44:6380,192.168.1.44:6381,192.168.1.84:6379,192.168.1.84:6380,192.168.1.84:6381
+#    host: ${resource.redis.host:127.0.0.1}
+#    port: ${resource.redis.port:6379}
     password: pamirs@2020
     timeout: 10000
     jedis:

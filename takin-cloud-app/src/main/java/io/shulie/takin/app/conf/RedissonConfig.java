@@ -1,13 +1,18 @@
 package io.shulie.takin.app.conf;
 
+import java.util.List;
+import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
+import org.redisson.config.ClusterServersConfig;
 import org.redisson.config.Config;
 import org.redisson.config.SentinelServersConfig;
 import org.redisson.config.SingleServerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties.Cluster;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties.Sentinel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,12 +50,25 @@ public class RedissonConfig {
             sentinelServersConfig.setCheckSentinelsList(false);
             return Redisson.create(config);
         }
-
-        SingleServerConfig singleServerConfig = config.useSingleServer();
-        singleServerConfig.setAddress(String.format("redis://%s:%s", redisProperties.getHost(), redisProperties.getPort()))
-            .setDatabase(redisProperties.getDatabase());
-        if (StringUtils.isNotBlank(redisProperties.getPassword())) {
-            singleServerConfig.setPassword(redisProperties.getPassword());
+        if (Objects.nonNull(redisProperties.getCluster())){
+            ClusterServersConfig clusterServersConfig = config.useClusterServers();
+            Cluster cluster = redisProperties.getCluster();
+            List<String> nodes = cluster.getNodes();
+            nodes.stream().filter(Objects::nonNull)
+                    .forEach(node ->{
+                        clusterServersConfig.addNodeAddress(String.format("redis://%s", node));
+                    });
+            if (StringUtils.isNotBlank(redisProperties.getPassword())) {
+                clusterServersConfig.setPassword(redisProperties.getPassword());
+            }
+        }else {
+            SingleServerConfig singleServerConfig = config.useSingleServer();
+            singleServerConfig.setAddress(
+                    String.format("redis://%s:%s", redisProperties.getHost(), redisProperties.getPort()))
+                .setDatabase(redisProperties.getDatabase());
+            if (StringUtils.isNotBlank(redisProperties.getPassword())) {
+                singleServerConfig.setPassword(redisProperties.getPassword());
+            }
         }
         return Redisson.create(config);
     }

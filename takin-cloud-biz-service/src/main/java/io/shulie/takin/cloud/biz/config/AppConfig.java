@@ -51,10 +51,13 @@ public class AppConfig {
     @Value("${report.data.holdRealThreadNum:true}")
     private Boolean holdRealThreadNum;
 
-    @Value("${spring.redis.host}")
+    @Value("${spring.redis.host:}")
     private String engineRedisAddress;
 
-    @Value("${spring.redis.port}")
+    @Value("${spring.redis.cluster.nodes:}")
+    private String engineRedisClusterAddress;
+
+    @Value("${spring.redis.port:}")
     private String engineRedisPort;
 
     @Value("${spring.redis.sentinel.nodes:}")
