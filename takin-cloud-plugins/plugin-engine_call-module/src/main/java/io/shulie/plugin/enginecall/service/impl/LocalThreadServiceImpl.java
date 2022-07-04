@@ -1,10 +1,7 @@
 package io.shulie.plugin.enginecall.service.impl;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -41,9 +38,9 @@ public class LocalThreadServiceImpl implements EngineCallService {
     private StringRedisTemplate stringRedisTemplate;
 
     private final static ExecutorService THREAD_POOL = new ThreadPoolExecutor(1, 6,
-        50L, TimeUnit.MILLISECONDS,
-        new NoLengthBlockingQueue<>(), new ThreadFactoryBuilder()
-        .setNameFormat("local-thread-task-%d").build(), new ThreadPoolExecutor.AbortPolicy());
+            50L, TimeUnit.MILLISECONDS,
+            new NoLengthBlockingQueue<>(), new ThreadFactoryBuilder()
+            .setNameFormat("local-thread-task-%d").build(), new ThreadPoolExecutor.AbortPolicy());
 
     private final ConcurrentHashMap<String, Process> shellProcess = new ConcurrentHashMap<>();
 
@@ -89,24 +86,30 @@ public class LocalThreadServiceImpl implements EngineCallService {
             sb.append(" -f y ");
             log.info("执行压测包，执行命令如下:{}", sb);
             int state = LinuxHelper.runShell(sb.toString(), null,
-                new LinuxHelper.Callback() {
-                    @Override
-                    public void before(Process process) {
-                        log.info("threadPoolExecutor 开始启动压测引擎");
-                    }
+                    new LinuxHelper.Callback() {
+                        @Override
+                        public void before(Process process) {
+                            log.info("threadPoolExecutor 开始启动压测引擎");
+                            shellProcess.put(jobName, process);
+                        }
 
-                    @Override
-                    public void after(Process process) {
-                        shellProcess.put(jobName, process);
-                    }
+                        @Override
+                        public void after(Process process) {
+                            shellProcess.remove(jobName);
+                        }
 
-                    @Override
-                    public void exception(Process process, Exception e) {
-                        log.error("异常代码【{}】,异常内容：压测引擎启动异常 --> " +
-                            "，异常信息: {}", TakinCloudExceptionEnum.SCHEDULE_START_ERROR, e);
-                    }
-                },
-                message -> log.info("执行返回结果:{}", message)
+                        @Override
+                        public void exception(Process process, Exception e) {
+                            shellProcess.remove(jobName);
+                            if (Objects.nonNull(process)) {
+                                process.destroy();
+                            }
+
+                            log.error("异常代码【{}】,异常内容：压测引擎启动异常 --> " +
+                                    "，异常信息: {}", TakinCloudExceptionEnum.SCHEDULE_START_ERROR, e);
+                        }
+                    },
+                    message -> log.info("执行返回结果:{}", message)
             );
             log.info("jmeter启动" + state);
         });
@@ -116,12 +119,17 @@ public class LocalThreadServiceImpl implements EngineCallService {
 
     @Override
     public void deleteJob(String jobName, String engineRedisKey) {
-        shellProcess.remove(jobName);
+        Process process = shellProcess.remove(jobName);
+        if (Objects.nonNull(process) ) {
+            process.destroyForcibly();
+            String cmd = "ps -ef | grep \"io.shulie.flpt.pressure.engine.Bootstrap\" | grep -v grep | awk '{print $1}' | xargs kill -2";
+            LinuxHelper.runShell(cmd, null, null, null);
+        }
     }
 
     @Override
     public void createConfigMap(Map<String, Object> configMap, String engineRedisKey) {
-        String fileName = (String)configMap.get("name");
+        String fileName = (String) configMap.get("name");
         FileUtils.writeTextFile(JsonHelper.obj2StringPretty(configMap.get("engine.conf")), taskDir + "/" + fileName);
         stringRedisTemplate.opsForHash().put(engineRedisKey, PressureInstanceRedisKey.SecondRedisKey.CONFIG_NAME, fileName);
     }
