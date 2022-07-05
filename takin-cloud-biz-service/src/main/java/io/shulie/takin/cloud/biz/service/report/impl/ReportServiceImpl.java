@@ -226,8 +226,8 @@ public class ReportServiceImpl implements ReportService {
             log.warn("获取报告异常，报告数据不存在。报告ID：{}", reportId);
             return null;
         }
-        //检测消耗流量计算
-        if(Objects.isNull(report.getAmount()) || report.getAmount().intValue() == 0){
+        //report结束后 检测消耗流量计算
+        if(Objects.equals(report.getStatus(), ReportConstants.FINISH_STATUS) && Objects.isNull(report.getAmount()) || report.getAmount().intValue() == 0){
            report = calculateAmountAndUpdate(report);
         }
         ReportDetailOutput detail = ReportConverter.INSTANCE.ofReportDetail(report);
@@ -311,6 +311,9 @@ public class ReportServiceImpl implements ReportService {
                 bill.setAvgThreadNum(avgThreadNum);
                 invoice.setData(bill);
                 log.info("计算流量信息，reportId:{}, time:{}, threads:{}", reportResult.getId(), testRunTime, avgThreadNum);
+                if (Objects.isNull(avgThreadNum) || avgThreadNum.intValue() == 0) {
+                    return reportResult;
+                }
                 Response<BigDecimal> paymentRes = assetExtApi.payment(invoice);
                 if (null != paymentRes && paymentRes.isSuccess()) {
                     reportResult.setAmount(paymentRes.getData());
