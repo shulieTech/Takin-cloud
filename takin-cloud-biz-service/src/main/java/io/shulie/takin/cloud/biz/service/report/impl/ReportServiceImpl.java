@@ -315,6 +315,8 @@ public class ReportServiceImpl implements ReportService {
                     return reportResult;
                 }
                 Response<BigDecimal> paymentRes = assetExtApi.payment(invoice);
+                //取数据库最新的数据
+                reportResult = reportDao.selectById(reportResult.getId());
                 if (null != paymentRes && paymentRes.isSuccess()) {
                     reportResult.setAmount(paymentRes.getData());
                 }
