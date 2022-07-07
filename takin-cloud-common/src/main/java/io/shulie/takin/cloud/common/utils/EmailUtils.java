@@ -11,6 +11,9 @@ import java.util.Properties;
 public class EmailUtils {
     private static SymmetricCrypto des = new SymmetricCrypto(SymmetricAlgorithm.DES, "sgEsnN6QWq8W7j5H01020304".getBytes());
     public static void main(String[] args) {
+        String a = " abc@126.com     \n" +
+                "def@qq6.com";
+        System.out.println(a.replace("\n",",").replace("\t","").replace(" ", ""));
         String s = des.encryptHex("afU3#kh1");
         System.out.println(s);
         String s2 = des.decryptStr(s);
@@ -34,7 +37,7 @@ public class EmailUtils {
         //String password = "afU3#kh1";
         String password = "02b2493b727b31d781d68e7bdfb9ad9b";
 
-        sendEmail(mailHost,username,password,mailTo,mailTittle,mailText);
+//        sendEmail(mailHost,username,password,mailTo,mailTittle,mailText);
     }
 
     public static void sendEmail(String mailHost,String username,String password,String mailTo, String mailTittle, String mailText) {
@@ -65,7 +68,9 @@ public class EmailUtils {
         try {
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(mailFrom));
-            message.setRecipient(Message.RecipientType.TO, new InternetAddress(mailTo));
+            mailTo = mailTo.replace("\n",",").replace("\t","").replace(" ", "");
+            InternetAddress[] internetAddressTo = new InternetAddress().parse(mailTo);
+            message.setRecipients(Message.RecipientType.TO, internetAddressTo);
             message.setSubject(mailTittle);
             message.setContent(mailText, "text/html;charset=UTF-8");
             return message;

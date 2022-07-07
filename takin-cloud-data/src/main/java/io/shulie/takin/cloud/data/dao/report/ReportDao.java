@@ -2,7 +2,9 @@ package io.shulie.takin.cloud.data.dao.report;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import io.shulie.takin.cloud.data.result.statistics.PressureListTotalResult;
 import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.data.model.mysql.ReportEntity;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
@@ -11,6 +13,8 @@ import io.shulie.takin.cloud.data.param.report.ReportUpdateParam;
 import io.shulie.takin.cloud.data.param.report.ReportInsertParam;
 import io.shulie.takin.cloud.data.param.report.ReportUpdateConclusionParam;
 import io.shulie.takin.cloud.data.model.mysql.ReportBusinessActivityDetailEntity;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * @author 无涯
@@ -138,4 +142,12 @@ public interface ReportDao {
     List<ReportEntity> queryReportBySceneIds(List<Long> sceneIds);
 
     List<ReportBusinessActivityDetailEntity> getActivityByReportIds(List<Long> reportIds);
+
+    @Select("<script>" +
+            "SELECT DISTINCT scene.notify_emails from t_warn_detail warn,t_report report ,t_scene_manage scene\n" +
+            "where warn.pt_id = report.id\n" +
+            "and report.scene_id = scene.id\n" +
+            "and warn.pt_id = #{ptId}"
+            + " </script>")
+    List<Map<String,String>> getEmailByPtId(@Param("ptId") Long ptId);
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit;
 
@@ -13,6 +14,8 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.shulie.takin.cloud.common.utils.EmailUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -262,9 +265,24 @@ public class SlaServiceImpl implements SlaService {
 
     private final SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    private void sendMail(WarnDetail warnDetai) {
-        String mailTo = "wuchunjing@shulie.io";
+    public static Cache<String, String> mailCacheLoc = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(100).build();
+    private String getMails(Long warnPtId){
+        String cacheKey = "scene_warn_mail_"+warnPtId;
+        if(!mailCacheLoc.asMap().containsKey(cacheKey)){
+            List<Map<String,String>> list = reportDao.getEmailByPtId(warnPtId);
+            if(list.size()!=0){
+                String emails = list.get(0).get("notify_emails");
+                mailCacheLoc.put(cacheKey, emails);
+            }
+        }
+        return mailCacheLoc.asMap().get(cacheKey);
+    }
 
+    private void sendMail(WarnDetail warnDetai) {
+        String mailTo = getMails(warnDetai.getPtId());
+        if(org.apache.commons.lang.StringUtils.isBlank(mailTo)){
+            return;
+        }
         String mailTittle="压测告警("+sf.format(warnDetai.getWarnTime())+")";
         String mailText = "<!DOCTYPE html>\n" +
                 "<html>\n" +
