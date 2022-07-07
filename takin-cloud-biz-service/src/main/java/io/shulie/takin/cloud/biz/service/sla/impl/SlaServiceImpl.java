@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.biz.service.sla.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
@@ -12,12 +13,14 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
+import io.shulie.takin.cloud.common.utils.EmailUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 
 import com.google.common.collect.Maps;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.CollectionUtils;
@@ -98,7 +101,7 @@ public class SlaServiceImpl implements SlaService {
             log.error("构建sla异常,查找到压测场景异常.{}", JSON.toJSONString(metrics), e);
             return false;
         }
-        SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivity =
+        SceneBusinessActivityRefOutput businessActivity =
             dto.getBusinessActivityConfig()
                 .stream()
                 .filter(data -> metrics.getTransaction().equals(data.getBindRef()))
@@ -148,7 +151,7 @@ public class SlaServiceImpl implements SlaService {
 
     private void doDestroy(Long sceneId, SendMetricsEvent metricsEvent,
         List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList,
-        SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivityDTO) {
+        SceneBusinessActivityRefOutput businessActivityDTO) {
         if (CollectionUtils.isEmpty(slaList)) {
             return;
         }
@@ -209,8 +212,8 @@ public class SlaServiceImpl implements SlaService {
         });
     }
 
-    private void doWarn(SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivityDTO,
-        SendMetricsEvent metricsEvent, List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
+    private void doWarn(SceneBusinessActivityRefOutput businessActivityDTO,
+                        SendMetricsEvent metricsEvent, List<SceneManageWrapperOutput.SceneSlaRefOutput> slaList) {
         if (CollectionUtils.isEmpty(slaList)) {
             return;
         }
@@ -239,11 +242,43 @@ public class SlaServiceImpl implements SlaService {
                 //报告未结束，才insert
                 if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(PREFIX_TASK + metricsEvent.getSceneId()))) {
                     tWarnDetailMapper.insertSelective(warnDetail);
+                    //新增发送告警邮件
+                    sendMail(warnDetail);
                 }
             } else {
                 stringRedisTemplate.opsForHash().put(SLA_WARN_KEY, String.valueOf(dto.getId()), JSON.toJSONString(model));
             }
         });
+    }
+
+    @Value("${warn.mail.host}")
+    private String mailHost;
+
+    @Value("${warn.mail.user}")
+    private String username;
+
+    @Value("${warn.mail.pass}")
+    private String password;
+
+    private final SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    private void sendMail(WarnDetail warnDetai) {
+        String mailTo = "wuchunjing@shulie.io";
+
+        String mailTittle="压测告警("+sf.format(warnDetai.getWarnTime())+")";
+        String mailText = "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "<meta charset=\"utf-8\">\n" +
+                "<title>时间：("+sf.format(warnDetai.getWarnTime())+")</title>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "<h1>报告主键："+warnDetai.getPtId()+"</h1>\n" +
+                "<h1>告警时间："+sf.format(warnDetai.getWarnTime())+"</h1>\n" +
+                "<p style=\"color:red;\">"+warnDetai.getWarnContent()+"</p>\n" +
+                "</body>\n" +
+                "</html>";
+        EmailUtils.sendEmail(mailHost,username,password,mailTo,mailTittle,mailText);
     }
 
     private Boolean matchContinue(AchieveModel model, Long timestamp) {
@@ -266,7 +301,7 @@ public class SlaServiceImpl implements SlaService {
      * @return 告警条件
      */
     private WarnDetail buildWarnDetail(Map<String, Object> conditionMap,
-        SceneManageWrapperOutput.SceneBusinessActivityRefOutput businessActivityDTO,
+        SceneBusinessActivityRefOutput businessActivityDTO,
         SendMetricsEvent metricsEvent,
         SceneManageWrapperOutput.SceneSlaRefOutput slaDto) {
         WarnDetail warnDetail = new WarnDetail();

@@ -1,22 +1,30 @@
 resource:
   mysql:
-    host: 192.168.1.108
+    host: 192.168.1.129
     port: 3306
   redis:
-    host: 192.168.1.108
+    host: 192.168.1.129
     port: 6379
   influxdb:
-    host: 192.168.1.108
+    host: 192.168.1.129
     port: 8086
 
 # zk
 takin:
   pradar:
     zk:
-      server: 192.168.1.131:2181
+      server: 192.168.1.185:2181
 
 
 # mybatis plus
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+# 告警邮件账号配置
+warn:
+  mail:
+    host: 111.22.67.133
+    user: ctp@cmss.chinamobile.com
+    pass: 02b2493b727b31d781d68e7bdfb9ad9b

@@ -197,6 +197,7 @@ public class SceneServiceImpl implements SceneService {
             return new BasicInfo() {{
                 setSceneId(scene.getId());
                 setName(scene.getSceneName());
+                setNotifyEmails(scene.getNotifyEmails());
                 setType(scene.getType());
                 setScriptType(scene.getScriptType());
                 setScriptId(Long.parseLong(scriptIdString));
@@ -413,7 +414,7 @@ public class SceneServiceImpl implements SceneService {
         PtConfigExt config, List<?> analysisResult, DataValidation dataValidation) {
         Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), dataValidation);
         // 组装数据实体类
-        SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),
+        SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),basicInfo.getNotifyEmails(),
             basicInfo.getScriptType(), config, feature, analysisResult);
         // 设置创建者信息
         sceneEntity.setUserId(CloudPluginUtils.getUserId());
@@ -456,7 +457,7 @@ public class SceneServiceImpl implements SceneService {
         PtConfigExt config, List<?> analysisResult, DataValidation dataValidation) {
         Map<String, Object> feature = assembleFeature(basicInfo.getScriptId(), basicInfo.getBusinessFlowId(), dataValidation);
         // 组装数据实体类
-        SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),
+        SceneManageEntity sceneEntity = assembleSceneEntity(basicInfo.getSceneId(), basicInfo.getType(), basicInfo.getName(),basicInfo.getNotifyEmails(),
             basicInfo.getScriptType(), config, feature, analysisResult);
         // 执行数据库操作
         int updateRows = sceneManageMapper.updateById(sceneEntity);
@@ -615,11 +616,12 @@ public class SceneServiceImpl implements SceneService {
      * @param analysisResult 脚本解析结果
      * @return 场景实体类
      */
-    private SceneManageEntity assembleSceneEntity(Long sceneId, int type, String name, int scriptType, PtConfigExt config, Object feature, Object analysisResult) {
+    private SceneManageEntity assembleSceneEntity(Long sceneId, int type, String name,String emails, int scriptType, PtConfigExt config, Object feature, Object analysisResult) {
         return new SceneManageEntity() {{
             setType(type);
             setId(sceneId);
             setSceneName(name);
+            setNotifyEmails(emails);
             setScriptType(scriptType);
             setPtConfig(JSONObject.toJSONString(config));
             setFeatures(JSONObject.toJSONString(feature));

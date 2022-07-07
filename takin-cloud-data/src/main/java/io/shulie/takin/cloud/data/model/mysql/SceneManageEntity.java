@@ -26,6 +26,13 @@ public class SceneManageEntity {
      */
     @TableField(value = "scene_name")
     private String sceneName;
+
+    /**
+     * 告警邮件
+     */
+    @TableField(value = "notify_emails")
+    private String notifyEmails;
+
     /**
      * 参考数据字典 场景状态
      */

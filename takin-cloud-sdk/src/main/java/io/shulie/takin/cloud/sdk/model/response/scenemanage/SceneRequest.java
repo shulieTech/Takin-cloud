@@ -58,6 +58,8 @@ public class SceneRequest extends ContextExt {
         @ApiModelProperty(value = "场景名称")
         @NotBlank(message = "场景名称不能为空")
         private String name;
+        @ApiModelProperty(value = "告警通知邮件")
+        private String notifyEmails;
         @ApiModelProperty(value = "场景类型:0常规，3流量调试，4巡检，5试跑模式")
         @NotNull(message = "场景类型不能为空")
         private Integer type;
