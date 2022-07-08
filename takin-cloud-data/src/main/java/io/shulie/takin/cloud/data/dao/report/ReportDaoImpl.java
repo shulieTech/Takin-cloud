@@ -271,4 +271,9 @@ public class ReportDaoImpl implements ReportDao {
         wrapper.in(ReportBusinessActivityDetailEntity::getReportId,reportIds);
         return detailMapper.selectList(wrapper);
     }
+
+    @Override
+    public List<Map<String, String>> getEmailByPtId(Long ptId) {
+        return reportMapper.getEmailByPtId(ptId);
+    }
 }

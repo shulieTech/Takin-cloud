@@ -143,11 +143,5 @@ public interface ReportDao {
 
     List<ReportBusinessActivityDetailEntity> getActivityByReportIds(List<Long> reportIds);
 
-    @Select("<script>" +
-            "SELECT DISTINCT scene.notify_emails from t_warn_detail warn,t_report report ,t_scene_manage scene\n" +
-            "where warn.pt_id = report.id\n" +
-            "and report.scene_id = scene.id\n" +
-            "and warn.pt_id = #{ptId}"
-            + " </script>")
-    List<Map<String,String>> getEmailByPtId(@Param("ptId") Long ptId);
+    List<Map<String,String>> getEmailByPtId(Long ptId);
 }

@@ -45,4 +45,12 @@
         ) t
     group by t.scene_id
   </select>
+
+  <select id="getEmailByPtId" parameterType="java.lang.Long" resultType="java.util.Map">
+    SELECT DISTINCT scene.notify_emails from t_warn_detail warn,t_report report ,t_scene_manage scene
+    where warn.pt_id = report.id
+    and report.scene_id = scene.id
+    and warn.pt_id = #{ptId}
+  </select>
+
 </mapper>
