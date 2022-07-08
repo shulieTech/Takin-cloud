@@ -109,6 +109,11 @@ public class ScheduleStartRequestExt extends ScheduleEventRequestExt {
     private Map<String, ThreadGroupConfigExt> threadGroupConfigMap;
 
     /**
+     * 占位符键值对
+     */
+    private Map<String, String> placeholderMap;
+
+    /**
      * 添加引擎插件路径
      *
      * @param enginePluginsFilePath 引擎插件路径

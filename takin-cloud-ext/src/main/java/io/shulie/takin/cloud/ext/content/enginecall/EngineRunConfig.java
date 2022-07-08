@@ -76,6 +76,11 @@ public class EngineRunConfig extends AbstractEntry {
      * 业务活动配置的目标信息
      */
     private Map<String, BusinessActivityExt> businessMap;
+
+    /**
+     * 占位符键值对
+     */
+    private Map<String, String> placeholderMap;
     /**
      * 是否通过xpath的md5进行关联，新老板区分
      */

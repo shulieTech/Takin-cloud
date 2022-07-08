@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.sdk.model.request.scenemanage;
 
 import java.util.List;
+import java.util.Map;
 
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.sdk.model.request.engine.EnginePluginsRefOpen;
@@ -34,5 +35,10 @@ public class SceneTaskStartReq extends ContextExt {
     private Boolean leakSqlEnable;
 
     private Boolean continueRead = false;
+
+    /**
+     * 占位符键值对
+     */
+    private Map<String, String> placeholderMap;
 
 }
