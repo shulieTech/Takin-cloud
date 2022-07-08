@@ -228,7 +228,7 @@ public class ScriptServiceImpl implements ScriptService {
         return false;
     }
 
-    private boolean chekCsvDataSet(HashTree hashTree, List<String> csvConfigs) {
+    public boolean chekCsvDataSet(HashTree hashTree, List<String> csvConfigs) {
         try {
             //提取beanShell
             List<CSVDataSet> csvDataSets = new ArrayList<>();
@@ -263,7 +263,7 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     private String nameMatch(List<String> csvConfigs, String rawFilePath) {
-        String rawFileName = null;
+        String rawFileName = rawFilePath;
         if (rawFilePath.contains("/")) {
             rawFileName = rawFilePath.substring(rawFilePath.lastIndexOf("/") + 1);
         }
@@ -271,7 +271,7 @@ public class ScriptServiceImpl implements ScriptService {
             rawFileName = rawFilePath.substring(rawFilePath.lastIndexOf("\\") + 1);
         }
         for (String csvConfig : csvConfigs) {
-            String csvFileName = null;
+            String csvFileName = csvConfig;
             if (csvConfig.contains("/")) {
                 csvFileName = csvConfig.substring(csvConfig.lastIndexOf("/") + 1);
             }
