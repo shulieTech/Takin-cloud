@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.sdk.model.request.scenetask;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -59,5 +60,9 @@ public class TaskFlowDebugStartReq extends ContextExt {
 
     private Long operateId;
 
+    /**
+     * 占位符键值对
+     */
+    private Map<String, String> placeholderMap;
 
 }

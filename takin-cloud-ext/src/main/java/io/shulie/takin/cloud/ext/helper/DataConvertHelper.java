@@ -44,6 +44,7 @@ public class DataConvertHelper {
         config.setScriptFileDir(CommonHelper.mergeDirPath(scriptFileDir, File.separator));
         config.setPressureScene(startRequest.getPressureScene());
         config.setContinuedTime(startRequest.getContinuedTime());
+        config.setPlaceholderMap(startRequest.getPlaceholderMap());
 
         if (null != startRequest.getExpectThroughput()) {
             config.setExpectThroughput(startRequest.getExpectThroughput() / startRequest.getTotalIp());

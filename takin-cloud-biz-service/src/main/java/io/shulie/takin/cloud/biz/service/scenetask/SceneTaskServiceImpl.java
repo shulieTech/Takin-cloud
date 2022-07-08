@@ -277,7 +277,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REFS,
             JsonHelper.bean2Json(activityRefs));
         //广播事件
-        sceneTaskEventService.callStartEvent(sceneData, report.getId());
+        sceneTaskEventService.callStartEvent(sceneData, report.getId(), input.getPlaceholderMap());
 
         return sceneAction;
     }

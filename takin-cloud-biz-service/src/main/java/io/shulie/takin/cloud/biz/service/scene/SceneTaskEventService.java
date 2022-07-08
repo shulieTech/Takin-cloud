@@ -81,7 +81,7 @@ public class SceneTaskEventService {
      * @param scene    场景
      * @param reportId 报告主键
      */
-    public void callStartEvent(SceneManageWrapperOutput scene, Long reportId) {
+    public void callStartEvent(SceneManageWrapperOutput scene, Long reportId, Map<String, String> placeholderMap) {
         Long sceneId = scene.getId();
         Long customerId = scene.getTenantId();
         ScheduleStartRequestExt scheduleStartRequest = new ScheduleStartRequestExt();
@@ -99,6 +99,7 @@ public class SceneTaskEventService {
         scheduleStartRequest.setTotalIp(scene.getIpNum());
         scheduleStartRequest.setExpectThroughput(scene.getConcurrenceNum());
         scheduleStartRequest.setThreadGroupConfigMap(scene.getThreadGroupConfigMap());
+        scheduleStartRequest.setPlaceholderMap(placeholderMap);
 
         Map<String, BusinessActivityExt> businessData = Maps.newHashMap();
         Integer tps = CommonUtil.sum(scene.getBusinessActivityConfig(), SceneManageWrapperOutput.SceneBusinessActivityRefOutput::getTargetTPS);
