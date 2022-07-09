@@ -531,7 +531,8 @@ public class SceneServiceImpl implements SceneService {
                     setSceneId(sceneId);
                     setFileName(fileName);
                     setFileMd5(t.getSign());
-                    setUploadPath(sceneId + "/" + fileName);
+//                    setUploadPath(sceneId + "/" + fileName);
+                    setUploadPath(filePath);
                     setFileType(t.getType());
                     setScriptType(scriptType);
                     setFileExtend(JSONObject.toJSONString(t.getExtend()));
