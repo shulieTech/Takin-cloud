@@ -1238,7 +1238,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             String[] split = uploadPath.split("/");
             //这里做个相对路径兼容
             String destPath = sceneManageService.getDestPath(sceneId);
-            if (destPath.endsWith(split[0])){
+            if (destPath.endsWith(split[0] + SceneManageConstant.FILE_SPLIT)){
                 uploadPath = destPath + split[1];
             }
             String fileMd5 = MD5Utils.getInstance().getMD5(new File(uploadPath));
