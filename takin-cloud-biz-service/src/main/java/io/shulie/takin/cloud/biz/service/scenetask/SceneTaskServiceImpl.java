@@ -1234,7 +1234,14 @@ public class SceneTaskServiceImpl implements SceneTaskService {
 
     private boolean checkOutJmx(SceneScriptRefOutput uploadFile, Long sceneId) {
         if (Objects.nonNull(uploadFile) && StringUtils.isNotBlank(uploadFile.getUploadPath())) {
-            String fileMd5 = MD5Utils.getInstance().getMD5(new File(uploadFile.getUploadPath()));
+            String uploadPath = uploadFile.getUploadPath();
+            String[] split = uploadPath.split("/");
+            //这里做个相对路径兼容
+            String destPath = sceneManageService.getDestPath(sceneId);
+            if (destPath.endsWith(split[0])){
+                uploadPath = destPath + split[1];
+            }
+            String fileMd5 = MD5Utils.getInstance().getMD5(new File(uploadPath));
             if (StringUtils.isNotBlank(uploadFile.getFileMd5())) {
                 return uploadFile.getFileMd5().equals(fileMd5);
             } else {
