@@ -53,4 +53,17 @@
     and warn.pt_id = #{ptId}
   </select>
 
+  <select id="getSceneProgress" parameterType="java.lang.Long" resultType="java.util.Map">
+    select
+      scene.id as sid,
+      JSON_EXTRACT(scene.pt_config, '$.ptDuration') as ptDuration,JSON_EXTRACT(scene.pt_config, '$.ptDurationUnit') as ptDurationUnit,
+      JSON_EXTRACT(scene.pt_config, '$.duration') as duration,JSON_EXTRACT(scene.pt_config, '$.unit') as unit,
+      report.id as rid,report.start_time,report.end_time,report.`status`
+    from t_scene_manage scene , t_report report
+    where scene.id = report.scene_id
+      and scene.id = #{sceneId}
+    order by report.id desc
+      limit 1
+  </select>
+
 </mapper>
