@@ -104,10 +104,11 @@ public interface ReportDao {
 
     /**
      * 更新报告开始时间
-     * @param reportId 报告主键
+     *
+     * @param reportId  报告主键
      * @param startTime 开始时间
      */
-    void updateReportStartTime(Long reportId,Date startTime);
+    void updateReportStartTime(Long reportId, Date startTime);
 
     /**
      * 更新报告结束时间
@@ -136,6 +137,7 @@ public interface ReportDao {
 
     /**
      * 根据场景ID查询正在运行的压测报告
+     *
      * @param sceneIds 场景ID
      * @return
      */
@@ -143,5 +145,8 @@ public interface ReportDao {
 
     List<ReportBusinessActivityDetailEntity> getActivityByReportIds(List<Long> reportIds);
 
-    List<Map<String,String>> getEmailByPtId(Long ptId);
+    List<Map<String, String>> getEmailByPtId(Long ptId);
+
+    List<Map<String, Object>> getSceneProgress(Long sceneId);
+
 }

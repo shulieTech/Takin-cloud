@@ -3,20 +3,17 @@ package io.shulie.takin.cloud.biz.service.scene.impl;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import cn.hutool.core.date.DateTime;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -102,7 +99,9 @@ import io.shulie.takin.utils.string.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -389,11 +388,87 @@ public class SceneManageServiceImpl implements SceneManageService {
             t.setThreadNum(threadNum.get(t.getId()));
             t.setHasReport(sceneIds.contains(t.getId()));
             t.setStatus(SceneManageStatusEnum.getAdaptStatus(t.getStatus()));
+            //计算场景压测进度
+            getProgress(t);
         });
 
         PageInfo<SceneManageListOutput> pageInfo = new PageInfo<>(resultList);
         pageInfo.setTotal(page.getTotal());
         return pageInfo;
+    }
+
+    private void getProgress(SceneManageListOutput t) {
+        if(t.getStatus()==2){
+            List<Map<String,Object>> progressList = reportDao.getSceneProgress(t.getId());
+            Map<String,Object> progressMap = progressList.size()==1?progressList.get(0):null;
+            if(progressMap!=null){
+                int durationFinal = 0;      //压测时长
+                String unitFinal = "";      //时长单位
+                if(progressMap.get("ptDurationUnit")!=null){
+                    durationFinal = NumberUtils.toInt(progressMap.get("ptDuration").toString());
+                    unitFinal = progressMap.get("ptDurationUnit").toString();
+                }
+                if(progressMap.get("unit")!=null) {
+                    durationFinal = NumberUtils.toInt(progressMap.get("duration").toString());
+                    unitFinal = progressMap.get("unit").toString();
+                }
+                Date startTime = null;      //压测开始时间
+                Date endTime = null;        //压测结束时间
+                if(progressMap.get("start_time")!=null) {
+                    LocalDateTime start = (LocalDateTime) progressMap.get("start_time");
+                    startTime = Date.from(start.atZone(ZoneId.systemDefault()).toInstant());
+                }
+                if(progressMap.get("end_time")!=null) {
+                    LocalDateTime end = (LocalDateTime) progressMap.get("end_time");
+                    endTime = Date.from(end.atZone(ZoneId.systemDefault()).toInstant());
+                }
+                t.setProgress(getProgress(startTime,endTime,durationFinal,unitFinal));
+            }
+        }
+    }
+
+    private int getProgress(Date startTime ,Date endTime,int durationFinal,String unitFinal ){
+        unitFinal = unitFinal.replace("\"","");
+        //已有结束时间
+        if(endTime!=null){
+            return 100;
+        }
+        Date planEndTime = null;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startTime);
+        if(unitFinal.equals(TimeUnitEnum.DAY.getValue())){
+            calendar.add(Calendar.DAY_OF_MONTH, durationFinal);
+            planEndTime = calendar.getTime();
+        }
+        if(unitFinal.equals(TimeUnitEnum.HOUR.getValue())){
+            calendar.add(Calendar.HOUR_OF_DAY, durationFinal);
+            planEndTime = calendar.getTime();
+        }
+        if(unitFinal.equals(TimeUnitEnum.MINUTE.getValue())){
+            calendar.add(Calendar.MINUTE, durationFinal);
+            planEndTime = calendar.getTime();
+        }
+        if(unitFinal.equals(TimeUnitEnum.SECOND.getValue())){
+            calendar.add(Calendar.SECOND, durationFinal);
+            planEndTime = calendar.getTime();
+        }
+        //已到结束时间
+        if (new Date().after(planEndTime)) {
+            return  100;
+        }
+        //计算执行的时间比例
+        Calendar s_calendar = Calendar.getInstance();
+        s_calendar.setTime(startTime);
+        Long s = s_calendar.getTimeInMillis();  //开始时间
+
+        Long n = System.currentTimeMillis();    //当前时间
+
+        s_calendar.setTime(planEndTime);
+        Long e = s_calendar.getTimeInMillis();  //结束日前
+
+        BigDecimal before = new BigDecimal(n-s);
+        BigDecimal all = new BigDecimal(e-s);
+        return before.divide(all,2, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100)).intValue();
     }
 
     private Map<String, Object> buildSceneManageRef(SceneManageWrapperInput wrapperRequest) {
