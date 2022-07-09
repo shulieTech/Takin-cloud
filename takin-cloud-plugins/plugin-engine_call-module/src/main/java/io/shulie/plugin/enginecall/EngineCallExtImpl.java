@@ -17,12 +17,7 @@ import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
 import io.shulie.takin.cloud.common.utils.JsonUtil;
 import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
-import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
-import io.shulie.takin.cloud.ext.content.enginecall.StrategyOutputExt;
-import io.shulie.takin.cloud.ext.content.enginecall.EngineRunConfig;
+import io.shulie.takin.cloud.ext.content.enginecall.*;
 import io.shulie.takin.cloud.ext.helper.DataConvertHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.pf4j.Extension;
@@ -130,6 +125,36 @@ public class EngineCallExtImpl implements EngineCallExtApi {
         strategyConfigExt.setCpuNum(new BigDecimal(2));
         strategyConfigExt.setMemorySize(new BigDecimal(3076));
         return strategyConfigExt;
+    }
+
+    @Override
+    public List<NodeMetrics> getNodeMetrics() {
+        return null;
+    }
+
+    @Override
+    public String addNode(String nodeIp, String name, String password) {
+        return null;
+    }
+
+    @Override
+    public Boolean deleteNode(String nodeName) {
+        return null;
+    }
+
+    @Override
+    public Boolean updateNode(String nodeName, String updateName) {
+        return null;
+    }
+
+    @Override
+    public Boolean enableNode(String name) {
+        return null;
+    }
+
+    @Override
+    public Boolean disableNode(String name) {
+        return null;
     }
 
     /**

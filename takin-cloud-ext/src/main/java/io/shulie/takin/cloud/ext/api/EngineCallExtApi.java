@@ -2,10 +2,7 @@ package io.shulie.takin.cloud.ext.api;
 
 import java.util.List;
 
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleRunRequest;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStopRequestExt;
-import io.shulie.takin.cloud.ext.content.enginecall.StrategyConfigExt;
-import io.shulie.takin.cloud.ext.content.enginecall.StrategyOutputExt;
+import io.shulie.takin.cloud.ext.content.enginecall.*;
 import io.shulie.takin.plugin.framework.core.extension.ExtensionPoint;
 
 /**
@@ -58,5 +55,44 @@ public interface EngineCallExtApi extends ExtensionPoint, Typed {
      * @return -
      */
     StrategyConfigExt getDefaultStrategyConfig();
+
+    /**
+     * 获取Node节点信息
+     * @return
+     */
+    List<NodeMetrics> getNodeMetrics();
+
+    /**
+     * 添加Node节点
+     * @param name
+     * @param password
+     * @param nodeIp
+     */
+    String addNode(String nodeIp, String name, String password);
+
+    /**
+     * 删除Node节点
+     * @param nodeName
+     */
+    Boolean deleteNode(String nodeName);
+
+    /**
+     * 修改Node名称
+     * @param nodeName
+     * @param updateName
+     */
+    Boolean updateNode(String nodeName, String updateName);
+
+    /**
+     * 启用Node
+     * @param name
+     */
+    Boolean enableNode(String name);
+
+    /**
+     * 禁用Node
+     * @param name
+     */
+    Boolean disableNode(String name);
 
 }

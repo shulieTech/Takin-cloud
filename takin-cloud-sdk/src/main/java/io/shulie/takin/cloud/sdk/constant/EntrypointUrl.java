@@ -199,4 +199,15 @@ public class EntrypointUrl {
     public final static String MODULE_HEALTH = "health";
     public final static String METHOD_HEALTH_CHECK = "";
 
+    /**
+     * 机器 - 压测机器
+     */
+    public final static String MODULE_MACHINE = "machine";
+    public final static String METHOD_MACHINE_LIST = "list";
+    public final static String METHOD_MACHINE_ADD = "add";
+    public final static String METHOD_MACHINE_UPDATE = "update";
+    public final static String METHOD_MACHINE_DELETE = "delete";
+    public final static String METHOD_MACHINE_ENABLE = "enable";
+    public final static String METHOD_MACHINE_DISABLE = "disable";
+
 }
