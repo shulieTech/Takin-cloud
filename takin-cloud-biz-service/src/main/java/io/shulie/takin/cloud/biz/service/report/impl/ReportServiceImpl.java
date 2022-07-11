@@ -58,6 +58,7 @@ import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventService;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
+import io.shulie.takin.cloud.biz.service.sla.SlaService;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
@@ -157,6 +158,8 @@ public class ReportServiceImpl implements ReportService {
     SceneTaskEventService sceneTaskEventService;
     @Resource
     TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
+    @Resource
+    private SlaService slaService;
 
     @Value("${report.aggregation.interval}")
     private String reportAggregationInterval;
@@ -1398,6 +1401,8 @@ public class ReportServiceImpl implements ReportService {
         warnDetail.setWarnTime(DateUtil.parseDateTime(input.getWarnTime()));
         warnDetail.setCreateTime(new Date());
         tWarnDetailMapper.insertSelective(warnDetail);
+        //新增发送告警邮件
+        slaService.sendMail(warnDetail);
     }
 
     private boolean isSla(ReportResult reportResult) {
