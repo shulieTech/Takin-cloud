@@ -282,7 +282,12 @@ public class SlaServiceImpl implements SlaService {
     }
 
     public void sendMail(WarnDetail warnDetai) {
-        String mailTo = getMails(warnDetai.getPtId());
+        String mailTo = null;
+        try {
+            mailTo = getMails(warnDetai.getPtId());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         if(org.apache.commons.lang.StringUtils.isBlank(mailTo)){
             return;
         }
