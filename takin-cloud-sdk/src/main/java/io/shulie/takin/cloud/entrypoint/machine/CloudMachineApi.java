@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.entrypoint.machine;
 
 import io.shulie.takin.cloud.ext.content.enginecall.NodeMetrics;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.sdk.model.request.machine.MachineAddReq;
 import io.shulie.takin.cloud.sdk.model.request.machine.MachineBaseReq;
 import io.shulie.takin.cloud.sdk.model.request.machine.MachineUpdateReq;
@@ -17,7 +18,7 @@ import java.util.List;
  * Author:   chenhongqiao@shulie.com
  */
 public interface CloudMachineApi {
-    ResponseResult<List<NodeMetricsResp>> list();
+    ResponseResult<List<NodeMetricsResp>> list(ContextExt req);
 
     String add(MachineAddReq req);
 

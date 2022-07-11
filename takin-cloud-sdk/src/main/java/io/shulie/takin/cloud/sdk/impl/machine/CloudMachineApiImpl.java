@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.sdk.impl.machine;
 
 import com.alibaba.fastjson.TypeReference;
 import io.shulie.takin.cloud.entrypoint.machine.CloudMachineApi;
+import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.sdk.model.request.machine.MachineAddReq;
 import io.shulie.takin.cloud.sdk.model.request.machine.MachineBaseReq;
@@ -28,10 +29,10 @@ public class CloudMachineApiImpl implements CloudMachineApi {
     CloudApiSenderService cloudApiSenderService;
 
     @Override
-    public ResponseResult<List<NodeMetricsResp>> list() {
+    public ResponseResult<List<NodeMetricsResp>> list(ContextExt req) {
         ResponseResult<List<NodeMetricsResp>> result = cloudApiSenderService.get(
                 EntrypointUrl.join(EntrypointUrl.MODULE_MACHINE, EntrypointUrl.METHOD_MACHINE_LIST),
-                null, new TypeReference<ResponseResult<List<NodeMetricsResp>>>() {});
+                req, new TypeReference<ResponseResult<List<NodeMetricsResp>>>() {});
         return ResponseResult.success(result.getData(), result.getTotalNum());
     }
 
