@@ -518,7 +518,7 @@ public class SceneServiceImpl implements SceneService {
                 case 1:
                     break;
                 case 2:
-                    destPath = destPath + SceneManageConstant.FILE_SPLIT + "attachments";
+                    destPath = destPath + SceneManageConstant.FILE_SPLIT + "attachments" + SceneManageConstant.FILE_SPLIT;
                     break;
                 default:
                     log.info("遇到{}类型的文件:[{}]", t.getType(), t.getPath());
@@ -526,7 +526,9 @@ public class SceneServiceImpl implements SceneService {
             }
             if (StrUtil.isNotBlank(destPath)) {
                 String filePath = destPath + fileName;
-                FileUtil.copy(t.getPath(), filePath, true);
+                if (!filePath.equals(t.getPath())) {
+                    FileUtil.copy(t.getPath(), filePath, true);
+                }
                 sceneScriptRefEntityList.add(new SceneScriptRefEntity() {{
                     setSceneId(sceneId);
                     setFileName(fileName);
