@@ -144,7 +144,13 @@ public class ScheduleServiceImpl implements ScheduleService {
         eventRequest.setLogQueueSize(NumberUtil.parseInt(appConfig.getLogQueueSize(), 25000));
 
         eventRequest.setPressureEngineBackendQueueCapacity(appConfig.getPressureEngineBackendQueueCapacity());
-        eventRequest.setEngineRedisAddress(appConfig.getEngineRedisAddress());
+        if (StringUtils.indexOf(appConfig.getEngineRedisClusterAddress(), ",") != -1) {
+            //redis集群模式
+            eventRequest.setEngineRedisAddress(appConfig.getEngineRedisClusterAddress());
+        } else if (StringUtils.isNotBlank(appConfig.getEngineRedisAddress())) {
+            //redis单例模式
+            eventRequest.setEngineRedisAddress(appConfig.getEngineRedisAddress());
+        }
         eventRequest.setEngineRedisPort(appConfig.getEngineRedisPort());
         eventRequest.setEngineRedisSentinelNodes(appConfig.getEngineRedisSentinelNodes());
         eventRequest.setEngineRedisSentinelMaster(appConfig.getEngineRedisSentinelMaster());

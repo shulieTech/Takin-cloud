@@ -112,6 +112,8 @@ public class SceneTaskEventService {
                 businessData.put(d.getBindRef(), d);
             }
         }
+        scheduleStartRequest.setTotalTps(tps);
+        scheduleStartRequest.setTps(NumberUtil.getRate(tps, scene.getIpNum()));
         scheduleStartRequest.setBusinessData(businessData);
         scheduleStartRequest.setBindByXpathMd5(StringUtils.isNoneBlank(scene.getScriptAnalysisResult()));
 

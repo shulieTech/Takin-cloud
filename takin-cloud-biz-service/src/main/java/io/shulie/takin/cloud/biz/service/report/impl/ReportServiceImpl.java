@@ -1,6 +1,8 @@
 package io.shulie.takin.cloud.biz.service.report.impl;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
@@ -18,6 +20,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
+
+import cn.hutool.core.bean.BeanUtil;
+import io.shulie.takin.cloud.biz.utils.DataUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -58,6 +64,7 @@ import io.shulie.takin.cloud.biz.service.scene.ReportEventService;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskEventService;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
+import io.shulie.takin.cloud.biz.service.sla.SlaService;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryOpitons;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.common.bean.scenemanage.WarnBean;
@@ -157,6 +164,8 @@ public class ReportServiceImpl implements ReportService {
     SceneTaskEventService sceneTaskEventService;
     @Resource
     TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
+    @Resource
+    private SlaService slaService;
 
     @Value("${report.aggregation.interval}")
     private String reportAggregationInterval;
@@ -225,6 +234,10 @@ public class ReportServiceImpl implements ReportService {
             log.warn("获取报告异常，报告数据不存在。报告ID：{}", reportId);
             return null;
         }
+        //report结束后 检测消耗流量计算
+        if(Objects.equals(report.getStatus(), ReportConstants.FINISH_STATUS) && Objects.isNull(report.getAmount()) || report.getAmount().intValue() == 0){
+           report = calculateAmountAndUpdate(report);
+        }
         ReportDetailOutput detail = ReportConverter.INSTANCE.ofReportDetail(report);
 
         //警告列表
@@ -260,13 +273,78 @@ public class ReportServiceImpl implements ReportService {
         return detail;
     }
 
+    /**
+     * 计算消耗流量并更新数据库
+     * @param reportResult
+     * @return
+     */
+    private ReportResult calculateAmountAndUpdate(ReportResult reportResult) {
+        try{
+            Date start = Objects.nonNull(reportResult.getStartTime()) ? reportResult.getStartTime() : reportResult.getGmtCreate();
+            Date end = Objects.nonNull(reportResult.getEndTime()) ? reportResult.getEndTime() : reportResult.getGmtUpdate();
+
+            if (Objects.isNull(start) || Objects.isNull(end)) {
+                return reportResult;
+            }
+            long testRunTime = DateUtil.between(start, end, DateUnit.SECOND);
+            if (testRunTime == 0) {
+                return reportResult;
+            }
+            //流量结算
+            AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
+            if (null != assetExtApi) {
+                AssetInvoiceExt<RealAssectBillExt> invoice = new AssetInvoiceExt<>();
+                invoice.setSceneId(reportResult.getSceneId());
+                invoice.setTaskId(reportResult.getId());
+                invoice.setCustomerId(reportResult.getTenantId());
+                invoice.setResourceId(reportResult.getId());
+                invoice.setResourceType(AssetTypeEnum.PRESS_REPORT.getCode());
+                invoice.setResourceName(AssetTypeEnum.PRESS_REPORT.getName());
+                invoice.setOperateId(reportResult.getOperateId());
+                invoice.setOperateName(reportResult.getOperateName());
+
+                RealAssectBillExt bill = new RealAssectBillExt();
+                bill.setTime(testRunTime);
+                BigDecimal avgThreadNum;
+                //如果有平均rt和平均tps，则:threadNum=tps*rt/1000,否则取报告中的平均线程数
+                if (null != reportResult.getAvgTps() && null != reportResult.getAvgRt()) {
+                    avgThreadNum = reportResult.getAvgTps().multiply(reportResult.getAvgRt())
+                            .divide(new BigDecimal(1000), 10, RoundingMode.HALF_UP);
+                    if (avgThreadNum.intValue() == 0) {
+                        avgThreadNum = reportResult.getAvgConcurrent();
+                    }
+                } else {
+                    avgThreadNum = reportResult.getAvgConcurrent();
+                }
+                bill.setAvgThreadNum(avgThreadNum);
+                invoice.setData(bill);
+                log.info("计算流量信息，reportId:{}, time:{}, threads:{}", reportResult.getId(), testRunTime, avgThreadNum);
+                if (Objects.isNull(avgThreadNum) || avgThreadNum.intValue() == 0) {
+                    return reportResult;
+                }
+                Response<BigDecimal> paymentRes = assetExtApi.payment(invoice);
+                //取数据库最新的数据
+                reportResult = reportDao.selectById(reportResult.getId());
+                if (null != paymentRes && paymentRes.isSuccess()) {
+                    reportResult.setAmount(paymentRes.getData());
+                }
+                //更新数据
+                ReportUpdateParam param = BeanUtil.copyProperties(reportResult, ReportUpdateParam.class);
+                reportDao.updateReport(param);
+            }
+        }catch (Exception e){
+            log.error("任务Id:{} 重新计算消耗流量发生异常; 异常信息:{}", reportResult.getId(), e.getMessage());
+        }
+        return reportResult;
+    }
+
     private void buildFailActivitiesByNodeDetails(List<ScriptNodeSummaryBean> reportNodeDetail,
         List<BusinessActivitySummaryBean> result) {
         if (CollectionUtils.isEmpty(reportNodeDetail)) {
             return;
         }
         for (ScriptNodeSummaryBean bean : reportNodeDetail) {
-            if (bean.getActivityId() > -1) {
+            if (bean.getActivityId() > 0) {
                 BusinessActivitySummaryBean summaryBean = new BusinessActivitySummaryBean();
                 summaryBean.setBusinessActivityId(bean.getActivityId());
                 summaryBean.setBusinessActivityName(bean.getTestName());
@@ -1365,11 +1443,15 @@ public class ReportServiceImpl implements ReportService {
             if (null != reportResult.getAvgTps() && null != reportResult.getAvgRt()) {
                 avgThreadNum = reportResult.getAvgTps().multiply(reportResult.getAvgRt())
                     .divide(new BigDecimal(1000), 10, RoundingMode.HALF_UP);
+                if (avgThreadNum.intValue() == 0) {
+                    avgThreadNum = reportResult.getAvgConcurrent();
+                }
             } else {
                 avgThreadNum = reportResult.getAvgConcurrent();
             }
             bill.setAvgThreadNum(avgThreadNum);
             invoice.setData(bill);
+            log.info("计算流量信息，reportId:{}, time:{}, threads:{}", reportResult.getId(), testRunTime, avgThreadNum);
             Response<BigDecimal> paymentRes = assetExtApi.payment(invoice);
             if (null != paymentRes && paymentRes.isSuccess()) {
                 reportResult.setAmount(paymentRes.getData());
@@ -1398,6 +1480,8 @@ public class ReportServiceImpl implements ReportService {
         warnDetail.setWarnTime(DateUtil.parseDateTime(input.getWarnTime()));
         warnDetail.setCreateTime(new Date());
         tWarnDetailMapper.insertSelective(warnDetail);
+        //新增发送告警邮件
+        slaService.sendMail(warnDetail);
     }
 
     private boolean isSla(ReportResult reportResult) {

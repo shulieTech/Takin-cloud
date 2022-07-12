@@ -192,6 +192,9 @@ public class SlaServiceImpl implements SlaService {
                         // 熔断数据也记录到告警明细中
                         WarnDetail warnDetail = buildWarnDetail(conditionMap, businessActivityDTO, metricsEvent, dto);
                         tWarnDetailMapper.insertSelective(warnDetail);
+                        //新增发送告警邮件
+                        sendMail(warnDetail);
+
                         // 记录sla熔断数据
                         UpdateReportSlaDataInput slaDataInput = new UpdateReportSlaDataInput();
                         SlaBean slaBean = new SlaBean();
@@ -278,8 +281,13 @@ public class SlaServiceImpl implements SlaService {
         return mailCacheLoc.asMap().get(cacheKey);
     }
 
-    private void sendMail(WarnDetail warnDetai) {
-        String mailTo = getMails(warnDetai.getPtId());
+    public void sendMail(WarnDetail warnDetai) {
+        String mailTo = null;
+        try {
+            mailTo = getMails(warnDetai.getPtId());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         if(org.apache.commons.lang.StringUtils.isBlank(mailTo)){
             return;
         }

@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.biz.service.sla;
 
+import com.pamirs.takin.entity.domain.entity.scene.manage.WarnDetail;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 
 /**
@@ -28,4 +29,7 @@ public interface SlaService {
      * @param sceneId 场景主键
      */
     void cacheData(Long sceneId);
+
+    void sendMail(WarnDetail warnDetai);
+
 }
