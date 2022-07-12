@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * ClassName:    MachineController
@@ -40,7 +41,12 @@ public class MachineController {
     @PostMapping(EntrypointUrl.METHOD_MACHINE_ADD)
     @ApiOperation(value = "添加压测机")
     public ResponseResult<String> add(@RequestBody MachineAddParam addParam) {
-        return ResponseResult.success(machineService.addNode(addParam));
+        String res = machineService.addNode(addParam);
+        if (Objects.equals(res, "添加node成功")) {
+            return ResponseResult.success(res);
+        } else {
+            return ResponseResult.fail(res, "");
+        }
     }
 
 
