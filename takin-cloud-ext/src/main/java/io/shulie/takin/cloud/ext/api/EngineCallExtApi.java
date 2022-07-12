@@ -68,7 +68,7 @@ public interface EngineCallExtApi extends ExtensionPoint, Typed {
      * @param password
      * @param nodeIp
      */
-    String addNode(String nodeIp, String name, String password);
+    String addNode(String nodeIp, String name, String userName, String password);
 
     /**
      * 删除Node节点

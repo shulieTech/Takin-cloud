@@ -34,7 +34,7 @@ public class MachineServiceImpl implements MachineService {
     @Override
     public String addNode(MachineAddParam addParam) {
         EngineCallExtApi engineCallExtApi = pluginUtils.getEngineCallExtApi();
-        return engineCallExtApi.addNode(addParam.getNodeIp(), addParam.getName(), addParam.getPassword());
+        return engineCallExtApi.addNode(addParam.getNodeIp(), addParam.getName(), addParam.getUsername(), addParam.getPassword());
     }
 
     @Override

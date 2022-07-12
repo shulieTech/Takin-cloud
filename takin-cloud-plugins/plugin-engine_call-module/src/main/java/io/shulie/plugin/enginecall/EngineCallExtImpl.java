@@ -133,7 +133,7 @@ public class EngineCallExtImpl implements EngineCallExtApi {
     }
 
     @Override
-    public String addNode(String nodeIp, String name, String password) {
+    public String addNode(String nodeIp, String name, String userName, String password) {
         return null;
     }
 

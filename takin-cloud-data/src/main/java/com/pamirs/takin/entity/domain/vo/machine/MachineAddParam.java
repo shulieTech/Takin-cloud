@@ -13,5 +13,6 @@ import lombok.Data;
 public class MachineAddParam {
     private String nodeIp;
     private String name;
+    private String username;
     private String password;
 }
