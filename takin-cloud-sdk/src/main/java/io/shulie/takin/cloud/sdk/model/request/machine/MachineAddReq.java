@@ -14,5 +14,6 @@ import lombok.Data;
 public class MachineAddReq extends ContextExt {
     private String nodeIp;
     private String name;
+    private String username;
     private String password;
 }
