@@ -62,9 +62,9 @@ public class LocalThreadServiceImpl implements EngineCallService {
         if (!new File(installDir).exists()) {
             return "未找到引擎包";
         }
-        if (CollectionUtils.isNotEmpty(shellProcess.keySet())) {
-            return "本地压测引擎目前只支持启动单个场景！";
-        }
+//        if (CollectionUtils.isNotEmpty(shellProcess.keySet())) {
+//            return "本地压测引擎目前只支持启动单个场景！";
+//        }
 
         // 删除原有解压包
         String enginePackDir = getEnginePackDir();
