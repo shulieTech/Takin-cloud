@@ -578,6 +578,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
                 r.addMsg("任务不存在");
                 return r;
             }
+            //调用正常关闭
+            stopInspectTask(report.getSceneId());
 
             String jobName = ScheduleConstants.getScheduleName(report.getSceneId(), reportId, report.getTenantId());
             String engineInstanceRedisKey = PressureInstanceRedisKey.getEngineInstanceRedisKey(report.getSceneId(), reportId, report.getTenantId());

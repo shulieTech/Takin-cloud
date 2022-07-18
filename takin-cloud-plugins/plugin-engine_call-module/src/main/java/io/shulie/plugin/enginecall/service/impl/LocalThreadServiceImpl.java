@@ -122,8 +122,8 @@ public class LocalThreadServiceImpl implements EngineCallService {
         Process process = shellProcess.remove(jobName);
         if (Objects.nonNull(process) ) {
             process.destroyForcibly();
-            String cmd = "ps -ef | grep \"io.shulie.flpt.pressure.engine.Bootstrap\" | grep -v grep | awk '{print $1}' | xargs kill -2";
-            LinuxHelper.runShell(cmd, null, null, null);
+//            String cmd = "ps -ef | grep \"io.shulie.flpt.pressure.engine.Bootstrap\" | grep -v grep | awk '{print $1}' | xargs kill -2";
+//            LinuxHelper.runShell(cmd, null, null, null);
         }
     }
 
