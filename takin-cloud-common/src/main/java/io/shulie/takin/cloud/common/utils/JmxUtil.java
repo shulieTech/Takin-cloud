@@ -1,25 +1,24 @@
 package io.shulie.takin.cloud.common.utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.StringWriter;
 import java.net.URL;
-import java.util.Map;
-import java.util.List;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.net.MalformedURLException;
 
+import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.dom4j.Element;
 import org.dom4j.Document;
+import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.DocumentException;
 
@@ -32,6 +31,12 @@ import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
 import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
 import io.shulie.takin.cloud.ext.content.enums.SamplerTypeEnum;
 import io.shulie.takin.cloud.common.pojo.jmeter.ThreadGroupProperty;
+import org.dom4j.io.XMLWriter;
+
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * @author liyuanba
@@ -56,6 +61,173 @@ public class JmxUtil {
             return null;
         }
         return buildNodeTree(f);
+    }
+
+    /**
+     * 按照ScriptNode中的结构重组jmx文件
+     *
+     * @param file       脚本文件路径
+     * @param scriptNode 线程组的结构
+     * @return 返回处理之后的脚本文件，返回新老MD5匹配
+     */
+    public static Map<String, String> replaceJmxContent(String file, ScriptNode scriptNode) {
+        if (StrUtil.isBlank(file)) {
+            return null;
+        }
+        SAXReader saxReader = new SAXReader();
+        File f = FileUtil.file(file);
+        if (!f.exists() || !f.isFile()) {
+            return null;
+        }
+        try {
+            Document document = saxReader.read(f);
+            Element root = document.getRootElement();
+            if (null == root) {
+                return null;
+            }
+            Element childContainer = root.element("hashTree");
+            if (null == childContainer) {
+                return null;
+            }
+            List<Element> elements = elements(childContainer);
+            List<Element> testPlan = findByXpath(elements, "/jmeterTestPlan/hashTree/TestPlan", false);
+            if (CollectionUtils.isEmpty(testPlan) && testPlan.size() <= 1) {
+                return null;
+            }
+            List<Element> threadGroup = findByXpath(elements(testPlan.get(1)), scriptNode.getXpath(), false);
+            if (CollectionUtils.isNotEmpty(threadGroup) && threadGroup.size() > 1) {
+                List<ScriptNode> oldThreadGroup = buildNodeTree(threadGroup);
+                //对比结构获取需要删除的数据
+                List<String> stringList = needDelXpath(oldThreadGroup, scriptNode);
+                if (CollectionUtils.isNotEmpty(stringList)) {
+                    for (String delXpath : stringList) {
+                        //找到所有相关的元素进行删除,在jmeter中需要同时删除元素后面的hashTree
+                        List<Element> needDelList = findByXpath(elements, delXpath, true);
+                        if (CollectionUtils.isNotEmpty(needDelList)) {
+                            for (Element needDel : needDelList) {
+                                removeByXpath(root, needDel.getUniquePath());
+                            }
+                        }
+                    }
+                }
+                Map<String, String> result = new HashMap<>();
+                Element element = threadGroup.get(1);
+                replace(element, scriptNode.getChildren(), result);
+                result.put("xmlContent", document.asXML());
+                return result;
+            }
+
+        } catch (Exception e) {
+            log.error("replaceJmxContent DocumentException, file=" + f.getAbsolutePath(), e);
+        }
+        return null;
+    }
+
+    private static void removeByXpath(Element removeElement, String xpath) {
+        if (removeElement == null) {
+            return;
+        }
+        List<Element> elements = elements(removeElement);
+        if (CollectionUtils.isEmpty(elements)) {
+            return;
+        }
+        for (Element element : elements) {
+            if (element.getUniquePath().equals(xpath)) {
+                removeElement.remove(element);
+                return;
+            }
+            removeByXpath(element, xpath);
+        }
+    }
+
+    private static List<String> needDelXpath(List<ScriptNode> oldThreadGroup, ScriptNode newScriptNode) {
+        if (CollectionUtils.isEmpty(oldThreadGroup) || newScriptNode == null) {
+            return null;
+        }
+        List<String> oldAllXpath = getAllXpath(oldThreadGroup);
+        List<String> newAllXpath = getAllXpath(Collections.singletonList(newScriptNode));
+        //如果新脚本没有xpath，所有的都需要删除
+        if (CollectionUtils.isEmpty(newAllXpath)) {
+            return oldAllXpath;
+        }
+        //旧脚本有，新脚本没有的，就是需要删除的数据
+        if (CollectionUtils.isNotEmpty(oldAllXpath)) {
+            return oldAllXpath.stream().filter(o -> !newAllXpath.contains(o)).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    private static List<String> getAllXpath(List<ScriptNode> scriptNodes) {
+        if (CollectionUtils.isEmpty(scriptNodes)) {
+            return null;
+        }
+        List<String> result = new ArrayList<>();
+        for (ScriptNode scriptNode : scriptNodes) {
+            result.add(scriptNode.getXpath());
+            List<String> allXpath = getAllXpath(scriptNode.getChildren());
+            if (CollectionUtils.isNotEmpty(allXpath)) {
+                result.addAll(allXpath);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 按照scriptNodes的结构重构element
+     *
+     * @param element
+     * @param scriptNodes
+     * @param result      新老xpathMd5对比
+     */
+    private static void replace(Element element, List<ScriptNode> scriptNodes, Map<String, String> result) {
+        if (CollectionUtils.isEmpty(scriptNodes)) {
+            return;
+        }
+        List<Element> elements = elements(element);
+        for (int i = 0; i < scriptNodes.size(); i++) {
+            List<Element> byXpath = findByXpath(elements, scriptNodes.get(i).getXpath(), false);
+            if (CollectionUtils.isNotEmpty(byXpath) && byXpath.size() > 1) {
+                System.out.println("替换xpath:" + scriptNodes.get(i).getXpath());
+                element.remove(byXpath.get(0));
+                element.remove(byXpath.get(1));
+                element.add(byXpath.get(0));
+                element.add(byXpath.get(1));
+                List<Element> byXpathReplace = findByXpath(elements, scriptNodes.get(i).getXpath(), false);
+                Element element1 = byXpathReplace.get(0);
+                result.put(scriptNodes.get(i).getXpathMd5(), Md5Util.md5(element1.getUniquePath()));
+                System.out.println("替换xpath后存储MD5:" + scriptNodes.get(i).getXpathMd5() + " " + Md5Util.md5(element1.getUniquePath()));
+                replace(byXpath.get(1), scriptNodes.get(i).getChildren(), result);
+            }
+        }
+    }
+
+    /**
+     * 查找元素和后面hashTree
+     * @param elements 被查询对象
+     * @param xpath 需要查询的xpath
+     * @param isAll 是否查询所有下级
+     * @return
+     */
+    private static List<Element> findByXpath(List<Element> elements, String xpath, boolean isAll) {
+        List<Element> elementList = new ArrayList<>();
+        for (int i = 0; i < elements.size(); i++) {
+            if (elements.get(i) != null && elements.get(i).getUniquePath().equals(xpath)) {
+                elementList.add(elements.get(i));
+                if (elements.get(i + 1) != null && "hashTree".equals(elements.get(i + 1).getName())) {
+                    elementList.add(elements.get(i + 1));
+                }
+            }
+            if (isAll) {
+                List<Element> children = elements(elements.get(i));
+                if (CollectionUtils.isNotEmpty(children)) {
+                    List<Element> byXpath = findByXpath(children, xpath, true);
+                    if (CollectionUtils.isNotEmpty(byXpath)) {
+                        elementList.addAll(byXpath);
+                    }
+                }
+            }
+        }
+        return elementList;
     }
 
     /**
@@ -218,9 +390,9 @@ public class JmxUtil {
                     continue;
                 }
                 JSONArray arr = o.values().stream().filter(Objects::nonNull)
-                    .map(v -> (JSONArray)v)
-                    .findFirst()
-                    .orElse(null);
+                        .map(v -> (JSONArray) v)
+                        .findFirst()
+                        .orElse(null);
                 if (null == arr) {
                     continue;
                 }
@@ -265,7 +437,7 @@ public class JmxUtil {
                     } else if (i <= holdTime) {
                         nowThreadNum += threadNum;
                     } else if (i < shutDownTime) {
-                        nowThreadNum += threadNum - (((double)threadNum / shutDown) * (i - holdTime));
+                        nowThreadNum += threadNum - (((double) threadNum / shutDown) * (i - holdTime));
                     } else if (i > shutDownTime) {
                         nowThreadNum += 0;
                     }
@@ -274,7 +446,7 @@ public class JmxUtil {
                     maxThreadNum = nowThreadNum;
                 }
             }
-            p.setMaxThreadNum((int)Math.ceil(maxThreadNum));
+            p.setMaxThreadNum((int) Math.ceil(maxThreadNum));
         }
         return p;
     }
@@ -398,7 +570,9 @@ public class JmxUtil {
                 } else if ("ShulieKafkaDataSetSampler".equals(name) || "io.shulie.jmeter.plugins.kafka.dataset.Sampler".equals(name)) {
                     node.setProps(buildProps(element));
                     Map<String, String> props = node.getProps();
-                    if (null == props) {return;}
+                    if (null == props) {
+                        return;
+                    }
                     String prefix = props.get("prefix");
                     String suffix = props.get("suffix");
                     String text = StrUtil.format("{}Kafka数据集采样器{}", prefix, suffix);
@@ -456,9 +630,13 @@ public class JmxUtil {
     }
 
     private static void setRabbitIdentification(ScriptNode node) {
-        if (null == node) {return;}
+        if (null == node) {
+            return;
+        }
         Map<String, String> props = node.getProps();
-        if (null == props) {return;}
+        if (null == props) {
+            return;
+        }
         String exchange = props.get("RabbitSampler.Exchange");
         String routingKey = props.get("RabbitPublisher.MessageRoutingKey");
         if (StrUtil.isBlank(routingKey)) {
@@ -541,7 +719,7 @@ public class JmxUtil {
             if (!(o instanceof Element)) {
                 continue;
             }
-            Element e = (Element)o;
+            Element e = (Element) o;
             if (isNotEnabled(e)) {
                 continue;
             }
@@ -604,7 +782,7 @@ public class JmxUtil {
     }
 
     public static Map<String, String> buildProps(Element element, List<String> propElementNames) {
-        return buildProps(element, propElementNames.toArray(new String[] {}));
+        return buildProps(element, propElementNames.toArray(new String[]{}));
     }
 
     /**
@@ -623,12 +801,12 @@ public class JmxUtil {
             return null;
         }
         return elements.stream().filter(Objects::nonNull)
-            .map(e -> JmxUtil.getKeyAndValue(e, propElementNames))
-            .filter(CollUtil::isNotEmpty)
-            .flatMap(Collection::stream)
-            .filter(Objects::nonNull)
-            .filter(p -> StrUtil.isNotBlank(p.getKey()) && Objects.nonNull(p.getValue()))
-            .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (o1, o2) -> o1));
+                .map(e -> JmxUtil.getKeyAndValue(e, propElementNames))
+                .filter(CollUtil::isNotEmpty)
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .filter(p -> StrUtil.isNotBlank(p.getKey()) && Objects.nonNull(p.getValue()))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (o1, o2) -> o1));
     }
 
     public static Pair<String, String> getBasePropElementKeyAndValue(Element e) {
@@ -669,7 +847,7 @@ public class JmxUtil {
         String name = e.getName();
         if (null != propElementNames && propElementNames.length > 0) {
             boolean contains = Arrays.stream(propElementNames).filter(Objects::nonNull)
-                .anyMatch(s -> s.equals(name));
+                    .anyMatch(s -> s.equals(name));
             if (!contains) {
                 return null;
             }
@@ -731,8 +909,8 @@ public class JmxUtil {
             return;
         }
         String collect = Arrays.stream(keys).filter(StrUtil::isNotBlank)
-            .map(props::get)
-            .collect(Collectors.joining("|"));
+                .map(props::get)
+                .collect(Collectors.joining("|"));
         node.setIdentification(collect);
         node.setRequestPath(collect);
     }
@@ -825,11 +1003,11 @@ public class JmxUtil {
             return 0;
         }
         return json.values().stream().filter(Objects::nonNull)
-            .map(o -> (String)o)
-            .filter(StrUtil::isNotBlank)
-            .map(NumberUtil::parseInt)
-            .findFirst()
-            .orElse(0);
+                .map(o -> (String) o)
+                .filter(StrUtil::isNotBlank)
+                .map(NumberUtil::parseInt)
+                .findFirst()
+                .orElse(0);
     }
 
     /**
@@ -846,7 +1024,7 @@ public class JmxUtil {
         List<Element> list = CollUtil.newArrayList();
         for (Object o : elements) {
             if (o instanceof Element) {
-                list.add((Element)o);
+                list.add((Element) o);
             }
         }
         return list;
@@ -934,4 +1112,5 @@ public class JmxUtil {
         }
         return result;
     }
+
 }
