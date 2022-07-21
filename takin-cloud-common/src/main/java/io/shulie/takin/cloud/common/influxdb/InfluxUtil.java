@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.common.influxdb;
 import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
 
+import io.shulie.takin.cloud.common.utils.CollectorUtil;
 import org.influxdb.BuilderException;
 import org.influxdb.annotation.Column;
 import org.influxdb.dto.Point;
@@ -48,7 +49,7 @@ public class InfluxUtil {
      */
     public static Point toPoint(String measurement, long time, Object pojo) {
         Point.Builder builder = Point.measurement(measurement)
-            .time(time, TimeUnit.MILLISECONDS)
+            .time(CollectorUtil.getTimeWindowTime(time), TimeUnit.MILLISECONDS)
             //当前类的字段添加到数据库
             .addFieldsFromPOJO(pojo)
             .addField("create_time", System.currentTimeMillis());
