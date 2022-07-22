@@ -81,9 +81,9 @@ dependencies {
 //        (!details.file.canonicalPath.contains('slf4j') && !details.file.canonicalPath.contains('gson'))}
 
     //Tests
-//    testImplementation ('org.springframework.boot:spring-boot-starter-test:2.6.6'){
-//        exclude group:"com.jayway.jsonpath", module:"json-path"
-//    }
+    testImplementation ('org.springframework.boot:spring-boot-starter-test:2.6.6'){
+        exclude group:"com.jayway.jsonpath", module:"json-path"
+    }
 }
 
 
