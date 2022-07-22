@@ -48,6 +48,7 @@ import java.util.*;
 public class ScriptTests {
     private static final Logger log = LoggerFactory.getLogger(ScriptTests.class);
     private final static String JMETER_UTILS_CLASS = "org.apache.jmeter.util.JMeterUtils";
+
     @Test
     public void loadJmeterProperties() {
         ArrayList<File> files = new ArrayList<>();
@@ -69,9 +70,10 @@ public class ScriptTests {
 
 
 //        String jmxFile ="/usr/local/apache-jmeter-5.4.1/jmx/kafka2.5.1.jmx";
-//        String jmxFile = "/Users/phine/data/nfs_dir/scriptfile/111/生成二维码.jmx";
+        String jmxFile = "/Users/phine/data/nfs_dir/scriptfile/111/生成二维码.jmx";
 //        String jmxFile ="/usr/local/apache-jmeter-5.4.1/jmx/PID2.jmx";
-        String jmxFile ="/Users/phine/Downloads/fota2.0下行.jmx";
+//        String jmxFile = "/Users/phine/Downloads/js.jmx";
+//        String jmxFile = "/Users/phine/Downloads/fota2.0下行.jmx";
 //        String jmxFile ="/Users/phine/Downloads/e门店-无清单团单-发版.jmx";
         try {
 //            ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
@@ -92,14 +94,13 @@ public class ScriptTests {
             Object o = aClass.getDeclaredConstructor().newInstance();
 
 
-
             Method set = aClass.getDeclaredMethod("set", String.class, Object.class);
             set.setAccessible(true);
             set.invoke(o, "log", log);
             set.invoke(o, "vars", new JMeterVariables());
             set.invoke(o, "ctx", JMeterContextService.getContext());
-            set.invoke(o,"props", JMeterUtils.getJMeterProperties());
-            set.invoke(o,"threadName", Thread.currentThread().getName());
+            set.invoke(o, "props", JMeterUtils.getJMeterProperties());
+            set.invoke(o, "threadName", Thread.currentThread().getName());
             HTTPSamplerBase base = new HTTPSamplerBase() {
                 @Override
                 protected HTTPSampleResult sample(java.net.URL url, String s, boolean b, int i) {
@@ -108,7 +109,6 @@ public class ScriptTests {
             };
             set.invoke(o, "Sampler", base);
             set.invoke(o, "SampleResult", new SampleResult());
-
 
 
             Method eval = aClass.getDeclaredMethod("eval", String.class);
@@ -120,9 +120,11 @@ public class ScriptTests {
 //                    "log.info(i);";
 //            ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
 //            Thread.currentThread().setContextClassLoader(jmeterLibClassLoader);
-           String str = Converter.convert(shells.get(0).getProperty("script"), String.class).toString();
-           log.info(str);
-            Object invoke = eval.invoke(o, str);
+            if (!shells.isEmpty()) {
+                String str = Converter.convert(shells.get(0).getProperty("script"), String.class).toString();
+                log.info(str);
+                Object invoke = eval.invoke(o, str);
+            }
 //            eval.invoke(o, "String str=\"1111\"");
 //            Thread.currentThread().setContextClassLoader(oldClassLoader);
             System.out.println(1);
