@@ -187,7 +187,6 @@ public class JmxUtil {
         for (int i = 0; i < scriptNodes.size(); i++) {
             List<Element> byXpath = findByXpath(elements, scriptNodes.get(i).getXpath(), false);
             if (CollectionUtils.isNotEmpty(byXpath) && byXpath.size() > 1) {
-                System.out.println("替换xpath:" + scriptNodes.get(i).getXpath());
                 element.remove(byXpath.get(0));
                 element.remove(byXpath.get(1));
                 element.add(byXpath.get(0));
@@ -195,7 +194,6 @@ public class JmxUtil {
                 List<Element> byXpathReplace = findByXpath(elements, scriptNodes.get(i).getXpath(), false);
                 Element element1 = byXpathReplace.get(0);
                 result.put(scriptNodes.get(i).getXpathMd5(), Md5Util.md5(element1.getUniquePath()));
-                System.out.println("替换xpath后存储MD5:" + scriptNodes.get(i).getXpathMd5() + " " + Md5Util.md5(element1.getUniquePath()));
                 replace(byXpath.get(1), scriptNodes.get(i).getChildren(), result);
             }
         }
