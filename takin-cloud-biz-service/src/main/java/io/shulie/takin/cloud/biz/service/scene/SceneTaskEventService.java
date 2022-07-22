@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.biz.service.scene;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +107,8 @@ public class SceneTaskEventService {
         if (CollectionUtils.isNotEmpty(activities)) {
             for (BusinessActivityExt d : activities) {
                 if (null != d.getTps()) {
-                    d.setRate(NumberUtil.getRate(d.getTps(), tps));
+                    double rate = new BigDecimal(d.getTps()).divide(new BigDecimal(tps), 10, BigDecimal.ROUND_HALF_UP).doubleValue();
+                    d.setRate(rate);
                 }
                 businessData.put(d.getBindRef(), d);
             }
