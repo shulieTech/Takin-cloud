@@ -13,10 +13,19 @@ import io.shulie.takin.cloud.model.response.ApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.CSVDataSet;
+import org.apache.jmeter.engine.PreCompiler;
+import org.apache.jmeter.engine.TurnElementsOn;
 import org.apache.jmeter.modifiers.BeanShellPreProcessor;
+import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
+import org.apache.jmeter.protocol.http.sampler.HTTPSamplerBase;
 import org.apache.jmeter.protocol.java.sampler.JavaSampler;
+import org.apache.jmeter.samplers.SampleResult;
+import org.apache.jmeter.testelement.TestStateListener;
+import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
+import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.collections.HashTree;
+import org.apache.jorphan.collections.SearchByClass;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -121,6 +130,11 @@ public class ScriptServiceImpl implements ScriptService {
                 installPlugin(pluginFiles);
                 //读取脚本内容&校验基础脚本
                 hashTree = SaveService.loadTree(jmxFile);
+                //初始化前置编译器
+                HashTree test = hashTree;
+                PreCompiler compiler = new PreCompiler();
+                test.traverse(compiler);
+                test.traverse(new TurnElementsOn());
                 //校验BeanShell
                 boolean shellFlag = chekBeanShell(hashTree);
                 if (!shellFlag) {
@@ -177,6 +191,16 @@ public class ScriptServiceImpl implements ScriptService {
             set.setAccessible(true);
             set.invoke(o, "log", log);
             set.invoke(o, "vars", new JMeterVariables());
+            set.invoke(o, "ctx", JMeterContextService.getContext());
+            set.invoke(o, "props", JMeterUtils.getJMeterProperties());
+            set.invoke(o, "threadName", Thread.currentThread().getName());
+            set.invoke(o, "Sampler", new HTTPSamplerBase() {
+                @Override
+                protected HTTPSampleResult sample(java.net.URL url, String s, boolean b, int i) {
+                    return null;
+                }
+            });
+            set.invoke(o, "SampleResult", new SampleResult());
 
             Method eval = aClass.getDeclaredMethod("eval", String.class);
             eval.setAccessible(true);
