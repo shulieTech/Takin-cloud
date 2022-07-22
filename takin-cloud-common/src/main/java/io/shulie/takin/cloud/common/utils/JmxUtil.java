@@ -1,42 +1,29 @@
 package io.shulie.takin.cloud.common.utils;
 
-import java.io.ByteArrayOutputStream;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
+import io.shulie.takin.cloud.common.pojo.Pair;
+import io.shulie.takin.cloud.common.pojo.jmeter.ThreadGroupProperty;
+import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.cloud.ext.content.enums.SamplerTypeEnum;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+
 import java.io.File;
-import java.io.StringWriter;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.net.MalformedURLException;
-
-import cn.hutool.core.io.FileUtil;
-import lombok.extern.slf4j.Slf4j;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.dom4j.Element;
-import org.dom4j.Document;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.SAXReader;
-import org.dom4j.DocumentException;
-
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.collection.CollUtil;
-
-import io.shulie.takin.cloud.common.pojo.Pair;
-import io.shulie.takin.cloud.ext.content.script.ScriptNode;
-import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
-import io.shulie.takin.cloud.common.enums.ThreadGroupTypeEnum;
-import io.shulie.takin.cloud.ext.content.enums.SamplerTypeEnum;
-import io.shulie.takin.cloud.common.pojo.jmeter.ThreadGroupProperty;
-import org.dom4j.io.XMLWriter;
-
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 /**
  * @author liyuanba
@@ -81,20 +68,7 @@ public class JmxUtil {
         }
         try {
             Document document = saxReader.read(f);
-            Element root = document.getRootElement();
-            if (null == root) {
-                return null;
-            }
-            Element childContainer = root.element("hashTree");
-            if (null == childContainer) {
-                return null;
-            }
-            List<Element> elements = elements(childContainer);
-            List<Element> testPlan = findByXpath(elements, "/jmeterTestPlan/hashTree/TestPlan", false);
-            if (CollectionUtils.isEmpty(testPlan) && testPlan.size() <= 1) {
-                return null;
-            }
-            List<Element> threadGroup = findByXpath(elements(testPlan.get(1)), scriptNode.getXpath(), false);
+            List<Element> threadGroup = getAllThreadGroup(document, scriptNode.getXpath());
             if (CollectionUtils.isNotEmpty(threadGroup) && threadGroup.size() > 1) {
                 List<ScriptNode> oldThreadGroup = buildNodeTree(threadGroup);
                 //对比结构获取需要删除的数据
@@ -102,25 +76,42 @@ public class JmxUtil {
                 if (CollectionUtils.isNotEmpty(stringList)) {
                     for (String delXpath : stringList) {
                         //找到所有相关的元素进行删除,在jmeter中需要同时删除元素后面的hashTree
-                        List<Element> needDelList = findByXpath(elements, delXpath, true);
+                        List<Element> needDelList = findByXpath(threadGroup, delXpath, true);
                         if (CollectionUtils.isNotEmpty(needDelList)) {
                             for (Element needDel : needDelList) {
-                                removeByXpath(root, needDel.getUniquePath());
+                                removeByXpath(document.getRootElement(), needDel.getUniquePath());
                             }
                         }
                     }
                 }
                 Map<String, String> result = new HashMap<>();
                 Element element = threadGroup.get(1);
-                replace(element, scriptNode.getChildren(), result);
+                replace(element, scriptNode.getChildren());
+                match(element, scriptNode.getChildren(), result);
                 result.put("xmlContent", document.asXML());
                 return result;
             }
-
         } catch (Exception e) {
             log.error("replaceJmxContent DocumentException, file=" + f.getAbsolutePath(), e);
         }
         return null;
+    }
+
+    private static List<Element> getAllThreadGroup(Document document, String xpath) {
+        Element root = document.getRootElement();
+        if (null == root) {
+            return null;
+        }
+        Element childContainer = root.element("hashTree");
+        if (null == childContainer) {
+            return null;
+        }
+        List<Element> elements = elements(childContainer);
+        List<Element> testPlan = findByXpath(elements, "/jmeterTestPlan/hashTree/TestPlan", false);
+        if (CollectionUtils.isEmpty(testPlan) && testPlan.size() <= 1) {
+            return null;
+        }
+        return findByXpath(elements(testPlan.get(1)), xpath, false);
     }
 
     private static void removeByXpath(Element removeElement, String xpath) {
@@ -172,38 +163,65 @@ public class JmxUtil {
         return result;
     }
 
+    private static void match(Element element, List<ScriptNode> scriptNodes, Map<String, String> result) {
+        if (CollectionUtils.isEmpty(scriptNodes)) {
+            return;
+        }
+        List<Element> elements = elements(element);
+        try {
+            for (int i = 0; i < scriptNodes.size(); i++) {
+                Element e = elements.get(2 * i);
+                result.put(scriptNodes.get(i).getXpathMd5(), Md5Util.md5(e.getUniquePath()));
+                match(elements.get(2 * i + 1), scriptNodes.get(i).getChildren(), result);
+                System.out.println(e.getName() + " " + e.getUniquePath() + " " + scriptNodes.get(i).getTestName());
+            }
+        } catch (Exception e) {
+            log.error("设置移动后匹配关系失败", e);
+        }
+    }
+
     /**
      * 按照scriptNodes的结构重构element
      *
      * @param element
      * @param scriptNodes
-     * @param result      新老xpathMd5对比
      */
-    private static void replace(Element element, List<ScriptNode> scriptNodes, Map<String, String> result) {
+    private static void replace(Element element, List<ScriptNode> scriptNodes) {
         if (CollectionUtils.isEmpty(scriptNodes)) {
             return;
         }
         List<Element> elements = elements(element);
+        //先替换子集的数据，因为先排序外层的话，内部的xpath和原本的就不一致了
+        List<ScriptNode> hasChildScriptNodeList = scriptNodes.stream().filter(o -> CollectionUtils.isNotEmpty(o.getChildren())).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(hasChildScriptNodeList)) {
+            for (ScriptNode scriptNode : hasChildScriptNodeList) {
+                List<Element> byXpath = findByXpath(elements, scriptNode.getXpath(), false);
+                replace(byXpath.get(1), scriptNode.getChildren());
+            }
+        }
+        List<Element> children = new ArrayList<>();
         for (int i = 0; i < scriptNodes.size(); i++) {
             List<Element> byXpath = findByXpath(elements, scriptNodes.get(i).getXpath(), false);
             if (CollectionUtils.isNotEmpty(byXpath) && byXpath.size() > 1) {
-                element.remove(byXpath.get(0));
-                element.remove(byXpath.get(1));
-                element.add(byXpath.get(0));
-                element.add(byXpath.get(1));
-                List<Element> byXpathReplace = findByXpath(elements, scriptNodes.get(i).getXpath(), false);
-                Element element1 = byXpathReplace.get(0);
-                result.put(scriptNodes.get(i).getXpathMd5(), Md5Util.md5(element1.getUniquePath()));
-                replace(byXpath.get(1), scriptNodes.get(i).getChildren(), result);
+                elements.remove(byXpath.get(0));
+                elements.remove(byXpath.get(1));
+                children.add(byXpath.get(0));
+                children.add(byXpath.get(1));
             }
         }
+        //将剩余的元素直接放进去
+        if (CollectionUtils.isNotEmpty(elements)) {
+            children.addAll(elements);
+        }
+        element.setContent(children);
     }
 
     /**
      * 查找元素和后面hashTree
+     *
      * @param elements 被查询对象
-     * @param xpath 需要查询的xpath
-     * @param isAll 是否查询所有下级
+     * @param xpath    需要查询的xpath
+     * @param isAll    是否查询所有下级
      * @return
      */
     private static List<Element> findByXpath(List<Element> elements, String xpath, boolean isAll) {
