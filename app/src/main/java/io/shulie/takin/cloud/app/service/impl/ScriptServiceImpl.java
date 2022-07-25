@@ -194,13 +194,13 @@ public class ScriptServiceImpl implements ScriptService {
             set.invoke(o, "ctx", JMeterContextService.getContext());
             set.invoke(o, "props", JMeterUtils.getJMeterProperties());
             set.invoke(o, "threadName", Thread.currentThread().getName());
-            set.invoke(o, "Sampler", new HTTPSamplerBase() {
+            set.invoke(o, "sampler", new HTTPSamplerBase() {
                 @Override
                 protected HTTPSampleResult sample(java.net.URL url, String s, boolean b, int i) {
                     return null;
                 }
             });
-            set.invoke(o, "SampleResult", new SampleResult());
+            set.invoke(o, "sampleResult", new SampleResult());
 
             Method eval = aClass.getDeclaredMethod("eval", String.class);
             eval.setAccessible(true);
