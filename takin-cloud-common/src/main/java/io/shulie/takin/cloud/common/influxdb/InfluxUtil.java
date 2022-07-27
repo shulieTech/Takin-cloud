@@ -3,10 +3,9 @@ package io.shulie.takin.cloud.common.influxdb;
 import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
 
-import io.shulie.takin.cloud.common.utils.CollectorUtil;
+import org.influxdb.dto.Point;
 import org.influxdb.BuilderException;
 import org.influxdb.annotation.Column;
-import org.influxdb.dto.Point;
 
 /**
  * @author qianshui
@@ -14,7 +13,9 @@ import org.influxdb.dto.Point;
  */
 public class InfluxUtil {
 
-    public static long MAX_ACCEPT_TIMESTAMP = 9223372036854L;
+    private InfluxUtil() {}
+
+    public static final long MAX_ACCEPT_TIMESTAMP = 9223372036854L;
 
     /**
      * 实时统计数据表
@@ -49,17 +50,17 @@ public class InfluxUtil {
      */
     public static Point toPoint(String measurement, long time, Object pojo) {
         Point.Builder builder = Point.measurement(measurement)
-            .time(CollectorUtil.getTimeWindowTime(time), TimeUnit.MILLISECONDS)
+            .time(time, TimeUnit.MILLISECONDS)
             //当前类的字段添加到数据库
             .addFieldsFromPOJO(pojo)
             .addField("create_time", System.currentTimeMillis());
-        Class superclass = pojo.getClass().getSuperclass();
+        Class<?> superclass = pojo.getClass().getSuperclass();
         //父类字段添加到数据库
-        addSuperClassFieldsFromPOJO(builder, pojo, superclass);
+        addSuperClassFieldsFromPojo(builder, pojo, superclass);
         return builder.build();
     }
 
-    private static void addSuperClassFieldsFromPOJO(Point.Builder builder, Object pojo, Class clazz) {
+    private static void addSuperClassFieldsFromPojo(Point.Builder builder, Object pojo, Class<?> clazz) {
         for (Field field : clazz.getDeclaredFields()) {
             Column column = field.getAnnotation(Column.class);
             if (column == null) {
@@ -70,7 +71,7 @@ public class InfluxUtil {
             addFieldByAttribute(builder, pojo, field, column, fieldName);
         }
         if (clazz != Object.class) {
-            addSuperClassFieldsFromPOJO(builder, pojo, clazz.getSuperclass());
+            addSuperClassFieldsFromPojo(builder, pojo, clazz.getSuperclass());
         }
     }
 

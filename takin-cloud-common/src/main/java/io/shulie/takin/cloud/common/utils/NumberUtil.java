@@ -34,65 +34,72 @@ import org.apache.commons.lang3.math.NumberUtils;
  */
 @Slf4j
 public class NumberUtil {
+    private NumberUtil() {}
+
     public static <T> double maxDouble(Collection<T> list, Function<T, Double> func) {
         return maxDouble(list, func, 0d);
     }
+
     public static <T> Double maxDouble(Collection<T> list, Function<T, Double> func, Double defValue) {
         if (CollectionUtils.isEmpty(list)) {
             return defValue;
         }
         OptionalDouble maxOpt = list.stream().filter(Objects::nonNull)
-                .map(func)
-                .filter(Objects::nonNull)
-                .mapToDouble(d -> d)
-                .max();
+            .map(func)
+            .filter(Objects::nonNull)
+            .mapToDouble(d -> d)
+            .max();
         return maxOpt.isPresent() ? maxOpt.getAsDouble() : defValue;
     }
 
     public static <T> int maxInt(Collection<T> list, Function<T, Integer> func) {
         return maxInt(list, func, 0);
     }
+
     public static <T> Integer maxInt(Collection<T> list, Function<T, Integer> func, Integer defValue) {
         if (CollectionUtils.isEmpty(list)) {
             return defValue;
         }
         OptionalInt maxOpt = list.stream().filter(Objects::nonNull)
-                .map(func)
-                .filter(Objects::nonNull)
-                .mapToInt(d -> d)
-                .max();
+            .map(func)
+            .filter(Objects::nonNull)
+            .mapToInt(d -> d)
+            .max();
         return maxOpt.isPresent() ? maxOpt.getAsInt() : defValue;
     }
 
     public static <T> double minDouble(Collection<T> list, Function<T, Double> func) {
         return maxDouble(list, func, 0d);
     }
+
     public static <T> Double minDouble(Collection<T> list, Function<T, Double> func, Double defValue) {
         if (CollectionUtils.isEmpty(list)) {
             return defValue;
         }
         OptionalDouble minOpt = list.stream().filter(Objects::nonNull)
-                .map(func)
-                .filter(Objects::nonNull)
-                .mapToDouble(d -> d)
-                .min();
+            .map(func)
+            .filter(Objects::nonNull)
+            .mapToDouble(d -> d)
+            .min();
         return minOpt.isPresent() ? minOpt.getAsDouble() : defValue;
     }
 
     public static <T> int minInt(Collection<T> list, Function<T, Integer> func) {
         return minInt(list, func, 0);
     }
+
     public static <T> Integer minInt(Collection<T> list, Function<T, Integer> func, Integer defValue) {
         if (CollectionUtils.isEmpty(list)) {
             return defValue;
         }
         OptionalInt minOpt = list.stream().filter(Objects::nonNull)
-                .map(func)
-                .filter(Objects::nonNull)
-                .mapToInt(d -> d)
-                .min();
+            .map(func)
+            .filter(Objects::nonNull)
+            .mapToInt(d -> d)
+            .min();
         return minOpt.isPresent() ? minOpt.getAsInt() : defValue;
     }
+
     /**
      * 从list中对某个字段的数字进行累加
      * 区别CommUtil.sum方法，一个是返回默认值0，一个返回null
@@ -106,10 +113,10 @@ public class NumberUtil {
             return defValue;
         }
         return list.stream().filter(Objects::nonNull)
-                .map(func)
-                .filter(Objects::nonNull)
-                .mapToInt(d -> d)
-                .sum();
+            .map(func)
+            .filter(Objects::nonNull)
+            .mapToInt(d -> d)
+            .sum();
     }
 
     public static <T> Long sumLong(Collection<T> list, Function<T, Long> func) {
@@ -121,10 +128,10 @@ public class NumberUtil {
             return defValue;
         }
         return list.stream().filter(Objects::nonNull)
-                .map(func)
-                .filter(Objects::nonNull)
-                .mapToLong(d -> d)
-                .sum();
+            .map(func)
+            .filter(Objects::nonNull)
+            .mapToLong(d -> d)
+            .sum();
     }
 
     public static <T> Double sumDouble(Collection<T> list, Function<T, Double> func) {
@@ -136,10 +143,10 @@ public class NumberUtil {
             return devValue;
         }
         return list.stream().filter(Objects::nonNull)
-                .map(func)
-                .filter(Objects::nonNull)
-                .mapToDouble(d -> d)
-                .sum();
+            .map(func)
+            .filter(Objects::nonNull)
+            .mapToDouble(d -> d)
+            .sum();
     }
 
     public static int sum(Integer a, Integer b) {
@@ -149,7 +156,7 @@ public class NumberUtil {
         if (null == b) {
             b = 0;
         }
-        return a+b;
+        return a + b;
     }
 
     public static int parseInt(String s) {
@@ -255,7 +262,7 @@ public class NumberUtil {
 
     public static boolean isZero(double a) {
         BigDecimal zero = new BigDecimal(0);
-        BigDecimal aa = new BigDecimal(a);
+        BigDecimal aa = BigDecimal.valueOf(a);
         return aa.compareTo(zero) == 0;
     }
 
@@ -268,10 +275,5 @@ public class NumberUtil {
 
     public static String decimalToString(BigDecimal decimal) {
         return decimalToString(decimal, 2, RoundingMode.HALF_DOWN);
-    }
-
-    public static void main(String[] args) {
-        System.out.println("isZero=" + decimalToString(null));
-        System.out.println("getRate=" + getRate(1, 0.00000d));
     }
 }

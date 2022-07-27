@@ -9,6 +9,28 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import io.shulie.takin.cloud.common.constants.ReportConstants;
+import lombok.extern.slf4j.Slf4j;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiOperation;
+
+import org.springframework.http.ResponseEntity;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import cn.hutool.core.collection.CollUtil;
+
+import io.shulie.takin.utils.json.JsonHelper;
+import io.shulie.takin.cloud.common.utils.UrlUtil;
+import io.shulie.takin.cloud.common.utils.IPUtils;
+import io.shulie.takin.cloud.common.utils.GsonUtil;
+import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.biz.cache.SceneTaskStatusCache;
 import io.shulie.takin.cloud.common.bean.collector.Constants;
 import io.shulie.takin.cloud.common.bean.collector.EventMetrics;
@@ -18,23 +40,6 @@ import io.shulie.takin.cloud.common.constants.PressureEngineConstants;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import io.shulie.takin.cloud.common.constants.PressureInstanceRedisKey;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
-import io.shulie.takin.cloud.common.utils.GsonUtil;
-import io.shulie.takin.cloud.common.utils.IPUtils;
-import io.shulie.takin.cloud.common.utils.UrlUtil;
-import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
-import io.shulie.takin.utils.json.JsonHelper;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
@@ -66,7 +71,7 @@ public class CollectorApplication {
             if (sceneId == null || reportId == null) {
                 return ResponseEntity.ok("唯一标示不能为空");
             }
-            if (null == metrics || metrics.size() < 1) {
+            if (CollUtil.isEmpty(metrics)) {
                 return ResponseEntity.ok("metrics数据为空");
             }
             // 分类
@@ -110,6 +115,14 @@ public class CollectorApplication {
         }
     }
 
+    /**
+     * 业务活动和MD5映射的转换
+     *
+     * @param responseMetrics 需要转换的数据
+     * @param sceneId         场景主键
+     * @param reportId        报告主键
+     * @param tenantId        租户主键
+     */
     private void culTransaction(List<ResponseMetrics> responseMetrics, Long sceneId, Long reportId, Long tenantId) {
         //后置匹配处理逻辑，如果是前置匹配，不需要处理
         if (!scriptPreMatch && CollectionUtils.isNotEmpty(responseMetrics)) {
@@ -127,7 +140,7 @@ public class CollectorApplication {
                         transaction = responseMetric.getTransaction().substring(md5Position + PressureEngineConstants.TRANSACTION_SPLIT_STR.length());
                     }
                     //特殊业务类型，不做处理
-                    if ("all".equals(transaction)) {
+                    if (ReportConstants.ALL_BUSINESS_ACTIVITY.equals(transaction)) {
                         return;
                     }
                     if (activityRefMap.containsKey(transaction)) {
