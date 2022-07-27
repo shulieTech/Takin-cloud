@@ -496,6 +496,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setResourceName(activityRefInput.getBusinessActivityName());
         // 设置用户主键
         sceneTaskStartInput.setOperateId(CloudPluginUtils.getUserId());
+        sceneTaskStartInput.setPlaceholderMap(input.getPlaceholderMap());
         SceneActionOutput sceneActionDTO = startTask(sceneTaskStartInput);
         //返回报告id
         return sceneActionDTO.getData();
@@ -559,6 +560,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         SceneInspectInput inspectInput = new SceneInspectInput().setFixedTimer(fixTimer).setLoopsNum(loopsNum);
         sceneTaskStartInput.setSceneInspectInput(inspectInput);
         sceneTaskStartInput.setContinueRead(false);
+        sceneTaskStartInput.setPlaceholderMap(input.getPlaceholderMap());
         SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput);
         startOutput.setSceneId(sceneManageId);
         startOutput.setReportId(sceneActionOutput.getData());
@@ -682,6 +684,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setResourceName(input.getScriptName());
         sceneTaskStartInput.setOperateId(input.getOperateId());
         sceneTaskStartInput.setOperateName(input.getOperateName());
+        sceneTaskStartInput.setPlaceholderMap(input.getPlaceholderMap());
         SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput);
         sceneTryRunTaskStartOutput.setReportId(sceneActionOutput.getData());
 

@@ -72,21 +72,10 @@ public class JmxUtil {
             if (CollectionUtils.isNotEmpty(threadGroup) && threadGroup.size() > 1) {
                 List<ScriptNode> oldThreadGroup = buildNodeTree(threadGroup);
                 //对比结构获取需要删除的数据
-                List<String> stringList = needDelXpath(oldThreadGroup, scriptNode);
-                if (CollectionUtils.isNotEmpty(stringList)) {
-                    for (String delXpath : stringList) {
-                        //找到所有相关的元素进行删除,在jmeter中需要同时删除元素后面的hashTree
-                        List<Element> needDelList = findByXpath(threadGroup, delXpath, true);
-                        if (CollectionUtils.isNotEmpty(needDelList)) {
-                            for (Element needDel : needDelList) {
-                                removeByXpath(document.getRootElement(), needDel.getUniquePath());
-                            }
-                        }
-                    }
-                }
+                List<String> needDelXpathList = needDelXpath(oldThreadGroup, scriptNode);
                 Map<String, String> result = new HashMap<>();
                 Element element = threadGroup.get(1);
-                replace(element, scriptNode.getChildren());
+                replace(element, scriptNode.getChildren(), needDelXpathList);
                 match(element, scriptNode.getChildren(), result);
                 result.put("xmlContent", document.asXML());
                 return result;
@@ -186,7 +175,7 @@ public class JmxUtil {
      * @param element
      * @param scriptNodes
      */
-    private static void replace(Element element, List<ScriptNode> scriptNodes) {
+    private static void replace(Element element, List<ScriptNode> scriptNodes, List<String> needDelXpathList) {
         if (CollectionUtils.isEmpty(scriptNodes)) {
             return;
         }
@@ -196,7 +185,7 @@ public class JmxUtil {
         if (CollectionUtils.isNotEmpty(hasChildScriptNodeList)) {
             for (ScriptNode scriptNode : hasChildScriptNodeList) {
                 List<Element> byXpath = findByXpath(elements, scriptNode.getXpath(), false);
-                replace(byXpath.get(1), scriptNode.getChildren());
+                replace(byXpath.get(1), scriptNode.getChildren(),needDelXpathList);
             }
         }
         List<Element> children = new ArrayList<>();
@@ -207,6 +196,16 @@ public class JmxUtil {
                 elements.remove(byXpath.get(1));
                 children.add(byXpath.get(0));
                 children.add(byXpath.get(1));
+            }
+        }
+        //剩余元素中查看是否存在需要删除的元素，存在直接删除
+        if (CollectionUtils.isNotEmpty(needDelXpathList)){
+            for (int i = 0; i < needDelXpathList.size(); i++) {
+                List<Element> byXpath = findByXpath(elements, needDelXpathList.get(i), false);
+                if (CollectionUtils.isNotEmpty(byXpath) && byXpath.size() > 1) {
+                    elements.remove(byXpath.get(0));
+                    elements.remove(byXpath.get(1));
+                }
             }
         }
         //将剩余的元素直接放进去
