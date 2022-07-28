@@ -85,7 +85,7 @@ public class PressureTestLogUploadTask implements Runnable {
      * 上传PTL文件
      */
     private void uploadPtlFile() {
-        String filePath = String.format(logDir + "/ptl/%s/%s/%s", this.sceneId, this.reportId, fileName);
+        String filePath = String.format("%s/ptl/%d/%d/%s",logDir, this.sceneId, this.reportId, fileName);
         log.info("上传压测明细日志--文件路径：{}", filePath);
         //解决报告已完成，但是文件还未生成，上传大小未0
         int waitCount = 0;
@@ -97,6 +97,7 @@ public class PressureTestLogUploadTask implements Runnable {
             } catch (InterruptedException e) {
                 cleanCache(this.fileName.replaceAll("\\.", ""));
                 log.warn("上传Jmeter日志--场景ID:{},休眠失败，文件路径【{}】", this.sceneId, filePath);
+                Thread.currentThread().interrupt();
                 return;
             }
         }
@@ -124,7 +125,7 @@ public class PressureTestLogUploadTask implements Runnable {
                 data = readFile(ptlFile, subFileName, position, ptlFile.getAbsolutePath(), fileFetcher, MAX_PUSH_SIZE);
                 // 如果没有读到数据需要判断是不是报告已经完成，如果报告已经完成说明任务已经结束，并且日志都已经推送完成，这时就可以结束这个文件的推送任务
                 //否则下一次继续读取
-                if (data == null || data.length == 0) {
+                if (data.length == 0) {
                     //场景状态是否是完成
                     boolean sceneEnded = isSceneEnded(this.sceneId);
                     if (sceneEnded) {
@@ -143,7 +144,7 @@ public class PressureTestLogUploadTask implements Runnable {
                         }
                         long lastSize = Math.max(fileSize - position, MAX_PUSH_SIZE);
                         data = readFile(ptlFile, subFileName, position, ptlFile.getAbsolutePath(), fileFetcher, lastSize);
-                        if (data != null && data.length > 0) {
+                        if (data.length > 0) {
                             pushLogService.pushLogToAmdb(data, VERSION);
                         } else if (lastSize > 0) {
                             TimeUnit.SECONDS.sleep(10);
@@ -163,6 +164,12 @@ public class PressureTestLogUploadTask implements Runnable {
                     continue;
                 }
                 pushLogService.pushLogToAmdb(data, VERSION);
+            } catch (InterruptedException e) {
+                cleanCache(subFileName);
+                log.error("异常代码【{}】,异常内容：推送日志到amdb异常 --> 异常信息: {}",
+                    TakinCloudExceptionEnum.TASK_RUNNING_LOG_PUSH_ERROR, e);
+                Thread.currentThread().interrupt();
+                return;
             } catch (Throwable e) {
                 cleanCache(subFileName);
                 log.error("异常代码【{}】,异常内容：推送日志到amdb异常 --> 异常信息: {}",
@@ -181,8 +188,7 @@ public class PressureTestLogUploadTask implements Runnable {
         String statusKey = String.format(SceneTaskRedisConstants.SCENE_TASK_RUN_KEY + "%s_%s", this.sceneId,
             this.reportId);
         stringRedisTemplate.opsForHash().delete(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
-            String.format("%s_%s_%s", this.sceneId,
-                this.reportId, fileName));
+            String.format("%d_%d_%s", this.sceneId, this.reportId, fileName));
         stringRedisTemplate.opsForHash().put(statusKey, SceneTaskRedisConstants.SCENE_RUN_TASK_STATUS_KEY,
             SceneRunTaskStatusEnum.ENDED.getText());
     }
@@ -195,7 +201,7 @@ public class PressureTestLogUploadTask implements Runnable {
      */
     private void cacheFileUploadedPosition(String fileName, Long position) {
         stringRedisTemplate.opsForHash().put(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
-            String.format("%s_%s_%s", this.sceneId, this.reportId, fileName),
+            String.format("%d_%d_%s", this.sceneId, this.reportId, fileName),
             String.valueOf(position));
     }
 
@@ -208,7 +214,7 @@ public class PressureTestLogUploadTask implements Runnable {
     private Long getPosition(String fileName) {
         Object position = stringRedisTemplate.opsForHash()
             .get(SceneTaskRedisConstants.PRESSURE_TEST_LOG_UPLOAD_RECORD,
-                String.format("%s_%s_%s", this.sceneId, this.reportId, fileName));
+                String.format("%d_%d_%s", this.sceneId, this.reportId, fileName));
         if (Objects.isNull(position)) {
             return 0L;
         } else {
@@ -258,12 +264,12 @@ public class PressureTestLogUploadTask implements Runnable {
         throws IOException {
         if (!file.exists() || !file.isFile()) {
             log.warn("上传压测明细日志--读取文件【{}】失败：文件不存在或非文件", filePath);
-            return null;
+            return new byte[0];
         }
         byte[] data = fileFetcher.read(position, pushSize);
         //已经读到当前行，等待文件继续写入
         if (data == null || data.length == 0) {
-            return data;
+            return new byte[0];
         }
         log.debug("上传压测明细日志--读取到文件大小:【{}】", data.length);
         position += data.length;
@@ -279,18 +285,17 @@ public class PressureTestLogUploadTask implements Runnable {
      */
     private void createUploadRecord(Long sceneId, Long reportId, Long tenantId, String fileName, Long fileSize) {
         log.info("上传压测明细日志--文件【{}】上传完成，创建上传记录", fileName);
-        ScenePressureTestLogUploadEntity entity = new ScenePressureTestLogUploadEntity() {{
-            setSceneId(sceneId);
-            setReportId(reportId);
-            setTenantId(tenantId);
-            setFileName(fileName);
-            setTaskStatus(SceneRunTaskStatusEnum.ENDED.getCode());
-            setUploadStatus(2);
-            setCreateTime(new Date());
-            setUploadCount(fileSize);
-        }};
-        int record = this.logUploadDAO.insertRecord(entity);
-        if (record == 1) {
+        ScenePressureTestLogUploadEntity entity = new ScenePressureTestLogUploadEntity();
+            entity.setSceneId(sceneId);
+            entity.setReportId(reportId);
+            entity.setTenantId(tenantId);
+            entity.setFileName(fileName);
+            entity.setTaskStatus(SceneRunTaskStatusEnum.ENDED.getCode());
+            entity.setUploadStatus(2);
+            entity.setCreateTime(new Date());
+            entity.setUploadCount(fileSize);
+        int insertRows = this.logUploadDAO.insertRecord(entity);
+        if (insertRows == 1) {
             log.info("上传压测明细日志--创建上传记录成功:sceneID:【{}】,reportID:【{}】,fileName:【{}】", sceneId, reportId, fileName);
         } else {
             log.error("异常代码【{}】,异常内容：上传压测明细日志--创建上传记录失败:sceneID:【{}】,reportID:【{}】,fileName:【{}",
