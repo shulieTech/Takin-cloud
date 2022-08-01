@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-
 import io.shulie.takin.cloud.data.entity.JobEntity;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.model.response.ApiResult;
@@ -25,9 +23,9 @@ import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.data.entity.JobExampleEventEntity;
-import io.shulie.takin.cloud.data.mapper.JobExampleEventMapper;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEventEntity;
-import io.shulie.takin.cloud.data.mapper.ResourceExampleEventMapper;
+import io.shulie.takin.cloud.data.service.JobExampleEventMapperService;
+import io.shulie.takin.cloud.data.service.ResourceExampleEventMapperService;
 
 /**
  * 墓志铭
@@ -42,10 +40,10 @@ public class GravestoneController {
     JobService jobService;
     @Resource
     ResourceService resourceService;
-    @Resource
-    JobExampleEventMapper jobExampleEventMapper;
-    @Resource
-    ResourceExampleEventMapper resourceExampleEventMapper;
+    @Resource(name = "jobExampleEventMapperServiceImpl")
+    JobExampleEventMapperService jobExampleEventMapper;
+    @Resource(name = "resourceExampleEventMapperServiceImpl")
+    ResourceExampleEventMapperService resourceExampleEventMapper;
 
     /**
      * 读取墓志铭
@@ -64,8 +62,9 @@ public class GravestoneController {
                 // 资源实例信息
                 result.add(new Gravestone(t.getCreateTime().getTime(), "资源实例创建", String.valueOf(t.getId())));
                 // 资源实例事件
-                List<ResourceExampleEventEntity> resourceExampleEvent = resourceExampleEventMapper.selectList(new LambdaQueryWrapper<>(ResourceExampleEventEntity.class)
-                    .eq(ResourceExampleEventEntity::getResourceExampleId, t.getId()));
+                List<ResourceExampleEventEntity> resourceExampleEvent = resourceExampleEventMapper.lambdaQuery()
+                    .eq(ResourceExampleEventEntity::getResourceExampleId, t.getId())
+                    .list();
                 resourceExampleEvent.forEach(c -> result.add(eventType(c.getTime(), c.getId(), c.getType(), c.getContext())));
             });
             if (jobId != null) {
@@ -80,8 +79,9 @@ public class GravestoneController {
                         // 任务实例信息
                         result.add(new Gravestone(resource.getCreateTime().getTime(), "任务实例创建", String.valueOf(t.getId())));
                         // 任务实例事件
-                        List<JobExampleEventEntity> jobExampleEvent = jobExampleEventMapper.selectList(new LambdaQueryWrapper<>(JobExampleEventEntity.class)
-                            .eq(JobExampleEventEntity::getJobExampleId, t.getId()));
+                        List<JobExampleEventEntity> jobExampleEvent = jobExampleEventMapper.lambdaQuery()
+                            .eq(JobExampleEventEntity::getJobExampleId, t.getId())
+                            .list();
                         jobExampleEvent.forEach(c -> result.add(eventType(c.getTime(), c.getId(), c.getType(), c.getContext())));
                     });
                 }

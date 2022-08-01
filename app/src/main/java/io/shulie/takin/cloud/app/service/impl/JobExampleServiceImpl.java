@@ -7,20 +7,20 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import io.shulie.takin.cloud.data.entity.JobEntity;
-import io.shulie.takin.cloud.data.mapper.JobMapper;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.data.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.app.service.JobExampleService;
 import io.shulie.takin.cloud.model.callback.JobExampleStop;
+import io.shulie.takin.cloud.data.service.JobMapperService;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.model.callback.JobExampleError;
 import io.shulie.takin.cloud.model.callback.JobExampleStart;
 import io.shulie.takin.cloud.model.callback.basic.JobExample;
 import io.shulie.takin.cloud.data.entity.JobExampleEventEntity;
-import io.shulie.takin.cloud.data.mapper.JobExampleEventMapper;
 import io.shulie.takin.cloud.model.callback.JobExampleHeartbeat;
 import io.shulie.takin.cloud.data.service.JobExampleMapperService;
+import io.shulie.takin.cloud.data.service.JobExampleEventMapperService;
 import io.shulie.takin.cloud.model.callback.JobExampleError.JobExampleErrorInfo;
 
 /**
@@ -32,15 +32,15 @@ import io.shulie.takin.cloud.model.callback.JobExampleError.JobExampleErrorInfo;
 @Slf4j
 public class JobExampleServiceImpl implements JobExampleService {
     @javax.annotation.Resource
-    JobMapper jobMapper;
-    @javax.annotation.Resource
     JsonService jsonService;
     @javax.annotation.Resource
     CallbackService callbackService;
-    @javax.annotation.Resource
-    JobExampleEventMapper jobExampleEventMapper;
-    @javax.annotation.Resource
-    JobExampleMapperService jobExampleMapperService;
+    @javax.annotation.Resource(name = "jobMapperServiceImpl")
+    JobMapperService jobMapper;
+    @javax.annotation.Resource(name = "jobExampleMapperServiceImpl")
+    JobExampleMapperService jobExampleMapper;
+    @javax.annotation.Resource(name = "jobExampleEventMapperServiceImpl")
+    JobExampleEventMapperService jobExampleEventMapper;
 
     @Override
     public void onHeartbeat(long id) {
@@ -51,7 +51,7 @@ public class JobExampleServiceImpl implements JobExampleService {
         // 创建回调
         callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
         // 记录事件
-        jobExampleEventMapper.insert(new JobExampleEventEntity()
+        jobExampleEventMapper.save(new JobExampleEventEntity()
             .setContext("{}")
             .setJobExampleId(id)
             .setType(NotifyEventType.JOB_EXAMPLE_HEARTBEAT.getCode())
@@ -68,7 +68,7 @@ public class JobExampleServiceImpl implements JobExampleService {
         boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
         log.info("启动任务：{}, 回调结果: {}", id, complete);
         // 记录事件
-        jobExampleEventMapper.insert(new JobExampleEventEntity()
+        jobExampleEventMapper.save(new JobExampleEventEntity()
             .setContext("{}")
             .setJobExampleId(id)
             .setType(NotifyEventType.JOB_EXAMPLE_START.getCode())
@@ -87,7 +87,7 @@ public class JobExampleServiceImpl implements JobExampleService {
         boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
         log.info("停止任务：{}, 回调结果: {}", id, complete);
         // 记录事件
-        jobExampleEventMapper.insert(new JobExampleEventEntity()
+        jobExampleEventMapper.save(new JobExampleEventEntity()
             .setContext("{}")
             .setJobExampleId(id)
             .setType(NotifyEventType.JOB_EXAMPLE_STOP.getCode())
@@ -109,7 +109,7 @@ public class JobExampleServiceImpl implements JobExampleService {
         // 记录事件
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
         objectNode.put("message", errorMessage);
-        jobExampleEventMapper.insert(new JobExampleEventEntity()
+        jobExampleEventMapper.save(new JobExampleEventEntity()
             .setJobExampleId(id)
             .setContext(objectNode.toPrettyString())
             .setType(NotifyEventType.JOB_EXAMPLE_ERROR.getCode())
@@ -118,8 +118,8 @@ public class JobExampleServiceImpl implements JobExampleService {
 
     @Override
     public JobExample getCallbackData(long jobExampleId, StringBuilder callbackUrl) {
-        JobExampleEntity jobExampleEntity = jobExampleMapperService.getById(jobExampleId);
-        JobEntity jobEntity = jobMapper.selectById(jobExampleEntity.getJobId());
+        JobExampleEntity jobExampleEntity = jobExampleMapper.getById(jobExampleId);
+        JobEntity jobEntity = jobMapper.getById(jobExampleEntity.getJobId());
         callbackUrl.append(jobEntity.getCallbackUrl());
         return new JobExample()
             .setJobId(jobEntity.getId())

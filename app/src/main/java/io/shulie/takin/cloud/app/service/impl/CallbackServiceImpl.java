@@ -37,17 +37,17 @@ import io.shulie.takin.cloud.data.service.CallbackLogMapperService;
 @Service
 @Slf4j(topic = "CALLBACK")
 public class CallbackServiceImpl implements CallbackService {
-    @javax.annotation.Resource
-    CallbackMapperService callbackMapperService;
-    @javax.annotation.Resource
-    CallbackLogMapperService callbackLogMapperService;
+    @javax.annotation.Resource(name = "callbackMapperServiceImpl")
+    CallbackMapperService callbackMapper;
+    @javax.annotation.Resource(name = "callbackLogMapperServiceImpl")
+    CallbackLogMapperService callbackLogMapper;
 
     private static final String RES_SUCCESS_TAG = "SUCCESS";
 
     @Override
     public PageInfo<CallbackEntity> list(int pageNumber, int pageSize, boolean isCompleted) {
         try (Page<Object> ignored = PageMethod.startPage(pageNumber, pageSize)) {
-            List<CallbackEntity> sourceList = callbackMapperService.lambdaQuery()
+            List<CallbackEntity> sourceList = callbackMapper.lambdaQuery()
                 // 未完成
                 .eq(CallbackEntity::getCompleted, isCompleted)
                 // 并且
@@ -62,7 +62,7 @@ public class CallbackServiceImpl implements CallbackService {
 
     @Override
     public void create(String url, byte[] content) {
-        callbackMapperService.save(new CallbackEntity().setUrl(url).setContext(content));
+        callbackMapper.save(new CallbackEntity().setUrl(url).setContext(content));
     }
 
     @Override
@@ -72,13 +72,13 @@ public class CallbackServiceImpl implements CallbackService {
             .setRequestData(data)
             .setCallbackId(callbackId)
             .setRequestTime(new Date());
-        callbackLogMapperService.save(callbackLogEntity);
+        callbackLogMapper.save(callbackLogEntity);
         return callbackLogEntity.getId();
     }
 
     @Override
     public boolean fillLog(long callbackLogId, byte[] data) {
-        CallbackLogEntity callbackLogEntity = callbackLogMapperService.getById(callbackLogId);
+        CallbackLogEntity callbackLogEntity = callbackLogMapper.getById(callbackLogId);
         if (callbackLogEntity == null) {
             log.warn("{}对应的数据库记录未找到", callbackLogId);
             return false;
@@ -95,7 +95,7 @@ public class CallbackServiceImpl implements CallbackService {
                 log.error("CallbackServiceImpl#fillLog", e);
             }
             // 填充日志信息
-            callbackLogMapperService.updateById(new CallbackLogEntity()
+            callbackLogMapper.updateById(new CallbackLogEntity()
                 .setId(callbackLogId)
                 .setResponseData(data)
                 .setCompleted(completed)
@@ -103,7 +103,7 @@ public class CallbackServiceImpl implements CallbackService {
             );
             // 更新回调的状态
             if (completed) {
-                callbackMapperService.lambdaUpdate().set(CallbackEntity::getCompleted, true)
+                callbackMapper.lambdaUpdate().set(CallbackEntity::getCompleted, true)
                     .eq(CallbackEntity::getId, callbackLogEntity.getCallbackId())
                     .update();
             }
@@ -131,10 +131,10 @@ public class CallbackServiceImpl implements CallbackService {
         boolean completed = isSuccess(responseData);
         //修改回调记录
         if (Objects.nonNull(id)) {
-            CallbackEntity entity = callbackMapperService.getById(id);
+            CallbackEntity entity = callbackMapper.getById(id);
             entity.setCompleted(completed);
             entity.setThresholdTime(new Date());
-            callbackMapperService.updateById(entity);
+            callbackMapper.updateById(entity);
         }
         //创建回调记录
         else {
@@ -143,7 +143,7 @@ public class CallbackServiceImpl implements CallbackService {
                 .setUrl(callbackUrl)
                 .setContext(content.getBytes(StandardCharsets.UTF_8))
                 .setThresholdTime(new Date());
-            callbackMapperService.save(callbackEntity);
+            callbackMapper.save(callbackEntity);
         }
         return completed;
     }
@@ -170,12 +170,12 @@ public class CallbackServiceImpl implements CallbackService {
      */
     private void updateThresholdTime(long callbackId) {
         try {
-            CallbackEntity callback = callbackMapperService.getById(callbackId);
-            Long logCount = callbackLogMapperService.lambdaQuery()
+            CallbackEntity callback = callbackMapper.getById(callbackId);
+            Long logCount = callbackLogMapper.lambdaQuery()
                 .eq(CallbackLogEntity::getCallbackId, callbackId)
                 .count();
             DateTime thresholdTime = DateUtil.offsetMillisecond(callback.getCreateTime(), 2 << logCount);
-            callbackMapperService.lambdaUpdate()
+            callbackMapper.lambdaUpdate()
                 .set(CallbackEntity::getThresholdTime, thresholdTime)
                 .eq(CallbackEntity::getId, callback.getId())
                 .update();

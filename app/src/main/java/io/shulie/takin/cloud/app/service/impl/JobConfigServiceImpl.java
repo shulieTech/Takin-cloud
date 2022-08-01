@@ -12,8 +12,8 @@ import io.shulie.takin.cloud.data.entity.ThreadConfigEntity;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 import io.shulie.takin.cloud.data.service.MetricsMapperService;
 import io.shulie.takin.cloud.data.entity.ThreadConfigExampleEntity;
-import io.shulie.takin.cloud.data.service.impl.ThreadConfigMapperServiceImpl;
-import io.shulie.takin.cloud.data.service.impl.ThreadConfigExampleMapperServiceImpl;
+import io.shulie.takin.cloud.data.service.ThreadConfigMapperService;
+import io.shulie.takin.cloud.data.service.ThreadConfigExampleMapperService;
 
 /**
  * 任务配置服务 - 实例
@@ -23,19 +23,19 @@ import io.shulie.takin.cloud.data.service.impl.ThreadConfigExampleMapperServiceI
 @Slf4j
 @Service
 public class JobConfigServiceImpl implements JobConfigService {
-    @javax.annotation.Resource
-    MetricsMapperService metricsMapperService;
-    @javax.annotation.Resource
-    ThreadConfigMapperServiceImpl threadConfigMapperService;
-    @javax.annotation.Resource
-    ThreadConfigExampleMapperServiceImpl threadConfigExampleMapperService;
+    @javax.annotation.Resource(name = "metricsMapperServiceImpl")
+    MetricsMapperService metricsMapper;
+    @javax.annotation.Resource(name = "threadConfigMapperServiceImpl")
+    ThreadConfigMapperService threadConfigMappe;
+    @javax.annotation.Resource(name = "threadConfigExampleMapperServiceImpl")
+    ThreadConfigExampleMapperService threadConfigExampleMapper;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public List<MetricsEntity> metricsList(long jobId) {
-        return metricsMapperService.lambdaQuery()
+        return metricsMapper.lambdaQuery()
             .eq(MetricsEntity::getJobId, jobId)
             .list();
     }
@@ -45,7 +45,7 @@ public class JobConfigServiceImpl implements JobConfigService {
      */
     @Override
     public List<ThreadConfigExampleEntity> threadList(long jobId) {
-        return threadConfigExampleMapperService.lambdaQuery()
+        return threadConfigExampleMapper.lambdaQuery()
             .eq(ThreadConfigExampleEntity::getJobId, jobId)
             .list();
     }
@@ -55,7 +55,7 @@ public class JobConfigServiceImpl implements JobConfigService {
      */
     @Override
     public List<ThreadConfigExampleEntity> threadExampleItem(long jobId, String ref) {
-        return threadConfigExampleMapperService.lambdaQuery()
+        return threadConfigExampleMapper.lambdaQuery()
             .eq(ThreadConfigExampleEntity::getJobId, jobId)
             .eq(CharSequenceUtil.isNotBlank(ref), ThreadConfigExampleEntity::getRef, ref)
             .list();
@@ -66,7 +66,7 @@ public class JobConfigServiceImpl implements JobConfigService {
      */
     @Override
     public void modifThreadConfigExample(long threadConfigExampleId, ThreadGroupType type, String context) {
-        threadConfigExampleMapperService.updateById(new ThreadConfigExampleEntity()
+        threadConfigExampleMapper.updateById(new ThreadConfigExampleEntity()
             .setContext(context)
             .setType(type.getCode())
             .setId(threadConfigExampleId)
@@ -78,7 +78,7 @@ public class JobConfigServiceImpl implements JobConfigService {
      */
     @Override
     public void createMetrics(List<MetricsEntity> metricsEntityList) {
-        metricsMapperService.saveBatch(metricsEntityList);
+        metricsMapper.saveBatch(metricsEntityList);
     }
 
     /**
@@ -86,7 +86,7 @@ public class JobConfigServiceImpl implements JobConfigService {
      */
     @Override
     public void createThread(List<ThreadConfigEntity> metricsEntityList) {
-        threadConfigMapperService.saveBatch(metricsEntityList);
+        threadConfigMappe.saveBatch(metricsEntityList);
     }
 
     /**
@@ -94,6 +94,6 @@ public class JobConfigServiceImpl implements JobConfigService {
      */
     @Override
     public void createThreadExample(List<ThreadConfigExampleEntity> threadConfigExampleEntityList) {
-        threadConfigExampleMapperService.saveBatch(threadConfigExampleEntityList);
+        threadConfigExampleMapper.saveBatch(threadConfigExampleEntityList);
     }
 }

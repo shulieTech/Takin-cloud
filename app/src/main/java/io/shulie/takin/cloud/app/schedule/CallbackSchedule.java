@@ -33,6 +33,5 @@ public class CallbackSchedule implements Runnable {
             boolean callback = callbackService.callback(entity.getId(), entity.getUrl(), callbackContent);
             log.info("回调定时器调度内容：{},调度结果：{}", callbackContent, callback);
         }
-
     }
 }

@@ -13,5 +13,7 @@ import io.shulie.takin.cloud.data.service.JobFileMapperService;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
-public class JobFileMapperServiceImpl extends ServiceImpl<JobFileMapper, JobFileEntity> implements JobFileMapperService {
+public class JobFileMapperServiceImpl
+    extends ServiceImpl<JobFileMapper, JobFileEntity>
+    implements JobFileMapperService {
 }

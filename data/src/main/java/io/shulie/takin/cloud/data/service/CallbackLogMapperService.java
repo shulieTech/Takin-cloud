@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import io.shulie.takin.cloud.data.entity.CallbackLogEntity;
 
 /**
- * Mapper - IService - 任务实例
+ * Mapper - IService - 回调日志
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */

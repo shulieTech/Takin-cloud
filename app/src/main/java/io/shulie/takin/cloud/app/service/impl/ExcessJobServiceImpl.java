@@ -65,15 +65,15 @@ public class ExcessJobServiceImpl implements ExcessJobService {
     MetricsService metricsService;
     @Resource
     CallbackService callbackService;
-    @Resource
-    ExcessJobMapperService excessJobMapperService;
-    @Resource
-    ExcessJobLogMapperService excessJobLogMapperService;
+    @Resource(name = "excessJobMapperServiceImpl")
+    ExcessJobMapperService excessJobMapper;
+    @Resource(name = "excessJobLogMapperServiceImpl")
+    ExcessJobLogMapperService excessJobLogMapper;
 
     @Override
     public PageInfo<ExcessJobEntity> list(int pageNumber, int pageSize, Integer type, boolean isCompleted) {
         try (Page<Object> ignore = PageMethod.startPage(pageNumber, pageSize)) {
-            List<ExcessJobEntity> list = excessJobMapperService.lambdaQuery()
+            List<ExcessJobEntity> list = excessJobMapper.lambdaQuery()
                 // 类型筛选
                 .eq(type != null, ExcessJobEntity::getType, type)
                 // 未完成
@@ -94,7 +94,7 @@ public class ExcessJobServiceImpl implements ExcessJobService {
             .setType(type)
             .setJobId(jobId)
             .setContent(content);
-        boolean saveResult = excessJobMapperService.save(excessJobEntity);
+        boolean saveResult = excessJobMapper.save(excessJobEntity);
         return saveResult ? excessJobEntity.getId() : null;
     }
 
@@ -104,10 +104,10 @@ public class ExcessJobServiceImpl implements ExcessJobService {
             .setExcessJobId(excessJobId)
             .setCompleted(isCompleted)
             .setContent(content);
-        boolean saveResult = excessJobLogMapperService.save(excessJobLogEntity);
+        boolean saveResult = excessJobLogMapper.save(excessJobLogEntity);
         if (saveResult && isCompleted) {
             // 更新任务信息
-            excessJobMapperService.lambdaUpdate()
+            excessJobMapper.lambdaUpdate()
                 .eq(ExcessJobEntity::getId, excessJobId)
                 .set(ExcessJobEntity::getCompleted, excessJobLogEntity.getCompleted())
                 .update();
@@ -374,13 +374,13 @@ public class ExcessJobServiceImpl implements ExcessJobService {
     private void updateThresholdTime(long excessJobId) {
         try {
             // 参数校验
-            ExcessJobEntity excessJobEntity = excessJobMapperService.getById(excessJobId);
+            ExcessJobEntity excessJobEntity = excessJobMapper.getById(excessJobId);
             if (excessJobEntity == null) {
                 log.warn(Message.MISS_EXCESS_JOB, excessJobId);
                 return;
             }
             // 获取错误次数
-            Long logCount = excessJobLogMapperService.lambdaQuery().eq(ExcessJobLogEntity::getExcessJobId, excessJobEntity.getId()).count();
+            Long logCount = excessJobLogMapper.lambdaQuery().eq(ExcessJobLogEntity::getExcessJobId, excessJobEntity.getId()).count();
             // 限定参与计算的最大错误次数
             logCount = logCount > 10 ? 10 : logCount;
             // 限定阈值时间
@@ -388,7 +388,7 @@ public class ExcessJobServiceImpl implements ExcessJobService {
             // 按秒累增
             DateTime thresholdTime = DateUtil.offsetSecond(baseTime, (int)(5 * logCount));
             // 更新数据库
-            excessJobMapperService.lambdaUpdate()
+            excessJobMapper.lambdaUpdate()
                 .set(ExcessJobEntity::getThresholdTime, thresholdTime)
                 .eq(ExcessJobEntity::getId, excessJobEntity.getId())
                 .update();

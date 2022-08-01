@@ -13,5 +13,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
-public class SlaEventMapperServiceImpl extends ServiceImpl<SlaEventMapper, SlaEventEntity> implements SlaEventMapperService {
+public class SlaEventMapperServiceImpl
+    extends ServiceImpl<SlaEventMapper, SlaEventEntity>
+    implements SlaEventMapperService {
 }

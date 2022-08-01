@@ -20,12 +20,10 @@ import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerBase;
 import org.apache.jmeter.protocol.java.sampler.JavaSampler;
 import org.apache.jmeter.samplers.SampleResult;
-import org.apache.jmeter.testelement.TestStateListener;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.collections.HashTree;
-import org.apache.jorphan.collections.SearchByClass;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -42,11 +40,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * ClassName:    ScriptServiceImpl
- * Package:    io.shulie.takin.cloud.app.service.impl
- * Description: 脚本服务实现
- * Datetime:    2022/5/19   11:32
- * Author:   chenhongqiao@shulie.com
+ * 脚本服务实现
+ *
+ * @author chenhongqiao@shulie.com
+ * @date 2022/5/19   11:32
  */
 @Service
 @Slf4j
@@ -108,7 +105,7 @@ public class ScriptServiceImpl implements ScriptService {
                 File pluginFile;
                 if (StringUtils.startsWith(plugin, "/")) {
                     String name = plugin.substring(plugin.lastIndexOf("/") + 1);
-                    pluginFile = JmeterPluginsConstant.localPluginFiles.getOrDefault(name, null);
+                    pluginFile = JmeterPluginsConstant.getOrDefault(name, null);
                     if (Objects.isNull(pluginFile)) {
                         continue;
                     }
@@ -312,7 +309,7 @@ public class ScriptServiceImpl implements ScriptService {
     private <T> void getHashTreeValue(HashTree hashTree, Class<T> t, List<T> objs) {
         for (Object o : hashTree.keySet()) {
             if (Objects.equals(o.getClass().getName(), t.getName())) {
-                objs.add((T) o);
+                objs.add((T)o);
             }
             if (CollectionUtil.isNotEmpty(hashTree.get(o))) {
                 getHashTreeValue(hashTree.get(o), t, objs);
@@ -322,7 +319,7 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     private void installPlugin(List<File> pluginFiles) {
-        if (CollectionUtils.isEmpty(pluginFiles)) return;
+        if (CollectionUtils.isEmpty(pluginFiles)) {return;}
         JmeterLibClassLoader libClassLoader = JmeterLibClassLoader.getInstance();
         libClassLoader.loadJars(pluginFiles);
         AppParentClassLoader instance = AppParentClassLoader.getInstance();

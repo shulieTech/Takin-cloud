@@ -14,5 +14,7 @@ import io.shulie.takin.cloud.data.service.CommandMapperService;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
-public class CommandMapperServiceImpl extends ServiceImpl<CommandMapper, CommandEntity> implements CommandMapperService {
+public class CommandMapperServiceImpl
+    extends ServiceImpl<CommandMapper, CommandEntity>
+    implements CommandMapperService {
 }

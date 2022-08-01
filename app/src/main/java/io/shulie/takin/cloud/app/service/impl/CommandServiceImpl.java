@@ -53,23 +53,22 @@ public class CommandServiceImpl implements CommandService {
     @Lazy
     @javax.annotation.Resource
     ResourceService resourceService;
-    @Lazy
-    @javax.annotation.Resource
-    MetricsMapperService metricsMapperService;
 
     @javax.annotation.Resource
     JsonService jsonService;
     @javax.annotation.Resource
     WatchmanConfig watchmanConfig;
 
-    @javax.annotation.Resource
-    CommandMapperService commandMapperService;
-    @javax.annotation.Resource
-    JobFileMapperService jobFileMapperService;
-    @javax.annotation.Resource
-    ThreadConfigMapperService threadConfigMapperService;
-    @javax.annotation.Resource
-    ThreadConfigExampleMapperService threadConfigExampleMapperService;
+    @javax.annotation.Resource(name = "metricsMapperServiceImpl")
+    MetricsMapperService metricsMapper;
+    @javax.annotation.Resource(name = "commandMapperServiceImpl")
+    CommandMapperService commandMapper;
+    @javax.annotation.Resource(name = "jobFileMapperServiceImpl")
+    JobFileMapperService jobFileMapper;
+    @javax.annotation.Resource(name = "threadConfigMapperServiceImpl")
+    ThreadConfigMapperService threadConfigMapper;
+    @javax.annotation.Resource(name = "threadConfigExampleMapperServiceImpl")
+    ThreadConfigExampleMapperService threadConfigExampleMapper;
 
     /**
      * {@inheritDoc}
@@ -172,7 +171,7 @@ public class CommandServiceImpl implements CommandService {
         // 声明命令内容
         List<Map<String, Object>> content = new ArrayList<>();
         // 获取所有的线程配置实例
-        List<ThreadConfigExampleEntity> threadConfigExampleEntityList = threadConfigExampleMapperService.lambdaQuery()
+        List<ThreadConfigExampleEntity> threadConfigExampleEntityList = threadConfigExampleMapper.lambdaQuery()
             .eq(ThreadConfigExampleEntity::getJobId, jobEntity.getId()).list();
         // 根据ref进行分组
         Map<String, List<ThreadConfigExampleEntity>> groupByRef = threadConfigExampleEntityList
@@ -221,7 +220,7 @@ public class CommandServiceImpl implements CommandService {
             .setContent(content)
             .setWatchmanId(watchmanId)
             .setType(commandType.getValue());
-        commandMapperService.save(commandEntity);
+        commandMapper.save(commandEntity);
         return commandEntity.getId();
     }
 
@@ -232,7 +231,7 @@ public class CommandServiceImpl implements CommandService {
         Map<String, String> content = new HashMap<>(2);
         content.put("type", type);
         content.put("message", message);
-        return commandMapperService.lambdaUpdate()
+        return commandMapper.lambdaUpdate()
             .set(CommandEntity::getAckContent, jsonService.writeValueAsString(content))
             .set(CommandEntity::getAckTime, new Date())
             .eq(CommandEntity::getId, id)
@@ -245,7 +244,7 @@ public class CommandServiceImpl implements CommandService {
     @Override
     public PageInfo<CommandEntity> range(long watchmanId, int number, CommandType type) {
         try (Page<?> ignored = PageMethod.startPage(1, number)) {
-            List<CommandEntity> list = commandMapperService.lambdaQuery()
+            List<CommandEntity> list = commandMapper.lambdaQuery()
                 .eq(type != null, CommandEntity::getType, type == null ? null : type.getValue())
                 .eq(CommandEntity::getWatchmanId, watchmanId)
                 .isNull(CommandEntity::getAckTime)
@@ -265,9 +264,9 @@ public class CommandServiceImpl implements CommandService {
         JobEntity jobEntity = jobService.jobEntity(jobId);
         // 线程组配置
         List<ThreadConfigEntity> threadConfigEntityList =
-            threadConfigMapperService.lambdaQuery().eq(ThreadConfigEntity::getJobId, jobId).list();
+            threadConfigMapper.lambdaQuery().eq(ThreadConfigEntity::getJobId, jobId).list();
         // 压测指标配置
-        List<MetricsEntity> metricsEntityList = metricsMapperService.lambdaQuery().eq(MetricsEntity::getJobId, jobId).list();
+        List<MetricsEntity> metricsEntityList = metricsMapper.lambdaQuery().eq(MetricsEntity::getJobId, jobId).list();
         Map<String, Object> basicConfig = new HashMap<>(32);
         basicConfig.put("taskId", jobId);
         basicConfig.put("pressureType", jobEntity.getType());
@@ -336,7 +335,7 @@ public class CommandServiceImpl implements CommandService {
      * @return 文件信息
      */
     private List<Map<String, Object>> packageStartJobWhitJobFile(long jobId, int number) {
-        List<JobFileEntity> jobFileEntityList = jobFileMapperService.lambdaQuery().eq(JobFileEntity::getJobId, jobId).list();
+        List<JobFileEntity> jobFileEntityList = jobFileMapper.lambdaQuery().eq(JobFileEntity::getJobId, jobId).list();
         Map<String, List<JobFileEntity>> fileInfo = jobFileEntityList.stream().collect(Collectors.groupingBy(JobFileEntity::getUri));
         List<Map<String, Object>> dataFileList = new ArrayList<>();
         fileInfo.forEach((k, v) -> {

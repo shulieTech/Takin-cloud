@@ -6,14 +6,11 @@ import java.util.ArrayList;
 
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
-import com.github.pagehelper.PageInfo;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.github.pagehelper.page.PageMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import io.shulie.takin.cloud.constant.Message;
 import io.shulie.takin.cloud.data.entity.JobEntity;
@@ -21,19 +18,19 @@ import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.resource.Resource;
-import io.shulie.takin.cloud.data.mapper.ResourceMapper;
 import io.shulie.takin.cloud.data.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
-import io.shulie.takin.cloud.data.mapper.ResourceExampleMapper;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.data.service.ResourceMapperService;
 import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
 import io.shulie.takin.cloud.constant.enums.ResourceExampleStatus;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEventEntity;
-import io.shulie.takin.cloud.data.mapper.ResourceExampleEventMapper;
 import io.shulie.takin.cloud.model.resource.ResourceExampleOverview;
+import io.shulie.takin.cloud.data.service.ResourceExampleMapperService;
+import io.shulie.takin.cloud.data.service.ResourceExampleEventMapperService;
 
 /**
  * 资源服务 - 实例
@@ -49,15 +46,15 @@ public class ResourceServiceImpl implements ResourceService {
     @javax.annotation.Resource
     JsonService jsonService;
     @javax.annotation.Resource
-    ResourceMapper resourceMapper;
-    @javax.annotation.Resource
     CommandService commandService;
     @javax.annotation.Resource
     WatchmanService watchmanService;
-    @javax.annotation.Resource
-    ResourceExampleMapper resourceExampleMapper;
-    @javax.annotation.Resource
-    ResourceExampleEventMapper resourceExampleEventMapper;
+    @javax.annotation.Resource(name = "resourceMapperServiceImpl")
+    ResourceMapperService resourceMapper;
+    @javax.annotation.Resource(name = "resourceExampleMapperServiceImpl")
+    ResourceExampleMapperService resourceExampleMapper;
+    @javax.annotation.Resource(name = "resourceExampleEventMapperServiceImpl")
+    ResourceExampleEventMapperService resourceExampleEventMapper;
 
     /**
      * {@inheritDoc}
@@ -70,10 +67,10 @@ public class ResourceServiceImpl implements ResourceService {
         }
         if (resourceId == null) {return new ArrayList<>(0);}
         // 查询条件
-        Wrapper<ResourceExampleEntity> wrapper = new LambdaQueryWrapper<ResourceExampleEntity>()
-            .eq(ResourceExampleEntity::getResourceId, resourceId);
-        // 执行查询
-        return resourceExampleMapper.selectList(wrapper);
+        return resourceExampleMapper.lambdaQuery()
+            .eq(ResourceExampleEntity::getResourceId, resourceId)
+            // 执行查询
+            .list();
     }
 
     /**
@@ -130,7 +127,7 @@ public class ResourceServiceImpl implements ResourceService {
                 .setCallbackUrl(apply.getCallbackUrl())
                 .setLimitCpu(CharSequenceUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu())
                 .setLimitMemory(CharSequenceUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
-            resourceMapper.insert(resourceEntity);
+            resourceMapper.save(resourceEntity);
             // 2. 创建任务实例
             for (int i = 0; i < apply.getNumber(); i++) {
                 ResourceExampleEntity resourceExampleEntity = new ResourceExampleEntity()
@@ -141,7 +138,7 @@ public class ResourceServiceImpl implements ResourceService {
                     .setWatchmanId(resourceEntity.getWatchmanId())
                     .setLimitCpu(CharSequenceUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu())
                     .setLimitMemory(CharSequenceUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
-                resourceExampleMapper.insert(resourceExampleEntity);
+                resourceExampleMapper.save(resourceExampleEntity);
             }
             // 3. 下发命令
             commandService.graspResource(resourceEntity.getId());
@@ -166,7 +163,7 @@ public class ResourceServiceImpl implements ResourceService {
      */
     @Override
     public ResourceExampleOverview exampleOverview(Long resourceExampleId) {
-        ResourceExampleEntity resourceExampleEntity = resourceExampleMapper.selectById(resourceExampleId);
+        ResourceExampleEntity resourceExampleEntity = resourceExampleMapper.getById(resourceExampleId);
         // 设置初始值
         ResourceExampleOverview result = new ResourceExampleOverview()
             .setStatus(ResourceExampleStatus.PENDING)
@@ -194,13 +191,15 @@ public class ResourceServiceImpl implements ResourceService {
         }
         // 设置心跳接口时间
         else {
-            Wrapper<ResourceExampleEventEntity> heartbeatWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
-                .orderByDesc(ResourceExampleEventEntity::getTime)
-                .eq(ResourceExampleEventEntity::getType, NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode())
-                .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
-            PageInfo<ResourceExampleEventEntity> heartbeatList = new PageInfo<>(resourceExampleEventMapper.selectList(heartbeatWrapper));
-            if (heartbeatList.getSize() > 0) {
-                result.setStatusTime(heartbeatList.getList().get(0).getTime().getTime());
+            try (Page<Object> ignored = PageMethod.startPage(1, 1)) {
+                ResourceExampleEventEntity dbResult = resourceExampleEventMapper.lambdaQuery()
+                    .orderByDesc(ResourceExampleEventEntity::getTime)
+                    .eq(ResourceExampleEventEntity::getType, NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode())
+                    .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId)
+                    .one();
+                if (dbResult != null) {
+                    result.setStatusTime(dbResult.getTime().getTime());
+                }
             }
         }
         return result;
@@ -214,14 +213,14 @@ public class ResourceServiceImpl implements ResourceService {
      */
     ResourceExampleEventEntity lastExampleStatus(long resourceExampleId) {
         try (Page<Object> ignored = PageMethod.startPage(1, 1)) {
-            // 查询条件 - 状态类型
-            Wrapper<ResourceExampleEventEntity> statusWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
+            return resourceExampleEventMapper.lambdaQuery()
+                // 查询条件 - 状态类型
                 .orderByDesc(ResourceExampleEventEntity::getTime)
                 .notIn(ResourceExampleEventEntity::getType,
                     NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode(), NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode())
-                .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
-            // 执行SQL
-            return resourceExampleEventMapper.selectList(statusWrapper).stream().findFirst().orElse(null);
+                .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId)
+                // 执行SQL
+                .one();
         }
     }
 
@@ -233,11 +232,11 @@ public class ResourceServiceImpl implements ResourceService {
      */
     ResourceExampleEventEntity lastExampleInfo(long resourceExampleId) {
         try (Page<Object> ignored = PageMethod.startPage(1, 1)) {
-            Wrapper<ResourceExampleEventEntity> infoWrapper = new LambdaQueryWrapper<ResourceExampleEventEntity>()
-                .orderByDesc(ResourceExampleEventEntity::getTime)
+            return resourceExampleEventMapper.lambdaQuery()
                 .eq(ResourceExampleEventEntity::getType, NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode())
-                .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId);
-            return resourceExampleEventMapper.selectList(infoWrapper).stream().findFirst().orElse(null);
+                .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId)
+                .orderByDesc(ResourceExampleEventEntity::getTime)
+                .one();
         }
     }
 
@@ -263,13 +262,13 @@ public class ResourceServiceImpl implements ResourceService {
      * {@inheritDoc}
      */
     public ResourceEntity entity(long id) {
-        return resourceMapper.selectById(id);
+        return resourceMapper.getById(id);
     }
 
     /**
      * {@inheritDoc}
      */
     public ResourceExampleEntity exampleEntity(long id) {
-        return resourceExampleMapper.selectById(id);
+        return resourceExampleMapper.getById(id);
     }
 }

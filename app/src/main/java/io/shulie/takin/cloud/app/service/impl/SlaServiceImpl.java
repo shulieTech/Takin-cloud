@@ -16,16 +16,16 @@ import io.shulie.takin.cloud.data.entity.JobEntity;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.SlaService;
 import io.shulie.takin.cloud.app.service.JsonService;
-import io.shulie.takin.cloud.data.entity.SlaEventEntity;
 import io.shulie.takin.cloud.model.request.MetricsInfo;
+import io.shulie.takin.cloud.data.entity.SlaEventEntity;
 import io.shulie.takin.cloud.model.callback.Sla.SlaInfo;
-import io.shulie.takin.cloud.data.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.CallbackService;
+import io.shulie.takin.cloud.data.entity.JobExampleEntity;
 import io.shulie.takin.cloud.constant.enums.FormulaSymbol;
 import io.shulie.takin.cloud.constant.enums.FormulaTarget;
-import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.data.service.SlaMapperService;
+import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.data.service.SlaEventMapperService;
 
 /**
@@ -44,17 +44,17 @@ public class SlaServiceImpl implements SlaService {
     ResourceService resourceService;
     @javax.annotation.Resource
     CallbackService callbackService;
-    @javax.annotation.Resource
-    SlaMapperService slaMapperService;
-    @javax.annotation.Resource
-    SlaEventMapperService slaEventMapperService;
+    @javax.annotation.Resource(name = "slaMapperServiceImpl")
+    SlaMapperService slaMapper;
+    @javax.annotation.Resource(name = "slaEventMapperServiceImpl")
+    SlaEventMapperService slaEventMapper;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public List<SlaEntity> list(long jobId) {
-        return slaMapperService.lambdaQuery().eq(SlaEntity::getJobId, jobId).list();
+        return slaMapper.lambdaQuery().eq(SlaEntity::getJobId, jobId).list();
     }
 
     /**
@@ -62,7 +62,7 @@ public class SlaServiceImpl implements SlaService {
      */
     @Override
     public void create(long jobId, String ref, FormulaTarget target, FormulaSymbol symbol, double number) {
-        slaMapperService.save(new SlaEntity()
+        slaMapper.save(new SlaEntity()
             .setRef(ref)
             .setJobId(jobId)
             .setFormulaNumber(number)
@@ -77,7 +77,7 @@ public class SlaServiceImpl implements SlaService {
     @Override
     public void event(Long jobId, Long jobExampleId, List<SlaEventEntity> slaEventEntityList) {
         if (CollUtil.isEmpty(slaEventEntityList)) {return;}
-        slaEventMapperService.saveBatch(slaEventEntityList);
+        slaEventMapper.saveBatch(slaEventEntityList);
         JobEntity jobEntity = jobService.jobEntity(jobId);
         JobExampleEntity jobExampleEntity = jobService.jobExampleEntity(jobExampleId);
         ResourceExampleEntity resourceExampleEntity = resourceService.exampleEntity(jobExampleEntity.getResourceExampleId());
@@ -108,7 +108,7 @@ public class SlaServiceImpl implements SlaService {
         // 业务结果
         List<SlaEventEntity> result = new ArrayList<>();
         // 获取条件
-        List<SlaEntity> slaEntityList = slaMapperService.lambdaQuery().eq(SlaEntity::getJobId, jobId).list();
+        List<SlaEntity> slaEntityList = slaMapper.lambdaQuery().eq(SlaEntity::getJobId, jobId).list();
         // 逐个数据判断
         for (MetricsInfo metricsInfo : metricsInfoList) {
             // 对应的条件列表

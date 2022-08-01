@@ -13,5 +13,7 @@ import io.shulie.takin.cloud.data.service.MetricsMapperService;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
-public class MetricsMapperServiceImpl extends ServiceImpl<MetricsMapper, MetricsEntity> implements MetricsMapperService {
+public class MetricsMapperServiceImpl
+    extends ServiceImpl<MetricsMapper, MetricsEntity>
+    implements MetricsMapperService {
 }

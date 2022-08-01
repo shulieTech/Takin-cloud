@@ -13,5 +13,7 @@ import io.shulie.takin.cloud.data.service.ThreadConfigExampleMapperService;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
-public class ThreadConfigExampleMapperServiceImpl extends ServiceImpl<ThreadConfigExampleMapper, ThreadConfigExampleEntity> implements ThreadConfigExampleMapperService {
+public class ThreadConfigExampleMapperServiceImpl
+    extends ServiceImpl<ThreadConfigExampleMapper, ThreadConfigExampleEntity>
+    implements ThreadConfigExampleMapperService {
 }

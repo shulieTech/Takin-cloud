@@ -20,9 +20,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-
 import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.resource.Resource;
@@ -33,10 +30,10 @@ import io.shulie.takin.cloud.model.watchman.Register.Body;
 import io.shulie.takin.cloud.model.resource.ResourceSource;
 import io.shulie.takin.cloud.model.watchman.Register.Header;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
-import io.shulie.takin.cloud.data.mapper.WatchmanEventMapper;
 import io.shulie.takin.cloud.data.entity.WatchmanEventEntity;
-import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 import io.shulie.takin.cloud.data.service.WatchmanMapperService;
+import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
+import io.shulie.takin.cloud.data.service.WatchmanEventMapperService;
 
 /**
  * 调度服务 - 实例
@@ -48,10 +45,10 @@ import io.shulie.takin.cloud.data.service.WatchmanMapperService;
 public class WatchmanServiceImpl implements WatchmanService {
     @javax.annotation.Resource
     JsonService jsonService;
-    @javax.annotation.Resource
-    WatchmanEventMapper watchmanEventMapper;
-    @javax.annotation.Resource
-    WatchmanMapperService watchmanMapperService;
+    @javax.annotation.Resource(name = "watchmanEventMapperServiceImpl")
+    WatchmanEventMapperService watchmanEventMapper;
+    @javax.annotation.Resource(name = "watchmanMapperServiceImpl")
+    WatchmanMapperService watchmanMapper;
 
     /**
      * {@inheritDoc}
@@ -59,7 +56,7 @@ public class WatchmanServiceImpl implements WatchmanService {
     @Override
     public PageInfo<WatchmanEntity> list(int pageNumber, int pageSize) {
         try (Page<?> ignored = PageMethod.startPage(pageNumber, pageSize)) {
-            return new PageInfo<>(watchmanMapperService.list());
+            return new PageInfo<>(watchmanMapper.list());
         }
     }
 
@@ -71,17 +68,17 @@ public class WatchmanServiceImpl implements WatchmanService {
         List<Resource> result = new ArrayList<>(0);
         // 找到最后一次上报的数据
         try (Page<Resource> ignored = PageMethod.startPage(1, 1)) {
-            // 查询条件 - 资源类型的上报
-            Wrapper<WatchmanEventEntity> wrapper = new LambdaQueryWrapper<WatchmanEventEntity>()
+            WatchmanEventEntity uploadInfo = watchmanEventMapper.lambdaQuery()
                 .orderByDesc(WatchmanEventEntity::getTime)
                 .eq(WatchmanEventEntity::getType, NotifyEventType.WATCHMAN_UPLOAD.getCode())
-                .eq(WatchmanEventEntity::getWatchmanId, watchmanId);
+                .eq(WatchmanEventEntity::getWatchmanId, watchmanId)
+                .one();
             // 执行SQL
-            PageInfo<WatchmanEventEntity> watchmanEventList = new PageInfo<>(watchmanEventMapper.selectList(wrapper));
+
             // 组装数据
-            if (!watchmanEventList.getList().isEmpty()) {
+            if (uploadInfo != null) {
                 // 组装返回数据
-                String eventContextString = watchmanEventList.getList().get(0).getContext();
+                String eventContextString = uploadInfo.getContext();
                 Map<String, Object> eventContext = jsonService.readValue(eventContextString, new TypeReference<Map<String, Object>>() {});
                 long resourceTime = Long.parseLong(String.valueOf(eventContext.get("time")));
                 // TODO 要校验时效
@@ -109,13 +106,13 @@ public class WatchmanServiceImpl implements WatchmanService {
     public boolean register(String ref, String refSign) {
         // 已存在返回TRUE
         if (ofRefSign(refSign) != null) {return true;}
-        return watchmanMapperService.save(new WatchmanEntity().setRef(ref).setRefSign(refSign));
+        return watchmanMapper.save(new WatchmanEntity().setRef(ref).setRefSign(refSign));
     }
 
     @Override
     public WatchmanEntity ofRefSign(String refSign) {
         // TODO 签名校验
-        WatchmanEntity entity = watchmanMapperService.lambdaQuery().eq(WatchmanEntity::getRefSign, refSign).one();
+        WatchmanEntity entity = watchmanMapper.lambdaQuery().eq(WatchmanEntity::getRefSign, refSign).one();
         if (entity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.WATCHMAN_MISS, refSign));}
         return entity;
     }
@@ -147,11 +144,11 @@ public class WatchmanServiceImpl implements WatchmanService {
      * @return 事件实体
      */
     private WatchmanEventEntity lastStatusEvent() {
-        Wrapper<WatchmanEventEntity> statusWrapper = new LambdaQueryWrapper<WatchmanEventEntity>()
-            .orderByDesc(WatchmanEventEntity::getTime)
-            .in(WatchmanEventEntity::getType, NotifyEventType.WATCHMAN_NORMAL.getCode(), NotifyEventType.WATCHMAN_ABNORMAL.getCode());
         try (Page<?> ignore = PageMethod.startPage(1, 1)) {
-            return watchmanEventMapper.selectList(statusWrapper).stream().findFirst().orElse(null);
+            return watchmanEventMapper.lambdaQuery()
+                .orderByDesc(WatchmanEventEntity::getTime)
+                .in(WatchmanEventEntity::getType, NotifyEventType.WATCHMAN_NORMAL.getCode(), NotifyEventType.WATCHMAN_ABNORMAL.getCode())
+                .one();
         }
     }
 
@@ -161,11 +158,11 @@ public class WatchmanServiceImpl implements WatchmanService {
      * @return 事件实体
      */
     private WatchmanEventEntity lastHeartbeatEvent() {
-        Wrapper<WatchmanEventEntity> heartbeatWrapper = new LambdaQueryWrapper<WatchmanEventEntity>()
-            .orderByDesc(WatchmanEventEntity::getTime)
-            .eq(WatchmanEventEntity::getType, NotifyEventType.WATCHMAN_HEARTBEAT.getCode());
         try (Page<?> ignore = PageMethod.startPage(1, 1)) {
-            return watchmanEventMapper.selectList(heartbeatWrapper).stream().findFirst().orElse(null);
+            return watchmanEventMapper.lambdaQuery()
+                .orderByDesc(WatchmanEventEntity::getTime)
+                .eq(WatchmanEventEntity::getType, NotifyEventType.WATCHMAN_HEARTBEAT.getCode())
+                .one();
         }
     }
 
@@ -190,7 +187,7 @@ public class WatchmanServiceImpl implements WatchmanService {
         context.put("time", String.valueOf(System.currentTimeMillis()));
         context.put("data", resourceList);
         // 插入数据库
-        watchmanEventMapper.insert(new WatchmanEventEntity()
+        watchmanEventMapper.save(new WatchmanEventEntity()
             .setWatchmanId(watchmanId)
             .setType(NotifyEventType.WATCHMAN_UPLOAD.getCode())
             .setContext(jsonService.writeValueAsString(context))
@@ -202,7 +199,7 @@ public class WatchmanServiceImpl implements WatchmanService {
      */
     @Override
     public void onHeartbeat(long watchmanId) {
-        watchmanEventMapper.insert(new WatchmanEventEntity()
+        watchmanEventMapper.save(new WatchmanEventEntity()
             .setContext("{}").setWatchmanId(watchmanId)
             .setType(NotifyEventType.WATCHMAN_HEARTBEAT.getCode())
         );
@@ -213,7 +210,7 @@ public class WatchmanServiceImpl implements WatchmanService {
      */
     @Override
     public void onNormal(long watchmanId) {
-        watchmanEventMapper.insert(new WatchmanEventEntity()
+        watchmanEventMapper.save(new WatchmanEventEntity()
             .setContext("{}").setWatchmanId(watchmanId)
             .setType(NotifyEventType.WATCHMAN_NORMAL.getCode())
         );
@@ -226,7 +223,7 @@ public class WatchmanServiceImpl implements WatchmanService {
     public void onAbnormal(long watchmanId, String message) {
         ObjectNode content = JsonNodeFactory.instance.objectNode();
         content.put("message", message);
-        watchmanEventMapper.insert(new WatchmanEventEntity()
+        watchmanEventMapper.save(new WatchmanEventEntity()
             .setWatchmanId(watchmanId).setContext(content.toPrettyString())
             .setType(NotifyEventType.WATCHMAN_ABNORMAL.getCode())
         );

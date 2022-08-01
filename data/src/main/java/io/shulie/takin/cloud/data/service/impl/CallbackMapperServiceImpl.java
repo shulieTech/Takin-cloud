@@ -12,5 +12,7 @@ import org.springframework.stereotype.Service;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
-public class CallbackMapperServiceImpl extends ServiceImpl<CallbackMapper, CallbackEntity> implements CallbackMapperService {
+public class CallbackMapperServiceImpl
+    extends ServiceImpl<CallbackMapper, CallbackEntity>
+    implements CallbackMapperService {
 }

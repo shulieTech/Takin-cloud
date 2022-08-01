@@ -9,10 +9,12 @@ import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.data.service.WatchmanMapperService;
 
 /**
- * Mapper - IService - Impl - 调度
+ * Mapper - IService - Impl - 调度器
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
-public class WatchmanMapperServiceImpl extends ServiceImpl<WatchmanMapper, WatchmanEntity> implements WatchmanMapperService {
+public class WatchmanMapperServiceImpl
+    extends ServiceImpl<WatchmanMapper, WatchmanEntity>
+    implements WatchmanMapperService {
 }

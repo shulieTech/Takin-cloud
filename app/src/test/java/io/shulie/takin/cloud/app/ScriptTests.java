@@ -7,34 +7,23 @@ import io.shulie.takin.cloud.app.service.jmeter.SaveService;
 import io.shulie.takin.cloud.constant.JmeterPluginsConstant;
 import org.apache.jmeter.engine.PreCompiler;
 import org.apache.jmeter.engine.TurnElementsOn;
-import org.apache.jmeter.extractor.json.jsonpath.JSONManager;
 import org.apache.jmeter.modifiers.BeanShellPreProcessor;
 import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerBase;
-import org.apache.jmeter.samplers.AbstractSampler;
-import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
-import org.apache.jmeter.samplers.Sampler;
-import org.apache.jmeter.testelement.TestStateListener;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.collections.HashTree;
-import org.apache.jorphan.collections.SearchByClass;
 import org.apache.jorphan.util.Converter;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
 
 import java.io.*;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.*;
 
 /**
@@ -52,7 +41,7 @@ public class ScriptTests {
     @Test
     public void loadJmeterProperties() {
         ArrayList<File> files = new ArrayList<>();
-        for (Map.Entry<String, File> fileEntry : JmeterPluginsConstant.localPluginFiles.entrySet()) {
+        for (Map.Entry<String, File> fileEntry : JmeterPluginsConstant.entrySet()) {
             files.add(fileEntry.getValue());
         }
 //        files.add(new File("/Users/phine/data/plugins/jmeter-plugins-height.jar"));

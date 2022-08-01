@@ -13,5 +13,7 @@ import io.shulie.takin.cloud.data.service.SlaMapperService;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
-public class SlaMapperServiceImpl extends ServiceImpl<SlaMapper, SlaEntity> implements SlaMapperService {
+public class SlaMapperServiceImpl
+    extends ServiceImpl<SlaMapper, SlaEntity>
+    implements SlaMapperService {
 }
