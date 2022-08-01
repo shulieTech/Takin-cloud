@@ -3,10 +3,10 @@ package io.shulie.takin.cloud.app.service;
 import java.util.List;
 import java.util.Collections;
 
-import io.shulie.takin.cloud.app.entity.MetricsEntity;
-import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
+import io.shulie.takin.cloud.data.entity.MetricsEntity;
+import io.shulie.takin.cloud.data.entity.ThreadConfigEntity;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
-import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
+import io.shulie.takin.cloud.data.entity.ThreadConfigExampleEntity;
 
 /**
  * 任务配置服务

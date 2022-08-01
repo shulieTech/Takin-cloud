@@ -1,24 +1,21 @@
 package io.shulie.takin.cloud.app.schedule;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import com.github.pagehelper.PageInfo;
-import io.shulie.takin.cloud.app.entity.ExcessJobEntity;
-import io.shulie.takin.cloud.app.service.ExcessJobService;
-import io.shulie.takin.cloud.constant.Message;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
+
+import com.github.pagehelper.PageInfo;
+
+import io.shulie.takin.cloud.data.entity.ExcessJobEntity;
+import io.shulie.takin.cloud.app.service.ExcessJobService;
 
 /**
- * ClassName:    CalibrationSchedule
- * Package:    io.shulie.takin.cloud.app.schedule
- * Description:
- * Datetime:    2022/6/9   18:47
- * Author:   chenhongqiao@shulie.com
+ * 校准调度
+ *
+ * @author chenhongqiao@shulie.com
  */
 @Slf4j
 public class CalibrationSchedule implements Runnable {
 
-    private ExcessJobService excessJobService;
+    private final ExcessJobService excessJobService;
 
     public CalibrationSchedule(ExcessJobService excessJobService) {
         this.excessJobService = excessJobService;

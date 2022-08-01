@@ -15,19 +15,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
-import io.shulie.takin.cloud.app.entity.JobEntity;
+import io.shulie.takin.cloud.data.entity.JobEntity;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.model.response.ApiResult;
-import io.shulie.takin.cloud.app.entity.ResourceEntity;
+import io.shulie.takin.cloud.data.entity.ResourceEntity;
 import io.shulie.takin.cloud.model.response.Gravestone;
-import io.shulie.takin.cloud.app.entity.JobExampleEntity;
+import io.shulie.takin.cloud.data.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
-import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
-import io.shulie.takin.cloud.app.entity.JobExampleEventEntity;
-import io.shulie.takin.cloud.app.mapper.JobExampleEventMapper;
-import io.shulie.takin.cloud.app.entity.ResourceExampleEventEntity;
-import io.shulie.takin.cloud.app.mapper.ResourceExampleEventMapper;
+import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.data.entity.JobExampleEventEntity;
+import io.shulie.takin.cloud.data.mapper.JobExampleEventMapper;
+import io.shulie.takin.cloud.data.entity.ResourceExampleEventEntity;
+import io.shulie.takin.cloud.data.mapper.ResourceExampleEventMapper;
 
 /**
  * 墓志铭

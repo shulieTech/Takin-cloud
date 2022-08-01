@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.shulie.takin.cloud.app.util.IpUtils;
-import io.shulie.takin.cloud.app.entity.JobEntity;
+import io.shulie.takin.cloud.data.entity.JobEntity;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.model.request.MetricsInfo;
 import io.shulie.takin.cloud.app.service.MetricsService;
-import io.shulie.takin.cloud.app.entity.JobExampleEntity;
+import io.shulie.takin.cloud.data.entity.JobExampleEntity;
 
 /**
  * 指标数据

@@ -2,11 +2,11 @@ package io.shulie.takin.cloud.app.service;
 
 import java.util.List;
 
-import io.shulie.takin.cloud.app.entity.JobEntity;
+import io.shulie.takin.cloud.data.entity.JobEntity;
 import io.shulie.takin.cloud.model.response.JobConfig;
 import io.shulie.takin.cloud.model.request.StartRequest;
 import io.shulie.takin.cloud.model.request.ModifyConfig;
-import io.shulie.takin.cloud.app.entity.JobExampleEntity;
+import io.shulie.takin.cloud.data.entity.JobExampleEntity;
 
 /**
  * 任务服务

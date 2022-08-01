@@ -6,28 +6,27 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.CharSequenceUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.model.callback.Sla;
-import io.shulie.takin.cloud.app.entity.SlaEntity;
-import io.shulie.takin.cloud.app.entity.JobEntity;
+import io.shulie.takin.cloud.data.entity.SlaEntity;
+import io.shulie.takin.cloud.data.entity.JobEntity;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.SlaService;
 import io.shulie.takin.cloud.app.service.JsonService;
-import io.shulie.takin.cloud.app.entity.SlaEventEntity;
+import io.shulie.takin.cloud.data.entity.SlaEventEntity;
 import io.shulie.takin.cloud.model.request.MetricsInfo;
 import io.shulie.takin.cloud.model.callback.Sla.SlaInfo;
-import io.shulie.takin.cloud.app.entity.JobExampleEntity;
+import io.shulie.takin.cloud.data.entity.JobExampleEntity;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.constant.enums.FormulaSymbol;
 import io.shulie.takin.cloud.constant.enums.FormulaTarget;
-import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
-import io.shulie.takin.cloud.app.service.mapper.SlaMapperService;
-import io.shulie.takin.cloud.app.service.mapper.SlaEventMapperService;
+import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.data.service.SlaMapperService;
+import io.shulie.takin.cloud.data.service.SlaEventMapperService;
 
 /**
  * SLA服务 - 实例

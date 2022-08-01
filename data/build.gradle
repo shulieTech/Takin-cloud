@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+    id 'io.shulie.takin.cloud.java-conventions'
+}
+
+dependencies {
+    // 项目内
+    implementation project(':constant')
+    // lombok
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+    // mysql
+    api libs.bundles.mysql
+    // Spring 注解
+    compileOnly libs.spring.context
+    annotationProcessor libs.spring.context
+}
+
+test {
+    useJUnitPlatform()
+}
+description = 'data'

@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.nio.file.Files;
 import java.io.OutputStream;
 import java.io.BufferedReader;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -21,38 +20,32 @@ import java.nio.charset.StandardCharsets;
 
 import javax.annotation.Resource;
 
-import cn.hutool.core.collection.CollectionUtil;
-import io.shulie.takin.cloud.app.executor.GlobalExecutor;
-import io.shulie.takin.cloud.app.schedule.CalibrationSchedule;
-import io.shulie.takin.cloud.app.schedule.CallbackSchedule;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.io.FileUtil;
 import com.github.pagehelper.Page;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.DateTime;
 import com.github.pagehelper.PageInfo;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.github.pagehelper.page.PageMethod;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import io.shulie.takin.cloud.constant.Message;
-import io.shulie.takin.cloud.app.entity.JobEntity;
+import io.shulie.takin.cloud.data.entity.JobEntity;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.conf.WatchmanConfig;
 import io.shulie.takin.cloud.model.callback.ExcessJob;
 import io.shulie.takin.cloud.model.request.MetricsInfo;
-import io.shulie.takin.cloud.app.entity.ExcessJobEntity;
 import io.shulie.takin.cloud.app.service.MetricsService;
 import io.shulie.takin.cloud.app.service.CallbackService;
+import io.shulie.takin.cloud.data.entity.ExcessJobEntity;
 import io.shulie.takin.cloud.constant.enums.ExcessJobType;
 import io.shulie.takin.cloud.app.service.ExcessJobService;
-import io.shulie.takin.cloud.app.entity.ExcessJobLogEntity;
-import io.shulie.takin.cloud.app.service.mapper.ExcessJobMapperService;
-import io.shulie.takin.cloud.app.service.mapper.ExcessJobLogMapperService;
-
-import static io.shulie.takin.cloud.constant.ScheduleConstant.SCHEDULE_CALLBACK_EXEC_DELAY_TIME;
-import static io.shulie.takin.cloud.constant.ScheduleConstant.SCHEDULE_INIT_EXEC_DELAY_TIME;
+import io.shulie.takin.cloud.data.entity.ExcessJobLogEntity;
+import io.shulie.takin.cloud.data.service.ExcessJobMapperService;
+import io.shulie.takin.cloud.data.service.ExcessJobLogMapperService;
 
 /**
  * 定时任务 - 服务 - 实现
@@ -81,16 +74,16 @@ public class ExcessJobServiceImpl implements ExcessJobService {
     public PageInfo<ExcessJobEntity> list(int pageNumber, int pageSize, Integer type, boolean isCompleted) {
         try (Page<Object> ignore = PageMethod.startPage(pageNumber, pageSize)) {
             List<ExcessJobEntity> list = excessJobMapperService.lambdaQuery()
-                    // 类型筛选
-                    .eq(type != null, ExcessJobEntity::getType, type)
-                    // 未完成
-                    .eq(ExcessJobEntity::getCompleted, isCompleted)
-                    // 并且
-                    .and(t ->
-                            // (阈值时间为空 || 阈值时间小于等于当前时间)
-                            t.isNull(ExcessJobEntity::getThresholdTime)
-                                    .or(c -> c.le(ExcessJobEntity::getThresholdTime, new Date())))
-                    .list();
+                // 类型筛选
+                .eq(type != null, ExcessJobEntity::getType, type)
+                // 未完成
+                .eq(ExcessJobEntity::getCompleted, isCompleted)
+                // 并且
+                .and(t ->
+                    // (阈值时间为空 || 阈值时间小于等于当前时间)
+                    t.isNull(ExcessJobEntity::getThresholdTime)
+                        .or(c -> c.le(ExcessJobEntity::getThresholdTime, new Date())))
+                .list();
             return PageInfo.of(list);
         }
     }
@@ -98,9 +91,9 @@ public class ExcessJobServiceImpl implements ExcessJobService {
     @Override
     public Long create(int type, long jobId, String content) {
         ExcessJobEntity excessJobEntity = new ExcessJobEntity()
-                .setType(type)
-                .setJobId(jobId)
-                .setContent(content);
+            .setType(type)
+            .setJobId(jobId)
+            .setContent(content);
         boolean saveResult = excessJobMapperService.save(excessJobEntity);
         return saveResult ? excessJobEntity.getId() : null;
     }
@@ -108,16 +101,16 @@ public class ExcessJobServiceImpl implements ExcessJobService {
     @Override
     public Long log(long excessJobId, String content, boolean isCompleted) {
         ExcessJobLogEntity excessJobLogEntity = new ExcessJobLogEntity()
-                .setExcessJobId(excessJobId)
-                .setCompleted(isCompleted)
-                .setContent(content);
+            .setExcessJobId(excessJobId)
+            .setCompleted(isCompleted)
+            .setContent(content);
         boolean saveResult = excessJobLogMapperService.save(excessJobLogEntity);
         if (saveResult && isCompleted) {
             // 更新任务信息
             excessJobMapperService.lambdaUpdate()
-                    .eq(ExcessJobEntity::getId, excessJobId)
-                    .set(ExcessJobEntity::getCompleted, excessJobLogEntity.getCompleted())
-                    .update();
+                .eq(ExcessJobEntity::getId, excessJobId)
+                .set(ExcessJobEntity::getCompleted, excessJobLogEntity.getCompleted())
+                .update();
             return excessJobLogEntity.getId();
         } else {
             updateThresholdTime(excessJobId);
@@ -156,11 +149,11 @@ public class ExcessJobServiceImpl implements ExcessJobService {
                 log.warn(Message.MISS_JOB, entity.getJobId());
             } else {
                 ExcessJob excessJob = new ExcessJob()
-                        .setContent(execContent)
-                        .setCompleted(completed)
-                        .setJobType(excessJobType)
-                        .setJobId(jobEntity.getId())
-                        .setResourceId(jobEntity.getResourceId());
+                    .setContent(execContent)
+                    .setCompleted(completed)
+                    .setJobType(excessJobType)
+                    .setJobId(jobEntity.getId())
+                    .setResourceId(jobEntity.getResourceId());
                 excessJob.setData(entity.getId());
                 // 保存回调信息
                 callbackService.callback(null, jobEntity.getCallbackUrl(), jsonService.writeValueAsString(excessJob));
@@ -206,19 +199,20 @@ public class ExcessJobServiceImpl implements ExcessJobService {
 
     /**
      * 对校准结果进行回调
-     * @param excessJobType
-     * @param jobEntity
-     * @param execContent
-     * @param completed
-     * @param entity
+     *
+     * @param excessJobType 额外任务类型
+     * @param jobEntity     任务
+     * @param execContent   执行结果
+     * @param completed     是否完成
+     * @param entity        额外任务
      */
     private void calibrationResultCallback(ExcessJobType excessJobType, JobEntity jobEntity, String execContent, boolean completed, ExcessJobEntity entity) {
         ExcessJob excessJob = new ExcessJob()
-                .setContent(execContent)
-                .setCompleted(completed)
-                .setJobType(excessJobType)
-                .setJobId(jobEntity.getId())
-                .setResourceId(jobEntity.getResourceId());
+            .setContent(execContent)
+            .setCompleted(completed)
+            .setJobType(excessJobType)
+            .setJobId(jobEntity.getId())
+            .setResourceId(jobEntity.getResourceId());
         excessJob.setData(entity.getId());
         // 保存回调信息
         boolean complete = callbackService.callback(null, jobEntity.getCallbackUrl(), jsonService.writeValueAsString(excessJob));
@@ -238,7 +232,7 @@ public class ExcessJobServiceImpl implements ExcessJobService {
         JobEntity jobEntity = jobService.jobEntity(jobId);
         // 获取工作目录
         File directory = FileUtil.file(watchmanConfig.getNfsPath(), "metrics",
-                String.valueOf(jobEntity.getResourceId()), String.valueOf(jobEntity.getId()));
+            String.valueOf(jobEntity.getResourceId()), String.valueOf(jobEntity.getId()));
         // 获取校正文件
         String[] directoryFileArray = directory.list((dir, name) -> Pattern.matches("^pressure-\\d\\.metrics\\.err$", name));
         long rollBackWriteLength = 0;
@@ -246,7 +240,7 @@ public class ExcessJobServiceImpl implements ExcessJobService {
             List<File> readyCalibrationFileList = Arrays.stream(directoryFileArray).map(t -> FileUtil.file(directory, t)).collect(Collectors.toList());
             //校验文件大小
             readyCalibrationFileList = readyCalibrationFileList.stream().filter(file -> FileUtil.size(file) > 0).collect(Collectors.toList());
-            if (CollectionUtil.isNotEmpty(readyCalibrationFileList)) {
+            if (CollUtil.isNotEmpty(readyCalibrationFileList)) {
                 // 获取回滚文件
                 File rollBackFile = getRollBackFile(directory);
                 // 初始化回滚并启动
@@ -392,12 +386,12 @@ public class ExcessJobServiceImpl implements ExcessJobService {
             // 限定阈值时间
             Date baseTime = excessJobEntity.getThresholdTime() == null ? excessJobEntity.getCreateTime() : excessJobEntity.getThresholdTime();
             // 按秒累增
-            DateTime thresholdTime = DateUtil.offsetSecond(baseTime, (int) (5 * logCount));
+            DateTime thresholdTime = DateUtil.offsetSecond(baseTime, (int)(5 * logCount));
             // 更新数据库
             excessJobMapperService.lambdaUpdate()
-                    .set(ExcessJobEntity::getThresholdTime, thresholdTime)
-                    .eq(ExcessJobEntity::getId, excessJobEntity.getId())
-                    .update();
+                .set(ExcessJobEntity::getThresholdTime, thresholdTime)
+                .eq(ExcessJobEntity::getId, excessJobEntity.getId())
+                .update();
         } catch (Exception e) {
             log.error("更新阈值时间失败:{}\n", excessJobId, e);
         }

@@ -1,21 +1,19 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
+import java.nio.charset.StandardCharsets;
 
+import cn.hutool.http.HttpUtil;
 import cn.hutool.http.ContentType;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpUtil;
-import cn.hutool.json.JSONUtil;
+
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import io.shulie.takin.cloud.app.executor.GlobalExecutor;
-import io.shulie.takin.cloud.app.schedule.CallbackSchedule;
+import com.alibaba.fastjson.JSONException;
+
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
 import cn.hutool.core.util.StrUtil;
@@ -23,19 +21,13 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.DateTime;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.page.PageMethod;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import io.shulie.takin.cloud.app.entity.CallbackEntity;
+import io.shulie.takin.cloud.data.entity.CallbackEntity;
 import io.shulie.takin.cloud.app.service.CallbackService;
-import io.shulie.takin.cloud.app.entity.CallbackLogEntity;
-import io.shulie.takin.cloud.app.service.mapper.CallbackMapperService;
-import io.shulie.takin.cloud.app.service.mapper.CallbackLogMapperService;
-
-import javax.annotation.PostConstruct;
-
-import static io.shulie.takin.cloud.constant.ScheduleConstant.SCHEDULE_CALLBACK_EXEC_DELAY_TIME;
-import static io.shulie.takin.cloud.constant.ScheduleConstant.SCHEDULE_INIT_EXEC_DELAY_TIME;
+import io.shulie.takin.cloud.data.entity.CallbackLogEntity;
+import io.shulie.takin.cloud.data.service.CallbackMapperService;
+import io.shulie.takin.cloud.data.service.CallbackLogMapperService;
 
 /**
  * 回调服务 - 实例
@@ -56,14 +48,14 @@ public class CallbackServiceImpl implements CallbackService {
     public PageInfo<CallbackEntity> list(int pageNumber, int pageSize, boolean isCompleted) {
         try (Page<Object> ignored = PageMethod.startPage(pageNumber, pageSize)) {
             List<CallbackEntity> sourceList = callbackMapperService.lambdaQuery()
-                    // 未完成
-                    .eq(CallbackEntity::getCompleted, isCompleted)
-                    // 并且
-                    .and(t ->
-                            // (阈值时间为空 || 阈值时间小于等于当前时间)
-                            t.isNull(CallbackEntity::getThresholdTime)
-                                    .or(c -> c.le(CallbackEntity::getThresholdTime, new Date())))
-                    .list();
+                // 未完成
+                .eq(CallbackEntity::getCompleted, isCompleted)
+                // 并且
+                .and(t ->
+                    // (阈值时间为空 || 阈值时间小于等于当前时间)
+                    t.isNull(CallbackEntity::getThresholdTime)
+                        .or(c -> c.le(CallbackEntity::getThresholdTime, new Date())))
+                .list();
             return new PageInfo<>(sourceList);
         }
     }
@@ -76,10 +68,10 @@ public class CallbackServiceImpl implements CallbackService {
     @Override
     public Long createLog(long callbackId, String url, byte[] data) {
         CallbackLogEntity callbackLogEntity = new CallbackLogEntity()
-                .setRequestUrl(url)
-                .setRequestData(data)
-                .setCallbackId(callbackId)
-                .setRequestTime(new Date());
+            .setRequestUrl(url)
+            .setRequestData(data)
+            .setCallbackId(callbackId)
+            .setRequestTime(new Date());
         callbackLogMapperService.save(callbackLogEntity);
         return callbackLogEntity.getId();
     }
@@ -95,31 +87,30 @@ public class CallbackServiceImpl implements CallbackService {
             boolean completed = false;
             try {
                 JSONObject resJson = JSON.parseObject(response);
-                if (Objects.nonNull(resJson) && resJson.getBoolean("success")
-                        && Objects.equals(resJson.getString("data"), RES_SUCCESS_TAG)) {
+                if (Objects.nonNull(resJson) && Boolean.TRUE.equals(resJson.getBoolean("success"))
+                    && Objects.equals(resJson.getString("data"), RES_SUCCESS_TAG)) {
                     completed = true;
                 }
             } catch (JSONException e) {
-                completed = false;
+                log.error("CallbackServiceImpl#fillLog", e);
             }
             // 填充日志信息
             callbackLogMapperService.updateById(new CallbackLogEntity()
-                    .setId(callbackLogId)
-                    .setResponseData(data)
-                    .setCompleted(completed)
-                    .setResponseTime(new Date())
+                .setId(callbackLogId)
+                .setResponseData(data)
+                .setCompleted(completed)
+                .setResponseTime(new Date())
             );
             // 更新回调的状态
             if (completed) {
                 callbackMapperService.lambdaUpdate().set(CallbackEntity::getCompleted, true)
-                        .eq(CallbackEntity::getId, callbackLogEntity.getCallbackId())
-                        .update();
+                    .eq(CallbackEntity::getId, callbackLogEntity.getCallbackId())
+                    .update();
             }
             // 更新阈值时间 - 防止回调堆积
             else {
                 updateThresholdTime(callbackLogEntity.getCallbackId());
             }
-
 
             // 返回结果
             return completed;
@@ -139,20 +130,21 @@ public class CallbackServiceImpl implements CallbackService {
         }
         boolean completed = isSuccess(responseData);
         //修改回调记录
-        if(Objects.nonNull(id)){
+        if (Objects.nonNull(id)) {
             CallbackEntity entity = callbackMapperService.getById(id);
             entity.setCompleted(completed);
             entity.setThresholdTime(new Date());
             callbackMapperService.updateById(entity);
-            return completed;
         }
         //创建回调记录
-        CallbackEntity callbackEntity = new CallbackEntity()
+        else {
+            CallbackEntity callbackEntity = new CallbackEntity()
                 .setCompleted(completed)
                 .setUrl(callbackUrl)
                 .setContext(content.getBytes(StandardCharsets.UTF_8))
                 .setThresholdTime(new Date());
-        callbackMapperService.save(callbackEntity);
+            callbackMapperService.save(callbackEntity);
+        }
         return completed;
     }
 
@@ -161,12 +153,12 @@ public class CallbackServiceImpl implements CallbackService {
         boolean completed = false;
         try {
             JSONObject resJson = JSON.parseObject(response);
-            if (Objects.nonNull(resJson) && resJson.getBoolean("success")
-                    && Objects.equals(resJson.getString("data"), RES_SUCCESS_TAG)) {
+            if (Objects.nonNull(resJson) && Boolean.TRUE.equals(resJson.getBoolean("success"))
+                && Objects.equals(resJson.getString("data"), RES_SUCCESS_TAG)) {
                 completed = true;
             }
         } catch (JSONException e) {
-            completed = false;
+            log.error("CallbackServiceImpl#isSuccess", e);
         }
         return completed;
     }
@@ -180,17 +172,16 @@ public class CallbackServiceImpl implements CallbackService {
         try {
             CallbackEntity callback = callbackMapperService.getById(callbackId);
             Long logCount = callbackLogMapperService.lambdaQuery()
-                    .eq(CallbackLogEntity::getCallbackId, callbackId)
-                    .count();
+                .eq(CallbackLogEntity::getCallbackId, callbackId)
+                .count();
             DateTime thresholdTime = DateUtil.offsetMillisecond(callback.getCreateTime(), 2 << logCount);
             callbackMapperService.lambdaUpdate()
-                    .set(CallbackEntity::getThresholdTime, thresholdTime)
-                    .eq(CallbackEntity::getId, callback.getId())
-                    .update();
+                .set(CallbackEntity::getThresholdTime, thresholdTime)
+                .eq(CallbackEntity::getId, callback.getId())
+                .update();
         } catch (Exception e) {
             log.error("更新阈值时间失败:{}\n", callbackId, e);
         }
     }
-
 
 }

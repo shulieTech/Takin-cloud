@@ -1,27 +1,23 @@
 package io.shulie.takin.cloud.app.schedule;
 
-import com.github.pagehelper.PageInfo;
-import io.shulie.takin.cloud.app.entity.CallbackEntity;
-import io.shulie.takin.cloud.app.service.CallbackService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import com.github.pagehelper.PageInfo;
+
 import java.nio.charset.StandardCharsets;
 
+import io.shulie.takin.cloud.data.entity.CallbackEntity;
+import io.shulie.takin.cloud.app.service.CallbackService;
+
 /**
- * ClassName:    CallbackSchedule
- * Package:    io.shulie.takin.cloud.app.schedule
- * Description: 向web服务回调锁定/释放/启动/停止信息
- * Datetime:    2022/6/9   17:20
- * Author:   chenhongqiao@shulie.com
+ * 向web服务回调锁定/释放/启动/停止信息
+ *
+ * @author chenhongqiao@shulie.com
  */
 @Slf4j
 public class CallbackSchedule implements Runnable {
 
-    private CallbackService callbackService;
+    private final CallbackService callbackService;
 
     public CallbackSchedule(CallbackService callbackService) {
         this.callbackService = callbackService;

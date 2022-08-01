@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.service.ResourceService;
-import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
 import io.shulie.takin.cloud.model.resource.ResourceExampleOverview;
 

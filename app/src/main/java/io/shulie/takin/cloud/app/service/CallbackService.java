@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets;
 
 import com.github.pagehelper.PageInfo;
 
-import io.shulie.takin.cloud.app.entity.CallbackEntity;
+import io.shulie.takin.cloud.data.entity.CallbackEntity;
 
 /**
  * 回调服务
@@ -72,7 +72,11 @@ public interface CallbackService {
 
     /**
      * 回调web
-     * @return
+     *
+     * @param id          回调主键
+     * @param callbackUrl 回调地址
+     * @param content     回调内容
+     * @return 回调结果
      */
     boolean callback(Long id, String callbackUrl, String content);
 }

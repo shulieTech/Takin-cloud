@@ -16,27 +16,27 @@ import org.springframework.context.annotation.Lazy;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import io.shulie.takin.cloud.constant.Message;
-import io.shulie.takin.cloud.app.entity.JobEntity;
+import io.shulie.takin.cloud.data.entity.JobEntity;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.conf.WatchmanConfig;
-import io.shulie.takin.cloud.app.entity.CommandEntity;
-import io.shulie.takin.cloud.app.entity.MetricsEntity;
-import io.shulie.takin.cloud.app.entity.JobFileEntity;
-import io.shulie.takin.cloud.app.entity.ResourceEntity;
+import io.shulie.takin.cloud.data.entity.CommandEntity;
+import io.shulie.takin.cloud.data.entity.MetricsEntity;
+import io.shulie.takin.cloud.data.entity.JobFileEntity;
+import io.shulie.takin.cloud.data.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.constant.enums.CommandType;
 import io.shulie.takin.cloud.app.service.ResourceService;
-import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
+import io.shulie.takin.cloud.data.entity.ThreadConfigEntity;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 import io.shulie.takin.cloud.constant.PressureEngineConstants;
-import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
-import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
-import io.shulie.takin.cloud.app.service.mapper.JobFileMapperService;
-import io.shulie.takin.cloud.app.service.mapper.MetricsMapperService;
-import io.shulie.takin.cloud.app.service.mapper.CommandMapperService;
-import io.shulie.takin.cloud.app.service.mapper.ThreadConfigMapperService;
-import io.shulie.takin.cloud.app.service.mapper.ThreadConfigExampleMapperService;
+import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.data.service.CommandMapperService;
+import io.shulie.takin.cloud.data.service.JobFileMapperService;
+import io.shulie.takin.cloud.data.service.MetricsMapperService;
+import io.shulie.takin.cloud.data.entity.ThreadConfigExampleEntity;
+import io.shulie.takin.cloud.data.service.ThreadConfigMapperService;
+import io.shulie.takin.cloud.data.service.ThreadConfigExampleMapperService;
 
 /**
  * 命令服务 - 实例
@@ -292,7 +292,7 @@ public class CommandServiceImpl implements CommandService {
         // 固定是0的
         basicConfig.put("tpsThreadMode", 0);
         // 现在没有办法区分版本
-        basicConfig.put("bindByXpathMd5", Objects.isNull(bindByXpathMd5) ? Objects.isNull(bindByXpathMd5) : bindByXpathMd5);
+        basicConfig.put("bindByXpathMd5", Objects.isNull(bindByXpathMd5) || bindByXpathMd5);
         // 以前的文件里面没有用到
         basicConfig.put("tpsTargetLevel", null);
         // 填充文件

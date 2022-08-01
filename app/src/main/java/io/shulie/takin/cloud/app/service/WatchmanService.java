@@ -5,7 +5,7 @@ import java.util.List;
 import com.github.pagehelper.PageInfo;
 
 import io.shulie.takin.cloud.model.resource.Resource;
-import io.shulie.takin.cloud.app.entity.WatchmanEntity;
+import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.model.resource.ResourceSource;
 import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 

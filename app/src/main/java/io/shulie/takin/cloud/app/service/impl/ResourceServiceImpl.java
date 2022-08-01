@@ -16,23 +16,23 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import io.shulie.takin.cloud.constant.Message;
-import io.shulie.takin.cloud.app.entity.JobEntity;
+import io.shulie.takin.cloud.data.entity.JobEntity;
 import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.resource.Resource;
-import io.shulie.takin.cloud.app.mapper.ResourceMapper;
-import io.shulie.takin.cloud.app.entity.ResourceEntity;
+import io.shulie.takin.cloud.data.mapper.ResourceMapper;
+import io.shulie.takin.cloud.data.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
-import io.shulie.takin.cloud.app.mapper.ResourceExampleMapper;
-import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.data.mapper.ResourceExampleMapper;
+import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
 import io.shulie.takin.cloud.constant.enums.ResourceExampleStatus;
-import io.shulie.takin.cloud.app.entity.ResourceExampleEventEntity;
-import io.shulie.takin.cloud.app.mapper.ResourceExampleEventMapper;
+import io.shulie.takin.cloud.data.entity.ResourceExampleEventEntity;
+import io.shulie.takin.cloud.data.mapper.ResourceExampleEventMapper;
 import io.shulie.takin.cloud.model.resource.ResourceExampleOverview;
 
 /**

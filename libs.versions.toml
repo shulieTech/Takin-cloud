@@ -9,6 +9,7 @@ dom4j = "1.6.1"
 mybatis-plus = "3.5.1"
 mysql-connector = "8.0.28"
 # spring
+spring = "5.3.19"
 spring-doc = "1.6.8"
 spring-boot = "2.6.7"
 spring-druid = "1.1.17"
@@ -20,6 +21,7 @@ spring-boo-redisson = "3.17.0"
 lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
 # spring
 spring-doc = { group = "org.springdoc", name = "springdoc-openapi-ui", version.ref = "spring-doc" }
+spring-context = { group = "org.springframework", name = "spring-context", version.ref = "spring" }
 spring-boot-test = { group = "org.springframework.boot", name = "spring-boot-test", version.ref = "spring-boot" }
 spring-pagehelper = { group = "com.github.pagehelper", name = "pagehelper-spring-boot-starter", version.ref = "spring.pagehelper" }
 spring-boot-redisson = { group = "org.redisson", name = "redisson-spring-boot-starter", version.ref = "spring-boo-redisson" }

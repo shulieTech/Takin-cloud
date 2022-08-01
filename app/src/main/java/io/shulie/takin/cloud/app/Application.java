@@ -16,8 +16,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @Slf4j
 @EnableScheduling
-@SpringBootApplication
-@MapperScan("io.shulie.takin.cloud.app.mapper")
+@MapperScan("io.shulie.takin.cloud.data.mapper")
+@SpringBootApplication(scanBasePackages = "io.shulie.takin.cloud")
 public class Application implements DisposableBean {
     public static void main(String[] args) {
         System.setProperty("pagehelper.banner", Boolean.FALSE.toString());

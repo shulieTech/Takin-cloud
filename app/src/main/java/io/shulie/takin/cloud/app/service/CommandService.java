@@ -2,7 +2,7 @@ package io.shulie.takin.cloud.app.service;
 
 import com.github.pagehelper.PageInfo;
 
-import io.shulie.takin.cloud.app.entity.CommandEntity;
+import io.shulie.takin.cloud.data.entity.CommandEntity;
 import io.shulie.takin.cloud.constant.enums.CommandType;
 
 /**
@@ -30,7 +30,8 @@ public interface CommandService {
     /**
      * 启动应用程序
      *
-     * @param jobId 任务主键
+     * @param jobId          任务主键
+     * @param bindByXpathMd5 是否通过xPathMd5绑定
      */
     void startApplication(long jobId, Boolean bindByXpathMd5);
 

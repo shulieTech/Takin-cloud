@@ -2,8 +2,8 @@ package io.shulie.takin.cloud.app.service;
 
 import java.util.List;
 
-import io.shulie.takin.cloud.app.entity.ResourceEntity;
-import io.shulie.takin.cloud.app.entity.ResourceExampleEntity;
+import io.shulie.takin.cloud.data.entity.ResourceEntity;
+import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
 import io.shulie.takin.cloud.model.resource.ResourceExampleOverview;
 

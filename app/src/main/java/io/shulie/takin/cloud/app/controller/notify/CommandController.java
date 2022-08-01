@@ -22,9 +22,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.shulie.takin.cloud.constant.Message;
 import io.shulie.takin.cloud.app.service.JsonService;
-import io.shulie.takin.cloud.app.entity.CommandEntity;
+import io.shulie.takin.cloud.data.entity.CommandEntity;
 import io.shulie.takin.cloud.model.response.ApiResult;
-import io.shulie.takin.cloud.app.entity.WatchmanEntity;
+import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.constant.enums.CommandType;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.app.service.WatchmanService;

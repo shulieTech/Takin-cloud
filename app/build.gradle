@@ -47,6 +47,7 @@ processResources {
 
 dependencies {
     // 项目内依赖
+    implementation project(':data')
     implementation project(':model')
     implementation project(':constant')
     // lombok
@@ -58,8 +59,6 @@ dependencies {
     annotationProcessor libs.spring.boot.configuration.processor
     // redis
     implementation libs.spring.boot.redisson
-    // mysql
-    implementation libs.bundles.mysql
     // swagger
     implementation libs.spring.doc
     // 其它

@@ -27,16 +27,16 @@ import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.model.watchman.Register;
-import io.shulie.takin.cloud.app.entity.WatchmanEntity;
+import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.model.watchman.Register.Body;
 import io.shulie.takin.cloud.model.resource.ResourceSource;
 import io.shulie.takin.cloud.model.watchman.Register.Header;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
-import io.shulie.takin.cloud.app.mapper.WatchmanEventMapper;
-import io.shulie.takin.cloud.app.entity.WatchmanEventEntity;
+import io.shulie.takin.cloud.data.mapper.WatchmanEventMapper;
+import io.shulie.takin.cloud.data.entity.WatchmanEventEntity;
 import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
-import io.shulie.takin.cloud.app.service.mapper.WatchmanMapperService;
+import io.shulie.takin.cloud.data.service.WatchmanMapperService;
 
 /**
  * 调度服务 - 实例

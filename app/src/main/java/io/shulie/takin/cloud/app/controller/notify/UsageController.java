@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.shulie.takin.cloud.constant.Message;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
-import io.shulie.takin.cloud.app.entity.JobEntity;
+import io.shulie.takin.cloud.data.entity.JobEntity;
 import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.callback.FileUsage;

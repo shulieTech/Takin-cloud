@@ -6,14 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.text.CharSequenceUtil;
 import org.springframework.stereotype.Service;
 
-import io.shulie.takin.cloud.app.entity.MetricsEntity;
+import io.shulie.takin.cloud.data.entity.MetricsEntity;
 import io.shulie.takin.cloud.app.service.JobConfigService;
-import io.shulie.takin.cloud.app.entity.ThreadConfigEntity;
+import io.shulie.takin.cloud.data.entity.ThreadConfigEntity;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
-import io.shulie.takin.cloud.app.entity.ThreadConfigExampleEntity;
-import io.shulie.takin.cloud.app.service.mapper.MetricsMapperService;
-import io.shulie.takin.cloud.app.service.impl.mapper.ThreadConfigMapperServiceImpl;
-import io.shulie.takin.cloud.app.service.impl.mapper.ThreadConfigExampleMapperServiceImpl;
+import io.shulie.takin.cloud.data.service.MetricsMapperService;
+import io.shulie.takin.cloud.data.entity.ThreadConfigExampleEntity;
+import io.shulie.takin.cloud.data.service.impl.ThreadConfigMapperServiceImpl;
+import io.shulie.takin.cloud.data.service.impl.ThreadConfigExampleMapperServiceImpl;
 
 /**
  * 任务配置服务 - 实例
