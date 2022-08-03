@@ -84,7 +84,7 @@ public class StatReportDTO {
      * @return -
      */
     public BigDecimal getSa() {
-        return BigDecimal.valueOf(NumberUtil.getPercentRate(saCount, getTempRequestCount()));
+        return BigDecimal.valueOf(NumberUtil.getPercentRate(saCount, getTempRequestCount(), BigDecimal.ROUND_DOWN));
     }
 
     /**
@@ -100,7 +100,7 @@ public class StatReportDTO {
         if (null == getFailRequest()) {
             return BigDecimal.valueOf(100);
         }
-        return BigDecimal.valueOf(NumberUtil.getPercentRate(getTempRequestCount() - getFailRequest(), getTempRequestCount()));
+        return BigDecimal.valueOf(NumberUtil.getPercentRate(getTempRequestCount() - getFailRequest(), getTempRequestCount(), BigDecimal.ROUND_DOWN));
         //fixed end
     }
 

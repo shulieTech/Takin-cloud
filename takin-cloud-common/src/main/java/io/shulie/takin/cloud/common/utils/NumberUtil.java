@@ -219,6 +219,10 @@ public class NumberUtil {
         return getRate(a, b, true, defValue, 2, BigDecimal.ROUND_HALF_UP);
     }
 
+    public static double getPercentRate(Number a, Number b, int roundMode) {
+        return getRate(a, b, true, 0d, 2, roundMode);
+    }
+
     /**
      * 计算a在b中的比例
      *
