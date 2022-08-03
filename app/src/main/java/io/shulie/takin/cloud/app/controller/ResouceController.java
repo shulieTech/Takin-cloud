@@ -1,9 +1,9 @@
 package io.shulie.takin.cloud.app.controller;
 
+import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
-import io.shulie.takin.cloud.constant.Message;
 import lombok.extern.slf4j.Slf4j;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import io.shulie.takin.cloud.constant.Message;
+import io.shulie.takin.cloud.data.entity.JobEntity;
+import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
@@ -34,6 +37,8 @@ import io.shulie.takin.cloud.model.resource.ResourceExampleOverview;
 @RequestMapping("/resource")
 public class ResouceController {
     @javax.annotation.Resource
+    JobService jobService;
+    @javax.annotation.Resource
     ResourceService resourceService;
 
     @Operation(summary = "资源实例明细(压力机明细)")
@@ -41,7 +46,11 @@ public class ResouceController {
     public ApiResult<List<ResourceExampleOverview>> watchmanResourceExample(
         @Parameter(description = "资源主键") @RequestParam Long resourceId,
         @Parameter(description = "任务主键") @RequestParam(required = false) Long jobId) {
-        List<ResourceExampleEntity> resourceExampleList = resourceService.listExample(resourceId, jobId);
+        if (resourceId == null && jobId != null) {
+            JobEntity jobEntity = jobService.jobEntity(jobId);
+            resourceId = jobEntity == null ? null : jobEntity.getResourceId();
+        }
+        List<ResourceExampleEntity> resourceExampleList = resourceService.listExample(resourceId);
         List<ResourceExampleOverview> result = new ArrayList<>(resourceExampleList.size());
         for (ResourceExampleEntity t : resourceExampleList) {
             result.add(resourceService.exampleOverview(t.getId()));
@@ -51,7 +60,7 @@ public class ResouceController {
 
     @Operation(summary = "资源校验")
     @PostMapping(value = "check")
-    public ApiResult<Boolean> check(@RequestBody ApplyResourceRequest apply) {
+    public ApiResult<Map<Long, Integer>> check(@RequestBody ApplyResourceRequest apply) {
         return ApiResult.success(resourceService.check(apply));
     }
 

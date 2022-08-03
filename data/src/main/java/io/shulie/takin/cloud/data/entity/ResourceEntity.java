@@ -24,10 +24,6 @@ public class ResourceEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 调度器主键
-     */
-    private Long watchmanId;
-    /**
      * 资源镜像
      */
     private String image;

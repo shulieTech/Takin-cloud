@@ -83,12 +83,13 @@ public class CommandServiceImpl implements CommandService {
         // 组装命令内容
         List<Map<String, Object>> exampleList = resourceExampleEntityList.stream()
             .map(t -> {
-                Map<String, Object> data = new HashMap<>(8);
+                Map<String, Object> data = new HashMap<>(10);
                 data.put("id", t.getId());
                 data.put("cpu", t.getCpu());
                 data.put("image", t.getImage());
                 data.put("memory", t.getMemory());
                 data.put("limitCpu", t.getLimitCpu());
+                data.put("watchmanId", t.getWatchmanId());
                 data.put("limitMemory", t.getLimitMemory());
                 data.put("nfsDir", watchmanConfig.getNfsDirectory());
                 data.put("nfsServer", watchmanConfig.getNfsServer());
@@ -101,14 +102,19 @@ public class CommandServiceImpl implements CommandService {
             long id = Long.parseLong(item.get("id").toString());
             item.put("indexNumber", (id - minId) + 1);
         }
-        // 组装数据
-        Map<String, Object> content = new HashMap<>(3);
-        content.put("type", 1);
-        content.put("example", exampleList);
-        content.put(Message.RESOURCE_ID, resourceId);
         // 生成命令
-        long commandId = create(resourceEntity.getWatchmanId(), CommandType.GRASP_RESOURCE, jsonService.writeValueAsString(content));
-        log.info("下发命令:生成资源实例:{},命令主键{}.", resourceId, commandId);
+        Map<String, List<Map<String, Object>>> groupExampleList = exampleList.stream()
+            .collect(Collectors.groupingBy(t -> t.get("watchmanId").toString()));
+        groupExampleList.forEach((k, v) -> {
+            Long watchmanId = Long.valueOf(k);
+            // 组装数据
+            Map<String, Object> content = new HashMap<>(3);
+            content.put("type", 1);
+            content.put("example", v);
+            content.put(Message.RESOURCE_ID, resourceId);
+            long commandId = create(watchmanId, CommandType.GRASP_RESOURCE, jsonService.writeValueAsString(content));
+            log.info("下发命令:生成资源实例:{},命令主键{}.", resourceId, commandId);
+        });
     }
 
     /**
@@ -119,10 +125,15 @@ public class CommandServiceImpl implements CommandService {
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(resourceId);
         if (resourceEntity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_RESOURCE, resourceId));}
+        // 请求入参
         Map<String, Object> content = new HashMap<>(1);
         content.put("resourceId", resourceEntity.getId());
-        long commandId = create(resourceEntity.getWatchmanId(), CommandType.RELEASE_RESOURCE, jsonService.writeValueAsString(content));
-        log.info("下发命令:释放资源:{},命令主键{}.", resourceId, commandId);
+        // 下发命令 - 分批次执行
+        resourceService.listExample(resourceEntity.getId()).stream().map(ResourceExampleEntity::getWatchmanId)
+            .distinct().forEach(t -> {
+                long commandId = create(t, CommandType.RELEASE_RESOURCE, jsonService.writeValueAsString(content));
+                log.info("下发命令:调度机:{},释放资源:{},命令主键{}.", t, resourceId, commandId);
+            });
     }
 
     /**
@@ -135,9 +146,14 @@ public class CommandServiceImpl implements CommandService {
         if (jobEntity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_JOB, jobId));}
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
-        // 下发命令
-        long commandId = create(resourceEntity.getWatchmanId(), CommandType.START_APPLICATION, packageStartJob(jobId, bindByXpathMd5));
-        log.info("下发命令:启动任务:{},命令主键{}.", jobId, commandId);
+        // 请求入参
+        String content = packageStartJob(jobId, bindByXpathMd5);
+        // 下发命令 - 分批次执行
+        resourceService.listExample(resourceEntity.getId()).stream().map(ResourceExampleEntity::getWatchmanId)
+            .distinct().forEach(t -> {
+                long commandId = create(t, CommandType.START_APPLICATION, content);
+                log.info("下发命令:启动任务:{},命令主键{}.", jobId, commandId);
+            });
     }
 
     /**
@@ -154,8 +170,14 @@ public class CommandServiceImpl implements CommandService {
         content.put("jobId", jobEntity.getId());
         content.put(Message.TASK_ID, jobEntity.getId());
         content.put(Message.RESOURCE_ID, jobEntity.getResourceId());
-        long commandId = create(resourceEntity.getWatchmanId(), CommandType.STOP_APPLICATION, jsonService.writeValueAsString(content));
-        log.info("下发命令:停止任务:{},命令主键{}.", jobId, commandId);
+        // 请求入参
+        String request = jsonService.writeValueAsString(content);
+        // 下发命令 - 分批次执行
+        resourceService.listExample(resourceEntity.getId()).stream().map(ResourceExampleEntity::getWatchmanId)
+            .distinct().forEach(t -> {
+                long commandId = create(t, CommandType.STOP_APPLICATION, request);
+                log.info("下发命令:停止任务:{},命令主键{}.", jobId, commandId);
+            });
     }
 
     /**
@@ -202,9 +224,14 @@ public class CommandServiceImpl implements CommandService {
         result.put("jobId", jobEntity.getId());
         result.put("taskId", jobEntity.getId());
         // 下发命令
-        long commandId = create(resourceEntity.getWatchmanId(), CommandType.MODIFY_THREAD_CONFIG, jsonService.writeValueAsString(result));
+        String request = jsonService.writeValueAsString(result);
+        // 下发命令 - 分批次执行
+        resourceService.listExample(resourceEntity.getId()).stream().map(ResourceExampleEntity::getWatchmanId)
+            .distinct().forEach(t -> {
+                long commandId = create(t, CommandType.MODIFY_THREAD_CONFIG, request);
+                log.info("下发命令:更新线程组配置:{},命令主键{}.", jobId, commandId);
+            });
         // 输出日志
-        log.info("下发命令:更新线程组配置:{},命令主键{}.", jobId, commandId);
     }
 
     /**

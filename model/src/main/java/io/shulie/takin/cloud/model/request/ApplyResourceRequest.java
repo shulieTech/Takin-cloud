@@ -1,5 +1,8 @@
 package io.shulie.takin.cloud.model.request;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import lombok.Data;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,6 +20,12 @@ public class ApplyResourceRequest {
      */
     @Schema(description = "调度主键")
     private Long watchmanId;
+    /**
+     * 调度主键列表
+     * <p>多个调度机选中的列表</p>
+     */
+    @Schema(description = "调度主键列表")
+    private List<Long> watchmanIdList = new ArrayList<>(0);
     /**
      * 申请的CPU
      */

@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.app.service;
 
 import java.util.List;
+import java.util.Map;
 
 import io.shulie.takin.cloud.data.entity.ResourceEntity;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
@@ -17,28 +18,20 @@ public interface ResourceService {
      * 列出资源实例
      *
      * @param resourceId 资源主键
-     * @param jobId      任务主键
      * @return 资源实例列表
      */
-    List<ResourceExampleEntity> listExample(Long resourceId, Long jobId);
-
-    /**
-     * 列出资源实例
-     *
-     * @param resourceId 资源主键
-     * @return 资源实例列表
-     */
-    default List<ResourceExampleEntity> listExample(long resourceId) {
-        return listExample(resourceId, null);
-    }
+    List<ResourceExampleEntity> listExample(Long resourceId);
 
     /**
      * 校验资源
      *
      * @param apply 资源申请信息
-     * @return true/false
+     * @return <ul>
+     * <li>key:调度主键</li>
+     * <li>value:分配POD数</li>
+     * </ul>
      */
-    boolean check(ApplyResourceRequest apply);
+    Map<Long, Integer> check(ApplyResourceRequest apply);
 
     /**
      * 锁定资源

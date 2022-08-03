@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.app.service.impl;
 
 import java.util.Map;
 import java.util.List;
+import java.util.HashMap;
 import java.util.ArrayList;
 
 import lombok.extern.slf4j.Slf4j;
@@ -9,17 +10,15 @@ import com.github.pagehelper.Page;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.github.pagehelper.page.PageMethod;
 import org.springframework.stereotype.Service;
-import org.springframework.context.annotation.Lazy;
+import cn.hutool.core.exceptions.ValidateException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import io.shulie.takin.cloud.constant.Message;
-import io.shulie.takin.cloud.data.entity.JobEntity;
 import io.shulie.takin.cloud.app.util.ResourceUtil;
-import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.resource.Resource;
-import io.shulie.takin.cloud.data.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
+import io.shulie.takin.cloud.data.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
@@ -40,9 +39,6 @@ import io.shulie.takin.cloud.data.service.ResourceExampleEventMapperService;
 @Slf4j
 @Service
 public class ResourceServiceImpl implements ResourceService {
-    @Lazy
-    @javax.annotation.Resource
-    JobService jobService;
     @javax.annotation.Resource
     JsonService jsonService;
     @javax.annotation.Resource
@@ -60,11 +56,7 @@ public class ResourceServiceImpl implements ResourceService {
      * {@inheritDoc}
      */
     @Override
-    public List<ResourceExampleEntity> listExample(Long resourceId, Long jobId) {
-        if (resourceId == null && jobId != null) {
-            JobEntity jobEntity = jobService.jobEntity(jobId);
-            resourceId = jobEntity == null ? null : jobEntity.getResourceId();
-        }
+    public List<ResourceExampleEntity> listExample(Long resourceId) {
         if (resourceId == null) {return new ArrayList<>(0);}
         // 查询条件
         return resourceExampleMapper.lambdaQuery()
@@ -77,37 +69,76 @@ public class ResourceServiceImpl implements ResourceService {
      * {@inheritDoc}
      */
     @Override
-    public boolean check(ApplyResourceRequest apply) {
+    public Map<Long, Integer> check(ApplyResourceRequest apply) {
+        if (apply.getWatchmanId() != null) {apply.getWatchmanIdList().add(apply.getWatchmanId());}
+        // 0. 返回值
+        Map<Long, Integer> result = new HashMap<>(apply.getWatchmanIdList().size());
         // 1. 声明需要的资源
-        int number = apply.getNumber();
         Double requestCpu = ResourceUtil.convertCpu(apply.getCpu());
         Long requestMemory = ResourceUtil.convertMemory(apply.getMemory());
         if (requestCpu == null || requestMemory == null) {
-            log.warn("请求的资源值无法解析.({},{})", apply.getCpu(), apply.getMemory());
-            return false;
+            String message = CharSequenceUtil.format("请求的资源值无法解析.({},{})", apply.getCpu(), apply.getMemory());
+            log.warn(message);
+            throw new ValidateException(message);
         }
         // 2. 获取调度所属的资源列表
-        List<Resource> resourceList = watchmanService.getResourceList(apply.getWatchmanId());
-        // 3. 循环判断每一个资源
-        for (int i = 0; i < resourceList.size() && number > 0; i++) {
-            Resource resource = resourceList.get(i);
-            if (resource != null) {
-                // 4. 声明每个资源拥有的量化资源
-                Double spareCpu = ResourceUtil.convertCpu(resource.getCpu().toString());
-                Long spareMemory = ResourceUtil.convertMemory(resource.getMemory().toString());
+        for (Long t : apply.getWatchmanIdList()) {
+            // 已经计算出来的分配方案
+            int currentPod = result.values().stream().mapToInt(c -> c).sum();
+            // 剩余需要分配的
+            int need = apply.getNumber() - currentPod;
+            // 2.1 如果还需要继续分配
+            if (need > 0) {
+                // 压榨出来的调度机资源
+                int pressPodNuber = press(t, requestCpu, requestMemory);
+                if (pressPodNuber >= need) {result.put(t, need);}
+            }
+            // 2.2 资源分配完毕
+            else {break;}
+        }
+        // 3. 所需的资源数量是否全部满足了
+        int currentPod = result.values().stream().mapToInt(c -> c).sum();
+        if (currentPod != apply.getNumber()) {
+            String message = CharSequenceUtil.format("资源不足.({},{})({}/{})",
+                apply.getCpu(), apply.getMemory(),
+                currentPod, apply.getNumber());
+            log.warn(message);
+            throw new ValidateException(message);
+        }
+        return result;
+    }
+
+    /**
+     * 压榨调度资源
+     *
+     * @param watchmanId    调度主键
+     * @param requestCpu    需要的CPU
+     * @param requestMemory 需要的内存
+     * @return 支持的POD数量
+     */
+    public int press(Long watchmanId, Double requestCpu, Long requestMemory) {
+        int number = 0;
+        // 1. 获取调度所属的资源列表
+        List<Resource> resourceList = watchmanService.getResourceList(watchmanId);
+        // 2. 循环压榨每一个资源
+        for (Resource t : resourceList) {
+            if (t != null) {
+                // 2.1 声明每个资源拥有的量化资源
+                Double spareCpu = ResourceUtil.convertCpu(t.getCpu().toString());
+                Long spareMemory = ResourceUtil.convertMemory(t.getMemory().toString());
                 // 空值校验
                 if (spareCpu != null && spareMemory != null) {
-                    // 5. 递减资源余量和申请的数量
-                    while (number > 0 && spareCpu >= requestCpu && spareMemory >= requestMemory) {
-                        number--;
+                    // 2.2 递减资源余量和申请的数量
+                    while (spareCpu >= requestCpu && spareMemory >= requestMemory) {
+                        number++;
                         spareCpu -= requestCpu;
                         spareMemory -= requestMemory;
                     }
                 }
             }
         }
-        // 6. 所需的资源数量是否全部满足了
-        return number == 0;
+        // 6. 压榨出的数量
+        return number;
     }
 
     /**
@@ -115,38 +146,48 @@ public class ResourceServiceImpl implements ResourceService {
      */
     @Override
     public String lock(ApplyResourceRequest apply) {
-        // 0. 预检
-        if (this.check(apply)) {
+        if (apply.getWatchmanId() != null) {
+            apply.setWatchmanId(null);
+            apply.getWatchmanIdList().add(apply.getWatchmanId());
+        }
+        try {
+            // 0. 预检
+            Map<Long, Integer> podAllocation = this.check(apply);
             // 1. 保存任务信息
             ResourceEntity resourceEntity = new ResourceEntity()
                 .setCpu(apply.getCpu())
                 .setImage(apply.getImage())
                 .setMemory(apply.getMemory())
                 .setNumber(apply.getNumber())
-                .setWatchmanId(apply.getWatchmanId())
                 .setCallbackUrl(apply.getCallbackUrl())
                 .setLimitCpu(CharSequenceUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu())
                 .setLimitMemory(CharSequenceUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
             resourceMapper.save(resourceEntity);
             // 2. 创建任务实例
-            for (int i = 0; i < apply.getNumber(); i++) {
-                ResourceExampleEntity resourceExampleEntity = new ResourceExampleEntity()
-                    .setCpu(apply.getCpu())
-                    .setImage(apply.getImage())
-                    .setMemory(apply.getMemory())
-                    .setResourceId(resourceEntity.getId())
-                    .setWatchmanId(resourceEntity.getWatchmanId())
-                    .setLimitCpu(CharSequenceUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu())
-                    .setLimitMemory(CharSequenceUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
-                resourceExampleMapper.save(resourceExampleEntity);
-            }
+            List<ResourceExampleEntity> resourceExampleEntityList = new ArrayList<>();
+            podAllocation.forEach((k, v) -> {
+                for (int i = 0; i < v; i++) {
+                    ResourceExampleEntity resourceExampleEntity = new ResourceExampleEntity()
+                        .setWatchmanId(k)
+                        .setCpu(apply.getCpu())
+                        .setImage(apply.getImage())
+                        .setMemory(apply.getMemory())
+                        .setResourceId(resourceEntity.getId())
+                        .setLimitCpu(CharSequenceUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu())
+                        .setLimitMemory(CharSequenceUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
+                    resourceExampleEntityList.add(resourceExampleEntity);
+                }
+            });
+            resourceExampleMapper.saveBatch(resourceExampleEntityList);
             // 3. 下发命令
             commandService.graspResource(resourceEntity.getId());
             // end 返回资源主键
             return resourceEntity.getId().toString();
         }
         // end 预检失败则直接返回 NULL
-        else {return null;}
+        catch (Exception e) {
+            return null;
+        }
     }
 
     /**
