@@ -36,8 +36,8 @@ tasks.withType(JavaCompile) {
 
 java {
     javadoc.options.addStringOption('Xdoclint:none', '-quiet')
-    withJavadocJar()
-    withSourcesJar()
+//    withSourcesJar()
+//    withJavadocJar()
 }
 
 javadoc {
