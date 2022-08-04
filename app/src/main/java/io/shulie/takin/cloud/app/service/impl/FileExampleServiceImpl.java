@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.app.service.impl;
 import java.util.List;
 import java.util.Objects;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.data.entity.FileExampleEntity;
@@ -11,7 +12,7 @@ import io.shulie.takin.cloud.model.request.file.ProgressRequest;
 import io.shulie.takin.cloud.data.service.FileExampleMapperService;
 
 /**
- * TODO
+ * 文件实例服务
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
@@ -47,6 +48,8 @@ public class FileExampleServiceImpl implements FileExampleService {
      */
     @Override
     public void fail(Long id, String message) {
+        // 0. 数据长度处理
+        message = CharSequenceUtil.subWithLength(message, 0, 255);
         // 1. 数据更新 [t_file_example]
         boolean updateResult = fileExampleMapper.lambdaUpdate()
             .set(FileExampleEntity::getMessage, message)

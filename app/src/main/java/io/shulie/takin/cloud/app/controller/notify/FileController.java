@@ -5,11 +5,11 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.shulie.takin.cloud.app.service.FileService;
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.service.FileExampleService;
 import io.shulie.takin.cloud.model.request.file.FailedRequest;
@@ -26,8 +26,6 @@ import io.shulie.takin.cloud.model.request.file.ProgressRequest;
 @RestController("NotiftFileController")
 public class FileController {
     @javax.annotation.Resource
-    FileService fileService;
-    @javax.annotation.Resource
     FileExampleService fileExampleService;
 
     /**
@@ -36,9 +34,9 @@ public class FileController {
      * @param requests 请求
      * @return -
      */
-    @GetMapping("progress/update")
+    @PostMapping("progress/update")
     @Operation(summary = "更新进度")
-    public ApiResult<Object> updateProgress(List<ProgressRequest> requests) {
+    public ApiResult<Object> updateProgress(@RequestBody List<ProgressRequest> requests) {
         fileExampleService.updateProgress(requests);
         return ApiResult.success();
     }
@@ -49,9 +47,9 @@ public class FileController {
      * @param requests 请求
      * @return -
      */
-    @GetMapping("failed")
+    @PostMapping("failed")
     @Operation(summary = "失败")
-    public ApiResult<Object> failed(FailedRequest requests) {
+    public ApiResult<Object> failed(@RequestBody FailedRequest requests) {
         fileExampleService.fail(requests.getId(), requests.getMessage());
         return ApiResult.success();
     }
