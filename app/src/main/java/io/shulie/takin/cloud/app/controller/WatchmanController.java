@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +22,8 @@ import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
+import io.shulie.takin.cloud.model.request.watchman.RegisteRequest;
+import io.shulie.takin.cloud.model.response.watchman.RegisteResponse;
 
 /**
  * 资源
@@ -55,4 +59,9 @@ public class WatchmanController {
         return ApiResult.success(watchmanService.getResourceList(watchmanId));
     }
 
+    @Operation(summary = "注册调度机")
+    @PostMapping("registe")
+    public ApiResult<RegisteResponse> registe(@RequestBody RegisteRequest registeRequest) {
+        return ApiResult.success(watchmanService.generate(registeRequest.getHeader(), registeRequest.getBody()));
+    }
 }

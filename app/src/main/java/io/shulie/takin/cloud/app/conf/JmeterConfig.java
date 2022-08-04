@@ -41,7 +41,8 @@ public class JmeterConfig {
             Resource[] resources = resourcePatternResolver.getResources("classpath:jmeter/lib/ext/*.jar");
             File extDir = new File("lib/ext");
             if (!extDir.exists()) {
-                extDir.mkdirs();
+                boolean mkdirsResult = extDir.mkdirs();
+                log.info("JmeterConfig#afterLoaded,mkdirs.result={}", mkdirsResult);
             }
             String extPath = extDir.getAbsolutePath();
             // 通过流将文件复制到file中
@@ -61,13 +62,10 @@ public class JmeterConfig {
             appProperties.setAccessible(true);
             appProperties.set(null, p);
             Class.forName("org.apache.jmeter.samplers.SampleSaveConfiguration");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+            Thread.currentThread().interrupt();
+        } catch (ClassNotFoundException | NoSuchFieldException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -84,7 +82,7 @@ public class JmeterConfig {
                 resource.getFilename();
                 File file = new File("tmp-" + resource.getFilename());
                 FileUtils.copyToFile(resource.getInputStream(), file);
-                JmeterPluginsConstant.put(resource.getFilename(), file);
+                JmeterPluginsConstant.getFiles().put(resource.getFilename(), file);
             }
 
         } catch (IOException e) {

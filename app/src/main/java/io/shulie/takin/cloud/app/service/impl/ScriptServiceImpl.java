@@ -52,7 +52,7 @@ public class ScriptServiceImpl implements ScriptService {
     @Value("${watchman.nfs-path}")
     private String nfsPath;
 
-    private static Object lockObj = new Object();
+    private static final Object lockObj = new Object();
 
     @Override
     public String buildJmeterScript(ScriptBuildRequest scriptRequest) {
@@ -105,7 +105,7 @@ public class ScriptServiceImpl implements ScriptService {
                 File pluginFile;
                 if (StringUtils.startsWith(plugin, "/")) {
                     String name = plugin.substring(plugin.lastIndexOf("/") + 1);
-                    pluginFile = JmeterPluginsConstant.getOrDefault(name, null);
+                    pluginFile = JmeterPluginsConstant.getFiles().getOrDefault(name, null);
                     if (Objects.isNull(pluginFile)) {
                         continue;
                     }

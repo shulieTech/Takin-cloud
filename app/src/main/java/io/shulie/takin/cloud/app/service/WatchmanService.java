@@ -9,9 +9,9 @@ import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.model.resource.ResourceSource;
 import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 
-import io.shulie.takin.cloud.model.watchman.Register;
 import io.shulie.takin.cloud.model.watchman.Register.Body;
 import io.shulie.takin.cloud.model.watchman.Register.Header;
+import io.shulie.takin.cloud.model.response.watchman.RegisteResponse;
 
 /**
  * 调度服务
@@ -98,5 +98,5 @@ public interface WatchmanService {
      * @param body   主要信息
      * @return 调度机信息
      */
-    Register generate(Header header, Body body);
+    RegisteResponse generate(Header header, Body body);
 }

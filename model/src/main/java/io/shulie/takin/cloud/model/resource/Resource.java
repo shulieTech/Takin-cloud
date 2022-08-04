@@ -5,10 +5,6 @@ import lombok.experimental.Accessors;
 
 /**
  * 资源
- * <ul>
- *     <li>CPU</li>
- *     <li>内存</li>
- * </ul>
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
@@ -26,4 +22,24 @@ public class Resource {
      * <p>1代码1Kb</p>
      */
     Long memory;
+    /**
+     * 资源类型
+     */
+    String type;
+    /**
+     * nfs服务端地址
+     */
+    private String nfsServer;
+    /**
+     * nfs服务端文件夹
+     */
+    private String nfsDir;
+    /**
+     * nfs已使用容量
+     */
+    private Long nfsUsableSpace;
+    /**
+     * nfs总容量
+     */
+    private Long nfsTotalSpace;
 }

@@ -2,9 +2,9 @@ package io.shulie.takin.cloud.constant;
 
 /**
  * 常量
+ * <p>源文件创建时间:2020-04-20 15:55</p>
  *
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
- * @date 2020-04-20 15:55
  */
 public class CollectorConstants {
     private CollectorConstants() {}
@@ -13,7 +13,6 @@ public class CollectorConstants {
      * redis key前缀
      */
     public static final String REDIS_PRESSURE_TASK_KEY = "COLLECTOR:JOB:TASK:%s";
-
 
     /**
      * 指标key 超时时间

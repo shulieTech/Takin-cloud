@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.resource.Resource;
-import io.shulie.takin.cloud.model.watchman.Register;
 import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.model.watchman.Register.Body;
@@ -33,6 +32,7 @@ import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.data.entity.WatchmanEventEntity;
 import io.shulie.takin.cloud.data.service.WatchmanMapperService;
 import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
+import io.shulie.takin.cloud.model.response.watchman.RegisteResponse;
 import io.shulie.takin.cloud.data.service.WatchmanEventMapperService;
 
 /**
@@ -233,7 +233,7 @@ public class WatchmanServiceImpl implements WatchmanService {
      * {@inheritDoc}
      */
     @Override
-    public Register generate(Header header, Body body) {
+    public RegisteResponse generate(Header header, Body body) {
         header.setAlg("HS256");
         header.setSign("MD5");
         body.setRef("tianci");
@@ -253,7 +253,7 @@ public class WatchmanServiceImpl implements WatchmanService {
         String ref = CharSequenceUtil.format("{}.{}.{}", base64HeaderString, base64BodyString, verifySignature);
         String refSign = SecureUtil.md5(ref);
 
-        return new Register().setRefSign(refSign).setHeader(header).setBody(body).setRef(ref);
+        return new RegisteResponse().setSign(refSign).setId(0L);
     }
 
 }
