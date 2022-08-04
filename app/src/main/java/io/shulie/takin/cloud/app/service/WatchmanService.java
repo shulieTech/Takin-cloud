@@ -22,11 +22,12 @@ public interface WatchmanService {
     /**
      * 调度机列表
      *
-     * @param pageNumber 分页页码
-     * @param pageSize   分页容量
+     * @param pageNumber     分页页码
+     * @param pageSize       分页容量
+     * @param watchmanIdList 调度机主键集合
      * @return 分页列表
      */
-    PageInfo<WatchmanEntity> list(int pageNumber, int pageSize);
+    PageInfo<WatchmanEntity> list(int pageNumber, int pageSize, List<Long> watchmanIdList);
 
     /**
      * 获取调度所属的资源列表

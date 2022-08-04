@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.app.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +22,7 @@ import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.WatchmanService;
+import io.shulie.takin.cloud.model.response.watchman.ListResponse;
 import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 import io.shulie.takin.cloud.model.request.watchman.RegisteRequest;
 import io.shulie.takin.cloud.model.response.watchman.RegisteResponse;
@@ -45,12 +47,20 @@ public class WatchmanController {
     }
 
     @Operation(summary = "调度器列表")
-    @GetMapping("list")
-    public ApiResult<List<WatchmanEntity>> list(
+    @PostMapping("list")
+    public ApiResult<List<ListResponse>> list(
         @Parameter(description = "分页页码", required = true) Integer pageNumber,
-        @Parameter(description = "分页容量", required = true) Integer pageSize) {
-        PageInfo<WatchmanEntity> list = watchmanService.list(pageNumber, pageSize);
-        return ApiResult.success(list.getList(), list.getTotal());
+        @Parameter(description = "分页容量", required = true) Integer pageSize,
+        @Parameter(description = "调度器主键集合", required = true) @RequestBody List<Long> watchmanIdList) {
+        PageInfo<WatchmanEntity> list = watchmanService.list(pageNumber, pageSize, watchmanIdList);
+        List<ListResponse> result = list.getList().stream()
+            .map(t -> new ListResponse()
+                .setId(t.getId())
+                .setRef(t.getRef())
+                .setRefSign(t.getRefSign())
+                .setResourceList(watchmanService.getResourceList(t.getId())))
+            .collect(Collectors.toList());
+        return ApiResult.success(result, list.getTotal());
     }
 
     @Operation(summary = "资源容量列表")

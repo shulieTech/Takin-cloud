@@ -12,6 +12,7 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.crypto.digest.HMac;
 import com.github.pagehelper.PageInfo;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.github.pagehelper.page.PageMethod;
 import org.springframework.stereotype.Service;
@@ -54,9 +55,12 @@ public class WatchmanServiceImpl implements WatchmanService {
      * {@inheritDoc}
      */
     @Override
-    public PageInfo<WatchmanEntity> list(int pageNumber, int pageSize) {
+    public PageInfo<WatchmanEntity> list(int pageNumber, int pageSize, List<Long> watchmanIdList) {
         try (Page<?> ignored = PageMethod.startPage(pageNumber, pageSize)) {
-            return new PageInfo<>(watchmanMapper.list());
+            List<WatchmanEntity> dbResult = watchmanMapper.lambdaQuery()
+                .in(CollUtil.isNotEmpty(watchmanIdList), WatchmanEntity::getId, watchmanIdList)
+                .list();
+            return new PageInfo<>(dbResult);
         }
     }
 
