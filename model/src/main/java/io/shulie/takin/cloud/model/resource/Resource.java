@@ -27,6 +27,10 @@ public class Resource {
      */
     String type;
     /**
+     * 名称
+     */
+    String name;
+    /**
      * nfs服务端地址
      */
     private String nfsServer;
