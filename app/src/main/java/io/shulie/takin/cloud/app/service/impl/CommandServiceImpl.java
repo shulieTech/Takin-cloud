@@ -100,8 +100,6 @@ public class CommandServiceImpl implements CommandService {
                 data.put("limitCpu", t.getLimitCpu());
                 data.put("watchmanId", t.getWatchmanId());
                 data.put("limitMemory", t.getLimitMemory());
-                data.put("nfsDir", watchmanConfig.getNfsDirectory());
-                data.put("nfsServer", watchmanConfig.getNfsServer());
                 return data;
             })
             .collect(Collectors.toList());

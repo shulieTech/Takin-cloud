@@ -2,7 +2,6 @@ package io.shulie.takin.cloud.app.controller.notify;
 
 import java.util.List;
 
-import io.shulie.takin.cloud.app.service.FileExampleService;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.shulie.takin.cloud.app.service.FileService;
 import io.shulie.takin.cloud.model.response.ApiResult;
+import io.shulie.takin.cloud.app.service.FileExampleService;
 import io.shulie.takin.cloud.model.request.file.FailedRequest;
 import io.shulie.takin.cloud.model.request.file.ProgressRequest;
 
@@ -23,12 +23,12 @@ import io.shulie.takin.cloud.model.request.file.ProgressRequest;
 @Slf4j(topic = "NOTIFY")
 @Tag(name = "文件资源状态上报")
 @RequestMapping("/notify/file")
-@RestController("NotiftJobExampleController")
+@RestController("NotiftFileController")
 public class FileController {
     @javax.annotation.Resource
     FileService fileService;
     @javax.annotation.Resource
-    FileExampleService  fileExampleService;
+    FileExampleService fileExampleService;
 
     /**
      * 上报文件资源下载调度

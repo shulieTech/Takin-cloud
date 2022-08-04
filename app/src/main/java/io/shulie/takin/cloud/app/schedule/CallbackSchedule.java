@@ -14,7 +14,7 @@ import io.shulie.takin.cloud.app.service.CallbackService;
  *
  * @author chenhongqiao@shulie.com
  */
-@Slf4j
+@Slf4j(topic = "CALLBACK")
 public class CallbackSchedule implements Runnable {
 
     private final CallbackService callbackService;
