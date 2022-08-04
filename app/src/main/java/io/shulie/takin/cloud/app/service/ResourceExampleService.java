@@ -2,8 +2,6 @@ package io.shulie.takin.cloud.app.service;
 
 import io.shulie.takin.cloud.model.request.ResourceExampleInfoRequest;
 
-import java.util.Map;
-
 /**
  * 资源实例服务
  *
@@ -43,7 +41,7 @@ public interface ResourceExampleService {
      * 信息事件
      * <p>不需要回调</p>
      *
-     * @param id   资源实例主键
+     * @param id      资源实例主键
      * @param request 资源实例信息
      */
     void onInfo(long id, ResourceExampleInfoRequest request);

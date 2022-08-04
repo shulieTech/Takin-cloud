@@ -42,6 +42,10 @@ public enum CommandType {
      * 修改线程配置
      */
     MODIFY_THREAD_CONFIG(302),
+    /**
+     * 下发文件
+     */
+    ANNOUNCE_FILE(400),
     // 格式化用
     ;
 

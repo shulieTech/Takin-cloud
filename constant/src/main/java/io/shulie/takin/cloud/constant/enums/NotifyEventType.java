@@ -35,6 +35,9 @@ public enum NotifyEventType {
     JOB_EXAMPLE_START(301, "任务实例启动"),
     JOB_EXAMPLE_STOP(302, "任务实例停止"),
     JOB_EXAMPLE_ERROR(303, "任务实例发生异常"),
+    // 文件资源
+    FILE_RESOURCE_DOWNLOAD_FAIL(400, "文件资源失败"),
+    FILE_RESOURCE_DOWNLOAD_PROGRESS(401, "文件资源进度"),
     // 格式化用
     ;
 

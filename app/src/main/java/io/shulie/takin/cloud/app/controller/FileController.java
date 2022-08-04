@@ -1,11 +1,9 @@
 package io.shulie.takin.cloud.app.controller;
 
-import java.util.List;
-
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +31,6 @@ public class FileController {
     @PostMapping("announce")
     public ApiResult<Long> announce(
         @Parameter(description = "文件列表", required = true) @RequestBody AnnounceRequest request) {
-        return ApiResult.success(fileService.announce(request.getWatchmanIdList(), request.getFileList()));
+        return ApiResult.success(fileService.announce(request.getCallbackUrl(), request.getWatchmanIdList(), request.getFileList()));
     }
 }

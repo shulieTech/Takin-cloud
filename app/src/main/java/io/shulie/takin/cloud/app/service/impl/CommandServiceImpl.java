@@ -7,6 +7,9 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 
+import io.shulie.takin.cloud.app.service.FileExampleService;
+import io.shulie.takin.cloud.app.service.FileService;
+import io.shulie.takin.cloud.data.entity.FileExampleEntity;
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
@@ -52,7 +55,13 @@ public class CommandServiceImpl implements CommandService {
     JobService jobService;
     @Lazy
     @javax.annotation.Resource
+    FileService fileService;
+    @Lazy
+    @javax.annotation.Resource
     ResourceService resourceService;
+    @Lazy
+    @javax.annotation.Resource
+    FileExampleService fileExampleService;
 
     @javax.annotation.Resource
     JsonService jsonService;
@@ -232,6 +241,20 @@ public class CommandServiceImpl implements CommandService {
                 log.info("下发命令:更新线程组配置:{},命令主键{}.", jobId, commandId);
             });
         // 输出日志
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void announceFile(long fileId) {
+        // 获取到所有的文件实例
+        List<FileExampleEntity> exampleEntityList = fileExampleService.listExample(fileId);
+        // 按调度器分组
+        Map<Long, List<FileExampleEntity>> groupData = exampleEntityList.stream()
+            .collect(Collectors.groupingBy(FileExampleEntity::getWatchmanId));
+        // 分调度器下发
+        groupData.forEach((k, v) -> create(k, CommandType.ANNOUNCE_FILE, jsonService.writeValueAsString(v)));
     }
 
     /**

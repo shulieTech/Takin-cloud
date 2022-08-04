@@ -1,7 +1,5 @@
 package io.shulie.takin.cloud.model.response.watchman;
 
-import java.util.List;
-
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -33,8 +31,8 @@ public class ListResponse {
     @Schema(description = "关键词签名")
     private String refSign;
     /**
-     * 资源列表
+     * 资源
      */
-    @Schema(description = "资源列表")
-    private List<Resource> resourceList;
+    @Schema(description = "资源总量")
+    private Resource resource;
 }

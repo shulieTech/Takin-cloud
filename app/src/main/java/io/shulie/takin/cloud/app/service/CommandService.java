@@ -50,6 +50,13 @@ public interface CommandService {
     void updateConfig(long jobId);
 
     /**
+     * 文件资源
+     *
+     * @param fileId 文件资源主键
+     */
+    void announceFile(long fileId);
+
+    /**
      * 命令确认
      *
      * @param id      命令主键
