@@ -65,12 +65,24 @@ public class WatchmanController {
         @Parameter(description = "调度器主键集合", required = true) @RequestBody List<Long> watchmanIdList) {
         PageInfo<WatchmanEntity> list = watchmanService.list(pageNumber, pageSize, watchmanIdList);
         List<ListResponse> result = list.getList().stream()
-            .map(t -> new ListResponse()
-                .setId(t.getId())
-                .setRef(t.getRef())
-                .setRefSign(t.getRefSign())
-                .setResourceList(watchmanService.getResourceList(t.getId())))
-            .collect(Collectors.toList());
+            .map(t -> {
+                Resource resource = new Resource().setCpu(0d).setMemory(0L);
+                watchmanService.getResourceList(t.getId()).forEach(c -> {
+                    if (c.getCpu() != null) {resource.setCpu(resource.getCpu() + c.getCpu());}
+                    if (c.getMemory() != null) {resource.setMemory(resource.getMemory() + c.getMemory());}
+                    resource.setName(c.getName());
+                    resource.setType(c.getType());
+                    resource.setNfsDir(c.getNfsDir());
+                    resource.setNfsServer(c.getNfsServer());
+                    resource.setNfsTotalSpace(c.getNfsTotalSpace());
+                    resource.setNfsUsableSpace(c.getNfsUsableSpace());
+                });
+                return new ListResponse()
+                    .setId(t.getId())
+                    .setRef(t.getRef())
+                    .setRefSign(t.getRefSign())
+                    .setResource(resource);
+            }).collect(Collectors.toList());
         return ApiResult.success(result, list.getTotal());
     }
 
