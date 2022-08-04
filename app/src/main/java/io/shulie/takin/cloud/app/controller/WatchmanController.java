@@ -1,6 +1,8 @@
 package io.shulie.takin.cloud.app.controller;
 
+import java.util.Map;
 import java.util.List;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +48,15 @@ public class WatchmanController {
         return ApiResult.success(watchmanService.status(watchmanId));
     }
 
+    @Operation(summary = "状态-批量")
+    @PostMapping("status/batch")
+    public ApiResult<Map<Long, WatchmanStatusResponse>> statusBatch(
+        @Parameter(description = "调度器主键集合", required = true) @RequestBody List<Long> watchmanIdList) {
+        Map<Long, WatchmanStatusResponse> result = new HashMap<>(watchmanIdList.size());
+        watchmanIdList.forEach(t -> result.put(t, watchmanService.status(t)));
+        return ApiResult.success(result);
+    }
+
     @Operation(summary = "调度器列表")
     @PostMapping("list")
     public ApiResult<List<ListResponse>> list(
@@ -67,6 +78,15 @@ public class WatchmanController {
     @GetMapping("resource")
     public ApiResult<List<Resource>> resourceList(@Parameter(description = "调度主键", required = true) @RequestParam Long watchmanId) {
         return ApiResult.success(watchmanService.getResourceList(watchmanId));
+    }
+
+    @Operation(summary = "资源容量列表-批量")
+    @PostMapping("resource/batch")
+    public ApiResult<Map<Long, List<Resource>>> resourceBatchList(
+        @Parameter(description = "调度器主键集合", required = true) @RequestBody List<Long> watchmanIdList) {
+        Map<Long, List<Resource>> result = new HashMap<>(watchmanIdList.size());
+        watchmanIdList.forEach(t -> result.put(t, watchmanService.getResourceList(t)));
+        return ApiResult.success(result);
     }
 
     @Operation(summary = "注册调度机")

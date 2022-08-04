@@ -59,4 +59,12 @@ public class Swagger {
             .build();
     }
 
+    @Bean
+    public GroupedOpenApi fileApi() {
+        return GroupedOpenApi.builder()
+            .group("文件资源")
+            .pathsToMatch("/file/**")
+            .build();
+    }
+
 }
