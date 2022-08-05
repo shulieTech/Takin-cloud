@@ -24,6 +24,7 @@ import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.WatchmanService;
+import io.shulie.takin.cloud.model.request.watchman.BatchRequest;
 import io.shulie.takin.cloud.model.response.watchman.ListResponse;
 import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 import io.shulie.takin.cloud.model.request.watchman.RegisteRequest;
@@ -51,9 +52,9 @@ public class WatchmanController {
     @Operation(summary = "状态-批量")
     @PostMapping("status/batch")
     public ApiResult<Map<Long, WatchmanStatusResponse>> statusBatch(
-        @Parameter(description = "调度器主键集合", required = true) @RequestBody List<Long> watchmanIdList) {
-        Map<Long, WatchmanStatusResponse> result = new HashMap<>(watchmanIdList.size());
-        watchmanIdList.forEach(t -> result.put(t, watchmanService.status(t)));
+        @Parameter(description = "调度器主键集合", required = true) @RequestBody BatchRequest request) {
+        Map<Long, WatchmanStatusResponse> result = new HashMap<>(request.getWatchmanIdList().size());
+        request.getWatchmanIdList().forEach(t -> result.put(t, watchmanService.status(t)));
         return ApiResult.success(result);
     }
 
@@ -95,9 +96,9 @@ public class WatchmanController {
     @Operation(summary = "资源容量列表-批量")
     @PostMapping("resource/batch")
     public ApiResult<Map<Long, List<Resource>>> resourceBatchList(
-        @Parameter(description = "调度器主键集合", required = true) @RequestBody List<Long> watchmanIdList) {
-        Map<Long, List<Resource>> result = new HashMap<>(watchmanIdList.size());
-        watchmanIdList.forEach(t -> result.put(t, watchmanService.getResourceList(t)));
+        @Parameter(description = "调度器主键集合", required = true) @RequestBody BatchRequest request) {
+        Map<Long, List<Resource>> result = new HashMap<>(request.getWatchmanIdList().size());
+        request.getWatchmanIdList().forEach(t -> result.put(t, watchmanService.getResourceList(t)));
         return ApiResult.success(result);
     }
 
