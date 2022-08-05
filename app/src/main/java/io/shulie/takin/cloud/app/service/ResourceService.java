@@ -5,7 +5,7 @@ import java.util.Map;
 
 import io.shulie.takin.cloud.data.entity.ResourceEntity;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
-import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
+import io.shulie.takin.cloud.model.request.job.resource.ApplyResourceRequest;
 import io.shulie.takin.cloud.model.resource.ResourceExampleOverview;
 
 /**

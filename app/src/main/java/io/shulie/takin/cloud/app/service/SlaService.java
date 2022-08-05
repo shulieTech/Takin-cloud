@@ -3,7 +3,7 @@ package io.shulie.takin.cloud.app.service;
 import java.util.List;
 
 import io.shulie.takin.cloud.data.entity.SlaEntity;
-import io.shulie.takin.cloud.model.request.MetricsInfo;
+import io.shulie.takin.cloud.model.request.job.pressure.MetricsInfo;
 import io.shulie.takin.cloud.data.entity.SlaEventEntity;
 import io.shulie.takin.cloud.constant.enums.FormulaSymbol;
 import io.shulie.takin.cloud.constant.enums.FormulaTarget;

@@ -2,6 +2,8 @@ package io.shulie.takin.cloud.app.service;
 
 import java.util.List;
 
+import io.shulie.takin.cloud.model.request.job.script.BuildRequest;
+
 /**
  * 脚本服务
  *
@@ -26,4 +28,12 @@ public interface ScriptService {
      * @param message   执行结果
      */
     void report(Long id, Boolean completed, String message);
+
+    /**
+     * 构建脚本
+     *
+     * @param scriptRequest 请求信息
+     * @return 脚本内容
+     */
+    String build(BuildRequest scriptRequest);
 }

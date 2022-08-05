@@ -3,7 +3,7 @@ package io.shulie.takin.cloud.app.service;
 import java.util.List;
 
 import io.shulie.takin.cloud.data.entity.FileEntity;
-import io.shulie.takin.cloud.model.request.file.AnnounceRequest;
+import io.shulie.takin.cloud.model.request.job.file.AnnounceRequest;
 
 /**
  * 文件资源服务

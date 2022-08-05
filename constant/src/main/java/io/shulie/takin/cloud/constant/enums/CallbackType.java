@@ -27,11 +27,11 @@ public enum CallbackType {
     RESOURCE_EXAMPLE_STOP(102, "资源实例停止"),
     RESOURCE_EXAMPLE_ERROR(103, "资源实例异常"),
     // 任务实例相关
-    JOB_EXAMPLE_HEARTBEAT(200, "任务实例心跳"),
-    JOB_EXAMPLE_START(201, "任务实例启动"),
-    JOB_EXAMPLE_STOP(202, "任务实例停止"),
-    JOB_EXAMPLE_ERROR(203, "任务实例异常"),
-    JOB_EXAMPLE_SUCCESSFUL(204, "任务实例正常停止"),
+    PRESSURE_EXAMPLE_HEARTBEAT(200, "施压任务实例心跳"),
+    PRESSURE_EXAMPLE_START(201, "施压任务实例启动"),
+    PRESSURE_EXAMPLE_STOP(202, "施压任务实例停止"),
+    PRESSURE_EXAMPLE_ERROR(203, "施压任务实例异常"),
+    PRESSURE_EXAMPLE_SUCCESSFUL(204, "施压任务实例正常停止"),
     // 过程数据[sla/csv用量]
     SLA(301, "触发SLA"),
     EXCESS_JOB(302, "额外的任务"),

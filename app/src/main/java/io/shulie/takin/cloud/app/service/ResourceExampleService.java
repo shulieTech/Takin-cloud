@@ -1,6 +1,6 @@
 package io.shulie.takin.cloud.app.service;
 
-import io.shulie.takin.cloud.model.request.ResourceExampleInfoRequest;
+import io.shulie.takin.cloud.model.request.job.resource.ResourceExampleInfoRequest;
 
 /**
  * 资源实例服务

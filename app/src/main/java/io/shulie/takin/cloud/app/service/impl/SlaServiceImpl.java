@@ -12,21 +12,21 @@ import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.model.callback.Sla;
 import io.shulie.takin.cloud.data.entity.SlaEntity;
-import io.shulie.takin.cloud.data.entity.JobEntity;
-import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.SlaService;
 import io.shulie.takin.cloud.app.service.JsonService;
-import io.shulie.takin.cloud.model.request.MetricsInfo;
+import io.shulie.takin.cloud.data.entity.PressureEntity;
 import io.shulie.takin.cloud.data.entity.SlaEventEntity;
 import io.shulie.takin.cloud.model.callback.Sla.SlaInfo;
+import io.shulie.takin.cloud.app.service.PressureService;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.CallbackService;
-import io.shulie.takin.cloud.data.entity.JobExampleEntity;
 import io.shulie.takin.cloud.constant.enums.FormulaSymbol;
 import io.shulie.takin.cloud.constant.enums.FormulaTarget;
 import io.shulie.takin.cloud.data.service.SlaMapperService;
+import io.shulie.takin.cloud.data.entity.PressureExampleEntity;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.data.service.SlaEventMapperService;
+import io.shulie.takin.cloud.model.request.job.pressure.MetricsInfo;
 
 /**
  * SLA服务 - 实例
@@ -37,9 +37,9 @@ import io.shulie.takin.cloud.data.service.SlaEventMapperService;
 @Slf4j
 public class SlaServiceImpl implements SlaService {
     @javax.annotation.Resource
-    JobService jobService;
-    @javax.annotation.Resource
     JsonService jsonService;
+    @javax.annotation.Resource
+    PressureService pressureService;
     @javax.annotation.Resource
     ResourceService resourceService;
     @javax.annotation.Resource
@@ -78,9 +78,9 @@ public class SlaServiceImpl implements SlaService {
     public void event(Long jobId, Long jobExampleId, List<SlaEventEntity> slaEventEntityList) {
         if (CollUtil.isEmpty(slaEventEntityList)) {return;}
         slaEventMapper.saveBatch(slaEventEntityList);
-        JobEntity jobEntity = jobService.jobEntity(jobId);
-        JobExampleEntity jobExampleEntity = jobService.jobExampleEntity(jobExampleId);
-        ResourceExampleEntity resourceExampleEntity = resourceService.exampleEntity(jobExampleEntity.getResourceExampleId());
+        PressureEntity pressureEntity = pressureService.jobEntity(jobId);
+        PressureExampleEntity pressureExampleEntity = pressureService.jobExampleEntity(jobExampleId);
+        ResourceExampleEntity resourceExampleEntity = resourceService.exampleEntity(pressureExampleEntity.getResourceExampleId());
         List<SlaInfo> slaInfoList = slaEventEntityList.stream().map(t -> new SlaInfo()
             .setJobId(jobId)
             .setRef(t.getRef())
@@ -99,7 +99,7 @@ public class SlaServiceImpl implements SlaService {
         sla.setData(slaInfoList);
         String slaString = jsonService.writeValueAsString(sla);
         // 创建回调
-        boolean complete = callbackService.callback(null, jobEntity.getCallbackUrl(), slaString);
+        boolean complete = callbackService.callback(null, pressureEntity.getCallbackUrl(), slaString);
         log.info("SLA触发：{}, 回调结果: {}", slaString, complete);
     }
 

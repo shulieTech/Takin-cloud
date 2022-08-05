@@ -24,7 +24,7 @@ import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.data.service.ResourceMapperService;
-import io.shulie.takin.cloud.model.request.ApplyResourceRequest;
+import io.shulie.takin.cloud.model.request.job.resource.ApplyResourceRequest;
 import io.shulie.takin.cloud.constant.enums.ResourceExampleStatus;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEventEntity;
 import io.shulie.takin.cloud.model.resource.ResourceExampleOverview;

@@ -1,8 +1,6 @@
 package io.shulie.takin.cloud.app.controller.notify;
 
-import java.util.Map;
-
-import io.shulie.takin.cloud.model.request.ResourceExampleInfoRequest;
+import io.shulie.takin.cloud.model.request.job.resource.ResourceExampleInfoRequest;
 import lombok.extern.slf4j.Slf4j;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import cn.hutool.core.text.CharSequenceUtil;
 
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.service.ResourceExampleService;

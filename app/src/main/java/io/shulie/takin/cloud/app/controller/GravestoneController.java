@@ -13,18 +13,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import io.shulie.takin.cloud.data.entity.JobEntity;
-import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.model.response.Gravestone;
 import io.shulie.takin.cloud.data.entity.ResourceEntity;
+import io.shulie.takin.cloud.data.entity.PressureEntity;
+import io.shulie.takin.cloud.app.service.PressureService;
 import io.shulie.takin.cloud.app.service.ResourceService;
-import io.shulie.takin.cloud.data.entity.JobExampleEntity;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
+import io.shulie.takin.cloud.data.entity.PressureExampleEntity;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
-import io.shulie.takin.cloud.data.entity.JobExampleEventEntity;
+import io.shulie.takin.cloud.data.entity.PressureExampleEventEntity;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEventEntity;
-import io.shulie.takin.cloud.data.service.JobExampleEventMapperService;
+import io.shulie.takin.cloud.data.service.PressureExampleEventMapperService;
 import io.shulie.takin.cloud.data.service.ResourceExampleEventMapperService;
 
 /**
@@ -37,11 +37,11 @@ import io.shulie.takin.cloud.data.service.ResourceExampleEventMapperService;
 @RequestMapping("/gravestone")
 public class GravestoneController {
     @Resource
-    JobService jobService;
+    PressureService pressureService;
     @Resource
     ResourceService resourceService;
-    @Resource(name = "jobExampleEventMapperServiceImpl")
-    JobExampleEventMapperService jobExampleEventMapper;
+    @Resource(name = "pressureExampleEventMapperServiceImpl")
+    PressureExampleEventMapperService jobExampleEventMapper;
     @Resource(name = "resourceExampleEventMapperServiceImpl")
     ResourceExampleEventMapperService resourceExampleEventMapper;
 
@@ -69,18 +69,18 @@ public class GravestoneController {
             });
             if (jobId != null) {
                 // 任务信息
-                JobEntity job = jobService.jobEntity(jobId);
+                PressureEntity job = pressureService.jobEntity(jobId);
                 if (job != null) {
                     // 任务信息
                     result.add(new Gravestone(resource.getCreateTime().getTime(), "任务创建", String.valueOf(job.getId())));
                     // 任务实例
-                    List<JobExampleEntity> jobExample = jobService.jobExampleEntityList(resource.getId());
+                    List<PressureExampleEntity> jobExample = pressureService.jobExampleEntityList(resource.getId());
                     jobExample.forEach(t -> {
                         // 任务实例信息
                         result.add(new Gravestone(resource.getCreateTime().getTime(), "任务实例创建", String.valueOf(t.getId())));
                         // 任务实例事件
-                        List<JobExampleEventEntity> jobExampleEvent = jobExampleEventMapper.lambdaQuery()
-                            .eq(JobExampleEventEntity::getJobExampleId, t.getId())
+                        List<PressureExampleEventEntity> jobExampleEvent = jobExampleEventMapper.lambdaQuery()
+                            .eq(PressureExampleEventEntity::getJobExampleId, t.getId())
                             .list();
                         jobExampleEvent.forEach(c -> result.add(eventType(c.getTime(), c.getId(), c.getType(), c.getContext())));
                     });

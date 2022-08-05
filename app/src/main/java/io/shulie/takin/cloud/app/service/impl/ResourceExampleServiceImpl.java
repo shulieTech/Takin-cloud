@@ -14,17 +14,17 @@ import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.data.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.app.service.ResourceService;
-import io.shulie.takin.cloud.data.entity.JobExampleEntity;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.constant.enums.BusinessStateEnum;
+import io.shulie.takin.cloud.data.entity.PressureExampleEntity;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.service.ResourceExampleService;
-import io.shulie.takin.cloud.data.service.JobExampleMapperService;
 import io.shulie.takin.cloud.model.callback.basic.ResourceExample;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEventEntity;
-import io.shulie.takin.cloud.model.request.ResourceExampleInfoRequest;
+import io.shulie.takin.cloud.data.service.PressureExampleMapperService;
 import io.shulie.takin.cloud.data.service.ResourceExampleMapperService;
 import io.shulie.takin.cloud.data.service.ResourceExampleEventMapperService;
+import io.shulie.takin.cloud.model.request.job.resource.ResourceExampleInfoRequest;
 import io.shulie.takin.cloud.model.callback.ResourceExampleError.ResourceExampleErrorInfo;
 
 /**
@@ -44,8 +44,8 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
     ResourceService resourceService;
     @javax.annotation.Resource(name = "resourceExampleMapperServiceImpl")
     ResourceExampleMapperService resourceExampleMapper;
-    @javax.annotation.Resource(name = "jobExampleMapperServiceImpl")
-    JobExampleMapperService jobExampleMapper;
+    @javax.annotation.Resource(name = "pressureExampleMapperServiceImpl")
+    PressureExampleMapperService jobExampleMapper;
     @javax.annotation.Resource(name = "resourceExampleEventMapperServiceImpl")
     ResourceExampleEventMapperService resourceExampleEventMapper;
 
@@ -176,13 +176,13 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(resourceExampleEntity.getResourceId());
         // 根据资源实例主键，获取任务实例主键
-        JobExampleEntity jobExampleEntity = jobExampleMapper.lambdaQuery()
-            .eq(JobExampleEntity::getResourceExampleId, resourceExampleId).one();
+        PressureExampleEntity pressureExampleEntity = jobExampleMapper.lambdaQuery()
+            .eq(PressureExampleEntity::getResourceExampleId, resourceExampleId).one();
         callbackUrl.append(resourceEntity.getCallbackUrl());
         return new ResourceExample()
             .setResourceExampleId(resourceExampleEntity.getId())
             .setResourceId(resourceExampleEntity.getResourceId())
-            .setJobId(jobExampleEntity == null ? null : jobExampleEntity.getJobId())
-            .setJobExampleId(jobExampleEntity == null ? null : jobExampleEntity.getId());
+            .setJobId(pressureExampleEntity == null ? null : pressureExampleEntity.getJobId())
+            .setJobExampleId(pressureExampleEntity == null ? null : pressureExampleEntity.getId());
     }
 }

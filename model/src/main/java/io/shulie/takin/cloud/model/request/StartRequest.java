@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.shulie.takin.cloud.constant.enums.JobType;
+import io.shulie.takin.cloud.constant.enums.PressureType;
 import io.shulie.takin.cloud.constant.enums.FormulaSymbol;
 import io.shulie.takin.cloud.constant.enums.FormulaTarget;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
@@ -31,7 +31,7 @@ public class StartRequest {
     @Schema(description = "采样率")
     private Integer sampling;
     @Schema(description = "任务类型")
-    private JobType type;
+    private PressureType type;
     @Schema(description = "任务名称")
     private String name;
     @Schema(description = "是否老版本")

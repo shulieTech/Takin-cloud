@@ -7,9 +7,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 
-import io.shulie.takin.cloud.app.service.FileExampleService;
-import io.shulie.takin.cloud.app.service.FileService;
-import io.shulie.takin.cloud.data.entity.FileExampleEntity;
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
@@ -19,26 +16,29 @@ import org.springframework.context.annotation.Lazy;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import io.shulie.takin.cloud.constant.Message;
-import io.shulie.takin.cloud.data.entity.JobEntity;
-import io.shulie.takin.cloud.app.service.JobService;
 import io.shulie.takin.cloud.app.service.JsonService;
+import io.shulie.takin.cloud.app.service.FileService;
 import io.shulie.takin.cloud.app.conf.WatchmanConfig;
 import io.shulie.takin.cloud.data.entity.CommandEntity;
 import io.shulie.takin.cloud.data.entity.MetricsEntity;
-import io.shulie.takin.cloud.data.entity.JobFileEntity;
 import io.shulie.takin.cloud.data.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.constant.enums.CommandType;
+import io.shulie.takin.cloud.data.entity.PressureEntity;
 import io.shulie.takin.cloud.app.service.ResourceService;
+import io.shulie.takin.cloud.app.service.PressureService;
+import io.shulie.takin.cloud.data.entity.FileExampleEntity;
+import io.shulie.takin.cloud.app.service.FileExampleService;
+import io.shulie.takin.cloud.data.entity.PressureFileEntity;
 import io.shulie.takin.cloud.data.entity.ThreadConfigEntity;
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
 import io.shulie.takin.cloud.constant.PressureEngineConstants;
 import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.data.service.CommandMapperService;
-import io.shulie.takin.cloud.data.service.JobFileMapperService;
 import io.shulie.takin.cloud.data.service.MetricsMapperService;
 import io.shulie.takin.cloud.data.entity.ThreadConfigExampleEntity;
 import io.shulie.takin.cloud.data.service.ThreadConfigMapperService;
+import io.shulie.takin.cloud.data.service.PressureFileMapperService;
 import io.shulie.takin.cloud.data.service.ThreadConfigExampleMapperService;
 
 /**
@@ -52,7 +52,7 @@ public class CommandServiceImpl implements CommandService {
 
     @Lazy
     @javax.annotation.Resource
-    JobService jobService;
+    PressureService pressureService;
     @Lazy
     @javax.annotation.Resource
     FileService fileService;
@@ -72,8 +72,8 @@ public class CommandServiceImpl implements CommandService {
     MetricsMapperService metricsMapper;
     @javax.annotation.Resource(name = "commandMapperServiceImpl")
     CommandMapperService commandMapper;
-    @javax.annotation.Resource(name = "jobFileMapperServiceImpl")
-    JobFileMapperService jobFileMapper;
+    @javax.annotation.Resource(name = "pressureFileMapperServiceImpl")
+    PressureFileMapperService jobFileMapper;
     @javax.annotation.Resource(name = "threadConfigMapperServiceImpl")
     ThreadConfigMapperService threadConfigMapper;
     @javax.annotation.Resource(name = "threadConfigExampleMapperServiceImpl")
@@ -149,10 +149,10 @@ public class CommandServiceImpl implements CommandService {
     @Override
     public void startApplication(long jobId, Boolean bindByXpathMd5) {
         // 获取任务
-        JobEntity jobEntity = jobService.jobEntity(jobId);
-        if (jobEntity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_JOB, jobId));}
+        PressureEntity pressureEntity = pressureService.jobEntity(jobId);
+        if (pressureEntity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_JOB, jobId));}
         // 获取资源
-        ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
+        ResourceEntity resourceEntity = resourceService.entity(pressureEntity.getResourceId());
         // 请求入参
         String content = packageStartJob(jobId, bindByXpathMd5);
         // 下发命令 - 分批次执行
@@ -169,14 +169,14 @@ public class CommandServiceImpl implements CommandService {
     @Override
     public void stopApplication(long jobId) {
         // 获取任务
-        JobEntity jobEntity = jobService.jobEntity(jobId);
-        if (jobEntity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_JOB, jobId));}
+        PressureEntity pressureEntity = pressureService.jobEntity(jobId);
+        if (pressureEntity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_JOB, jobId));}
         // 获取资源
-        ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
+        ResourceEntity resourceEntity = resourceService.entity(pressureEntity.getResourceId());
         Map<String, Object> content = new HashMap<>(3);
-        content.put("jobId", jobEntity.getId());
-        content.put(Message.TASK_ID, jobEntity.getId());
-        content.put(Message.RESOURCE_ID, jobEntity.getResourceId());
+        content.put("jobId", pressureEntity.getId());
+        content.put(Message.TASK_ID, pressureEntity.getId());
+        content.put(Message.RESOURCE_ID, pressureEntity.getResourceId());
         // 请求入参
         String request = jsonService.writeValueAsString(content);
         // 下发命令 - 分批次执行
@@ -193,15 +193,15 @@ public class CommandServiceImpl implements CommandService {
     @Override
     public void updateConfig(long jobId) {
         // 获取任务
-        JobEntity jobEntity = jobService.jobEntity(jobId);
-        if (jobEntity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_JOB, jobId));}
+        PressureEntity pressureEntity = pressureService.jobEntity(jobId);
+        if (pressureEntity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_JOB, jobId));}
         // 获取资源
-        ResourceEntity resourceEntity = resourceService.entity(jobEntity.getResourceId());
+        ResourceEntity resourceEntity = resourceService.entity(pressureEntity.getResourceId());
         // 声明命令内容
         List<Map<String, Object>> content = new ArrayList<>();
         // 获取所有的线程配置实例
         List<ThreadConfigExampleEntity> threadConfigExampleEntityList = threadConfigExampleMapper.lambdaQuery()
-            .eq(ThreadConfigExampleEntity::getJobId, jobEntity.getId()).list();
+            .eq(ThreadConfigExampleEntity::getJobId, pressureEntity.getId()).list();
         // 根据ref进行分组
         Map<String, List<ThreadConfigExampleEntity>> groupByRef = threadConfigExampleEntityList
             .stream().collect(Collectors.groupingBy(ThreadConfigExampleEntity::getRef));
@@ -228,8 +228,8 @@ public class CommandServiceImpl implements CommandService {
         });
         Map<String, Object> result = new HashMap<>(3);
         result.put("content", content);
-        result.put("jobId", jobEntity.getId());
-        result.put("taskId", jobEntity.getId());
+        result.put("jobId", pressureEntity.getId());
+        result.put("taskId", pressureEntity.getId());
         // 下发命令
         String request = jsonService.writeValueAsString(result);
         // 下发命令 - 分批次执行
@@ -309,7 +309,7 @@ public class CommandServiceImpl implements CommandService {
      */
     public String packageStartJob(long jobId, Boolean bindByXpathMd5) {
         // 任务
-        JobEntity jobEntity = jobService.jobEntity(jobId);
+        PressureEntity pressureEntity = pressureService.jobEntity(jobId);
         // 线程组配置
         List<ThreadConfigEntity> threadConfigEntityList =
             threadConfigMapper.lambdaQuery().eq(ThreadConfigEntity::getJobId, jobId).list();
@@ -317,11 +317,11 @@ public class CommandServiceImpl implements CommandService {
         List<MetricsEntity> metricsEntityList = metricsMapper.lambdaQuery().eq(MetricsEntity::getJobId, jobId).list();
         Map<String, Object> basicConfig = new HashMap<>(32);
         basicConfig.put("taskId", jobId);
-        basicConfig.put("pressureType", jobEntity.getType());
-        basicConfig.put("resourceId", jobEntity.getResourceId());
-        basicConfig.put("memSetting", jobEntity.getStartOption());
-        basicConfig.put("continuedTime", jobEntity.getDuration());
-        basicConfig.put("traceSampling", jobEntity.getSampling());
+        basicConfig.put("pressureType", pressureEntity.getType());
+        basicConfig.put("resourceId", pressureEntity.getResourceId());
+        basicConfig.put("memSetting", pressureEntity.getStartOption());
+        basicConfig.put("continuedTime", pressureEntity.getDuration());
+        basicConfig.put("traceSampling", pressureEntity.getSampling());
         basicConfig.put("zkServers", watchmanConfig.getZkAddress());
         basicConfig.put("logQueueSize", watchmanConfig.getLogQueueSize());
         basicConfig.put("backendQueueCapacity", watchmanConfig.getBackendQueueCapacity());
@@ -344,7 +344,7 @@ public class CommandServiceImpl implements CommandService {
         basicConfig.put("tpsTargetLevel", null);
         // 填充文件
         // 获取所有文件
-        List<Map<String, Object>> dataFileList = packageStartJobWhitJobFile(jobEntity.getId(), jobEntity.getResourceExampleNumber());
+        List<Map<String, Object>> dataFileList = packageStartJobWhitJobFile(pressureEntity.getId(), pressureEntity.getResourceExampleNumber());
         basicConfig.put("dataFileList", dataFileList);
         // 压测指标配置
         Map<String, Map<String, Object>> businessMap = packageStartJobWhitBusinessMap(metricsEntityList);
@@ -383,18 +383,18 @@ public class CommandServiceImpl implements CommandService {
      * @return 文件信息
      */
     private List<Map<String, Object>> packageStartJobWhitJobFile(long jobId, int number) {
-        List<JobFileEntity> jobFileEntityList = jobFileMapper.lambdaQuery().eq(JobFileEntity::getJobId, jobId).list();
-        Map<String, List<JobFileEntity>> fileInfo = jobFileEntityList.stream().collect(Collectors.groupingBy(JobFileEntity::getUri));
+        List<PressureFileEntity> pressureFileEntityList = jobFileMapper.lambdaQuery().eq(PressureFileEntity::getJobId, jobId).list();
+        Map<String, List<PressureFileEntity>> fileInfo = pressureFileEntityList.stream().collect(Collectors.groupingBy(PressureFileEntity::getUri));
         List<Map<String, Object>> dataFileList = new ArrayList<>();
         fileInfo.forEach((k, v) -> {
-            JobFileEntity info = v.get(0);
+            PressureFileEntity info = v.get(0);
             boolean split = !Long.valueOf(-1).equals(info.getStartPoint()) && !Long.valueOf(-1).equals(info.getEndPoint());
             Map<String, List<Map<String, Object>>> splitInfo = new HashMap<>(number);
             if (split) {
                 for (int i = 0; i < number; i++) {
                     List<Map<String, Object>> itemSplitInfo = new ArrayList<>(v.size());
                     for (int j = 0, vSize = v.size(); j < vSize; j++) {
-                        JobFileEntity t = v.get(j);
+                        PressureFileEntity t = v.get(j);
                         Map<String, Object> config = new HashMap<>(4);
                         config.put("partition", j);
                         config.put("end", t.getEndPoint());

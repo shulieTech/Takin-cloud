@@ -3,7 +3,7 @@ package io.shulie.takin.cloud.app.service;
 import java.util.List;
 
 import io.shulie.takin.cloud.data.entity.FileExampleEntity;
-import io.shulie.takin.cloud.model.request.file.ProgressRequest;
+import io.shulie.takin.cloud.model.request.job.file.ProgressRequest;
 
 /**
  * 文件资源实例服务

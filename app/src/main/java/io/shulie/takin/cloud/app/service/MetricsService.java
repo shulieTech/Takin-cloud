@@ -2,7 +2,7 @@ package io.shulie.takin.cloud.app.service;
 
 import java.util.List;
 
-import io.shulie.takin.cloud.model.request.MetricsInfo;
+import io.shulie.takin.cloud.model.request.job.pressure.MetricsInfo;
 
 /**
  * 指标数据服务

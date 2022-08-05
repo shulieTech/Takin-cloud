@@ -31,4 +31,9 @@ public class AnnounceRequest {
      */
     @Schema(description = "附件路径")
     List<String> attachmentsPath;
+    /**
+     * 插件路径
+     */
+    @Schema(description = "插件路径")
+    List<String> pluginPath;
 }

@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.service.FileExampleService;
-import io.shulie.takin.cloud.model.request.file.FailedRequest;
-import io.shulie.takin.cloud.model.request.file.ProgressRequest;
+import io.shulie.takin.cloud.model.request.job.file.FailedRequest;
+import io.shulie.takin.cloud.model.request.job.file.ProgressRequest;
 
 /**
  * 文件资源状态上报

@@ -21,13 +21,13 @@ import io.shulie.takin.cloud.model.request.job.script.ReportRequest;
 @Slf4j(topic = "NOTIFY")
 @Tag(name = "脚本校验上报")
 @RestController("NotiftScriptController")
-@RequestMapping("/notify/job/script/verification")
+@RequestMapping("/notify/job/script")
 public class ScriptController {
 
     @javax.annotation.Resource
     ScriptService scriptService;
 
-    @PostMapping("report")
+    @PostMapping("verification/report")
     @Operation(summary = "上报")
     public ApiResult<Object> report(
         @Parameter(description = "请求参数", required = true) @RequestBody ReportRequest request) {
