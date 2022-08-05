@@ -52,10 +52,10 @@ public class Swagger {
     }
 
     @Bean
-    public GroupedOpenApi excessJobApi() {
+    public GroupedOpenApi scriptVerificationApi() {
         return GroupedOpenApi.builder()
-            .group("额外的任务")
-            .pathsToMatch("/excess/job/**")
+            .group("脚本校验")
+            .pathsToMatch("/job/script/verification/**")
             .build();
     }
 
@@ -63,7 +63,7 @@ public class Swagger {
     public GroupedOpenApi fileApi() {
         return GroupedOpenApi.builder()
             .group("文件资源")
-            .pathsToMatch("/file/**")
+            .pathsToMatch("/job/file/**")
             .build();
     }
 

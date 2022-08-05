@@ -14,15 +14,15 @@ import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.model.request.file.AnnounceRequest;
 
 /**
- * 文件资源
+ * 文件资源任务
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 
 @Slf4j
 @RestController
-@Tag(name = "文件资源")
-@RequestMapping("/file")
+@Tag(name = "文件资源任务")
+@RequestMapping("/job/file")
 public class FileController {
     @javax.annotation.Resource
     FileService fileService;

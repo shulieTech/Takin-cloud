@@ -21,8 +21,8 @@ import io.shulie.takin.cloud.model.request.file.ProgressRequest;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Slf4j(topic = "NOTIFY")
-@Tag(name = "文件资源状态上报")
-@RequestMapping("/notify/file")
+@Tag(name = "文件资源任务上报")
+@RequestMapping("/notify/job/file")
 @RestController("NotiftFileController")
 public class FileController {
     @javax.annotation.Resource
