@@ -34,21 +34,6 @@ public class WatchmanController {
     WatchmanService watchmanService;
 
     /**
-     * 注册
-     *
-     * @param ref     关键词
-     * @param refSign 关键词签名
-     * @return true/false
-     */
-    @Operation(summary = "注册")
-    @GetMapping("register")
-    public ApiResult<Boolean> register(
-        @Parameter(description = "关键词") String ref,
-        @Parameter(description = "关键词签名") String refSign) {
-        return ApiResult.success(watchmanService.register(ref, refSign));
-    }
-
-    /**
      * 心跳
      *
      * @param refSign 签名

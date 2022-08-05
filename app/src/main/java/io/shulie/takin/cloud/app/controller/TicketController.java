@@ -2,13 +2,17 @@ package io.shulie.takin.cloud.app.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.service.TicketService;
+import io.shulie.takin.cloud.data.entity.WatchmanEntity;
+import io.shulie.takin.cloud.app.service.WatchmanService;
 
 /**
  * ticket
@@ -22,28 +26,27 @@ import io.shulie.takin.cloud.app.service.TicketService;
 public class TicketController {
     @javax.annotation.Resource
     TicketService ticketService;
+    @javax.annotation.Resource
+    WatchmanService watchmanService;
 
-    @Operation(summary = "请求ticket")
-    @PostMapping("create")
-    public ApiResult<String> createTicket(Long watchmanId) {
+    @Operation(summary = "生成Ticket")
+    @GetMapping("generate")
+    public ApiResult<String> generate(
+        @Parameter(description = "关键词签名", required = true) @RequestParam String refSign) {
         // 0. 根据入参找到对应的调度机公钥
-        String publicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCEsMro2KQYmTgoqEXUeSJLCNFHhfwTstrvAj8BNCF4yoAbaDjYF9r/"
-            + "ZrV6j2JszyxYvPFB+N+ZCOI/hc/"
-            + "59midqobbGgoxCSkOJJbsih4hnAahYUKytrxpinvkFXpGppkMpdSRnDvT7XkA2RpH5nNMCiDpjLeTGuf+8NdN6I4fSQIDAQAB";
+        WatchmanEntity watchmanEntity = watchmanService.ofRefSign(refSign);
         // 1. 生成随机Ticket
         String ticket = ticketService.generate();
-        // 2. ticket 存入内存
-        // 3. Ticket使用公钥加密
-        String encryptTicket = ticketService.encrypt(ticket, publicKey);
+        // 2. ticket 存入内存并使用公钥加密
+        String encryptTicket = ticketService.encrypt(watchmanEntity.getId().toString(), ticket, watchmanEntity.getPublicKey());
         // 4. 返回数据
         return ApiResult.success(encryptTicket);
     }
 
     @Operation(summary = "更新ticket-会加验签")
-    @PostMapping("update")
-    public ApiResult<String> updateTicket() {
-        String ticket = "随机字符串";
-        // MD5( ticket+"内存中的TICKET")
-        return ApiResult.success(ticket);
+    @GetMapping("update")
+    public ApiResult<String> update(
+        @Parameter(description = "关键词签名", required = true) @RequestParam String refSign) {
+        return this.generate(refSign);
     }
 }

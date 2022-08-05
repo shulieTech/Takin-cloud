@@ -8,20 +8,37 @@ package io.shulie.takin.cloud.app.service;
 public interface TicketService {
 
     /**
-     * 生成签名
+     * 获取ticket
      *
-     * @return 随机ticket
+     * @param id 标识
+     * @return -
+     */
+    String get(String id);
+
+    /**
+     * 生成ticket
+     *
+     * @return -
      */
     String generate();
 
     /**
+     * 验证ticket
+     *
+     * @param ticket 需要验证的ticket
+     * @return 验证结果
+     */
+    boolean verification(String ticket);
+
+    /**
      * 加密ticket
      *
+     * @param id        标识
      * @param ticket    需要加密的ticket
      * @param publicKey 公钥
      * @return 加密后的ticket
      */
-    String encrypt(String ticket, String publicKey);
+    String encrypt(String id, String ticket, String publicKey);
 
     /**
      * 放篡改签名
