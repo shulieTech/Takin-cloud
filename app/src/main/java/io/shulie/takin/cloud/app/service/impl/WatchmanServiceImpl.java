@@ -107,6 +107,25 @@ public class WatchmanServiceImpl implements WatchmanService {
      * {@inheritDoc}
      */
     @Override
+    public Resource getResourceSum(Long watchmanId) {
+        Resource resource = new Resource().setCpu(0d).setMemory(0L);
+        this.getResourceList(watchmanId).forEach(t -> {
+            if (t.getCpu() != null) {resource.setCpu(resource.getCpu() + t.getCpu());}
+            if (t.getMemory() != null) {resource.setMemory(resource.getMemory() + t.getMemory());}
+            resource.setName(t.getName());
+            resource.setType(t.getType());
+            resource.setNfsDir(t.getNfsDir());
+            resource.setNfsServer(t.getNfsServer());
+            resource.setNfsTotalSpace(t.getNfsTotalSpace());
+            resource.setNfsUsableSpace(t.getNfsUsableSpace());
+        });
+        return resource;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean register(String ref, String refSign) {
         // 已存在返回TRUE
         if (ofRefSign(refSign) != null) {return true;}
@@ -128,12 +147,12 @@ public class WatchmanServiceImpl implements WatchmanService {
         if (status != null && NotifyEventType.WATCHMAN_ABNORMAL.getCode().equals(status.getType())) {
             Map<String, Object> eventContext = jsonService.readValue(status.getContext(), new TypeReference<Map<String, Object>>() {});
             String message = eventContext.get(Message.MESSAGE_NAME) == null ? null : eventContext.get(Message.MESSAGE_NAME).toString();
-            return new WatchmanStatusResponse(status.getTime().getTime(), message);
+            return new WatchmanStatusResponse(status.getTime().getTime(), message, null);
         }
         // 返回心跳时间
         WatchmanEventEntity heartbeat = lastHeartbeatEvent();
         if (heartbeat != null) {
-            return new WatchmanStatusResponse(heartbeat.getTime().getTime(), null);
+            return new WatchmanStatusResponse(heartbeat.getTime().getTime(), null, null);
         }
         return null;
     }

@@ -46,7 +46,9 @@ public class WatchmanController {
     @Operation(summary = "状态")
     @GetMapping("status")
     public ApiResult<WatchmanStatusResponse> status(@Parameter(description = "调度主键", required = true) Long watchmanId) {
-        return ApiResult.success(watchmanService.status(watchmanId));
+        WatchmanStatusResponse status = watchmanService.status(watchmanId);
+        status.setResource(watchmanService.getResourceSum(watchmanId));
+        return ApiResult.success();
     }
 
     @Operation(summary = "状态-批量")
@@ -63,27 +65,15 @@ public class WatchmanController {
     public ApiResult<List<ListResponse>> list(
         @Parameter(description = "分页页码", required = true) Integer pageNumber,
         @Parameter(description = "分页容量", required = true) Integer pageSize,
-        @Parameter(description = "调度器主键集合", required = true) @RequestBody List<Long> watchmanIdList) {
-        PageInfo<WatchmanEntity> list = watchmanService.list(pageNumber, pageSize, watchmanIdList);
+        @Parameter(description = "调度器主键集合", required = true) @RequestBody BatchRequest request) {
+        PageInfo<WatchmanEntity> list = watchmanService.list(pageNumber, pageSize, request.getWatchmanIdList());
         List<ListResponse> result = list.getList().stream()
-            .map(t -> {
-                Resource resource = new Resource().setCpu(0d).setMemory(0L);
-                watchmanService.getResourceList(t.getId()).forEach(c -> {
-                    if (c.getCpu() != null) {resource.setCpu(resource.getCpu() + c.getCpu());}
-                    if (c.getMemory() != null) {resource.setMemory(resource.getMemory() + c.getMemory());}
-                    resource.setName(c.getName());
-                    resource.setType(c.getType());
-                    resource.setNfsDir(c.getNfsDir());
-                    resource.setNfsServer(c.getNfsServer());
-                    resource.setNfsTotalSpace(c.getNfsTotalSpace());
-                    resource.setNfsUsableSpace(c.getNfsUsableSpace());
-                });
-                return new ListResponse()
-                    .setId(t.getId())
-                    .setRef(t.getRef())
-                    .setRefSign(t.getRefSign())
-                    .setResource(resource);
-            }).collect(Collectors.toList());
+            .map(t -> new ListResponse()
+                .setId(t.getId())
+                .setRef(t.getRef())
+                .setRefSign(t.getRefSign())
+                .setResource(watchmanService.getResourceSum(t.getId())))
+            .collect(Collectors.toList());
         return ApiResult.success(result, list.getTotal());
     }
 

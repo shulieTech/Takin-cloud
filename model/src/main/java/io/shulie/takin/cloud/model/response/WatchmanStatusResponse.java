@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import io.shulie.takin.cloud.model.resource.Resource;
+
 /**
  * 监听器状态
  *
@@ -27,4 +29,9 @@ public class WatchmanStatusResponse {
      */
     @Schema(description = "错误信息")
     String message;
+    /**
+     * 资源
+     */
+    @Schema(description = "资源总量")
+    private Resource resource;
 }

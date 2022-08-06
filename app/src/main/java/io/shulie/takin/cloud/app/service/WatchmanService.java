@@ -38,6 +38,14 @@ public interface WatchmanService {
     List<Resource> getResourceList(Long watchmanId);
 
     /**
+     * 获取调度器所属的资源总量
+     *
+     * @param watchmanId 调度主键
+     * @return 资源总量(列表汇总结果)
+     */
+    Resource getResourceSum(Long watchmanId);
+
+    /**
      * 调度注册
      *
      * @param ref     关键词
