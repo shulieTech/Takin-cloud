@@ -85,10 +85,7 @@ public class WatchmanServiceImpl implements WatchmanService {
                 String eventContextString = uploadInfo.getContext();
                 Map<String, Object> eventContext = jsonService.readValue(eventContextString, new TypeReference<Map<String, Object>>() {});
                 long resourceTime = Long.parseLong(String.valueOf(eventContext.get("time")));
-                // TODO 要校验时效
-                if (resourceTime < 0) {
-                    log.warn("调度资源获取:最后一次上报的资源时效了");
-                }
+                if (resourceTime < 0) {log.warn("调度资源获取:最后一次上报的资源失效了");}
                 Object resourceListObject = eventContext.get("data");
                 if (resourceListObject instanceof List) {
                     result.addAll(jsonService.readValue(jsonService.writeValueAsString(resourceListObject), new TypeReference<List<Resource>>() {}));
@@ -134,7 +131,6 @@ public class WatchmanServiceImpl implements WatchmanService {
 
     @Override
     public WatchmanEntity ofRefSign(String refSign) {
-        // TODO 签名校验
         WatchmanEntity entity = watchmanMapper.lambdaQuery().eq(WatchmanEntity::getRefSign, refSign).one();
         if (entity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.WATCHMAN_MISS, refSign));}
         return entity;

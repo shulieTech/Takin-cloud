@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import cn.hutool.json.JSONException;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,7 +46,7 @@ public class JsonServiceImpl implements JsonService {
         try {
             return objectMapper.readValue(jsonString, valueTypeRef);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("解析metrics数据异常，不是标准JSON字符串");
+            throw new JSONException("解析metrics数据异常，不是标准JSON字符串");
         }
     }
 }
