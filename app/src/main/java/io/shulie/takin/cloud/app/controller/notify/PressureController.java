@@ -15,12 +15,12 @@ import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.service.PressureService;
 
 /**
- * 任务上报
+ * 施压任务上报
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
-@Tag(name = "任务上报")
 @Slf4j(topic = "NOTIFY")
+@Tag(name = "施压任务上报")
 @RequestMapping("/notify/pressure")
 @RestController("NotiftPressureController")
 public class PressureController {
@@ -30,12 +30,12 @@ public class PressureController {
     /**
      * 启动
      *
-     * @param id 任务主键
+     * @param id 施压任务主键
      * @return -
      */
     @GetMapping("start")
     @Operation(summary = "启动")
-    public ApiResult<Object> startJob(@Parameter(description = "任务主键", required = true) @RequestParam Long id) {
+    public ApiResult<Object> start(@Parameter(description = "任务主键", required = true) @RequestParam Long id) {
         pressureService.onStart(id);
         return ApiResult.success();
     }
@@ -43,7 +43,7 @@ public class PressureController {
     /**
      * 停止
      *
-     * @param id 任务主键
+     * @param id 施压任务主键
      * @return -
      */
     @GetMapping("stop")

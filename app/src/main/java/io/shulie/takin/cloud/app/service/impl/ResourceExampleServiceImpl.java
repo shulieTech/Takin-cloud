@@ -45,7 +45,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
     @javax.annotation.Resource(name = "resourceExampleMapperServiceImpl")
     ResourceExampleMapperService resourceExampleMapper;
     @javax.annotation.Resource(name = "pressureExampleMapperServiceImpl")
-    PressureExampleMapperService jobExampleMapper;
+    PressureExampleMapperService pressureExampleMapper;
     @javax.annotation.Resource(name = "resourceExampleEventMapperServiceImpl")
     ResourceExampleEventMapperService resourceExampleEventMapper;
 
@@ -176,13 +176,13 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(resourceExampleEntity.getResourceId());
         // 根据资源实例主键，获取任务实例主键
-        PressureExampleEntity pressureExampleEntity = jobExampleMapper.lambdaQuery()
+        PressureExampleEntity pressureExampleEntity = pressureExampleMapper.lambdaQuery()
             .eq(PressureExampleEntity::getResourceExampleId, resourceExampleId).one();
         callbackUrl.append(resourceEntity.getCallbackUrl());
         return new ResourceExample()
             .setResourceExampleId(resourceExampleEntity.getId())
             .setResourceId(resourceExampleEntity.getResourceId())
-            .setJobId(pressureExampleEntity == null ? null : pressureExampleEntity.getJobId())
-            .setJobExampleId(pressureExampleEntity == null ? null : pressureExampleEntity.getId());
+            .setPressureId(pressureExampleEntity == null ? null : pressureExampleEntity.getPressureId())
+            .setPressureExampleId(pressureExampleEntity == null ? null : pressureExampleEntity.getId());
     }
 }

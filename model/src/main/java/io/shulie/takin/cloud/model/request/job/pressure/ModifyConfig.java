@@ -16,10 +16,10 @@ import io.shulie.takin.cloud.model.request.StartRequest.ThreadConfigInfo;
 @Schema(description = "修改线程组配置")
 public class ModifyConfig {
     /**
-     * 任务主键
+     * 施压任务主键
      */
     @Schema(description = "任务主键")
-    private Long jobId;
+    private Long pressureId;
     /**
      * 关键字
      */

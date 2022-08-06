@@ -41,7 +41,7 @@ public class GravestoneController {
     @Resource
     ResourceService resourceService;
     @Resource(name = "pressureExampleEventMapperServiceImpl")
-    PressureExampleEventMapperService jobExampleEventMapper;
+    PressureExampleEventMapperService pressureExampleEventMapper;
     @Resource(name = "resourceExampleEventMapperServiceImpl")
     ResourceExampleEventMapperService resourceExampleEventMapper;
 
@@ -51,7 +51,7 @@ public class GravestoneController {
      * @return 内容
      */
     @RequestMapping("read")
-    public ApiResult<List<Gravestone>> read(@RequestParam Integer resourceId, @RequestParam(required = false) Integer jobId) {
+    public ApiResult<List<Gravestone>> read(@RequestParam Integer resourceId, @RequestParam(required = false) Integer pressureId) {
         List<Gravestone> result = new LinkedList<>();
         ResourceEntity resource = resourceService.entity(resourceId);
         if (resource != null) {
@@ -67,22 +67,22 @@ public class GravestoneController {
                     .list();
                 resourceExampleEvent.forEach(c -> result.add(eventType(c.getTime(), c.getId(), c.getType(), c.getContext())));
             });
-            if (jobId != null) {
-                // 任务信息
-                PressureEntity job = pressureService.jobEntity(jobId);
-                if (job != null) {
-                    // 任务信息
-                    result.add(new Gravestone(resource.getCreateTime().getTime(), "任务创建", String.valueOf(job.getId())));
-                    // 任务实例
-                    List<PressureExampleEntity> jobExample = pressureService.jobExampleEntityList(resource.getId());
-                    jobExample.forEach(t -> {
-                        // 任务实例信息
+            if (pressureId != null) {
+                // 施压任务
+                PressureEntity pressure = pressureService.entity(pressureId);
+                if (pressure != null) {
+                    // 施压任务
+                    result.add(new Gravestone(resource.getCreateTime().getTime(), "任务创建", String.valueOf(pressure.getId())));
+                    // 施压任务实例
+                    List<PressureExampleEntity> pressureExample = pressureService.exampleEntityList(resource.getId());
+                    pressureExample.forEach(t -> {
+                        // 施压任务实例信息
                         result.add(new Gravestone(resource.getCreateTime().getTime(), "任务实例创建", String.valueOf(t.getId())));
-                        // 任务实例事件
-                        List<PressureExampleEventEntity> jobExampleEvent = jobExampleEventMapper.lambdaQuery()
-                            .eq(PressureExampleEventEntity::getJobExampleId, t.getId())
+                        // 施压任务实例事件
+                        List<PressureExampleEventEntity> pressureExampleEvent = pressureExampleEventMapper.lambdaQuery()
+                            .eq(PressureExampleEventEntity::getPressureExampleId, t.getId())
                             .list();
-                        jobExampleEvent.forEach(c -> result.add(eventType(c.getTime(), c.getId(), c.getType(), c.getContext())));
+                        pressureExampleEvent.forEach(c -> result.add(eventType(c.getTime(), c.getId(), c.getType(), c.getContext())));
                     });
                 }
             }

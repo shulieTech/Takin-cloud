@@ -24,9 +24,9 @@ public class PressureExampleEventEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 任务实例主键
+     * 施压任务实例主键
      */
-    private Long jobExampleId;
+    private Long pressureExampleId;
     /**
      * 事件上报时间
      */

@@ -25,9 +25,9 @@ public class PressureExampleError extends Base<PressureExampleErrorInfo> {
         private String errorMessage;
 
         public PressureExampleErrorInfo(PressureExample pressureExample) {
-            setJobId(pressureExample.getJobId());
+            setPressureId(pressureExample.getPressureId());
             setResourceId(pressureExample.getResourceId());
-            setJobExampleId(pressureExample.getJobExampleId());
+            setPressureExampleId(pressureExample.getPressureExampleId());
             setResourceExampleId(pressureExample.getResourceExampleId());
         }
     }

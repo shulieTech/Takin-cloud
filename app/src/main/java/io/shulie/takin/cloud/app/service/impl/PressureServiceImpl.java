@@ -60,23 +60,23 @@ public class PressureServiceImpl implements PressureService {
     @javax.annotation.Resource
     ResourceService resourceService;
     @javax.annotation.Resource
-    PressureExampleService pressureExampleService;
-    @javax.annotation.Resource
     PressureConfigService pressureConfigService;
-    @javax.annotation.Resource(name = "pressureMapperServiceImpl")
-    PressureMapperService jobMapper;
+    @javax.annotation.Resource
+    PressureExampleService pressureExampleService;
     @javax.annotation.Resource(name = "slaMapperServiceImpl")
     SlaMapperService slaMapper;
-    @javax.annotation.Resource(name = "pressureFileMapperServiceImpl")
-    PressureFileMapperService jobFileMapper;
     @javax.annotation.Resource(name = "metricsMapperServiceImpl")
     MetricsMapperService metricsMapper;
+    @javax.annotation.Resource(name = "pressureMapperServiceImpl")
+    PressureMapperService pressureMapper;
     @javax.annotation.Resource(name = "resourceExampleServiceImpl")
     ResourceExampleService resourceExample;
-    @javax.annotation.Resource(name = "pressureExampleMapperServiceImpl")
-    PressureExampleMapperService jobExampleMapper;
+    @javax.annotation.Resource(name = "pressureFileMapperServiceImpl")
+    PressureFileMapperService pressureFileMapper;
     @javax.annotation.Resource(name = "threadConfigMapperServiceImpl")
     ThreadConfigMapperService threadConfigMapper;
+    @javax.annotation.Resource(name = "pressureExampleMapperServiceImpl")
+    PressureExampleMapperService pressureExampleMapper;
     @javax.annotation.Resource(name = "threadConfigExampleMapperServiceImpl")
     ThreadConfigExampleMapperService threadConfigExampleMapper;
 
@@ -84,73 +84,73 @@ public class PressureServiceImpl implements PressureService {
      * {@inheritDoc}
      */
     @Override
-    public String start(StartRequest jobInfo) {
+    public String start(StartRequest info) {
         // 获取资源
-        ResourceEntity resource = resourceService.entity(jobInfo.getResourceId());
+        ResourceEntity resource = resourceService.entity(info.getResourceId());
         // 生成任务
-        PressureEntity job = startFillJob(resource.getId(), resource.getNumber(), jobInfo);
-        jobMapper.save(job);
-        // 填充job实例
-        List<PressureExampleEntity> jobExample = startFillJobExample(job.getId(), job.getDuration(), resource.getId(), resource.getNumber());
-        jobExampleMapper.saveBatch(jobExample);
+        PressureEntity pressure = fillPressure(resource.getId(), resource.getNumber(), info);
+        pressureMapper.save(pressure);
+        // 填充施压任务实例
+        List<PressureExampleEntity> pressureExample = fillPressureExample(pressure.getId(), pressure.getDuration(), resource.getId(), resource.getNumber());
+        pressureExampleMapper.saveBatch(pressureExample);
         // 填充线程组配置
-        List<ThreadConfigEntity> threadConfig = startFillThreadConfig(job.getId(), jobInfo);
+        List<ThreadConfigEntity> threadConfig = startFillThreadConfig(pressure.getId(), info);
         threadConfigMapper.saveBatch(threadConfig);
         // 填充线程配置实例
-        List<ThreadConfigExampleEntity> threadConfigExample = startFillThreadConfigExample(job.getId(), jobInfo, jobExample);
+        List<ThreadConfigExampleEntity> threadConfigExample = startFillThreadConfigExample(pressure.getId(), info, pressureExample);
         threadConfigExampleMapper.saveBatch(threadConfigExample);
         // 填充SLA配置
-        List<SlaEntity> slaList = startFillSla(job.getId(), jobInfo.getSlaConfig());
+        List<SlaEntity> slaList = startFillSla(pressure.getId(), info.getSlaConfig());
         slaMapper.saveBatch(slaList);
         // 切分、填充任务文件
-        List<PressureFileEntity> jobFileList = startFillJobFile(job.getId(), jobInfo, jobExample);
-        jobFileMapper.saveBatch(jobFileList);
+        List<PressureFileEntity> fileList = fillFile(pressure.getId(), info, pressureExample);
+        pressureFileMapper.saveBatch(fileList);
         // 指标目标
-        List<MetricsEntity> metricsList = startFillMetrics(job.getId(), jobInfo.getMetricsConfig());
+        List<MetricsEntity> metricsList = startFillMetrics(pressure.getId(), info.getMetricsConfig());
         metricsMapper.saveBatch(metricsList);
         // 下发启动命令
-        commandService.startApplication(job.getId(), jobInfo.getBindByXpathMd5());
+        commandService.startApplication(pressure.getId(), info.getBindByXpathMd5());
         // 返回任务主键
-        return String.valueOf(job.getId());
+        return String.valueOf(pressure.getId());
     }
 
     /**
      * 填充任务实体
      *
-     * @param jobInfo               任务信息
+     * @param info                  施压任务信息
      * @param resourceId            资源主键
      * @param resourceExampleNumber 资源实例数量
-     * @return 任务实体
+     * @return 施压任务实体
      */
-    private PressureEntity startFillJob(long resourceId, int resourceExampleNumber, StartRequest jobInfo) {
+    private PressureEntity fillPressure(long resourceId, int resourceExampleNumber, StartRequest info) {
         // 时长取最大值
-        Integer duration = jobInfo.getThreadConfig()
+        Integer duration = info.getThreadConfig()
             .stream().map(ThreadConfigInfo::getDuration)
             .max(Comparator.naturalOrder()).orElse(0);
         return new PressureEntity()
             .setResourceId(resourceId)
-            .setName(jobInfo.getName())
+            .setName(info.getName())
             .setDuration(duration)
-            .setSampling(jobInfo.getSampling())
-            .setType(jobInfo.getType().getCode())
-            .setStartOption(jobInfo.getJvmOptions())
-            .setCallbackUrl(jobInfo.getCallbackUrl())
+            .setSampling(info.getSampling())
+            .setType(info.getType().getCode())
+            .setStartOption(info.getJvmOptions())
+            .setCallbackUrl(info.getCallbackUrl())
             .setResourceExampleNumber(resourceExampleNumber);
     }
 
     /**
-     * 填充任务实例
+     * 填充施压任务实例
      *
-     * @param jobId          任务主键
+     * @param pressureId     施压任务主键
      * @param duration       持续时长
      * @param resourceId     资源主键
      * @param resourceNumber 资源需要生成的实例数量
-     * @return 任务实例
+     * @return 施压任务实例
      */
-    private List<PressureExampleEntity> startFillJobExample(long jobId, int duration, long resourceId, int resourceNumber) {
+    private List<PressureExampleEntity> fillPressureExample(long pressureId, int duration, long resourceId, int resourceNumber) {
         List<ResourceExampleEntity> resourceExampleEntityList = resourceService.listExample(resourceId);
         return IntStream.range(0, resourceNumber).mapToObj(t -> new PressureExampleEntity()
-            .setJobId(jobId)
+            .setPressureId(pressureId)
             .setNumber(t + 1)
             .setDuration(duration)
             .setResourceExampleId(resourceExampleEntityList.get(t).getId())).collect(Collectors.toList());
@@ -159,18 +159,18 @@ public class PressureServiceImpl implements PressureService {
     /**
      * 填充线程组配置
      *
-     * @param jobInfo 任务信息
-     * @param jobId   任务主键
+     * @param info       施压任务信息
+     * @param pressureId 施压任务主键
      * @return 线程组配置
      */
-    private List<ThreadConfigEntity> startFillThreadConfig(long jobId, StartRequest jobInfo) {
-        return jobInfo.getThreadConfig().stream().map(threadConfigInfo -> {
+    private List<ThreadConfigEntity> startFillThreadConfig(long pressureId, StartRequest info) {
+        return info.getThreadConfig().stream().map(threadConfigInfo -> {
             Map<String, Object> context = threadConfigInfo(threadConfigInfo);
-            if (jobInfo.getExt() != null) {
-                context.putAll(jobInfo.getExt());
+            if (info.getExt() != null) {
+                context.putAll(info.getExt());
             }
             return new ThreadConfigEntity()
-                .setJobId(jobId)
+                .setPressureId(pressureId)
                 .setRef(threadConfigInfo.getRef())
                 .setMode(threadConfigInfo.getType().getCode())
                 .setContext(jsonService.writeValueAsString(context));
@@ -180,31 +180,31 @@ public class PressureServiceImpl implements PressureService {
     /**
      * 启动任务 - 填充线程配置实例
      *
-     * @param jobId      任务主键
-     * @param jobInfo    任务信息
-     * @param jobExample 任务实例实体
+     * @param pressureId      施压任务主键
+     * @param info            施压任务信息
+     * @param pressureExample 施压任务实例实体
      * @return 线程配置实例
      */
-    private List<ThreadConfigExampleEntity> startFillThreadConfigExample(long jobId, StartRequest jobInfo, List<PressureExampleEntity> jobExample) {
+    private List<ThreadConfigExampleEntity> startFillThreadConfigExample(long pressureId, StartRequest info, List<PressureExampleEntity> pressureExample) {
         // 切分线程配置
-        List<List<ThreadConfigInfo>> splitResult = splitThreadConfig(jobInfo.getThreadConfig(), jobExample.size());
+        List<List<ThreadConfigInfo>> splitResult = splitThreadConfig(info.getThreadConfig(), pressureExample.size());
         // 组装返回值
-        List<ThreadConfigExampleEntity> threadConfigExample = new ArrayList<>(jobExample.size());
-        PressureExampleEntity pressureExampleEntity = jobExample.get(0);
+        List<ThreadConfigExampleEntity> threadConfigExample = new ArrayList<>(pressureExample.size());
+        PressureExampleEntity pressureExampleEntity = pressureExample.get(0);
         IntStream.range(0, splitResult.size()).forEach(t -> {
             List<ThreadConfigInfo> threadConfigInfoList = splitResult.get(t);
             IntStream.range(0, threadConfigInfoList.size()).mapToObj(c -> {
                 ThreadConfigInfo z = threadConfigInfoList.get(c);
                 Map<String, Object> context = threadConfigInfo(z);
-                if (jobInfo.getExt() != null) {
-                    context.putAll(jobInfo.getExt());
+                if (info.getExt() != null) {
+                    context.putAll(info.getExt());
                 }
                 return new ThreadConfigExampleEntity()
-                    .setJobId(jobId)
+                    .setPressureId(pressureId)
                     .setRef(z.getRef())
                     .setSerialNumber(c)
                     .setType(z.getType().getCode())
-                    .setJobExampleId(pressureExampleEntity.getId())
+                    .setPressureExampleId(pressureExampleEntity.getId())
                     .setContext(jsonService.writeValueAsString(context));
             }).forEach(threadConfigExample::add);
         });
@@ -214,13 +214,13 @@ public class PressureServiceImpl implements PressureService {
     /**
      * 填充SLA
      *
-     * @param jobId       任务主键
+     * @param pressureId  施压任务主键
      * @param slaInfoList SLA信息
      * @return SLA
      */
-    private List<SlaEntity> startFillSla(long jobId, List<SlaInfo> slaInfoList) {
+    private List<SlaEntity> startFillSla(long pressureId, List<SlaInfo> slaInfoList) {
         return slaInfoList.stream().map(t -> new SlaEntity()
-            .setJobId(jobId)
+            .setPressureId(pressureId)
             .setRef(t.getRef())
             .setAttach(t.getAttach())
             .setFormulaNumber(t.getFormulaNumber())
@@ -229,33 +229,33 @@ public class PressureServiceImpl implements PressureService {
     }
 
     /**
-     * 填充任务文件
+     * 填充施压任务文件
      *
-     * @param jobId          任务主键
-     * @param jobInfo        任务信息
-     * @param jobExampleList 任务实例实体
-     * @return 任务文件
+     * @param pressureId          施压任务主键
+     * @param pressureInfo        施压任务信息
+     * @param pressureExampleList 施压任务实例实体
+     * @return 施压任务文件
      */
-    private List<PressureFileEntity> startFillJobFile(long jobId, StartRequest jobInfo, List<PressureExampleEntity> jobExampleList) {
+    private List<PressureFileEntity> fillFile(long pressureId, StartRequest pressureInfo, List<PressureExampleEntity> pressureExampleList) {
         List<PressureFileEntity> pressureFileEntityList = new ArrayList<>();
-        IntStream.range(0, jobExampleList.size()).forEach(t -> {
-            PressureExampleEntity jobExample = jobExampleList.get(t);
+        IntStream.range(0, pressureExampleList.size()).forEach(t -> {
+            PressureExampleEntity pressureExample = pressureExampleList.get(t);
             // 脚本文件
             pressureFileEntityList.add(new PressureFileEntity()
-                .setJobId(jobId)
+                .setPressureId(pressureId)
                 .setEndPoint(-1L)
                 .setStartPoint(-1L)
                 .setType(FileType.SCRIPT.getCode())
-                .setJobExampleId(jobExample.getId())
-                .setUri(jobInfo.getScriptFile().getUri()));
+                .setPressureExampleId(pressureExample.getId())
+                .setUri(pressureInfo.getScriptFile().getUri()));
             // 数据文件
-            List<FileInfo> dataFile = jobInfo.getDataFile() == null ? new ArrayList<>() : jobInfo.getDataFile();
+            List<FileInfo> dataFile = pressureInfo.getDataFile() == null ? new ArrayList<>() : pressureInfo.getDataFile();
             dataFile.stream().map(c -> {
                 PressureFileEntity pressureFileEntity = new PressureFileEntity()
-                    .setJobId(jobId)
+                    .setPressureId(pressureId)
                     .setUri(c.getUri())
                     .setType(FileType.DATA.getCode())
-                    .setJobExampleId(jobExample.getId())
+                    .setPressureExampleId(pressureExample.getId())
                     .setEndPoint(-1L)
                     .setStartPoint(-1L);
                 if (Objects.nonNull(c.getSplitList())) {
@@ -269,13 +269,13 @@ public class PressureServiceImpl implements PressureService {
                 return pressureFileEntity;
             }).forEach(pressureFileEntityList::add);
             // 依赖文件
-            List<FileInfo> dependencyFile = jobInfo.getDependencyFile() == null ? new ArrayList<>(0) : jobInfo.getDependencyFile();
+            List<FileInfo> dependencyFile = pressureInfo.getDependencyFile() == null ? new ArrayList<>(0) : pressureInfo.getDependencyFile();
             dependencyFile.stream().map(c -> (new PressureFileEntity()
-                .setJobId(jobId)
+                .setPressureId(pressureId)
                 .setEndPoint(-1L)
                 .setUri(c.getUri())
                 .setStartPoint(-1L)
-                .setJobExampleId(jobExample.getId()))
+                .setPressureExampleId(pressureExample.getId()))
                 .setType(FileType.ATTACHMENT.getCode())).forEach(pressureFileEntityList::add);
         });
         return pressureFileEntityList;
@@ -284,11 +284,11 @@ public class PressureServiceImpl implements PressureService {
     /**
      * 填充指标信息
      *
-     * @param jobId           任务主键
+     * @param pressureId      施压任务主键
      * @param metricsInfoList 指标信息
      * @return 指标信息
      */
-    private List<MetricsEntity> startFillMetrics(long jobId, List<MetricsInfo> metricsInfoList) {
+    private List<MetricsEntity> startFillMetrics(long pressureId, List<MetricsInfo> metricsInfoList) {
         return metricsInfoList.stream().map(t -> {
             String context = null;
             try {
@@ -301,7 +301,7 @@ public class PressureServiceImpl implements PressureService {
             } catch (Exception e) {
                 log.warn("JSON序列化失败");
             }
-            return new MetricsEntity().setJobId(jobId).setContext(context).setRef(t.getRef());
+            return new MetricsEntity().setPressureId(pressureId).setContext(context).setRef(t.getRef());
         }).collect(Collectors.toList());
 
     }
@@ -326,11 +326,11 @@ public class PressureServiceImpl implements PressureService {
      * {@inheritDoc}
      */
     @Override
-    public void stop(long jobId) {
+    public void stop(long pressureId) {
         // 获取任务
-        PressureEntity pressureEntity = jobMapper.getById(jobId);
+        PressureEntity pressureEntity = pressureMapper.getById(pressureId);
         if (pressureEntity == null) {
-            throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_JOB, jobId));
+            throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_PRESSURE, pressureId));
         }
         // 停止任务
         commandService.stopApplication(pressureEntity.getId());
@@ -340,8 +340,8 @@ public class PressureServiceImpl implements PressureService {
      * {@inheritDoc}
      */
     @Override
-    public List<PressureConfig> getConfig(long jobId, String ref) {
-        List<ThreadConfigExampleEntity> threadConfigExampleEntity = pressureConfigService.threadExampleItem(jobId, ref);
+    public List<PressureConfig> getConfig(long id, String ref) {
+        List<ThreadConfigExampleEntity> threadConfigExampleEntity = pressureConfigService.threadExampleItem(id, ref);
         return threadConfigExampleEntity.stream().map(t -> {
             ThreadConfigInfo context = null;
             try {
@@ -352,8 +352,8 @@ public class PressureServiceImpl implements PressureService {
             ThreadConfigInfo finalContext = context;
             return new PressureConfig()
                 .setRef(t.getRef())
-                .setJobId(t.getJobId())
                 .setContext(finalContext)
+                .setPressureId(t.getPressureId())
                 .setType(ThreadGroupType.of(t.getType()));
         }).collect(Collectors.toList());
 
@@ -363,9 +363,9 @@ public class PressureServiceImpl implements PressureService {
      * {@inheritDoc}
      */
     @Override
-    public void modifyConfig(long jobId, ModifyConfig context) {
+    public void modifyConfig(long id, ModifyConfig context) {
         // 1. 找到要修改的配置项
-        List<ThreadConfigExampleEntity> threadConfigExample = pressureConfigService.threadExampleItem(jobId, context.getRef());
+        List<ThreadConfigExampleEntity> threadConfigExample = pressureConfigService.threadExampleItem(id, context.getRef());
         // 2.1 如果没有抛出异常
         if (CollUtil.isEmpty(threadConfigExample)) {
             throw new IllegalArgumentException("未找到可修改的配置");
@@ -382,43 +382,43 @@ public class PressureServiceImpl implements PressureService {
             });
         }
         // 2.3 下发命令
-        commandService.updateConfig(jobId);
+        commandService.updateConfig(id);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public PressureEntity jobEntity(long jobId) {
-        return jobMapper.getById(jobId);
+    public PressureEntity entity(long id) {
+        return pressureMapper.getById(id);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public PressureExampleEntity jobExampleEntity(long jobExampleId) {
-        return jobExampleMapper.getById(jobExampleId);
+    public PressureExampleEntity exampleEntity(long exampleId) {
+        return pressureExampleMapper.getById(exampleId);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public List<PressureExampleEntity> jobExampleEntityList(long jobId) {
-        return jobExampleMapper.lambdaQuery()
-            .eq(PressureExampleEntity::getJobId, jobId)
+    public List<PressureExampleEntity> exampleEntityList(long pressureId) {
+        return pressureExampleMapper.lambdaQuery()
+            .eq(PressureExampleEntity::getPressureId, pressureId)
             .list();
     }
 
     @Override
-    public void onStart(long id) {
-        jobExampleEntityList(id).forEach(t -> pressureExampleService.onStart(t.getId()));
+    public void onStart(long pressureId) {
+        exampleEntityList(pressureId).forEach(t -> pressureExampleService.onStart(t.getId()));
     }
 
     @Override
-    public void onStop(long id) {
-        jobExampleEntityList(id).forEach(t -> {
+    public void onStop(long pressureId) {
+        exampleEntityList(pressureId).forEach(t -> {
             // 停止任务实例
             pressureExampleService.onStop(t.getId());
             // 停止任务实例对应的资源实例

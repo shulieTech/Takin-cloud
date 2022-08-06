@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.app.executor.GlobalExecutor;
 import io.shulie.takin.cloud.app.schedule.CallbackSchedule;
+import io.shulie.takin.cloud.app.service.CalibrationService;
+import io.shulie.takin.cloud.app.schedule.CalibrationSchedule;
 
 /**
  * 调度配置
@@ -23,6 +25,8 @@ public class ScheduleConfig {
     private GlobalExecutor globalExecutor;
     @Resource
     private CallbackService callbackService;
+    @Resource
+    private CalibrationService calibrationService;
 
     @Value("${schedule.delay.initial:0}")
     Integer initialDelay;
@@ -34,5 +38,6 @@ public class ScheduleConfig {
     public void init() {
         TimeUnit unit = TimeUnit.MILLISECONDS;
         globalExecutor.getExecutor().scheduleWithFixedDelay(new CallbackSchedule(callbackService), initialDelay, delay, unit);
+        globalExecutor.getExecutor().scheduleWithFixedDelay(new CalibrationSchedule(calibrationService), initialDelay, delay, unit);
     }
 }

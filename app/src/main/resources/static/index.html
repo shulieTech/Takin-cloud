@@ -41,13 +41,13 @@
     </style>
     <script>
         function cacheData() {
-            localStorage.setItem('jobId', $('#jobId').val());
+            localStorage.setItem('pressureId', $('#pressureId').val());
             localStorage.setItem('resourceId', $('#resourceId').val());
         }
 
         function getData() {
             return {
-                jobId: localStorage.getItem('jobId'),
+                pressureId: localStorage.getItem('pressureId'),
                 resourceId: localStorage.getItem('resourceId'),
             }
         }
@@ -55,7 +55,7 @@
         $(function () {
             // 缓存数据
             let oldData = getData();
-            $('#jobId').val(oldData.jobId);
+            $('#pressureId').val(oldData.pressureId);
             $('#resourceId').val(oldData.resourceId);
             // 回车键入
             $(document).keydown(function (event) {
@@ -125,8 +125,8 @@
             <input type="number" class="form-control" id="resourceId" step="1" min="1" placeholder="必填项">
         </div>
         <div class="form-group">
-            <label for="jobId">任务主键</label>
-            <input type="number" class="form-control" id="jobId" step="1" min="1" placeholder="非必填">
+            <label for="pressureId">任务主键</label>
+            <input type="number" class="form-control" id="pressureId" step="1" min="1" placeholder="非必填">
         </div>
         <button type="button" class="btn btn-default" id="load">加载</button>
     </form>

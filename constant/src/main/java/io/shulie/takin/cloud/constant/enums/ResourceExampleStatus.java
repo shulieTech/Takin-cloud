@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
- * 任务实例状态
+ * 资源实例状态
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */

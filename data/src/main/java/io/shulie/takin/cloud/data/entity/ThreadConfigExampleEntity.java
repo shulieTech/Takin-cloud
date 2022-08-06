@@ -28,13 +28,13 @@ public class ThreadConfigExampleEntity {
      */
     private Integer serialNumber;
     /**
-     * 任务主键
+     * 施压任务主键
      */
-    private Long jobId;
+    private Long pressureId;
     /**
-     * 任务实例主键
+     * 施压任务实例主键
      */
-    private Long jobExampleId;
+    private Long pressureExampleId;
     /**
      * 关键字
      */

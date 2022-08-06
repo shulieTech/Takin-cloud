@@ -53,18 +53,18 @@ public class SlaServiceImpl implements SlaService {
      * {@inheritDoc}
      */
     @Override
-    public List<SlaEntity> list(long jobId) {
-        return slaMapper.lambdaQuery().eq(SlaEntity::getJobId, jobId).list();
+    public List<SlaEntity> list(long pressureId) {
+        return slaMapper.lambdaQuery().eq(SlaEntity::getPressureId, pressureId).list();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void create(long jobId, String ref, FormulaTarget target, FormulaSymbol symbol, double number) {
+    public void create(long pressureId, String ref, FormulaTarget target, FormulaSymbol symbol, double number) {
         slaMapper.save(new SlaEntity()
             .setRef(ref)
-            .setJobId(jobId)
+            .setPressureId(pressureId)
             .setFormulaNumber(number)
             .setFormulaTarget(target.getCode())
             .setFormulaSymbol(symbol.getCode())
@@ -75,18 +75,18 @@ public class SlaServiceImpl implements SlaService {
      * {@inheritDoc}
      */
     @Override
-    public void event(Long jobId, Long jobExampleId, List<SlaEventEntity> slaEventEntityList) {
+    public void event(Long pressureId, Long pressureExampleId, List<SlaEventEntity> slaEventEntityList) {
         if (CollUtil.isEmpty(slaEventEntityList)) {return;}
         slaEventMapper.saveBatch(slaEventEntityList);
-        PressureEntity pressureEntity = pressureService.jobEntity(jobId);
-        PressureExampleEntity pressureExampleEntity = pressureService.jobExampleEntity(jobExampleId);
+        PressureEntity pressureEntity = pressureService.entity(pressureId);
+        PressureExampleEntity pressureExampleEntity = pressureService.exampleEntity(pressureExampleId);
         ResourceExampleEntity resourceExampleEntity = resourceService.exampleEntity(pressureExampleEntity.getResourceExampleId());
         List<SlaInfo> slaInfoList = slaEventEntityList.stream().map(t -> new SlaInfo()
-            .setJobId(jobId)
+            .setPressureId(pressureId)
             .setRef(t.getRef())
             .setNumber(t.getNumber())
             .setAttach(t.getAttach())
-            .setJobExampleId(jobExampleId)
+            .setPressureExampleId(pressureExampleId)
             .setFormulaNumber(t.getFormulaNumber())
             .setFormulaSymbol(t.getFormulaSymbol())
             .setFormulaTarget(t.getFormulaTarget())
@@ -104,11 +104,11 @@ public class SlaServiceImpl implements SlaService {
     }
 
     @Override
-    public List<SlaEventEntity> check(Long jobId, Long jobExampleId, List<MetricsInfo> metricsInfoList) {
+    public List<SlaEventEntity> check(Long pressureId, Long pressureExampleId, List<MetricsInfo> metricsInfoList) {
         // 业务结果
         List<SlaEventEntity> result = new ArrayList<>();
         // 获取条件
-        List<SlaEntity> slaEntityList = slaMapper.lambdaQuery().eq(SlaEntity::getJobId, jobId).list();
+        List<SlaEntity> slaEntityList = slaMapper.lambdaQuery().eq(SlaEntity::getPressureId, pressureId).list();
         // 逐个数据判断
         for (MetricsInfo metricsInfo : metricsInfoList) {
             // 对应的条件列表
@@ -123,11 +123,11 @@ public class SlaServiceImpl implements SlaService {
                 // 符合校验则添加到业务结果里面
                 if (compareResult != null) {
                     result.add(new SlaEventEntity()
-                        .setJobId(jobId)
+                        .setPressureId(pressureId)
                         .setNumber(compareResult)
                         .setRef(metricsInfo.getTransaction())
                         .setSlaId(condition.getId())
-                        .setJobExampleId(jobExampleId)
+                        .setPressureExampleId(pressureExampleId)
                         .setAttach(condition.getAttach())
                         .setFormulaNumber(condition.getFormulaNumber())
                         .setFormulaTarget(condition.getFormulaTarget())

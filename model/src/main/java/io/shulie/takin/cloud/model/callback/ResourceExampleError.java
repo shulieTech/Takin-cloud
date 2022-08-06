@@ -24,9 +24,9 @@ public class ResourceExampleError extends Base<ResourceExampleErrorInfo> {
         private String errorMessage;
 
         public ResourceExampleErrorInfo(ResourceExample resourceExample) {
-            setJobId(resourceExample.getJobId());
+            setPressureId(resourceExample.getPressureId());
             setResourceId(resourceExample.getResourceId());
-            setJobExampleId(resourceExample.getJobExampleId());
+            setPressureExampleId(resourceExample.getPressureExampleId());
             setResourceExampleId(resourceExample.getResourceExampleId());
         }
     }

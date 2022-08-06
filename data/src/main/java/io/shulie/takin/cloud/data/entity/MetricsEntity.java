@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 /**
- * 数据库实体隐射 - 指标配置
+ * 数据库实体隐射 - 施压任务指标配置
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
@@ -22,9 +22,9 @@ public class MetricsEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 任务主键
+     * 施压任务主键
      */
-    private Long jobId;
+    private Long pressureId;
     /**
      * 关键词
      */

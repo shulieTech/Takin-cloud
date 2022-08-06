@@ -52,9 +52,9 @@ public class PressureUsageController {
         Object taskIdValue = request.get("taskId");
         if (taskIdValue == null) {return ApiResult.fail(Message.UNKNOWN + Message.COMMA + Message.TASK_ID);}
         // 根据任务主键获取任务信息
-        long jobId = Long.parseLong(taskIdValue.toString());
-        PressureEntity pressureEntity = pressureService.jobEntity(jobId);
-        if (pressureEntity == null) {return ApiResult.fail(CharSequenceUtil.format(Message.MISS_JOB, jobId));}
+        long pressureId = Long.parseLong(taskIdValue.toString());
+        PressureEntity pressureEntity = pressureService.entity(pressureId);
+        if (pressureEntity == null) {return ApiResult.fail(CharSequenceUtil.format(Message.MISS_PRESSURE, pressureId));}
         // 组装回调
         FileUsage content = new FileUsage();
         content.setData(request);

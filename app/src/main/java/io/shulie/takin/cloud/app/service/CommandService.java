@@ -30,24 +30,24 @@ public interface CommandService {
     /**
      * 启动应用程序
      *
-     * @param jobId          任务主键
+     * @param pressureId     施压任务主键
      * @param bindByXpathMd5 是否通过xPathMd5绑定
      */
-    void startApplication(long jobId, Boolean bindByXpathMd5);
+    void startApplication(long pressureId, Boolean bindByXpathMd5);
 
     /**
      * 停止应用程序
      *
-     * @param jobId 任务主键
+     * @param pressureId 施压任务主键
      */
-    void stopApplication(long jobId);
+    void stopApplication(long pressureId);
 
     /**
      * 更新配置
      *
-     * @param jobId 任务主键
+     * @param pressureId 施压任务主键
      */
-    void updateConfig(long jobId);
+    void updateConfig(long pressureId);
 
     /**
      * 文件资源

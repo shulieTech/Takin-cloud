@@ -21,22 +21,22 @@ public class InfluxUtil {
     /**
      * 指标数据上报的数据表
      *
-     * @param jobExampleId 任务实例主键
+     * @param pressureExampleId 施压任务实例主键
      * @return 表名
      */
-    public static String getMetricsMeasurement(Long jobExampleId) {
-        return getMeasurement("metrics", jobExampleId);
+    public static String getMetricsMeasurement(Long pressureExampleId) {
+        return getMeasurement("metrics", pressureExampleId);
     }
 
     /**
      * 拼装influxdb表名
      *
-     * @param jobExampleId    任务实例主键
-     * @param measurementName 名称
+     * @param pressureExampleId 施压任务实例主键
+     * @param measurementName   名称
      * @return 表名
      */
-    public static String getMeasurement(String measurementName, Long jobExampleId) {
-        return String.format("%s_%s", measurementName, jobExampleId);
+    public static String getMeasurement(String measurementName, Long pressureExampleId) {
+        return String.format("%s_%s", measurementName, pressureExampleId);
     }
 
     /**
@@ -50,7 +50,6 @@ public class InfluxUtil {
     public static Point toPoint(String measurement, long time, Object pojo) {
         Point.Builder builder = Point.measurement(measurement)
             .time(CollectorUtil.getTimeWindowTime(time), TimeUnit.MILLISECONDS)
-            //当前类的字段添加到数据库
             .addFieldsFromPOJO(pojo)
             .addField("create_time", System.currentTimeMillis());
         Class<?> superclass = pojo.getClass().getSuperclass();

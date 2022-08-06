@@ -8,7 +8,7 @@ import io.shulie.takin.cloud.data.mapper.PressureExampleEventMapper;
 import io.shulie.takin.cloud.data.service.PressureExampleEventMapperService;
 
 /**
- * Mapper - IService - Impl - 任务实例
+ * Mapper - IService - Impl - 施压任务实例
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */

@@ -17,7 +17,7 @@ import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.service.PressureExampleService;
 
 /**
- * 任务实例上报
+ * 施压任务实例上报
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
@@ -32,7 +32,7 @@ public class PressureExampleController {
     /**
      * 心跳
      *
-     * @param id 任务实例主键
+     * @param id 施压任务实例主键
      * @return -
      */
     @GetMapping("heartbeat")
@@ -45,7 +45,7 @@ public class PressureExampleController {
     /**
      * 启动
      *
-     * @param id 任务实例主键
+     * @param id 施压任务实例主键
      * @return -
      */
     @GetMapping("start")
@@ -58,7 +58,7 @@ public class PressureExampleController {
     /**
      * 停止
      *
-     * @param id 任务实例主键
+     * @param id 施压任务实例主键
      * @return -
      */
     @GetMapping("stop")
@@ -71,7 +71,7 @@ public class PressureExampleController {
     /**
      * 发生异常
      *
-     * @param id      任务实例主键
+     * @param id      施压任务实例主键
      * @param content 异常信息(字符串)
      * @return -
      */

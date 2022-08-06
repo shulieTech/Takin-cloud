@@ -12,19 +12,19 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class PressureExample {
     /**
-     * 任务主键
+     * 施压任务主键
      */
-    private long jobId;
+    private long pressureId;
     /**
      * 资源主键
      */
     private long resourceId;
     /**
+     * 施压任务实例主键
+     */
+    private long pressureExampleId;
+    /**
      * 资源实例主键
      */
     private long resourceExampleId;
-    /**
-     * 任务实例主键
-     */
-    private long jobExampleId;
 }

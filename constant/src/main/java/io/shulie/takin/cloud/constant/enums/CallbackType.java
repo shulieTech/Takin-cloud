@@ -26,7 +26,7 @@ public enum CallbackType {
     RESOURCE_EXAMPLE_START(101, "资源实例启动"),
     RESOURCE_EXAMPLE_STOP(102, "资源实例停止"),
     RESOURCE_EXAMPLE_ERROR(103, "资源实例异常"),
-    // 任务实例相关
+    // 施压任务实例相关
     PRESSURE_EXAMPLE_HEARTBEAT(200, "施压任务实例心跳"),
     PRESSURE_EXAMPLE_START(201, "施压任务实例启动"),
     PRESSURE_EXAMPLE_STOP(202, "施压任务实例停止"),
@@ -34,7 +34,7 @@ public enum CallbackType {
     PRESSURE_EXAMPLE_SUCCESSFUL(204, "施压任务实例正常停止"),
     // 过程数据[sla/csv用量]
     SLA(301, "触发SLA"),
-    EXCESS_JOB(302, "额外的任务"),
+    CALIBRATION(302, "数据校准任务"),
     FILE_USAGE(303, "文件用量"),
     // 文件资源
     FILE_RESOURCE_FAIL(400, "文件资源失败"),

@@ -45,9 +45,9 @@ public class ResouceController {
     @GetMapping("example/list")
     public ApiResult<List<ResourceExampleOverview>> watchmanResourceExample(
         @Parameter(description = "资源主键") @RequestParam Long resourceId,
-        @Parameter(description = "任务主键") @RequestParam(required = false) Long jobId) {
-        if (resourceId == null && jobId != null) {
-            PressureEntity pressureEntity = pressureService.jobEntity(jobId);
+        @Parameter(description = "任务主键") @RequestParam(required = false) Long pressureId) {
+        if (resourceId == null && pressureId != null) {
+            PressureEntity pressureEntity = pressureService.entity(pressureId);
             resourceId = pressureEntity == null ? null : pressureEntity.getResourceId();
         }
         List<ResourceExampleEntity> resourceExampleList = resourceService.listExample(resourceId);

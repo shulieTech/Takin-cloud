@@ -8,33 +8,29 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 /**
- * 数据库实体隐射 - 施压任务实例
+ * 数据校准任务 - 执行记录
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
 @Accessors(chain = true)
-@TableName("t_pressure_example")
-public class PressureExampleEntity {
+@TableName("t_calibration_log")
+public class CalibrationLogEntity {
     /**
      * 数据主键
      */
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 施压任务主键
+     * 数据校准任务主键
      */
-    private Long pressureId;
+    private Long calibrationId;
     /**
-     * 资源实例主键
+     * 数据校准任务日志内容
      */
-    private Long resourceExampleId;
+    private String content;
     /**
-     * 序列号
+     * 是否完成
      */
-    private Integer number;
-    /**
-     * 持续时长
-     */
-    private Integer duration;
+    private Boolean completed;
 }

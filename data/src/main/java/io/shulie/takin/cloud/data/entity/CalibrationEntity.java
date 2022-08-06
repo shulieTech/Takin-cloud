@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.data.entity;
 
+import java.util.Date;
+
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -8,44 +10,33 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 /**
- * 数据库实体隐射 - SLA
+ * 数据校准任务
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
-@TableName("t_sla")
 @Accessors(chain = true)
-public class SlaEntity {
+@TableName("t_calibration_job")
+public class CalibrationEntity {
     /**
      * 数据主键
      */
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 施压任务主键
+     * 压测任务主键
      */
     private Long pressureId;
     /**
-     * 关键词
+     * 是否完成
      */
-    private String ref;
+    private Boolean completed;
     /**
-     * 附加数据
+     * 创建时间
      */
-    private String attach;
+    private Date createTime;
     /**
-     * 算式目标
-     * <p>(RT、TPS、SA、成功率)</p>
+     * 阈值时间
      */
-    private Integer formulaTarget;
-    /**
-     * 算式符号
-     * <p>(>=、>、=、<=、<)</p>
-     */
-    private Integer formulaSymbol;
-    /**
-     * 算式数值
-     * <p>(用户输入)</p>
-     */
-    private Double formulaNumber;
+    private Date thresholdTime;
 }

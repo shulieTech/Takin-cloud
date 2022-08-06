@@ -33,13 +33,13 @@ public class Sla extends Base<List<SlaInfo>> {
          */
         private String attach;
         /**
-         * 任务主键
+         * 施压任务主键
          */
-        private long jobId;
+        private long pressureId;
         /**
-         * 任务实例主键
+         * 施压任务实例主键
          */
-        private long jobExampleId;
+        private long pressureExampleId;
         /**
          * 资源主键
          */

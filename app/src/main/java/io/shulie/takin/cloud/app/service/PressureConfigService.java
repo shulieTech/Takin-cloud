@@ -17,27 +17,27 @@ public interface PressureConfigService {
     /**
      * 获取指标配置列表
      *
-     * @param jobId 任务主键
+     * @param pressureId 施压任务主键
      * @return 指标配置列表
      */
-    List<MetricsEntity> metricsList(long jobId);
+    List<MetricsEntity> metricsList(long pressureId);
 
     /**
      * 获取线程组配置列表
      *
-     * @param jobId 任务主键
+     * @param pressureId 施压任务主键
      * @return 线程组配置列表
      */
-    List<ThreadConfigExampleEntity> threadList(long jobId);
+    List<ThreadConfigExampleEntity> threadList(long pressureId);
 
     /**
      * 获取线程组配置实例
      *
-     * @param jobId 任务主键
-     * @param ref   关键词
+     * @param pressureId 施压任务主键
+     * @param ref        关键词
      * @return 线程组配置
      */
-    List<ThreadConfigExampleEntity> threadExampleItem(long jobId, String ref);
+    List<ThreadConfigExampleEntity> threadExampleItem(long pressureId, String ref);
 
     /**
      * 修改线程组
@@ -60,6 +60,7 @@ public interface PressureConfigService {
      *
      * @param metricsEntity 指标配置
      */
+    @SuppressWarnings("unused")
     default void createMetrics(MetricsEntity metricsEntity) {
         createMetrics(Collections.singletonList(metricsEntity));
     }
@@ -76,6 +77,7 @@ public interface PressureConfigService {
      *
      * @param threadConfigEntity 线程组配置
      */
+    @SuppressWarnings("unused")
     default void createThread(ThreadConfigEntity threadConfigEntity) {
         createThread(Collections.singletonList(threadConfigEntity));
     }
@@ -92,6 +94,7 @@ public interface PressureConfigService {
      *
      * @param threadConfigExampleEntity 线程组配置实例
      */
+    @SuppressWarnings("unused")
     default void createThreadExample(ThreadConfigExampleEntity threadConfigExampleEntity) {
         createThreadExample(Collections.singletonList(threadConfigExampleEntity));
     }

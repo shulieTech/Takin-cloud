@@ -84,7 +84,7 @@ public class MetricsInfo {
     @Column(name = "percent_data")
     private String percentData;
     /**
-     * 任务实例编号
+     * 施压任务实例编号
      */
     @Column(tag = true, name = "pod_no")
     private String podNo;

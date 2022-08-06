@@ -32,8 +32,8 @@ public class ScriptController {
     @Operation(summary = "下发脚本校验命令")
     public ApiResult<Long> announce(
         @Parameter(description = "请求参数", required = true) @RequestBody AnnounceRequest request) {
-        Long jobId = scriptService.announce(request.getScriptPath(), request.getDataFilePath(), request.getAttachmentsPath());
-        return ApiResult.success(jobId);
+        Long id = scriptService.announce(request.getScriptPath(), request.getDataFilePath(), request.getAttachmentsPath());
+        return ApiResult.success(id);
     }
 
     @Operation(summary = "构建脚本")

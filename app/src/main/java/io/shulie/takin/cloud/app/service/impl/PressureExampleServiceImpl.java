@@ -36,95 +36,98 @@ public class PressureExampleServiceImpl implements PressureExampleService {
     @javax.annotation.Resource
     CallbackService callbackService;
     @javax.annotation.Resource(name = "pressureMapperServiceImpl")
-    PressureMapperService jobMapper;
+    PressureMapperService pressureMapper;
     @javax.annotation.Resource(name = "pressureExampleMapperServiceImpl")
-    PressureExampleMapperService jobExampleMapper;
+    PressureExampleMapperService pressureExampleMapper;
     @javax.annotation.Resource(name = "pressureExampleEventMapperServiceImpl")
-    PressureExampleEventMapperService jobExampleEventMapper;
+    PressureExampleEventMapperService pressureExampleEventMapper;
 
     @Override
-    public void onHeartbeat(long id) {
+    public void onHeartbeat(long pressureExampleId) {
         // 基础信息准备
         StringBuilder callbackUrl = new StringBuilder();
         PressureExampleHeartbeat context = new PressureExampleHeartbeat();
-        context.setData(getCallbackData(id, callbackUrl));
+        context.setData(getCallbackData(pressureExampleId, callbackUrl));
         // 创建回调
         callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
         // 记录事件
-        jobExampleEventMapper.save(new PressureExampleEventEntity()
+        pressureExampleEventMapper.save(new PressureExampleEventEntity()
             .setContext("{}")
-            .setJobExampleId(id)
+            .setPressureExampleId(pressureExampleId)
             .setType(NotifyEventType.PRESSURE_EXAMPLE_HEARTBEAT.getCode())
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void onStart(long id) {
+    public void onStart(long pressureExampleId) {
         // 基础信息准备
         StringBuilder callbackUrl = new StringBuilder();
         PressureExampleStart context = new PressureExampleStart();
-        context.setData(getCallbackData(id, callbackUrl));
+        context.setData(getCallbackData(pressureExampleId, callbackUrl));
         //回调
         boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
-        log.info("启动任务：{}, 回调结果: {}", id, complete);
+        log.info("启动任务：{}, 回调结果: {}", pressureExampleId, complete);
         // 记录事件
-        jobExampleEventMapper.save(new PressureExampleEventEntity()
+        pressureExampleEventMapper.save(new PressureExampleEventEntity()
             .setContext("{}")
-            .setJobExampleId(id)
+            .setPressureExampleId(pressureExampleId)
             .setType(NotifyEventType.PRESSURE_EXAMPLE_START.getCode())
         );
         //启动后触发心跳 防止超时
-        onHeartbeat(id);
+        onHeartbeat(pressureExampleId);
     }
 
     @Override
-    public void onStop(long id) {
+    public void onStop(long pressureExampleId) {
         // 基础信息准备
         StringBuilder callbackUrl = new StringBuilder();
         PressureExampleStop context = new PressureExampleStop();
-        context.setData(getCallbackData(id, callbackUrl));
+        context.setData(getCallbackData(pressureExampleId, callbackUrl));
         // 创建回调
         boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
-        log.info("停止任务：{}, 回调结果: {}", id, complete);
+        log.info("停止任务：{}, 回调结果: {}", pressureExampleId, complete);
         // 记录事件
-        jobExampleEventMapper.save(new PressureExampleEventEntity()
+        pressureExampleEventMapper.save(new PressureExampleEventEntity()
             .setContext("{}")
-            .setJobExampleId(id)
+            .setPressureExampleId(pressureExampleId)
             .setType(NotifyEventType.PRESSURE_EXAMPLE_STOP.getCode())
         );
     }
 
     @Override
-    public void onError(long id, String errorMessage) {
+    public void onError(long pressureExampleId, String errorMessage) {
         // 基础信息准备
         StringBuilder callbackUrl = new StringBuilder();
-        PressureExample pressureExample = getCallbackData(id, callbackUrl);
+        PressureExample pressureExample = getCallbackData(pressureExampleId, callbackUrl);
         PressureExampleErrorInfo errorInfo = new PressureExampleErrorInfo(pressureExample);
         errorInfo.setErrorMessage(errorMessage);
         PressureExampleError context = new PressureExampleError();
         context.setData(errorInfo);
         // 创建回调
         boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
-        log.info("任务异常信息回调：{}, 回调结果: {}", id, complete);
+        log.info("任务异常信息回调：{}, 回调结果: {}", pressureExampleId, complete);
         // 记录事件
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
         objectNode.put("message", errorMessage);
-        jobExampleEventMapper.save(new PressureExampleEventEntity()
-            .setJobExampleId(id)
+        pressureExampleEventMapper.save(new PressureExampleEventEntity()
+            .setPressureExampleId(pressureExampleId)
             .setContext(objectNode.toPrettyString())
             .setType(NotifyEventType.PRESSURE_EXAMPLE_ERROR.getCode())
         );
     }
 
     @Override
-    public PressureExample getCallbackData(long jobExampleId, StringBuilder callbackUrl) {
-        PressureExampleEntity pressureExampleEntity = jobExampleMapper.getById(jobExampleId);
-        PressureEntity pressureEntity = jobMapper.getById(pressureExampleEntity.getJobId());
+    public PressureExample getCallbackData(long pressureExampleId, StringBuilder callbackUrl) {
+        PressureExampleEntity pressureExampleEntity = pressureExampleMapper.getById(pressureExampleId);
+        PressureEntity pressureEntity = pressureMapper.getById(pressureExampleEntity.getPressureId());
         callbackUrl.append(pressureEntity.getCallbackUrl());
         return new PressureExample()
-            .setJobId(pressureEntity.getId())
+            .setPressureId(pressureEntity.getId())
             .setResourceId(pressureEntity.getResourceId())
-            .setJobExampleId(pressureExampleEntity.getId())
+            .setPressureExampleId(pressureExampleEntity.getId())
             .setResourceExampleId(pressureExampleEntity.getResourceExampleId());
     }
 }

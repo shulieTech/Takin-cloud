@@ -38,22 +38,22 @@ public class PressureController {
 
     @Operation(summary = "停止任务")
     @GetMapping("stop")
-    public ApiResult<Object> stop(@Parameter(description = "任务主键") Long jobId) {
-        pressureService.stop(jobId);
+    public ApiResult<Object> stop(@Parameter(description = "任务主键") Long pressureId) {
+        pressureService.stop(pressureId);
         return ApiResult.success();
     }
 
     @Operation(summary = "查看配置")
     @GetMapping("config/get")
-    public ApiResult<List<PressureConfig>> getConfig(@Parameter(description = "任务主键") Long jobId,
+    public ApiResult<List<PressureConfig>> getConfig(@Parameter(description = "任务主键") Long pressureId,
         @Parameter(description = "ref(可以不传)") String ref) {
-        return ApiResult.success(pressureService.getConfig(jobId, ref));
+        return ApiResult.success(pressureService.getConfig(pressureId, ref));
     }
 
     @Operation(summary = "修改配置")
     @PostMapping(value = "config/modify")
     public ApiResult<Object> modifyConfig(@RequestBody ModifyConfig info) {
-        pressureService.modifyConfig(info.getJobId(), info);
+        pressureService.modifyConfig(info.getPressureId(), info);
         return ApiResult.success();
     }
 }

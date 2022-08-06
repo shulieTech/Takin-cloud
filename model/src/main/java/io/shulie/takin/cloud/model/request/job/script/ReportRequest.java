@@ -15,12 +15,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "脚本校验任务下发参数")
 public class ReportRequest {
     /**
-     * 任务主键
+     * 脚本校验任务主键
      */
     @Schema(description = "任务主键")
     private Long id;
     /**
-     * 任务主键
+     * 脚本校验任务主键
      */
     @Schema(description = "任务主键")
     private Boolean completed;

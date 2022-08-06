@@ -8,7 +8,7 @@
     <property name="metrics_log_path" value="./logs/metrics"/>
     <property name="callback_log_path" value="./logs/callback"/>
     <property name="my_batis_log_path" value="./logs/my_batis"/>
-    <property name="excess_job_log_path" value="./logs/excess_job"/>
+    <property name="calibration_log_path" value="./logs/calibration"/>
     <!--  MyBatis配置  -->
     <logger name="com.apache.ibatis" level="DEBUG"/>
     <logger name="java.sql.Statement" level="DEBUG"/>
@@ -51,6 +51,42 @@
     <logger name="CALLBACK" level="DEBUG" additivity="false">
         <appender-ref ref="CALLBACK_INFO"/>
         <appender-ref ref="CALLBACK_NOT_INFO"/>
+    </logger>
+    <!--  数据校准任务的日志单独输出  -->
+    <appender name="CALIBRATION_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/calibration_info.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <maxFileSize>100MB</maxFileSize>
+            <fileNamePattern>${calibration_log_path}/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>info</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+    <appender name="CALIBRATION_NOT_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/calibration_not_info.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <maxFileSize>100MB</maxFileSize>
+            <fileNamePattern>${calibration_log_path}/not_info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>warn</level>
+        </filter>
+    </appender>
+    <!--  输出控制  -->
+    <logger name="CALIBRATION" level="DEBUG" additivity="false">
+        <appender-ref ref="CALIBRATION_INFO"/>
+        <appender-ref ref="CALIBRATION_NOT_INFO"/>
     </logger>
     <!--  通知事件的日志单独输出  -->
     <appender name="NOTIFY_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">

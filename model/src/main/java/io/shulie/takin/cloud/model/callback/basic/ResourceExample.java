@@ -12,17 +12,17 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class ResourceExample {
     /**
-     * 任务主键
+     * 施压任务主键
      */
-    private Long jobId;
+    private Long pressureId;
     /**
      * 资源主键
      */
     private long resourceId;
     /**
-     * 任务实例主键
+     * 施压任务实例主键
      */
-    private Long jobExampleId;
+    private Long pressureExampleId;
     /**
      * 资源实例主键
      */

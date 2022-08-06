@@ -22,9 +22,9 @@ public class ThreadConfigEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 任务主键
+     * 施压任务主键
      */
-    private Long jobId;
+    private Long pressureId;
     /**
      * 关键字
      */

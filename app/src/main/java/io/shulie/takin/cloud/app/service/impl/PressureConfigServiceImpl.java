@@ -34,9 +34,9 @@ public class PressureConfigServiceImpl implements PressureConfigService {
      * {@inheritDoc}
      */
     @Override
-    public List<MetricsEntity> metricsList(long jobId) {
+    public List<MetricsEntity> metricsList(long pressureId) {
         return metricsMapper.lambdaQuery()
-            .eq(MetricsEntity::getJobId, jobId)
+            .eq(MetricsEntity::getPressureId, pressureId)
             .list();
     }
 
@@ -44,9 +44,9 @@ public class PressureConfigServiceImpl implements PressureConfigService {
      * {@inheritDoc}
      */
     @Override
-    public List<ThreadConfigExampleEntity> threadList(long jobId) {
+    public List<ThreadConfigExampleEntity> threadList(long pressureId) {
         return threadConfigExampleMapper.lambdaQuery()
-            .eq(ThreadConfigExampleEntity::getJobId, jobId)
+            .eq(ThreadConfigExampleEntity::getPressureId, pressureId)
             .list();
     }
 
@@ -54,9 +54,9 @@ public class PressureConfigServiceImpl implements PressureConfigService {
      * {@inheritDoc}
      */
     @Override
-    public List<ThreadConfigExampleEntity> threadExampleItem(long jobId, String ref) {
+    public List<ThreadConfigExampleEntity> threadExampleItem(long pressureId, String ref) {
         return threadConfigExampleMapper.lambdaQuery()
-            .eq(ThreadConfigExampleEntity::getJobId, jobId)
+            .eq(ThreadConfigExampleEntity::getPressureId, pressureId)
             .eq(CharSequenceUtil.isNotBlank(ref), ThreadConfigExampleEntity::getRef, ref)
             .list();
     }

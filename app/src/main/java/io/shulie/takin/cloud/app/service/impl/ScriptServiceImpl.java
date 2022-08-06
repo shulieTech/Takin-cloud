@@ -33,7 +33,7 @@ public class ScriptServiceImpl implements ScriptService {
      */
     @Override
     public void report(Long id, Boolean completed, String message) {
-        // Do nothing, now.
+        // TODO 回调控制台
     }
 
     /**

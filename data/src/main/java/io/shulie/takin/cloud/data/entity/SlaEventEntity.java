@@ -22,17 +22,17 @@ public class SlaEventEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 任务主键
+     * 施压任务主键
      */
-    private Long jobId;
+    private Long pressureId;
     /**
      * SLA主键
      */
     private Long slaId;
     /**
-     * 任务实例主键
+     * 施压任务实例主键
      */
-    private Long jobExampleId;
+    private Long pressureExampleId;
     /**
      * 关键词
      */

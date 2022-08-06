@@ -24,13 +24,13 @@ public class PressureFileEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 任务主键
+     * 施压任务主键
      */
-    private Long jobId;
+    private Long pressureId;
     /**
-     * 任务实例主键
+     * 施压任务实例主键
      */
-    private Long jobExampleId;
+    private Long pressureExampleId;
     /**
      * 文件类型
      */
@@ -44,7 +44,7 @@ public class PressureFileEntity {
      */
     private Long startPoint;
     /**
-     * 任务的运行模式
+     * 运行模式
      */
     private Long endPoint;
     /**

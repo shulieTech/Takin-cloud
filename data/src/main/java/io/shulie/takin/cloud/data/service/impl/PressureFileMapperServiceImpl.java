@@ -8,7 +8,7 @@ import io.shulie.takin.cloud.data.mapper.PressureFileMapper;
 import io.shulie.takin.cloud.data.service.PressureFileMapperService;
 
 /**
- * Mapper - IService - Impl - 任务文件
+ * Mapper - IService - Impl - 施压任务文件
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */

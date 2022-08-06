@@ -22,7 +22,7 @@ public class PressureEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 任务名称
+     * 施压任务名称
      */
     private String name;
     /**
@@ -30,7 +30,7 @@ public class PressureEntity {
      */
     private Long resourceId;
     /**
-     * 任务持续时长
+     * 持续时长
      */
     private Integer duration;
     /**
@@ -38,7 +38,7 @@ public class PressureEntity {
      */
     private Integer sampling;
     /**
-     * 任务的运行模式
+     * 运行模式
      */
     private Integer type;
     /**

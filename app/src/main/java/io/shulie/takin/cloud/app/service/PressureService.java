@@ -18,71 +18,71 @@ public interface PressureService {
     /**
      * 启动
      *
-     * @param jobInfo 任务信息
-     * @return 任务主键
+     * @param info 施压任务信息
+     * @return 施压任务主键
      */
-    String start(StartRequest jobInfo);
+    String start(StartRequest info);
 
     /**
      * 停止
      *
-     * @param jobId 任务主键
+     * @param pressureId 施压任务主键
      */
-    void stop(long jobId);
+    void stop(long pressureId);
 
     /**
      * 查看配置
      *
-     * @param jobId 任务主键
-     * @param ref   关键词
+     * @param id  施压任务主键
+     * @param ref 关键词
      * @return 配置内容
      */
-    List<PressureConfig> getConfig(long jobId, String ref);
+    List<PressureConfig> getConfig(long id, String ref);
 
     /**
      * 修改配置
      *
-     * @param jobId   任务主键
+     * @param id      施压任务主键
      * @param context 配置内容
      */
-    void modifyConfig(long jobId, ModifyConfig context);
+    void modifyConfig(long id, ModifyConfig context);
 
     /**
-     * 获取数据对象 - 任务
+     * 获取数据对象 - 施压任务
      *
-     * @param jobId 任务主键
+     * @param id 数据主键
      * @return Entity
      */
-    PressureEntity jobEntity(long jobId);
+    PressureEntity entity(long id);
 
     /**
-     * 获取数据对象 - 任务实例
+     * 获取数据对象 - 施压任务实例
      *
-     * @param jobExampleId 任务实例主键
+     * @param exampleId 数据主键
      * @return Entity
      */
-    PressureExampleEntity jobExampleEntity(long jobExampleId);
+    PressureExampleEntity exampleEntity(long exampleId);
 
     /**
-     * 获取数据对象 - 任务实例
+     * 获取数据对象 - 施压任务实例
      * <p>根据任务主键查询任务实例列表</p>
      *
-     * @param jobId 任务主键
-     * @return 任务实例列表
+     * @param pressureId 施压任务主键
+     * @return 施压任务实例列表
      */
-    List<PressureExampleEntity> jobExampleEntityList(long jobId);
+    List<PressureExampleEntity> exampleEntityList(long pressureId);
 
     /**
      * 启动事件
      *
-     * @param id 任务主键
+     * @param pressureId 施压任务主键
      */
-    void onStart(long id);
+    void onStart(long pressureId);
 
     /**
      * 停止事件
      *
-     * @param id 任务主键
+     * @param pressureId 施压任务主键
      */
-    void onStop(long id);
+    void onStop(long pressureId);
 }
