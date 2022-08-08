@@ -20,7 +20,7 @@ import io.shulie.takin.cloud.app.service.PressureService;
 import io.shulie.takin.cloud.data.entity.MetricsEntity;
 import io.shulie.takin.cloud.data.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CommandService;
-import io.shulie.takin.cloud.model.request.StartRequest;
+import io.shulie.takin.cloud.model.request.job.pressure.StartRequest;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.model.response.PressureConfig;
 import io.shulie.takin.cloud.data.entity.PressureFileEntity;
@@ -34,15 +34,15 @@ import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.service.PressureExampleService;
 import io.shulie.takin.cloud.data.service.PressureMapperService;
 import io.shulie.takin.cloud.app.service.ResourceExampleService;
-import io.shulie.takin.cloud.model.request.StartRequest.SlaInfo;
-import io.shulie.takin.cloud.model.request.StartRequest.FileInfo;
+import io.shulie.takin.cloud.model.request.job.pressure.StartRequest.SlaInfo;
+import io.shulie.takin.cloud.model.request.job.pressure.StartRequest.FileInfo;
 import io.shulie.takin.cloud.data.entity.ThreadConfigExampleEntity;
 import io.shulie.takin.cloud.data.service.PressureFileMapperService;
 import io.shulie.takin.cloud.data.service.ThreadConfigMapperService;
-import io.shulie.takin.cloud.model.request.StartRequest.MetricsInfo;
+import io.shulie.takin.cloud.model.request.job.pressure.StartRequest.MetricsInfo;
 import io.shulie.takin.cloud.model.request.job.pressure.ModifyConfig;
 import io.shulie.takin.cloud.data.service.PressureExampleMapperService;
-import io.shulie.takin.cloud.model.request.StartRequest.ThreadConfigInfo;
+import io.shulie.takin.cloud.model.request.job.pressure.StartRequest.ThreadConfigInfo;
 import io.shulie.takin.cloud.data.service.ThreadConfigExampleMapperService;
 
 /**

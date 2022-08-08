@@ -21,15 +21,15 @@ public class ListResponse {
     @Schema(description = "调度机标识")
     private Long id;
     /**
-     * 关键词
+     * 附加数据
      */
-    @Schema(description = "关键词")
-    private String ref;
+    @Schema(name = "附加数据", description = "注册调度机时填入的信息,原样返回")
+    private String attach;
     /**
      * 关键词签名
      */
     @Schema(description = "关键词签名")
-    private String refSign;
+    private String sign;
     /**
      * 资源
      */

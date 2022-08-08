@@ -36,14 +36,14 @@ public class WatchmanController {
     /**
      * 心跳
      *
-     * @param refSign 签名
+     * @param sign 签名
      * @return -
      */
 
     @GetMapping("heartbeat")
     @Operation(summary = "心跳")
-    public ApiResult<Object> heartbeat(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign) {
-        WatchmanEntity entity = watchmanService.ofRefSign(refSign);
+    public ApiResult<Object> heartbeat(@Parameter(description = "签名", required = true) @RequestParam String sign) {
+        WatchmanEntity entity = watchmanService.ofSign(sign);
         watchmanService.onHeartbeat(entity.getId());
         return ApiResult.success();
     }
@@ -51,15 +51,15 @@ public class WatchmanController {
     /**
      * 发生异常
      *
-     * @param refSign 签名
+     * @param sign    签名
      * @param content 异常内容(字符串)
      * @return -
      */
     @PostMapping("abnormal")
     @Operation(summary = "发生异常")
-    public ApiResult<Object> abnormal(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign,
+    public ApiResult<Object> abnormal(@Parameter(description = "签名", required = true) @RequestParam String sign,
         @Parameter(description = "异常信息", required = true) @RequestBody String content) {
-        WatchmanEntity entity = watchmanService.ofRefSign(refSign);
+        WatchmanEntity entity = watchmanService.ofSign(sign);
         watchmanService.onAbnormal(entity.getId(), content);
         return ApiResult.success();
     }
@@ -67,13 +67,13 @@ public class WatchmanController {
     /**
      * 恢复正常
      *
-     * @param refSign 签名
+     * @param sign 签名
      * @return -
      */
     @GetMapping("normal")
     @Operation(summary = "恢复正常")
-    public ApiResult<Object> normal(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign) {
-        WatchmanEntity entity = watchmanService.ofRefSign(refSign);
+    public ApiResult<Object> normal(@Parameter(description = "签名", required = true) @RequestParam String sign) {
+        WatchmanEntity entity = watchmanService.ofSign(sign);
         watchmanService.onNormal(entity.getId());
         return ApiResult.success();
     }
@@ -81,15 +81,15 @@ public class WatchmanController {
     /**
      * 上报资源
      *
-     * @param refSign 签名
+     * @param sign    签名
      * @param content 资源信息(Json字符串)
      * @return -
      */
     @PostMapping("upload")
     @Operation(summary = "上报资源")
-    public ApiResult<Object> upload(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign,
+    public ApiResult<Object> upload(@Parameter(description = "签名", required = true) @RequestParam String sign,
         @Parameter(description = "资源列表", required = true) @RequestBody List<ResourceSource> content) {
-        WatchmanEntity entity = watchmanService.ofRefSign(refSign);
+        WatchmanEntity entity = watchmanService.ofSign(sign);
         watchmanService.upload(entity.getId(), content);
         return ApiResult.success();
     }

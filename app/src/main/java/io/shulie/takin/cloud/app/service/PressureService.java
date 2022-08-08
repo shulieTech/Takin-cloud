@@ -3,7 +3,7 @@ package io.shulie.takin.cloud.app.service;
 import java.util.List;
 
 import io.shulie.takin.cloud.data.entity.PressureEntity;
-import io.shulie.takin.cloud.model.request.StartRequest;
+import io.shulie.takin.cloud.model.request.job.pressure.StartRequest;
 import io.shulie.takin.cloud.model.response.PressureConfig;
 import io.shulie.takin.cloud.data.entity.PressureExampleEntity;
 import io.shulie.takin.cloud.model.request.job.pressure.ModifyConfig;

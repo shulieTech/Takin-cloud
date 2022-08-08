@@ -5,7 +5,7 @@ import lombok.Data;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import io.shulie.takin.cloud.constant.enums.ThreadGroupType;
-import io.shulie.takin.cloud.model.request.StartRequest.ThreadConfigInfo;
+import io.shulie.takin.cloud.model.request.job.pressure.StartRequest.ThreadConfigInfo;
 
 /**
  * 修改线程组配置

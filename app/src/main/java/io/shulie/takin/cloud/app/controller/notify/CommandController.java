@@ -55,12 +55,12 @@ public class CommandController {
 
     @GetMapping("pop")
     @Operation(summary = "弹出一条命令")
-    public ApiResult<Object> ack(@Parameter(description = "关键词签名", required = true) @RequestParam String refSign,
+    public ApiResult<Object> ack(@Parameter(description = "签名", required = true) @RequestParam String sign,
         @Parameter(description = "命令类型", required = true) @RequestParam Integer type) {
         // 兑换命令类型
         CommandType commandType = CommandType.of(type);
         if (commandType == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.UNKOWN_COMMAND_TYPE, type));}
-        WatchmanEntity entity = watchmanService.ofRefSign(refSign);
+        WatchmanEntity entity = watchmanService.ofSign(sign);
         PageInfo<CommandEntity> range = commandService.range(entity.getId(), 1, commandType);
         // 没有命令则返回 null
         if (range.getSize() == 0) {return ApiResult.success();}

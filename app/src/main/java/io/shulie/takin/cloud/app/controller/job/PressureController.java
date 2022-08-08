@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.shulie.takin.cloud.model.response.ApiResult;
-import io.shulie.takin.cloud.model.request.StartRequest;
+import io.shulie.takin.cloud.model.request.job.pressure.StartRequest;
 import io.shulie.takin.cloud.app.service.PressureService;
 import io.shulie.takin.cloud.model.response.PressureConfig;
 import io.shulie.takin.cloud.model.request.job.pressure.ModifyConfig;

@@ -26,9 +26,9 @@ public class WatchmanEntity {
      */
     private String ref;
     /**
-     * 关键词签名
+     * 签名
      */
-    private String refSign;
+    private String sign;
     /**
      * 数据加密的公钥
      */

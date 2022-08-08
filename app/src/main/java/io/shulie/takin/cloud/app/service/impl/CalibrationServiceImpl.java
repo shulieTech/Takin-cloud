@@ -52,7 +52,7 @@ import io.shulie.takin.cloud.data.service.CalibrationLogMapperService;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
-@Slf4j(topic = "CALIBRATION-JOB")
+@Slf4j(topic = "CALIBRATION")
 public class CalibrationServiceImpl implements CalibrationService {
     @Resource
     JsonServiceImpl jsonService;

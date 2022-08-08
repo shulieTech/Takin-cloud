@@ -32,9 +32,9 @@ public class TicketController {
     @Operation(summary = "生成Ticket")
     @GetMapping("generate")
     public ApiResult<String> generate(
-        @Parameter(description = "关键词签名", required = true) @RequestParam String refSign) {
+        @Parameter(description = "签名", required = true) @RequestParam String sign) {
         // 0. 根据入参找到对应的调度机公钥
-        WatchmanEntity watchmanEntity = watchmanService.ofRefSign(refSign);
+        WatchmanEntity watchmanEntity = watchmanService.ofSign(sign);
         // 1. 生成随机Ticket
         String ticket = ticketService.generate();
         // 2. ticket 存入内存并使用公钥加密
@@ -46,7 +46,7 @@ public class TicketController {
     @Operation(summary = "更新ticket-会加验签")
     @GetMapping("update")
     public ApiResult<String> update(
-        @Parameter(description = "关键词签名", required = true) @RequestParam String refSign) {
-        return this.generate(refSign);
+        @Parameter(description = "签名", required = true) @RequestParam String sign) {
+        return this.generate(sign);
     }
 }

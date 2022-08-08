@@ -1,4 +1,4 @@
-package io.shulie.takin.cloud.model.request;
+package io.shulie.takin.cloud.model.request.job.pressure;
 
 import java.util.Map;
 import java.util.List;

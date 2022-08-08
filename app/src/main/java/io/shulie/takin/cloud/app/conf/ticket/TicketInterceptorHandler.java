@@ -52,7 +52,7 @@ public class TicketInterceptorHandler implements HandlerInterceptor {
             // 时间戳转换
             long timestamp = Long.parseLong(ticketTimestamp + "");
             // 获取调度器
-            Long watchamanId = watchmanService.ofRefSign(watchmanSign).getId();
+            Long watchamanId = watchmanService.ofSign(watchmanSign).getId();
             // 获取调度器的当前ticket
             String ticket = ticketService.get(watchamanId.toString());
             // 校验ticket
@@ -82,7 +82,7 @@ public class TicketInterceptorHandler implements HandlerInterceptor {
         long timestamp = System.currentTimeMillis();
         String watchmanSign = request.getHeader("WATCHMAN-SIGN");
         // 获取调度器
-        Long watchamanId = watchmanService.ofRefSign(watchmanSign).getId();
+        Long watchamanId = watchmanService.ofSign(watchmanSign).getId();
         // 获取调度器的当前ticket
         String ticket = ticketService.get(watchamanId.toString());
         // 计算签名

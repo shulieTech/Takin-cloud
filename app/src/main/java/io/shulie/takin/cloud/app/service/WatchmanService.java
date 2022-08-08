@@ -8,8 +8,6 @@ import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.model.resource.ResourceSource;
 import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
-
-import io.shulie.takin.cloud.model.watchman.Register.Body;
 import io.shulie.takin.cloud.model.response.watchman.RegisteResponse;
 
 /**
@@ -47,11 +45,11 @@ public interface WatchmanService {
     /**
      * 调度注册
      *
-     * @param ref     关键词
-     * @param refSign 关键词签名
+     * @param ref  关键词
+     * @param sign 签名
      * @return true/false
      */
-    boolean register(String ref, String refSign);
+    boolean register(String ref, String sign);
 
     /**
      * 根据refSign获取调度信息
@@ -59,7 +57,7 @@ public interface WatchmanService {
      * @param refSign {@link WatchmanEntity#getRef}
      * @return 调度信息 | null
      */
-    WatchmanEntity ofRefSign(String refSign);
+    WatchmanEntity ofSign(String refSign);
 
     /**
      * 获取调度机状态
@@ -102,11 +100,11 @@ public interface WatchmanService {
     /**
      * 生成调度机信息
      *
-     * @param publicKey 公钥
-     * @param body      主要信息
+     * @param publicKey  公钥
+     * @param bodyString 主要信息
      * @return 调度机信息
      */
-    RegisteResponse generate(Body body, String publicKey);
+    RegisteResponse generate(String bodyString, String publicKey);
 
     /**
      * 更新调度机信息

@@ -29,7 +29,6 @@ import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.WatchmanService;
-import io.shulie.takin.cloud.model.watchman.Register.Body;
 import io.shulie.takin.cloud.model.resource.ResourceSource;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.data.entity.WatchmanEventEntity;
@@ -125,16 +124,16 @@ public class WatchmanServiceImpl implements WatchmanService {
      * {@inheritDoc}
      */
     @Override
-    public boolean register(String ref, String refSign) {
+    public boolean register(String ref, String sign) {
         // 已存在返回TRUE
-        if (ofRefSign(refSign) != null) {return true;}
-        return watchmanMapper.save(new WatchmanEntity().setRef(ref).setRefSign(refSign));
+        if (ofSign(sign) != null) {return true;}
+        return watchmanMapper.save(new WatchmanEntity().setRef(ref).setSign(sign));
     }
 
     @Override
-    public WatchmanEntity ofRefSign(String refSign) {
-        WatchmanEntity entity = watchmanMapper.lambdaQuery().eq(WatchmanEntity::getRefSign, refSign).one();
-        if (entity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.WATCHMAN_MISS, refSign));}
+    public WatchmanEntity ofSign(String sign) {
+        WatchmanEntity entity = watchmanMapper.lambdaQuery().eq(WatchmanEntity::getSign, sign).one();
+        if (entity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.WATCHMAN_MISS, sign));}
         return entity;
     }
 
@@ -254,26 +253,23 @@ public class WatchmanServiceImpl implements WatchmanService {
      * {@inheritDoc}
      */
     @Override
-    public RegisteResponse generate(Body body, String publicKey) {
-        Map<String, String> header = new HashMap<>(2);
-        header.put("alg", "HS256");
-        String headerString = jsonService.writeValueAsString(header);
-        String bodyString = jsonService.writeValueAsString(body);
+    public RegisteResponse generate(String bodyString, String publicKey) {
+        String headerString = "{\"alg\":\"RSA\"}";
 
         String base64HeaderString = Base64.encodeUrlSafe(headerString);
         String base64BodyString = Base64.encodeUrlSafe(bodyString);
         String ref = crypto(base64HeaderString, base64BodyString, publicKey);
-        String refSign = SecureUtil.md5(ref);
+        String sign = SecureUtil.md5(ref);
 
         // 保存到数据库
         WatchmanEntity watchmanEntity = new WatchmanEntity()
             .setRef(ref)
-            .setRefSign(refSign)
+            .setSign(sign)
             .setPublicKey(publicKey);
         watchmanMapper.save(watchmanEntity);
         // 响应数据
         return new RegisteResponse()
-            .setSign(refSign)
+            .setSign(sign)
             .setId(watchmanEntity.getId());
     }
 
@@ -286,7 +282,7 @@ public class WatchmanServiceImpl implements WatchmanService {
             String refSign = SecureUtil.md5(ref);
             return watchmanMapper.lambdaUpdate()
                 .set(WatchmanEntity::getRef, ref)
-                .set(WatchmanEntity::getRefSign, refSign)
+                .set(WatchmanEntity::getSign, refSign)
                 .eq(WatchmanEntity::getId, id).update();
         } else {
             return false;

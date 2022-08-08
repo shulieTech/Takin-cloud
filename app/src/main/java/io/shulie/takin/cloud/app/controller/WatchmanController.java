@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.data.entity.WatchmanEntity;
@@ -44,6 +45,8 @@ import io.shulie.takin.cloud.model.request.watchman.BatchUpdateRequest;
 public class WatchmanController {
     @javax.annotation.Resource
     WatchmanService watchmanService;
+    @javax.annotation.Resource
+    JsonService jsonService;
 
     @Operation(summary = "状态")
     @GetMapping("status")
@@ -72,8 +75,8 @@ public class WatchmanController {
         List<ListResponse> result = list.getList().stream()
             .map(t -> new ListResponse()
                 .setId(t.getId())
-                .setRef(t.getRef())
-                .setRefSign(t.getRefSign())
+                .setAttach(t.getRef())
+                .setSign(t.getSign())
                 .setResource(watchmanService.getResourceSum(t.getId())))
             .collect(Collectors.toList());
         return ApiResult.success(result, list.getTotal());
@@ -98,22 +101,23 @@ public class WatchmanController {
     @PostMapping("registe")
     public ApiResult<RegisteResponse> registe(
         @Parameter(description = "入参", required = true) @RequestBody RegisteRequest registeRequest) {
-        return ApiResult.success(watchmanService.generate(registeRequest.getBody(), registeRequest.getPublicKey()));
+        String bodyString = jsonService.writeValueAsString(registeRequest.getAttach());
+        return ApiResult.success(watchmanService.generate(bodyString, registeRequest.getPublicKey()));
     }
 
     @Operation(summary = "更新调度机")
     @PostMapping("update")
     public ApiResult<Boolean> update(
         @Parameter(description = "入参", required = true) @RequestBody UpdateRequest request) {
-        return ApiResult.success(watchmanService.update(request.getId(), request.getPublicKey()));
+        return ApiResult.success(watchmanService.update(request.getWatchmanId(), request.getPublicKey()));
     }
 
     @Operation(summary = "更新调度机-批量")
     @PostMapping("update/batch")
     public ApiResult<Map<Long, Boolean>> updateBatch(
         @Parameter(description = "入参", required = true) @RequestBody BatchUpdateRequest request) {
-        Map<Long, Boolean> result = new HashMap<>(request.getIdList().size());
-        request.getIdList().forEach(t -> result.put(t, watchmanService.update(t, request.getPublicKey())));
+        Map<Long, Boolean> result = new HashMap<>(request.getWatchmanIdList().size());
+        request.getWatchmanIdList().forEach(t -> result.put(t, watchmanService.update(t, request.getPublicKey())));
         return ApiResult.success(result);
     }
 
