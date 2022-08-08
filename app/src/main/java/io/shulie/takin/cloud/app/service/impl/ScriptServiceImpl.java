@@ -6,17 +6,17 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
-import io.shulie.takin.cloud.app.service.CommandService;
-import io.shulie.takin.cloud.app.service.JsonService;
-import io.shulie.takin.cloud.data.entity.ScriptEntity;
-import io.shulie.takin.cloud.data.service.ScriptMapperService;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
 import cn.hutool.core.exceptions.ValidateException;
 
+import io.shulie.takin.cloud.app.service.JsonService;
+import io.shulie.takin.cloud.data.entity.ScriptEntity;
 import io.shulie.takin.cloud.app.service.ScriptService;
+import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.app.service.CallbackService;
+import io.shulie.takin.cloud.data.service.ScriptMapperService;
 import io.shulie.takin.cloud.model.request.job.script.BuildRequest;
 
 /**
@@ -41,7 +41,8 @@ public class ScriptServiceImpl implements ScriptService {
      * {@inheritDoc}
      */
     @Override
-    public Long announce(String callbackUrl, String scriptFilePath, List<String> dataFilePath, List<String> attachmentFilePath, List<String> pluginPath) {
+    public Long announce(Long watchmanId, String callbackUrl,
+        String scriptFilePath, List<String> dataFilePath, List<String> attachmentFilePath, List<String> pluginPath) {
         // 1. 组装任务数据
         Map<String, Object> content = new HashMap<>(4);
         content.put("plugin", pluginPath);
@@ -50,6 +51,7 @@ public class ScriptServiceImpl implements ScriptService {
         content.put("attachments", attachmentFilePath);
         // 2. 保存数据
         ScriptEntity scriptEntity = new ScriptEntity()
+            .setWatchmanId(watchmanId)
             .setCallbackUrl(callbackUrl)
             .setContent(jsonService.writeValueAsString(content));
         scriptMapper.save(scriptEntity);
@@ -107,5 +109,13 @@ public class ScriptServiceImpl implements ScriptService {
             log.error("构建脚本出错.", e);
             throw new ValidateException("构建脚本出错", e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ScriptEntity entity(Long id) {
+        return scriptMapper.getById(id);
     }
 }

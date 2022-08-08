@@ -2,6 +2,7 @@ package io.shulie.takin.cloud.app.service;
 
 import java.util.List;
 
+import io.shulie.takin.cloud.data.entity.ScriptEntity;
 import io.shulie.takin.cloud.model.request.job.script.BuildRequest;
 
 /**
@@ -14,13 +15,14 @@ public interface ScriptService {
      * 下发任务
      *
      * @param callbackUrl        回调路径
-     * @param scriptFilePath         脚本文件路径
+     * @param scriptFilePath     脚本文件路径
      * @param dataFilePath       数据文件路径
      * @param attachmentFilePath 附件文件路径
      * @param pluginPath         插件路径
      * @return 脚本校验任务主键
      */
-    Long announce(String callbackUrl, String scriptFilePath, List<String> dataFilePath, List<String> attachmentFilePath, List<String> pluginPath);
+    Long announce(Long watchmanId, String callbackUrl,
+        String scriptFilePath, List<String> dataFilePath, List<String> attachmentFilePath, List<String> pluginPath);
 
     /**
      * 报告结果
@@ -38,4 +40,12 @@ public interface ScriptService {
      * @return 脚本内容
      */
     String build(BuildRequest scriptRequest);
+
+    /**
+     * 获取数据实体
+     *
+     * @param id 数据主键
+     * @return 数据实体
+     */
+    ScriptEntity entity(Long id);
 }

@@ -1,8 +1,7 @@
 package io.shulie.takin.cloud.model.request.watchman;
 
-import java.util.List;
-
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,12 +13,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Data
 @Accessors(chain = true)
+@EqualsAndHashCode(callSuper = true)
 @Schema(description = "更新调度机-批量")
-public class BatchUpdateRequest {
-    /**
-     * 主键集合
-     */
-    private List<Long> idList;
+public class BatchUpdateRequest extends BatchRequest {
     /**
      * 公钥
      */

@@ -17,7 +17,7 @@ public class UpdateRequest {
     /**
      * 主键
      */
-    private Long id;
+    private Long watchmanId;
     /**
      * 公钥
      */

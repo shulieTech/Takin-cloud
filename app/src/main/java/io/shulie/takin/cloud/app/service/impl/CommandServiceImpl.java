@@ -18,6 +18,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.shulie.takin.cloud.constant.Message;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.conf.WatchmanConfig;
+import io.shulie.takin.cloud.data.entity.ScriptEntity;
+import io.shulie.takin.cloud.app.service.ScriptService;
 import io.shulie.takin.cloud.data.entity.CommandEntity;
 import io.shulie.takin.cloud.data.entity.MetricsEntity;
 import io.shulie.takin.cloud.data.entity.ResourceEntity;
@@ -58,6 +60,9 @@ public class CommandServiceImpl implements CommandService {
     @Lazy
     @javax.annotation.Resource
     FileExampleService fileExampleService;
+    @Lazy
+    @javax.annotation.Resource
+    ScriptService scriptService;
 
     @javax.annotation.Resource
     JsonService jsonService;
@@ -253,7 +258,16 @@ public class CommandServiceImpl implements CommandService {
 
     @Override
     public void announceScript(long scriptId) {
-        // TODO 下发命令的操作
+        // 找到任务内容
+        ScriptEntity scriptEntity = scriptService.entity(scriptId);
+        if (Objects.nonNull(scriptEntity)) {
+            // 下发命令的操作
+            CommandEntity commandEntity = new CommandEntity()
+                .setContent(jsonService.writeValueAsString(scriptEntity))
+                .setWatchmanId(scriptEntity.getWatchmanId())
+                .setType(CommandType.ANNOUNCE_SCRIPT.getValue());
+            commandMapper.save(commandEntity);
+        }
     }
 
     /**
