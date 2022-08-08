@@ -37,9 +37,8 @@ public enum CallbackType {
     CALIBRATION(302, "数据校准任务"),
     FILE_USAGE(303, "文件用量"),
     // 文件资源
-    FILE_RESOURCE_FAIL(400, "文件资源失败"),
-    FILE_RESOURCE_COMPLETE(401, "文件资源完成"),
-    FILE_RESOURCE_PROGRESS(402, "文件资源进度"),
+    FILE_RESOURCE_PROGRESS(400, "文件资源进度"),
+    SCRIPT_RESULT(500, "脚本校验结果"),
     // 格式化用
     ;
     @JsonValue

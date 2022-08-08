@@ -28,6 +28,10 @@ public class ScriptEntity {
      */
     private Long watchmanId;
     /**
+     * 附加数据
+     */
+    private String attach;
+    /**
      * 回调地址
      */
     private String callbackUrl;

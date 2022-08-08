@@ -64,6 +64,16 @@ public interface CallbackService {
     }
 
     /**
+     * 创建回调
+     *
+     * @param url     回调路径
+     * @param content 回调内容
+     */
+    default void create(String url, CallbackType type, String content) {
+        create(url, type, content.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
      * 回调web
      *
      * @param id      回调主键

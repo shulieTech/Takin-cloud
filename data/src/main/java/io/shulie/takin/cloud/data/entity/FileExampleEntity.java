@@ -30,6 +30,10 @@ public class FileExampleEntity {
      */
     private Long watchmanId;
     /**
+     * 附加数据
+     */
+    private String attach;
+    /**
      * 文件路径
      */
     private String path;

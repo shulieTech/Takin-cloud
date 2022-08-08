@@ -31,6 +31,7 @@ public class FileController {
     @PostMapping("announce")
     public ApiResult<Long> announce(
         @Parameter(description = "文件列表", required = true) @RequestBody AnnounceRequest request) {
-        return ApiResult.success(fileService.announce(request.getCallbackUrl(), request.getWatchmanIdList(), request.getFileList()));
+        return ApiResult.success(fileService.announce(request.getAttach(), request.getCallbackUrl(),
+            request.getWatchmanIdList(), request.getFileList()));
     }
 }

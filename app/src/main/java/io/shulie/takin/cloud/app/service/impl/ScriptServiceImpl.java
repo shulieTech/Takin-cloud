@@ -16,7 +16,9 @@ import io.shulie.takin.cloud.data.entity.ScriptEntity;
 import io.shulie.takin.cloud.app.service.ScriptService;
 import io.shulie.takin.cloud.app.service.CommandService;
 import io.shulie.takin.cloud.app.service.CallbackService;
+import io.shulie.takin.cloud.constant.enums.CallbackType;
 import io.shulie.takin.cloud.data.service.ScriptMapperService;
+import io.shulie.takin.cloud.model.callback.script.ResultReport;
 import io.shulie.takin.cloud.model.request.job.script.BuildRequest;
 
 /**
@@ -76,7 +78,11 @@ public class ScriptServiceImpl implements ScriptService {
                 .update();
             // 2. 回调控制台
             if (Boolean.TRUE.equals(updateResult)) {
-                callbackService.create(scriptEntity.getCallbackUrl(), jsonService.writeValueAsString(scriptEntity));
+                ResultReport reportData = new ResultReport().setResult(completed)
+                    .setAttach(scriptEntity.getAttach())
+                    .setMessage(message);
+                callbackService.create(scriptEntity.getCallbackUrl(), CallbackType.FILE_RESOURCE_PROGRESS,
+                    jsonService.writeValueAsString(reportData));
             }
         }
     }

@@ -31,9 +31,12 @@ public class FileServiceImpl implements FileService {
      * {@inheritDoc}
      */
     @Override
-    public long announce(String callbackUrl, List<Long> watchmanIdList, List<AnnounceRequest.File> fileList) {
+    public long announce(String attach, String callbackUrl,
+        List<Long> watchmanIdList, List<AnnounceRequest.File> fileList) {
         // 1. 数据入库 [t_file]
-        FileEntity fileEntity = new FileEntity();
+        FileEntity fileEntity = new FileEntity()
+            .setCallbackUrl(callbackUrl)
+            .setAttach(attach);
         fileMapper.save(fileEntity);
         // 2. 数据入库 [t_file_example]
         List<FileExampleEntity> fileExampleEntityList = new ArrayList<>(fileList.size() * watchmanIdList.size());
@@ -42,7 +45,9 @@ public class FileServiceImpl implements FileService {
             .setFileId(fileEntity.getId())
             .setPath(t.getPath())
             .setSign(t.getSign())
-            .setWatchmanId(c))));
+            .setAttach(attach)
+            .setWatchmanId(c)
+        )));
         boolean exampleSaveResult = fileExampleService.saveBatch(fileExampleEntityList);
         if (exampleSaveResult) {
             // 3. 数据入库 [t_command]

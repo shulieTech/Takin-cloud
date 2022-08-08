@@ -16,12 +16,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Accessors(chain = true)
 @Schema(description = "文件资源管理下发的请求")
 public class AnnounceRequest {
+    @Schema(description = "附加数据")
+    private String attach;
     @Schema(description = "回调地址")
-    String callbackUrl;
+    private String callbackUrl;
     @Schema(description = "文件列表")
-    List<File> fileList;
+    private List<File> fileList;
     @Schema(description = "调度器主键列表")
-    List<Long> watchmanIdList;
+    private List<Long> watchmanIdList;
 
     @Data
     public static class File {

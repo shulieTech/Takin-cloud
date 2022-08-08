@@ -32,4 +32,9 @@ public class ProgressRequest {
      */
     @Schema(description = "是否完成")
     Boolean completed;
+    /**
+     * 消息
+     */
+    @Schema(description = "消息")
+    private String message;
 }

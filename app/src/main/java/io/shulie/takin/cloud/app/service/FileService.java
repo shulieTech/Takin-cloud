@@ -15,12 +15,14 @@ public interface FileService {
     /**
      * 下发命令
      *
+     * @param attach         附加数据
      * @param fileList       文件列表
      * @param callbackUrl    回调地址
      * @param watchmanIdList 调度机主键列表
      * @return 文件资源管理-批次主键
      */
-    long announce(String callbackUrl, List<Long> watchmanIdList, List<AnnounceRequest.File> fileList);
+    long announce(String attach, String callbackUrl,
+        List<Long> watchmanIdList, List<AnnounceRequest.File> fileList);
 
     /**
      * 获取数据项

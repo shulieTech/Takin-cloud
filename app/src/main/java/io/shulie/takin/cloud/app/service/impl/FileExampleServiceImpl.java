@@ -1,13 +1,9 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import java.util.Map;
 import java.util.List;
 import java.util.Objects;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
@@ -16,8 +12,10 @@ import io.shulie.takin.cloud.data.entity.FileEntity;
 import io.shulie.takin.cloud.app.service.FileService;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.service.CallbackService;
+import io.shulie.takin.cloud.constant.enums.CallbackType;
 import io.shulie.takin.cloud.data.entity.FileExampleEntity;
 import io.shulie.takin.cloud.app.service.FileExampleService;
+import io.shulie.takin.cloud.model.callback.file.ProgressReport;
 import io.shulie.takin.cloud.data.service.FileExampleMapperService;
 import io.shulie.takin.cloud.model.request.job.file.ProgressRequest;
 
@@ -43,7 +41,6 @@ public class FileExampleServiceImpl implements FileExampleService {
      */
     @Override
     public void updateProgress(List<ProgressRequest> progressList) {
-        List<Long> callbackIdList = new ArrayList<>(progressList.size());
         // 1. 数据更新 [t_file_example]
         for (ProgressRequest t : progressList) {
             boolean updateResult = fileExampleMapper.lambdaUpdate()
@@ -58,25 +55,9 @@ public class FileExampleServiceImpl implements FileExampleService {
                 .eq(FileExampleEntity::getCompleted, Boolean.FALSE)
                 .update();
             if (updateResult) {
-                callbackIdList.add(t.getId());
+                // 进度上报
+                progressReport(t.getId());
             }
-        }
-        // 2. 数据入库 [t_callback]
-        if (CollUtil.isNotEmpty(callbackIdList)) {
-            // 2.1 获取数据
-            Map<Long, List<FileExampleEntity>> callbackData = fileExampleMapper.lambdaQuery()
-                .in(FileExampleEntity::getId, callbackIdList).list().stream()
-                .collect(Collectors.groupingBy(FileExampleEntity::getFileId));
-            // 2.2 数据分组
-            callbackData.forEach((k, v) -> {
-                // 2.3 获取文件
-                FileEntity fileEntity = fileService.entity(k);
-                // 2.4 创建回调
-                if (fileEntity != null && CollUtil.isNotEmpty(v)) {
-                    callbackService.create(fileEntity.getCallbackUrl(),
-                        StrUtil.utf8Str(jsonService.writeValueAsString(v)));
-                }
-            });
         }
     }
 
@@ -97,21 +78,8 @@ public class FileExampleServiceImpl implements FileExampleService {
             .eq(FileExampleEntity::getCompleted, Boolean.FALSE)
             .update();
         if (updateResult) {
-            // 2. 数据入库 [t_callback]
-            // 2.1 获取文件实例
-            FileExampleEntity fileExampleEntity = fileExampleMapper.getById(id);
-            // 2.2 获取文件
-            FileEntity fileEntity = fileService.entity(fileExampleEntity.getFileId());
-            if (fileEntity != null) {
-                // 2.3 获取相关的所有文件实例
-                List<FileExampleEntity> callbackData = fileExampleMapper.lambdaQuery()
-                    .eq(FileExampleEntity::getFileId, fileExampleEntity.getFileId()).list();
-                // 2.4 创建回调
-                if (CollUtil.isNotEmpty(callbackData)) {
-                    callbackService.create(fileEntity.getCallbackUrl(),
-                        StrUtil.utf8Str(jsonService.writeValueAsString(callbackData)));
-                }
-            }
+            // 进度上报
+            progressReport(id);
         }
     }
 
@@ -129,6 +97,28 @@ public class FileExampleServiceImpl implements FileExampleService {
     @Override
     public List<FileExampleEntity> listExample(long fileId) {
         return fileExampleMapper.lambdaQuery().eq(FileExampleEntity::getFileId, fileId).list();
+    }
+
+    /**
+     * 进度上报
+     *
+     * @param fileExampleId 文件实例主键
+     */
+    public void progressReport(Long fileExampleId) {
+        FileExampleEntity fileExampleEntity = fileExampleMapper.getById(fileExampleId);
+        if (Objects.nonNull(fileExampleEntity)) {
+            FileEntity fileEntity = fileService.entity(fileExampleEntity.getFileId());
+            if (Objects.nonNull(fileEntity)) {
+                ProgressReport progressReport = new ProgressReport()
+                    .setPath(fileExampleEntity.getPath())
+                    .setAttach(fileExampleEntity.getAttach())
+                    .setMessage(fileExampleEntity.getMessage())
+                    .setComplete(fileExampleEntity.getCompleted())
+                    .setProgress(fileExampleEntity.getCompleteSize() + "");
+                callbackService.create(fileEntity.getCallbackUrl(), CallbackType.FILE_RESOURCE_PROGRESS,
+                    StrUtil.utf8Str(jsonService.writeValueAsString(progressReport)));
+            }
+        }
     }
 
 }
