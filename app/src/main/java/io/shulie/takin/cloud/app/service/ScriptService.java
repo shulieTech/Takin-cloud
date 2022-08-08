@@ -13,12 +13,14 @@ public interface ScriptService {
     /**
      * 下发任务
      *
-     * @param scriptPath      脚本路径
-     * @param dataFilePath    数据文件路径
-     * @param attachmentsPath 附件路径
+     * @param callbackUrl        回调路径
+     * @param scriptFilePath         脚本文件路径
+     * @param dataFilePath       数据文件路径
+     * @param attachmentFilePath 附件文件路径
+     * @param pluginPath         插件路径
      * @return 脚本校验任务主键
      */
-    Long announce(String scriptPath, List<String> dataFilePath, List<String> attachmentsPath);
+    Long announce(String callbackUrl, String scriptFilePath, List<String> dataFilePath, List<String> attachmentFilePath, List<String> pluginPath);
 
     /**
      * 报告结果

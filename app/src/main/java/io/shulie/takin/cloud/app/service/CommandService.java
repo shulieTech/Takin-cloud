@@ -57,6 +57,13 @@ public interface CommandService {
     void announceFile(long fileId);
 
     /**
+     * 脚本校验
+     *
+     * @param scriptId 主键
+     */
+    void announceScript(long scriptId);
+
+    /**
      * 命令确认
      *
      * @param id      命令主键

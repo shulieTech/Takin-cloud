@@ -17,23 +17,28 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "脚本校验任务下发参数")
 public class AnnounceRequest {
     /**
+     * 回调路径
+     */
+    @Schema(description = "回调路径")
+    private String callbackUrl;
+    /**
      * 脚本路径
      */
     @Schema(description = "脚本路径")
-    String scriptPath;
+    private String scriptPath;
     /**
      * 数据文件路径
      */
     @Schema(description = "数据文件路径")
-    List<String> dataFilePath;
+    private List<String> dataFilePath;
     /**
      * 附件路径
      */
     @Schema(description = "附件路径")
-    List<String> attachmentsPath;
+    private List<String> attachmentsPath;
     /**
      * 插件路径
      */
     @Schema(description = "插件路径")
-    List<String> pluginPath;
+    private List<String> pluginPath;
 }

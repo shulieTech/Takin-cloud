@@ -1,14 +1,22 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Objects;
 
+import io.shulie.takin.cloud.app.service.CommandService;
+import io.shulie.takin.cloud.app.service.JsonService;
+import io.shulie.takin.cloud.data.entity.ScriptEntity;
+import io.shulie.takin.cloud.data.service.ScriptMapperService;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
 import cn.hutool.core.exceptions.ValidateException;
 
 import io.shulie.takin.cloud.app.service.ScriptService;
+import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.model.request.job.script.BuildRequest;
 
 /**
@@ -20,12 +28,35 @@ import io.shulie.takin.cloud.model.request.job.script.BuildRequest;
 @Service
 public class ScriptServiceImpl implements ScriptService {
 
+    @javax.annotation.Resource
+    JsonService jsonService;
+    @javax.annotation.Resource
+    CommandService commandService;
+    @javax.annotation.Resource
+    CallbackService callbackService;
+    @javax.annotation.Resource(name = "scriptMapperServiceImpl")
+    ScriptMapperService scriptMapper;
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public Long announce(String scriptPath, List<String> dataFilePath, List<String> attachmentsPath) {
-        return 0L;
+    public Long announce(String callbackUrl, String scriptFilePath, List<String> dataFilePath, List<String> attachmentFilePath, List<String> pluginPath) {
+        // 1. 组装任务数据
+        Map<String, Object> content = new HashMap<>(4);
+        content.put("plugin", pluginPath);
+        content.put("data", dataFilePath);
+        content.put("script", scriptFilePath);
+        content.put("attachments", attachmentFilePath);
+        // 2. 保存数据
+        ScriptEntity scriptEntity = new ScriptEntity()
+            .setCallbackUrl(callbackUrl)
+            .setContent(jsonService.writeValueAsString(content));
+        scriptMapper.save(scriptEntity);
+        // 3. 写入命令
+        Long scriptId = scriptEntity.getId();
+        commandService.announceScript(scriptEntity.getId());
+        return scriptId;
     }
 
     /**
@@ -33,7 +64,19 @@ public class ScriptServiceImpl implements ScriptService {
      */
     @Override
     public void report(Long id, Boolean completed, String message) {
-        // TODO 回调控制台
+        ScriptEntity scriptEntity = scriptMapper.getById(id);
+        if (Objects.nonNull(scriptEntity)) {
+            // 1. 更新状态
+            boolean updateResult = scriptMapper.lambdaUpdate()
+                .set(ScriptEntity::getCompleted, completed)
+                .set(ScriptEntity::getMessage, message)
+                .isNull(ScriptEntity::getCompleted)
+                .update();
+            // 2. 回调控制台
+            if (Boolean.TRUE.equals(updateResult)) {
+                callbackService.create(scriptEntity.getCallbackUrl(), jsonService.writeValueAsString(scriptEntity));
+            }
+        }
     }
 
     /**

@@ -32,7 +32,8 @@ public class ScriptController {
     @Operation(summary = "下发脚本校验命令")
     public ApiResult<Long> announce(
         @Parameter(description = "请求参数", required = true) @RequestBody AnnounceRequest request) {
-        Long id = scriptService.announce(request.getScriptPath(), request.getDataFilePath(), request.getAttachmentsPath());
+        Long id = scriptService.announce(request.getCallbackUrl(), request.getScriptPath(),
+            request.getDataFilePath(), request.getAttachmentsPath(), request.getPluginPath());
         return ApiResult.success(id);
     }
 

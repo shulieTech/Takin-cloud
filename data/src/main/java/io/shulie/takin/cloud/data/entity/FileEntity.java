@@ -5,6 +5,7 @@ import lombok.experimental.Accessors;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 
 /**
  * 文件
@@ -12,6 +13,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
+@TableName("t_file")
 @Accessors(chain = true)
 public class FileEntity {
     /**

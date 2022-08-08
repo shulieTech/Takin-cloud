@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.data.entity;
 
+import java.util.Date;
+
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -8,54 +10,41 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 /**
- * 文件实例
+ * 脚本任务
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Data
-@TableName("t_file_example")
+@TableName("t_script")
 @Accessors(chain = true)
-public class FileExampleEntity {
+public class ScriptEntity {
     /**
      * 数据主键
      */
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
-     * 文件主键
+     * 回调地址
      */
-    private Long fileId;
+    private String callbackUrl;
     /**
-     * 调度主键
+     * 任务内容
      */
-    private Long watchmanId;
+    private String content;
     /**
-     * 文件路径
+     * 开始时间
      */
-    private String path;
+    private Date startTime;
     /**
-     * 文件摘要(MD5)
-     */
-    private String sign;
-    /**
-     * 下载地址
-     */
-    private String downloadUrl;
-    /**
-     * 完成的大小
-     */
-    private Long completeSize;
-    /**
-     * 总总数
-     */
-    private Long totalSize;
-    /**
-     * 是否已完成
+     * 是否完成
      */
     private Boolean completed;
     /**
-     * 信息
+     * 任务结果
      */
     private String message;
-
+    /**
+     * 结束时间
+     */
+    private Date endTime;
 }
