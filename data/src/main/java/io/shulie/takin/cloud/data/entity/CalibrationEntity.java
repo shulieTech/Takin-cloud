@@ -16,7 +16,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
  */
 @Data
 @Accessors(chain = true)
-@TableName("t_calibration_job")
+@TableName("t_calibration")
 public class CalibrationEntity {
     /**
      * 数据主键

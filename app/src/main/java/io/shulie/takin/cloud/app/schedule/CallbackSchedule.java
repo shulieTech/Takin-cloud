@@ -23,15 +23,19 @@ public class CallbackSchedule implements Runnable {
 
     @Override
     public void run() {
-        PageInfo<CallbackEntity> ready = callbackService.listNotCompleted(1, 100);
-        log.info("开始调度.共{}条,本次计划调度{}条", ready.getTotal(), ready.getSize());
-        ready.getList().forEach(t -> {
-            try {
-                callbackService.callback(t.getId(), t.getUrl(), t.getType(), t.getContext());
-                log.info("回调定时器调度了一条:{}", t.getId());
-            } catch (RuntimeException e) {
-                log.error("调度异常\n", e);
-            }
-        });
+        try {
+            PageInfo<CallbackEntity> ready = callbackService.listNotCompleted(1, 100);
+            log.info("开始调度.共{}条,本次计划调度{}条", ready.getTotal(), ready.getSize());
+            ready.getList().forEach(t -> {
+                try {
+                    callbackService.callback(t.getId(), t.getUrl(), t.getType(), t.getContext());
+                    log.info("回调定时器调度了一条:{}", t.getId());
+                } catch (RuntimeException e) {
+                    log.error("调度异常\n", e);
+                }
+            });
+        } catch (RuntimeException e) {
+            log.error("单次调度异常\n", e);
+        }
     }
 }
