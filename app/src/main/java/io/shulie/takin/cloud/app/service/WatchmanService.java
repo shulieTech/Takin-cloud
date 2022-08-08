@@ -10,7 +10,6 @@ import io.shulie.takin.cloud.model.resource.ResourceSource;
 import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 
 import io.shulie.takin.cloud.model.watchman.Register.Body;
-import io.shulie.takin.cloud.model.watchman.Register.Header;
 import io.shulie.takin.cloud.model.response.watchman.RegisteResponse;
 
 /**
@@ -103,9 +102,17 @@ public interface WatchmanService {
     /**
      * 生成调度机信息
      *
-     * @param header 头部信息
-     * @param body   主要信息
+     * @param publicKey 公钥
+     * @param body      主要信息
      * @return 调度机信息
      */
-    RegisteResponse generate(Header header, Body body);
+    RegisteResponse generate(Body body, String publicKey);
+
+    /**
+     * 更新调度机信息
+     *
+     * @param id        主键
+     * @param publicKey 公钥
+     */
+    boolean update(Long id, String publicKey);
 }

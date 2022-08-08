@@ -4,22 +4,25 @@ import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
-import cn.hutool.crypto.SecureUtil;
-import cn.hutool.core.codec.Base64;
-import cn.hutool.crypto.digest.HMac;
 import com.github.pagehelper.PageInfo;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.CharSequenceUtil;
 import com.github.pagehelper.page.PageMethod;
 import org.springframework.stereotype.Service;
-import io.shulie.takin.cloud.constant.Message;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+
+import cn.hutool.crypto.SecureUtil;
+import cn.hutool.core.codec.Base64;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.crypto.asymmetric.KeyType;
+import cn.hutool.core.text.CharSequenceUtil;
+import io.shulie.takin.cloud.constant.Message;
+import cn.hutool.crypto.asymmetric.AsymmetricCrypto;
 
 import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.service.JsonService;
@@ -28,7 +31,6 @@ import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.model.watchman.Register.Body;
 import io.shulie.takin.cloud.model.resource.ResourceSource;
-import io.shulie.takin.cloud.model.watchman.Register.Header;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.data.entity.WatchmanEventEntity;
 import io.shulie.takin.cloud.data.service.WatchmanMapperService;
@@ -252,27 +254,51 @@ public class WatchmanServiceImpl implements WatchmanService {
      * {@inheritDoc}
      */
     @Override
-    public RegisteResponse generate(Header header, Body body) {
-        header.setAlg("HS256");
-        header.setSign("MD5");
-        body.setRef("tianci");
-        body.setTimeOfValidity(253402271999999L);
-        body.setTimeOfCreate(System.currentTimeMillis());
+    public RegisteResponse generate(Body body, String publicKey) {
+        Map<String, String> header = new HashMap<>(2);
+        header.put("alg", "HS256");
         String headerString = jsonService.writeValueAsString(header);
         String bodyString = jsonService.writeValueAsString(body);
 
         String base64HeaderString = Base64.encodeUrlSafe(headerString);
         String base64BodyString = Base64.encodeUrlSafe(bodyString);
-        String secret = "shulie@2022";
-        log.info("head(base64) " + base64HeaderString);
-        log.info("body(base64)" + base64BodyString);
-        log.info("secret " + secret);
-        HMac hMac = SecureUtil.hmacSha256(secret);
-        String verifySignature = hMac.digestBase64(CharSequenceUtil.format("{}.{}", base64HeaderString, base64BodyString), true);
-        String ref = CharSequenceUtil.format("{}.{}.{}", base64HeaderString, base64BodyString, verifySignature);
+        String ref = crypto(base64HeaderString, base64BodyString, publicKey);
         String refSign = SecureUtil.md5(ref);
 
-        return new RegisteResponse().setSign(refSign).setId(0L);
+        // 保存到数据库
+        WatchmanEntity watchmanEntity = new WatchmanEntity()
+            .setRef(ref)
+            .setRefSign(refSign)
+            .setPublicKey(publicKey);
+        watchmanMapper.save(watchmanEntity);
+        // 响应数据
+        return new RegisteResponse()
+            .setSign(refSign)
+            .setId(watchmanEntity.getId());
+    }
+
+    @Override
+    public boolean update(Long id, String publicKey) {
+        WatchmanEntity watchmanEntity = watchmanMapper.getById(id);
+        if (Objects.nonNull(watchmanEntity)) {
+            String[] oldRef = watchmanEntity.getRef().split("\\.");
+            String ref = crypto(oldRef[0], oldRef[1], publicKey);
+            String refSign = SecureUtil.md5(ref);
+            return watchmanMapper.lambdaUpdate()
+                .set(WatchmanEntity::getRef, ref)
+                .set(WatchmanEntity::getRefSign, refSign)
+                .eq(WatchmanEntity::getId, id).update();
+        } else {
+            return false;
+        }
+    }
+
+    String crypto(String head, String body, String publicKey) {
+        log.info("head(base64){}\nbody(base64)\n{}publicKey:{}" + head, body, publicKey);
+        AsymmetricCrypto asymmetricCrypto = SecureUtil.rsa(null, publicKey);
+        String readyCrypto = CharSequenceUtil.format("{}.{}", head, body);
+        String verifySignature = asymmetricCrypto.encryptBase64(readyCrypto, KeyType.PublicKey);
+        return CharSequenceUtil.format("{}.{}.{}", head, body, verifySignature);
     }
 
 }

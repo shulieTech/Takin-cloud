@@ -25,10 +25,12 @@ import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 import io.shulie.takin.cloud.model.request.watchman.BatchRequest;
+import io.shulie.takin.cloud.model.request.watchman.UpdateRequest;
 import io.shulie.takin.cloud.model.response.watchman.ListResponse;
 import io.shulie.takin.cloud.model.response.WatchmanStatusResponse;
 import io.shulie.takin.cloud.model.request.watchman.RegisteRequest;
 import io.shulie.takin.cloud.model.response.watchman.RegisteResponse;
+import io.shulie.takin.cloud.model.request.watchman.BatchUpdateRequest;
 
 /**
  * 资源
@@ -94,7 +96,25 @@ public class WatchmanController {
 
     @Operation(summary = "注册调度机")
     @PostMapping("registe")
-    public ApiResult<RegisteResponse> registe(@RequestBody RegisteRequest registeRequest) {
-        return ApiResult.success(watchmanService.generate(registeRequest.getHeader(), registeRequest.getBody()));
+    public ApiResult<RegisteResponse> registe(
+        @Parameter(description = "入参", required = true) @RequestBody RegisteRequest registeRequest) {
+        return ApiResult.success(watchmanService.generate(registeRequest.getBody(), registeRequest.getPublicKey()));
     }
+
+    @Operation(summary = "更新调度机")
+    @PostMapping("update")
+    public ApiResult<Boolean> update(
+        @Parameter(description = "入参", required = true) @RequestBody UpdateRequest request) {
+        return ApiResult.success(watchmanService.update(request.getId(), request.getPublicKey()));
+    }
+
+    @Operation(summary = "更新调度机-批量")
+    @PostMapping("update/batch")
+    public ApiResult<Map<Long, Boolean>> updateBatch(
+        @Parameter(description = "入参", required = true) @RequestBody BatchUpdateRequest request) {
+        Map<Long, Boolean> result = new HashMap<>(request.getIdList().size());
+        request.getIdList().forEach(t -> result.put(t, watchmanService.update(t, request.getPublicKey())));
+        return ApiResult.success(result);
+    }
+
 }

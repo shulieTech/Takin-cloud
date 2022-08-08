@@ -47,7 +47,7 @@ public enum CommandType {
      */
     ANNOUNCE_FILE(400),
     /**
-     * 下发文件
+     * 脚本校验
      */
     ANNOUNCE_SCRIPT(500),
     // 格式化用

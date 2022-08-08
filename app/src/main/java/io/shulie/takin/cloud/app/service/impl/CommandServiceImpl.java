@@ -251,6 +251,11 @@ public class CommandServiceImpl implements CommandService {
         groupData.forEach((k, v) -> create(k, CommandType.ANNOUNCE_FILE, jsonService.writeValueAsString(v)));
     }
 
+    @Override
+    public void announceScript(long scriptId) {
+        // TODO 下发命令的操作
+    }
+
     /**
      * 命令入库
      *
