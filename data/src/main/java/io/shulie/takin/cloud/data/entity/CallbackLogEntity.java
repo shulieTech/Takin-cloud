@@ -28,6 +28,10 @@ public class CallbackLogEntity {
      */
     private Long callbackId;
     /**
+     * 回调类型
+     */
+    private Integer type;
+    /**
      * 请求路径
      */
     private String requestUrl;

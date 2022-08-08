@@ -58,7 +58,7 @@ public class PressureUsageController {
         // 组装回调
         FileUsage content = new FileUsage();
         content.setData(request);
-        callbackService.callback(null, pressureEntity.getCallbackUrl(), jsonService.writeValueAsString(content));
+        callbackService.create(pressureEntity.getCallbackUrl(), jsonService.writeValueAsString(content));
         return ApiResult.success();
     }
 }

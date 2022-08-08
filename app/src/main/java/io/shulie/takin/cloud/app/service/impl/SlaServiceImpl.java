@@ -99,8 +99,8 @@ public class SlaServiceImpl implements SlaService {
         sla.setData(slaInfoList);
         String slaString = jsonService.writeValueAsString(sla);
         // 创建回调
-        boolean complete = callbackService.callback(null, pressureEntity.getCallbackUrl(), slaString);
-        log.info("SLA触发：{}, 回调结果: {}", slaString, complete);
+        callbackService.create(pressureEntity.getCallbackUrl(), slaString);
+        log.info("SLA触发：{}", slaString);
     }
 
     @Override

@@ -49,7 +49,7 @@ public class PressureExampleServiceImpl implements PressureExampleService {
         PressureExampleHeartbeat context = new PressureExampleHeartbeat();
         context.setData(getCallbackData(pressureExampleId, callbackUrl));
         // 创建回调
-        callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
+        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
         // 记录事件
         pressureExampleEventMapper.save(new PressureExampleEventEntity()
             .setContext("{}")
@@ -68,8 +68,8 @@ public class PressureExampleServiceImpl implements PressureExampleService {
         PressureExampleStart context = new PressureExampleStart();
         context.setData(getCallbackData(pressureExampleId, callbackUrl));
         //回调
-        boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
-        log.info("启动任务：{}, 回调结果: {}", pressureExampleId, complete);
+        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        log.info("启动任务：{}", pressureExampleId);
         // 记录事件
         pressureExampleEventMapper.save(new PressureExampleEventEntity()
             .setContext("{}")
@@ -87,8 +87,8 @@ public class PressureExampleServiceImpl implements PressureExampleService {
         PressureExampleStop context = new PressureExampleStop();
         context.setData(getCallbackData(pressureExampleId, callbackUrl));
         // 创建回调
-        boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
-        log.info("停止任务：{}, 回调结果: {}", pressureExampleId, complete);
+        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        log.info("停止任务：{}", pressureExampleId);
         // 记录事件
         pressureExampleEventMapper.save(new PressureExampleEventEntity()
             .setContext("{}")
@@ -107,8 +107,8 @@ public class PressureExampleServiceImpl implements PressureExampleService {
         PressureExampleError context = new PressureExampleError();
         context.setData(errorInfo);
         // 创建回调
-        boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
-        log.info("任务异常信息回调：{}, 回调结果: {}", pressureExampleId, complete);
+        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        log.info("任务异常信息回调：{}", pressureExampleId);
         // 记录事件
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
         objectNode.put("message", errorMessage);

@@ -56,7 +56,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleHeartbeat context = new ResourceExampleHeartbeat();
         context.setData(getCallbackData(id, callbackUrl));
         // 创建回调
-        callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
+        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
         // 记录事件
         resourceExampleEventMapper.save(new ResourceExampleEventEntity()
             .setContext("{}")
@@ -71,8 +71,8 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleStart context = new ResourceExampleStart();
         context.setData(getCallbackData(id, callbackUrl));
         // 创建回调
-        boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
-        log.info("锁定资源：{}, 回调结果: {}", id, complete);
+        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        log.info("锁定资源：{}", id);
         // 记录事件
         resourceExampleEventMapper.save(new ResourceExampleEventEntity()
             .setContext("{}")
@@ -91,8 +91,8 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleStop context = new ResourceExampleStop();
         context.setData(getCallbackData(id, callbackUrl));
         // 创建回调
-        boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
-        log.info("释放资源：{}, 回调结果: {}", id, complete);
+        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        log.info("释放资源：{}", id);
         // 记录事件
         resourceExampleEventMapper.save(new ResourceExampleEventEntity()
             .setContext("{}")
@@ -139,8 +139,8 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
             .exists();
         if (!stoped) {
             // 创建回调
-            boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
-            log.info("任务正常停止信息：{}, 回调结果: {}", id, complete);
+            callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+            log.info("任务正常停止信息：{}", id);
             // 记录事件
             resourceExampleEventMapper.save(new ResourceExampleEventEntity()
                 .setContext("{}")
@@ -159,8 +159,8 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleError context = new ResourceExampleError();
         context.setData(errorInfo);
         // 创建回调
-        boolean complete = callbackService.callback(null, callbackUrl.toString(), jsonService.writeValueAsString(context));
-        log.info("资源异常信息：{}, 回调结果: {}", id, complete);
+        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        log.info("资源异常信息：{}", id);
         // 记录事件
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
         objectNode.put("message", errorMessage);

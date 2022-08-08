@@ -24,6 +24,10 @@ public class CallbackEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
     /**
+     * 回调类型
+     */
+    private Integer type;
+    /**
      * 回调路径
      */
     private String url;

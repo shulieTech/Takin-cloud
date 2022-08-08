@@ -141,7 +141,7 @@ public class CalibrationServiceImpl implements CalibrationService {
                     .setResourceId(pressureEntity.getResourceId());
                 calibration.setData(entity.getId());
                 // 保存回调信息
-                callbackService.callback(null, pressureEntity.getCallbackUrl(), jsonService.writeValueAsString(calibration));
+                callbackService.create(pressureEntity.getCallbackUrl(), jsonService.writeValueAsString(calibration));
             }
         }
     }

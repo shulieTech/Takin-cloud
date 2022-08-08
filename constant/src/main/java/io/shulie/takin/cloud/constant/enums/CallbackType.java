@@ -43,7 +43,7 @@ public enum CallbackType {
     // 格式化用
     ;
     @JsonValue
-    private final Integer code;
+    private final int code;
     private final String description;
 
     private static final Map<Integer, CallbackType> EXAMPLE_MAP = new HashMap<>(8);

@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import com.github.pagehelper.PageInfo;
 
 import io.shulie.takin.cloud.data.entity.CallbackEntity;
+import io.shulie.takin.cloud.constant.enums.CallbackType;
 
 /**
  * 回调服务
@@ -39,7 +40,18 @@ public interface CallbackService {
      * @param url     回调路径
      * @param content 回调内容
      */
-    void create(String url, byte[] content);
+    default void create(String url, byte[] content) {
+        create(url, null, content);
+    }
+
+    /**
+     * 创建回调
+     *
+     * @param url     回调路径
+     * @param type    回调类型
+     * @param content 回调内容
+     */
+    void create(String url, CallbackType type, byte[] content);
 
     /**
      * 创建回调
@@ -52,31 +64,27 @@ public interface CallbackService {
     }
 
     /**
-     * 预创建回调日志
-     *
-     * @param callbackId 回调主键
-     * @param url        回调路径
-     * @param data       回调内容
-     * @return 回调日志主键
-     */
-    Long createLog(long callbackId, String url, byte[] data);
-
-    /**
-     * 填充回调日志
-     *
-     * @param callbackLogId 回调日志主键
-     * @param data          响应内容
-     * @return true/false
-     */
-    boolean fillLog(long callbackLogId, byte[] data);
-
-    /**
      * 回调web
      *
-     * @param id          回调主键
-     * @param callbackUrl 回调地址
-     * @param content     回调内容
-     * @return 回调结果
+     * @param id      回调主键
+     * @param url     回调地址
+     * @param type    回调类型
+     * @param content 回调内容
      */
-    boolean callback(Long id, String callbackUrl, String content);
+    void callback(Long id, String url, Integer type, byte[] content);
+
+    /**
+     * 更新完成状态
+     *
+     * @param callbackId 回调主键
+     * @param completed  是否完成
+     */
+    void updateCompleted(long callbackId, Boolean completed);
+
+    /**
+     * 更新阈值时间
+     *
+     * @param callbackId 回调主键
+     */
+    void updateThresholdTime(long callbackId);
 }
