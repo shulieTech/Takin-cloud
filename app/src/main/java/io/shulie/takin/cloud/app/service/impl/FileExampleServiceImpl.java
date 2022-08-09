@@ -49,10 +49,10 @@ public class FileExampleServiceImpl implements FileExampleService {
                 .set(FileExampleEntity::getCompleteSize, t.getCompleteSize())
                 .set(FileExampleEntity::getTotalSize, t.getTotalSize())
                 // ------ where
-                .eq(FileExampleEntity::getId, t.getId())
                 .isNull(FileExampleEntity::getMessage)
+                .eq(FileExampleEntity::getId, t.getId())
+                .isNull(FileExampleEntity::getCompleted)
                 .lt(Objects.nonNull(t.getCompleteSize()), FileExampleEntity::getCompleteSize, t.getCompleteSize())
-                .eq(FileExampleEntity::getCompleted, Boolean.FALSE)
                 .update();
             if (updateResult) {
                 // 进度上报
@@ -72,10 +72,11 @@ public class FileExampleServiceImpl implements FileExampleService {
         boolean updateResult = fileExampleMapper.lambdaUpdate()
             // set
             .set(FileExampleEntity::getMessage, message)
+            .set(FileExampleEntity::getCompleted, false)
             // where
             .eq(FileExampleEntity::getId, id)
             .isNull(FileExampleEntity::getMessage)
-            .eq(FileExampleEntity::getCompleted, Boolean.FALSE)
+            .isNull(FileExampleEntity::getCompleted)
             .update();
         if (updateResult) {
             // 进度上报
