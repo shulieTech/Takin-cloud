@@ -48,6 +48,7 @@ public class TicketHeaderAdvice implements ResponseBodyAdvice<Object> {
         String sign = ticketService.sign(null, timestamp, ticket);
         // 写入请求头
         response.getHeaders().set("TICKET-SIGN", sign);
+        response.getHeaders().set("TICKET-TIMESTAMP", Long.toString(timestamp));
         // 原样返回body
         return body;
     }
