@@ -7,8 +7,8 @@ import org.springframework.http.MediaType;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.AbstractMappingJacksonResponseBodyAdvice;
 
 import io.shulie.takin.cloud.app.service.TicketService;
 import io.shulie.takin.cloud.app.service.WatchmanService;
@@ -19,8 +19,8 @@ import io.shulie.takin.cloud.app.service.WatchmanService;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Slf4j
-@ControllerAdvice("io.shulie.takin.cloud.app.controller.notify")
-public class TicketHeaderAdvice implements ResponseBodyAdvice<Object> {
+@RestControllerAdvice("io.shulie.takin.cloud.app.controller.notify")
+public class TicketHeaderAdvice extends AbstractMappingJacksonResponseBodyAdvice {
     @javax.annotation.Resource
     TicketService ticketService;
     @javax.annotation.Resource
@@ -33,10 +33,9 @@ public class TicketHeaderAdvice implements ResponseBodyAdvice<Object> {
      * {@inheritDoc}
      */
     @Override
-    public Object beforeBodyWrite(Object body,
-        @NonNull MethodParameter returnType,
-        @NonNull MediaType selectedContentType,
-        @NonNull Class selectedConverterType,
+    protected void beforeBodyWriteInternal(
+        @NonNull org.springframework.http.converter.json.MappingJacksonValue bodyContainer,
+        @NonNull MediaType contentType, @NonNull MethodParameter returnType,
         ServerHttpRequest request, ServerHttpResponse response) {
         long timestamp = System.currentTimeMillis();
         String watchmanSign = request.getHeaders().getFirst("WATCHMAN-SIGN");
@@ -49,7 +48,5 @@ public class TicketHeaderAdvice implements ResponseBodyAdvice<Object> {
         // 写入请求头
         response.getHeaders().set("TICKET-SIGN", sign);
         response.getHeaders().set("TICKET-TIMESTAMP", Long.toString(timestamp));
-        // 原样返回body
-        return body;
     }
 }
