@@ -17,6 +17,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "脚本校验任务下发参数")
 public class AnnounceRequest {
     /**
+     * 附加数据
+     */
+    @Schema(description = "附加数据")
+    private String attach;
+    /**
      * 调度器主键
      */
     @Schema(description = "调度器主键")

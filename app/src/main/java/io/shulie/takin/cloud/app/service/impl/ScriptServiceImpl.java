@@ -43,8 +43,9 @@ public class ScriptServiceImpl implements ScriptService {
      * {@inheritDoc}
      */
     @Override
-    public Long announce(Long watchmanId, String callbackUrl,
-        String scriptFilePath, List<String> dataFilePath, List<String> attachmentFilePath, List<String> pluginPath) {
+    public Long announce(Long watchmanId, String callbackUrl, String attach,
+        String scriptFilePath, List<String> dataFilePath,
+        List<String> attachmentFilePath, List<String> pluginPath) {
         // 1. 组装任务数据
         Map<String, Object> content = new HashMap<>(4);
         content.put("plugin", pluginPath);
@@ -55,6 +56,7 @@ public class ScriptServiceImpl implements ScriptService {
         ScriptEntity scriptEntity = new ScriptEntity()
             .setWatchmanId(watchmanId)
             .setCallbackUrl(callbackUrl)
+            .setAttach(attach)
             .setContent(jsonService.writeValueAsString(content));
         scriptMapper.save(scriptEntity);
         // 3. 写入命令

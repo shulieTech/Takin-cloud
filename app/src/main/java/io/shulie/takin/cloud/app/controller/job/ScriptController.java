@@ -33,8 +33,9 @@ public class ScriptController {
     public ApiResult<Long> announce(
         @Parameter(description = "请求参数", required = true) @RequestBody AnnounceRequest request) {
         Long id = scriptService.announce(
-            request.getWatchmanId(), request.getCallbackUrl(), request.getScriptPath(),
-            request.getDataFilePath(), request.getAttachmentsPath(), request.getPluginPath());
+            request.getWatchmanId(), request.getCallbackUrl(), request.getAttach(),
+            request.getScriptPath(), request.getDataFilePath(),
+            request.getAttachmentsPath(), request.getPluginPath());
         return ApiResult.success(id);
     }
 
