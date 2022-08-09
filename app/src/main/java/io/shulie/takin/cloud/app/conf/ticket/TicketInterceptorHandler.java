@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.app.conf.ticket;
 
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -8,19 +9,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
+import cn.hutool.http.Header;
 import cn.hutool.http.HttpStatus;
+import cn.hutool.http.ContentType;
 import cn.hutool.core.exceptions.ValidateException;
-import io.shulie.takin.cloud.model.response.ApiResult;
-import io.shulie.takin.cloud.app.service.WatchmanService;
 
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import org.springframework.web.servlet.ModelAndView;
 import io.shulie.takin.cloud.app.service.JsonService;
+import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.service.TicketService;
+import io.shulie.takin.cloud.app.service.WatchmanService;
 
 /**
  * 登录拦截器Handler
@@ -60,7 +61,7 @@ public class TicketInterceptorHandler implements HandlerInterceptor {
                 // 重新计算签名
                 String sign = ticketService.sign(null, timestamp, ticket);
                 // 校验成功
-                if (sign.equals(ticketSign)) {return true;}
+                if (sign.equalsIgnoreCase(ticketSign)) {return true;}
                 // 校验失败
                 else {throw new ValidateException("签名校验失败.\nin:{}\ncalc:{}", ticketSign, sign);}
             } else {
@@ -69,25 +70,11 @@ public class TicketInterceptorHandler implements HandlerInterceptor {
         } catch (Exception e) {
             log.error("验签失败", e);
             response.setStatus(HttpStatus.HTTP_UNAUTHORIZED);
+            response.setHeader(Header.CONTENT_TYPE.toString(), ContentType.build(ContentType.JSON, StandardCharsets.UTF_8));
             PrintWriter writer = response.getWriter();
             writer.write(jsonService.writeValueAsString(ApiResult.fail(e.getMessage())));
             writer.flush();
             return false;
         }
-    }
-
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response,
-        @NonNull Object handler, @Nullable ModelAndView modelAndView) {
-        long timestamp = System.currentTimeMillis();
-        String watchmanSign = request.getHeader("WATCHMAN-SIGN");
-        // 获取调度器
-        Long watchamanId = watchmanService.ofSign(watchmanSign).getId();
-        // 获取调度器的当前ticket
-        String ticket = ticketService.get(watchamanId.toString());
-        // 计算签名
-        String sign = ticketService.sign(null, timestamp, ticket);
-        // 写入请求头
-        response.setHeader("TICKET-SIGN", sign);
     }
 }

@@ -22,7 +22,6 @@ public class TicketInterceptor implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(ticketInterceptorHandler)
-            .addPathPatterns("/notify/**")
-            .addPathPatterns("/ticket/update");
+            .addPathPatterns("/notify/**");
     }
 }
