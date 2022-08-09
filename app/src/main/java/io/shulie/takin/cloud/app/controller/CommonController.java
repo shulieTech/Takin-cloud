@@ -6,7 +6,6 @@ import java.util.HashMap;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -27,13 +26,13 @@ public class CommonController {
     WatchmanConfig watchmanConfig;
 
     @Operation(summary = "健康检查")
-    @GetMapping("health/checkup")
+    @RequestMapping("health/checkup")
     public ApiResult<Long> checkUp() {
         return ApiResult.success(System.currentTimeMillis());
     }
 
     @Operation(summary = "版本信息")
-    @GetMapping("version")
+    @RequestMapping("version")
     public ApiResult<Map<String, Object>> version() {
         Map<String, Object> result = new HashMap<>(2);
         result.put("version", watchmanConfig.getApplicationVersion());
