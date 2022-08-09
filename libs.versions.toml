@@ -23,9 +23,10 @@ lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" 
 spring-doc = { group = "org.springdoc", name = "springdoc-openapi-ui", version.ref = "spring-doc" }
 spring-context = { group = "org.springframework", name = "spring-context", version.ref = "spring" }
 spring-boot-test = { group = "org.springframework.boot", name = "spring-boot-test", version.ref = "spring-boot" }
-spring-pagehelper = { group = "com.github.pagehelper", name = "pagehelper-spring-boot-starter", version.ref = "spring.pagehelper" }
 spring-boot-redisson = { group = "org.redisson", name = "redisson-spring-boot-starter", version.ref = "spring-boo-redisson" }
 spring-boot-starter-web = { group = "org.springframework.boot", name = "spring-boot-starter-web", version.ref = "spring-boot" }
+spring-pagehelper = { group = "com.github.pagehelper", name = "pagehelper-spring-boot-starter", version.ref = "spring.pagehelper" }
+spring-boot-validation = { group = "org.springframework.boot", name = "spring-boot-starter-validation", version.ref = "spring-boot" }
 spring-boot-configuration-processor = { group = "org.springframework.boot", name = "spring-boot-configuration-processor", version.ref = "spring-boot" }
 # mysql
 mysql = { group = "mysql", name = "mysql-connector-java", version.ref = "mysql-connector" }

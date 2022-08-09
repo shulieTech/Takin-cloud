@@ -54,7 +54,7 @@ public class GlobalExceptionHandle {
     @ExceptionHandler(org.springframework.validation.BindException.class)
     public ApiResult<Object> exceptionHandler(org.springframework.validation.BindException e) {
         Iterator<String> collect = e.getBindingResult().getFieldErrors().stream()
-            .map(org.springframework.context.MessageSourceResolvable::getDefaultMessage).iterator();
+            .map(t -> t.getField() + ":" + t.getDefaultMessage()).iterator();
         return ApiResult.fail(CharSequenceUtil.join(",", collect));
     }
 }

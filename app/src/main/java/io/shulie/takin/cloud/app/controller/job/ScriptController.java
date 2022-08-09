@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,7 +32,7 @@ public class ScriptController {
     @PostMapping("announce")
     @Operation(summary = "下发脚本校验命令")
     public ApiResult<Long> announce(
-        @Parameter(description = "请求参数", required = true) @RequestBody AnnounceRequest request) {
+        @Parameter(description = "请求参数", required = true) @Validated @RequestBody AnnounceRequest request) {
         Long id = scriptService.announce(
             request.getWatchmanId(), request.getCallbackUrl(), request.getAttach(),
             request.getScriptPath(), request.getDataFilePath(),

@@ -1,13 +1,16 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.io.IOException;
 import java.util.Map;
+import java.util.List;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Objects;
+import java.io.IOException;
+import java.util.ArrayList;
 
 import lombok.extern.slf4j.Slf4j;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import org.springframework.stereotype.Service;
 import cn.hutool.core.exceptions.ValidateException;
 
@@ -44,19 +47,20 @@ public class ScriptServiceImpl implements ScriptService {
      */
     @Override
     public Long announce(Long watchmanId, String callbackUrl, String attach,
-        String scriptFilePath, List<String> dataFilePath,
-        List<String> attachmentFilePath, List<String> pluginPath) {
+        String scriptPath, List<String> dataPath,
+        List<String> attachmentPath, List<String> pluginPath) {
         // 1. 组装任务数据
+        List<String> emptyList = new ArrayList<>(0);
         Map<String, Object> content = new HashMap<>(4);
-        content.put("plugin", pluginPath);
-        content.put("data", dataFilePath);
-        content.put("script", scriptFilePath);
-        content.put("attachments", attachmentFilePath);
+        content.put("script", scriptPath);
+        content.put("data", dataPath == null ? emptyList : dataPath);
+        content.put("plugin", pluginPath == null ? emptyList : pluginPath);
+        content.put("attachment", attachmentPath == null ? emptyList : attachmentPath);
         // 2. 保存数据
         ScriptEntity scriptEntity = new ScriptEntity()
+            .setAttach(attach)
             .setWatchmanId(watchmanId)
             .setCallbackUrl(callbackUrl)
-            .setAttach(attach)
             .setContent(jsonService.writeValueAsString(content));
         scriptMapper.save(scriptEntity);
         // 3. 写入命令
@@ -70,11 +74,15 @@ public class ScriptServiceImpl implements ScriptService {
      */
     @Override
     public void report(Long id, Boolean completed, String message) {
+        // 0.1 数据长度处理
+        message = CharSequenceUtil.subWithLength(message, 0, 255);
+        // 0.2 获取数据实例
         ScriptEntity scriptEntity = scriptMapper.getById(id);
         if (Objects.nonNull(scriptEntity)) {
             // 1. 更新状态
             boolean updateResult = scriptMapper.lambdaUpdate()
                 .set(ScriptEntity::getCompleted, completed)
+                .set(ScriptEntity::getEndTime, new Date())
                 .set(ScriptEntity::getMessage, message)
                 .isNull(ScriptEntity::getCompleted)
                 .update();

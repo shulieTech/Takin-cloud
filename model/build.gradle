@@ -5,6 +5,8 @@ plugins {
 dependencies {
     // 项目内依赖
     api project(':constant')
+    // 参数验证
+    implementation libs.spring.boot.validation
     // lombok
     compileOnly libs.lombok
     annotationProcessor libs.lombok

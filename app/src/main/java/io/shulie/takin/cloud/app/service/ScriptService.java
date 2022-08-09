@@ -14,18 +14,18 @@ public interface ScriptService {
     /**
      * 下发任务
      *
-     * @param watchmanId         调度器主键
-     * @param callbackUrl        回调路径
-     * @param attach             附加数据
-     * @param scriptFilePath     脚本文件路径
-     * @param dataFilePath       数据文件路径
-     * @param attachmentFilePath 附件文件路径
-     * @param pluginPath         插件路径
+     * @param watchmanId     调度器主键
+     * @param callbackUrl    回调路径
+     * @param attach         附加数据
+     * @param scriptPath     脚本文件路径
+     * @param dataPath       数据文件路径
+     * @param attachmentPath 附件文件路径
+     * @param pluginPath     插件路径
      * @return 脚本校验任务主键
      */
     Long announce(Long watchmanId, String callbackUrl, String attach,
-        String scriptFilePath, List<String> dataFilePath,
-        List<String> attachmentFilePath, List<String> pluginPath);
+        String scriptPath, List<String> dataPath,
+        List<String> attachmentPath, List<String> pluginPath);
 
     /**
      * 报告结果

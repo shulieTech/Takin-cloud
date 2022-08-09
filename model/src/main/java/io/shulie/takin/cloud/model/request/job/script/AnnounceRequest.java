@@ -2,6 +2,9 @@ package io.shulie.takin.cloud.model.request.job.script;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
+
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -19,21 +22,25 @@ public class AnnounceRequest {
     /**
      * 附加数据
      */
+    @NotBlank(message = "附加数据不能为空")
     @Schema(description = "附加数据")
     private String attach;
     /**
      * 调度器主键
      */
+    @NotNull(message = "调度器主键不能为空")
     @Schema(description = "调度器主键")
     private Long watchmanId;
     /**
      * 回调路径
      */
+    @NotBlank(message = "回调路径不能为空")
     @Schema(description = "回调路径")
     private String callbackUrl;
     /**
      * 脚本路径
      */
+    @NotBlank(message = "脚本路径不能为空")
     @Schema(description = "脚本路径")
     private String scriptPath;
     /**

@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.model.request.job.script;
 
+import javax.validation.constraints.NotNull;
+
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -17,16 +19,18 @@ public class ReportRequest {
     /**
      * 脚本校验任务主键
      */
-    @Schema(description = "任务主键")
+    @NotNull(message = "脚本校验任务主键不能为空")
+    @Schema(description = "脚本校验任务主键", required = true)
     private Long id;
-    /**
-     * 脚本校验任务主键
-     */
-    @Schema(description = "任务主键")
-    private Boolean completed;
     /**
      * 执行结果
      */
-    @Schema(description = "执行结果")
+    @NotNull(message = "执行结果不能为空")
+    @Schema(description = "执行结果", required = true)
+    private Boolean result;
+    /**
+     * 执行结果描述
+     */
+    @Schema(description = "执行结果描述")
     private String message;
 }
