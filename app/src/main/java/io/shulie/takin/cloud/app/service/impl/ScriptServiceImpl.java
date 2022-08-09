@@ -85,6 +85,7 @@ public class ScriptServiceImpl implements ScriptService {
                 .set(ScriptEntity::getEndTime, new Date())
                 .set(ScriptEntity::getMessage, message)
                 .isNull(ScriptEntity::getCompleted)
+                .eq(ScriptEntity::getId, id)
                 .update();
             // 2. 回调控制台
             if (Boolean.TRUE.equals(updateResult)) {
