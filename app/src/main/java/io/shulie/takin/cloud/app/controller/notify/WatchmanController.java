@@ -86,7 +86,7 @@ public class WatchmanController {
      * @return -
      */
     @PostMapping("upload")
-    @Operation(summary = "上报资源")
+    @Operation(summary = "集群资源")
     public ApiResult<Object> upload(@Parameter(description = "签名", required = true) @RequestParam String sign,
         @Parameter(description = "资源列表", required = true) @RequestBody List<ResourceSource> content) {
         WatchmanEntity entity = watchmanService.ofSign(sign);

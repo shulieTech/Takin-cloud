@@ -1,7 +1,5 @@
 package io.shulie.takin.cloud.app.controller.job;
 
-import javax.validation.Valid;
-
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.service.ScriptService;
-import io.shulie.takin.cloud.model.request.job.script.BuildRequest;
 import io.shulie.takin.cloud.model.request.job.script.AnnounceRequest;
 
 /**
@@ -21,16 +18,16 @@ import io.shulie.takin.cloud.model.request.job.script.AnnounceRequest;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
-@RestController
 @Tag(name = "脚本任务")
 @RequestMapping("/job/script")
+@RestController("JobScriptController")
 public class ScriptController {
 
     @javax.annotation.Resource
     ScriptService scriptService;
 
     @PostMapping("announce")
-    @Operation(summary = "下发脚本校验命令")
+    @Operation(summary = "下发")
     public ApiResult<Long> announce(
         @Parameter(description = "请求参数", required = true) @Validated @RequestBody AnnounceRequest request) {
         Long id = scriptService.announce(
@@ -38,11 +35,5 @@ public class ScriptController {
             request.getScriptPath(), request.getDataFilePath(),
             request.getAttachmentsPath(), request.getPluginPath());
         return ApiResult.success(id);
-    }
-
-    @Operation(summary = "构建脚本")
-    @PostMapping(value = "build")
-    public ApiResult<String> buildScript(@Valid @RequestBody BuildRequest request) {
-        return ApiResult.success(scriptService.build(request));
     }
 }

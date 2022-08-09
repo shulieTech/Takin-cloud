@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -30,7 +30,7 @@ public class ScriptController {
     ScriptService scriptService;
 
     @PostMapping("verification/report")
-    @Operation(summary = "上报")
+    @Operation(summary = "结果上报")
     public ApiResult<Object> report(
         @Parameter(description = "请求参数", required = true) @Validated @RequestBody ReportRequest request) {
         scriptService.report(request.getId(), request.getResult(), request.getMessage());

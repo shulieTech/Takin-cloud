@@ -14,31 +14,31 @@ public class Swagger {
     @Bean
     public GroupedOpenApi commonApi() {
         return GroupedOpenApi.builder()
-            .group("通用模块")
+            .group("通用")
             .pathsToMatch("/common/**")
-            .build();
-    }
-
-    @Bean
-    public GroupedOpenApi resourceApi() {
-        return GroupedOpenApi.builder()
-            .group("资源模块")
-            .pathsToMatch("/resource/**")
             .build();
     }
 
     @Bean
     public GroupedOpenApi jobApi() {
         return GroupedOpenApi.builder()
-            .group("任务模块")
+            .group("任务")
             .pathsToMatch("/job/**")
+            .build();
+    }
+
+    @Bean
+    public GroupedOpenApi jobExpandApi() {
+        return GroupedOpenApi.builder()
+            .group("任务拓展")
+            .pathsToMatch("/expand/job/**")
             .build();
     }
 
     @Bean
     public GroupedOpenApi watchmanApi() {
         return GroupedOpenApi.builder()
-            .group("调度器模块")
+            .group("调度器")
             .pathsToMatch("/watchman/**")
             .build();
     }
@@ -46,25 +46,8 @@ public class Swagger {
     @Bean
     public GroupedOpenApi notityApi() {
         return GroupedOpenApi.builder()
-            .group("上报模块")
+            .group("调度器上报数据")
             .pathsToMatch("/notify/**")
             .build();
     }
-
-    @Bean
-    public GroupedOpenApi scriptVerificationApi() {
-        return GroupedOpenApi.builder()
-            .group("脚本校验")
-            .pathsToMatch("/job/script/verification/**")
-            .build();
-    }
-
-    @Bean
-    public GroupedOpenApi fileApi() {
-        return GroupedOpenApi.builder()
-            .group("文件资源")
-            .pathsToMatch("/job/file/**")
-            .build();
-    }
-
 }
