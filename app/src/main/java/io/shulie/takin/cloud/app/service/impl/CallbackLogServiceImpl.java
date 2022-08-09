@@ -26,7 +26,7 @@ import io.shulie.takin.cloud.data.service.CallbackLogMapperService;
 @Slf4j
 @Service
 public class CallbackLogServiceImpl implements CallbackLogService {
-    private static final String RES_SUCCESS_TAG = "SUCCESS";
+    private static final String RES_SUCCESS_TAG = "success";
 
     @Lazy
     @javax.annotation.Resource
@@ -96,8 +96,7 @@ public class CallbackLogServiceImpl implements CallbackLogService {
         try {
             JSONObject resJson = JSON.parseObject(response);
             return Objects.nonNull(resJson)
-                && Boolean.TRUE.equals(resJson.getBoolean("success"))
-                && Objects.equals(resJson.getString("data"), RES_SUCCESS_TAG);
+                && Boolean.TRUE.equals(resJson.getBoolean(RES_SUCCESS_TAG));
         } catch (JSONException e) {
             log.error("CallbackServiceImpl#isSuccess", e);
             return false;
