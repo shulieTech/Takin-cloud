@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import io.shulie.takin.cloud.app.service.JsonService;
+import io.shulie.takin.cloud.constant.TicketConstants;
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.app.service.TicketService;
 import io.shulie.takin.cloud.app.service.WatchmanService;
@@ -47,9 +48,9 @@ public class TicketInterceptorHandler implements HandlerInterceptor {
         throws Exception {
         try {
             // 获取请求头
-            String ticketSign = request.getHeader("TICKET-SIGN");
-            String watchmanSign = request.getHeader("WATCHMAN-SIGN");
-            String ticketTimestamp = request.getHeader("TICKET-TIMESTAMP");
+            String ticketSign = request.getHeader(TicketConstants.HEADER_TICKET_SIGN);
+            String watchmanSign = request.getHeader(TicketConstants.HEADER_WATCHMAN_SIGN);
+            String ticketTimestamp = request.getHeader(TicketConstants.HEADER_TICKET_TIMESTAMP);
             // 时间戳转换
             long timestamp = Long.parseLong(ticketTimestamp + "");
             // 获取调度器

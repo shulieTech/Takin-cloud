@@ -10,6 +10,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMappingJacksonResponseBodyAdvice;
 
+import io.shulie.takin.cloud.constant.TicketConstants;
 import io.shulie.takin.cloud.app.service.TicketService;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 
@@ -38,7 +39,7 @@ public class TicketHeaderAdvice extends AbstractMappingJacksonResponseBodyAdvice
         @NonNull MediaType contentType, @NonNull MethodParameter returnType,
         ServerHttpRequest request, ServerHttpResponse response) {
         long timestamp = System.currentTimeMillis();
-        String watchmanSign = request.getHeaders().getFirst("WATCHMAN-SIGN");
+        String watchmanSign = request.getHeaders().getFirst(TicketConstants.HEADER_WATCHMAN_SIGN);
         // 获取调度器
         Long watchamanId = watchmanService.ofSign(watchmanSign).getId();
         // 获取调度器的当前ticket
@@ -46,7 +47,7 @@ public class TicketHeaderAdvice extends AbstractMappingJacksonResponseBodyAdvice
         // 计算签名
         String sign = ticketService.sign(null, timestamp, ticket);
         // 写入请求头
-        response.getHeaders().set("TICKET-SIGN", sign);
-        response.getHeaders().set("TICKET-TIMESTAMP", Long.toString(timestamp));
+        response.getHeaders().set(TicketConstants.HEADER_TICKET_SIGN, sign);
+        response.getHeaders().set(TicketConstants.HEADER_TICKET_TIMESTAMP, Long.toString(timestamp));
     }
 }

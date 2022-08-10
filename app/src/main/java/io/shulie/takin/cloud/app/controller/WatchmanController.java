@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -100,7 +101,7 @@ public class WatchmanController {
     @Operation(summary = "注册调度机")
     @PostMapping("registe")
     public ApiResult<RegisteResponse> registe(
-        @Parameter(description = "入参", required = true) @RequestBody RegisteRequest registeRequest) {
+        @Parameter(description = "入参", required = true) @Validated @RequestBody RegisteRequest registeRequest) {
         String bodyString = jsonService.writeValueAsString(registeRequest.getAttach());
         return ApiResult.success(watchmanService.generate(bodyString, registeRequest.getPublicKey()));
     }
@@ -108,7 +109,7 @@ public class WatchmanController {
     @Operation(summary = "更新调度机")
     @PostMapping("update")
     public ApiResult<Boolean> update(
-        @Parameter(description = "入参", required = true) @RequestBody UpdateRequest request) {
+        @Parameter(description = "入参", required = true) @Validated @RequestBody UpdateRequest request) {
         return ApiResult.success(watchmanService.update(request.getWatchmanId(), request.getPublicKey()));
     }
 

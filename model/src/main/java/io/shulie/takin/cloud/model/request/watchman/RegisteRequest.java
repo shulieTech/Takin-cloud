@@ -1,5 +1,7 @@
 package io.shulie.takin.cloud.model.request.watchman;
 
+import javax.validation.constraints.NotNull;
+
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -23,6 +25,7 @@ public class RegisteRequest {
      * 附加数据
      * <p></p>
      */
+    @NotNull(message = "附加数据不能为空")
     @Schema(name = "附加数据", description = "在查询中原样返回", required = true)
     private Object attach;
     /**
