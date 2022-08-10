@@ -15,8 +15,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,16 +51,15 @@ public class WatchmanController {
 
     @Operation(summary = "状态")
     @GetMapping("status")
-    public ApiResult<WatchmanStatusResponse> status(@Parameter(description = "调度主键", required = true) Long watchmanId) {
-        WatchmanStatusResponse status = watchmanService.status(watchmanId);
-        status.setResource(watchmanService.getResourceSum(watchmanId));
-        return ApiResult.success();
+    public ApiResult<WatchmanStatusResponse> status(
+        @Parameter(description = "调度主键", required = true) @RequestParam Long watchmanId) {
+        return ApiResult.success(watchmanService.status(watchmanId));
     }
 
     @Operation(summary = "状态-批量")
     @PostMapping("status/batch")
     public ApiResult<Map<Long, WatchmanStatusResponse>> statusBatch(
-        @Parameter(description = "调度器主键集合", required = true) @RequestBody BatchRequest request) {
+        @Parameter(description = "调度器主键集合", required = true) @Validated @RequestBody BatchRequest request) {
         Map<Long, WatchmanStatusResponse> result = new HashMap<>(request.getWatchmanIdList().size());
         request.getWatchmanIdList().forEach(t -> result.put(t, watchmanService.status(t)));
         return ApiResult.success(result);
@@ -69,8 +68,8 @@ public class WatchmanController {
     @Operation(summary = "调度器列表")
     @PostMapping("list")
     public ApiResult<List<ListResponse>> list(
-        @Parameter(description = "分页页码", required = true) Integer pageNumber,
-        @Parameter(description = "分页容量", required = true) Integer pageSize,
+        @Parameter(description = "分页页码") @RequestParam(defaultValue = "1") Integer pageNumber,
+        @Parameter(description = "分页容量") @RequestParam(defaultValue = "10") Integer pageSize,
         @Parameter(description = "调度器主键集合", required = true) @RequestBody BatchRequest request) {
         PageInfo<WatchmanEntity> list = watchmanService.list(pageNumber, pageSize, request.getWatchmanIdList());
         List<ListResponse> result = list.getList().stream()
@@ -85,14 +84,15 @@ public class WatchmanController {
 
     @Operation(summary = "资源容量列表")
     @GetMapping("resource")
-    public ApiResult<List<Resource>> resourceList(@Parameter(description = "调度主键", required = true) @RequestParam Long watchmanId) {
+    public ApiResult<List<Resource>> resourceList(
+        @Parameter(description = "调度主键", required = true) @RequestParam Long watchmanId) {
         return ApiResult.success(watchmanService.getResourceList(watchmanId));
     }
 
     @Operation(summary = "资源容量列表-批量")
     @PostMapping("resource/batch")
     public ApiResult<Map<Long, List<Resource>>> resourceBatchList(
-        @Parameter(description = "调度器主键集合", required = true) @RequestBody BatchRequest request) {
+        @Parameter(description = "调度器主键集合", required = true) @Validated @RequestBody BatchRequest request) {
         Map<Long, List<Resource>> result = new HashMap<>(request.getWatchmanIdList().size());
         request.getWatchmanIdList().forEach(t -> result.put(t, watchmanService.getResourceList(t)));
         return ApiResult.success(result);

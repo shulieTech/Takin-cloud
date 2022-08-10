@@ -141,19 +141,21 @@ public class WatchmanServiceImpl implements WatchmanService {
 
     @Override
     public WatchmanStatusResponse status(Long watchmanId) {
+        WatchmanStatusResponse statusResponse = null;
         // 是否有(异常/恢复)事件
-        WatchmanEventEntity status = lastStatusEvent();
+        WatchmanEventEntity status = lastStatusEvent(watchmanId);
         if (status != null && NotifyEventType.WATCHMAN_ABNORMAL.getCode().equals(status.getType())) {
             Map<String, Object> eventContext = jsonService.readValue(status.getContext(), new TypeReference<Map<String, Object>>() {});
             String message = eventContext.get(Message.MESSAGE_NAME) == null ? null : eventContext.get(Message.MESSAGE_NAME).toString();
-            return new WatchmanStatusResponse(status.getTime().getTime(), message, null);
+            statusResponse = new WatchmanStatusResponse(status.getTime().getTime(), message, null);
         }
         // 返回心跳时间
-        WatchmanEventEntity heartbeat = lastHeartbeatEvent();
+        WatchmanEventEntity heartbeat = lastHeartbeatEvent(watchmanId);
         if (heartbeat != null) {
-            return new WatchmanStatusResponse(heartbeat.getTime().getTime(), null, null);
+            statusResponse = new WatchmanStatusResponse(heartbeat.getTime().getTime(), null, null);
         }
-        return null;
+        if (Objects.nonNull(statusResponse)) {statusResponse.setResource(this.getResourceSum(watchmanId));}
+        return statusResponse;
     }
 
     /**
@@ -165,10 +167,11 @@ public class WatchmanServiceImpl implements WatchmanService {
      *
      * @return 事件实体
      */
-    private WatchmanEventEntity lastStatusEvent() {
+    private WatchmanEventEntity lastStatusEvent(Long watchmanId) {
         try (Page<?> ignore = PageMethod.startPage(1, 1)) {
             return watchmanEventMapper.lambdaQuery()
                 .orderByDesc(WatchmanEventEntity::getTime)
+                .eq(WatchmanEventEntity::getWatchmanId, watchmanId)
                 .in(WatchmanEventEntity::getType, NotifyEventType.WATCHMAN_NORMAL.getCode(), NotifyEventType.WATCHMAN_ABNORMAL.getCode())
                 .one();
         }
@@ -179,10 +182,11 @@ public class WatchmanServiceImpl implements WatchmanService {
      *
      * @return 事件实体
      */
-    private WatchmanEventEntity lastHeartbeatEvent() {
+    private WatchmanEventEntity lastHeartbeatEvent(Long watchmanId) {
         try (Page<?> ignore = PageMethod.startPage(1, 1)) {
             return watchmanEventMapper.lambdaQuery()
                 .orderByDesc(WatchmanEventEntity::getTime)
+                .eq(WatchmanEventEntity::getWatchmanId, watchmanId)
                 .eq(WatchmanEventEntity::getType, NotifyEventType.WATCHMAN_HEARTBEAT.getCode())
                 .one();
         }

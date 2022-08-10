@@ -2,6 +2,9 @@ package io.shulie.takin.cloud.model.request.watchman;
 
 import java.util.List;
 
+import javax.validation.constraints.Size;
+import javax.validation.constraints.NotNull;
+
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -19,5 +22,7 @@ public class BatchRequest {
      * 调度器主键集合
      */
     @Schema(description = "调度器主键集合")
+    @NotNull(message = "调度器主键集合不能为空")
+    @Size(min = 1, message = "调度器主键集合不能为空")
     private List<Long> watchmanIdList;
 }
