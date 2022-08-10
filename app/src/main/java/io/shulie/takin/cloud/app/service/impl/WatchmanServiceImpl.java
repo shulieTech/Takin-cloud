@@ -109,7 +109,9 @@ public class WatchmanServiceImpl implements WatchmanService {
     @Override
     public Resource getResourceSum(Long watchmanId) {
         Resource resource = new Resource().setCpu(0d).setMemory(0L);
-        this.getResourceList(watchmanId).forEach(t -> {
+        List<Resource> resourceList = this.getResourceList(watchmanId);
+        if (CollUtil.isEmpty(resourceList)) {return null;}
+        resourceList.forEach(t -> {
             if (t.getCpu() != null) {resource.setCpu(resource.getCpu() + t.getCpu());}
             if (t.getMemory() != null) {resource.setMemory(resource.getMemory() + t.getMemory());}
             resource.setName(t.getName());
@@ -132,6 +134,9 @@ public class WatchmanServiceImpl implements WatchmanService {
         return watchmanMapper.save(new WatchmanEntity().setRef(ref).setSign(sign));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public WatchmanEntity ofSign(String sign) {
         WatchmanEntity entity = watchmanMapper.lambdaQuery().eq(WatchmanEntity::getSign, sign).one();
@@ -139,6 +144,9 @@ public class WatchmanServiceImpl implements WatchmanService {
         return entity;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public WatchmanStatusResponse status(Long watchmanId) {
         WatchmanStatusResponse statusResponse = null;
@@ -165,6 +173,7 @@ public class WatchmanServiceImpl implements WatchmanService {
      *     <li>调度正常</li>
      * </ul>
      *
+     * @param watchmanId 调度器主键
      * @return 事件实体
      */
     private WatchmanEventEntity lastStatusEvent(Long watchmanId) {
@@ -180,6 +189,7 @@ public class WatchmanServiceImpl implements WatchmanService {
     /**
      * 返回最后一此上报的"心跳"的事件
      *
+     * @param watchmanId 调度器主键
      * @return 事件实体
      */
     private WatchmanEventEntity lastHeartbeatEvent(Long watchmanId) {
@@ -314,6 +324,14 @@ public class WatchmanServiceImpl implements WatchmanService {
         }
     }
 
+    /**
+     * 调度机的JWT加密
+     *
+     * @param head      头
+     * @param body      体
+     * @param publicKey 公钥
+     * @return 最终的JWT
+     */
     String crypto(String head, String body, String publicKey) {
         log.info("head(base64){}\nbody(base64)\n{}publicKey:{}" + head, body, publicKey);
         AsymmetricCrypto asymmetricCrypto = SecureUtil.rsa(null, publicKey);
