@@ -23,7 +23,7 @@ import io.shulie.takin.cloud.app.service.PressureExampleService;
  */
 @Slf4j(topic = "NOTIFY")
 @Tag(name = "任务实例上报")
-@RequestMapping("/notify/pressure/example")
+@RequestMapping("/notify/job/pressure/example")
 @RestController("NotiftPressureExampleController")
 public class PressureExampleController {
     @javax.annotation.Resource

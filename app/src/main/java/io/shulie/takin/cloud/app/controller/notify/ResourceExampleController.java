@@ -24,7 +24,7 @@ import io.shulie.takin.cloud.app.service.ResourceExampleService;
  */
 @Slf4j(topic = "NOTIFY")
 @Tag(name = "资源实例上报")
-@RequestMapping("/notify/resource_example")
+@RequestMapping("/notify/job/resource/example")
 @RestController("NotiftResourceExampleController")
 public class ResourceExampleController {
     @javax.annotation.Resource

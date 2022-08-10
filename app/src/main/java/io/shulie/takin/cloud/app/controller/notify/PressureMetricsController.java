@@ -35,7 +35,7 @@ import io.shulie.takin.cloud.data.entity.PressureExampleEntity;
  */
 @Tag(name = "压测指标数据上报")
 @Slf4j(topic = "METRICS")
-@RequestMapping("/notify/pressure/metrics")
+@RequestMapping("/notify/job/pressure/metrics")
 @RestController("NotiftPressureMetricsController")
 public class PressureMetricsController {
     @javax.annotation.Resource
