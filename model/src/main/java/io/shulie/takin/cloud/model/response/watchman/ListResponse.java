@@ -23,7 +23,7 @@ public class ListResponse {
     /**
      * 附加数据
      */
-    @Schema(name = "附加数据", description = "注册调度机时填入的信息,原样返回")
+    @Schema(description = "附加数据,注册调度机时填入的信息,原样返回")
     private String attach;
     /**
      * 关键词签名

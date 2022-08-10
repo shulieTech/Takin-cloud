@@ -26,7 +26,7 @@ public class RegisteRequest {
      * <p></p>
      */
     @NotNull(message = "附加数据不能为空")
-    @Schema(name = "附加数据", description = "在查询中原样返回", required = true)
+    @Schema(description = "附加数据,在查询中原样返回", required = true)
     private Object attach;
     /**
      * 创建时间
