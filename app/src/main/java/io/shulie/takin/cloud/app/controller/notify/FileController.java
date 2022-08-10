@@ -36,8 +36,21 @@ public class FileController {
      */
     @PostMapping("progress/update")
     @Operation(summary = "更新进度")
-    public ApiResult<Object> updateProgress(@RequestBody List<ProgressRequest> requests) {
+    public ApiResult<Object> updateProgress(@RequestBody ProgressRequest requests) {
         fileExampleService.updateProgress(requests);
+        return ApiResult.success();
+    }
+
+    /**
+     * 上报文件资源下载调度 - 批量
+     *
+     * @param requests 请求
+     * @return -
+     */
+    @PostMapping("progress/update/batch")
+    @Operation(summary = "更新进度-批量")
+    public ApiResult<Object> updateProgress(@RequestBody List<ProgressRequest> requests) {
+        requests.forEach(t -> fileExampleService.updateProgress(t));
         return ApiResult.success();
     }
 

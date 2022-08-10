@@ -40,24 +40,22 @@ public class FileExampleServiceImpl implements FileExampleService {
      * {@inheritDoc}
      */
     @Override
-    public void updateProgress(List<ProgressRequest> progressList) {
+    public void updateProgress(ProgressRequest progress) {
         // 1. 数据更新 [t_file_example]
-        for (ProgressRequest t : progressList) {
-            boolean updateResult = fileExampleMapper.lambdaUpdate()
-                // ------ set
-                .set(FileExampleEntity::getCompleted, t.getCompleted())
-                .set(FileExampleEntity::getCompleteSize, t.getCompleteSize())
-                .set(FileExampleEntity::getTotalSize, t.getTotalSize())
-                // ------ where
-                .isNull(FileExampleEntity::getMessage)
-                .eq(FileExampleEntity::getId, t.getId())
-                .isNull(FileExampleEntity::getCompleted)
-                .lt(Objects.nonNull(t.getCompleteSize()), FileExampleEntity::getCompleteSize, t.getCompleteSize())
-                .update();
-            if (updateResult) {
-                // 进度上报
-                progressReport(t.getId());
-            }
+        boolean updateResult = fileExampleMapper.lambdaUpdate()
+            // ------ set
+            .set(FileExampleEntity::getCompleted, progress.getCompleted())
+            .set(FileExampleEntity::getCompleteSize, progress.getCompleteSize())
+            .set(Objects.nonNull(progress.getTotalSize()), FileExampleEntity::getTotalSize, progress.getTotalSize())
+            // ------ where
+            .isNull(FileExampleEntity::getMessage)
+            .isNull(FileExampleEntity::getCompleted)
+            .eq(FileExampleEntity::getId, progress.getId())
+            .lt(Objects.nonNull(progress.getCompleteSize()), FileExampleEntity::getCompleteSize, progress.getCompleteSize())
+            .update();
+        if (updateResult) {
+            // 进度上报
+            progressReport(progress.getId());
         }
     }
 

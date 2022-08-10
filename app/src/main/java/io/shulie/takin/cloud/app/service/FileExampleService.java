@@ -17,7 +17,7 @@ public interface FileExampleService {
      *
      * @param progressList 进度列表
      */
-    void updateProgress(List<ProgressRequest> progressList);
+    void updateProgress(ProgressRequest progressList);
 
     /**
      * 标记为失败
