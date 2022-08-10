@@ -29,4 +29,35 @@ public class ResourceSource {
      */
     @Schema(description = "内存")
     String memory;
+    /**
+     * 资源类型
+     */
+    @Schema(description = "资源类型")
+    String type;
+    /**
+     * 名称
+     */
+    @Schema(description = "调度机名称")
+    String name;
+    /**
+     * nfs服务端地址
+     */
+    @Schema(description = "nfs服务端地址")
+    private String nfsServer;
+    /**
+     * nfs服务端文件夹
+     */
+    @Schema(description = "nfs服务端文件夹")
+    private String nfsDir;
+
+    /**
+     * nfs已使用容量
+     */
+    @Schema(description = "nfs已使用容量")
+    private Long nfsUsableSpace;
+    /**
+     * nfs总容量
+     */
+    @Schema(description = "nfs总容量")
+    private Long nfsTotalSpace;
 }

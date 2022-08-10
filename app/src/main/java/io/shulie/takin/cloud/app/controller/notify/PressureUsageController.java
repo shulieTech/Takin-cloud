@@ -4,6 +4,7 @@ import java.util.Map;
 import java.nio.charset.StandardCharsets;
 
 import lombok.extern.slf4j.Slf4j;
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,7 +51,7 @@ public class PressureUsageController {
         Map<String, Object> request = jsonService.readValue(new String(body, StandardCharsets.UTF_8), new TypeReference<Map<String, Object>>() {});
         // 从请求体获取到任务主键
         Object taskIdValue = request.get("taskId");
-        if (taskIdValue == null) {return ApiResult.fail(Message.UNKNOWN + Message.COMMA + Message.TASK_ID);}
+        if (taskIdValue == null) {return ApiResult.fail(Message.UNKNOWN + CharPool.COMMA + Message.TASK_ID);}
         // 根据任务主键获取任务信息
         long pressureId = Long.parseLong(taskIdValue.toString());
         PressureEntity pressureEntity = pressureService.entity(pressureId);

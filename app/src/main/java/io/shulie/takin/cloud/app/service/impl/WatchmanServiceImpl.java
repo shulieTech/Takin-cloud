@@ -17,18 +17,20 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.core.text.StrPool;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.core.text.CharSequenceUtil;
-import io.shulie.takin.cloud.constant.Message;
 import cn.hutool.crypto.asymmetric.AsymmetricCrypto;
 
+import io.shulie.takin.cloud.constant.Message;
 import io.shulie.takin.cloud.app.util.ResourceUtil;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.resource.Resource;
 import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.WatchmanService;
+import io.shulie.takin.cloud.constant.enums.ResourceType;
 import io.shulie.takin.cloud.model.resource.ResourceSource;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.data.entity.WatchmanEventEntity;
@@ -194,14 +196,33 @@ public class WatchmanServiceImpl implements WatchmanService {
         // resource -> 转换
         List<String> errorMessage = new ArrayList<>(2);
         List<Resource> resourceList = content.stream().map(t -> {
-            Double cpu = ResourceUtil.convertCpu(t.getCpu());
-            Long memory = ResourceUtil.convertMemory(t.getMemory());
-            if (cpu == null) {errorMessage.add(CharSequenceUtil.format(Message.CAN_NOT_CONVERT_CPU, t.getCpu()));}
-            if (memory == null) {errorMessage.add(CharSequenceUtil.format(Message.CAN_NOT_CONVERT_MEMORY, t.getMemory()));}
-            return new Resource().setCpu(cpu).setMemory(memory);
+            if (ResourceType.DRILLING.getName().equalsIgnoreCase(t.getType())) {
+                return new Resource()
+                    .setNfsDir(t.getNfsDir())
+                    .setNfsServer(t.getNfsServer())
+                    .setNfsTotalSpace(t.getNfsTotalSpace())
+                    .setNfsUsableSpace(t.getNfsUsableSpace())
+                    .setName(t.getName()).setType(t.getType());
+            }
+            // 兼容处理
+            else if (ResourceType.NODE.getName().equalsIgnoreCase(t.getType())
+                || CharSequenceUtil.isBlank((t.getType()))
+            ) {
+                Double cpu = ResourceUtil.convertCpu(t.getCpu());
+                Long memory = ResourceUtil.convertMemory(t.getMemory());
+                if (cpu == null) {errorMessage.add(CharSequenceUtil.format(Message.CAN_NOT_CONVERT_CPU, t.getCpu()));}
+                if (memory == null) {errorMessage.add(CharSequenceUtil.format(Message.CAN_NOT_CONVERT_MEMORY, t.getMemory()));}
+                return new Resource()
+                    .setCpu(cpu).setMemory(memory)
+                    .setType(t.getType());
+            }
+            // 位置的资源类型
+            else {
+                return new Resource().setType(t.getType());
+            }
         }).collect(Collectors.toList());
         // 转换校验
-        if (!errorMessage.isEmpty()) {throw new IllegalArgumentException(String.join(Message.COMMA, errorMessage));}
+        if (!errorMessage.isEmpty()) {throw new IllegalArgumentException(String.join(StrPool.COMMA, errorMessage));}
         // 组装入库数据
         Map<String, Object> context = new HashMap<>(2);
         context.put("time", String.valueOf(System.currentTimeMillis()));

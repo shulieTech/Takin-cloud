@@ -3,6 +3,8 @@ package io.shulie.takin.cloud.model.response;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import io.shulie.takin.cloud.constant.Message;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -15,7 +17,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "Api结果")
 @SuppressWarnings({"unused", "rawtypes", "unchecked"})
 public class ApiResult<T> {
-    private static final String SUCCESS_MESSAGE = "SUCCESS";
 
     @Schema(description = "数据")
     private T data = null;
@@ -44,7 +45,7 @@ public class ApiResult<T> {
      * @return 成功的API结果
      */
     public static <T> ApiResult<T> success(T data) {
-        return new ApiResult().setData(data).setSuccess(true).setMsg(SUCCESS_MESSAGE);
+        return new ApiResult().setData(data).setSuccess(true).setMsg(Message.SUCCESS);
     }
 
     /**

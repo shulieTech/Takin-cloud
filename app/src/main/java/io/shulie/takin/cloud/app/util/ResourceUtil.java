@@ -3,10 +3,10 @@ package io.shulie.takin.cloud.app.util;
 import lombok.extern.slf4j.Slf4j;
 
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 
 /**
  * 资源工具
- *
  * <a href="https://kubernetes.io/zh/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes">K8s文档</a>
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
@@ -40,7 +40,7 @@ public class ResourceUtil {
      * @return 可量化的数值
      */
     public static Double convertCpu(String cpu) {
-        if (cpu.endsWith(CPU_UNIT_C)) {
+        if (CharSequenceUtil.isBlank(cpu)) {return null;} else if (cpu.endsWith(CPU_UNIT_C)) {
             return parseDouble(cpu.substring(0, cpu.length() - (CPU_UNIT_C.length())));
         } else if (cpu.endsWith(CPU_UNIT_M)) {
             Double value = parseDouble(cpu.substring(0, cpu.length() - (CPU_UNIT_M.length())));
@@ -56,8 +56,9 @@ public class ResourceUtil {
      * @return 可量化的数值
      */
     public static Long convertMemory(String memory) {
+        if (CharSequenceUtil.isBlank(memory)) {return null;}
         // 不带单位直接返回
-        if (NumberUtil.isNumber(memory)) {return NumberUtil.parseNumber(memory).longValue();}
+        else if (NumberUtil.isNumber(memory)) {return NumberUtil.parseNumber(memory).longValue();}
         char[] memoryCharArray = memory.toCharArray();
         // 处理特殊的m单位
         if (memoryCharArray[memory.length() - 1] == MEMORY_UNIT_M) {
