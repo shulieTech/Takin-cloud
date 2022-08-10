@@ -5,13 +5,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.MD5;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.exceptions.ValidateException;
@@ -79,7 +79,12 @@ public class TicketServiceImpl implements TicketService {
     public String encrypt(String id, String ticket, String publicKey) {
         try {
             ticketMap.put(id, ticket);
-            return new RSA(null, publicKey).encryptBase64(ticket, KeyType.PublicKey);
+            // 如果公钥为空则不加密
+            if (!CharSequenceUtil.isNotBlank(publicKey)) {return ticket;}
+            // 否则将ticket以公钥加密
+            else {
+                return SecureUtil.rsa(null, publicKey).encryptBase64(ticket, KeyType.PublicKey);
+            }
         } catch (RuntimeException ex) {
             log.error("加密Ticket失败", ex);
             ticketMap.remove(id);
