@@ -4,9 +4,12 @@ import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.github.pagehelper.page.PageMethod;
 import org.springframework.stereotype.Service;
@@ -61,7 +64,6 @@ public class ResourceServiceImpl implements ResourceService {
         // 查询条件
         return resourceExampleMapper.lambdaQuery()
             .eq(ResourceExampleEntity::getResourceId, resourceId)
-            // 执行查询
             .list();
     }
 
@@ -70,7 +72,11 @@ public class ResourceServiceImpl implements ResourceService {
      */
     @Override
     public Map<Long, Integer> check(ApplyResourceRequest apply) {
-        if (apply.getWatchmanId() != null) {apply.getWatchmanIdList().add(apply.getWatchmanId());}
+        // 兼容单机
+        if (apply.getWatchmanId() != null
+            && !apply.getWatchmanIdList().contains(apply.getWatchmanId())) {
+            apply.getWatchmanIdList().add(apply.getWatchmanId());
+        }
         // 0. 返回值
         Map<Long, Integer> result = new HashMap<>(apply.getWatchmanIdList().size());
         // 1. 声明需要的资源
@@ -119,21 +125,21 @@ public class ResourceServiceImpl implements ResourceService {
     public int press(Long watchmanId, Double requestCpu, Long requestMemory) {
         int number = 0;
         // 1. 获取调度所属的资源列表
-        List<Resource> resourceList = watchmanService.getResourceList(watchmanId);
+        List<Resource> resourceList = watchmanService.getResourceList(watchmanId).stream()
+            .filter(t -> Objects.nonNull(t) && Objects.nonNull(t.getCpu()) && Objects.nonNull(t.getMemory()))
+            .collect(Collectors.toList());
         // 2. 循环压榨每一个资源
         for (Resource t : resourceList) {
-            if (t != null) {
-                // 2.1 声明每个资源拥有的量化资源
-                Double spareCpu = ResourceUtil.convertCpu(t.getCpu().toString());
-                Long spareMemory = ResourceUtil.convertMemory(t.getMemory().toString());
-                // 空值校验
-                if (spareCpu != null && spareMemory != null) {
-                    // 2.2 递减资源余量和申请的数量
-                    while (spareCpu >= requestCpu && spareMemory >= requestMemory) {
-                        number++;
-                        spareCpu -= requestCpu;
-                        spareMemory -= requestMemory;
-                    }
+            // 2.1 声明每个资源拥有的量化资源
+            Double spareCpu = ResourceUtil.convertCpu(t.getCpu().toString());
+            Long spareMemory = ResourceUtil.convertMemory(t.getMemory().toString());
+            // 空值校验
+            if (spareCpu != null && spareMemory != null) {
+                // 2.2 递减资源余量和申请的数量
+                while (spareCpu >= requestCpu && spareMemory >= requestMemory) {
+                    number++;
+                    spareCpu -= requestCpu;
+                    spareMemory -= requestMemory;
                 }
             }
         }
@@ -146,10 +152,6 @@ public class ResourceServiceImpl implements ResourceService {
      */
     @Override
     public String lock(ApplyResourceRequest apply) {
-        if (apply.getWatchmanId() != null) {
-            apply.setWatchmanId(null);
-            apply.getWatchmanIdList().add(apply.getWatchmanId());
-        }
         try {
             // 0. 预检
             Map<Long, Integer> podAllocation = this.check(apply);
@@ -167,14 +169,20 @@ public class ResourceServiceImpl implements ResourceService {
             List<ResourceExampleEntity> resourceExampleEntityList = new ArrayList<>();
             podAllocation.forEach((k, v) -> {
                 for (int i = 0; i < v; i++) {
+                    String cpu = ObjectUtil.defaultIfNull(ResourceUtil.convertCpu(apply.getCpu()), 0d).toString();
+                    String memory = ObjectUtil.defaultIfNull(ResourceUtil.convertMemory(apply.getMemory()), 0L).toString();
+                    String limitCpuString = CharSequenceUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu();
+                    String limitMemoryString = CharSequenceUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory();
+                    String limitCpu = ObjectUtil.defaultIfNull(ResourceUtil.convertCpu(limitCpuString), 0d).toString();
+                    String limitMemory = ObjectUtil.defaultIfNull(ResourceUtil.convertMemory(limitMemoryString), 0L).toString();
                     ResourceExampleEntity resourceExampleEntity = new ResourceExampleEntity()
+                        .setCpu(cpu)
+                        .setMemory(memory)
+                        .setLimitCpu(limitCpu)
+                        .setLimitMemory(limitMemory)
                         .setWatchmanId(k)
-                        .setCpu(apply.getCpu())
                         .setImage(apply.getImage())
-                        .setMemory(apply.getMemory())
-                        .setResourceId(resourceEntity.getId())
-                        .setLimitCpu(CharSequenceUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu())
-                        .setLimitMemory(CharSequenceUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory());
+                        .setResourceId(resourceEntity.getId());
                     resourceExampleEntityList.add(resourceExampleEntity);
                 }
             });
@@ -186,6 +194,7 @@ public class ResourceServiceImpl implements ResourceService {
         }
         // end 预检失败则直接返回 NULL
         catch (Exception e) {
+            log.error("资源锁定失败", e);
             return null;
         }
     }
@@ -255,12 +264,10 @@ public class ResourceServiceImpl implements ResourceService {
     ResourceExampleEventEntity lastExampleStatus(long resourceExampleId) {
         try (Page<Object> ignored = PageMethod.startPage(1, 1)) {
             return resourceExampleEventMapper.lambdaQuery()
-                // 查询条件 - 状态类型
                 .orderByDesc(ResourceExampleEventEntity::getTime)
                 .notIn(ResourceExampleEventEntity::getType,
                     NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode(), NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode())
                 .eq(ResourceExampleEventEntity::getResourceExampleId, resourceExampleId)
-                // 执行SQL
                 .one();
         }
     }
