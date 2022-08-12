@@ -19,6 +19,7 @@ import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.model.callback.FileUsage;
 import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.cloud.data.entity.PressureEntity;
+import io.shulie.takin.cloud.constant.enums.CallbackType;
 import io.shulie.takin.cloud.app.service.PressureService;
 import io.shulie.takin.cloud.app.service.CallbackService;
 
@@ -59,7 +60,7 @@ public class PressureUsageController {
         // 组装回调
         FileUsage content = new FileUsage();
         content.setData(request);
-        callbackService.create(pressureEntity.getCallbackUrl(), jsonService.writeValueAsString(content));
+        callbackService.create(pressureEntity.getCallbackUrl(), CallbackType.FILE_USAGE, jsonService.writeValueAsString(content));
         return ApiResult.success();
     }
 }

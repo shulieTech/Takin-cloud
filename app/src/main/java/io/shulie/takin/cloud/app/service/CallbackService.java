@@ -38,30 +38,10 @@ public interface CallbackService {
      * 创建回调
      *
      * @param url     回调路径
-     * @param content 回调内容
-     */
-    default void create(String url, byte[] content) {
-        create(url, null, content);
-    }
-
-    /**
-     * 创建回调
-     *
-     * @param url     回调路径
      * @param type    回调类型
      * @param content 回调内容
      */
     void create(String url, CallbackType type, byte[] content);
-
-    /**
-     * 创建回调
-     *
-     * @param url     回调路径
-     * @param content 回调内容
-     */
-    default void create(String url, String content) {
-        create(url, content.getBytes(StandardCharsets.UTF_8));
-    }
 
     /**
      * 创建回调

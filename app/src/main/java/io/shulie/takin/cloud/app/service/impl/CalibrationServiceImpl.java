@@ -35,13 +35,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.shulie.takin.cloud.constant.Message;
 import io.shulie.takin.cloud.app.conf.WatchmanConfig;
 import io.shulie.takin.cloud.data.entity.PressureEntity;
-import io.shulie.takin.cloud.app.service.PressureMetricsService;
 import io.shulie.takin.cloud.model.callback.Calibration;
 import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.app.service.PressureService;
+import io.shulie.takin.cloud.constant.enums.CallbackType;
 import io.shulie.takin.cloud.data.entity.CalibrationEntity;
 import io.shulie.takin.cloud.app.service.CalibrationService;
 import io.shulie.takin.cloud.data.entity.CalibrationLogEntity;
+import io.shulie.takin.cloud.app.service.PressureMetricsService;
 import io.shulie.takin.cloud.data.service.CalibrationMapperService;
 import io.shulie.takin.cloud.model.request.job.pressure.MetricsInfo;
 import io.shulie.takin.cloud.data.service.CalibrationLogMapperService;
@@ -141,7 +142,7 @@ public class CalibrationServiceImpl implements CalibrationService {
                     .setResourceId(pressureEntity.getResourceId());
                 calibration.setData(entity.getId());
                 // 保存回调信息
-                callbackService.create(pressureEntity.getCallbackUrl(), jsonService.writeValueAsString(calibration));
+                callbackService.create(pressureEntity.getCallbackUrl(), CallbackType.CALIBRATION, jsonService.writeValueAsString(calibration));
             }
         }
     }

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.data.entity.PressureEntity;
 import io.shulie.takin.cloud.app.service.CallbackService;
+import io.shulie.takin.cloud.constant.enums.CallbackType;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.data.entity.PressureExampleEntity;
 import io.shulie.takin.cloud.app.service.PressureExampleService;
@@ -49,7 +50,7 @@ public class PressureExampleServiceImpl implements PressureExampleService {
         PressureExampleHeartbeat context = new PressureExampleHeartbeat();
         context.setData(getCallbackData(pressureExampleId, callbackUrl));
         // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        callbackService.create(callbackUrl.toString(), CallbackType.PRESSURE_EXAMPLE_HEARTBEAT, jsonService.writeValueAsString(context));
         // 记录事件
         pressureExampleEventMapper.save(new PressureExampleEventEntity()
             .setContext("{}")
@@ -68,7 +69,7 @@ public class PressureExampleServiceImpl implements PressureExampleService {
         PressureExampleStart context = new PressureExampleStart();
         context.setData(getCallbackData(pressureExampleId, callbackUrl));
         //回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        callbackService.create(callbackUrl.toString(), CallbackType.PRESSURE_EXAMPLE_START, jsonService.writeValueAsString(context));
         log.info("启动任务：{}", pressureExampleId);
         // 记录事件
         pressureExampleEventMapper.save(new PressureExampleEventEntity()
@@ -87,7 +88,7 @@ public class PressureExampleServiceImpl implements PressureExampleService {
         PressureExampleStop context = new PressureExampleStop();
         context.setData(getCallbackData(pressureExampleId, callbackUrl));
         // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        callbackService.create(callbackUrl.toString(), CallbackType.PRESSURE_EXAMPLE_STOP, jsonService.writeValueAsString(context));
         log.info("停止任务：{}", pressureExampleId);
         // 记录事件
         pressureExampleEventMapper.save(new PressureExampleEventEntity()
@@ -107,7 +108,7 @@ public class PressureExampleServiceImpl implements PressureExampleService {
         PressureExampleError context = new PressureExampleError();
         context.setData(errorInfo);
         // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        callbackService.create(callbackUrl.toString(), CallbackType.PRESSURE_EXAMPLE_ERROR, jsonService.writeValueAsString(context));
         log.info("任务异常信息回调：{}", pressureExampleId);
         // 记录事件
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();

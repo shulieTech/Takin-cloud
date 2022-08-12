@@ -20,6 +20,7 @@ import io.shulie.takin.cloud.model.callback.Sla.SlaInfo;
 import io.shulie.takin.cloud.app.service.PressureService;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.app.service.CallbackService;
+import io.shulie.takin.cloud.constant.enums.CallbackType;
 import io.shulie.takin.cloud.constant.enums.FormulaSymbol;
 import io.shulie.takin.cloud.constant.enums.FormulaTarget;
 import io.shulie.takin.cloud.data.service.SlaMapperService;
@@ -99,7 +100,7 @@ public class SlaServiceImpl implements SlaService {
         sla.setData(slaInfoList);
         String slaString = jsonService.writeValueAsString(sla);
         // 创建回调
-        callbackService.create(pressureEntity.getCallbackUrl(), slaString);
+        callbackService.create(pressureEntity.getCallbackUrl(), CallbackType.SLA, slaString);
         log.info("SLA触发：{}", slaString);
     }
 

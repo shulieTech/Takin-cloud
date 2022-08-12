@@ -14,6 +14,7 @@ import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.data.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.app.service.ResourceService;
+import io.shulie.takin.cloud.constant.enums.CallbackType;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.constant.enums.BusinessStateEnum;
 import io.shulie.takin.cloud.data.entity.PressureExampleEntity;
@@ -56,7 +57,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleHeartbeat context = new ResourceExampleHeartbeat();
         context.setData(getCallbackData(id, callbackUrl));
         // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        callbackService.create(callbackUrl.toString(), CallbackType.RESOURCE_EXAMPLE_HEARTBEAT, jsonService.writeValueAsString(context));
         // 记录事件
         resourceExampleEventMapper.save(new ResourceExampleEventEntity()
             .setContext("{}")
@@ -71,7 +72,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleStart context = new ResourceExampleStart();
         context.setData(getCallbackData(id, callbackUrl));
         // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        callbackService.create(callbackUrl.toString(), CallbackType.RESOURCE_EXAMPLE_START, jsonService.writeValueAsString(context));
         log.info("锁定资源：{}", id);
         // 记录事件
         resourceExampleEventMapper.save(new ResourceExampleEventEntity()
@@ -91,7 +92,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleStop context = new ResourceExampleStop();
         context.setData(getCallbackData(id, callbackUrl));
         // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        callbackService.create(callbackUrl.toString(), CallbackType.RESOURCE_EXAMPLE_STOP, jsonService.writeValueAsString(context));
         log.info("释放资源：{}", id);
         // 记录事件
         resourceExampleEventMapper.save(new ResourceExampleEventEntity()
@@ -139,7 +140,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
             .exists();
         if (!stoped) {
             // 创建回调
-            callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+            callbackService.create(callbackUrl.toString(), CallbackType.RESOURCE_EXAMPLE_STOP, jsonService.writeValueAsString(context));
             log.info("任务正常停止信息：{}", id);
             // 记录事件
             resourceExampleEventMapper.save(new ResourceExampleEventEntity()
@@ -159,7 +160,7 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
         ResourceExampleError context = new ResourceExampleError();
         context.setData(errorInfo);
         // 创建回调
-        callbackService.create(callbackUrl.toString(), jsonService.writeValueAsString(context));
+        callbackService.create(callbackUrl.toString(), CallbackType.RESOURCE_EXAMPLE_ERROR, jsonService.writeValueAsString(context));
         log.info("资源异常信息：{}", id);
         // 记录事件
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
