@@ -1,8 +1,8 @@
 # 版本
 [versions]
-hutool = "5.7.22"
-lombok = "1.18.22"
-jackson = "2.13.2"
+hutool = "5.8.5"
+lombok = "1.18.24"
+jackson = "2.13.3"
 influxdb = "2.22"
 dom4j = "1.6.1"
 # mybatis
