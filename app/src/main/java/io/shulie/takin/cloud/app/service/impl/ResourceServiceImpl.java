@@ -170,16 +170,16 @@ public class ResourceServiceImpl implements ResourceService {
             podAllocation.forEach((k, v) -> {
                 for (int i = 0; i < v; i++) {
                     String cpu = ObjectUtil.defaultIfNull(ResourceUtil.convertCpu(apply.getCpu()), 0d).toString();
-                    String memory = ObjectUtil.defaultIfNull(ResourceUtil.convertMemory(apply.getMemory()), 0L).toString();
                     String limitCpuString = CharSequenceUtil.isBlank(apply.getLimitCpu()) ? apply.getCpu() : apply.getLimitCpu();
-                    String limitMemoryString = CharSequenceUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory();
                     String limitCpu = ObjectUtil.defaultIfNull(ResourceUtil.convertCpu(limitCpuString), 0d).toString();
-                    String limitMemory = ObjectUtil.defaultIfNull(ResourceUtil.convertMemory(limitMemoryString), 0L).toString();
+                    String limitMemoryString = CharSequenceUtil.isBlank(apply.getLimitMemory()) ? apply.getMemory() : apply.getLimitMemory();
+                    Long memory = ObjectUtil.defaultIfNull(ResourceUtil.convertMemory(apply.getMemory()), 0L);
+                    Long limitMemory = ObjectUtil.defaultIfNull(ResourceUtil.convertMemory(limitMemoryString), 0L);
                     ResourceExampleEntity resourceExampleEntity = new ResourceExampleEntity()
                         .setCpu(cpu)
-                        .setMemory(memory)
                         .setLimitCpu(limitCpu)
-                        .setLimitMemory(limitMemory)
+                        .setMemory((memory / ResourceUtil.getMemoryBasic()) + "Mi")
+                        .setLimitMemory((limitMemory / ResourceUtil.getMemoryBasic()) + "Mi")
                         .setWatchmanId(k)
                         .setImage(apply.getImage())
                         .setResourceId(resourceEntity.getId());

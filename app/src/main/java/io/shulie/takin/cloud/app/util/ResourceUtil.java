@@ -34,6 +34,13 @@ public class ResourceUtil {
         1024L * 1024L * 1024L * 1024L * 1024L * 1024L};
 
     /**
+     * 获取内存可视化的转换基数
+     *
+     * @return 基数 1024
+     */
+    public static Long getMemoryBasic() {return MEMORY_I[0];}
+
+    /**
      * 转换CPU
      *
      * @param cpu 入参
@@ -58,12 +65,12 @@ public class ResourceUtil {
     public static Long convertMemory(String memory) {
         if (CharSequenceUtil.isBlank(memory)) {return null;}
         // 不带单位直接返回
-        else if (NumberUtil.isNumber(memory)) {return NumberUtil.parseNumber(memory).longValue();}
+        else if (NumberUtil.isNumber(memory)) {return NumberUtil.parseNumber(memory).longValue() * getMemoryBasic();}
         char[] memoryCharArray = memory.toCharArray();
         // 处理特殊的m单位
         if (memoryCharArray[memory.length() - 1] == MEMORY_UNIT_M) {
             String memoryRemoveM = memory.substring(0, memory.length() - 4);
-            if (NumberUtil.isNumber(memoryRemoveM)) {return NumberUtil.parseNumber(memoryRemoveM).longValue();}
+            if (NumberUtil.isNumber(memoryRemoveM)) {return NumberUtil.parseNumber(memoryRemoveM).longValue() * getMemoryBasic();}
         }
         // 判断是使用1000递乘还是1024
         boolean useXi = memoryCharArray[memory.length() - 1] == 'i';
