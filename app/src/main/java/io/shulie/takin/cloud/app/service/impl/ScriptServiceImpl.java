@@ -89,9 +89,12 @@ public class ScriptServiceImpl implements ScriptService {
                 .update();
             // 2. 回调控制台
             if (Boolean.TRUE.equals(updateResult)) {
-                ResultReport reportData = new ResultReport().setResult(completed)
+                ResultReport reportData = new ResultReport();
+                reportData.setData(new ResultReport.Data()
+                    .setResult(completed)
                     .setAttach(scriptEntity.getAttach())
-                    .setMessage(message);
+                    .setMessage(message)
+                );
                 callbackService.create(scriptEntity.getCallbackUrl(), CallbackType.FILE_RESOURCE_PROGRESS,
                     jsonService.writeValueAsString(reportData));
             }

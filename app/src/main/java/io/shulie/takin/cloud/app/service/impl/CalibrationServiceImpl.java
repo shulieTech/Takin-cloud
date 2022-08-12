@@ -135,12 +135,14 @@ public class CalibrationServiceImpl implements CalibrationService {
             if (pressureEntity == null) {
                 log.warn(Message.MISS_PRESSURE, entity.getPressureId());
             } else {
-                Calibration calibration = new Calibration()
+                Calibration calibration = new Calibration();
+                calibration.setData(new Calibration.Data()
+                    .setId(entity.getId())
                     .setContent(execContent)
                     .setCompleted(completed)
                     .setPressureId(pressureEntity.getId())
-                    .setResourceId(pressureEntity.getResourceId());
-                calibration.setData(entity.getId());
+                    .setResourceId(pressureEntity.getResourceId())
+                );
                 // 保存回调信息
                 callbackService.create(pressureEntity.getCallbackUrl(), CallbackType.CALIBRATION, jsonService.writeValueAsString(calibration));
             }

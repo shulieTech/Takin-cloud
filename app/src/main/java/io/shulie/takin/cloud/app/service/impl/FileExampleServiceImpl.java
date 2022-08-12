@@ -108,12 +108,14 @@ public class FileExampleServiceImpl implements FileExampleService {
         if (Objects.nonNull(fileExampleEntity)) {
             FileEntity fileEntity = fileService.entity(fileExampleEntity.getFileId());
             if (Objects.nonNull(fileEntity)) {
-                ProgressReport progressReport = new ProgressReport()
+                ProgressReport progressReport = new ProgressReport();
+                progressReport.setData(new ProgressReport.Data()
                     .setPath(fileExampleEntity.getPath())
                     .setAttach(fileExampleEntity.getAttach())
                     .setMessage(fileExampleEntity.getMessage())
                     .setComplete(fileExampleEntity.getCompleted())
-                    .setProgress(fileExampleEntity.getCompleteSize() + "");
+                    .setProgress(fileExampleEntity.getCompleteSize() + "")
+                );
                 callbackService.create(fileEntity.getCallbackUrl(), CallbackType.FILE_RESOURCE_PROGRESS,
                     StrUtil.utf8Str(jsonService.writeValueAsString(progressReport)));
             }
