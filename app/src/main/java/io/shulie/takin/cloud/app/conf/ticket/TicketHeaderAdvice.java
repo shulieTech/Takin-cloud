@@ -12,6 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.AbstractMappingJack
 
 import io.shulie.takin.cloud.constant.TicketConstants;
 import io.shulie.takin.cloud.app.service.TicketService;
+import io.shulie.takin.cloud.data.entity.WatchmanEntity;
 import io.shulie.takin.cloud.app.service.WatchmanService;
 
 /**
@@ -37,13 +38,15 @@ public class TicketHeaderAdvice extends AbstractMappingJacksonResponseBodyAdvice
     protected void beforeBodyWriteInternal(
         @NonNull org.springframework.http.converter.json.MappingJacksonValue bodyContainer,
         @NonNull MediaType contentType, @NonNull MethodParameter returnType,
-        ServerHttpRequest request, ServerHttpResponse response) {
+        @NonNull ServerHttpRequest request, @NonNull ServerHttpResponse response) {
         long timestamp = System.currentTimeMillis();
         String watchmanSign = request.getHeaders().getFirst(TicketConstants.HEADER_WATCHMAN_SIGN);
-        // 获取调度器
-        Long watchamanId = watchmanService.ofSign(watchmanSign).getId();
+        // 获取调度器 - 忽略未找到的异常
+        WatchmanEntity watchman = null;
+        try {watchman = watchmanService.ofSign(watchmanSign);} catch (IllegalArgumentException e) {log.debug(e.getMessage());}
+        Long watchamanId = watchman == null ? null : watchman.getId();
         // 获取调度器的当前ticket
-        String ticket = ticketService.get(watchamanId.toString());
+        String ticket = ticketService.get(String.valueOf(watchamanId));
         // 计算签名
         String sign = ticketService.sign(null, timestamp, ticket);
         // 写入请求头
