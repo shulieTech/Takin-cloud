@@ -314,7 +314,7 @@ public class CalibrationServiceImpl implements CalibrationService {
             // 限定参与计算的最大错误次数
             logCount = logCount > 10 ? 10 : logCount;
             // 限定阈值时间
-            Date baseTime = calibrationEntity.getThresholdTime() == null ? calibrationEntity.getCreateTime() : calibrationEntity.getThresholdTime();
+            Date baseTime = calibrationEntity.getThresholdTime() == null ? calibrationEntity.getStartTime() : calibrationEntity.getThresholdTime();
             // 按秒累增
             DateTime thresholdTime = DateUtil.offsetSecond(baseTime, (int)(5 * logCount));
             // 更新数据库

@@ -32,9 +32,13 @@ public class CalibrationEntity {
      */
     private Boolean completed;
     /**
-     * 创建时间
+     * 开始时间
      */
-    private Date createTime;
+    private Date startTime;
+    /**
+     * 结束时间
+     */
+    private Date endTime;
     /**
      * 阈值时间
      */
