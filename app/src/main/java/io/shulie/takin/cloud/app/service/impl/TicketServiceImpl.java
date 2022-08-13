@@ -58,7 +58,7 @@ public class TicketServiceImpl implements TicketService {
         try {
             String[] a = CharSequenceUtil.splitToArray(ticket, TICKET_TIME_SEPARATOR);
             if (ArrayUtil.isEmpty(a) || a.length != 2) {
-                throw new ValidateException("ticket长度不符");
+                throw new ValidateException("ticket长度不符:" + ticket);
             }
             String timeString = a[0];
             long time = Long.parseLong(timeString);

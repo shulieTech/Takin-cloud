@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import cn.hutool.http.Header;
 import cn.hutool.http.HttpStatus;
 import cn.hutool.http.ContentType;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.exceptions.ValidateException;
 
 import org.springframework.lang.NonNull;
@@ -46,13 +47,16 @@ public class TicketInterceptorHandler implements HandlerInterceptor {
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
         @NonNull Object handler)
         throws Exception {
+        boolean result = true;
+        String exceptionMessage = null;
         try {
             // 获取请求头
             String ticketSign = request.getHeader(TicketConstants.HEADER_TICKET_SIGN);
             String watchmanSign = request.getHeader(TicketConstants.HEADER_WATCHMAN_SIGN);
-            String ticketTimestamp = request.getHeader(TicketConstants.HEADER_TICKET_TIMESTAMP);
+            String ticketTimestamp = CharSequenceUtil.blankToDefault(
+                request.getHeader(TicketConstants.HEADER_TICKET_TIMESTAMP), "0");
             // 时间戳转换
-            long timestamp = Long.parseLong(ticketTimestamp + "");
+            long timestamp = Long.parseLong(ticketTimestamp);
             // 获取调度器
             Long watchamanId = watchmanService.ofSign(watchmanSign).getId();
             // 获取调度器的当前ticket
@@ -62,20 +66,30 @@ public class TicketInterceptorHandler implements HandlerInterceptor {
                 // 重新计算签名
                 String sign = ticketService.sign(null, timestamp, ticket);
                 // 校验成功
-                if (sign.equalsIgnoreCase(ticketSign)) {return true;}
-                // 校验失败
-                else {throw new ValidateException("签名校验失败.\nin:{}\ncalc:{}", ticketSign, sign);}
+                if (!sign.equalsIgnoreCase(ticketSign)) {throw new ValidateException("签名校验失败.\nin:{}\ncalc:{}", ticketSign, sign);}
             } else {
                 throw new ValidateException("ticket校验失败.{}", ticket);
             }
-        } catch (Exception e) {
-            log.error("验签失败", e);
-            response.setStatus(HttpStatus.HTTP_UNAUTHORIZED);
-            response.setHeader(Header.CONTENT_TYPE.toString(), ContentType.build(ContentType.JSON, StandardCharsets.UTF_8));
-            PrintWriter writer = response.getWriter();
-            writer.write(jsonService.writeValueAsString(ApiResult.fail(e.getMessage())));
-            writer.flush();
-            return false;
+        } catch (ValidateException e) {
+            result = false;
+            exceptionMessage = e.getMessage();
+            log.error("验签失败[{}]\n{}", request.getRequestURL().toString(), e.getMessage());
+        } catch (RuntimeException e) {
+            result = false;
+            exceptionMessage = e.getMessage();
+            log.error("验签失败[{}]", request.getRequestURL().toString(), e);
+        } finally {
+            if (Boolean.FALSE.equals(result)) {
+                PrintWriter writer = response.getWriter();
+                // 设置响应头
+                response.setStatus(HttpStatus.HTTP_UNAUTHORIZED);
+                response.setHeader(Header.CONTENT_TYPE.toString(),
+                    ContentType.build(ContentType.JSON, StandardCharsets.UTF_8));
+                // 设置响应体
+                writer.write(jsonService.writeValueAsString(ApiResult.fail(exceptionMessage)));
+                writer.flush();
+            }
         }
+        return result;
     }
 }
