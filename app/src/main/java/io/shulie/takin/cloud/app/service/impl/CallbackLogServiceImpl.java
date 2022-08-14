@@ -24,8 +24,8 @@ import io.shulie.takin.cloud.data.service.CallbackLogMapperService;
  *
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
-@Slf4j
 @Service
+@Slf4j(topic = "CALLBACK")
 public class CallbackLogServiceImpl implements CallbackLogService {
 
     @Lazy
