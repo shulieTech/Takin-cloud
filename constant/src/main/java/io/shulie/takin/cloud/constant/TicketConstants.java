@@ -12,7 +12,7 @@ public class TicketConstants {
     /**
      * 加密签名
      */
-    public static final String HEADER_TICKET_SIGN = "TICKET_SIGN";
+    public static final String HEADER_TICKET_SIGN = "TICKET-SIGN";
     /**
      * 调度器标识签名
      */

@@ -1,7 +1,12 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import java.io.File;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.PostConstruct;
+
+import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +21,7 @@ import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.exceptions.ValidateException;
 
+import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.service.TicketService;
 
 /**
@@ -26,10 +32,34 @@ import io.shulie.takin.cloud.app.service.TicketService;
 @Slf4j
 @Service
 public class TicketServiceImpl implements TicketService {
-
+    @javax.annotation.Resource
+    private JsonService jsonService;
     ConcurrentHashMap<String, String> ticketMap = new ConcurrentHashMap<>();
     private static final long TICKET_TIME = DateUnit.MINUTE.getMillis() * 10;
     private static final String TICKET_TIME_SEPARATOR = String.valueOf(CharPool.AT);
+
+    private static final File CACHE_DATA_FILE = FileUtil.file(".ticket");
+
+    @PostConstruct
+    public void postConstruct() {
+        init();
+    }
+
+    /**
+     * 从缓存初始化Ticket
+     */
+    private void init() {
+        try {
+            if (!FileUtil.exist(CACHE_DATA_FILE)) {FileUtil.writeUtf8String("", CACHE_DATA_FILE);}
+            String cache = FileUtil.readUtf8String(CACHE_DATA_FILE);
+            Map<String, String> cacheData = jsonService.readValue(cache,
+                new com.fasterxml.jackson.core.type.TypeReference<Map<String, String>>() {});
+            log.info("初始化Ticket:{}", cacheData);
+            ticketMap.putAll(cacheData);
+        } catch (Exception e) {
+            log.error("初始化Ticket失败", e);
+        }
+    }
 
     /**
      * {@inheritDoc}
@@ -89,6 +119,8 @@ public class TicketServiceImpl implements TicketService {
             log.error("加密Ticket失败", ex);
             ticketMap.remove(id);
             throw ex;
+        } finally {
+            FileUtil.writeUtf8String(jsonService.writeValueAsString(ticketMap), CACHE_DATA_FILE);
         }
     }
 
