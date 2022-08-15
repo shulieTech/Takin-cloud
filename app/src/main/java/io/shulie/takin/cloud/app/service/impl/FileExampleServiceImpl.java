@@ -51,7 +51,7 @@ public class FileExampleServiceImpl implements FileExampleService {
             .isNull(FileExampleEntity::getMessage)
             .isNull(FileExampleEntity::getCompleted)
             .eq(FileExampleEntity::getId, progress.getId())
-            .lt(Objects.nonNull(progress.getCompleteSize()), FileExampleEntity::getCompleteSize, progress.getCompleteSize())
+            .le(Objects.nonNull(progress.getCompleteSize()), FileExampleEntity::getCompleteSize, progress.getCompleteSize())
             .update();
         if (updateResult) {
             // 进度上报

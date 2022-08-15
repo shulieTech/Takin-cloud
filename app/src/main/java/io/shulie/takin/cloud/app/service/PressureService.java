@@ -28,7 +28,7 @@ public interface PressureService {
      *
      * @param pressureId 施压任务主键
      */
-    void stop(long pressureId);
+    void stop(Long pressureId);
 
     /**
      * 查看配置
@@ -37,7 +37,7 @@ public interface PressureService {
      * @param ref 关键词
      * @return 配置内容
      */
-    List<PressureConfig> getConfig(long id, String ref);
+    List<PressureConfig> getConfig(Long id, String ref);
 
     /**
      * 修改配置
@@ -45,7 +45,7 @@ public interface PressureService {
      * @param id      施压任务主键
      * @param context 配置内容
      */
-    void modifyConfig(long id, ModifyConfig context);
+    void modifyConfig(Long id, ModifyConfig context);
 
     /**
      * 获取数据对象 - 施压任务
@@ -53,7 +53,7 @@ public interface PressureService {
      * @param id 数据主键
      * @return Entity
      */
-    PressureEntity entity(long id);
+    PressureEntity entity(Long id);
 
     /**
      * 获取数据对象 - 施压任务实例
@@ -61,7 +61,7 @@ public interface PressureService {
      * @param exampleId 数据主键
      * @return Entity
      */
-    PressureExampleEntity exampleEntity(long exampleId);
+    PressureExampleEntity exampleEntity(Long exampleId);
 
     /**
      * 获取数据对象 - 施压任务实例
@@ -70,19 +70,19 @@ public interface PressureService {
      * @param pressureId 施压任务主键
      * @return 施压任务实例列表
      */
-    List<PressureExampleEntity> exampleEntityList(long pressureId);
+    List<PressureExampleEntity> exampleEntityList(Long pressureId);
 
     /**
      * 启动事件
      *
      * @param pressureId 施压任务主键
      */
-    void onStart(long pressureId);
+    void onStart(Long pressureId);
 
     /**
      * 停止事件
      *
      * @param pressureId 施压任务主键
      */
-    void onStop(long pressureId);
+    void onStop(Long pressureId);
 }

@@ -326,7 +326,7 @@ public class PressureServiceImpl implements PressureService {
      * {@inheritDoc}
      */
     @Override
-    public void stop(long pressureId) {
+    public void stop(Long pressureId) {
         // 获取任务
         PressureEntity pressureEntity = pressureMapper.getById(pressureId);
         if (pressureEntity == null) {
@@ -340,7 +340,7 @@ public class PressureServiceImpl implements PressureService {
      * {@inheritDoc}
      */
     @Override
-    public List<PressureConfig> getConfig(long id, String ref) {
+    public List<PressureConfig> getConfig(Long id, String ref) {
         List<ThreadConfigExampleEntity> threadConfigExampleEntity = pressureConfigService.threadExampleItem(id, ref);
         return threadConfigExampleEntity.stream().map(t -> {
             ThreadConfigInfo context = null;
@@ -363,7 +363,7 @@ public class PressureServiceImpl implements PressureService {
      * {@inheritDoc}
      */
     @Override
-    public void modifyConfig(long id, ModifyConfig context) {
+    public void modifyConfig(Long id, ModifyConfig context) {
         // 1. 找到要修改的配置项
         List<ThreadConfigExampleEntity> threadConfigExample = pressureConfigService.threadExampleItem(id, context.getRef());
         // 2.1 如果没有抛出异常
@@ -389,7 +389,7 @@ public class PressureServiceImpl implements PressureService {
      * {@inheritDoc}
      */
     @Override
-    public PressureEntity entity(long id) {
+    public PressureEntity entity(Long id) {
         return pressureMapper.getById(id);
     }
 
@@ -397,7 +397,7 @@ public class PressureServiceImpl implements PressureService {
      * {@inheritDoc}
      */
     @Override
-    public PressureExampleEntity exampleEntity(long exampleId) {
+    public PressureExampleEntity exampleEntity(Long exampleId) {
         return pressureExampleMapper.getById(exampleId);
     }
 
@@ -405,19 +405,19 @@ public class PressureServiceImpl implements PressureService {
      * {@inheritDoc}
      */
     @Override
-    public List<PressureExampleEntity> exampleEntityList(long pressureId) {
+    public List<PressureExampleEntity> exampleEntityList(Long pressureId) {
         return pressureExampleMapper.lambdaQuery()
             .eq(PressureExampleEntity::getPressureId, pressureId)
             .list();
     }
 
     @Override
-    public void onStart(long pressureId) {
+    public void onStart(Long pressureId) {
         exampleEntityList(pressureId).forEach(t -> pressureExampleService.onStart(t.getId()));
     }
 
     @Override
-    public void onStop(long pressureId) {
+    public void onStop(Long pressureId) {
         exampleEntityList(pressureId).forEach(t -> {
             // 停止任务实例
             pressureExampleService.onStop(t.getId());

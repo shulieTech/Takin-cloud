@@ -51,7 +51,7 @@ public class GravestoneController {
      * @return 内容
      */
     @RequestMapping("read")
-    public ApiResult<List<Gravestone>> read(@RequestParam Integer resourceId, @RequestParam(required = false) Integer pressureId) {
+    public ApiResult<List<Gravestone>> read(@RequestParam Long resourceId, @RequestParam(required = false) Long pressureId) {
         List<Gravestone> result = new LinkedList<>();
         ResourceEntity resource = resourceService.entity(resourceId);
         if (resource != null) {
