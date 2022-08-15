@@ -24,6 +24,8 @@ public class TicketInterceptor implements WebMvcConfigurer {
         registry.addInterceptor(ticketInterceptorHandler)
             .addPathPatterns("/notify/**")
             // ignore from JMeter's request.
-            .excludePathPatterns("/notify/job/pressure/metrics/**");
+            .excludePathPatterns("/notify/job/pressure/usage/**")
+            .excludePathPatterns("/notify/job/pressure/metrics/**")
+        ;
     }
 }

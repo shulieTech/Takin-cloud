@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
-import cn.hutool.http.Header;
 import cn.hutool.http.HttpStatus;
 import cn.hutool.http.ContentType;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -80,12 +79,12 @@ public class TicketInterceptorHandler implements HandlerInterceptor {
             log.error("验签失败[{}]", request.getRequestURL().toString(), e);
         } finally {
             if (Boolean.FALSE.equals(result)) {
-                PrintWriter writer = response.getWriter();
                 // 设置响应头
                 response.setStatus(HttpStatus.HTTP_UNAUTHORIZED);
-                response.setHeader(Header.CONTENT_TYPE.toString(),
-                    ContentType.build(ContentType.JSON, StandardCharsets.UTF_8));
+                response.setContentType(ContentType.JSON.getValue());
+                response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
                 // 设置响应体
+                PrintWriter writer = response.getWriter();
                 writer.write(jsonService.writeValueAsString(ApiResult.fail(exceptionMessage)));
                 writer.flush();
             }
