@@ -1,10 +1,10 @@
-# \n\s+?foreign key
-# \n\s+?comment
-# \n\s+?primary key
+#\n\s+?\b(foreign|comment|primary|unique|on)
+#$1
 
 create table if not exists t_callback
 (
     id             bigint auto_increment comment '主键' primary key,
+    type           int        default -1                not null comment '类型',
     url            varchar(1000)                        not null comment '回调路径',
     context        blob                                 not null comment '回调内容',
     create_time    timestamp  default CURRENT_TIMESTAMP not null comment '创建时间',
@@ -16,6 +16,7 @@ create table if not exists t_callback_log
 (
     id            bigint auto_increment comment '主键' primary key,
     callback_id   bigint                               not null comment '回调主键',
+    type          int        default -1                not null comment '类型',
     request_url   varchar(1000)                        not null comment '请求路径',
     request_data  blob                                 not null comment '请求数据',
     request_time  timestamp  default CURRENT_TIMESTAMP not null comment '请求时间',
@@ -28,26 +29,17 @@ create table if not exists t_callback_log
 create table if not exists t_file
 (
     id           bigint auto_increment comment '主键' primary key,
-    callback_url varchar(255) null comment '回调地址'
+    callback_url varchar(255) null comment '回调地址',
+    attach       varchar(255) null comment '附加数据'
 ) comment '文件';
-
-create table if not exists t_script_verification
-(
-    id         int auto_increment comment '主键' primary key,
-    content    json                               not null comment '任务内容',
-    start_time datetime default CURRENT_TIMESTAMP not null comment '开始时间',
-    completed  tinyint(1)                         null comment '是否完成',
-    message    varchar(255)                       null comment '执行结果',
-    end_time   datetime                           null comment '结束时间'
-) comment '脚本校验任务';
 
 create table if not exists t_watchman
 (
     id         bigint auto_increment comment '主键' primary key,
     ref        varchar(512)            not null comment '关键词',
-    ref_sign   varchar(255)            not null comment '关键词签名',
+    sign       varchar(255)            not null comment '关键词签名',
     public_key varchar(512) default '' not null comment '数据加密的公钥',
-    constraint t_watchman_ref_sign_uindex unique (ref_sign)
+    constraint t_watchman_ref_sign_uindex unique (sign)
 ) comment '调度器';
 
 create table if not exists t_command
@@ -65,23 +57,37 @@ create table if not exists t_command
 create table if not exists t_file_example
 (
     id            bigint auto_increment comment '主键' primary key,
-    file_id       bigint                not null comment '文件主键',
-    watchman_id   bigint                not null comment '调度器主键',
-    path          varchar(255)          not null comment '文件路径',
-    sign          varchar(255)          not null comment '文件摘要(MD5)',
-    download_url  varchar(255)          not null comment '下载地址',
-    complete_size bigint     default 0  not null comment '完成的大小',
-    total_size    bigint     default -1 not null comment '总大小',
-    completed     tinyint(1) default 0  not null comment '已完成',
-    message       varchar(255)          null comment '消息',
+    file_id       bigint                  not null comment '文件主键',
+    watchman_id   bigint                  not null comment '调度器主键',
+    attach        varchar(255)            null comment '附加数据',
+    path          varchar(255)            not null comment '文件路径',
+    sign          varchar(255) default '' not null comment '文件摘要(MD5)',
+    download_url  varchar(2048)           not null comment '下载地址',
+    complete_size bigint       default 0  not null comment '完成的大小',
+    total_size    bigint       default -1 not null comment '总大小',
+    completed     tinyint(1)              null comment '已完成',
+    message       varchar(255)            null comment '消息',
     constraint t_file_example_t_watchman_id_fk foreign key (watchman_id) references t_watchman (id),
     constraint t_file_manage_list_t_file_manage_id_fk foreign key (file_id) references t_file (id)
 ) comment '文件实例';
 
+create table if not exists t_script
+(
+    id           int auto_increment comment '主键' primary key,
+    watchman_id  bigint                             not null comment '调度器主键',
+    attach       varchar(255)                       null comment '附加数据',
+    content      json                               not null comment '任务内容',
+    callback_url varchar(255)                       not null comment '回调地址',
+    start_time   datetime default CURRENT_TIMESTAMP not null comment '开始时间',
+    completed    tinyint(1)                         null comment '是否完成',
+    message      varchar(255)                       null comment '执行结果',
+    end_time     datetime                           null comment '结束时间',
+    constraint t_script_t_watchman_id_fk foreign key (watchman_id) references t_watchman (id)
+) comment '脚本校验任务';
+
 create table if not exists t_resource
 (
     id           bigint auto_increment comment '主键' primary key,
-    watchman_id  bigint                              not null comment '调度器主键',
     number       int                                 not null comment '需要的数量',
     cpu          varchar(255)                        not null comment '需要的CPU',
     memory       varchar(255)                        not null comment '需要的内存',
@@ -89,8 +95,7 @@ create table if not exists t_resource
     limit_memory varchar(255)                        not null comment '限定的内存',
     create_time  timestamp default CURRENT_TIMESTAMP not null comment '创建时间',
     callback_url varchar(512)                        not null comment '状态回调接口路径',
-    image        varchar(1024)                       null comment '资源镜像信息',
-    constraint t_resource_t_watchman_id_fk foreign key (watchman_id) references t_watchman (id)
+    image        varchar(1024)                       null comment '资源镜像信息'
 ) comment '资源表';
 
 create table if not exists t_pressure
@@ -109,14 +114,23 @@ create table if not exists t_pressure
 
 create table if not exists t_calibration
 (
-    id          bigint auto_increment comment '主键' primary key,
-    pressure_id bigint                               not null comment '施压任务主键',
-    content     varchar(512)                         not null comment '任务内容',
-    completed   tinyint(1) default 0                 not null comment '是否完成',
-    start_time  timestamp  default CURRENT_TIMESTAMP not null comment '开始时间',
-    end_time    timestamp                            null comment '结束时间',
+    id             bigint auto_increment comment '主键' primary key,
+    pressure_id    bigint                               not null comment '施压任务主键',
+    completed      tinyint(1) default 0                 not null comment '是否完成',
+    start_time     timestamp  default CURRENT_TIMESTAMP not null comment '开始时间',
+    end_time       timestamp                            null comment '结束时间',
+    threshold_time datetime                             null comment '阈值时间',
     constraint t_calibration_t_pressure_id_fk foreign key (pressure_id) references t_pressure (id)
 ) comment '数据校准任务';
+
+create table if not exists t_calibration_log
+(
+    id             bigint auto_increment primary key,
+    calibration_id bigint       not null,
+    content        varchar(255) null,
+    completed      tinyint(1)   null,
+    constraint t_calibration_log_t_calibration_id_fk foreign key (calibration_id) references t_calibration (id)
+);
 
 create table if not exists t_metrics_config
 (
