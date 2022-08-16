@@ -14,7 +14,7 @@ public class Message {
     public static final String TPS_NUMBER = "tps";
     public static final String THREAD_NUMBER = "number";
     public static final String MESSAGE_NAME = "message";
-    public static final String WATCHMAN_MISS = "调度机未上报";
+    public static final String WATCHMAN_MISS = "调度机未匹配:{}";
     public static final String MISS_PRESSURE = "未找到施压任务:{}";
     public static final String MISS_CALIBRATION = "未找到数据校准任务:{}";
     public static final String MISS_RESOURCE = "未找到资源:{}";
