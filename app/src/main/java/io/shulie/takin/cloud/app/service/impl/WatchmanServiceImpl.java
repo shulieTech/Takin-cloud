@@ -308,16 +308,20 @@ public class WatchmanServiceImpl implements WatchmanService {
             .setId(watchmanEntity.getId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean update(Long id, String publicKey) {
         WatchmanEntity watchmanEntity = watchmanMapper.getById(id);
         if (Objects.nonNull(watchmanEntity)) {
             String[] oldRef = watchmanEntity.getRef().split("\\.");
             String ref = crypto(oldRef[0], oldRef[1], publicKey);
-            String refSign = SecureUtil.md5(ref);
+            String sign = SecureUtil.md5(ref);
             return watchmanMapper.lambdaUpdate()
                 .set(WatchmanEntity::getRef, ref)
-                .set(WatchmanEntity::getSign, refSign)
+                .set(WatchmanEntity::getSign, sign)
+                .set(WatchmanEntity::getPublicKey, publicKey)
                 .eq(WatchmanEntity::getId, id).update();
         } else {
             return false;
