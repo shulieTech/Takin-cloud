@@ -4,6 +4,16 @@ plugins {
 
 description = 'sdk'
 
+dependencies {
+    // 项目内依赖
+    implementation project(':constant')
+    // lombok
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+    // 其它
+    implementation libs.hutool
+}
+
 publishing {
     repositories {
         maven {
