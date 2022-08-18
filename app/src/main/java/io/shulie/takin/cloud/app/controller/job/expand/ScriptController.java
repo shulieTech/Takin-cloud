@@ -20,7 +20,7 @@ import io.shulie.takin.cloud.model.request.job.script.BuildRequest;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Tag(name = "脚本任务拓展")
-@RequestMapping("/expand/job/script")
+@RequestMapping("/job/expand/script")
 @RestController("JobExpandScriptController")
 public class ScriptController {
     @javax.annotation.Resource

@@ -31,7 +31,7 @@ public class Swagger {
     public GroupedOpenApi jobExpandApi() {
         return GroupedOpenApi.builder()
             .group("任务拓展")
-            .pathsToMatch("/expand/job/**")
+            .pathsToMatch("/job/expand/**")
             .build();
     }
 

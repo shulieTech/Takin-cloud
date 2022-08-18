@@ -18,7 +18,7 @@ repositories {
 }
 
 group = 'io.shulie.takin.cloud'
-version = '5.4.0.17'
+version = '5.4.0.18'
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 publishing {

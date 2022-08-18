@@ -29,7 +29,7 @@ import io.shulie.takin.cloud.model.request.job.resource.ApplyResourceRequest;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Tag(name = "资源任务拓展")
-@RequestMapping("/expand/job/resource")
+@RequestMapping("/job/expand/resource")
 @RestController("JobExpandResouceController")
 public class ResouceController {
     @javax.annotation.Resource

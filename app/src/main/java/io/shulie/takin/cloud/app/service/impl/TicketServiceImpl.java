@@ -2,15 +2,17 @@ package io.shulie.takin.cloud.app.service.impl;
 
 import java.io.File;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
-import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.system.SystemUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.MD5;
 import cn.hutool.core.text.CharPool;
@@ -34,11 +36,11 @@ import io.shulie.takin.cloud.app.service.TicketService;
 public class TicketServiceImpl implements TicketService {
     @javax.annotation.Resource
     private JsonService jsonService;
-    ConcurrentHashMap<String, String> ticketMap = new ConcurrentHashMap<>();
+    ConcurrentMap<String, String> ticketMap = new ConcurrentHashMap<>();
     private static final long TICKET_TIME = DateUnit.MINUTE.getMillis() * 10;
     private static final String TICKET_TIME_SEPARATOR = String.valueOf(CharPool.AT);
 
-    private static final File CACHE_DATA_FILE = FileUtil.file(".ticket");
+    private static final File CACHE_DATA_FILE = FileUtil.file(SystemUtil.getUserInfo().getCurrentDir(), ".ticket");
 
     @PostConstruct
     public void postConstruct() {

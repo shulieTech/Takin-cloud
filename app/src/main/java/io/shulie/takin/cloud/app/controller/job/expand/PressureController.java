@@ -23,7 +23,7 @@ import io.shulie.takin.cloud.model.request.job.pressure.ModifyConfig;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Tag(name = "发压任务拓展")
-@RequestMapping("/expand/job/pressure")
+@RequestMapping("/job/expand/pressure")
 @RestController("JobExpandPressureController")
 public class PressureController {
     @javax.annotation.Resource
