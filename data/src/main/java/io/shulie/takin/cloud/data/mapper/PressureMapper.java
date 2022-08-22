@@ -1,0 +1,13 @@
+package io.shulie.takin.cloud.data.mapper;
+
+import io.shulie.takin.cloud.data.entity.PressureEntity;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+/**
+ * 施压任务 - MyBatisPlus
+ *
+ * @author <a href="mailto:472546172@qq.com">张天赐</a>
+ */
+public interface PressureMapper extends BaseMapper<PressureEntity> {
+}

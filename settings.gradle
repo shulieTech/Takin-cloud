@@ -1,0 +1,16 @@
+rootProject.name = 'takin-cloud'
+// 包含的模块
+include(':constant')
+include(':model')
+include(':data')
+include(':sdk')
+include(':app')
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            from(files("./libs.versions.toml"))
+        }
+    }
+}
+

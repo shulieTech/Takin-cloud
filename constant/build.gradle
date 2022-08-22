@@ -1,0 +1,30 @@
+plugins {
+    id 'io.shulie.takin.cloud.java-conventions'
+}
+
+dependencies {
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+
+    implementation libs.hutool
+    compileOnly libs.jackson.annotations
+}
+
+description = 'constant'
+
+publishing {
+    repositories {
+        maven {
+            name = "OSSRH"
+            if (project.version.toString().endsWith("-SNAPSHOT")) {
+                url = "https://packages.aliyun.com/maven/repository/2101190-snapshot-EQD7pQ/"
+            } else {
+                url = "https://packages.aliyun.com/maven/repository/2101190-release-xxuvBf/"
+            }
+            credentials {
+                username = findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
+                password = findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
+            }
+        }
+    }
+}

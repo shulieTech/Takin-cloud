@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        url = uri('https://maven.aliyun.com/nexus/content/groups/public')
+    }
+    maven {
+        url = uri('https://packages.aliyun.com/maven/repository/2101190-release-xxuvBf/')
+    }
+    maven {
+        url = uri('https://packages.aliyun.com/maven/repository/2101190-snapshot-EQD7pQ/')
+    }
+}
+
+group = 'io.shulie.takin.cloud'
+version = '5.4.0.18'
+java.sourceCompatibility = JavaVersion.VERSION_1_8
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+
+java {
+    javadoc.options.addStringOption('Xdoclint:none', '-quiet')
+//    withSourcesJar()
+//    withJavadocJar()
+}
+
+javadoc {
+    options.addStringOption("charset", "UTF-8")
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}

@@ -1,0 +1,36 @@
+plugins {
+    id 'io.shulie.takin.cloud.java-conventions'
+}
+
+dependencies {
+    // 项目内依赖
+    api project(':constant')
+    // 参数验证
+    implementation libs.spring.boot.validation
+    // lombok
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+    // 编译依赖项
+    compileOnly libs.influxdb
+    compileOnly libs.spring.doc
+    implementation 'org.hibernate.validator:hibernate-validator:6.2.0.Final'
+}
+
+description = 'model'
+
+publishing {
+    repositories {
+        maven {
+            name = "OSSRH"
+            if (project.version.toString().endsWith("-SNAPSHOT")) {
+                url = "https://packages.aliyun.com/maven/repository/2101190-snapshot-EQD7pQ/"
+            } else {
+                url = "https://packages.aliyun.com/maven/repository/2101190-release-xxuvBf/"
+            }
+            credentials {
+                username = findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
+                password = findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
+            }
+        }
+    }
+}

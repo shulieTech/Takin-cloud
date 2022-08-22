@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+    <contextName>logback</contextName>
+    <!--  日志目录配置  -->
+    <property name="log_path" value="./logs"/>
+    <property name="notify_log_path" value="./logs/notify"/>
+    <property name="service_log_path" value="./logs/service"/>
+    <property name="metrics_log_path" value="./logs/metrics"/>
+    <property name="callback_log_path" value="./logs/callback"/>
+    <property name="my_batis_log_path" value="./logs/my_batis"/>
+    <property name="calibration_log_path" value="./logs/calibration"/>
+    <!--  MyBatis配置  -->
+    <logger name="com.apache.ibatis" level="DEBUG"/>
+    <logger name="java.sql.Statement" level="DEBUG"/>
+    <logger name="java.sql.Connection" level="DEBUG"/>
+    <logger name="java.sql.PreparedStatement" level="DEBUG"/>
+    <!--  输出格式配置  -->
+    <property name="pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} [%X{onlyToken}] - %msg%n"/>
+    <!--  回调任务的日志单独输出  -->
+    <appender name="CALLBACK_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/callback_info.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <maxFileSize>100MB</maxFileSize>
+            <fileNamePattern>${callback_log_path}/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>info</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+    <appender name="CALLBACK_NOT_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/callback_not_info.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <maxFileSize>100MB</maxFileSize>
+            <fileNamePattern>${callback_log_path}/not_info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>warn</level>
+        </filter>
+    </appender>
+    <!--  输出控制  -->
+    <logger name="CALLBACK" level="DEBUG" additivity="false">
+        <appender-ref ref="CALLBACK_INFO"/>
+        <appender-ref ref="CALLBACK_NOT_INFO"/>
+    </logger>
+    <!--  数据校准任务的日志单独输出  -->
+    <appender name="CALIBRATION_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/calibration_info.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <maxFileSize>100MB</maxFileSize>
+            <fileNamePattern>${calibration_log_path}/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>info</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+    <appender name="CALIBRATION_NOT_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/calibration_not_info.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <maxFileSize>100MB</maxFileSize>
+            <fileNamePattern>${calibration_log_path}/not_info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>warn</level>
+        </filter>
+    </appender>
+    <!--  输出控制  -->
+    <logger name="CALIBRATION" level="DEBUG" additivity="false">
+        <appender-ref ref="CALIBRATION_INFO"/>
+        <appender-ref ref="CALIBRATION_NOT_INFO"/>
+    </logger>
+    <!--  通知事件的日志单独输出  -->
+    <appender name="NOTIFY_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/notify_info.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <maxFileSize>100MB</maxFileSize>
+            <fileNamePattern>${notify_log_path}/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>info</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+    <appender name="NOTIFY_NOT_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/notify_not_info.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <maxFileSize>100MB</maxFileSize>
+            <fileNamePattern>${notify_log_path}/not_info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>warn</level>
+        </filter>
+    </appender>
+    <!--  输出控制  -->
+    <logger name="NOTIFY" level="DEBUG" additivity="false">
+        <appender-ref ref="CALLBACK_INFO"/>
+        <appender-ref ref="CALLBACK_NOT_INFO"/>
+    </logger>
+    <!--  指标上报的日志单独输出  -->
+    <appender name="METRICS_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/metrics_info.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <maxFileSize>100MB</maxFileSize>
+            <fileNamePattern>${metrics_log_path}/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>info</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+    <appender name="METRICS_NOT_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/metrics_not_info.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <maxFileSize>100MB</maxFileSize>
+            <fileNamePattern>${metrics_log_path}/not_info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>warn</level>
+        </filter>
+    </appender>
+    <!--  输出控制  -->
+    <logger name="METRICS" level="DEBUG" additivity="false">
+        <appender-ref ref="METRICS_INFO"/>
+        <appender-ref ref="METRICS_NOT_INFO"/>
+    </logger>
+    <!--  指标上报的日志单独输出  -->
+    <appender name="MY-BATIS_ALL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/mybatis.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <maxFileSize>100MB</maxFileSize>
+            <fileNamePattern>${my_batis_log_path}/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>trace</level>
+        </filter>
+    </appender>
+    <!--  输出控制  -->
+    <logger name="MY-BATIS" level="DEBUG" additivity="false">
+        <appender-ref ref="MY-BATIS_ALL"/>
+    </logger>
+    <!--  普通日志  -->
+    <!--输出到控制台-->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${pattern}</pattern>
+        </encoder>
+    </appender>
+    <!--  输出到文件  -->
+    <appender name="SERVICE_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/service_info.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <maxFileSize>100MB</maxFileSize>
+            <fileNamePattern>${service_log_path}/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>info</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+    <appender name="SERVICE_NOT_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/service_not_info.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <maxFileSize>100MB</maxFileSize>
+            <fileNamePattern>${service_log_path}/not_info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>warn</level>
+        </filter>
+    </appender>
+    <!--  输出控制  -->
+    <root level="info">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="SERVICE_INFO"/>
+        <appender-ref ref="SERVICE_NOT_INFO"/>
+    </root>
+</configuration>
