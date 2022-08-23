@@ -25,10 +25,11 @@ public interface TicketService {
     /**
      * 验证ticket
      *
+     * @param id     验证的ticket的key
      * @param ticket 需要验证的ticket
      * @return 验证结果
      */
-    boolean verification(String ticket);
+    boolean verification(String id, String ticket);
 
     /**
      * 加密ticket

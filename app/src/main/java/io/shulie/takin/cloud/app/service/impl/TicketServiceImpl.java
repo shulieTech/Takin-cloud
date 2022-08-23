@@ -1,18 +1,10 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import java.io.File;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.PostConstruct;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.crypto.SecureUtil;
-import cn.hutool.system.SystemUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.MD5;
 import cn.hutool.core.text.CharPool;
@@ -23,7 +15,6 @@ import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.exceptions.ValidateException;
 
-import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.service.TicketService;
 
 /**
@@ -35,41 +26,18 @@ import io.shulie.takin.cloud.app.service.TicketService;
 @Service
 public class TicketServiceImpl implements TicketService {
     @javax.annotation.Resource
-    private JsonService jsonService;
-    ConcurrentMap<String, String> ticketMap = new ConcurrentHashMap<>();
+    StringRedisTemplate stringRedisTemplate;
+    private static final String TICKET_CACHE_KEY = "takin:cloud:ticket";
     private static final long TICKET_TIME = DateUnit.MINUTE.getMillis() * 10;
     private static final String TICKET_TIME_SEPARATOR = String.valueOf(CharPool.AT);
-
-    private static final File CACHE_DATA_FILE = FileUtil.file(SystemUtil.getUserInfo().getCurrentDir(), ".ticket");
-
-    @PostConstruct
-    public void postConstruct() {
-        init();
-    }
-
-    /**
-     * 从缓存初始化Ticket
-     */
-    private void init() {
-        try {
-            if (!FileUtil.exist(CACHE_DATA_FILE)) {FileUtil.writeUtf8String("", CACHE_DATA_FILE);}
-            String cache = FileUtil.readUtf8String(CACHE_DATA_FILE);
-            Map<String, String> cacheData = jsonService.readValue(cache,
-                new com.fasterxml.jackson.core.type.TypeReference<Map<String, String>>() {});
-            log.info("初始化Ticket:{}", cacheData);
-            ticketMap.putAll(cacheData);
-        } catch (Exception e) {
-            log.error("初始化Ticket失败", e);
-        }
-    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public String get(String id) {
-        String ticket = ticketMap.get(id);
-        return ticket + "";
+        Object ticket = stringRedisTemplate.opsForHash().get(TICKET_CACHE_KEY, id);
+        return StrUtil.utf8Str(ticket);
     }
 
     /**
@@ -86,7 +54,7 @@ public class TicketServiceImpl implements TicketService {
      * {@inheritDoc}
      */
     @Override
-    public boolean verification(String ticket) {
+    public boolean verification(String id, String ticket) {
         try {
             String[] a = CharSequenceUtil.splitToArray(ticket, TICKET_TIME_SEPARATOR);
             if (ArrayUtil.isEmpty(a) || a.length != 2) {
@@ -100,6 +68,7 @@ public class TicketServiceImpl implements TicketService {
             return true;
         } catch (RuntimeException e) {
             log.error("ticket校验失败", e);
+            stringRedisTemplate.opsForHash().delete(TICKET_CACHE_KEY, id);
             return false;
         }
     }
@@ -110,7 +79,7 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public String encrypt(String id, String ticket, String publicKey) {
         try {
-            ticketMap.put(id, ticket);
+            stringRedisTemplate.opsForHash().put(TICKET_CACHE_KEY, id, ticket);
             // 如果公钥为空则不加密
             if (!CharSequenceUtil.isNotBlank(publicKey)) {return ticket;}
             // 否则将ticket以公钥加密
@@ -119,10 +88,8 @@ public class TicketServiceImpl implements TicketService {
             }
         } catch (RuntimeException ex) {
             log.error("加密Ticket失败", ex);
-            ticketMap.remove(id);
+            stringRedisTemplate.opsForHash().delete(TICKET_CACHE_KEY, id);
             throw ex;
-        } finally {
-            FileUtil.writeUtf8String(jsonService.writeValueAsString(ticketMap), CACHE_DATA_FILE);
         }
     }
 

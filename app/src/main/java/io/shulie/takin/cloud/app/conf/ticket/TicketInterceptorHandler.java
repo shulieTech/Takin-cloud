@@ -61,7 +61,7 @@ public class TicketInterceptorHandler implements HandlerInterceptor {
             // 获取调度器的当前ticket
             String ticket = ticketService.get(watchamanId.toString());
             // 校验ticket
-            if (ticketService.verification(ticket)) {
+            if (ticketService.verification(watchamanId.toString(),ticket)) {
                 // 重新计算签名
                 String sign = ticketService.sign(null, timestamp, ticket);
                 // 校验成功
