@@ -6,7 +6,8 @@ description = 'sdk'
 
 dependencies {
     // 项目内依赖
-    implementation project(':constant')
+    api project(':model')
+    api project(':constant')
     // lombok
     compileOnly libs.lombok
     annotationProcessor libs.lombok
