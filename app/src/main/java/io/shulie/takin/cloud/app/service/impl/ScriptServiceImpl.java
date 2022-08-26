@@ -2,9 +2,9 @@ package io.shulie.takin.cloud.app.service.impl;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Map;
 import java.util.List;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -26,6 +26,7 @@ import org.apache.jmeter.protocol.java.sampler.JavaSampler;
 
 import lombok.extern.slf4j.Slf4j;
 
+import cn.hutool.core.text.StrPool;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.exceptions.ValidateException;
@@ -55,6 +56,7 @@ public class ScriptServiceImpl implements ScriptService {
     WatchmanConfig watchmanConfig;
 
     private static final Object lockObj = new Object();
+    private static final String PROPERTY_TESTELEMENT_ENABLED = "TestElement.enabled";
 
     @Override
     public String buildJmeterScript(ScriptBuildRequest scriptRequest) {
@@ -89,10 +91,10 @@ public class ScriptServiceImpl implements ScriptService {
 
     @Override
     public ApiResult<Object> checkJmeterScript(ScriptCheckRequest scriptCheckRequest) {
-        if (StringUtils.startsWith(scriptCheckRequest.getScriptPath(), "/")) {
+        if (StringUtils.startsWith(scriptCheckRequest.getScriptPath(), StrPool.SLASH)) {
             return ApiResult.fail("脚本路径应该为相对路径");
         }
-        String path = StringUtils.trimToEmpty(watchmanConfig.getNfsPath() + "/" + scriptCheckRequest.getScriptPath());
+        String path = StringUtils.trimToEmpty(watchmanConfig.getNfsPath() + StrPool.SLASH + scriptCheckRequest.getScriptPath());
         //检测压测脚本是否存在
         File jmxFile = new File(path);
         if (!jmxFile.exists()) {
@@ -105,14 +107,14 @@ public class ScriptServiceImpl implements ScriptService {
             String[] plugins = scriptCheckRequest.getPluginPaths().split(",");
             for (String plugin : plugins) {
                 File pluginFile;
-                if (StringUtils.startsWith(plugin, "/")) {
-                    String name = plugin.substring(plugin.lastIndexOf("/") + 1);
+                if (StringUtils.startsWith(plugin, StrPool.SLASH)) {
+                    String name = plugin.substring(plugin.lastIndexOf(StrPool.SLASH) + 1);
                     pluginFile = JmeterPluginsConstant.localPluginFiles.getOrDefault(name, null);
                     if (Objects.isNull(pluginFile)) {
                         continue;
                     }
                 } else {
-                    String pluginPath = StringUtils.trim(watchmanConfig.getNfsPath() + "/" + plugin);
+                    String pluginPath = StringUtils.trim(watchmanConfig.getNfsPath() + StrPool.SLASH + plugin);
                     pluginFile = new File(pluginPath);
                     if (!pluginFile.exists()) {
                         return ApiResult.fail(String.format("插件不存在，请检测插件路径：%s", pluginPath));
@@ -137,10 +139,7 @@ public class ScriptServiceImpl implements ScriptService {
                 //校验BeanShell
                 chekBeanShell(hashTree);
                 //校验JavaSampler
-                boolean javaFlag = chekJavaSampler(hashTree);
-                if (!javaFlag) {
-                    return ApiResult.fail("JavaSampler校验失败，请检查配置项[classname]依赖的插件是否上传");
-                }
+                chekJavaSampler(hashTree);
             } finally {
                 //卸载插件
                 unInstallPlugin();
@@ -152,10 +151,10 @@ public class ScriptServiceImpl implements ScriptService {
         if (StringUtils.isNotBlank(scriptCheckRequest.getCsvPaths())) {
             String[] temps = scriptCheckRequest.getCsvPaths().split(",");
             for (String csvPath : temps) {
-                if (StringUtils.startsWith(csvPath, "/")) {
+                if (StringUtils.startsWith(csvPath, StrPool.SLASH)) {
                     return ApiResult.fail("CSV文件路径应该为相对路径");
                 }
-                csvPath = StringUtils.trimToEmpty(watchmanConfig.getNfsPath() + "/" + csvPath);
+                csvPath = StringUtils.trimToEmpty(watchmanConfig.getNfsPath() + StrPool.SLASH + csvPath);
                 File csvFile = new File(csvPath);
                 if (!csvFile.exists()) {
                     return ApiResult.fail(String.format("CSV文件不存在，请检测CSV文件路径：%s", csvPath));
@@ -163,10 +162,7 @@ public class ScriptServiceImpl implements ScriptService {
                 csvConfigs.add(csvPath);
             }
         }
-        boolean csvFlag = chekCsvDataSet(hashTree, csvConfigs);
-        if (!csvFlag) {
-            return ApiResult.fail("csv校验失败，请检查相关csv文件是否上传");
-        }
+        chekCsvDataSet(hashTree, csvConfigs);
         return ApiResult.success("脚本验证成功");
     }
 
@@ -177,7 +173,7 @@ public class ScriptServiceImpl implements ScriptService {
             getHashTreeValue(hashTree, BeanShellPreProcessor.class, shells);
             if (CollUtil.isEmpty(shells)) {return;}
             for (BeanShellPreProcessor shell : shells) {
-                boolean flag = shell.getProperty("TestElement.enabled").getBooleanValue();
+                boolean flag = shell.getProperty(PROPERTY_TESTELEMENT_ENABLED).getBooleanValue();
                 if (!flag) {
                     continue;
                 }
@@ -202,16 +198,14 @@ public class ScriptServiceImpl implements ScriptService {
         }
     }
 
-    private boolean chekJavaSampler(HashTree hashTree) {
+    private void chekJavaSampler(HashTree hashTree) {
         try {
             //提取beanShell
             List<JavaSampler> javas = new ArrayList<>();
             getHashTreeValue(hashTree, JavaSampler.class, javas);
-            if (CollUtil.isEmpty(javas)) {
-                return true;
-            }
+            if (CollUtil.isEmpty(javas)) {return;}
             for (JavaSampler javaSampler : javas) {
-                boolean flag = javaSampler.getProperty("TestElement.enabled").getBooleanValue();
+                boolean flag = javaSampler.getProperty(PROPERTY_TESTELEMENT_ENABLED).getBooleanValue();
                 if (!flag) {
                     continue;
                 }
@@ -220,23 +214,23 @@ public class ScriptServiceImpl implements ScriptService {
                 //校验
                 Class.forName(clazz, false, JmeterLibClassLoader.getInstance());
             }
-            return true;
+        } catch (ClassNotFoundException e) {
+            log.error("校验Java采样器失败,实现类未找到.", e);
+            throw new ValidateException(e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("校验Java采样器失败", e);
+            throw e;
         }
-        return false;
     }
 
-    public boolean chekCsvDataSet(HashTree hashTree, List<String> csvConfigs) {
+    public void chekCsvDataSet(HashTree hashTree, List<String> csvConfigs) {
         try {
             //提取beanShell
             List<CSVDataSet> csvDataSets = new ArrayList<>();
             getHashTreeValue(hashTree, CSVDataSet.class, csvDataSets);
-            if (CollUtil.isEmpty(csvDataSets)) {
-                return true;
-            }
+            if (CollUtil.isEmpty(csvDataSets)) {return;}
             for (CSVDataSet csvDataSet : csvDataSets) {
-                boolean flag = csvDataSet.getProperty("TestElement.enabled").getBooleanValue();
+                boolean flag = csvDataSet.getProperty(PROPERTY_TESTELEMENT_ENABLED).getBooleanValue();
                 //提取filename
                 String csvFileName = csvDataSet.getProperty("filename").getStringValue();
                 if (!flag || StringUtils.isBlank(csvFileName)) {
@@ -245,31 +239,30 @@ public class ScriptServiceImpl implements ScriptService {
                 //校验csvFile
                 String csvConfig = nameMatch(csvConfigs, csvFileName);
                 if (csvConfigs.isEmpty() || StringUtils.isBlank(csvConfig)) {
-                    return false;
+                    throw new ValidateException("文件[{}]未上传", csvFileName);
                 }
             }
-            return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("校验csv数据集失败", e);
+            throw e;
         }
-        return false;
     }
 
     private String nameMatch(List<String> csvConfigs, String rawFilePath) {
         String rawFileName = rawFilePath;
-        if (rawFilePath.contains("/")) {
-            rawFileName = rawFilePath.substring(rawFilePath.lastIndexOf("/") + 1);
+        if (rawFilePath.contains(StrPool.SLASH)) {
+            rawFileName = rawFilePath.substring(rawFilePath.lastIndexOf(StrPool.SLASH) + 1);
         }
-        if (rawFilePath.contains("\\")) {
-            rawFileName = rawFilePath.substring(rawFilePath.lastIndexOf("\\") + 1);
+        if (rawFilePath.contains(StrPool.BACKSLASH)) {
+            rawFileName = rawFilePath.substring(rawFilePath.lastIndexOf(StrPool.BACKSLASH) + 1);
         }
         for (String csvConfig : csvConfigs) {
             String csvFileName = csvConfig;
-            if (csvConfig.contains("/")) {
-                csvFileName = csvConfig.substring(csvConfig.lastIndexOf("/") + 1);
+            if (csvConfig.contains(StrPool.SLASH)) {
+                csvFileName = csvConfig.substring(csvConfig.lastIndexOf(StrPool.SLASH) + 1);
             }
-            if (csvConfig.contains("\\")) {
-                csvFileName = csvConfig.substring(csvConfig.lastIndexOf("\\") + 1);
+            if (csvConfig.contains(StrPool.BACKSLASH)) {
+                csvFileName = csvConfig.substring(csvConfig.lastIndexOf(StrPool.BACKSLASH) + 1);
             }
             if (StringUtils.equalsIgnoreCase(csvFileName, rawFileName)) {
                 return csvConfig;
