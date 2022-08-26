@@ -1,61 +1,60 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import cn.hutool.core.collection.CollectionUtil;
-import io.shulie.takin.cloud.app.classloader.AppParentClassLoader;
-import io.shulie.takin.cloud.app.classloader.JmeterLibClassLoader;
-import io.shulie.takin.cloud.app.service.ScriptService;
-import io.shulie.takin.cloud.app.service.jmeter.SaveService;
-import io.shulie.takin.cloud.app.util.JmeterScriptUtil;
-import io.shulie.takin.cloud.constant.JmeterPluginsConstant;
-import io.shulie.takin.cloud.model.request.ScriptBuildRequest;
-import io.shulie.takin.cloud.model.request.ScriptCheckRequest;
-import io.shulie.takin.cloud.model.response.ApiResult;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.jmeter.config.CSVDataSet;
-import org.apache.jmeter.engine.PreCompiler;
-import org.apache.jmeter.engine.TurnElementsOn;
-import org.apache.jmeter.modifiers.BeanShellPreProcessor;
-import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
-import org.apache.jmeter.protocol.http.sampler.HTTPSamplerBase;
-import org.apache.jmeter.protocol.java.sampler.JavaSampler;
-import org.apache.jmeter.samplers.SampleResult;
-import org.apache.jmeter.testelement.TestStateListener;
-import org.apache.jmeter.threads.JMeterContextService;
-import org.apache.jmeter.threads.JMeterVariables;
-import org.apache.jmeter.util.JMeterUtils;
-import org.apache.jorphan.collections.HashTree;
-import org.apache.jorphan.collections.SearchByClass;
+import java.io.File;
+import java.net.URL;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.net.MalformedURLException;
+
+import javax.annotation.Resource;
+
+import org.dom4j.Element;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.jmeter.config.CSVDataSet;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.jmeter.engine.PreCompiler;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+import org.apache.jmeter.engine.TurnElementsOn;
+import org.apache.jorphan.collections.HashTree;
+import org.apache.jmeter.modifiers.BeanShellPreProcessor;
+import org.apache.jmeter.protocol.java.sampler.JavaSampler;
 
-import java.io.File;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
+
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.exceptions.ValidateException;
+
+import io.shulie.takin.cloud.app.conf.WatchmanConfig;
+import io.shulie.takin.cloud.model.response.ApiResult;
+import io.shulie.takin.cloud.app.util.JmeterScriptUtil;
+import io.shulie.takin.cloud.app.service.ScriptService;
+import io.shulie.takin.cloud.constant.JmeterPluginsConstant;
+import io.shulie.takin.cloud.app.service.jmeter.SaveService;
+import io.shulie.takin.cloud.model.request.ScriptBuildRequest;
+import io.shulie.takin.cloud.model.request.ScriptCheckRequest;
+import io.shulie.takin.cloud.app.classloader.AppParentClassLoader;
+import io.shulie.takin.cloud.app.classloader.JmeterLibClassLoader;
 
 /**
- * ClassName:    ScriptServiceImpl
- * Package:    io.shulie.takin.cloud.app.service.impl
- * Description: 脚本服务实现
- * Datetime:    2022/5/19   11:32
- * Author:   chenhongqiao@shulie.com
+ * 脚本服务实现
+ *
+ * @author chenhongqiao@shulie.com
+ * @date 2022/5/19   11:32
  */
-@Service
 @Slf4j
+@Service
 public class ScriptServiceImpl implements ScriptService {
 
-    @Value("${watchman.nfs-path}")
-    private String nfsPath;
+    @Resource
+    WatchmanConfig watchmanConfig;
 
-    private static Object lockObj = new Object();
+    private static final Object lockObj = new Object();
 
     @Override
     public String buildJmeterScript(ScriptBuildRequest scriptRequest) {
@@ -93,7 +92,7 @@ public class ScriptServiceImpl implements ScriptService {
         if (StringUtils.startsWith(scriptCheckRequest.getScriptPath(), "/")) {
             return ApiResult.fail("脚本路径应该为相对路径");
         }
-        String path = StringUtils.trimToEmpty(new StringBuilder().append(nfsPath).append("/").append(scriptCheckRequest.getScriptPath()).toString());
+        String path = StringUtils.trimToEmpty(watchmanConfig.getNfsPath() + "/" + scriptCheckRequest.getScriptPath());
         //检测压测脚本是否存在
         File jmxFile = new File(path);
         if (!jmxFile.exists()) {
@@ -113,7 +112,7 @@ public class ScriptServiceImpl implements ScriptService {
                         continue;
                     }
                 } else {
-                    String pluginPath = StringUtils.trim(new StringBuilder().append(nfsPath).append("/").append(plugin).toString());
+                    String pluginPath = StringUtils.trim(watchmanConfig.getNfsPath() + "/" + plugin);
                     pluginFile = new File(pluginPath);
                     if (!pluginFile.exists()) {
                         return ApiResult.fail(String.format("插件不存在，请检测插件路径：%s", pluginPath));
@@ -136,11 +135,7 @@ public class ScriptServiceImpl implements ScriptService {
                 test.traverse(compiler);
                 test.traverse(new TurnElementsOn());
                 //校验BeanShell
-                boolean shellFlag = chekBeanShell(hashTree);
-                if (!shellFlag) {
-                    return ApiResult.fail("BeanShell校验失败，请检查相关依赖的插件是否上传");
-                }
-
+                chekBeanShell(hashTree);
                 //校验JavaSampler
                 boolean javaFlag = chekJavaSampler(hashTree);
                 if (!javaFlag) {
@@ -160,7 +155,7 @@ public class ScriptServiceImpl implements ScriptService {
                 if (StringUtils.startsWith(csvPath, "/")) {
                     return ApiResult.fail("CSV文件路径应该为相对路径");
                 }
-                csvPath = StringUtils.trimToEmpty(new StringBuilder().append(nfsPath).append("/").append(csvPath).toString());
+                csvPath = StringUtils.trimToEmpty(watchmanConfig.getNfsPath() + "/" + csvPath);
                 File csvFile = new File(csvPath);
                 if (!csvFile.exists()) {
                     return ApiResult.fail(String.format("CSV文件不存在，请检测CSV文件路径：%s", csvPath));
@@ -175,35 +170,12 @@ public class ScriptServiceImpl implements ScriptService {
         return ApiResult.success("脚本验证成功");
     }
 
-    private boolean chekBeanShell(HashTree hashTree) {
+    private void chekBeanShell(HashTree hashTree) {
         try {
             //提取beanShell
             List<BeanShellPreProcessor> shells = new ArrayList<>();
             getHashTreeValue(hashTree, BeanShellPreProcessor.class, shells);
-            if (CollectionUtil.isEmpty(shells)) {
-                return true;
-            }
-
-            Class<?> aClass = Class.forName("org.apache.jmeter.util.BeanShellInterpreter", false, this.getClass().getClassLoader());
-            Object o = aClass.newInstance();
-            //环境设置
-            Method set = aClass.getDeclaredMethod("set", String.class, Object.class);
-            set.setAccessible(true);
-            set.invoke(o, "log", log);
-            set.invoke(o, "vars", new JMeterVariables());
-            set.invoke(o, "ctx", JMeterContextService.getContext());
-            set.invoke(o, "props", JMeterUtils.getJMeterProperties());
-            set.invoke(o, "threadName", Thread.currentThread().getName());
-            set.invoke(o, "sampler", new HTTPSamplerBase() {
-                @Override
-                protected HTTPSampleResult sample(java.net.URL url, String s, boolean b, int i) {
-                    return null;
-                }
-            });
-            set.invoke(o, "sampleResult", new SampleResult());
-
-            Method eval = aClass.getDeclaredMethod("eval", String.class);
-            eval.setAccessible(true);
+            if (CollUtil.isEmpty(shells)) {return;}
             for (BeanShellPreProcessor shell : shells) {
                 boolean flag = shell.getProperty("TestElement.enabled").getBooleanValue();
                 if (!flag) {
@@ -211,20 +183,23 @@ public class ScriptServiceImpl implements ScriptService {
                 }
                 //提取beanShell中的script
                 String script = shell.getProperty("script").getStringValue();
+                List<String> importList = Arrays.stream(script.split("\\s*;\\s*"))
+                    .filter(t -> CharSequenceUtil.trim(t).startsWith("import"))
+                    .filter(t -> t.split("\\s").length == 2).map(t -> t.split("\\s")[1])
+                    .collect(Collectors.toList());
                 //校验script
-                ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                Thread.currentThread().setContextClassLoader(AppParentClassLoader.getInstance());
-                eval.invoke(o, script);
-                Thread.currentThread().setContextClassLoader(contextClassLoader);
+                List<String> result = new ArrayList<>(importList.size());
+                importList.forEach(t -> {
+                    try {AppParentClassLoader.getInstance().loadClass(t);}
+                    // 异常可能是没有加载Jar包
+                    catch (ClassNotFoundException e) {result.add(t);}
+                });
+                if (CollUtil.isNotEmpty(result)) {throw new ValidateException("下列类的依赖包未加载:[{}]", result);}
             }
-
-            //清除class
-            //bsh.BshClassManager
-
-            return true;
         } catch (Exception e) {
+            log.error("BeanShell校验失败.", e);
+            throw e;
         }
-        return false;
     }
 
     private boolean chekJavaSampler(HashTree hashTree) {
@@ -232,7 +207,7 @@ public class ScriptServiceImpl implements ScriptService {
             //提取beanShell
             List<JavaSampler> javas = new ArrayList<>();
             getHashTreeValue(hashTree, JavaSampler.class, javas);
-            if (CollectionUtil.isEmpty(javas)) {
+            if (CollUtil.isEmpty(javas)) {
                 return true;
             }
             for (JavaSampler javaSampler : javas) {
@@ -257,25 +232,19 @@ public class ScriptServiceImpl implements ScriptService {
             //提取beanShell
             List<CSVDataSet> csvDataSets = new ArrayList<>();
             getHashTreeValue(hashTree, CSVDataSet.class, csvDataSets);
-            if (CollectionUtil.isEmpty(csvDataSets)) {
+            if (CollUtil.isEmpty(csvDataSets)) {
                 return true;
             }
             for (CSVDataSet csvDataSet : csvDataSets) {
                 boolean flag = csvDataSet.getProperty("TestElement.enabled").getBooleanValue();
-                if (!flag) {
-                    continue;
-                }
                 //提取filename
                 String csvFileName = csvDataSet.getProperty("filename").getStringValue();
-                if (StringUtils.isBlank(csvFileName)) {
+                if (!flag || StringUtils.isBlank(csvFileName)) {
                     continue;
                 }
                 //校验csvFile
-                if (csvConfigs.isEmpty()) {
-                    return false;
-                }
                 String csvConfig = nameMatch(csvConfigs, csvFileName);
-                if (StringUtils.isBlank(csvConfig)) {
+                if (csvConfigs.isEmpty() || StringUtils.isBlank(csvConfig)) {
                     return false;
                 }
             }
@@ -310,19 +279,18 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     private <T> void getHashTreeValue(HashTree hashTree, Class<T> t, List<T> objs) {
-        for (Object o : hashTree.keySet()) {
-            if (Objects.equals(o.getClass().getName(), t.getName())) {
-                objs.add((T) o);
+        for (Map.Entry<Object, HashTree> entry : hashTree.entrySet()) {
+            if (Objects.equals(entry.getKey().getClass().getName(), t.getName())) {
+                objs.add((T)entry.getKey());
             }
-            if (CollectionUtil.isNotEmpty(hashTree.get(o))) {
-                getHashTreeValue(hashTree.get(o), t, objs);
+            if (CollUtil.isNotEmpty(entry.getValue())) {
+                getHashTreeValue(entry.getValue(), t, objs);
             }
         }
-        return;
     }
 
     private void installPlugin(List<File> pluginFiles) {
-        if (CollectionUtils.isEmpty(pluginFiles)) return;
+        if (CollUtil.isEmpty(pluginFiles)) {return;}
         JmeterLibClassLoader libClassLoader = JmeterLibClassLoader.getInstance();
         libClassLoader.loadJars(pluginFiles);
         AppParentClassLoader instance = AppParentClassLoader.getInstance();
