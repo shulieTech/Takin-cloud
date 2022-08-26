@@ -15,14 +15,17 @@ import javax.annotation.Resource;
 import org.dom4j.Element;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
-import org.apache.jmeter.config.CSVDataSet;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.jmeter.engine.PreCompiler;
 import org.springframework.stereotype.Service;
-import org.apache.jmeter.engine.TurnElementsOn;
 import org.apache.jorphan.collections.HashTree;
+
+import org.apache.jmeter.config.CSVDataSet;
+import org.apache.jmeter.engine.PreCompiler;
+import org.apache.jmeter.engine.TurnElementsOn;
 import org.apache.jmeter.modifiers.BeanShellPreProcessor;
 import org.apache.jmeter.protocol.java.sampler.JavaSampler;
+import org.apache.jmeter.testelement.TestElement;
+import org.apache.jmeter.testelement.property.JMeterProperty;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -126,11 +129,11 @@ public class ScriptServiceImpl implements ScriptService {
         HashTree hashTree;
         synchronized (lockObj) {
             try {
-
                 //加载插件
                 installPlugin(pluginFiles);
                 //读取脚本内容&校验基础脚本
-                hashTree = SaveService.loadTree(jmxFile);
+                HashTree originalHashTree = SaveService.loadTree(jmxFile);
+                hashTree = remoteDisabledNode(originalHashTree);
                 //初始化前置编译器
                 HashTree test = hashTree;
                 PreCompiler compiler = new PreCompiler();
@@ -164,6 +167,29 @@ public class ScriptServiceImpl implements ScriptService {
         }
         chekCsvDataSet(hashTree, csvConfigs);
         return ApiResult.success("脚本验证成功");
+    }
+
+    /**
+     * 移除树中禁用掉的节点
+     *
+     * @param source 原树
+     * @return 处理后的树
+     */
+    private HashTree remoteDisabledNode(HashTree source) {
+        HashTree result = new HashTree();
+        if (CollUtil.isNotEmpty(source)) {
+            source.forEach((k, v) -> {
+                if (k instanceof TestElement) {
+                    TestElement testElement = (TestElement)k;
+                    JMeterProperty enabled = testElement.getProperty(PROPERTY_TESTELEMENT_ENABLED);
+                    String enabledStr = enabled == null ? Boolean.FALSE.toString() : enabled.toString();
+                    if (Boolean.TRUE.equals(Boolean.parseBoolean(enabledStr))) {
+                        result.add(k, remoteDisabledNode(v));
+                    }
+                }
+            });
+        }
+        return result;
     }
 
     private void chekBeanShell(HashTree hashTree) {
