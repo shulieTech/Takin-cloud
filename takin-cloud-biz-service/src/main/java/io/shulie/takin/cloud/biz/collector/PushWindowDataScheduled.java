@@ -496,7 +496,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         PressureOutput result = new PressureOutput()
             .setTime(time).setTestName(testName).setTransaction(transaction)
             .setCount(0).setSumRt(0L).setSaCount(0).setDataNum(0).setFailCount(0)
-            .setMaxRt(0d).setMinRt(0d).setActiveThreads(0).setSentBytes(0L).setReceivedBytes(0L);
+            .setMaxRt(Double.MIN_VALUE).setMinRt(Double.MAX_VALUE)
+            .setActiveThreads(0).setSentBytes(0L).setReceivedBytes(0L);
         // 根据pod编号进行分组
         Map<String, List<ResponseMetrics>> podGroupData =
             metricsList.stream().collect(Collectors.groupingBy(ResponseMetrics::getPodNum));
