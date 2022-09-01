@@ -2,7 +2,7 @@ package io.shulie.takin.cloud.biz.service.statistics;
 
 import java.util.List;
 
-import io.shulie.takin.cloud.biz.input.statistics.PressureTotalInput;
+import io.shulie.takin.cloud.sdk.model.request.statistics.PressureTotalReq;
 import io.shulie.takin.cloud.biz.output.statistics.PressureListTotalOutput;
 import io.shulie.takin.cloud.biz.output.statistics.PressurePieTotalOutput;
 import io.shulie.takin.cloud.biz.output.statistics.ReportTotalOutput;
@@ -18,7 +18,7 @@ public interface PressureStatisticsService {
      * @param input 入参
      * @return -
      */
-    PressurePieTotalOutput getPressurePieTotal(PressureTotalInput input);
+    PressurePieTotalOutput getPressurePieTotal(PressureTotalReq input);
 
     /**
      * 统计报告通过/未通过
@@ -26,7 +26,7 @@ public interface PressureStatisticsService {
      * @param input 入参
      * @return -
      */
-    ReportTotalOutput getReportTotal(PressureTotalInput input);
+    ReportTotalOutput getReportTotal(PressureTotalReq input);
 
     /**
      * 压测场景次数统计 && 压测脚本次数统计
@@ -34,7 +34,7 @@ public interface PressureStatisticsService {
      * @param input 入参
      * @return -
      */
-    List<PressureListTotalOutput> getPressureListTotal(PressureTotalInput input);
+    List<PressureListTotalOutput> getPressureListTotal(PressureTotalReq input);
 
 }
 

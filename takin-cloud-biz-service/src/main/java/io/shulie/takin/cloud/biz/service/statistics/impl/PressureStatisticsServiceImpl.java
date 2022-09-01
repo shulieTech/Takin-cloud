@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import cn.hutool.core.bean.BeanUtil;
 import com.google.common.collect.Lists;
 import io.shulie.takin.cloud.biz.cloudserver.StatisticsConverter;
-import io.shulie.takin.cloud.biz.input.statistics.PressureTotalInput;
+import io.shulie.takin.cloud.sdk.model.request.statistics.PressureTotalReq;
 import io.shulie.takin.cloud.biz.output.statistics.PressureListTotalOutput;
 import io.shulie.takin.cloud.biz.output.statistics.PressurePieTotalOutput;
 import io.shulie.takin.cloud.biz.output.statistics.ReportTotalOutput;
@@ -31,9 +31,9 @@ public class PressureStatisticsServiceImpl implements PressureStatisticsService 
     private StatisticsManageDao statisticsManageDao;
 
     @Override
-    public PressurePieTotalOutput getPressurePieTotal(PressureTotalInput input) {
+    public PressurePieTotalOutput getPressurePieTotal(PressureTotalReq input) {
         List<PressurePieTotalResult> list = statisticsManageDao.getPressureScenePieTotal(input.getStartTime(),
-            input.getEndTime());
+            input.getEndTime(), input.getTenantId(), input.getEnvCode());
         List<PressurePieTotalOutput.PressurePieTotal> totals = Lists.newArrayList();
         if (list != null && list.size() > 0) {
             list.stream().map(data -> {
@@ -67,6 +67,7 @@ public class PressureStatisticsServiceImpl implements PressureStatisticsService 
             pieTotal.setType(SceneManageStatusEnum.WAIT.getDesc());
             totals.add(pieTotal);
         }
+        if (list == null) {return new PressurePieTotalOutput();}
         Integer count = list.stream().mapToInt(PressurePieTotalResult::getCount).sum();
         PressurePieTotalOutput result = new PressurePieTotalOutput();
         result.setData(totals);
@@ -75,25 +76,29 @@ public class PressureStatisticsServiceImpl implements PressureStatisticsService 
     }
 
     @Override
-    public ReportTotalOutput getReportTotal(PressureTotalInput input) {
+    public ReportTotalOutput getReportTotal(PressureTotalReq input) {
         // 需要先统计这个时间内创建的场景
-        ReportTotalResult result = statisticsManageDao.getReportTotal(input.getStartTime(), input.getEndTime());
+        ReportTotalResult result = statisticsManageDao.getReportTotal(input.getStartTime(), input.getEndTime(),
+            input.getTenantId(), input.getEnvCode());
         return BeanUtil.copyProperties(result, ReportTotalOutput.class);
     }
 
     @Override
-    public List<PressureListTotalOutput> getPressureListTotal(PressureTotalInput input) {
+    public List<PressureListTotalOutput> getPressureListTotal(PressureTotalReq input) {
         List<PressureListTotalResult> list = Lists.newArrayList();
         switch (input.getType()) {
             case "0":
-                list = statisticsManageDao.getPressureSceneListTotal(input.getStartTime(), input.getEndTime());
+                list = statisticsManageDao.getPressureSceneListTotal(input.getStartTime(), input.getEndTime(),
+                    input.getTenantId(), input.getEnvCode());
                 break;
             case "1":
                 if (input.getScriptIds() != null && input.getScriptIds().size() > 0) {
-                    list = statisticsManageDao.getPressureScriptListTotal(input.getStartTime(), input.getEndTime(), input.getScriptIds());
+                    list = statisticsManageDao.getPressureScriptListTotal(input.getStartTime(), input.getEndTime(), input.getScriptIds(),
+                        input.getTenantId(), input.getEnvCode());
                 }
                 break;
-            default: {}
+            default:
+                break;
         }
 
         return StatisticsConverter.INSTANCE.ofResult(list);

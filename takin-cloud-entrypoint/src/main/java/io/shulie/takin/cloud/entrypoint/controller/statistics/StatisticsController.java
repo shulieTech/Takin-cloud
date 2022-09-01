@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import io.shulie.takin.cloud.biz.input.statistics.PressureTotalInput;
 import io.shulie.takin.cloud.biz.output.statistics.PressureListTotalOutput;
 import io.shulie.takin.cloud.biz.output.statistics.PressurePieTotalOutput;
 import io.shulie.takin.cloud.biz.output.statistics.ReportTotalOutput;
@@ -42,10 +41,7 @@ public class StatisticsController {
     @GetMapping(EntrypointUrl.METHOD_STATISTICS_PRESSURE_PIE_TOTAL)
     @ApiOperation("统计压测场景分类")
     public ResponseResult<PressurePieTotalResp> getPressurePieTotal(PressureTotalReq req) {
-        PressureTotalInput input = new PressureTotalInput();
-        input.setStartTime(req.getStartTime());
-        input.setEndTime(req.getEndTime());
-        PressurePieTotalOutput output = pressureStatisticsService.getPressurePieTotal(input);
+        PressurePieTotalOutput output = pressureStatisticsService.getPressurePieTotal(req);
         return ResponseResult.success(StatisticsConvert.of(output));
     }
 
@@ -57,10 +53,7 @@ public class StatisticsController {
     @GetMapping(EntrypointUrl.METHOD_STATISTICS_REPORT_TOTAL)
     @ApiOperation("统计报告通过以及未通过")
     public ResponseResult<ReportTotalResp> getReportTotal(PressureTotalReq req) {
-        PressureTotalInput input = new PressureTotalInput();
-        input.setStartTime(req.getStartTime());
-        input.setEndTime(req.getEndTime());
-        ReportTotalOutput output = pressureStatisticsService.getReportTotal(input);
+        ReportTotalOutput output = pressureStatisticsService.getReportTotal(req);
         return ResponseResult.success(StatisticsConvert.of(output));
     }
 
@@ -72,12 +65,7 @@ public class StatisticsController {
     @PostMapping(EntrypointUrl.METHOD_STATISTICS_PRESSURE_LIST_TOTAL)
     @ApiOperation("统计压测场景次数以及压测脚本次数")
     public ResponseResult<List<PressureListTotalResp>> getPressureListTotal(@RequestBody PressureTotalReq req) {
-        PressureTotalInput input = new PressureTotalInput();
-        input.setStartTime(req.getStartTime());
-        input.setEndTime(req.getEndTime());
-        input.setScriptIds(req.getScriptIds());
-        input.setType(req.getType());
-        List<PressureListTotalOutput> output = pressureStatisticsService.getPressureListTotal(input);
+        List<PressureListTotalOutput> output = pressureStatisticsService.getPressureListTotal(req);
         return ResponseResult.success(StatisticsConvert.of(output));
     }
 
