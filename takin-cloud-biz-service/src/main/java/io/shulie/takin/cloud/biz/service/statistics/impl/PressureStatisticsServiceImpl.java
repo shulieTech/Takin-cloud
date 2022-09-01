@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.google.common.collect.Lists;
+import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
 import io.shulie.takin.cloud.biz.cloudserver.StatisticsConverter;
 import io.shulie.takin.cloud.biz.input.statistics.PressureTotalInput;
 import io.shulie.takin.cloud.biz.output.statistics.PressureListTotalOutput;
@@ -33,7 +34,7 @@ public class PressureStatisticsServiceImpl implements PressureStatisticsService 
     @Override
     public PressurePieTotalOutput getPressurePieTotal(PressureTotalInput input) {
         List<PressurePieTotalResult> list = statisticsManageDao.getPressureScenePieTotal(input.getStartTime(),
-            input.getEndTime());
+            input.getEndTime(), CloudPluginUtils.getTenantId(), CloudPluginUtils.getEnvCode());
         List<PressurePieTotalOutput.PressurePieTotal> totals = Lists.newArrayList();
         if (list != null && list.size() > 0) {
             list.stream().map(data -> {
@@ -77,7 +78,8 @@ public class PressureStatisticsServiceImpl implements PressureStatisticsService 
     @Override
     public ReportTotalOutput getReportTotal(PressureTotalInput input) {
         // 需要先统计这个时间内创建的场景
-        ReportTotalResult result = statisticsManageDao.getReportTotal(input.getStartTime(), input.getEndTime());
+        ReportTotalResult result = statisticsManageDao.getReportTotal(input.getStartTime(), input.getEndTime(),
+            CloudPluginUtils.getTenantId(), CloudPluginUtils.getEnvCode());
         return BeanUtil.copyProperties(result, ReportTotalOutput.class);
     }
 
@@ -86,11 +88,13 @@ public class PressureStatisticsServiceImpl implements PressureStatisticsService 
         List<PressureListTotalResult> list = Lists.newArrayList();
         switch (input.getType()) {
             case "0":
-                list = statisticsManageDao.getPressureSceneListTotal(input.getStartTime(), input.getEndTime());
+                list = statisticsManageDao.getPressureSceneListTotal(input.getStartTime(), input.getEndTime(),
+                    CloudPluginUtils.getTenantId(), CloudPluginUtils.getEnvCode());
                 break;
             case "1":
                 if (input.getScriptIds() != null && input.getScriptIds().size() > 0) {
-                    list = statisticsManageDao.getPressureScriptListTotal(input.getStartTime(), input.getEndTime(), input.getScriptIds());
+                    list = statisticsManageDao.getPressureScriptListTotal(input.getStartTime(), input.getEndTime(), input.getScriptIds(),
+                        CloudPluginUtils.getTenantId(), CloudPluginUtils.getEnvCode());
                 }
                 break;
             default: {}
