@@ -6,6 +6,8 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
+import io.shulie.takin.cloud.sdk.model.request.statistics.FullRequest;
+import io.shulie.takin.cloud.sdk.model.response.statistics.FullResponse;
 import io.shulie.takin.cloud.entrypoint.statistics.CloudPressureStatisticsApi;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.sdk.model.request.statistics.PressureTotalReq;
@@ -42,6 +44,12 @@ public class CloudPressureStatisticsApiImpl implements CloudPressureStatisticsAp
     public List<PressureListTotalResp> getPressureListTotal(PressureTotalReq req) {
         return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_STATISTICS, EntrypointUrl.METHOD_STATISTICS_PRESSURE_LIST_TOTAL),
             req, new TypeReference<ResponseResult<List<PressureListTotalResp>>>() {}).getData();
+    }
+
+    @Override
+    public FullResponse full(FullRequest req) {
+        return cloudApiSenderService.post(EntrypointUrl.join(EntrypointUrl.MODULE_STATISTICS, EntrypointUrl.METHOD_STATISTICS_PRESSURE_FULL),
+            req, new TypeReference<ResponseResult<FullResponse>>() {}).getData();
     }
 
 }

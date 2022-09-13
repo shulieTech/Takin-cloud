@@ -2,9 +2,12 @@ package io.shulie.takin.cloud.entrypoint.controller.statistics;
 
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.annotation.Resource;
 
 import io.shulie.takin.cloud.biz.input.statistics.PressureTotalInput;
+import io.shulie.takin.cloud.sdk.model.request.statistics.FullRequest;
+import io.shulie.takin.cloud.sdk.model.response.statistics.FullResponse;
 import io.shulie.takin.cloud.biz.output.statistics.PressureListTotalOutput;
 import io.shulie.takin.cloud.biz.output.statistics.PressurePieTotalOutput;
 import io.shulie.takin.cloud.biz.output.statistics.ReportTotalOutput;
@@ -81,4 +84,9 @@ public class StatisticsController {
         return ResponseResult.success(StatisticsConvert.of(output));
     }
 
+    @ApiOperation("全量统计")
+    @PostMapping(EntrypointUrl.METHOD_STATISTICS_PRESSURE_FULL)
+    public ResponseResult<FullResponse> getPressurePieTotal(@RequestBody @Valid FullRequest request) {
+        return ResponseResult.success(new FullResponse());
+    }
 }
