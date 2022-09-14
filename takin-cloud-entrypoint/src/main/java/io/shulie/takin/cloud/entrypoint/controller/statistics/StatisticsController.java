@@ -5,7 +5,9 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.annotation.Resource;
 
+import cn.hutool.core.date.DateUtil;
 import io.shulie.takin.cloud.biz.input.statistics.PressureTotalInput;
+import io.shulie.takin.cloud.biz.service.statistics.FullStatisticsService;
 import io.shulie.takin.cloud.sdk.model.request.statistics.FullRequest;
 import io.shulie.takin.cloud.sdk.model.response.statistics.FullResponse;
 import io.shulie.takin.cloud.biz.output.statistics.PressureListTotalOutput;
@@ -34,6 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(EntrypointUrl.BASIC + "/" + EntrypointUrl.MODULE_STATISTICS)
 public class StatisticsController {
 
+    @Resource
+    private FullStatisticsService fullStatisticsService;
     @Resource
     private PressureStatisticsService pressureStatisticsService;
 
@@ -87,6 +91,7 @@ public class StatisticsController {
     @ApiOperation("全量统计")
     @PostMapping(EntrypointUrl.METHOD_STATISTICS_PRESSURE_FULL)
     public ResponseResult<FullResponse> getPressurePieTotal(@RequestBody @Valid FullRequest request) {
-        return ResponseResult.success(new FullResponse());
+        return ResponseResult.success(fullStatisticsService.full(
+            DateUtil.date(request.getStartTime()), DateUtil.date(request.getEndTime()), request.getTopNumber()));
     }
 }

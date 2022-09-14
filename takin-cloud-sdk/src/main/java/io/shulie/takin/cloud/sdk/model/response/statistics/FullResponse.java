@@ -15,41 +15,72 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class FullResponse {
     /**
-     * 可运行的场景数量
+     * 场景统计
      */
-    private int sceneRunableCount = 0;
+    private Scene scene = new Scene();
     /**
-     * 运行中的场景数量
+     * 报告统计
      */
-    private int sceneRunningCount = 0;
-    /**
-     * 可运行的场景比例
-     */
-    private String sceneRunableProportion;
-    /**
-     * 运行中的场景比例
-     */
-    private String sceneRunningProportion;
-    /**
-     * 结论为通过的报告数量
-     */
-    private int reportConclusionTrueCount = 0;
-    /**
-     * 结论为不通过的报告数量
-     */
-    private int reportConclusionFalseCount = 0;
-    /**
-     * 结论为通过的报告比例
-     */
-    private String reportConclusionTrueProportion;
-    /**
-     * 结论为不通过的报告比例
-     */
-    private String reportConclusionFalseProportion;
+    private Report report = new Report();
     /**
      * 头部榜单
      */
     private List<TopItem> topList = new ArrayList<>(0);
+
+    /**
+     * 场景信息
+     */
+    @Data
+    public static class Scene {
+        /**
+         * 总数
+         */
+        private int count = 0;
+
+        /**
+         * 可运行的场景数量
+         */
+        private int runableCount = 0;
+        /**
+         * 运行中的场景数量
+         */
+        private int runningCount = 0;
+        /**
+         * 可运行的场景比例
+         */
+        private String runableProportion;
+        /**
+         * 运行中的场景比例
+         */
+        private String runningProportion;
+    }
+
+    /**
+     * 场景信息
+     */
+    @Data
+    public static class Report {
+        /**
+         * 总数
+         */
+        private int count = 0;
+        /**
+         * 结论为通过的报告数量
+         */
+        private int conclusionTrueCount = 0;
+        /**
+         * 结论为不通过的报告数量
+         */
+        private int conclusionFalseCount = 0;
+        /**
+         * 结论为通过的报告比例
+         */
+        private String conclusionTrueProportion;
+        /**
+         * 结论为不通过的报告比例
+         */
+        private String conclusionFalseProportion;
+    }
 
     /**
      * 榜单数据
