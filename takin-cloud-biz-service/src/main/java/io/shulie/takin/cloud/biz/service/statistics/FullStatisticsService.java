@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 
 import io.shulie.takin.cloud.sdk.model.response.statistics.FullResponse;
-import io.shulie.takin.cloud.sdk.model.response.statistics.FullResponse.TopItem;
 
 /**
  * 全量统计
@@ -47,6 +46,6 @@ public interface FullStatisticsService {
      * @param number 榜单数量
      * @return -
      */
-    List<TopItem> topList(int number, Date startTime, Date endTime);
+    List<FullResponse.TopItem> topList(int number, Date startTime, Date endTime);
 
 }
