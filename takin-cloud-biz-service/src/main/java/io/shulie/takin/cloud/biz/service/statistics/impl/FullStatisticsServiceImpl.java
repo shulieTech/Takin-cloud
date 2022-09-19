@@ -230,7 +230,6 @@ public class FullStatisticsServiceImpl implements FullStatisticsService {
             // 根据scene_id聚合后排序
             QueryWrapper<ReportEntity> reportWrapper = getReportWrapper(startTime, endTime,
                 sceneIdColumn, COUNT_SELECT_COLUMN)
-                .eq("type", 0)
                 .groupBy(sceneIdColumn)
                 .orderByDesc(COUNT_COLUMN);
             reportMapper.selectMaps(reportWrapper)
@@ -282,6 +281,7 @@ public class FullStatisticsServiceImpl implements FullStatisticsService {
     private QueryWrapper<ReportEntity> getReportWrapper(Date startTime, Date endTime, String... columns) {
         return new QueryWrapper<ReportEntity>()
             .select(columns)
+            .eq("type", 0)
             .eq("tenant_id", CloudPluginUtils.getTenantId())
             .eq("env_code", CloudPluginUtils.getEnvCode())
             .ge("gmt_create", startTime)
