@@ -96,7 +96,7 @@ public class FullStatisticsServiceImpl implements FullStatisticsService {
         List<Integer> freeStatusList = SceneManageStatusEnum.getFree()
             .stream().map(SceneManageStatusEnum::getValue)
             .collect(Collectors.toList());
-        List<Integer> runningStatusList = SceneManageStatusEnum.getStarting()
+        List<Integer> runningStatusList = SceneManageStatusEnum.getWorking()
             .stream().map(SceneManageStatusEnum::getValue)
             .collect(Collectors.toList());
         for (Entry<Integer, Integer> entry : sceneInfo.entrySet()) {
