@@ -282,6 +282,7 @@ public class FullStatisticsServiceImpl implements FullStatisticsService {
         return new QueryWrapper<ReportEntity>()
             .select(columns)
             .eq("type", 0)
+            .eq("status", 2)
             .eq("tenant_id", CloudPluginUtils.getTenantId())
             .eq("env_code", CloudPluginUtils.getEnvCode())
             .ge("gmt_create", startTime)

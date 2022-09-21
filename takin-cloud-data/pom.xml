@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.shulie.takin</groupId>
         <artifactId>takin-cloud</artifactId>
-        <version>5.2.9.2</version>
+        <version>5.2.9.3</version>
         <relativePath>../pom.xml</relativePath>
 
     </parent>
