@@ -5,7 +5,7 @@
     <parent>
         <artifactId>takin-cloud-plugins</artifactId>
         <groupId>io.shulie.takin</groupId>
-        <version>takin-cloud-5.0.2.1-SNAPSHOT</version>
+        <version>takin-cloud-5.0.2.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -25,12 +25,12 @@
 <!--        <dependency>-->
 <!--            <groupId>io.shulie.takin</groupId>-->
 <!--            <artifactId>takin-cloud-common</artifactId>-->
-<!--            <version>takin-cloud-5.0.2.1-SNAPSHOT</version>-->
+<!--            <version>takin-cloud-5.0.2.2-SNAPSHOT</version>-->
 <!--        </dependency>-->
 <!--        <dependency>-->
 <!--            <groupId>io.shulie.takin</groupId>-->
 <!--            <artifactId>takin-cloud-ext</artifactId>-->
-<!--            <version>takin-cloud-5.0.2.1-SNAPSHOT</version>-->
+<!--            <version>takin-cloud-5.0.2.2-SNAPSHOT</version>-->
 <!--        </dependency>-->
 <!--        <dependency>-->
 <!--            <groupId>io.shulie.takin</groupId>-->
