@@ -49,7 +49,7 @@ public class InfluxUtil {
      */
     public static Point toPoint(String measurement, long time, Object pojo) {
         Point.Builder builder = Point.measurement(measurement)
-            .time(CollectorUtil.getTimeWindowTime(time), TimeUnit.MILLISECONDS)
+            .time(time, TimeUnit.MILLISECONDS)
             .addFieldsFromPOJO(pojo)
             .addField("create_time", System.currentTimeMillis());
         Class<?> superclass = pojo.getClass().getSuperclass();
