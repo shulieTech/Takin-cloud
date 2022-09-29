@@ -452,7 +452,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         List<String> pods = Lists.newArrayList();
         return metricses.stream().filter(Objects::nonNull)
             .filter(m -> transaction.equals(m.getTransaction()))
-            .filter(m -> !pods.contains(m.getPodNo()))
+            .filter(m -> !pods.contains(m.getPodNo() + m.getTime()))
             .map(m -> {
                 pods.add(m.getPodNo());
                 return m;
