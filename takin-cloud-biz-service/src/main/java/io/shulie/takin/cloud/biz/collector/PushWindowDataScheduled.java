@@ -1,72 +1,62 @@
 package io.shulie.takin.cloud.biz.collector;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
+import lombok.extern.slf4j.Slf4j;
+
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+
+import org.apache.ibatis.jdbc.SQL;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import io.shulie.takin.cloud.biz.collector.collector.AbstractIndicators;
-import io.shulie.takin.cloud.biz.config.AppConfig;
-import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
-import io.shulie.takin.cloud.biz.output.statistics.PressureOutput;
-import io.shulie.takin.cloud.biz.output.statistics.RtDataOutput;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+
+import io.shulie.takin.eventcenter.Event;
+import io.shulie.takin.cloud.common.utils.*;
 import io.shulie.takin.cloud.biz.utils.DataUtils;
 import io.shulie.takin.cloud.biz.utils.Executors;
+import io.shulie.takin.eventcenter.entity.TaskConfig;
+import io.shulie.takin.ext.content.script.ScriptNode;
+import io.shulie.takin.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.eventcenter.EventCenterTemplate;
+import io.shulie.takin.cloud.data.dao.report.ReportDao;
+import io.shulie.takin.eventcenter.annotation.IntrestFor;
+import io.shulie.takin.cloud.common.bean.task.TaskResult;
+import io.shulie.takin.cloud.common.influxdb.InfluxDBUtil;
+import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
 import io.shulie.takin.cloud.common.bean.collector.Metrics;
+import io.shulie.takin.cloud.data.result.report.ReportResult;
+import io.shulie.takin.cloud.common.constants.ReportConstants;
+import io.shulie.takin.cloud.biz.output.statistics.RtDataOutput;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.data.param.report.ReportQueryParam;
+import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
+import io.shulie.takin.cloud.common.constants.CollectorConstants;
+import io.shulie.takin.cloud.biz.output.statistics.PressureOutput;
 import io.shulie.takin.cloud.common.bean.collector.ResponseMetrics;
 import io.shulie.takin.cloud.common.bean.collector.SendMetricsEvent;
 import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
-import io.shulie.takin.cloud.common.bean.task.TaskResult;
-import io.shulie.takin.cloud.common.constants.CollectorConstants;
-import io.shulie.takin.cloud.common.constants.ReportConstants;
-import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.common.influxdb.InfluxDBUtil;
-import io.shulie.takin.cloud.common.influxdb.InfluxWriter;
-import io.shulie.takin.cloud.common.exception.TakinCloudException;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.common.utils.*;
-import io.shulie.takin.cloud.data.dao.report.ReportDao;
-import io.shulie.takin.cloud.data.dao.scenemanage.SceneManageDAO;
-import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.data.param.report.ReportQueryParam;
-import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageResult;
-import io.shulie.takin.eventcenter.Event;
-import io.shulie.takin.eventcenter.EventCenterTemplate;
-import io.shulie.takin.eventcenter.annotation.IntrestFor;
-import io.shulie.takin.eventcenter.entity.TaskConfig;
-import io.shulie.takin.ext.content.enums.NodeTypeEnum;
-import io.shulie.takin.ext.content.script.ScriptNode;
-import io.shulie.takin.utils.json.JsonHelper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.ScanOptions;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import io.shulie.takin.cloud.biz.collector.collector.AbstractIndicators;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 
 /**
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
@@ -84,25 +74,12 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     private SceneManageDAO sceneManageDAO;
     @Resource
     private EventCenterTemplate eventCenterTemplate;
-    @Resource
-    private AppConfig appConfig;
 
     @Value("${scheduling.enabled:true}")
     private Boolean schedulingEnabled;
 
-    @Value("${scheduling.delayTime:30000}")
-    private int delayTimeWindow;
-
-    @Value("${scheduling.delayQuick:true}")
-    private boolean delayQuick;
-
     @Value("${report.metric.isSaveLastPoint:true}")
     private boolean isSaveLastPoint;
-
-    /**
-     * 用于时间窗口 记忆
-     */
-    private static final Map<String, Long> timeWindowMap = Maps.newConcurrentMap();
 
     public void sendMetrics(Metrics metrics) {
         Event event = new Event();
@@ -124,7 +101,11 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         Map<String, Object> extMap = taskBean.getExtendMap();
         List<String> refList = Lists.newArrayList();
         if (MapUtils.isNotEmpty(extMap)) {
-            refList.addAll((List)extMap.get("businessActivityBindRef"));
+            Object businessActivityBindRef = extMap.get("businessActivityBindRef");
+            if (businessActivityBindRef instanceof List) {
+                CollUtil.newArrayList(businessActivityBindRef)
+                    .forEach(t -> refList.add(t == null ? null : t.toString()));
+            }
         }
         ArrayList<String> transation = new ArrayList<>(refList);
         transation.add("all");
@@ -167,66 +148,35 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         }
     }
 
-    /**
-     * 计算读取的时间窗口
-     *
-     * @return -
-     */
-    private Long refreshTimeWindow(String engineName) {
-        long timeWindow = 0L;
-        String tempTimestamp = ScheduleConstants.TEMP_TIMESTAMP_SIGN + engineName;
-        // 插入成功 进行计数
-        if (timeWindowMap.containsKey(tempTimestamp)) {
-            // 获取下一个5s,并更新redis
-            timeWindow = CollectorUtil.addWindowTime(timeWindowMap.get(tempTimestamp));
-            timeWindowMap.put(tempTimestamp, timeWindow);
-            return timeWindow;
-        }
-        String startTimeKey = engineName + ScheduleConstants.FIRST_SIGN;
-        if (redisTemplate.hasKey(startTimeKey)) {
-            // 延迟5s 获取数据
-            timeWindow = CollectorUtil.getPushWindowTime(
-                CollectorUtil.getTimeWindow((Long)redisTemplate.opsForValue().get(startTimeKey)).getTimeInMillis());
-            timeWindowMap.put(tempTimestamp, timeWindow);
-        }
-
-        return timeWindow;
-    }
-
     private Long getMetricsMinTimeWindow(Long sceneId, Long reportId, Long customerId) {
-        Long timeWindow = null;
         try {
             String measurement = InfluxDBUtil.getMetricsMeasurement(sceneId, reportId, customerId);
-            ResponseMetrics metrics = influxWriter.querySingle(
-                "select * from " + measurement + " where time>0 order by time asc limit 1", ResponseMetrics.class);
-            if (null != metrics) {
-                timeWindow = metrics.getTime();
-            }
-        } catch (Throwable e) {
-            log.error("查询失败", e);
-        }
-        return timeWindow;
+            ResponseMetrics metrics = influxWriter.querySingle(new SQL()
+                .SELECT("*").FROM(measurement).WHERE("time > 0")
+                .ORDER_BY("time ASC").LIMIT(1).toString(), ResponseMetrics.class);
+            if (null != metrics) {return CollectorUtil.getTimeWindowTime(metrics.getTime());}
+        } catch (Throwable e) {log.error("查询失败", e);}
+        return null;
     }
 
     private List<ResponseMetrics> queryMetrics(Long sceneId, Long reportId, Long customerId, Long timeWindow) {
         try {
+            //查询引擎上报数据时，通过时间窗向前5s来查询，(0,5]
             String measurement = InfluxDBUtil.getMetricsMeasurement(sceneId, reportId, customerId);
-            StringBuilder sql = new StringBuilder("select * from");
-            sql.append(" ").append(measurement);
-            if (null != timeWindow) {
-                long time = TimeUnit.NANOSECONDS.convert(timeWindow, TimeUnit.MILLISECONDS);
-                sql.append(" ").append("where").append(" ").append("time=").append(time);
-                return influxWriter.query(sql.toString(), ResponseMetrics.class);
+            SQL sql = new SQL().SELECT("*").FROM(measurement);
+            if (timeWindow != null) {
+                long endTime = TimeUnit.NANOSECONDS.convert(timeWindow, TimeUnit.MILLISECONDS);
+                long startTime = endTime - TimeUnit.NANOSECONDS.convert(CollectorConstants.SEND_TIME, TimeUnit.SECONDS);
+                sql.WHERE("time > " + startTime).WHERE("time <= " + endTime);
+                List<ResponseMetrics> query = influxWriter.query(sql.toString(), ResponseMetrics.class);
+                log.info("汇总查询日志：sceneId:{},sql:{},查询结果数量:{}", sceneId, sql, query == null ? "null" : query.size());
+                return query;
             } else {
                 timeWindow = getMetricsMinTimeWindow(sceneId, reportId, customerId);
-                if (null != timeWindow) {
-                    return queryMetrics(sceneId, reportId, customerId, timeWindow);
-                }
+                if (timeWindow != null) {return queryMetrics(sceneId, reportId, customerId, timeWindow);}
             }
-        } catch (Throwable e) {
-            log.error("查询失败", e);
-        }
-        return null;
+        } catch (Throwable e) {log.error("查询失败", e);}
+        return new ArrayList<>();
     }
 
     /**
@@ -265,6 +215,18 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         return timeWindow;
     }
 
+    /**
+     * 聚合指标数据
+     *
+     * @param sceneId    场景主键
+     * @param reportId   报告主键
+     * @param customerId 租户主键
+     * @param podNum     pod数量
+     * @param endTime    停止时间
+     * @param timeWindow 时间窗口
+     * @param nodes      脚本解析结果
+     * @return 真实操作的时间窗口
+     */
     private Long reduceMetrics(Long sceneId, Long reportId, Long customerId, Integer podNum, long endTime,
         Long timeWindow, List<ScriptNode> nodes) {
         String logPre = String.format("reduceMetrics %s-%s-%s:%s", sceneId, reportId, customerId,
@@ -275,186 +237,187 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             //则通过当前压测统计表的未完成记录时间进行统计（数据统计有缺失的为未完成）
             timeWindow = getWorkingPressureMinTimeWindow(sceneId, reportId, customerId);
             //如果不存在当前未完成记录时间
-            if (null == timeWindow) {
+            if (timeWindow == null) {
                 //则根据最新统计记录时间获取下一个时间窗口
                 timeWindow = getPressureMaxTimeNextTimeWindow(sceneId, reportId, customerId);
             }
         }
         //如果当前处理的时间窗口已经大于当结束时间窗口，则退出
-        if (null != timeWindow && timeWindow > endTime) {
-            log.info(logPre + " return 1!timeWindow=" + DateUtil.showTime(timeWindow) + ", endTime=" + DateUtil
-                .showTime(endTime));
+        if (timeWindow != null && timeWindow > endTime) {
+            log.info("{} return 1!timeWindow={}, endTime={}",
+                logPre, DateUtil.showTime(timeWindow), DateUtil.showTime(endTime));
             return timeWindow;
         }
         //timeWindow如果为空，则获取全部metrics数据，如果不为空则获取该时间窗口的数据
-        List<ResponseMetrics> metriceses = queryMetrics(sceneId, reportId, customerId, timeWindow);
-        if (CollectionUtils.isNotEmpty(metriceses)) {
-            log.info(logPre + " queryMetrics timeWindow=" + DateUtil.showTime(timeWindow) + ", endTime=" + DateUtil
-                .showTime(endTime) + ", metricses.size=" + metriceses.size());
-            if (null == timeWindow) {
-                timeWindow = metriceses.stream().filter(Objects::nonNull)
-                    .map(ResponseMetrics::getTime)
-                    .filter(l -> l > 0)
-                    .findFirst()
-                    .orElse(endTime);
-            }
-            //如果当前处理的时间窗口已经大于结束时间窗口，则退出
-            if (timeWindow > endTime) {
-                log.info(logPre + " return 3!timeWindow=" + DateUtil.showTime(timeWindow) + ", endTime=" + DateUtil
-                    .showTime(endTime));
-                return timeWindow;
-            }
-
-            List<String> transactions = metriceses.stream().filter(Objects::nonNull)
-                .map(ResponseMetrics::getTransaction)
-                .filter(StringUtils::isNotBlank)
-                //过滤掉控制器
-                .filter(t -> !this.isController(t, nodes))
-                .distinct()
-                .collect(Collectors.toList());
-            if (CollectionUtils.isEmpty(transactions)) {
-                log.info(logPre + " return 4!transactions is empty!");
-                return timeWindow;
-            }
-
-            String measurement = InfluxDBUtil.getMeasurement(sceneId, reportId, customerId);
-            long time = timeWindow;
-
-            List<PressureOutput> results = transactions.stream().filter(StringUtils::isNotBlank)
-                .map(s -> this.filterByTransactionAndPodNo(metriceses, s))
-                .filter(CollectionUtils::isNotEmpty)
-                .map(l -> this.toPressureOutput(l, podNum, time))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-            List<PressureOutput> slaList = new ArrayList<>();
-            slaList.addAll(results);
-            //统计没有回传的节点数据
-            if (CollectionUtils.isNotEmpty(nodes)) {
-                //控制器统计
-                List<ScriptNode> controllerNodes = JmxUtil.getScriptNodeByType(NodeTypeEnum.CONTROLLER, nodes);
-                if (CollectionUtils.isNotEmpty(controllerNodes)) {
-                    controllerNodes.stream().filter(Objects::nonNull)
-                        //过滤掉已经有数据的控制器
-                        .filter(c -> !transactions.contains(c.getXpathMd5()))
-                        .forEach(c -> this.summaryNodeMetrics(c, podNum, time, results,slaList));
-                }
-                //线程组统计
-                List<ScriptNode> threadGroupNodes = JmxUtil.getScriptNodeByType(NodeTypeEnum.THREAD_GROUP, nodes);
-                if (CollectionUtils.isNotEmpty(threadGroupNodes)) {
-                    threadGroupNodes.stream().filter(Objects::nonNull)
-                        .filter(n -> !transactions.contains(n.getXpathMd5()))
-                        .forEach(n -> this.summaryNodeMetrics(n, podNum, time, results,slaList));
-                }
-                //测试计划统计
-                List<ScriptNode> testPlanNodes = JmxUtil.getScriptNodeByType(NodeTypeEnum.TEST_PLAN, nodes);
-                if (CollectionUtils.isNotEmpty(testPlanNodes)) {
-                    testPlanNodes.stream().filter(Objects::nonNull)
-                        .filter(t -> !transactions.contains(t.getXpathMd5()))
-                        .forEach(t -> this.summaryNodeMetrics(t, podNum, time, results,slaList));
-                }
-            }
-            //如果是老版本的，统计ALL
-            else {
-                //todo 排除事务控制器的数据，如何判断是否为事务控制器
-                //int allSaCount = results.stream().filter(Objects::nonNull)
-                //    .filter(p -> !ReportConstants.ALL_BUSINESS_ACTIVITY.equals(p.getTransaction()))
-                //    .map(PressureOutput::getSaCount)
-                //    .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-                //    .sum();
-                results.add(createPressureOutput(results,time,podNum,ReportConstants.ALL_BUSINESS_ACTIVITY,ReportConstants.ALL_BUSINESS_ACTIVITY));
-
-            }
-            //sla处理
-            try {
-                List<SendMetricsEvent> sendMetricsEventList = getSendMetricsEventList(sceneId, reportId, customerId,
-                    timeWindow, slaList);
-                //未finish，发事件
-                String existKey = String.format(CollectorConstants.REDIS_PRESSURE_TASK_KEY,
-                    getTaskKey(sceneId, reportId, customerId));
-                if (Boolean.TRUE.equals(redisTemplate.hasKey(existKey))) {
-                    //排除控制器和理线程组，只处理采样器和测试计划
-                    sendMetricsEventList.stream().filter(Objects::nonNull)
-                        .forEach(this::sendMetrics);
-                }
-            } catch (Exception e) {
-                log.error(
-                    "【collector metric】【error-sendMetricsEvents】 write influxDB time : {} sceneId : {}, reportId : "
-                        + "{},customerId : {}, error:{}",
-                    timeWindow, sceneId, reportId, customerId, e.getMessage());
-            }
-            results.stream().filter(Objects::nonNull)
-                .map(p -> InfluxDBUtil.toPoint(measurement, time, p))
-                .forEach(influxWriter::insert);
-
-        } else {
-            log.info(logPre + ", timeWindow=" + DateUtil.showTime(timeWindow) + "， metrics is empty!");
+        List<ResponseMetrics> metricsList = queryMetrics(sceneId, reportId, customerId, timeWindow);
+        if (CollUtil.isEmpty(metricsList)) {
+            log.info("{}, timeWindow={} ， metrics 是空集合!", logPre, DateUtil.showTime(timeWindow));
+            return timeWindow;
         }
+        log.info("{} queryMetrics timeWindow={}, endTime={}, metricsList.size={}",
+            logPre, DateUtil.showTime(timeWindow), DateUtil.showTime(endTime), metricsList.size());
+        if (null == timeWindow) {
+            timeWindow = metricsList.stream().filter(Objects::nonNull)
+                .map(t -> CollectorUtil.getTimeWindowTime(t.getTime()))
+                .filter(l -> l > 0)
+                .findFirst()
+                .orElse(endTime);
+        }
+        //如果当前处理的时间窗口已经大于结束时间窗口，则退出
+        if (timeWindow > endTime) {
+            log.info("{} return 3!timeWindow={}, endTime={}",
+                logPre, DateUtil.showTime(endTime), DateUtil.showTime(timeWindow));
+            return timeWindow;
+        }
+
+        List<String> transactions = metricsList.stream().filter(Objects::nonNull)
+            .map(ResponseMetrics::getTransaction)
+            .filter(StringUtils::isNotBlank)
+            //过滤掉控制器
+            .filter(t -> !this.isController(t, nodes))
+            .distinct()
+            .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(transactions)) {
+            log.info("{} return 4!transactions is empty!", logPre);
+            return timeWindow;
+        }
+
+        String measurement = InfluxDBUtil.getMeasurement(sceneId, reportId, customerId);
+        long time = timeWindow;
+
+        List<PressureOutput> results = transactions.stream().filter(StringUtils::isNotBlank)
+            .map(s -> this.filterByTransactionAndPodNo(metricsList, s))
+            .filter(CollectionUtils::isNotEmpty)
+            .map(l -> this.toPressureOutput(l, podNum, time))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+
+        List<PressureOutput> slaList = new ArrayList<>(results);
+        //统计没有回传的节点数据
+        if (CollectionUtils.isNotEmpty(nodes)) {
+            //控制器统计
+            List<ScriptNode> controllerNodes = JmxUtil.getScriptNodeByType(NodeTypeEnum.CONTROLLER, nodes);
+            if (CollectionUtils.isNotEmpty(controllerNodes)) {
+                controllerNodes.stream().filter(Objects::nonNull)
+                    //过滤掉已经有数据的控制器
+                    .filter(c -> !transactions.contains(c.getXpathMd5()))
+                    .forEach(c -> this.summaryNodeMetrics(c, podNum, time, results, slaList));
+            }
+            //线程组统计
+            List<ScriptNode> threadGroupNodes = JmxUtil.getScriptNodeByType(NodeTypeEnum.THREAD_GROUP, nodes);
+            if (CollectionUtils.isNotEmpty(threadGroupNodes)) {
+                threadGroupNodes.stream().filter(Objects::nonNull)
+                    .filter(n -> !transactions.contains(n.getXpathMd5()))
+                    .forEach(n -> this.summaryNodeMetrics(n, podNum, time, results, slaList));
+            }
+            //测试计划统计
+            List<ScriptNode> testPlanNodes = JmxUtil.getScriptNodeByType(NodeTypeEnum.TEST_PLAN, nodes);
+            if (CollectionUtils.isNotEmpty(testPlanNodes)) {
+                testPlanNodes.stream().filter(Objects::nonNull)
+                    .filter(t -> !transactions.contains(t.getXpathMd5()))
+                    .forEach(t -> this.summaryNodeMetrics(t, podNum, time, results, slaList));
+            }
+        }
+        //如果是老版本的，统计ALL
+        else {
+            results.add(createPressureOutput(results, time, podNum,
+                ReportConstants.ALL_BUSINESS_ACTIVITY, ReportConstants.ALL_BUSINESS_ACTIVITY));
+        }
+        //sla处理
+        try {
+            List<SendMetricsEvent> sendMetricsEventList = getSendMetricsEventList(sceneId, reportId, customerId,
+                timeWindow, slaList);
+            //未finish，发事件
+            String existKey = String.format(CollectorConstants.REDIS_PRESSURE_TASK_KEY,
+                getTaskKey(sceneId, reportId, customerId));
+            if (Boolean.TRUE.equals(redisTemplate.hasKey(existKey))) {
+                //排除控制器和理线程组，只处理采样器和测试计划
+                sendMetricsEventList.stream().filter(Objects::nonNull)
+                    .forEach(this::sendMetrics);
+            }
+        } catch (Exception e) {
+            log.error(
+                "【collector metric】【error-sendMetricsEvents】 write influxDB time : {} sceneId : {}, reportId : "
+                    + "{},customerId : {}, error:{}",
+                timeWindow, sceneId, reportId, customerId, e.getMessage());
+        }
+        results.stream().filter(Objects::nonNull)
+            .map(p -> InfluxDBUtil.toPoint(measurement, time, p))
+            .forEach(influxWriter::insert);
+
         log.info(logPre + " finished!timeWindow=" + DateUtil.showTime(timeWindow) + ", endTime=" + DateUtil
             .showTime(endTime));
         return timeWindow;
     }
 
-    private boolean isController(String transaction, List<ScriptNode> nodes){
+    private boolean isController(String transaction, List<ScriptNode> nodes) {
         List<ScriptNode> nodeList = JmxUtil.getScriptNodeByType(NodeTypeEnum.CONTROLLER, nodes);
-        if (CollectionUtils.isNotEmpty(nodeList)){
+        if (CollectionUtils.isNotEmpty(nodeList)) {
             List<String> controllerTransactions = nodeList.stream().filter(Objects::nonNull)
                 .map(ScriptNode::getXpathMd5)
                 .collect(Collectors.toList());
             return controllerTransactions.contains(transaction);
-        }else{
+        } else {
             return false;
         }
     }
 
-
-    private PressureOutput createPressureOutput(List<PressureOutput> results,long time,int podNum,String transaction,String testName){
+    private PressureOutput createPressureOutput(List<PressureOutput> results, long time,
+        int podNum, String transaction, String testName) {
         int count = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getCount)
-            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+            .filter(Objects::nonNull)
+            .mapToInt(i -> i)
             .sum();
         int failCount = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getFailCount)
-            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+            .filter(Objects::nonNull)
+            .mapToInt(i -> i)
             .sum();
         int saCount = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getSaCount)
-            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+            .filter(Objects::nonNull)
+            .mapToInt(i -> i)
             .sum();
         double sa = NumberUtil.getPercentRate(saCount, count);
         double successRate = NumberUtil.getPercentRate(count - failCount, count);
         long sendBytes = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getSentBytes)
-            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
+            .filter(Objects::nonNull)
+            .mapToLong(l -> l)
             .sum();
         long receiveBytes = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getReceivedBytes)
-            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
+            .filter(Objects::nonNull)
+            .mapToLong(l -> l)
             .sum();
 
         long sumRt = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getSumRt)
-            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
+            .filter(Objects::nonNull)
+            .mapToLong(l -> l)
             .sum();
 
         double avgRt = NumberUtil.getRate(sumRt, count);
 
         double maxRt = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getMaxRt)
-            .mapToDouble(d -> Objects.isNull(d) ? 0 : d)
+            .filter(Objects::nonNull)
+            .mapToDouble(d -> d)
             .max()
             .orElse(0);
 
         double minRt = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getMinRt)
-            .mapToDouble(d -> Objects.isNull(d) ? 0 : d)
+            .filter(Objects::nonNull)
+            .mapToDouble(d -> d)
             .min()
             .orElse(0);
 
-        //fixme 目前压测采样器回传的活跃线程数就是整个线程组的活跃线程数,暂时先取一个最大值，理论上同一个时间窗口回传的活跃线程数都是相同的
         int activeThreads = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getActiveThreads)
-            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+            .filter(Objects::nonNull)
+            .mapToInt(i -> i)
             .max()
             .orElse(0);
         double avgTps = NumberUtil.getRate(count, CollectorConstants.SEND_TIME);
@@ -465,33 +428,18 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         String percentSa = calculateSaPercent(percentData);
         int podNos = results.stream().filter(Objects::nonNull)
             .map(PressureOutput::getDataNum)
-            .mapToInt(i -> Objects.isNull(i) ? 0 : i)
+            .filter(Objects::nonNull)
+            .mapToInt(i -> i)
             .findFirst()
             .orElse(0);
         double dataRate = NumberUtil.getPercentRate(podNos, podNum, 100d);
         int status = podNos < podNum ? 0 : 1;
-        PressureOutput output = new PressureOutput();
-        output.setTime(time);
-        output.setCount(count);
-        output.setTransaction(transaction);
-        output.setFailCount(failCount);
-        output.setSaCount(saCount);
-        output.setSa(sa);
-        output.setSuccessRate(successRate);
-        output.setSentBytes(sendBytes);
-        output.setReceivedBytes(receiveBytes);
-        output.setSumRt(sumRt);
-        output.setAvgRt(avgRt);
-        output.setMaxRt(maxRt);
-        output.setMinRt(minRt);
-        output.setActiveThreads(activeThreads);
-        output.setAvgTps(avgTps);
-        output.setSaPercent(percentSa);
-        output.setDataNum(podNos);
-        output.setDataRate(dataRate);
-        output.setStatus(status);
-        output.setTestName(testName);
-        return output;
+        return new PressureOutput()
+            .setTime(time).setCount(count).setTransaction(transaction).setFailCount(failCount)
+            .setSaCount(saCount).setSa(sa).setSuccessRate(successRate).setSentBytes(sendBytes)
+            .setReceivedBytes(receiveBytes).setSumRt(sumRt).setAvgRt(avgRt).setMaxRt(maxRt)
+            .setMinRt(minRt).setActiveThreads(activeThreads).setAvgTps(avgTps).setStatus(status)
+            .setDataNum(podNos).setSaPercent(percentSa).setDataRate(dataRate).setTestName(testName);
     }
 
     /**
@@ -505,22 +453,11 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         return metricses.stream().filter(Objects::nonNull)
             .filter(m -> transaction.equals(m.getTransaction()))
             .filter(m -> !pods.contains(m.getPodNo()))
-            .peek(m -> pods.add(m.getPodNo()))
+            .map(m -> {
+                pods.add(m.getPodNo());
+                return m;
+            })
             .collect(Collectors.toList());
-    }
-
-    /**
-     * 判断回传的transaction中是不否包含目标controller的xpathMD5值
-     *
-     * @param transactions 回传的节点
-     * @param transaction  要验证的controller节点
-     * @return 是否为控制器
-     */
-    private boolean filterScriptNodeController(List<String> transactions, String transaction) {
-        if (CollectionUtils.isEmpty(transactions)) {
-            return true;
-        }
-        return !transactions.contains(transaction);
     }
 
     /**
@@ -531,7 +468,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
      * @param time       时间窗口
      * @param data       经过统计计算的metrics数据
      */
-    private void summaryNodeMetrics(ScriptNode targetNode, int podNum, Long time, List<PressureOutput> data,List<PressureOutput> slaList) {
+    private void summaryNodeMetrics(ScriptNode targetNode, int podNum, Long time, List<PressureOutput> data, List<PressureOutput> slaList) {
         String transaction = targetNode.getXpathMd5();
         String testName = targetNode.getTestName();
         List<ScriptNode> childSamplers = JmxUtil.getScriptNodeByType(NodeTypeEnum.SAMPLER, targetNode.getChildren());
@@ -548,7 +485,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         }
         PressureOutput pressureOutput = createPressureOutput(tmpData, time, podNum, transaction, testName);
         data.add(pressureOutput);
-        if (CollectionUtils.isNotEmpty(slaList) && targetNode.getType() == NodeTypeEnum.TEST_PLAN){
+        if (CollectionUtils.isNotEmpty(slaList) && targetNode.getType() == NodeTypeEnum.TEST_PLAN) {
             slaList.add(pressureOutput);
         }
     }
@@ -556,90 +493,62 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     /**
      * 实时数据统计
      */
-    private PressureOutput toPressureOutput(List<ResponseMetrics> metricses, Integer podNum, long time) {
-        if (CollectionUtils.isEmpty(metricses)) {
-            return null;
+    private PressureOutput toPressureOutput(List<ResponseMetrics> metricsList, Integer podNum, long time) {
+        if (CollUtil.isEmpty(metricsList)) {return null;}
+        String transaction = metricsList.get(0).getTransaction();
+        String testName = metricsList.get(0).getTestName();
+        PressureOutput result = new PressureOutput()
+            .setTime(time).setTestName(testName).setTransaction(transaction)
+            .setCount(0).setSumRt(0L).setSaCount(0).setDataNum(0).setFailCount(0)
+            .setMaxRt(Double.MIN_VALUE).setMinRt(Double.MAX_VALUE)
+            .setActiveThreads(0).setSentBytes(0L).setReceivedBytes(0L);
+        // 根据pod编号进行分组
+        Map<String, List<ResponseMetrics>> podGroupData =
+            metricsList.stream().collect(Collectors.groupingBy(ResponseMetrics::getPodNum));
+        for (Map.Entry<String, List<ResponseMetrics>> entry : podGroupData.entrySet()) {
+            List<ResponseMetrics> metrics = entry.getValue();
+            if (CollUtil.isNotEmpty(metrics)) {
+                // 请求总数|总RT|SA总数|请求失败总数|发送字节|响应字节
+                // 都是简单的求和
+                result.setCount(result.getCount() + NumberUtil.sum(metrics, ResponseMetrics::getCount));
+                result.setSumRt(result.getSumRt() + NumberUtil.sumLong(metrics, ResponseMetrics::getSumRt));
+                result.setSaCount(result.getSaCount() + NumberUtil.sum(metrics, ResponseMetrics::getSaCount));
+                result.setFailCount(result.getFailCount() + NumberUtil.sum(metrics, ResponseMetrics::getFailCount));
+                result.setSentBytes(result.getSentBytes() + NumberUtil.sumLong(metrics, ResponseMetrics::getSentBytes));
+                result.setReceivedBytes(result.getReceivedBytes() + NumberUtil.sumLong(metrics, ResponseMetrics::getReceivedBytes));
+                // 最大RT|最小RT
+                // 取极值
+                result.setMaxRt(Math.max(result.getMaxRt(), NumberUtil.maxDouble(metrics, ResponseMetrics::getMaxRt)));
+                result.setMinRt(Math.min(result.getMinRt(), NumberUtil.minDouble(metrics, ResponseMetrics::getMinRt)));
+                // 活跃线程数(并发数)
+                // pod内计算平均值后累加
+                //  1. 计算出当前pod的并发数平均值
+                double activeThread = cn.hutool.core.util.NumberUtil.div(NumberUtil.sum(metrics, ResponseMetrics::getActiveThreads), metrics.size());
+                //  2. 累加
+                result.setActiveThreads(result.getActiveThreads() + (int)activeThread);
+                // dataNumber
+                if (CharSequenceUtil.isNotBlank(entry.getKey())) {result.setDataNum(result.getDataNum() + 1);}
+            }
         }
-        String transaction = metricses.get(0).getTransaction();
-        String testName = metricses.get(0).getTestName();
-
-        int count = metricses.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getCount)
-            .mapToInt(i -> Objects.nonNull(i) ? i : 0)
-            .sum();
-        int failCount = metricses.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getFailCount)
-            .mapToInt(i -> Objects.nonNull(i) ? i : 0)
-            .sum();
-        int saCount = metricses.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getSaCount)
-            .mapToInt(i -> Objects.nonNull(i) ? i : 0)
-            .sum();
-        double sa = NumberUtil.getPercentRate(saCount, count);
-        double successRate = NumberUtil.getPercentRate(count - failCount, count);
-        long sendBytes = metricses.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getSentBytes)
-            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
-            .sum();
-        long receivedBytes = metricses.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getReceivedBytes)
-            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
-            .sum();
-        long sumRt = metricses.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getSumRt)
-            .mapToLong(l -> Objects.isNull(l) ? 0 : l)
-            .sum();
-        double avgRt = NumberUtil.getRate(sumRt, count);
-        double maxRt = metricses.stream().filter(Objects::nonNull)
-            .mapToDouble(ResponseMetrics::getMaxRt)
-            .filter(Objects::nonNull)
-            .max()
-            .orElse(0);
-        double minRt = metricses.stream().filter(Objects::nonNull)
-            .mapToDouble(ResponseMetrics::getMinRt)
-            .filter(Objects::nonNull)
-            .min()
-            .orElse(0);
-        int activeThreads = metricses.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getActiveThreads)
-            .mapToInt(i -> Objects.nonNull(i) ? i : 0)
-            .sum();
-        double avgTps = NumberUtil.getRate(count, CollectorConstants.SEND_TIME);
-        List<String> percentDatas = metricses.stream().filter(Objects::nonNull)
+        // 数据收集的是否完整
+        result.setStatus(result.getDataNum().equals(podNum) ? 1 : 0);
+        // SA       =   SA总数 / 请求总数
+        result.setSa(NumberUtil.getPercentRate(result.getSaCount(), result.getCount()));
+        // 成功率      =   ( 请求总数 - 请求失败总数 ) / 请求总数
+        result.setSuccessRate(NumberUtil.getPercentRate(result.getCount() - result.getFailCount(), result.getCount()));
+        // 平均RT     =   总RT / 请求总数
+        result.setAvgRt(NumberUtil.getRate(result.getSumRt(), result.getCount()));
+        // 平均TPS    =   请求总数 / 聚合窗口大小
+        result.setAvgTps(NumberUtil.getRate(result.getCount(), CollectorConstants.SEND_TIME));
+        // 数据采集量    =   数据来源的pod个数 / 总pod个数
+        result.setDataRate(NumberUtil.getPercentRate(result.getDataNum(), podNum, 100d));
+        // 百分位
+        List<String> percentDataList = metricsList.stream().filter(Objects::nonNull)
             .map(ResponseMetrics::getPercentData)
-            .filter(StringUtils::isNotBlank)
+            .filter(CharSequenceUtil::isNotBlank)
             .collect(Collectors.toList());
-        String percentSa = calculateSaPercent(percentDatas);
-        List<String> podNos = metricses.stream().filter(Objects::nonNull)
-            .map(ResponseMetrics::getPodNo)
-            .filter(StringUtils::isNotBlank)
-            .distinct()
-            .collect(Collectors.toList());
-        int dataNum = CollectionUtils.isEmpty(podNos) ? 0 : podNos.size();
-        double dataRate = NumberUtil.getPercentRate(dataNum, podNum, 100d);
-        int status = dataNum < podNum ? 0 : 1;
-        PressureOutput p = new PressureOutput();
-        p.setTime(time);
-        p.setTransaction(transaction);
-        p.setCount(count);
-        p.setFailCount(failCount);
-        p.setSaCount(saCount);
-        p.setSa(sa);
-        p.setSuccessRate(successRate);
-        p.setSentBytes(sendBytes);
-        p.setReceivedBytes(receivedBytes);
-        p.setSumRt(sumRt);
-        p.setAvgRt(avgRt);
-        p.setMaxRt(maxRt);
-        p.setMinRt(minRt);
-        p.setActiveThreads(activeThreads);
-        p.setAvgTps(avgTps);
-        p.setSaPercent(percentSa);
-        p.setDataNum(dataNum);
-        p.setDataRate(dataRate);
-        p.setStatus(status);
-        p.setTestName(testName);
-        return p;
+        result.setSaPercent(calculateSaPercent(percentDataList));
+        return result;
     }
 
     private void finishPushData(Long sceneId, Long reportId, Long customerId, Integer podNum, Long timeWindow,
@@ -652,7 +561,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             DateUtil.showTime(timeWindow), DateUtil.showTime(endTime), DateUtil.showTime(nowTimeWindow));
 
         ReportResult report = reportDao.selectById(reportId);
-        if (null != report && null != report.getEndTime()) {
+        if (report != null && report.getEndTime() != null) {
             endTime = Math.min(endTime, report.getEndTime().getTime());
         }
 
@@ -683,9 +592,6 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             event.setExt(new TaskResult(sceneId, reportId, customerId));
             eventCenterTemplate.doEvents(event);
             redisTemplate.delete(last(taskKey));
-            // 删除 timeWindowMap 的key
-            String tempTimestamp = ScheduleConstants.TEMP_TIMESTAMP_SIGN + engineName;
-            timeWindowMap.remove(tempTimestamp);
             log.info("---> 本次压测{}-{}-{}完成，已发送finished事件！<------", sceneId, reportId, customerId);
         }
         // 超时自动检修，强行触发关闭
@@ -695,117 +601,78 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     /**
      * 实时数据统计
      */
-    public void pushData2() {
-        ReportQueryParam param = new ReportQueryParam();
-        param.setStatus(0);
-        param.setIsDel(0);
+    public void pushData() {
+        ReportQueryParam param = new ReportQueryParam().setStatus(0).setIsDel(0);
         List<ReportResult> results = reportDao.queryReportList(param);
-        if (CollectionUtils.isEmpty(results)) {
-            log.info("没有需要统计的报告！");
-            return;
-        }
-        List<Long> reportIds = CommonUtil.getList(results, ReportResult::getId);
-        log.info("找到需要统计的报告：" + JsonHelper.bean2Json(reportIds));
-        results.stream().filter(Objects::nonNull)
-            .map(r -> (Runnable)() -> {
+        if (CollectionUtils.isEmpty(results)) {log.info("没有需要统计的报告！");}
+        // 开始统计
+        else {
+            List<Long> reportIds = results.stream()
+                .filter(Objects::nonNull)
+                .map(ReportResult::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+            log.info("找到需要统计的报告：{}", reportIds);
+            results.forEach(r -> Executors.execute(() -> {
                 Long sceneId = r.getSceneId();
                 Long reportId = r.getId();
                 Long customerId = r.getCustomerId();
                 String lockKey = String.format("pushData:%s:%s:%s", sceneId, reportId, customerId);
-                if (!lock(lockKey, "1")) {
-                    return;
-                }
+                if (!lock(lockKey, "1")) {return;}
                 try {
                     List<ScriptNode> nodes = JsonUtil.parseArray(r.getScriptNodeTree(), ScriptNode.class);
                     SceneManageWrapperOutput scene = sceneManageService.getSceneManage(sceneId, null);
-                    if (null == scene) {
-                        log.info("no such scene manager!sceneId=" + sceneId);
-                        return;
-                    }
-                    //结束时间取开始压测时间+总测试时间+3分钟， 3分钟富裕时间，给与pod启动和压测引擎启动延时时间
-                    long endTime = TimeUnit.MINUTES.toMillis(3L);
-                    if (null != r.getStartTime()) {
-                        endTime += r.getStartTime().getTime();
-                    } else if (null != r.getGmtCreate()) {
-                        endTime += r.getGmtCreate().getTime();
-                    }
-                    if (null != scene.getTotalTestTime()) {
-                        endTime += TimeUnit.SECONDS.toMillis(scene.getTotalTestTime());
-                    } else if (null != scene.getPressureTestSecond()) {
-                        endTime += TimeUnit.SECONDS.toMillis(scene.getPressureTestSecond());
-                    }
-                    int podNum = scene.getIpNum();
-                    long nowTimeWindow = CollectorUtil.getNowTimeWindow();
-                    long breakTime = Math.min(endTime, nowTimeWindow);
-                    Long timeWindow = null;
-                    do {
-                        //获取最后一条数据的时间，如果最后一条回传数据的时间比当前时间少3分钟以上，则认为引擎不会继续回传数据了，结束掉,设置endTime为最后一条数据的时间
-                        //if(ifReportOutOfTime(sceneId, reportId, customerId,r)){
-                        //    log.error("3分钟未收到压测引擎回传数据或上条数据已超过三分钟，停止数据收集，场景ID:{},报告ID:{}",sceneId,reportId);
-                        //    break;
-                        //}
-                        //不用递归，而是采用do...while...的方式是防止需要处理的时间段太长引起stackOverFlow错误
-                        timeWindow = reduceMetrics(sceneId, reportId, customerId, podNum, breakTime, timeWindow, nodes);
-                        if (null == timeWindow) {
-                            timeWindow = nowTimeWindow;
-                            break;
+                    if (scene != null) {
+                        //结束时间取开始压测时间+总测试时间+3分钟， 3分钟富裕时间，给与pod启动和压测引擎启动延时时间
+                        long endTime = getEndTime(scene, r);
+                        int podNum = scene.getIpNum();
+                        long nowTimeWindow = CollectorUtil.getNowTimeWindow();
+                        long breakTime = Math.min(endTime, nowTimeWindow);
+                        Long timeWindow = -1L;
+                        while (timeWindow <= breakTime) {
+                            //获取最后一条数据的时间，如果最后一条回传数据的时间比当前时间少3分钟以上，则认为引擎不会继续回传数据了，结束掉,设置endTime为最后一条数据的时间
+                            //if(ifReportOutOfTime(sceneId, reportId, customerId,r)){
+                            //    log.error("3分钟未收到压测引擎回传数据或上条数据已超过三分钟，停止数据收集，场景ID:{},报告ID:{}",sceneId,reportId);
+                            //    break;
+                            //}
+                            if (timeWindow <= 0) {timeWindow = null;}
+                            timeWindow = reduceMetrics(sceneId, reportId, customerId, podNum, breakTime, timeWindow, nodes);
+                            if (null == timeWindow) {
+                                timeWindow = nowTimeWindow;
+                                break;
+                            }
+                            timeWindow = CollectorUtil.getNextTimeWindow(timeWindow);
                         }
-                        timeWindow = CollectorUtil.getNextTimeWindow(timeWindow);
-                    } while (timeWindow <= breakTime);
-
-                    if (r.getEndTime() != null){
-                        // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
-                        sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
+                        if (r.getEndTime() != null) {
+                            // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
+                            sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
                                 .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
                                 .updateEnum(SceneManageStatusEnum.STOP)
                                 .build());
+                        }
+                        // 结束报告
+                        finishPushData(sceneId, reportId, customerId, podNum, timeWindow, endTime, nodes);
                     }
-
-                    finishPushData(sceneId, reportId, customerId, podNum, timeWindow, endTime, nodes);
-                } catch (Throwable t) {
-                    log.error("pushData2 error!", t);
-                } finally {
-                    unlock(lockKey, "0");
-                }
-            })
-            .forEach(Executors::execute);
+                    // 没有找到场景
+                    else {log.info("no such scene manager!sceneId=" + sceneId);}
+                } catch (Throwable t) {log.error("pushData error!", t);} finally {unlock(lockKey, "0");}
+            }));
+        }
     }
 
-    /**
-     * 暂时先不用
-     * @param sceneId
-     * @param reportId
-     * @param customerId
-     * @param report
-     * @return
-     */
-    private boolean ifReportOutOfTime(Long sceneId, Long reportId, Long customerId, ReportResult report) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("select * from ")
-            .append(InfluxDBUtil.getMetricsMeasurement(sceneId, reportId, customerId))
-            .append(" order by create_time desc limit 1");
-        try {
-            PressureOutput pressure = influxWriter.querySingle(sql.toString(), PressureOutput.class);
-            if (Objects.nonNull(pressure)) {
-                long lastMetricsTime = pressure.getTime();
-                if (lastMetricsTime > 0) {
-                    long s = (System.currentTimeMillis() - lastMetricsTime) / (1000 * 60);
-                    if (s > 3) {
-                        report.setEndTime(new Date(lastMetricsTime));
-                        return true;
-                    }
-                }
-            } else {
-                long s = (System.currentTimeMillis() - report.getStartTime().getTime()) / (1000 * 60);
-                if (s > 3) {
-                    report.setEndTime(new Date());
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            log.error("查询metrics数据异常:{}", e.toString());
+    long getEndTime(SceneManageWrapperOutput scene, ReportResult report) {
+        long endTime = TimeUnit.MINUTES.toMillis(3L);
+        if (null != report.getStartTime()) {
+            endTime += report.getStartTime().getTime();
+        } else if (null != report.getGmtCreate()) {
+            endTime += report.getGmtCreate().getTime();
         }
-        return false;
+        if (null != scene.getTotalTestTime()) {
+            endTime += TimeUnit.SECONDS.toMillis(scene.getTotalTestTime());
+        } else if (null != scene.getPressureTestSecond()) {
+            endTime += TimeUnit.SECONDS.toMillis(scene.getPressureTestSecond());
+        }
+        return endTime;
     }
 
     /**
@@ -814,130 +681,8 @@ public class PushWindowDataScheduled extends AbstractIndicators {
      */
     @Async("collectorSchedulerPool")
     @Scheduled(cron = "0/5 * * * * ? ")
-    public void pushData() {
-        if (!schedulingEnabled) {
-            return;
-        }
-        if (StringUtils.isNotBlank(appConfig.getCollector()) && "influxdb".equalsIgnoreCase(appConfig.getCollector())) {
-            pushData2();
-            return;
-        }
-        pushData1();
-    }
-
-    public void pushData1() {
-        try {
-            Set<String> keys = this.keys(String.format(CollectorConstants.REDIS_PRESSURE_TASK_KEY, "*"));
-            for (String sceneReportKey : keys) {
-                Executors.execute(() -> {
-                    try {
-                        int lastIndex = sceneReportKey.lastIndexOf(":");
-                        if (-1 == lastIndex) {
-                            return;
-                        }
-                        String sceneReportId = sceneReportKey.substring(lastIndex + 1);
-                        String[] split = sceneReportId.split("_");
-                        Long sceneId = Long.valueOf(split[0]);
-                        Long reportId = Long.valueOf(split[1]);
-                        Long customerId = null;
-                        if (split.length == 3) {
-                            customerId = Long.valueOf(split[2]);
-                        }
-                        ReportResult reportResult = reportDao.selectById(reportId);
-                        SceneManageEntity sceneManageEntity = sceneManageDAO.queueSceneById(sceneId);
-                        if (SceneManageStatusEnum.ifFree(sceneManageEntity.getStatus())) {
-                            delTask(sceneId, reportId, customerId);
-                            return;
-                        }
-
-                        if (lock(sceneReportKey, "collectorSchedulerPool")) {
-                            String engineName = ScheduleConstants.getEngineName(sceneId, reportId, customerId);
-
-                            // 记录一个redis 时间计数开始时间的时间窗口开始
-                            long timeWindow = refreshTimeWindow(engineName);
-
-                            if (timeWindow == 0) {
-                                unlock(sceneReportKey, "collectorSchedulerPool");
-                                return;
-                            }
-                            List<String> transactions = (List<String>)redisTemplate.opsForValue().get(sceneReportKey);
-                            if (null == transactions || transactions.size() == 0) {
-                                unlock(sceneReportKey, "collectorSchedulerPool");
-                                return;
-                            }
-                            log.info("【collector metric】{}-{}-{}:{}", sceneId, reportId, customerId, timeWindow);
-                            String taskKey = getPressureTaskKey(sceneId, reportId, customerId);
-                            //判断是否有数据延迟了，需要加快处理流程，否则会丢失数据,保证当前线程刷的数据始终在30s之类
-                            if (delayQuick) {
-                                while (timeWindow > 0 && System.currentTimeMillis() - timeWindow > delayTimeWindow) {
-                                    log.warn("当前push Data延迟时间为{}", timeWindow);
-                                    final Long customerIdTmp = customerId;
-                                    final long delayTmp = timeWindow;
-                                    Executors.execute(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            writeInfluxDB(transactions, taskKey, delayTmp, sceneId, reportId,
-                                                customerIdTmp, reportResult.getScriptNodeTree());
-                                        }
-                                    });
-                                    timeWindow = refreshTimeWindow(engineName);
-                                }
-                            }
-                            // 写入数据
-                            writeInfluxDB(transactions, taskKey, timeWindow, sceneId, reportId, customerId,
-                                reportResult.getScriptNodeTree());
-                            // 读取结束标识   手动收尾
-                            String last = String.valueOf(redisTemplate.opsForValue().get(last(taskKey)));
-                            if (ScheduleConstants.LAST_SIGN.equals(last)) {
-                                // 只需触发一次即可
-                                String endTimeKey = engineName + ScheduleConstants.LAST_SIGN;
-                                long endTime = CollectorUtil.getEndWindowTime(
-                                    (Long)redisTemplate.opsForValue().get(endTimeKey));
-                                log.info("触发手动收尾操作，当前时间窗口：{},结束时间窗口：{},", timeWindow, endTime);
-                                // 比较 endTime timeWindow
-                                // 如果结束时间 小于等于当前时间，数据不用补充，
-                                // 如果结束时间 大于 当前时间，需要补充期间每5秒的数据 延后5s
-                                endTime = CollectorUtil.addWindowTime(endTime);
-                                while (isSaveLastPoint && endTime > timeWindow) {
-                                    timeWindow = CollectorUtil.addWindowTime(timeWindow);
-                                    // 1、确保 redis->influxDB
-                                    log.info("redis->influxDB，当前时间窗口：{},", timeWindow);
-                                    writeInfluxDB(transactions, taskKey, timeWindow, sceneId, reportId, customerId,
-                                        reportResult.getScriptNodeTree());
-                                }
-                                log.info("本次压测{}-{}-{},metric数据已经全部上报influxDB", sceneId, reportId, customerId);
-                                // 清除 SLA配置 清除PushWindowDataScheduled 删除pod job configMap  生成报告
-                                Event event = new Event();
-                                event.setEventName("finished");
-                                event.setExt(new TaskResult(sceneId, reportId, customerId));
-                                eventCenterTemplate.doEvents(event);
-                                redisTemplate.delete(last(taskKey));
-                                // 删除 timeWindowMap 的key
-                                String tempTimestamp = ScheduleConstants.TEMP_TIMESTAMP_SIGN + engineName;
-                                timeWindowMap.remove(tempTimestamp);
-                            }
-
-                            if (reportResult.getEndTime() != null){
-                                // 更新压测场景状态  压测引擎运行中,压测引擎停止压测 ---->压测引擎停止压测
-                                sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
-                                        .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
-                                        .updateEnum(SceneManageStatusEnum.STOP)
-                                        .build());
-                            }
-                            // 超时自动检修，强行触发关闭
-                            forceClose(taskKey, timeWindow, sceneId, reportId, customerId);
-                        }
-                    } catch (Exception e) {
-                        log.error("【collector】Real-time data analysis for anomalies hashkey:{}, error:{}",
-                            sceneReportKey, e);
-                    } finally {
-                        unlock(sceneReportKey, "collectorSchedulerPool");
-                    }
-                });
-            }
-        } catch (Throwable e) {
-            log.error(e.getMessage(), e);
-        }
+    public void pushDataScheduled() {
+        if (Boolean.TRUE.equals(schedulingEnabled)) {pushData();}
     }
 
     /**
@@ -960,7 +705,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 .map(SceneManageResult::getType)
                 .map(SceneManageStatusEnum::getSceneManageStatusEnum)
                 .map(SceneManageStatusEnum::getDesc).orElse("未找到场景"));
-            if (sceneManage != null && !sceneManage.getType().equals(SceneManageStatusEnum.FORCE_STOP.getValue())) {
+            if (sceneManage != null && !SceneManageStatusEnum.FORCE_STOP.getValue().equals(sceneManage.getType())) {
                 sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, customerId)
                     .checkEnum(SceneManageStatusEnum.ENGINE_RUNNING, SceneManageStatusEnum.STOP)
                     .updateEnum(SceneManageStatusEnum.STOP)
@@ -972,132 +717,6 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             event.setExt(new TaskResult(sceneId, reportId, customerId));
             eventCenterTemplate.doEvents(event);
             redisTemplate.delete(last(taskKey));
-            // 删除 timeWindowMap 的key
-            String engineName = ScheduleConstants.getEngineName(sceneId, reportId, customerId);
-            String tempTimestamp = ScheduleConstants.TEMP_TIMESTAMP_SIGN + engineName;
-            timeWindowMap.remove(tempTimestamp);
-        }
-    }
-
-    private void writeInfluxDB(List<String> transactions, String taskKey, long timeWindow, Long sceneId, Long reportId,
-        Long customerId, String nodeTree) {
-        long start = System.currentTimeMillis();
-        List<PressureOutput> resultList = new ArrayList<>();
-        for (String transaction : transactions) {
-            Integer count = getIntValue(countKey(taskKey, transaction, timeWindow));
-            //todo 判断是否控制器，如果是控制器
-            if (null == count || count < 1) {
-                log.error(
-                    "【collector metric】【null == count || count < 1】 write influxDB time : {},{}-{}-{}-{}, ", timeWindow,
-                    sceneId, reportId, customerId, transaction);
-                continue;
-            }
-            Integer failCount = getIntValue(failCountKey(taskKey, transaction, timeWindow));
-            Integer saCount = getIntValue(saCountKey(taskKey, transaction, timeWindow));
-            Long sumRt = getLongValueFromMap(rtKey(taskKey, transaction, timeWindow));
-
-            Double maxRt = getDoubleValue(maxRtKey(taskKey, transaction, timeWindow));
-            Double minRt = getDoubleValue(minRtKey(taskKey, transaction, timeWindow));
-
-            Integer activeThreads = getIntValue(activeThreadsKey(taskKey, transaction, timeWindow));
-            Double avgTps = getAvgTps(count);
-            // 算平均rt
-            Double avgRt = getAvgRt(count, sumRt);
-            Double saRate = getSaRate(count, saCount);
-            Double successRate = getSuccessRate(count, failCount);
-
-            List<String> percentDatas = getStringValue(percentDataKey(taskKey, transaction, timeWindow));
-            String percentSa = calculateSaPercent(percentDatas);
-
-            Map<String, String> tags = new HashMap<>();
-            tags.put("transaction", transaction);
-            if (StringUtils.isNotBlank(nodeTree)) {
-                PressureOutput output = new PressureOutput();
-                output.setTransaction(transaction);
-                List<String> stringValue = getStringValue(testNameKey(taskKey, transaction, timeWindow));
-                if (CollectionUtils.isNotEmpty(stringValue)) {
-                    output.setTestName(stringValue.get(0));
-                }
-                output.setCount(count);
-                output.setFailCount(failCount);
-                output.setSaCount(saCount);
-                output.setSumRt(sumRt);
-                output.setMaxRt(maxRt);
-                output.setMinRt(minRt);
-                output.setAvgRt(avgRt);
-                output.setAvgTps(avgTps);
-                output.setSa(saRate);
-                output.setSuccessRate(successRate);
-                output.setSaPercent(percentSa);
-                output.setActiveThreads(activeThreads);
-                resultList.add(output);
-            } else {
-                Map<String, Object> fields = getInfluxdbFieldMap(count, failCount,
-                    saCount, sumRt, maxRt, minRt, avgTps, avgRt, saRate, successRate, activeThreads, percentSa);
-                log.debug("metrics数据入库:时间窗:{},percentSa:{}", timeWindow, percentDatas);
-                influxWriter.insert(InfluxDBUtil.getMeasurement(sceneId, reportId, customerId), tags,
-                    fields, timeWindow);
-            }
-            try {
-                SendMetricsEvent metrics = getSendMetricsEvent(sceneId, reportId, customerId, timeWindow,
-                    transaction, count, failCount, maxRt, minRt, avgTps, avgRt,
-                    saRate, successRate);
-                //未finish，发事件
-                String existKey = String.format(CollectorConstants.REDIS_PRESSURE_TASK_KEY,
-                    getTaskKey(sceneId, reportId, customerId));
-                if (redisTemplate.hasKey(existKey)) {
-                    sendMetrics(metrics);
-                }
-            } catch (Exception e) {
-                log.error(
-                    "【collector metric】【error】 write influxDB time : {} sceneId : {}, reportId : {},customerId : {}, "
-                        + "error:{}",
-                    timeWindow, sceneId, reportId, customerId, e.getMessage());
-            }
-            long end = System.currentTimeMillis();
-            log.info(
-                "【collector metric】【success】 write influxDB time : {},write time：{} sceneId : {}, reportId : {},"
-                    + "customerId : {}",
-                timeWindow, (end - start), sceneId, reportId, customerId);
-
-        }
-        if (CollectionUtils.isNotEmpty(resultList)) {
-            int allSaCount = resultList.stream().filter(Objects::nonNull)
-                .map(PressureOutput::getCount)
-                .mapToInt(i -> Objects.isNull(i) ? 0 : i)
-                .sum();
-            List<ScriptNode> childControllers = JsonPathUtil.getChildControllers(nodeTree, null);
-            childControllers.stream().filter(Objects::nonNull)
-                .filter(c -> !transactions.contains(c.getXpathMd5()))
-                .forEach(c -> this.summaryNodeMetrics(c, 0, timeWindow, resultList,null));
-
-            List<ScriptNode> threadGroupNodes = JsonPathUtil.getChildrenByMd5(nodeTree, null,
-                NodeTypeEnum.THREAD_GROUP);
-            if (CollectionUtils.isNotEmpty(threadGroupNodes)) {
-                threadGroupNodes.stream().filter(Objects::nonNull)
-                    .filter(c -> !transactions.contains(c.getXpathMd5()))
-                    .forEach(c -> this.summaryNodeMetrics(c, 0, timeWindow, resultList,null));
-            }
-
-            String measurement = InfluxDBUtil.getMeasurement(sceneId, reportId, customerId);
-            resultList.stream().filter(Objects::nonNull)
-                .peek(o -> {
-                    if ("all".equalsIgnoreCase(o.getTransaction())) {
-                        o.setSaCount(allSaCount);
-                        List<ScriptNode> testPlans = JsonPathUtil.getChildrenByMd5(nodeTree, null,
-                            NodeTypeEnum.TEST_PLAN);
-                        if (CollectionUtils.isNotEmpty(testPlans)) {
-                            String testPlanTransaction = testPlans.stream().filter(Objects::nonNull)
-                                .map(ScriptNode::getXpathMd5)
-                                .filter(StringUtils::isNotBlank)
-                                .findFirst()
-                                .orElse("all");
-                            o.setTransaction(testPlanTransaction);
-                        }
-                    }
-                })
-                .map(p -> InfluxDBUtil.toPoint(measurement, timeWindow, p))
-                .forEach(influxWriter::insert);
         }
     }
 
@@ -1120,8 +739,10 @@ public class PushWindowDataScheduled extends AbstractIndicators {
 
         //所有rt按耗时排序
         List<RtDataOutput> rtDatas = percentMapList.stream().filter(Objects::nonNull)
-            .peek(DataUtils::percentMapRemoveDuplicateHits)
-            .map(Map::values)
+            .map(t -> {
+                DataUtils.percentMapRemoveDuplicateHits(t);
+                return t.values();
+            })
             .filter(CollectionUtils::isNotEmpty)
             .flatMap(Collection::stream)
             .sorted(Comparator.comparing(RtDataOutput::getTime))
@@ -1147,27 +768,6 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         return DataUtils.percentMapToString(result);
     }
 
-    private Map<String, Object> getInfluxdbFieldMap(Integer count, Integer failCount, Integer saCount, Long sumRt,
-        Double maxRt, Double minRt, Double avgTps, Double avgRt, Double saRate, Double successRate,
-        Integer activeThreads, String saPercent) {
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("count", count);
-        fields.put("fail_count", failCount);
-        fields.put("sa_count", saCount);
-        fields.put("sum_rt", sumRt);
-        fields.put("max_rt", maxRt);
-        fields.put("min_rt", minRt);
-
-        fields.put("avg_tps", avgTps);
-        fields.put("avg_rt", avgRt);
-        fields.put("sa", saRate);
-        fields.put("sa_percent", saPercent);
-        fields.put("success_rate", successRate);
-        fields.put("active_threads", activeThreads);
-        fields.put("write_time", System.currentTimeMillis());
-        return fields;
-    }
-
     private List<SendMetricsEvent> getSendMetricsEventList(Long sceneId, Long reportId, Long customerId,
         long timeWindow, List<PressureOutput> pressureOutputs) {
         return pressureOutputs.stream().filter(Objects::nonNull)
@@ -1188,114 +788,6 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 metrics.setCustomerId(customerId);
                 return metrics;
             }).collect(Collectors.toList());
-    }
-
-    private SendMetricsEvent getSendMetricsEvent(Long sceneId, Long reportId, Long customerId, long timeWindow,
-        String transaction,
-        Integer count, Integer failCount, Double maxRt, Double minRt, Double avgTps, Double avgRt, Double saRate,
-        Double successRate) {
-        SendMetricsEvent metrics = new SendMetricsEvent();
-        metrics.setTransaction(transaction);
-        metrics.setCount(count);
-        metrics.setFailCount(failCount);
-        metrics.setAvgTps(avgTps);
-        metrics.setAvgRt(avgRt);
-        metrics.setSa(saRate);
-        metrics.setMaxRt(maxRt);
-        metrics.setMinRt(minRt);
-        metrics.setSuccessRate(successRate);
-        metrics.setTimestamp(timeWindow);
-        metrics.setReportId(reportId);
-        metrics.setSceneId(sceneId);
-        metrics.setCustomerId(customerId);
-        return metrics;
-    }
-
-    private void scan(String pattern, Consumer<byte[]> consumer) {
-        this.redisTemplate.execute((RedisConnection connection) -> {
-            try (Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions().count(Long.MAX_VALUE).match(pattern)
-                .build())) {
-                cursor.forEachRemaining(consumer);
-                return null;
-            } catch (Exception e) {
-                throw new TakinCloudException(TakinCloudExceptionEnum.TASK_RUNNING_GET_RUNNING_JOB_KEY, "获取运行中的job失败！",
-                    e);
-            }
-        });
-    }
-
-    /**
-     * 获取符合条件的key
-     *
-     * @param pattern 表达式
-     * @return -
-     */
-    public Set<String> keys(String pattern) {
-        Set<String> keys = new HashSet<>();
-        this.scan(pattern, item -> {
-            //符合条件的key
-            String key = new String(item, StandardCharsets.UTF_8);
-            keys.add(key);
-        });
-        return keys;
-    }
-
-    /**
-     * 平均TPS计算
-     *
-     * @return -
-     */
-    private Double getAvgTps(Integer count) {
-        if (null == count || 0 == count) {
-            return 0d;
-        }
-        BigDecimal countDecimal = BigDecimal.valueOf(count);
-        return countDecimal.divide(BigDecimal.valueOf(CollectorConstants.SEND_TIME), 2, RoundingMode.HALF_UP)
-            .doubleValue();
-    }
-
-    /**
-     * 平均RT 计算
-     *
-     * @return -
-     */
-    private Double getAvgRt(Integer count, Long sumRt) {
-        if (null == count || 0 == count) {
-            return 0d;
-        }
-        BigDecimal countDecimal = BigDecimal.valueOf(count);
-        BigDecimal rtDecimal = BigDecimal.valueOf(sumRt);
-        return rtDecimal.divide(countDecimal, 2, RoundingMode.HALF_UP).doubleValue();
-    }
-
-    /**
-     * 事物成功率
-     *
-     * @return -
-     */
-    private Double getSaRate(Integer count, Integer saCount) {
-        if (null == count || 0 == count) {
-            return 0d;
-        }
-        BigDecimal countDecimal = BigDecimal.valueOf(count);
-        BigDecimal saCountDecimal = BigDecimal.valueOf(saCount);
-        return saCountDecimal.divide(countDecimal, 2, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100))
-            .doubleValue();
-    }
-
-    /**
-     * 请求成功率
-     *
-     * @return -
-     */
-    private Double getSuccessRate(Integer count, Integer failCount) {
-        if (null == count || 0 == count) {
-            return 0d;
-        }
-        BigDecimal countDecimal = BigDecimal.valueOf(count);
-        BigDecimal failCountDecimal = BigDecimal.valueOf(failCount);
-        return countDecimal.subtract(failCountDecimal).multiply(BigDecimal.valueOf(100)).divide(countDecimal, 2,
-            RoundingMode.HALF_UP).doubleValue();
     }
 
 }

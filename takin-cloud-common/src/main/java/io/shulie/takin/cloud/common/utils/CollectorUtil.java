@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
  * @date 2020-04-20 20:38
  */
 public class CollectorUtil {
+    private CollectorUtil() {}
 
     /**
      * 组装时间戳 +  podNum
@@ -48,7 +49,12 @@ public class CollectorUtil {
         int nowSecond = 0;
         Calendar instance = Calendar.getInstance();
         instance.setTimeInMillis(timestamp);
+
         int second = instance.get(Calendar.SECOND);
+        int millSecond = instance.get(Calendar.MILLISECOND);
+        if (millSecond > 0) {
+            second = second + 1;
+        }
         for (int time : CollectorConstants.timeWindow) {
             if (second <= time) {
                 nowSecond = time;
@@ -64,6 +70,7 @@ public class CollectorUtil {
         }
         return instance;
     }
+
     public static long getTimeWindowTime(long timestamp) {
         return getTimeWindow(timestamp).getTimeInMillis();
     }
@@ -104,7 +111,7 @@ public class CollectorUtil {
     public static long addWindowTime(long timestamp) {
         Calendar instance = Calendar.getInstance();
         instance.setTimeInMillis(timestamp);
-        instance.add(Calendar.SECOND, 5);
+        instance.add(Calendar.SECOND, CollectorConstants.SEND_TIME);
         return instance.getTimeInMillis();
     }
 
@@ -117,14 +124,6 @@ public class CollectorUtil {
     public static long getEndWindowTime(long timestamp) {
         Calendar instance = getTimeWindow(timestamp);
         return instance.getTimeInMillis();
-    }
-
-    public static void main(String[] args) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.SECOND, 56);
-
-        Calendar timeWindow = getTimeWindow(calendar.getTimeInMillis());
-        System.out.println(timeWindow.getTime());
     }
 
 }

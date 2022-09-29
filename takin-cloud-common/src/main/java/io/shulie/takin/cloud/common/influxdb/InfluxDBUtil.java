@@ -1,7 +1,5 @@
 package io.shulie.takin.cloud.common.influxdb;
 
-import io.shulie.takin.cloud.common.utils.CollectorUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.influxdb.BuilderException;
 import org.influxdb.annotation.Column;
 import org.influxdb.dto.Point;
@@ -15,8 +13,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class InfluxDBUtil {
 
-    public static long MAX_ACCEPT_TIMESTAMP = 9223372036854L;
+    private InfluxDBUtil() {}
 
+    public static final long MAX_ACCEPT_TIMESTAMP = 9223372036854L;
 
     /**
      * 实时统计数据表
@@ -51,17 +50,17 @@ public class InfluxDBUtil {
      */
     public static Point toPoint(String measurement, long time, Object pojo) {
         Point.Builder builder = Point.measurement(measurement)
-                .time(CollectorUtil.getTimeWindowTime(time), TimeUnit.MILLISECONDS)
-                //当前类的字段添加到数据库
-                .addFieldsFromPOJO(pojo)
-                .addField("create_time", System.currentTimeMillis());
-        Class superclass = pojo.getClass().getSuperclass();
+            .time(time, TimeUnit.MILLISECONDS)
+            //当前类的字段添加到数据库
+            .addFieldsFromPOJO(pojo)
+            .addField("create_time", System.currentTimeMillis());
+        Class<?> superclass = pojo.getClass().getSuperclass();
         //父类字段添加到数据库
         addSuperClassFieldsFromPOJO(builder, pojo, superclass);
         return builder.build();
     }
 
-    private static void addSuperClassFieldsFromPOJO(Point.Builder builder, Object pojo, Class clazz) {
+    private static void addSuperClassFieldsFromPOJO(Point.Builder builder, Object pojo, Class<?> clazz) {
         for (Field field : clazz.getDeclaredFields()) {
             Column column = field.getAnnotation(Column.class);
             if (column == null) {
@@ -80,7 +79,7 @@ public class InfluxDBUtil {
         try {
             Object fieldValue = field.get(pojo);
             if (column.tag()) {
-                builder.tag(fieldName, (String) fieldValue);
+                builder.tag(fieldName, (String)fieldValue);
             } else {
                 builder.field(fieldName, fieldValue);
             }

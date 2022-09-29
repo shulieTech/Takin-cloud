@@ -16,13 +16,15 @@
 package io.shulie.takin.cloud.biz.output.statistics;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 import org.influxdb.annotation.Column;
 
 /**
- * @Author: liyuanba
- * @Date: 2021/9/23 9:20 下午
+ * @author liyuanba
+ * @date 2021/9/23 9:20 下午
  */
 @Data
+@Accessors(chain = true)
 public class PressureOutput {
     @Column(tag = true, name = "transaction")
     private String transaction;
