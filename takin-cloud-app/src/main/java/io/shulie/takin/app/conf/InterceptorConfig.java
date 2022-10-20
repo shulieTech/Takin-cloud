@@ -14,7 +14,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 public class InterceptorConfig extends WebMvcConfigurerAdapter{
 
     public void addInterceptors(InterceptorRegistry registry){
-        registry.addInterceptor(new SecurityInterceptor())
-                .addPathPatterns("/**");
+//        registry.addInterceptor(new SecurityInterceptor())
+//                .addPathPatterns("/**");
     }
 }
