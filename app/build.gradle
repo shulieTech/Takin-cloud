@@ -65,10 +65,6 @@ dependencies {
     implementation libs.dom4j
     implementation libs.hutool
     implementation libs.influxdb
-    implementation 'com.alibaba:fastjson:1.2.79'
-    implementation 'com.thoughtworks.xstream:xstream:1.4.19'
-    implementation 'org.apache.commons:commons-text:1.9'
-    implementation 'commons-io:commons-io:2.7'
 
     //Tests
     testImplementation ('org.springframework.boot:spring-boot-starter-test:2.6.6'){

@@ -1,19 +1,19 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import java.util.Map;
 import java.util.Date;
 import java.util.Objects;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONException;
 
 import lombok.extern.slf4j.Slf4j;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.BooleanUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import io.shulie.takin.cloud.constant.Message;
+import io.shulie.takin.cloud.app.service.JsonService;
 import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.data.entity.CallbackLogEntity;
 import io.shulie.takin.cloud.app.service.CallbackLogService;
@@ -27,6 +27,9 @@ import io.shulie.takin.cloud.data.service.CallbackLogMapperService;
 @Service
 @Slf4j(topic = "CALLBACK")
 public class CallbackLogServiceImpl implements CallbackLogService {
+
+    @javax.annotation.Resource
+    JsonService jsonService;
 
     @Lazy
     @javax.annotation.Resource
@@ -93,13 +96,9 @@ public class CallbackLogServiceImpl implements CallbackLogService {
      */
     private boolean isSuccess(byte[] responseData) {
         String response = StrUtil.utf8Str(responseData);
-        try {
-            JSONObject resJson = JSON.parseObject(response);
-            return Objects.nonNull(resJson)
-                && Boolean.TRUE.equals(resJson.getBoolean(Message.SUCCESS));
-        } catch (JSONException e) {
-            log.error("CallbackServiceImpl#isSuccess", e);
-            return false;
-        }
+        Map<String, Object> resJson = jsonService.readValue(response, new TypeReference<Map<String, Object>>() {});
+        return Objects.nonNull(resJson)
+            && Objects.nonNull(resJson.get(Message.SUCCESS))
+            && Boolean.TRUE.equals(BooleanUtil.toBoolean(resJson.get(Message.SUCCESS).toString()));
     }
 }

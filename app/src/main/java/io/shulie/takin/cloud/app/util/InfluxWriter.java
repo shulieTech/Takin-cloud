@@ -10,6 +10,7 @@ import cn.hutool.json.JSONUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Point;
@@ -19,7 +20,6 @@ import org.influxdb.dto.QueryResult;
 import org.influxdb.InfluxDBFactory;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -64,7 +64,7 @@ public class InfluxWriter {
 
     @PostConstruct
     public void init() {
-        if (StringUtils.isBlank(influxdbUrl)) {
+        if (CharSequenceUtil.isBlank(influxdbUrl)) {
             return;
         }
         influx = InfluxDBFactory.connect(influxdbUrl, userName, password);

@@ -6,15 +6,15 @@ jackson = "2.13.3"
 influxdb = "2.22"
 dom4j = "1.6.1"
 # mybatis
-mybatis-plus = "3.5.1"
-mysql-connector = "8.0.28"
+mybatis-plus = "3.5.2"
+mysql-connector = "8.0.29"
 # spring
-spring = "5.3.19"
-spring-doc = "1.6.8"
-spring-boot = "2.6.7"
-spring-druid = "1.1.17"
-spring-pagehelper = "1.4.2"
-spring-boo-redisson = "3.17.0"
+spring = "5.3.23"
+spring-doc = "1.6.11"
+spring-boot = "2.7.4"
+spring-druid = "1.2.13"
+spring-pagehelper = "1.4.5"
+spring-boo-redisson = "3.17.7"
 # 单个依赖
 [libraries]
 # lobmok
