@@ -1665,15 +1665,23 @@ public class ReportServiceImpl implements ReportService {
             return jtlPath + "/" + "Jmeter.zip";
         } else if (needZip) {
             // 开始压缩
-            String command = StrUtil.indexedFormat("sudo zip -r -j {0}/Jmeter.zip {0} {1}", jtlPath, logPath);
+            String command = StrUtil.indexedFormat("zip -r -j {0}/Jmeter.zip {0} {1}", jtlPath, logPath);
             log.info("压测日志打包成文件:{}", command);
-            Boolean result = LinuxHelper.executeLinuxCmd(command);
-            if (result) {
-                // 返回成功
-                return jtlPath + "/" + "Jmeter.zip";
+            try {
+                Boolean result = LinuxHelper.executeLinuxCmd(command);
+                if (result) {
+                    // 返回成功
+                    return jtlPath + "/" + "Jmeter.zip";
+                }
+                throw new TakinCloudException(TakinCloudExceptionEnum.FILE_ZIP_ERROR, "查看" + jtlPath);
+            } catch (Exception e) {
+                log.error("压测日志打包成文件异常:{}", e.getMessage());
+                throw e;
             }
-            throw new TakinCloudException(TakinCloudExceptionEnum.FILE_ZIP_ERROR, "查看" + jtlPath);
-        } else {return "";}
+
+        } else {
+            return "";
+        }
     }
 
     @Override
