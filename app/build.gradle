@@ -65,7 +65,7 @@ dependencies {
     // 其它
     implementation libs.hutool
     implementation libs.influxdb
-    implementation 'com.alibaba:fastjson:1.2.79'
+    implementation 'com.alibaba:fastjson:1.2.83'
 }
 
 description = 'app'
