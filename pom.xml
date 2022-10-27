@@ -43,7 +43,7 @@
         <flyway.version>5.2.4</flyway.version>
         <easypoi-base.version>4.3.0</easypoi-base.version>
         <easypoi-annotation.version>4.4.0</easypoi-annotation.version>
-        <redisson.version>3.15.6</redisson.version>
+        <redisson.version>3.17.6</redisson.version>
         <takin-plugin-framework-spring.version>1.0.3</takin-plugin-framework-spring.version>
     </properties>
 
