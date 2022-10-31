@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.constant.Message;
@@ -263,7 +262,7 @@ public class PressureServiceImpl implements PressureService {
                         .setStartPoint(c.getSplitList().get(t).getStart());
                 }
                 String name = FileUtil.getName(c.getUri());
-                if (StringUtils.indexOf(name, "jar") != -1) {
+                if (CharSequenceUtil.indexOfIgnoreCase(name, "jar") != -1) {
                     pressureFileEntity.setType(FileType.PLUGIN.getCode());
                 }
                 return pressureFileEntity;

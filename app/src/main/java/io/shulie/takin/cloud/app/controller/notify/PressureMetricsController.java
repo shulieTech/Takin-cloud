@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
 
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 
 import io.shulie.takin.cloud.constant.Message;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import io.shulie.takin.cloud.app.util.IpUtils;
 import io.shulie.takin.cloud.data.entity.PressureEntity;
 import io.shulie.takin.cloud.app.service.PressureService;
 import io.shulie.takin.cloud.model.response.ApiResult;
@@ -53,7 +53,7 @@ public class PressureMetricsController {
         HttpServletRequest request) {
         List<MetricsInfo> filterData = data.stream().filter(t -> "response".equals(t.getType())).collect(Collectors.toList());
         if (!filterData.isEmpty()) {
-            pressureMetricsService.upload(pressureId, pressureExampleId, filterData, IpUtils.getIp(request));
+            pressureMetricsService.upload(pressureId, pressureExampleId, filterData, ServletUtil.getClientIP(request));
         }
         return ApiResult.success();
     }
