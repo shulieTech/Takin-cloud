@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.collection.CollUtil;
 import org.springframework.stereotype.Service;
@@ -50,16 +51,22 @@ public class PressurePressureMetricsServiceImpl implements PressureMetricsServic
         log.debug("Metrics-Upload({}-{}):接受到的数据:{}", pressureId, pressureExampleId, metricsList);
         log.info("Metrics-Upload({}-{}): 接收到的数据:{}条,时间范围:{},延时:{}", pressureId, pressureExampleId,
             metricsList.size(), timestamp, (System.currentTimeMillis() - timestamp));
-        // 回调数据
-        pressureExampleService.onHeartbeat(pressureExampleId);
-        // 写入InfluxDB
-        collectorToInfluxdb(pressureId, metricsList);
-        // 统计每个时间窗口pod调用数量
-        statisticalIp(pressureId, timestamp, ip);
-        // SLA检查
-        List<SlaEventEntity> check = slaService.check(pressureId, pressureExampleId, metricsList);
-        // 进行通知
-        slaService.event(pressureId, pressureExampleId, check);
+        try {
+            // 回调数据
+            pressureExampleService.onHeartbeat(pressureExampleId);
+            // 写入InfluxDB
+            collectorToInfluxdb(pressureId, metricsList);
+            // 统计每个时间窗口pod调用数量
+            statisticalIp(pressureId, timestamp, ip);
+            // SLA检查
+            List<SlaEventEntity> check = slaService.check(pressureId, pressureExampleId, metricsList);
+            // 进行通知
+            slaService.event(pressureId, pressureExampleId, check);
+        }catch (Throwable e) {
+            log.error("upload error,{}-{}", pressureId, pressureExampleId);
+            log.error("upload error,data detail is {}", JSON.toJSONString(metricsList));
+            throw e;
+        }
     }
 
     /**
