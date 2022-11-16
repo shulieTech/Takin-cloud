@@ -53,7 +53,13 @@ public class PressureMetricsController {
         HttpServletRequest request) {
         List<MetricsInfo> filterData = data.stream().filter(t -> "response".equals(t.getType())).collect(Collectors.toList());
         if (!filterData.isEmpty()) {
-            pressureMetricsService.upload(pressureId, pressureExampleId, filterData, ServletUtil.getClientIP(request));
+            try {
+                pressureMetricsService.upload(pressureId, pressureExampleId, filterData, ServletUtil.getClientIP(request));
+            }catch (Throwable e){
+                log.error("upload report data error,{}-{}",pressureId,pressureExampleId);
+                log.error("upload report data error,data is {}",data);
+                throw e;
+            }
         }
         return ApiResult.success();
     }
