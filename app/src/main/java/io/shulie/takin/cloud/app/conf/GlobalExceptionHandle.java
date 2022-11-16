@@ -44,6 +44,7 @@ public class GlobalExceptionHandle {
                 .append(" cause = ")
                 .append(null == e.getCause() ? "" : e.getCause().toString())
                 .append(" StackTrace = ").append(null == e.getStackTrace() || e.getStackTrace().length == 0 ? "" : e.getStackTrace().toString());
+        log.error("全局异常捕获-消息不可读异常,{}",sb.toString());
         String message = CharSequenceUtil.subBefore(sb.toString(), CharPool.COLON, false);
 
 
