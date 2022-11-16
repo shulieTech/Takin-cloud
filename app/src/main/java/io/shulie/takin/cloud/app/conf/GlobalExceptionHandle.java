@@ -6,6 +6,7 @@ import java.util.Optional;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.CharSequenceUtil;
 
+import com.alibaba.fastjson.JSON;
 import io.shulie.takin.cloud.model.response.ApiResult;
 
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -43,7 +44,7 @@ public class GlobalExceptionHandle {
                 .append(e.getMessage())
                 .append(" cause = ")
                 .append(null == e.getCause() ? "" : e.getCause().toString())
-                .append(" StackTrace = ").append(null == e.getStackTrace() || e.getStackTrace().length == 0 ? "" : e.getStackTrace().toString());
+                .append(" StackTrace = ").append(null == e.getStackTrace() || e.getStackTrace().length == 0 ? "" : JSON.toJSONString(e.getStackTrace()));
         log.error("全局异常捕获-消息不可读异常,{}",sb.toString());
         String message = CharSequenceUtil.subBefore(sb.toString(), CharPool.COLON, false);
 
