@@ -1,9 +1,22 @@
 package io.shulie.takin.cloud.app.controller.notify;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import cn.chinaunicom.pinpoint.thrift.dto.TStressTestAgentData;
+import cn.hutool.core.collection.ListUtil;
+import com.alibaba.fastjson.JSONObject;
+import io.shulie.takin.sdk.kafka.MessageReceiveCallBack;
+import io.shulie.takin.sdk.kafka.MessageReceiveService;
+import io.shulie.takin.sdk.kafka.MessageSendService;
+import io.shulie.takin.sdk.kafka.entity.MessageEntity;
+import io.shulie.takin.sdk.kafka.impl.KafkaSendServiceFactory;
+import io.shulie.takin.sdk.kafka.impl.MessageReceiveServiceImpl;
+import io.shulie.takin.sdk.kafka.impl.SdkHttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +29,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,19 +53,21 @@ import io.shulie.takin.cloud.data.entity.PressureExampleEntity;
 @Slf4j(topic = "METRICS")
 @RequestMapping("/notify/job/pressure/metrics")
 @RestController("NotiftPressureMetricsController")
-public class PressureMetricsController {
+public class PressureMetricsController implements InitializingBean {
     @javax.annotation.Resource
     PressureService pressureService;
     @javax.annotation.Resource
     PressureMetricsService pressureMetricsService;
+    @Value("${kafka.server.config:}")
+    private String kafkaServerConfig;
 
     @PostMapping("upload")
     @Operation(summary = "聚合上报")
     public ApiResult<Object> upload(
-        @Parameter(description = "任务主键", required = true) @RequestParam Long pressureId,
-        @Parameter(description = "任务实例主键", required = true) @RequestParam Long pressureExampleId,
-        @Parameter(description = "聚合的指标数据", required = true) @RequestBody List<MetricsInfo> data,
-        HttpServletRequest request) {
+            @Parameter(description = "任务主键", required = true) @RequestParam Long pressureId,
+            @Parameter(description = "任务实例主键", required = true) @RequestParam Long pressureExampleId,
+            @Parameter(description = "聚合的指标数据", required = true) @RequestBody List<MetricsInfo> data,
+            HttpServletRequest request) {
         List<MetricsInfo> filterData = data.stream().filter(t -> "response".equals(t.getType())).collect(Collectors.toList());
         if (!filterData.isEmpty()) {
             pressureMetricsService.upload(pressureId, pressureExampleId, filterData, ServletUtil.getClientIP(request));
@@ -61,15 +78,21 @@ public class PressureMetricsController {
     @PostMapping("upload_old")
     @Operation(summary = "聚合上报-旧模式")
     public ApiResult<Object> uploadByOld(
-        @Parameter(description = "任务主键-新版本") @RequestParam(required = false) Long pressureId,
-        @Parameter(description = "聚合的指标数据", required = true) @RequestBody List<MetricsInfo> data,
-        @Parameter(description = "任务主键-旧版本", deprecated = true) @RequestParam(required = false) Long jobId,
-        HttpServletRequest request) {
-        if (data.isEmpty()) {return ApiResult.fail(Message.EMPTY_METRICS_LIST);}
+            @Parameter(description = "任务主键-新版本") @RequestParam(required = false) Long pressureId,
+            @Parameter(description = "聚合的指标数据", required = true) @RequestBody List<MetricsInfo> data,
+            @Parameter(description = "任务主键-旧版本", deprecated = true) @RequestParam(required = false) Long jobId,
+            HttpServletRequest request) {
+        if (data.isEmpty()) {
+            return ApiResult.fail(Message.EMPTY_METRICS_LIST);
+        }
         // 兼容老版本
-        if (Objects.isNull(pressureId) && Objects.nonNull(jobId)) {pressureId = jobId;}
+        if (Objects.isNull(pressureId) && Objects.nonNull(jobId)) {
+            pressureId = jobId;
+        }
         PressureEntity pressureEntity = pressureService.entity(pressureId);
-        if (pressureEntity == null) {return ApiResult.fail(CharSequenceUtil.format(Message.MISS_PRESSURE, pressureId));}
+        if (pressureEntity == null) {
+            return ApiResult.fail(CharSequenceUtil.format(Message.MISS_PRESSURE, pressureId));
+        }
         String pressureExampleNumberString = data.get(0).getPodNo();
         Integer pressureExampleNumber = Integer.parseInt(pressureExampleNumberString);
         // 根据任务和任务实例编号找到任务实例
@@ -80,5 +103,26 @@ public class PressureMetricsController {
         }
         // 执行暨定方法
         return upload(pressureId, pressureExampleEntity.getId(), data, request);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        MessageReceiveService messageReceiveService = new KafkaSendServiceFactory().getKafkaMessageReceiveInstance();
+        List<String> topics = ListUtil.of("stress-test-pressure-metrics-upload-old");
+        messageReceiveService.receive(topics, new MessageReceiveCallBack() {
+            @Override
+            public void success(MessageEntity messageEntity) {
+                Object data = messageEntity.getBody().get("data");
+                Object jobId = messageEntity.getBody().get("jobId");
+                String dataString = JSONObject.toJSONString(data);
+                List<MetricsInfo> metricsInfos = JSONObject.parseArray(dataString, MetricsInfo.class);
+                uploadByOld(null, metricsInfos, Long.parseLong(jobId.toString()), new SdkHttpServletRequest(messageEntity.getHeaders()));
+            }
+
+            @Override
+            public void fail(String errorMessage) {
+                log.error("接收kafka消息失败:{}", errorMessage);
+            }
+        });
     }
 }

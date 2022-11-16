@@ -59,6 +59,10 @@ dependencies {
     annotationProcessor libs.spring.boot.configuration.processor
     // redis
     implementation libs.spring.boot.redisson
+    //kafka
+    implementation ("io.shulie.takin:takin-message-sdk-kafka:2.0.4.1")
+    //fastjson
+    implementation ("com.alibaba:fastjson:1.2.83")
     // swagger
     implementation libs.spring.doc
     // 其它

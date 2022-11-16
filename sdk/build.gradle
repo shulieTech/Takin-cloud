@@ -17,6 +17,7 @@ dependencies {
 
 publishing {
     repositories {
+        mavenLocal()
         maven {
             name = "OSSRH"
             if (project.version.toString().endsWith("-SNAPSHOT")) {
