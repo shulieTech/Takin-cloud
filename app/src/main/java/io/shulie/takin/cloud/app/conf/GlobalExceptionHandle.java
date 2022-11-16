@@ -1,6 +1,7 @@
 package io.shulie.takin.cloud.app.conf;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -37,7 +38,15 @@ public class GlobalExceptionHandle {
     public ApiResult<Object> exceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException e) {
         log.error("全局异常捕获-消息不可读异常.\n请求路径-({})", httpServletRequest.getRequestURL().toString());
         // 消息处理,取冒号之前的内容
-        String message = CharSequenceUtil.subBefore(e.getMessage(), CharPool.COLON, false);
+        StringBuilder sb = new StringBuilder()
+                .append("message = ")
+                .append(e.getMessage())
+                .append(" cause = ")
+                .append(null == e.getCause() ? "" : e.getCause().toString())
+                .append(" StackTrace = ").append(null == e.getStackTrace() || e.getStackTrace().length == 0 ? "" : e.getStackTrace().toString());
+        String message = CharSequenceUtil.subBefore(sb.toString(), CharPool.COLON, false);
+
+
         return ApiResult.fail(message);
     }
 
