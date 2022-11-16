@@ -66,24 +66,25 @@ public class PressurePressureMetricsServiceImpl implements PressureMetricsServic
      * {@inheritDoc}
      */
     public void collectorToInfluxdb(Long pressureId, List<MetricsInfo> metricsList) {
-        if (CollUtil.isEmpty(metricsList)) {
-            return;
-        }
-        String measurement = InfluxUtil.getMetricsMeasurement(pressureId);
-        List<MetricsInfo> metricsInfoList = metricsList.stream().filter(Objects::nonNull).collect(Collectors.toList());
-        metricsInfoList.forEach(metrics -> {
-            //判断有没有MD5值
-            int strPosition = metrics.getTransaction().lastIndexOf(PressureEngineConstants.TRANSACTION_SPLIT_STR);
-            if (strPosition > 0) {
-                String transaction = metrics.getTransaction();
-                metrics.setTransaction(transaction.substring(strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length()));
-                metrics.setTestName((transaction.substring(0, strPosition)));
-            } else {
-                metrics.setTransaction(metrics.getTransaction());
-                metrics.setTestName(metrics.getTransaction());
+        try {
+            if (CollUtil.isEmpty(metricsList)) {
+                return;
             }
-        });
-        metricsInfoList.stream().map(metrics -> {
+            String measurement = InfluxUtil.getMetricsMeasurement(pressureId);
+            List<MetricsInfo> metricsInfoList = metricsList.stream().filter(Objects::nonNull).collect(Collectors.toList());
+            metricsInfoList.forEach(metrics -> {
+                //判断有没有MD5值
+                int strPosition = metrics.getTransaction().lastIndexOf(PressureEngineConstants.TRANSACTION_SPLIT_STR);
+                if (strPosition > 0) {
+                    String transaction = metrics.getTransaction();
+                    metrics.setTransaction(transaction.substring(strPosition + PressureEngineConstants.TRANSACTION_SPLIT_STR.length()));
+                    metrics.setTestName((transaction.substring(0, strPosition)));
+                } else {
+                    metrics.setTransaction(metrics.getTransaction());
+                    metrics.setTestName(metrics.getTransaction());
+                }
+            });
+            metricsInfoList.stream().map(metrics -> {
                 //处理时间戳-纳秒转成毫秒，防止插入influxdb报错
                 if (Objects.nonNull(metrics.getTime()) && metrics.getTime() > InfluxUtil.MAX_ACCEPT_TIMESTAMP) {
                     metrics.setTimestamp(metrics.getTimestamp() / 1000000);
@@ -92,8 +93,12 @@ public class PressurePressureMetricsServiceImpl implements PressureMetricsServic
                     metrics.setTimestamp(metrics.getTimestamp() / 1000000);
                 }
                 return InfluxUtil.toPoint(measurement, metrics.getTimestamp(), metrics);
-            })
-            .forEach(influxWriter::insert);
+            }).forEach(influxWriter::insert);
+        } catch (Throwable e) {
+            log.error("collectorToInfluxdb error", e);
+            throw e;
+        }
+
     }
 
     /**
