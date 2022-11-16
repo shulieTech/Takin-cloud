@@ -65,7 +65,7 @@ dependencies {
     implementation libs.dom4j
     implementation libs.hutool
     implementation libs.influxdb
-
+    implementation 'com.alibaba:fastjson:2.0.17'
     //Tests
     testImplementation ('org.springframework.boot:spring-boot-starter-test:2.6.6'){
         exclude group:"com.jayway.jsonpath", module:"json-path"

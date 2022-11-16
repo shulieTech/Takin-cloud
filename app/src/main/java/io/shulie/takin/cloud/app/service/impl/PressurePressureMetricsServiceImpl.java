@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit;
 
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.collection.CollUtil;
 import org.springframework.stereotype.Service;
@@ -22,6 +21,8 @@ import io.shulie.takin.cloud.app.service.PressureMetricsService;
 import io.shulie.takin.cloud.constant.PressureEngineConstants;
 import io.shulie.takin.cloud.app.service.PressureExampleService;
 import io.shulie.takin.cloud.model.request.job.pressure.MetricsInfo;
+
+import static com.alibaba.fastjson.JSON.*;
 
 /**
  * 施压任务指标服务 - 实例
@@ -64,7 +65,7 @@ public class PressurePressureMetricsServiceImpl implements PressureMetricsServic
             slaService.event(pressureId, pressureExampleId, check);
         }catch (Throwable e) {
             log.error("upload error,{}-{}", pressureId, pressureExampleId);
-            log.error("upload error,data detail is {}", JSON.toJSONString(metricsList));
+            log.error("upload error,data detail is {}", metricsList.toString());
             throw e;
         }
     }
