@@ -58,8 +58,6 @@ public class PressureMetricsController implements InitializingBean {
     PressureService pressureService;
     @javax.annotation.Resource
     PressureMetricsService pressureMetricsService;
-    @Value("${kafka.server.config:}")
-    private String kafkaServerConfig;
 
     @PostMapping("upload")
     @Operation(summary = "聚合上报")
@@ -109,20 +107,22 @@ public class PressureMetricsController implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         MessageReceiveService messageReceiveService = new KafkaSendServiceFactory().getKafkaMessageReceiveInstance();
         List<String> topics = ListUtil.of("stress-test-pressure-metrics-upload-old");
-        messageReceiveService.receive(topics, new MessageReceiveCallBack() {
-            @Override
-            public void success(MessageEntity messageEntity) {
-                Object data = messageEntity.getBody().get("data");
-                Object jobId = messageEntity.getBody().get("jobId");
-                String dataString = JSONObject.toJSONString(data);
-                List<MetricsInfo> metricsInfos = JSONObject.parseArray(dataString, MetricsInfo.class);
-                uploadByOld(null, metricsInfos, Long.parseLong(jobId.toString()), new SdkHttpServletRequest(messageEntity.getHeaders()));
-            }
+        Executors.newCachedThreadPool().execute(()-> {
+            messageReceiveService.receive(topics, new MessageReceiveCallBack() {
+                @Override
+                public void success(MessageEntity messageEntity) {
+                    Object data = messageEntity.getBody().get("data");
+                    Object jobId = messageEntity.getBody().get("jobId");
+                    String dataString = JSONObject.toJSONString(data);
+                    List<MetricsInfo> metricsInfos = JSONObject.parseArray(dataString, MetricsInfo.class);
+                    uploadByOld(null, metricsInfos, Long.parseLong(jobId.toString()), new SdkHttpServletRequest(messageEntity.getHeaders()));
+                }
 
-            @Override
-            public void fail(String errorMessage) {
-                log.error("接收kafka消息失败:{}", errorMessage);
-            }
+                @Override
+                public void fail(String errorMessage) {
+                    log.error("接收kafka消息失败:{}", errorMessage);
+                }
+            });
         });
     }
 }
