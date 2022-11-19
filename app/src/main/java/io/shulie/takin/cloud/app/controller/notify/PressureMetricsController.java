@@ -1,48 +1,33 @@
 package io.shulie.takin.cloud.app.controller.notify;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-
-import cn.chinaunicom.pinpoint.thrift.dto.TStressTestAgentData;
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.extra.servlet.ServletUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.shulie.takin.cloud.app.service.PressureMetricsService;
+import io.shulie.takin.cloud.app.service.PressureService;
+import io.shulie.takin.cloud.constant.Message;
+import io.shulie.takin.cloud.data.entity.PressureEntity;
+import io.shulie.takin.cloud.data.entity.PressureExampleEntity;
+import io.shulie.takin.cloud.model.request.job.pressure.MetricsInfo;
+import io.shulie.takin.cloud.model.response.ApiResult;
 import io.shulie.takin.sdk.kafka.MessageReceiveCallBack;
 import io.shulie.takin.sdk.kafka.MessageReceiveService;
-import io.shulie.takin.sdk.kafka.MessageSendService;
 import io.shulie.takin.sdk.kafka.entity.MessageEntity;
 import io.shulie.takin.sdk.kafka.impl.KafkaSendServiceFactory;
-import io.shulie.takin.sdk.kafka.impl.MessageReceiveServiceImpl;
 import io.shulie.takin.sdk.kafka.impl.SdkHttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
-
-import javax.servlet.http.HttpServletRequest;
-
-import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.core.text.CharSequenceUtil;
-
-import io.shulie.takin.cloud.constant.Message;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import io.shulie.takin.cloud.data.entity.PressureEntity;
-import io.shulie.takin.cloud.app.service.PressureService;
-import io.shulie.takin.cloud.model.response.ApiResult;
-import io.shulie.takin.cloud.model.request.job.pressure.MetricsInfo;
-import io.shulie.takin.cloud.app.service.PressureMetricsService;
-import io.shulie.takin.cloud.data.entity.PressureExampleEntity;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
  * 指标数据
@@ -105,12 +90,15 @@ public class PressureMetricsController implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        log.info("开始监听stress-test-pressure-metrics-upload-old的数据");
         MessageReceiveService messageReceiveService = new KafkaSendServiceFactory().getKafkaMessageReceiveInstance();
+        log.info("初始化完成，开始监听");
         List<String> topics = ListUtil.of("stress-test-pressure-metrics-upload-old");
         Executors.newCachedThreadPool().execute(()-> {
             messageReceiveService.receive(topics, new MessageReceiveCallBack() {
                 @Override
                 public void success(MessageEntity messageEntity) {
+                    log.info("收到消息" + messageEntity);
                     Object data = messageEntity.getBody().get("data");
                     Object jobId = messageEntity.getBody().get("jobId");
                     String dataString = JSONObject.toJSONString(data);
