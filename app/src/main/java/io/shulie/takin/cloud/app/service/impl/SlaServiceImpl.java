@@ -162,7 +162,7 @@ public class SlaServiceImpl implements SlaService {
                 targetValue = (info.getCount() * 1.0) / 5;
                 break;
             case SUCCESS_RATE:
-                targetValue = 100 - ((info.getFailCount() * 1.0) / info.getCount());
+                targetValue = 100 - ((info.getFailCount() * 100.0) / info.getCount());
                 break;
             default:
                 return targetValue;
