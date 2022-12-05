@@ -19,6 +19,11 @@ public enum EngineStatusEnum {
      */
     START_FAILED("启动失败", "startFail"),
     /**
+     * 开始压测
+     */
+    PRESSURE("开始压测","pressure"),
+
+    /**
      * 中断
      */
     INTERRUPT("中断", "interrupt"),

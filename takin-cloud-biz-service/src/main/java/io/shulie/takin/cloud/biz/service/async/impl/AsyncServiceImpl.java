@@ -1,38 +1,35 @@
 package io.shulie.takin.cloud.biz.service.async.impl;
 
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
+import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
+import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
+import io.shulie.takin.cloud.biz.service.async.AsyncService;
+import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
+import io.shulie.takin.cloud.common.bean.task.TaskResult;
+import io.shulie.takin.cloud.common.constants.SceneManageConstant;
+import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
+import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.common.enums.engine.BusinessStateEnum;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
+import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
+import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
+import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
+import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
+import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
+import io.shulie.takin.eventcenter.Event;
+import io.shulie.takin.eventcenter.EventCenterTemplate;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-
-import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
-
-import io.shulie.takin.eventcenter.Event;
-import io.shulie.takin.cloud.ext.api.EngineCallExtApi;
-import io.shulie.takin.eventcenter.EventCenterTemplate;
-import io.shulie.takin.cloud.common.bean.task.TaskResult;
-import io.shulie.takin.cloud.biz.service.async.AsyncService;
-import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
-import io.shulie.takin.cloud.common.constants.ScheduleConstants;
-import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
-import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
-import io.shulie.takin.cloud.common.constants.SceneManageConstant;
-import io.shulie.takin.cloud.data.dao.scene.manage.SceneManageDAO;
-import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
-import io.shulie.takin.cloud.biz.collector.collector.CollectorService;
-import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
-import io.shulie.takin.cloud.ext.content.enginecall.ScheduleStartRequestExt;
-import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author qianshui
@@ -82,6 +79,9 @@ public class AsyncServiceImpl implements AsyncService {
                 try {
                     if (Integer.parseInt(pressureNodeNum) == Integer.parseInt(pressureNodeTotal)) {
                         checkPass = true;
+                        // 设置全部启动
+                        String pressurePodName = ScheduleConstants.getPodIsReady(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getTenantId());
+                        stringRedisTemplate.opsForValue().set(pressurePodName, BusinessStateEnum.PRESSURE.getState());
                         log.info("后台检查到pod全部启动成功.....");
                         break;
                     }
@@ -117,15 +117,15 @@ public class AsyncServiceImpl implements AsyncService {
             //设置缓存，用以检查压测场景启动状态 lxr 20210623
             String k8sPodKey = String.format(SceneTaskRedisConstants.PRESSURE_NODE_ERROR_KEY + "%s_%s", startRequest.getSceneId(), startRequest.getTaskId());
             String startedPodNum = stringRedisTemplate.opsForValue().get(pressureNodeName);
-            stringRedisTemplate.opsForHash().put(k8sPodKey, SceneTaskRedisConstants.PRESSURE_NODE_START_ERROR,
-                String.format("节点没有在设定时间【%s】s内启动，计划启动节点个数【%s】,实际启动节点个数【%s】,导致压测停止",
+            String error = String.format("节点没有在设定时间【%s】s内启动，计划启动节点个数【%s】,实际启动节点个数【%s】,导致压测停止",
                     // 设定时间
                     pressureNodeStartExpireTime,
                     // 计划启动节点个数
                     stringRedisTemplate.opsForValue().get(pressureNodeTotalName),
                     // 实际启动节点个数
-                    StringUtils.isBlank(startedPodNum) ? 0 : startedPodNum));
-            callStop(startRequest);
+                    StringUtils.isBlank(startedPodNum) ? 0 : startedPodNum);
+            stringRedisTemplate.opsForHash().put(k8sPodKey, SceneTaskRedisConstants.PRESSURE_NODE_START_ERROR, error);
+            callStop(startRequest,error);
         }
     }
 
@@ -165,11 +165,11 @@ public class AsyncServiceImpl implements AsyncService {
         return !SceneManageConstant.SCENE_TASK_JOB_STATUS_RUNNING.equals(engineCallExtApi.getJobStatus(jobName));
     }
 
-    private void callStop(ScheduleStartRequestExt startRequest) {
+    private void callStop(ScheduleStartRequestExt startRequest,String error) {
         // 汇报失败
         sceneManageService.reportRecord(SceneManageStartRecordVO.build(startRequest.getSceneId(),
             startRequest.getTaskId(),
-            startRequest.getTenantId()).success(false).errorMsg("").build());
+            startRequest.getTenantId()).success(false).errorMsg(error).build());
         // 清除 SLA配置 清除PushWindowDataScheduled 删除pod job configMap  生成报告拦截 状态拦截
         Event event = new Event();
         event.setEventName("finished");

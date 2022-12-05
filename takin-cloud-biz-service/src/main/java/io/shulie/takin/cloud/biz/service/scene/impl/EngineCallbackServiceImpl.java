@@ -1,9 +1,5 @@
 package io.shulie.takin.cloud.biz.service.scene.impl;
 
-import java.util.Arrays;
-
-import javax.annotation.Resource;
-
 import com.pamirs.takin.entity.domain.vo.engine.EngineNotifyParam;
 import com.pamirs.takin.entity.domain.vo.scenemanage.SceneManageStartRecordVO;
 import io.shulie.takin.cloud.biz.service.report.ReportService;
@@ -13,6 +9,7 @@ import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
 import io.shulie.takin.cloud.common.constants.ReportConstants;
 import io.shulie.takin.cloud.common.constants.SceneTaskRedisConstants;
 import io.shulie.takin.cloud.common.constants.ScheduleConstants;
+import io.shulie.takin.cloud.common.enums.engine.BusinessStateEnum;
 import io.shulie.takin.cloud.common.enums.engine.EngineStatusEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneRunTaskStatusEnum;
 import io.shulie.takin.common.beans.response.ResponseResult;
@@ -20,6 +17,10 @@ import io.shulie.takin.utils.json.JsonHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * @author 何仲奇
@@ -70,6 +71,13 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
                 //修改缓存压测启动状态为失败
                 setTryRunTaskInfo(notify.getSceneId(), notify.getResultId(), notify.getTenantId(), notify.getMsg());
                 break;
+            case PRESSURE:
+                //获取压测状态
+                log.info("{}-{}-{}-{}当前压力机Pod:{}, 压测引擎获取压测状态",notify.getSceneId(),notify.getResultId(),notify.getTenantId(),notify.getPodNum());
+                String pressurePodName = ScheduleConstants.getPodIsReady(notify.getSceneId(), notify.getResultId(), notify.getTenantId());
+                String isReady = stringRedisTemplate.opsForValue().get(pressurePodName);
+                boolean pressure = Objects.equals(isReady, BusinessStateEnum.PRESSURE.getState());
+                return ResponseResult.success(pressure);
             case INTERRUPT:
                 //获取中断状态
                 boolean interruptFlag = Boolean.parseBoolean(stringRedisTemplate.opsForValue().get(ScheduleConstants.INTERRUPT_POD + scheduleName));

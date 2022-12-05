@@ -207,4 +207,18 @@ public class ScheduleConstants {
         return String.format("pressure-node-%s-%s-%s", sceneId, reportId, tenantId);
     }
 
+
+    /**
+     * pod 就绪
+     *
+     * @return -
+     */
+    public static String getPodIsReady(Long sceneId, Long reportId, Long tenantId) {
+        // 兼容原始redis key
+        if (null == tenantId) {
+            return String.format("pod-is-ready-%s-%s", sceneId, reportId);
+        }
+        return String.format("pod-is-ready-%s-%s-%s", sceneId, reportId, tenantId);
+    }
+
 }
