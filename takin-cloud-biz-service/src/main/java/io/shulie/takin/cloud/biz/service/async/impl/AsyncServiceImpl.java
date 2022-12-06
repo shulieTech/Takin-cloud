@@ -82,7 +82,7 @@ public class AsyncServiceImpl implements AsyncService {
                         // 设置全部启动
                         String pressurePodName = ScheduleConstants.getPodIsReady(startRequest.getSceneId(), startRequest.getTaskId(), startRequest.getTenantId());
                         stringRedisTemplate.opsForValue().set(pressurePodName, BusinessStateEnum.PRESSURE.getState());
-                        log.info("后台检查到pod全部启动成功.....");
+                        log.info("后台检查到pod all启动成功.....");
                         break;
                     }
                 } catch (Exception e) {

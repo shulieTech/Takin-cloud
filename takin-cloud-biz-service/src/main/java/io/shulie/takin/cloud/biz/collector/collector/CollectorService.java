@@ -1,11 +1,5 @@
 package io.shulie.takin.cloud.biz.collector.collector;
 
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
-
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.pamirs.takin.entity.dao.report.TReportMapper;
 import com.pamirs.takin.entity.domain.entity.report.Report;
@@ -41,6 +35,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="tangyuhan@shulie.io">yuhan.tang</a>
@@ -203,11 +204,11 @@ public class CollectorService extends AbstractIndicators {
                     Long count = stringRedisTemplate.opsForValue().increment(engineName, 1);
 
                     if (count != null && count == 1) {
+                        notifyStart(sceneId, reportId, metric.getTimestamp());
                         sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, tenantId)
                             .checkEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING)
                             .updateEnum(SceneManageStatusEnum.ENGINE_RUNNING)
                             .build());
-                        notifyStart(sceneId, reportId, metric.getTimestamp());
                         cacheTryRunTaskStatus(sceneId, reportId, tenantId, SceneRunTaskStatusEnum.RUNNING);
                     }
                     //如果从cloud上传请求流量明细，则需要启动异步线程去读取ptl文件上传
