@@ -970,7 +970,6 @@ public class ReportServiceImpl implements ReportService {
     private String getTaskTime(Date startTime, Date endTime, Long totalTestTime) {
         LocalDateTime start = startTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         LocalDateTime end = endTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-        log.info("startTime:{},end:{}", startTime, endTime);
         long seconds = Duration.between(start, end).getSeconds();
         if (seconds > totalTestTime) {
             seconds = totalTestTime;
