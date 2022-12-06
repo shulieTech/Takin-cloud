@@ -4,4 +4,4 @@ gradle wrapper
 
 # 项目打包
 
-./grdlew :app:clean :app:build
+./gradlew :app:clean :app:build
