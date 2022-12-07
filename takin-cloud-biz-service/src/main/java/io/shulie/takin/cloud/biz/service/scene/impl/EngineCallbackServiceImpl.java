@@ -73,9 +73,11 @@ public class EngineCallbackServiceImpl implements EngineCallbackService {
                 break;
             case PRESSURE:
                 //获取压测状态
-                log.info("{}-{}-{}-{}当前压力机Pod:{}, 压测引擎获取压测状态",notify.getSceneId(),notify.getResultId(),notify.getTenantId(),notify.getPodNum());
+
                 String pressurePodName = ScheduleConstants.getPodIsReady(notify.getSceneId(), notify.getResultId(), notify.getTenantId());
                 String isReady = stringRedisTemplate.opsForValue().get(pressurePodName);
+                log.info("{}-{}-{}当前压力机Pod：{}, 压测引擎获取压测状态：{}",
+                        notify.getSceneId(),notify.getResultId(),notify.getTenantId(),notify.getPodNum(),isReady);
                 boolean pressure = Objects.equals(isReady, BusinessStateEnum.PRESSURE.getState());
                 return ResponseResult.success(pressure);
             case INTERRUPT:

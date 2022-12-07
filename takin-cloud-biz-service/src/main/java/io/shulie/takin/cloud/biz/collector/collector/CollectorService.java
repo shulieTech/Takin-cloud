@@ -204,11 +204,11 @@ public class CollectorService extends AbstractIndicators {
                     Long count = stringRedisTemplate.opsForValue().increment(engineName, 1);
 
                     if (count != null && count == 1) {
-                        notifyStart(sceneId, reportId, metric.getTimestamp());
                         sceneManageService.updateSceneLifeCycle(UpdateStatusBean.build(sceneId, reportId, tenantId)
                             .checkEnum(SceneManageStatusEnum.PRESSURE_NODE_RUNNING)
                             .updateEnum(SceneManageStatusEnum.ENGINE_RUNNING)
                             .build());
+                        notifyStart(sceneId, reportId, System.currentTimeMillis());
                         cacheTryRunTaskStatus(sceneId, reportId, tenantId, SceneRunTaskStatusEnum.RUNNING);
                     }
                     //如果从cloud上传请求流量明细，则需要启动异步线程去读取ptl文件上传
@@ -228,7 +228,7 @@ public class CollectorService extends AbstractIndicators {
                         log.info("本次压测{}-{}-{}:打入结束标识", sceneId, reportId, tenantId);
                         setLast(last(taskKey), ScheduleConstants.LAST_SIGN);
                         setMax(engineName + ScheduleConstants.LAST_SIGN, metric.getTimestamp());
-                        notifyEnd(sceneId, reportId, metric.getTimestamp(), tenantId);
+                        notifyEnd(sceneId, reportId,System.currentTimeMillis(), tenantId);
                         return;
                     }
                     // 计数 回传标识数量
@@ -242,7 +242,7 @@ public class CollectorService extends AbstractIndicators {
                         // 删除临时标识
                         stringRedisTemplate.delete(ScheduleConstants.TEMP_LAST_SIGN + engineName);
                         // 压测停止
-                        notifyEnd(sceneId, reportId, metric.getTimestamp(), tenantId);
+                        notifyEnd(sceneId, reportId,System.currentTimeMillis(), tenantId);
                     }
                 }
             } catch (Exception e) {
