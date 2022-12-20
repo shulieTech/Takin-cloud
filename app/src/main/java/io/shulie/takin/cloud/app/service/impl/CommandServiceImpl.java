@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -377,7 +378,10 @@ public class CommandServiceImpl implements CommandService {
                 .map(t -> jsonService.readValue(t.getContext(), new TypeReference<Map<String, String>>() {}))
                 .map(t -> t.getOrDefault("tps", "0"))
                 .map(t -> t == null ? "0" : t)
-                .mapToInt(Integer::parseInt)
+                .mapToInt(o -> {
+                    BigDecimal bigDecimal = new BigDecimal(o);
+                    return bigDecimal.intValue();
+                })
                 .sum();
             basicConfig.put("tpsTargetLevel", tpsTargetLevel);
         }
