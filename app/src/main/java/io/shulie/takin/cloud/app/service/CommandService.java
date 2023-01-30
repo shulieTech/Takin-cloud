@@ -4,6 +4,9 @@ import com.github.pagehelper.PageInfo;
 
 import io.shulie.takin.cloud.data.entity.CommandEntity;
 import io.shulie.takin.cloud.constant.enums.CommandType;
+import io.shulie.takin.cloud.model.request.job.pressure.StartRequest;
+
+import java.util.List;
 
 /**
  * 命令服务
@@ -31,9 +34,9 @@ public interface CommandService {
      * 启动应用程序
      *
      * @param pressureId     施压任务主键
-     * @param bindByXpathMd5 是否通过xPathMd5绑定
+     * @param info 是否通过xPathMd5绑定,启动参数
      */
-    void startApplication(long pressureId, Boolean bindByXpathMd5);
+    void startApplication(long pressureId, StartRequest info);
 
     /**
      * 停止应用程序

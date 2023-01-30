@@ -8,6 +8,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 
+import io.shulie.takin.cloud.model.request.job.pressure.StartRequest;
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
@@ -149,14 +150,14 @@ public class CommandServiceImpl implements CommandService {
      * {@inheritDoc}
      */
     @Override
-    public void startApplication(long pressureId, Boolean bindByXpathMd5) {
+    public void startApplication(long pressureId, StartRequest info) {
         // 获取任务
         PressureEntity pressureEntity = pressureService.entity(pressureId);
         if (pressureEntity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_PRESSURE, pressureId));}
         // 获取资源
         ResourceEntity resourceEntity = resourceService.entity(pressureEntity.getResourceId());
         // 请求入参
-        String content = packageStartCommand(pressureId, bindByXpathMd5);
+        String content = packageStartCommand(pressureId, info);
         // 下发命令 - 分批次执行
         resourceService.listExample(resourceEntity.getId()).stream().map(ResourceExampleEntity::getWatchmanId)
             .distinct().forEach(t -> {
@@ -323,7 +324,7 @@ public class CommandServiceImpl implements CommandService {
      * @param pressureId 施压任务主键
      * @return 启动任务参数
      */
-    public String packageStartCommand(long pressureId, Boolean bindByXpathMd5) {
+    public String packageStartCommand(long pressureId, StartRequest info) {
         // 施压任务
         PressureEntity pressureEntity = pressureService.entity(pressureId);
         // 线程组配置
@@ -355,7 +356,7 @@ public class CommandServiceImpl implements CommandService {
         // 固定是0的
         basicConfig.put("tpsThreadMode", 0);
         // 现在没有办法区分版本
-        basicConfig.put("bindByXpathMd5", Objects.isNull(bindByXpathMd5) || bindByXpathMd5);
+        basicConfig.put("bindByXpathMd5", Objects.isNull(info.getBindByXpathMd5()) || info.getBindByXpathMd5());
         // 以前的文件里面没有用到
         basicConfig.put("tpsTargetLevel", null);
         // 填充文件
@@ -385,6 +386,10 @@ public class CommandServiceImpl implements CommandService {
                 .sum();
             basicConfig.put("tpsTargetLevel", tpsTargetLevel);
         }
+
+        basicConfig.put("slaConfig", info.getSlaConfig());
+        basicConfig.put("tenantAppKey",info.getTenantAppKey());
+        basicConfig.put("envCode",info.getEnvCode());
         // 输出成JSON
         return jsonService.writeValueAsString(basicConfig);
     }

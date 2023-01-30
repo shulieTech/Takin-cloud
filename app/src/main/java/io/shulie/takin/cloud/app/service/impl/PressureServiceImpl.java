@@ -99,8 +99,8 @@ public class PressureServiceImpl implements PressureService {
         List<ThreadConfigExampleEntity> threadConfigExample = startFillThreadConfigExample(pressure.getId(), info, pressureExample);
         threadConfigExampleMapper.saveBatch(threadConfigExample);
         // 填充SLA配置
-        List<SlaEntity> slaList = startFillSla(pressure.getId(), info.getSlaConfig());
-        slaMapper.saveBatch(slaList);
+//        List<SlaEntity> slaList = startFillSla(pressure.getId(), info.getSlaConfig());
+//        slaMapper.saveBatch(slaList);
         // 切分、填充任务文件
         List<PressureFileEntity> fileList = fillFile(pressure.getId(), info, pressureExample);
         pressureFileMapper.saveBatch(fileList);
@@ -108,7 +108,7 @@ public class PressureServiceImpl implements PressureService {
         List<MetricsEntity> metricsList = startFillMetrics(pressure.getId(), info.getMetricsConfig());
         metricsMapper.saveBatch(metricsList);
         // 下发启动命令
-        commandService.startApplication(pressure.getId(), info.getBindByXpathMd5());
+        commandService.startApplication(pressure.getId(), info);
         // 返回任务主键
         return String.valueOf(pressure.getId());
     }

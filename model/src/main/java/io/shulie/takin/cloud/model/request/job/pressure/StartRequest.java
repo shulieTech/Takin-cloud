@@ -53,6 +53,15 @@ public class StartRequest {
      */
     private Map<String, Object> ext;
 
+    /**
+     * 租户主键
+     */
+    private String tenantAppKey;
+    /**
+     * 环境编码
+     */
+    private String envCode;
+
     @Data
     @Schema(description = "文件信息")
     public static class FileInfo {
@@ -129,6 +138,18 @@ public class StartRequest {
          * <p>(用户输入)</p>
          */
         private Double formulaNumber;
+        /**
+         * 连续出现次数
+         */
+        private Integer times;
+        /**
+         * 事件类型
+         */
+        private String event;
+        /**
+         * 应用名称列表，为cpu和内存sla计算使用
+         */
+        private String appNames;
     }
 
     @Data

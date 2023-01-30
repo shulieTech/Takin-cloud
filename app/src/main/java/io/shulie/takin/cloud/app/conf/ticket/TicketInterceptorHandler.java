@@ -14,6 +14,7 @@ import cn.hutool.http.ContentType;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.exceptions.ValidateException;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -38,7 +39,8 @@ public class TicketInterceptorHandler implements HandlerInterceptor {
     TicketService ticketService;
     @Resource
     WatchmanService watchmanService;
-
+    @Value("${drilling.ticket.check:false}")
+    private boolean drillingTicketCheck;
     /**
      * {@inheritDoc}
      */
@@ -46,6 +48,9 @@ public class TicketInterceptorHandler implements HandlerInterceptor {
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
         @NonNull Object handler)
         throws Exception {
+        if (!drillingTicketCheck){
+            return true;
+        }
         boolean result = true;
         String exceptionMessage = null;
         try {

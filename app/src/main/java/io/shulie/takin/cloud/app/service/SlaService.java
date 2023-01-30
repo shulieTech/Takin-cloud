@@ -6,6 +6,7 @@ import io.shulie.takin.cloud.data.entity.SlaEntity;
 import io.shulie.takin.cloud.data.entity.SlaEventEntity;
 import io.shulie.takin.cloud.constant.enums.FormulaSymbol;
 import io.shulie.takin.cloud.constant.enums.FormulaTarget;
+import io.shulie.takin.cloud.model.callback.Sla;
 import io.shulie.takin.cloud.model.request.job.pressure.MetricsInfo;
 
 /**
@@ -42,6 +43,9 @@ public interface SlaService {
      * @param slaEventEntityList 触发了SLA的记录
      */
     void event(Long pressureId, Long pressureExampleId, List<SlaEventEntity> slaEventEntityList);
+
+
+    void event(Long pressureId, List<Sla.SlaInfo> slaInfoList);
 
     /**
      * 检出触发SAL的指标数据

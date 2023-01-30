@@ -105,6 +105,20 @@ public class SlaServiceImpl implements SlaService {
     }
 
     @Override
+    public void event(Long pressureId, List<SlaInfo> slaInfoList) {
+        if (CollUtil.isEmpty(slaInfoList)) {return;}
+        PressureEntity pressureEntity = pressureService.entity(pressureId);
+        Sla sla = new Sla();
+        sla.setTime(new Date());
+        sla.setCallbackTime(new Date());
+        sla.setData(slaInfoList);
+        String slaString = jsonService.writeValueAsString(sla);
+        // 创建回调
+        callbackService.create(pressureEntity.getCallbackUrl(), CallbackType.SLA, slaString);
+        log.info("SLA触发：{}", slaString);
+    }
+
+    @Override
     public List<SlaEventEntity> check(Long pressureId, Long pressureExampleId, List<MetricsInfo> metricsInfoList) {
         // 业务结果
         List<SlaEventEntity> result = new ArrayList<>();
