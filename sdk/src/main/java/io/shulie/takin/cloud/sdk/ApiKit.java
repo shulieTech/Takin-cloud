@@ -24,13 +24,21 @@ public class ApiKit {
     private final Api api;
     private final String sign;
     private final String baseUrl;
+    private final boolean drillingTicketCheck;
 
     public ApiKit(String baseUrl, String sign, io.shulie.takin.cloud.constant.Api api) {
         this.api = api;
         this.sign = sign;
         this.baseUrl = baseUrl;
+        this.drillingTicketCheck = false;
     }
 
+    public ApiKit(String baseUrl, String sign, io.shulie.takin.cloud.constant.Api api, boolean drillingTicketCheck) {
+        this.api = api;
+        this.sign = sign;
+        this.baseUrl = baseUrl;
+        this.drillingTicketCheck = drillingTicketCheck;
+    }
     /**
      * 弹出命令
      *
@@ -49,7 +57,9 @@ public class ApiKit {
             String body = response.body();
             apiResult = JSONUtil.toBean(body, new TypeReference<ApiResult<CommandContent>>() {}, false);
             // 方法在返回数据前进行一下签名校验
-            response.ticket();
+            if (drillingTicketCheck){
+                response.ticket();
+            }
             if (apiResult.isSuccess()) {
                 // 返回命令内容的json字符串
                 if (Objects.nonNull(apiResult.getData())) {

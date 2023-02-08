@@ -1,9 +1,7 @@
 package io.shulie.takin.cloud.app.controller.notify;
 
-import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import com.alibaba.fastjson.JSONObject;
 import io.shulie.takin.cloud.app.service.PressureMetricsService;
 import io.shulie.takin.cloud.app.service.PressureService;
 import io.shulie.takin.cloud.constant.Message;
@@ -11,22 +9,15 @@ import io.shulie.takin.cloud.data.entity.PressureEntity;
 import io.shulie.takin.cloud.data.entity.PressureExampleEntity;
 import io.shulie.takin.cloud.model.request.job.pressure.MetricsInfo;
 import io.shulie.takin.cloud.model.response.ApiResult;
-import io.shulie.takin.sdk.kafka.MessageReceiveCallBack;
-import io.shulie.takin.sdk.kafka.MessageReceiveService;
-import io.shulie.takin.sdk.kafka.entity.MessageEntity;
-import io.shulie.takin.sdk.kafka.impl.KafkaSendServiceFactory;
-import io.shulie.takin.sdk.kafka.impl.SdkHttpServletRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -38,7 +29,7 @@ import java.util.stream.Collectors;
 @Slf4j(topic = "METRICS")
 @RequestMapping("/notify/job/pressure/metrics")
 @RestController("NotiftPressureMetricsController")
-public class PressureMetricsController implements InitializingBean {
+public class PressureMetricsController {
     @javax.annotation.Resource
     PressureService pressureService;
     @javax.annotation.Resource
@@ -88,29 +79,4 @@ public class PressureMetricsController implements InitializingBean {
         return upload(pressureId, pressureExampleEntity.getId(), data, request);
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        log.info("开始监听stress-test-pressure-metrics-upload-old的数据");
-        MessageReceiveService messageReceiveService = new KafkaSendServiceFactory().getKafkaMessageReceiveInstance();
-        log.info("初始化完成，开始监听");
-        List<String> topics = ListUtil.of("stress-test-pressure-metrics-upload-old");
-        Executors.newCachedThreadPool().execute(()-> {
-            messageReceiveService.receive(topics, new MessageReceiveCallBack() {
-                @Override
-                public void success(MessageEntity messageEntity) {
-                    log.info("收到消息" + messageEntity);
-                    Object data = messageEntity.getBody().get("data");
-                    Object jobId = messageEntity.getBody().get("jobId");
-                    String dataString = JSONObject.toJSONString(data);
-                    List<MetricsInfo> metricsInfos = JSONObject.parseArray(dataString, MetricsInfo.class);
-                    uploadByOld(null, metricsInfos, Long.parseLong(jobId.toString()), new SdkHttpServletRequest(messageEntity.getHeaders()));
-                }
-
-                @Override
-                public void fail(String errorMessage) {
-                    log.error("接收kafka消息失败:{}", errorMessage);
-                }
-            });
-        });
-    }
 }

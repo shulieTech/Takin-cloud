@@ -46,7 +46,7 @@ public class PressureController {
     @Operation(summary = "sla中断消息通知")
     @PostMapping(value = "slaNotify")
     public ApiResult<String> slaNotify(@RequestBody SlaNotifyRequest info) {
-        service.event(info.getPressureId(), info.getSlaEventEntityList());
+        service.event(info.getPressureId(), info.getSlaInfoList());
         return ApiResult.success();
     }
 }

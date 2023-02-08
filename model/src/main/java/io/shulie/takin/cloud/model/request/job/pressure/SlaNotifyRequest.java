@@ -11,5 +11,5 @@ public class SlaNotifyRequest implements Serializable {
 
     private Long pressureId;
 
-    private List<Sla.SlaInfo> slaEventEntityList;
+    private List<Sla.SlaInfo> slaInfoList;
 }
