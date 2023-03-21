@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
@@ -242,11 +243,12 @@ public class WatchmanServiceImpl implements WatchmanService {
         context.put("time", String.valueOf(System.currentTimeMillis()));
         context.put("data", resourceList);
         // 插入数据库
-        watchmanEventMapper.save(new WatchmanEventEntity()
-            .setWatchmanId(watchmanId)
-            .setType(NotifyEventType.WATCHMAN_UPLOAD.getCode())
-            .setContext(jsonService.writeValueAsString(context))
-        );
+        //watchmanEventMapper.save(new WatchmanEventEntity()
+        //    .setWatchmanId(watchmanId)
+        //    .setType(NotifyEventType.WATCHMAN_UPLOAD.getCode())
+        //    .setContext(jsonService.writeValueAsString(context))
+        //);
+        saveOrUpdateWatchmanEvent(watchmanId, NotifyEventType.WATCHMAN_UPLOAD.getCode(), jsonService.writeValueAsString(context));
     }
 
     /**
@@ -254,10 +256,11 @@ public class WatchmanServiceImpl implements WatchmanService {
      */
     @Override
     public void onHeartbeat(long watchmanId) {
-        watchmanEventMapper.save(new WatchmanEventEntity()
-            .setContext("{}").setWatchmanId(watchmanId)
-            .setType(NotifyEventType.WATCHMAN_HEARTBEAT.getCode())
-        );
+        //watchmanEventMapper.save(new WatchmanEventEntity()
+        //    .setContext("{}").setWatchmanId(watchmanId)
+        //    .setType(NotifyEventType.WATCHMAN_HEARTBEAT.getCode())
+        //);
+        saveOrUpdateWatchmanEvent(watchmanId, NotifyEventType.WATCHMAN_HEARTBEAT.getCode(), "{}");
     }
 
     /**
@@ -265,10 +268,11 @@ public class WatchmanServiceImpl implements WatchmanService {
      */
     @Override
     public void onNormal(long watchmanId) {
-        watchmanEventMapper.save(new WatchmanEventEntity()
-            .setContext("{}").setWatchmanId(watchmanId)
-            .setType(NotifyEventType.WATCHMAN_NORMAL.getCode())
-        );
+        //watchmanEventMapper.save(new WatchmanEventEntity()
+        //    .setContext("{}").setWatchmanId(watchmanId)
+        //    .setType(NotifyEventType.WATCHMAN_NORMAL.getCode())
+        //);
+        saveOrUpdateWatchmanEvent(watchmanId, NotifyEventType.WATCHMAN_NORMAL.getCode(), "{}");
     }
 
     /**
@@ -278,10 +282,11 @@ public class WatchmanServiceImpl implements WatchmanService {
     public void onAbnormal(long watchmanId, String message) {
         ObjectNode content = JsonNodeFactory.instance.objectNode();
         content.put("message", message);
-        watchmanEventMapper.save(new WatchmanEventEntity()
-            .setWatchmanId(watchmanId).setContext(content.toPrettyString())
-            .setType(NotifyEventType.WATCHMAN_ABNORMAL.getCode())
-        );
+        //watchmanEventMapper.save(new WatchmanEventEntity()
+        //    .setWatchmanId(watchmanId).setContext(content.toPrettyString())
+        //    .setType(NotifyEventType.WATCHMAN_ABNORMAL.getCode())
+        //);
+        saveOrUpdateWatchmanEvent(watchmanId, NotifyEventType.WATCHMAN_ABNORMAL.getCode(), content.toPrettyString());
     }
 
     /**
@@ -342,6 +347,31 @@ public class WatchmanServiceImpl implements WatchmanService {
         String readyCrypto = CharSequenceUtil.format("{}.{}", head, body);
         String verifySignature = asymmetricCrypto.encryptBase64(readyCrypto, KeyType.PublicKey);
         return CharSequenceUtil.format("{}.{}.{}", head, body, verifySignature);
+    }
+
+    private void saveOrUpdateWatchmanEvent(long watchmanId, int typeCode, String context) {
+        try {
+            WatchmanEventEntity dbInfo = watchmanEventMapper.lambdaQuery()
+                .eq(WatchmanEventEntity::getWatchmanId, watchmanId)
+                .eq(WatchmanEventEntity::getType, typeCode)
+
+
+                .one();
+            if (dbInfo != null) {
+                watchmanEventMapper.updateById(new WatchmanEventEntity()
+                    .setContext(context).setWatchmanId(watchmanId)
+                    .setType(typeCode).setTime(new Date())
+                    .setId(dbInfo.getId())
+                );
+            } else {
+                watchmanEventMapper.save(new WatchmanEventEntity()
+                    .setContext(context).setWatchmanId(watchmanId)
+                    .setType(typeCode)
+                );
+            }
+        } catch (Exception e) {
+            log.error("execute saveOrUpdateWatchmanEvent failure....watchmanId={},type={}", watchmanId, typeCode);
+        }
     }
 
 }
