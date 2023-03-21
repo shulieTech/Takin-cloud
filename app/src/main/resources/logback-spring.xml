@@ -10,10 +10,10 @@
     <property name="my_batis_log_path" value="./logs/my_batis"/>
     <property name="calibration_log_path" value="./logs/calibration"/>
     <!--  MyBatis配置  -->
-    <logger name="com.apache.ibatis" level="DEBUG"/>
-    <logger name="java.sql.Statement" level="DEBUG"/>
-    <logger name="java.sql.Connection" level="DEBUG"/>
-    <logger name="java.sql.PreparedStatement" level="DEBUG"/>
+    <logger name="com.apache.ibatis" level="INFO"/>
+    <logger name="java.sql.Statement" level="INFO"/>
+    <logger name="java.sql.Connection" level="INFO"/>
+    <logger name="java.sql.PreparedStatement" level="INFO"/>
     <!--  输出格式配置  -->
     <property name="pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} [%X{onlyToken}] - %msg%n"/>
     <!--  回调任务的日志单独输出  -->
@@ -24,7 +24,9 @@
             <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <maxFileSize>100MB</maxFileSize>
+            <MaxHistory>3</MaxHistory>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>50MB</totalSizeCap>
             <fileNamePattern>${callback_log_path}/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -40,7 +42,9 @@
             <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <maxFileSize>100MB</maxFileSize>
+            <MaxHistory>3</MaxHistory>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>50MB</totalSizeCap>
             <fileNamePattern>${callback_log_path}/not_info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -48,7 +52,7 @@
         </filter>
     </appender>
     <!--  输出控制  -->
-    <logger name="CALLBACK" level="DEBUG" additivity="false">
+    <logger name="CALLBACK" level="INFO" additivity="false">
         <appender-ref ref="CALLBACK_INFO"/>
         <appender-ref ref="CALLBACK_NOT_INFO"/>
     </logger>
@@ -60,7 +64,9 @@
             <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <maxFileSize>100MB</maxFileSize>
+            <MaxHistory>3</MaxHistory>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>50MB</totalSizeCap>
             <fileNamePattern>${calibration_log_path}/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -76,7 +82,9 @@
             <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <maxFileSize>100MB</maxFileSize>
+            <MaxHistory>3</MaxHistory>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>50MB</totalSizeCap>
             <fileNamePattern>${calibration_log_path}/not_info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -84,7 +92,7 @@
         </filter>
     </appender>
     <!--  输出控制  -->
-    <logger name="CALIBRATION" level="DEBUG" additivity="false">
+    <logger name="CALIBRATION" level="INFO" additivity="false">
         <appender-ref ref="CALIBRATION_INFO"/>
         <appender-ref ref="CALIBRATION_NOT_INFO"/>
     </logger>
@@ -96,7 +104,9 @@
             <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <maxFileSize>100MB</maxFileSize>
+            <MaxHistory>3</MaxHistory>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>50MB</totalSizeCap>
             <fileNamePattern>${notify_log_path}/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -112,7 +122,9 @@
             <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <maxFileSize>100MB</maxFileSize>
+            <MaxHistory>3</MaxHistory>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>50MB</totalSizeCap>
             <fileNamePattern>${notify_log_path}/not_info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -120,7 +132,7 @@
         </filter>
     </appender>
     <!--  输出控制  -->
-    <logger name="NOTIFY" level="DEBUG" additivity="false">
+    <logger name="NOTIFY" level="INFO" additivity="false">
         <appender-ref ref="CALLBACK_INFO"/>
         <appender-ref ref="CALLBACK_NOT_INFO"/>
     </logger>
@@ -132,7 +144,9 @@
             <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <maxFileSize>100MB</maxFileSize>
+            <MaxHistory>3</MaxHistory>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>50MB</totalSizeCap>
             <fileNamePattern>${metrics_log_path}/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -148,7 +162,9 @@
             <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <maxFileSize>100MB</maxFileSize>
+            <MaxHistory>3</MaxHistory>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>50MB</totalSizeCap>
             <fileNamePattern>${metrics_log_path}/not_info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -156,7 +172,7 @@
         </filter>
     </appender>
     <!--  输出控制  -->
-    <logger name="METRICS" level="DEBUG" additivity="false">
+    <logger name="METRICS" level="INFO" additivity="false">
         <appender-ref ref="METRICS_INFO"/>
         <appender-ref ref="METRICS_NOT_INFO"/>
     </logger>
@@ -168,15 +184,17 @@
             <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <maxFileSize>100MB</maxFileSize>
+            <MaxHistory>3</MaxHistory>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>50MB</totalSizeCap>
             <fileNamePattern>${my_batis_log_path}/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>trace</level>
+            <level>info</level>
         </filter>
     </appender>
     <!--  输出控制  -->
-    <logger name="MY-BATIS" level="DEBUG" additivity="false">
+    <logger name="MY-BATIS" level="INFO" additivity="false">
         <appender-ref ref="MY-BATIS_ALL"/>
     </logger>
     <!--  普通日志  -->
@@ -195,7 +213,9 @@
             <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <maxFileSize>100MB</maxFileSize>
+            <MaxHistory>3</MaxHistory>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>50MB</totalSizeCap>
             <fileNamePattern>${service_log_path}/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -211,7 +231,9 @@
             <pattern>${pattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <maxFileSize>100MB</maxFileSize>
+            <MaxHistory>3</MaxHistory>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>50MB</totalSizeCap>
             <fileNamePattern>${service_log_path}/not_info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
