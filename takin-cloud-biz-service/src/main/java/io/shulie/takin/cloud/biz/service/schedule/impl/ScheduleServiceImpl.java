@@ -166,6 +166,10 @@ public class ScheduleServiceImpl implements ScheduleService {
         ptlLogConfig.setPtlUploadFrom(appConfig.getEngineLogUploadModel());
         eventRequest.setPtlLogConfig(ptlLogConfig);
 
+        //设置 label ，用于区分尊享版不同租户的压力机node tenantId = xxx
+        eventRequest.setLabel(request.getTenantId().toString());
+        eventRequest.setExclusiveEngine(request.getExclusiveEngine());
+
         //把数据放入缓存，初始化回调调度需要
         stringRedisTemplate.opsForValue().set(scheduleName, JSON.toJSONString(eventRequest));
         // 需要将 本次调度 pod数量存入redis,报告中用到

@@ -80,8 +80,10 @@ public class SceneTaskEventService {
      *
      * @param scene    场景
      * @param reportId 报告主键
+     * @param exclusiveEngine 是否有专用发压机，0 没有，1 有
      */
-    public void callStartEvent(SceneManageWrapperOutput scene, Long reportId, Map<String, String> placeholderMap) {
+    public void callStartEvent(SceneManageWrapperOutput scene, Long reportId, Map<String, String> placeholderMap,
+                               Integer exclusiveEngine) {
         Long sceneId = scene.getId();
         Long customerId = scene.getTenantId();
         ScheduleStartRequestExt scheduleStartRequest = new ScheduleStartRequestExt();
@@ -149,6 +151,7 @@ public class SceneTaskEventService {
         });
         scheduleStartRequest.setDataFile(dataFileList);
         scheduleStartRequest.setFileContinueRead(scene.isContinueRead());
+        scheduleStartRequest.setExclusiveEngine(exclusiveEngine);
         Event event = new Event();
         event.setEventName(ScheduleEventConstant.START_SCHEDULE_EVENT);
         event.setExt(scheduleStartRequest);

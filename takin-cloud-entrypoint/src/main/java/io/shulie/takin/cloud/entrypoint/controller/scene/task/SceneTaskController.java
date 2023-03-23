@@ -243,6 +243,7 @@ public class SceneTaskController {
         CloudPluginUtils.fillUserData(input);
         input.setOperateId(input.getUserId());
         input.setOperateName(input.getUserName());
+        input.setExclusiveEngine(sceneTryRunTaskStartReq.getExclusiveEngine());
         //压测引擎插件需要传入插件id和插件版本 modified by xr.l 20210712
         List<EnginePluginInput> enginePluginInputs = null;
         if (CollectionUtils.isNotEmpty(sceneTryRunTaskStartReq.getEnginePlugins())) {

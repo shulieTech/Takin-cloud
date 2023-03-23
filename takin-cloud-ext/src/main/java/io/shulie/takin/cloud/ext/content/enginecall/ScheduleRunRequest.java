@@ -54,4 +54,15 @@ public class ScheduleRunRequest {
      * 引擎日志配置
      */
     private PtlLogConfigExt ptlLogConfig;
+
+    /**
+     * 租户ID，node标签，tenantId=xx，用于区分租户压力机
+     */
+    private String label;
+
+    /**
+     * 是否拥有专属发压机，0没有，1有， 有专属发压机有，会让pod到指定node节点启动
+     */
+    private Integer exclusiveEngine;
+
 }

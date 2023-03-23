@@ -1,8 +1,6 @@
 package io.shulie.takin.cloud.entrypoint.controller.scene.manage;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -32,6 +30,8 @@ import io.shulie.takin.cloud.entrypoint.convert.SceneManageRespConvertor;
 import io.shulie.takin.cloud.entrypoint.convert.SceneScriptRefRespConvertor;
 import io.shulie.takin.cloud.entrypoint.convert.SceneSlaRefRespConvertor;
 import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
+import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
+import io.shulie.takin.cloud.ext.content.script.ScriptNode;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.sdk.model.common.TimeBean;
 import io.shulie.takin.cloud.sdk.model.common.TimeUnitEnum;
@@ -152,6 +152,63 @@ public class SceneManageDetailController {
                 resp.setScheduleInterval(schedualInterval);
             }
         }
+
+        // 并发数计算 开放云套餐验证用
+        Map<String, ThreadGroupConfigExt> threadGroupMap = resp.getThreadGroupConfigMap();
+        int realThreadNum = 0;
+        for(String key : threadGroupMap.keySet()){
+            // 并发模式取实际并发值
+            if(threadGroupMap.get(key).getType() == 1){
+                realThreadNum = realThreadNum + threadGroupMap.get(key).getThreadNum();
+            }
+            // TPS 模式取TPS/2
+            if(threadGroupMap.get(key).getType() == 0){
+                List<ScriptNode> scriptNodes = JSON.parseArray(resp.getScriptAnalysisResult(),ScriptNode.class);
+                // 拿到TPS模式线程租
+                ScriptNode scriptNode = findScriptNode(key,scriptNodes);
+                if(scriptNode == null) continue;
+                // TPS 所有sampler xpathMd5 值
+                List<String> xPathMd5s = new ArrayList<>();
+                getAllXPathMd5(Collections.singletonList(scriptNode),xPathMd5s);
+                for(String xPathMd5 : xPathMd5s){
+                    for(SceneManageWrapperOutput.SceneBusinessActivityRefOutput output : resp.getBusinessActivityConfig()){
+                        if(output.getBindRef().equals(xPathMd5)){
+                            realThreadNum = realThreadNum + output.getTargetTPS()/2;
+                        }
+                    }
+                }
+            }
+        }
+        resp.setRealThreadNum(realThreadNum);
+    }
+
+    private void getAllXPathMd5(List<ScriptNode> nodeList,List<String> xPathMd5){
+
+        for(ScriptNode node : nodeList){
+            if(node.getType().equals(NodeTypeEnum.SAMPLER)){
+                xPathMd5.add(node.getXpathMd5());
+            }
+            if(node.getChildren() == null){
+                continue;
+            }
+            getAllXPathMd5(node.getChildren(),xPathMd5);
+        }
+    }
+
+    private  ScriptNode findScriptNode(String xPathMd5, List<ScriptNode> nodeList) {
+        for (ScriptNode scriptNode : nodeList) {
+            if(scriptNode.getXpathMd5().equals(xPathMd5)){
+                return scriptNode;
+            }
+            if(scriptNode.getChildren() == null){
+                continue;
+            }
+            ScriptNode returnNode = findScriptNode(xPathMd5,scriptNode.getChildren());
+            if(returnNode != null){
+                return returnNode;
+            }
+        }
+        return null;
     }
 
     /**

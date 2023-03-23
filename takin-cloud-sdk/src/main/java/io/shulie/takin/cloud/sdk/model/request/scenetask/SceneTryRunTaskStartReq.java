@@ -65,4 +65,7 @@ public class SceneTryRunTaskStartReq extends ContextExt {
      * 占位符键值对
      */
     private Map<String, String> placeholderMap;
+
+    private Integer exclusiveEngine;
+
 }

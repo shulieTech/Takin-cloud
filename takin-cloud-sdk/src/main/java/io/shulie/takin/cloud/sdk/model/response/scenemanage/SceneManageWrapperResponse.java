@@ -95,6 +95,9 @@ public class SceneManageWrapperResponse extends ContextExt {
 
     private Integer scheduleInterval;
 
+    @ApiModelProperty(value = "实际并发数量")
+    private Integer realThreadNum;
+
     @Data
     @EqualsAndHashCode(callSuper = true)
     public static class SceneBusinessActivityRefResponse extends SceneBusinessActivityRefBean {

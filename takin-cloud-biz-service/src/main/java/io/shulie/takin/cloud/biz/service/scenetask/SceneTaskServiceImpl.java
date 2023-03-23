@@ -223,8 +223,9 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             sceneAction.setMsg(Arrays.asList(jb.getString(ReportConstants.PRESSURE_MSG).split(",")));
             return sceneAction;
         }
+        //230216 移动云-开放云不冻结流量
         //流量冻结
-        frozenAccountFlow(input, report, sceneData);
+//        frozenAccountFlow(input, report, sceneData);
 
         // 清除SLA条件缓存
         stringRedisTemplate.opsForHash().delete(SlaServiceImpl.SLA_SCENE_KEY, String.valueOf(input.getSceneId()));
@@ -244,7 +245,8 @@ public class SceneTaskServiceImpl implements SceneTaskService {
             PressureInstanceRedisKey.SecondRedisKey.ACTIVITY_REFS,
             JsonHelper.bean2Json(activityRefs));
         //广播事件
-        sceneTaskEventService.callStartEvent(sceneData, report.getId(), input.getPlaceholderMap());
+        sceneTaskEventService.callStartEvent(sceneData, report.getId(), input.getPlaceholderMap(),
+                input.getExclusiveEngine());
 
         return sceneAction;
     }
@@ -664,6 +666,7 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         sceneTaskStartInput.setOperateId(input.getOperateId());
         sceneTaskStartInput.setOperateName(input.getOperateName());
         sceneTaskStartInput.setPlaceholderMap(input.getPlaceholderMap());
+        sceneTaskStartInput.setExclusiveEngine(input.getExclusiveEngine());
         SceneActionOutput sceneActionOutput = startTask(sceneTaskStartInput);
         sceneTryRunTaskStartOutput.setReportId(sceneActionOutput.getData());
 
@@ -743,13 +746,14 @@ public class SceneTaskServiceImpl implements SceneTaskService {
         if (null == sceneData.getTenantId()) {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_START_VERIFY_ERROR, "场景没有绑定客户信息");
         }
-        AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
-        if (assetExtApi != null) {
-            AccountInfoExt account = assetExtApi.queryAccount(sceneData.getTenantId(), input.getOperateId());
-            if (null == account || account.getBalance().compareTo(sceneData.getEstimateFlow()) < 0) {
-                throw new TakinCloudException(TakinCloudExceptionEnum.TASK_START_VERIFY_ERROR, "压测流量不足！");
-            }
-        }
+        // 开放云不限定流量 230216
+//        AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
+//        if (assetExtApi != null) {
+//            AccountInfoExt account = assetExtApi.queryAccount(sceneData.getTenantId(), input.getOperateId());
+//            if (null == account || account.getBalance().compareTo(sceneData.getEstimateFlow()) < 0) {
+//                throw new TakinCloudException(TakinCloudExceptionEnum.TASK_START_VERIFY_ERROR, "压测流量不足！");
+//            }
+//        }
 
         if (!SceneManageStatusEnum.ifFree(sceneData.getStatus())) {
             throw new TakinCloudException(TakinCloudExceptionEnum.TASK_START_VERIFY_ERROR, "当前场景不为待启动状态！");
