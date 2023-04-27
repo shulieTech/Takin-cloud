@@ -213,9 +213,10 @@ public class ReportServiceImpl implements ReportService {
             return null;
         }
         //report结束后 检测消耗流量计算
-        if (Objects.equals(report.getStatus(), ReportConstants.FINISH_STATUS) && Objects.isNull(report.getAmount()) || report.getAmount().intValue() == 0) {
-            report = calculateAmountAndUpdate(report);
-        }
+        //开放云暂时不计算流量
+//        if (Objects.equals(report.getStatus(), ReportConstants.FINISH_STATUS) && Objects.isNull(report.getAmount()) || report.getAmount().intValue() == 0) {
+//            report = calculateAmountAndUpdate(report);
+//        }
         ReportDetailOutput detail = ReportConverter.INSTANCE.ofReportDetail(report);
 
         //警告列表
@@ -1404,40 +1405,42 @@ public class ReportServiceImpl implements ReportService {
         reportResult.setGmtUpdate(new Date());
 
         //流量结算
-        AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
-        if (null != assetExtApi) {
-            AssetInvoiceExt<RealAssectBillExt> invoice = new AssetInvoiceExt<>();
-            invoice.setSceneId(reportResult.getSceneId());
-            invoice.setTaskId(reportResult.getId());
-            invoice.setCustomerId(reportResult.getTenantId());
-            invoice.setResourceId(reportResult.getId());
-            invoice.setResourceType(AssetTypeEnum.PRESS_REPORT.getCode());
-            invoice.setResourceName(AssetTypeEnum.PRESS_REPORT.getName());
-            invoice.setOperateId(reportResult.getOperateId());
-            invoice.setOperateName(reportResult.getOperateName());
-
-            RealAssectBillExt bill = new RealAssectBillExt();
-            bill.setTime(testRunTime);
-
-            BigDecimal avgThreadNum;
-            //如果有平均rt和平均tps，则:threadNum=tps*rt/1000,否则取报告中的平均线程数
-            if (null != reportResult.getAvgTps() && null != reportResult.getAvgRt()) {
-                avgThreadNum = reportResult.getAvgTps().multiply(reportResult.getAvgRt())
-                        .divide(new BigDecimal(1000), 10, RoundingMode.HALF_UP);
-                if (avgThreadNum.intValue() == 0) {
-                    avgThreadNum = reportResult.getAvgConcurrent();
-                }
-            } else {
-                avgThreadNum = reportResult.getAvgConcurrent();
-            }
-            bill.setAvgThreadNum(avgThreadNum);
-            invoice.setData(bill);
-            log.info("计算流量信息，reportId:{}, time:{}, threads:{}", reportResult.getId(), testRunTime, avgThreadNum);
-            Response<BigDecimal> paymentRes = assetExtApi.payment(invoice);
-            if (null != paymentRes && paymentRes.isSuccess()) {
-                reportResult.setAmount(paymentRes.getData());
-            }
-        }
+        // 开放云暂时不计算流量信息
+//        AssetExtApi assetExtApi = pluginManager.getExtension(AssetExtApi.class);
+//        if (null != assetExtApi) {
+//            AssetInvoiceExt<RealAssectBillExt> invoice = new AssetInvoiceExt<>();
+//            invoice.setSceneId(reportResult.getSceneId());
+//            invoice.setTaskId(reportResult.getId());
+//            invoice.setCustomerId(reportResult.getTenantId());
+//            invoice.setResourceId(reportResult.getId());
+//            invoice.setResourceType(AssetTypeEnum.PRESS_REPORT.getCode());
+//            invoice.setResourceName(AssetTypeEnum.PRESS_REPORT.getName());
+//            invoice.setOperateId(reportResult.getOperateId());
+//            invoice.setOperateName(reportResult.getOperateName());
+//
+//            RealAssectBillExt bill = new RealAssectBillExt();
+//            bill.setTime(testRunTime);
+//
+//            BigDecimal avgThreadNum;
+//            //如果有平均rt和平均tps，则:threadNum=tps*rt/1000,否则取报告中的平均线程数
+//            if (null != reportResult.getAvgTps() && null != reportResult.getAvgRt()) {
+//                avgThreadNum = reportResult.getAvgTps().multiply(reportResult.getAvgRt())
+//                        .divide(new BigDecimal(1000), 10, RoundingMode.HALF_UP);
+//                if (avgThreadNum.intValue() == 0) {
+//                    avgThreadNum = reportResult.getAvgConcurrent();
+//                }
+//            } else {
+//                avgThreadNum = reportResult.getAvgConcurrent();
+//            }
+//            bill.setAvgThreadNum(avgThreadNum);
+//            invoice.setData(bill);
+//
+//            log.info("计算流量信息，reportId:{}, time:{}, threads:{}", reportResult.getId(), testRunTime, avgThreadNum);
+//            Response<BigDecimal> paymentRes = assetExtApi.payment(invoice);
+//            if (null != paymentRes && paymentRes.isSuccess()) {
+//                reportResult.setAmount(paymentRes.getData());
+//            }
+//        }
         //填充开始结束时间
         if (Objects.isNull(reportResult.getStartTime())) {
             reportResult.setStartTime(reportResult.getGmtCreate());

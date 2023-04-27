@@ -44,4 +44,9 @@ public class SceneTaskStartInput {
      * 占位符键值对
      */
     private Map<String, String> placeholderMap;
+
+    /**
+     * 是否拥有专属发压机，0没有，1有， 有专属发压机有，会让pod到指定node节点启动
+     */
+    private Integer exclusiveEngine;
 }

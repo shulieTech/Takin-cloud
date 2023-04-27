@@ -46,6 +46,9 @@ public class SceneManageWrapperOutput extends ContextExt {
     @ApiModelProperty(value = "并发数量")
     private Integer concurrenceNum;
 
+    @ApiModelProperty(value = "并发模式= 并发数量，TPS模式= TPS/2 开放云验证用")
+    private Integer realThreadNum;
+
     @ApiModelProperty(value = "指定IP数")
     private Integer ipNum;
 

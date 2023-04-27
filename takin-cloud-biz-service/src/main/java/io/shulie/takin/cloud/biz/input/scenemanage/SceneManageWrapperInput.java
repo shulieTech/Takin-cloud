@@ -103,4 +103,7 @@ public class SceneManageWrapperInput extends ContextExt {
      * 占位符键值对
      */
     private Map<String, String> placeholderMap;
+    //ecloud 专用压力机标识
+    private Integer exclusiveEngine;
+
 }
