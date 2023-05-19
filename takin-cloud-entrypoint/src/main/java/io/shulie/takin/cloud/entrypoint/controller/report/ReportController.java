@@ -3,12 +3,17 @@ package io.shulie.takin.cloud.entrypoint.controller.report;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.pagehelper.PageInfo;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
@@ -44,6 +49,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.redisson.api.RList;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -66,6 +75,29 @@ public class ReportController {
     private ReportService reportService;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private RedisTemplate redisTemplate;
+
+    private LoadingCache<String, Object> cloudReportCache = Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.SECONDS).build(new CacheLoader<String, Object>() {
+
+        @Override
+        public @Nullable Object load(@NonNull String key) {
+            Long id = Long.parseLong(key.split(":")[1]);
+            Object value = redisTemplate.opsForValue().get(key);
+            if (value != null) {
+                return value;
+            }
+            if (key.startsWith("ReportApi#tempReportDetail")) {
+                value = doTempReportDetail(id);
+            } else if (key.startsWith("ReportApi#getReportByReportId")) {
+                value = doGetReportByReportId(id);
+            } else if (key.startsWith("ReportApi#getSummaryList")) {
+                value = reportService.getNodeSummaryList(id);
+            }
+            redisTemplate.opsForValue().set(key, value, 5, TimeUnit.SECONDS);
+            return value;
+        }
+    });
 
     @ApiOperation("报告列表")
     @GetMapping(EntrypointUrl.METHOD_REPORT_LIST)
@@ -85,6 +117,11 @@ public class ReportController {
     @ApiImplicitParam(name = "reportId", value = "报告ID")
     @GetMapping(value = EntrypointUrl.METHOD_REPORT_DETAIL)
     public ResponseResult<ReportDetailResp> getReportByReportId(Long reportId) {
+        ReportDetailResp o = (ReportDetailResp) cloudReportCache.get(String.format("ReportApi#getReportByReportId:%d", reportId));
+        return ResponseResult.success(o);
+    }
+
+    private ReportDetailResp doGetReportByReportId(Long reportId) {
         ReportDetailOutput detailOutput = reportService.getReportByReportId(reportId);
         if (detailOutput == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在Id:" + reportId);
@@ -97,7 +134,7 @@ public class ReportController {
         } catch (Throwable e) {
             result.setHasJtl(false);
         }
-        return ResponseResult.success(result);
+        return result;
     }
 
     /**
@@ -142,11 +179,11 @@ public class ReportController {
             if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
                 data = JSON.parseObject(stringRedisTemplate.opsForValue().get(key), ReportTrendResp.class);
                 if (Objects.isNull(data)
-                    || CollectionUtils.isEmpty(data.getConcurrent())
-                    || CollectionUtils.isEmpty(data.getSa())
-                    || CollectionUtils.isEmpty(data.getRt())
-                    || CollectionUtils.isEmpty(data.getTps())
-                    || CollectionUtils.isEmpty(data.getSuccessRate())) {
+                        || CollectionUtils.isEmpty(data.getConcurrent())
+                        || CollectionUtils.isEmpty(data.getSa())
+                        || CollectionUtils.isEmpty(data.getRt())
+                        || CollectionUtils.isEmpty(data.getTps())
+                        || CollectionUtils.isEmpty(data.getSuccessRate())) {
                     data = reportService.queryReportTrend(reportTrendQuery);
                     stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(data));
                 }
@@ -169,6 +206,11 @@ public class ReportController {
     @GetMapping(EntrypointUrl.METHOD_REPORT_DETAIL_TEMP)
     @ApiImplicitParam(name = "sceneId", value = "场景ID")
     public ResponseResult<ReportDetailResp> tempReportDetail(Long sceneId) {
+        ReportDetailResp o = (ReportDetailResp) cloudReportCache.get(String.format("ReportApi#tempReportDetail:%d", sceneId));
+        return ResponseResult.success(o);
+    }
+
+    private ReportDetailResp doTempReportDetail(Long sceneId){
         ReportDetailOutput detailOutput = reportService.tempReportDetail(sceneId);
         if (detailOutput == null) {
             throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在");
@@ -177,7 +219,7 @@ public class ReportController {
         if (CollectionUtils.isNotEmpty(detailOutput.getStopReasons())) {
             resp.setStopReasons(detailOutput.getStopReasons());
         }
-        return ResponseResult.success(resp);
+        return resp;
     }
 
     @ApiOperation("实况报告链路趋势")
@@ -215,7 +257,8 @@ public class ReportController {
     @ApiOperation("压测明细")
     @GetMapping(EntrypointUrl.METHOD_REPORT_SUMMARY)
     public ResponseResult<NodeTreeSummaryResp> queryActivitiesSummaryList(ReportDetailByIdReq req) {
-        return ResponseResult.success(reportService.getNodeSummaryList(req.getReportId()));
+        NodeTreeSummaryResp o = (NodeTreeSummaryResp) cloudReportCache.get(String.format("ReportApi#getSummaryList:%d", req.getReportId()));
+        return ResponseResult.success(o);
     }
 
     @ApiOperation("报告汇总")
