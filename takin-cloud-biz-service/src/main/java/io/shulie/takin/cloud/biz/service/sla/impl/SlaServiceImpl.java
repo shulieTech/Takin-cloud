@@ -18,6 +18,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 
 import com.google.common.collect.Maps;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.CollectionUtils;
@@ -62,6 +63,7 @@ public class SlaServiceImpl implements SlaService {
     public static final String SLA_WARN_KEY = "TAKIN:SLA:WARN:KEY";
     public static final String SLA_SCENE_KEY = "TAKIN:SLA:SCENE:KEY";
     public static final String SLA_DESTROY_KEY = "TAKIN:SLA:DESTROY:KEY";
+    public static final String SLA_WARN_COUNT_KEY = "TAKIN:SLA:WARN:COUNT:KEY:%s";
 
     @Resource
     private ReportDao reportDao;
@@ -75,6 +77,9 @@ public class SlaServiceImpl implements SlaService {
     private SceneManageService sceneManageService;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    
+    @Value("${takin.sceneWarn.saveCount:100}")
+    private Integer slaCount;
 
     @Override
     public Boolean buildWarn(SendMetricsEvent metrics) {
@@ -138,12 +143,19 @@ public class SlaServiceImpl implements SlaService {
             id -> stringRedisTemplate.opsForHash().delete(SLA_WARN_KEY, String.valueOf(id)));
         stringRedisTemplate.opsForHash().delete(SLA_SCENE_KEY, String.valueOf(sceneId));
         stringRedisTemplate.delete(PREFIX_TASK + sceneId);
+        // 清除场景sla计数器
+        stringRedisTemplate.delete(String.format(SLA_WARN_COUNT_KEY,sceneId));
         log.info("清除SLA分析内存配置成功, sceneId={}", sceneId);
     }
 
     @Override
     public void cacheData(Long sceneId) {
         stringRedisTemplate.opsForValue().set(PREFIX_TASK + sceneId, "on", 7, TimeUnit.DAYS);
+        String salCountKey = String.format(SLA_WARN_COUNT_KEY,sceneId);
+        // 设置sla计数器
+        stringRedisTemplate.opsForValue().increment(salCountKey,0);
+        // 由于自增无法在一行设置有效，因此分割开设置，并且将过期时间设置与压测过期时间一致
+        stringRedisTemplate.expire(salCountKey,7,TimeUnit.DAYS);
     }
 
     private void doDestroy(Long sceneId, SendMetricsEvent metricsEvent,
@@ -185,7 +197,9 @@ public class SlaServiceImpl implements SlaService {
                     if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(PREFIX_TASK + metricsEvent.getSceneId()))) {
                         // 熔断数据也记录到告警明细中
                         WarnDetail warnDetail = buildWarnDetail(conditionMap, businessActivityDTO, metricsEvent, dto);
-                        tWarnDetailMapper.insertSelective(warnDetail);
+                        if(enableSaveWarn(sceneId)){
+                            tWarnDetailMapper.insertSelective(warnDetail);
+                        }
                         // 记录sla熔断数据
                         UpdateReportSlaDataInput slaDataInput = new UpdateReportSlaDataInput();
                         SlaBean slaBean = new SlaBean();
@@ -237,7 +251,8 @@ public class SlaServiceImpl implements SlaService {
             if (model.getTimes() >= dto.getRule().getTimes()) {
                 WarnDetail warnDetail = buildWarnDetail(conditionMap, businessActivityDTO, metricsEvent, dto);
                 //报告未结束，才insert
-                if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(PREFIX_TASK + metricsEvent.getSceneId()))) {
+                if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(PREFIX_TASK + metricsEvent.getSceneId())) 
+                        && enableSaveWarn(metricsEvent.getSceneId())) {
                     tWarnDetailMapper.insertSelective(warnDetail);
                 }
             } else {
@@ -370,5 +385,28 @@ public class SlaServiceImpl implements SlaService {
         stringRedisTemplate.opsForHash().putAll(SLA_SCENE_KEY, dataMap);
         stringRedisTemplate.expire(SLA_SCENE_KEY, EXPIRE_TIME, TimeUnit.SECONDS);
         return dto;
+    }
+
+    
+    @Override
+    public boolean enableSaveWarn(Long sceneId){
+        try {
+            String slaCountKey = String.format(SLA_WARN_COUNT_KEY, sceneId);
+            // 获取场景sla计数器数值
+            String strCount = stringRedisTemplate.opsForValue().get(slaCountKey);
+            if(strCount == null || StringUtils.isBlank(strCount)){
+                return false;
+            }
+            int count = Integer.parseInt(strCount);
+            if(count > slaCount){
+                return false;
+            }
+            // 计数器自增1
+            stringRedisTemplate.opsForValue().increment(slaCountKey, 1);
+            return true;
+        }catch (Exception e){
+            log.error("获取场景:{}下,sal插入记录计数器异常", sceneId, e);
+            return false;
+        }
     }
 }

@@ -1,8 +1,6 @@
 package io.shulie.takin.cloud.biz.service.report.impl;
 
 import java.io.File;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Date;
@@ -22,13 +20,11 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import cn.hutool.core.bean.BeanUtil;
-import io.shulie.takin.cloud.biz.utils.DataUtils;
+import io.shulie.takin.cloud.biz.service.sla.SlaService;
 import lombok.extern.slf4j.Slf4j;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-
 import org.influxdb.impl.TimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.date.DateUtil;
@@ -158,6 +154,9 @@ public class ReportServiceImpl implements ReportService {
     SceneTaskEventService sceneTaskEventService;
     @Resource
     TReportBusinessActivityDetailMapper tReportBusinessActivityDetailMapper;
+    
+    @Resource
+    private SlaService slaService;
 
     @Value("${report.aggregation.interval}")
     private String reportAggregationInterval;
@@ -1471,7 +1470,9 @@ public class ReportServiceImpl implements ReportService {
         WarnDetail warnDetail = BeanUtil.copyProperties(input, WarnDetail.class);
         warnDetail.setWarnTime(DateUtil.parseDateTime(input.getWarnTime()));
         warnDetail.setCreateTime(new Date());
-        tWarnDetailMapper.insertSelective(warnDetail);
+        if(slaService.enableSaveWarn(input.getPtId())){
+            tWarnDetailMapper.insertSelective(warnDetail);
+        }
     }
 
     private boolean isSla(ReportResult reportResult) {
