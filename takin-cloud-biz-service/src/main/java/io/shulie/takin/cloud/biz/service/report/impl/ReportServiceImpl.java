@@ -15,12 +15,14 @@ import java.util.ArrayList;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
 import cn.hutool.core.bean.BeanUtil;
 import io.shulie.takin.cloud.biz.service.sla.SlaService;
+import io.shulie.takin.cloud.data.util.ReportScriptNodeLocalCache;
 import lombok.extern.slf4j.Slf4j;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -243,7 +245,13 @@ public class ReportServiceImpl implements ReportService {
                 JSON.parseObject(report.getFeatures()).getString(ReportConstants.FEATURES_ERROR_MSG));
         }
         detail.setTestTotalTime(TestTimeUtil.format(report.getStartTime(), report.getEndTime()));
-        List<ScriptNodeSummaryBean> reportNodeDetail = getReportNodeDetail(report.getScriptNodeTree(), reportId);
+        
+        List<ScriptNodeSummaryBean>  summaryBeans = ReportScriptNodeLocalCache.getCache(reportId) ;
+        if(null == summaryBeans){
+            summaryBeans = JsonUtil.parseArray(report.getScriptNodeTree(), ScriptNodeSummaryBean.class);
+            ReportScriptNodeLocalCache.setCache(reportId,summaryBeans);
+        }
+        List<ScriptNodeSummaryBean> reportNodeDetail = getReportNodeDetailV2(summaryBeans, reportId);
         detail.setNodeDetail(reportNodeDetail);
 
         List<BusinessActivitySummaryBean> businessActivities = new ArrayList<>();
@@ -362,6 +370,12 @@ public class ReportServiceImpl implements ReportService {
         List<ReportBusinessActivityDetail> activities = tReportBusinessActivityDetailMapper
             .queryReportBusinessActivityDetailByReportId(reportId);
         return getScriptNodeSummaryBeans(scriptNodeTree, activities);
+    }
+    
+    private List<ScriptNodeSummaryBean> getReportNodeDetailV2(List<ScriptNodeSummaryBean> scriptNodeTree, Long reportId) {
+        List<ReportBusinessActivityDetail> activities = tReportBusinessActivityDetailMapper
+                .queryReportBusinessActivityDetailByReportId(reportId);
+        return getScriptNodeSummaryBeansV2(scriptNodeTree, activities);
     }
 
     @Override
@@ -674,6 +688,80 @@ public class ReportServiceImpl implements ReportService {
             }).collect(Collectors.toList());
     }
 
+    /**
+     * 处理节点链路明细
+     *
+     * @param nodeTree 节点树
+     * @param details  业务活动详情
+     * @return -
+     */
+    private List<ScriptNodeSummaryBean> getScriptNodeSummaryBeansV2(List<ScriptNodeSummaryBean> nodeTree,
+                                                                  List<ReportBusinessActivityDetail> details) {
+        Map<String, ReportBusinessActivityDetail> collect = details.stream().collect(Collectors.toMap(ReportBusinessActivityDetail::getBindRef, Function.identity(), (key1, key2) -> key2));
+        if (CollectionUtils.isNotEmpty(nodeTree)) {
+            buildScriptNodeSummaryBeansData(nodeTree,collect);
+            return nodeTree;
+        }
+        return details.stream().filter(Objects::nonNull)
+                .map(detail -> {
+                    ScriptNodeSummaryBean bean = new ScriptNodeSummaryBean();
+                    bean.setXpathMd5(detail.getBindRef());
+                    bean.setTestName(detail.getBusinessActivityName());
+                    bean.setTotalRequest(detail.getRequest());
+                    bean.setAvgConcurrenceNum(detail.getAvgConcurrenceNum());
+                    bean.setSuccessRate(new DataBean(detail.getSuccessRate(), detail.getTargetSuccessRate()));
+                    bean.setTps(new DataBean(detail.getTps(), detail.getTargetTps()));
+                    bean.setMaxTps(detail.getMaxTps());
+                    bean.setAvgRt(new DataBean(detail.getRt(), detail.getTargetRt()));
+                    bean.setMaxRt(detail.getMaxRt());
+                    bean.setMinRt(detail.getMinRt());
+                    bean.setPassFlag((Optional.ofNullable(detail.getPassFlag()).orElse(0)));
+                    bean.setDistribute(getDistributes(detail.getRtDistribute()));
+                    bean.setApplicationIds(detail.getApplicationIds());
+                    bean.setActivityId(detail.getBusinessActivityId());
+                    bean.setSa(new DataBean(detail.getSa(),detail.getTargetSa()));
+                    return bean;
+                }).collect(Collectors.toList());
+    }
+
+    /**
+     * 利用递归将节点数据全部进行填充
+     * @param beans 脚本节点数据
+     * @param collect 业务活动字表数据
+     */
+    public void buildScriptNodeSummaryBeansData(List<ScriptNodeSummaryBean> beans, Map<String, ReportBusinessActivityDetail> collect) {
+        beans.forEach(c -> {
+            ReportBusinessActivityDetail detail = collect.get(c.getXpathMd5());
+            if (null != detail) {
+                c.setAvgRt(new DataBean(detail.getRt(), detail.getTargetRt()));
+                c.setSa(new DataBean(detail.getSa(), detail.getTargetSa()));
+                c.setTps(new DataBean(detail.getTps(), detail.getTargetTps()));
+                c.setMaxRt(detail.getMaxRt());
+                c.setMinRt(detail.getMinRt());
+                c.setMaxTps(detail.getMaxTps());
+                c.setActivityId(detail.getBusinessActivityId());
+                //采样器和设置过目标的控制器视作业务活动，才会对是否达标进行判断，否则按照达标判断
+                if (detail.getBusinessActivityId() > -1) {
+                    c.setPassFlag(Optional.ofNullable(detail.getPassFlag()).orElse(0));
+                } else {
+
+                    c.setPassFlag(1);
+                }
+                c.setTotalRequest(detail.getRequest());
+                c.setSuccessRate(new DataBean(detail.getSuccessRate(), detail.getTargetSuccessRate()));
+                c.setAvgConcurrenceNum(detail.getAvgConcurrenceNum());
+                c.setDistribute(getDistributes(detail.getRtDistribute()));
+                if (detail.getBusinessActivityId() > -1 && StringUtils.isNotBlank(detail.getApplicationIds())) {
+                    c.setApplicationIds(detail.getApplicationIds());
+                }
+            }
+            List<ScriptNodeSummaryBean> children = c.getChildren();
+            if(CollectionUtils.isNotEmpty(children)){
+                buildScriptNodeSummaryBeansData(children, collect);
+            }
+        });
+    }
+    
     @Override
     public Map<String, Object> getReportWarnCount(Long reportId) {
         Map<String, Object> dataMap = tReportBusinessActivityDetailMapper.selectCountByReportId(reportId);
