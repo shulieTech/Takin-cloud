@@ -61,7 +61,7 @@ public class ReportScriptNodeLocalCache {
      * 删除缓存
      * @param key 缓存key
      */
-    public static void delCache(String key){
+    public static void delCache(Long key){
         CACHE.invalidate(key);
     }
 }

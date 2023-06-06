@@ -246,10 +246,10 @@ public class ReportServiceImpl implements ReportService {
         }
         detail.setTestTotalTime(TestTimeUtil.format(report.getStartTime(), report.getEndTime()));
         
-        List<ScriptNodeSummaryBean>  summaryBeans = ReportScriptNodeLocalCache.getCache(reportId) ;
+        List<ScriptNodeSummaryBean>  summaryBeans = ReportScriptNodeLocalCache.getCache(report.getSceneId()) ;
         if(null == summaryBeans){
             summaryBeans = JsonUtil.parseArray(report.getScriptNodeTree(), ScriptNodeSummaryBean.class);
-            ReportScriptNodeLocalCache.setCache(reportId,summaryBeans);
+            ReportScriptNodeLocalCache.setCache(report.getSceneId(),summaryBeans);
         }
         List<ScriptNodeSummaryBean> reportNodeDetail = getReportNodeDetailV2(summaryBeans, reportId);
         detail.setNodeDetail(reportNodeDetail);

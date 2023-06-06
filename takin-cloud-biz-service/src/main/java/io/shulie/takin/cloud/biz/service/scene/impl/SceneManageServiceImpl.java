@@ -69,6 +69,7 @@ import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageErrorEnum;
 import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.common.exception.TakinCloudException;
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
+import io.shulie.takin.cloud.data.util.ReportScriptNodeLocalCache;
 import io.shulie.takin.cloud.sdk.model.common.UploadFileDTO;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.CloudUpdateSceneFileRequest;
 import io.shulie.takin.cloud.common.utils.EnginePluginUtils;
@@ -442,6 +443,7 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (isScriptManage && fileNeedChange && StringUtils.isNotBlank(scriptPath) && sceneId != null) {
             this.operateFileOnSystem(wrapperRequest.getUploadFile(), sceneId);
         }
+        ReportScriptNodeLocalCache.delCache(wrapperRequest.getId());
     }
 
     private void updateToDatabase(SceneManageCreateOrUpdateParam updateParam, List<SceneBusinessActivityRef> businessActivityList,
