@@ -249,7 +249,9 @@ public class ReportServiceImpl implements ReportService {
         List<ScriptNodeSummaryBean>  summaryBeans = ReportScriptNodeLocalCache.getCache(report.getSceneId()) ;
         if(null == summaryBeans){
             summaryBeans = JsonUtil.parseArray(report.getScriptNodeTree(), ScriptNodeSummaryBean.class);
-            ReportScriptNodeLocalCache.setCache(report.getSceneId(),summaryBeans);
+            if(CollectionUtils.isNotEmpty(summaryBeans)){
+                ReportScriptNodeLocalCache.setCache(report.getSceneId(),summaryBeans);
+            }
         }
         List<ScriptNodeSummaryBean> reportNodeDetail = getReportNodeDetailV2(summaryBeans, reportId);
         detail.setNodeDetail(reportNodeDetail);
