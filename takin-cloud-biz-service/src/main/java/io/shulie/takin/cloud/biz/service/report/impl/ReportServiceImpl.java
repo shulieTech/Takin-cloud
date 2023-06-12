@@ -539,10 +539,7 @@ public class ReportServiceImpl implements ReportService {
             SceneTaskRedisConstants.PRESSURE_NODE_START_ERROR);
         if (Objects.nonNull(pressureNodeStartError)) {
             // 组装压力节点异常显示数据
-            stopReasons.add(new StopReasonBean() {{
-                setType(SceneStopReasonEnum.PRESSURE_NODE.getType());
-                setDescription(SceneStopReasonEnum.toDesc(pressureNodeStartError.toString()));
-            }});
+            stopReasons.add(new StopReasonBean(SceneStopReasonEnum.PRESSURE_NODE.getType(), SceneStopReasonEnum.toDesc(pressureNodeStartError.toString())));
             //  持久化
             getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG, pressureNodeStartError.toString());
             reportDao.updateReport(new ReportUpdateParam() {{
@@ -557,10 +554,7 @@ public class ReportServiceImpl implements ReportService {
         Object errorObj = stringRedisTemplate.opsForHash().get(key, SceneTaskRedisConstants.SCENE_RUN_TASK_ERROR);
         if (Objects.nonNull(errorObj)) {
             // 组装压测引擎异常显示数据
-            stopReasons.add(new StopReasonBean() {{
-                setType(SceneStopReasonEnum.ENGINE.getType());
-                setDescription(SceneStopReasonEnum.toEngineDesc(errorObj.toString()));
-            }});
+            stopReasons.add(new StopReasonBean(SceneStopReasonEnum.ENGINE.getType(), SceneStopReasonEnum.toEngineDesc(errorObj.toString())));
             //  持久化
             getReportFeatures(reportResult, ReportConstants.PRESSURE_MSG, errorObj.toString());
             reportDao.updateReport(new ReportUpdateParam() {{

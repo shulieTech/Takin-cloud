@@ -10,4 +10,13 @@ import lombok.Data;
 public class StopReasonBean {
     private String type;
     private String description;
+
+    public StopReasonBean() {
+    }
+
+    public StopReasonBean(String type, String description) {
+        this.type = type;
+        this.description = description;
+    }
+
 }
