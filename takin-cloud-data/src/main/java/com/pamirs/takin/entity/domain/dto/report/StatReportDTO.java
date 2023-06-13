@@ -77,6 +77,8 @@ public class StatReportDTO {
      */
     private Long recordCount;
 
+    private String transaction;
+
     /**
      * 获取SA
      * sa总数/总请求*100

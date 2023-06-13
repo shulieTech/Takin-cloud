@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -253,7 +254,10 @@ public class ReportServiceImpl implements ReportService {
                 ReportScriptNodeLocalCache.setCache(report.getSceneId(),summaryBeans);
             }
         }
-        List<ScriptNodeSummaryBean> reportNodeDetail = getReportNodeDetailV2(summaryBeans, reportId);
+        List<ReportBusinessActivityDetail> activities = tReportBusinessActivityDetailMapper
+                .queryReportBusinessActivityDetailByReportId(reportId);
+
+        List<ScriptNodeSummaryBean> reportNodeDetail = getReportNodeDetailV2(summaryBeans, activities);
         detail.setNodeDetail(reportNodeDetail);
 
         List<BusinessActivitySummaryBean> businessActivities = new ArrayList<>();
@@ -368,15 +372,11 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    private List<ScriptNodeSummaryBean> getReportNodeDetail(String scriptNodeTree, Long reportId) {
-        List<ReportBusinessActivityDetail> activities = tReportBusinessActivityDetailMapper
-            .queryReportBusinessActivityDetailByReportId(reportId);
+    private List<ScriptNodeSummaryBean> getReportNodeDetail(String scriptNodeTree, List<ReportBusinessActivityDetail> activities) {
         return getScriptNodeSummaryBeans(scriptNodeTree, activities);
     }
     
-    private List<ScriptNodeSummaryBean> getReportNodeDetailV2(List<ScriptNodeSummaryBean> scriptNodeTree, Long reportId) {
-        List<ReportBusinessActivityDetail> activities = tReportBusinessActivityDetailMapper
-                .queryReportBusinessActivityDetailByReportId(reportId);
+    private List<ScriptNodeSummaryBean> getReportNodeDetailV2(List<ScriptNodeSummaryBean> scriptNodeTree, List<ReportBusinessActivityDetail> activities) {
         return getScriptNodeSummaryBeansV2(scriptNodeTree, activities);
     }
 
@@ -437,54 +437,45 @@ public class ReportServiceImpl implements ReportService {
             String.format("%d'%d\"", wrapper.getTotalTestTime() / 60, wrapper.getTotalTestTime() % 60));
 
         // 补充操作人
-        List<ReportBusinessActivityDetail> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper
-            .queryReportBusinessActivityDetailByReportId(reportResult.getId());
-        if (StringUtils.isNotBlank(reportResult.getScriptNodeTree())) {
-            String nodeTree = reportResult.getScriptNodeTree();
-            Map<String, Map<String, Object>> resultMap = new HashMap<>(reportBusinessActivityDetails.size());
-            reportBusinessActivityDetails.stream()
-                .filter(Objects::nonNull)
-                .forEach(ref -> {
-                    StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getTenantId(),
-                        ref.getBindRef());
-                    Map<String, Object> objectMap = fillTempMap(data, ref);
-                    resultMap.put(ref.getBindRef(), objectMap);
-                });
-            String resultTree = JsonPathUtil.putNodesToJson(nodeTree, resultMap);
-            reportDetail.setNodeDetail(JsonUtil.parseArray(resultTree,
-                ScriptNodeSummaryBean.class));
-        } else {
-            List<ScriptNodeSummaryBean> nodeDetails = reportBusinessActivityDetails.stream()
-                .filter(Objects::nonNull)
-                .map(ref -> {
-                    StatReportDTO data = statTempReport(sceneId, reportResult.getId(), reportResult.getTenantId(),
-                        ref.getBindRef());
-                    return new ScriptNodeSummaryBean() {{
-                        setName(ref.getBusinessActivityName());
-                        setTestName(ref.getBusinessActivityName());
-                        setXpathMd5(ref.getBindRef());
-                        if (Objects.nonNull(data)) {
-                            setAvgRt(new DataBean(data.getAvgRt(), ref.getTargetRt()));
-                            setSa(new DataBean(data.getSa(), ref.getTargetSa()));
-                            setTps(new DataBean(data.getTps(), ref.getTargetTps()));
-                            setSuccessRate(new DataBean(data.getSuccessRate(), ref.getTargetSuccessRate()));
-                            setAvgConcurrenceNum(data.getAvgConcurrenceNum());
-                            setTempRequestCount(data.getTempRequestCount());
-                            setTotalRequest(data.getTotalRequest());
-                        } else {
-                            setAvgRt(new DataBean("0", ref.getTargetRt()));
-                            setSa(new DataBean("0", ref.getTargetSa()));
-                            setTps(new DataBean("0", ref.getTargetTps()));
-                            setSuccessRate(new DataBean("0", ref.getTargetSuccessRate()));
-                            setAvgConcurrenceNum(new BigDecimal(0));
-                            setTempRequestCount(0L);
-                            setTotalRequest(0L);
-                        }
-                    }};
-                }).collect(Collectors.toList());
-            reportDetail.setNodeDetail(nodeDetails);
-
+        List<ReportBusinessActivityDetail> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper.queryReportBusinessActivityDetailByReportId(reportResult.getId());
+        ExecutorService service = Executors.newFixedThreadPool(10);
+        List<Future<StatReportDTO>> futures = new ArrayList<>();
+        List<StatReportDTO> statReportDTOList = new ArrayList<>();
+        for (ReportBusinessActivityDetail businessActivityDetail : reportBusinessActivityDetails) {
+            Callable<StatReportDTO> task = () -> statTempReport(sceneId, reportResult.getId(), reportResult.getTenantId(), businessActivityDetail.getBindRef());
+            Future<StatReportDTO> future = service.submit(task);
+            futures.add(future);
         }
+
+        for (Future<StatReportDTO> future:futures) {
+            try {
+                statReportDTOList.add(future.get());
+            } catch (Exception e) {
+                throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, e);
+            } finally {
+                service.shutdown();
+            }
+        }
+
+       Map<String,ReportBusinessActivityDetail> reportBusinessActivityDetailMap = reportBusinessActivityDetails.parallelStream()
+               .filter(a -> Objects.nonNull(a)).collect(Collectors.toMap(ReportBusinessActivityDetail::getBindRef, ref -> ref, (k1, k2) -> k1));
+
+        List<ScriptNodeSummaryBean> summaryBeans = statReportDTOList.parallelStream().filter(a -> Objects.nonNull(a) || StringUtils.isBlank(a.getTransaction())).map(ref -> {
+            ScriptNodeSummaryBean bean = new ScriptNodeSummaryBean();
+            ReportBusinessActivityDetail reportBusinessActivityDetail = reportBusinessActivityDetailMap.get(ref.getTransaction());
+            bean.setAvgRt(new DataBean(ref.getAvgRt(), reportBusinessActivityDetail.getRt()));
+            bean.setSa(new DataBean(ref.getSa(), reportBusinessActivityDetail.getTargetSa()));
+            bean.setTps(new DataBean(ref.getTps(), reportBusinessActivityDetail.getTargetTps()));
+            bean.setSuccessRate(new DataBean(statReport.getSuccessRate(), reportBusinessActivityDetail.getTargetSuccessRate()));
+            bean.setAvgConcurrenceNum(ref.getAvgConcurrenceNum());
+            bean.setTotalRequest(ref.getTotalRequest());
+            bean.setTempRequestCount(ref.getTempRequestCount());
+            return bean;
+        }).collect(Collectors.toList());
+        List<ScriptNodeSummaryBean> reportNodeDetail = getReportNodeDetailV2(summaryBeans,reportBusinessActivityDetails);
+        reportDetail.setNodeDetail(reportNodeDetail);
+
+
         //检查任务是否超时
         boolean taskIsTimeOut = checkSceneTaskIsTimeOut(reportResult, wrapper);
         if (wrapper.getStatus().intValue() == SceneManageStatusEnum.PRESSURE_TESTING.getValue().intValue() && taskIsTimeOut) {
@@ -648,11 +639,11 @@ public class ReportServiceImpl implements ReportService {
      */
     private List<ScriptNodeSummaryBean> getScriptNodeSummaryBeans(String nodeTree,
         List<ReportBusinessActivityDetail> details) {
-        Map<String, Map<String, Object>> resultMap = new HashMap<>(details.size());
+        ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> resultMap = new ConcurrentHashMap<>(details.size());
         if (StringUtils.isNotBlank(nodeTree)) {
             details.stream().filter(Objects::nonNull)
                 .forEach(detail -> {
-                    Map<String, Object> objectMap = fillReportMap(detail);
+                    ConcurrentHashMap<String, Object> objectMap = fillReportMap(detail);
                     if (Objects.nonNull(objectMap)) {
                         resultMap.put(detail.getBindRef(), objectMap);
                     }
@@ -922,7 +913,7 @@ public class ReportServiceImpl implements ReportService {
     private StatReportDTO statTempReport(Long sceneId, Long reportId, Long tenantId, String transaction) {
         String measurement = InfluxUtil.getMeasurement(sceneId, reportId, tenantId);
         String influxDbSql = "select"
-            + " count as tempRequestCount, fail_count as failRequest, avg_tps as tps , avg_rt as avgRt, sa_count as saCount, active_threads as avgConcurrenceNum"
+            + " count as tempRequestCount, fail_count as failRequest, avg_tps as tps , avg_rt as avgRt, sa_count as saCount, active_threads as avgConcurrenceNum,transaction"
             + " from "
             + measurement
             + " where transaction = '" + transaction + "'"
@@ -1569,9 +1560,9 @@ public class ReportServiceImpl implements ReportService {
             && StringUtils.isNotEmpty(jsonObject.getString(ReportConstants.SLA_ERROR_MSG));
     }
 
-    private Map<String, Object> fillReportMap(ReportBusinessActivityDetail detail) {
+    private ConcurrentHashMap<String, Object> fillReportMap(ReportBusinessActivityDetail detail) {
         if (Objects.nonNull(detail)) {
-            Map<String, Object> resultMap = new HashMap<>(13);
+            ConcurrentHashMap<String, Object> resultMap = new ConcurrentHashMap<>(13);
             resultMap.put("avgRt", new DataBean(detail.getRt(), detail.getTargetRt()));
             resultMap.put("sa", new DataBean(detail.getSa(), detail.getTargetSa()));
             resultMap.put("tps", new DataBean(detail.getTps(), detail.getTargetTps()));
@@ -1618,11 +1609,11 @@ public class ReportServiceImpl implements ReportService {
         return result;
     }
 
-    private Map<String, Object> fillTempMap(StatReportDTO statReport, ReportBusinessActivityDetail detail) {
+    private ConcurrentHashMap<String, Object> fillTempMap(StatReportDTO statReport, ReportBusinessActivityDetail detail) {
         if (Objects.isNull(detail)) {
             return null;
         }
-        Map<String, Object> resultMap = new HashMap<>(6);
+        ConcurrentHashMap<String, Object> resultMap = new ConcurrentHashMap<>(7);
         if (Objects.nonNull(statReport)) {
             resultMap.put("avgRt", new DataBean(statReport.getAvgRt(), detail.getTargetRt()));
             resultMap.put("sa", new DataBean(statReport.getSa(), detail.getTargetSa()));
@@ -1669,9 +1660,9 @@ public class ReportServiceImpl implements ReportService {
             reportBusinessActivityDetails.stream()
                 .filter(Objects::nonNull)
                 .forEach(detail -> {
-                    Map<String, Object> tmpMap = new HashMap<>(1);
+                    ConcurrentHashMap<String, Object> tmpMap = new ConcurrentHashMap<>(1);
                     tmpMap.put("businessActivityId", detail.getBusinessActivityId());
-                    Map<String, Map<String, Object>> resultMap = new HashMap<>(1);
+                    ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> resultMap = new ConcurrentHashMap<>(1);
                     resultMap.put(detail.getBindRef(), tmpMap);
                     JsonPathUtil.putNodesToJson(context, resultMap);
                 });

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.Objects;
 import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -96,23 +97,23 @@ public class JsonPathUtil {
      * @param nodeMaps 需要添加的节点；外层Key为匹配父节点名称的value，内层map：key是json的key，value是json的value
      */
     public static void putNodesToJson(DocumentContext context, String key,
-        Map<String, Map<String, Object>> nodeMaps) {
+                                      ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> nodeMaps) {
         if (Objects.isNull(context) || StringUtils.isBlank(key) || Objects.isNull(nodeMaps) || nodeMaps.size() <= 0) {
             return;
         }
-        for (Map.Entry<String, Map<String, Object>> md5Entry : nodeMaps.entrySet()) {
-            for (Map.Entry<String, Object> entry : md5Entry.getValue().entrySet()) {
+        for (ConcurrentHashMap.Entry<String, ConcurrentHashMap<String, Object>> md5Entry : nodeMaps.entrySet()) {
+            for (ConcurrentHashMap.Entry<String, Object> entry : md5Entry.getValue().entrySet()) {
                 context.put(JsonPath.compile("$..[?(@." + key + "=='" + md5Entry.getKey() + "')]"), entry.getKey(),
                     entry.getValue());
             }
         }
     }
 
-    public static void putNodesToJson(DocumentContext context, Map<String, Map<String, Object>> nodeMaps) {
+    public static void putNodesToJson(DocumentContext context, ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> nodeMaps) {
         putNodesToJson(context, DEFAULT_KEY, nodeMaps);
     }
 
-    public static String putNodesToJson(String targetJson, Map<String, Map<String, Object>> nodeMaps) {
+    public static String putNodesToJson(String targetJson, ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> nodeMaps) {
         DocumentContext context = JsonPath.using(JACKSON_CONFIGURATION).parse(targetJson);
         putNodesToJson(context, nodeMaps);
         return context.jsonString();
