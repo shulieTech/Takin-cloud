@@ -1,9 +1,6 @@
 package io.shulie.takin.cloud.common.utils;
 
-import java.util.Map;
-import java.util.List;
-import java.util.Objects;
-import java.util.Collections;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
@@ -97,11 +94,11 @@ public class JsonPathUtil {
      * @param nodeMaps 需要添加的节点；外层Key为匹配父节点名称的value，内层map：key是json的key，value是json的value
      */
     public static void putNodesToJson(DocumentContext context, String key,
-                                      ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> nodeMaps) {
+                                      ConcurrentHashMap<String, HashMap<String, Object>> nodeMaps) {
         if (Objects.isNull(context) || StringUtils.isBlank(key) || Objects.isNull(nodeMaps) || nodeMaps.size() <= 0) {
             return;
         }
-        for (ConcurrentHashMap.Entry<String, ConcurrentHashMap<String, Object>> md5Entry : nodeMaps.entrySet()) {
+        for (ConcurrentHashMap.Entry<String, HashMap<String, Object>> md5Entry : nodeMaps.entrySet()) {
             for (ConcurrentHashMap.Entry<String, Object> entry : md5Entry.getValue().entrySet()) {
                 context.put(JsonPath.compile("$..[?(@." + key + "=='" + md5Entry.getKey() + "')]"), entry.getKey(),
                     entry.getValue());
@@ -109,11 +106,11 @@ public class JsonPathUtil {
         }
     }
 
-    public static void putNodesToJson(DocumentContext context, ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> nodeMaps) {
+    public static void putNodesToJson(DocumentContext context, ConcurrentHashMap<String, HashMap<String, Object>> nodeMaps) {
         putNodesToJson(context, DEFAULT_KEY, nodeMaps);
     }
 
-    public static String putNodesToJson(String targetJson, ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> nodeMaps) {
+    public static String putNodesToJson(String targetJson, ConcurrentHashMap<String, HashMap<String, Object>> nodeMaps) {
         DocumentContext context = JsonPath.using(JACKSON_CONFIGURATION).parse(targetJson);
         putNodesToJson(context, nodeMaps);
         return context.jsonString();

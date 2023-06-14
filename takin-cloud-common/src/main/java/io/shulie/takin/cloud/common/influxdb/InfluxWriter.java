@@ -11,6 +11,9 @@ import com.alibaba.fastjson.JSONObject;
 
 import io.shulie.takin.cloud.common.exception.TakinCloudExceptionEnum;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.ConnectionPool;
+import okhttp3.Dispatcher;
+import okhttp3.OkHttpClient;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.influxdb.InfluxDB;
@@ -65,7 +68,16 @@ public class InfluxWriter {
         if (StringUtils.isBlank(influxdbUrl)) {
             return;
         }
-        influx = InfluxDBFactory.connect(influxdbUrl, userName, password);
+        // 增加一些自定义的influxDB默认客户端okHttpClinet连接池设置
+        Dispatcher dispatcher = new Dispatcher();
+        dispatcher.setMaxRequests(1000);
+        dispatcher.setMaxRequestsPerHost(1000);
+        OkHttpClient.Builder okHttpClient = new OkHttpClient.Builder();
+        okHttpClient.connectTimeout(5000, TimeUnit.MILLISECONDS);
+        okHttpClient.callTimeout(3000,TimeUnit.MILLISECONDS);
+        okHttpClient.readTimeout(3000,TimeUnit.MILLISECONDS);
+        okHttpClient.connectionPool(new ConnectionPool(100,5,TimeUnit.MILLISECONDS)).dispatcher(dispatcher);
+        influx = InfluxDBFactory.connect(influxdbUrl, userName, password, okHttpClient);
         influx.enableBatch(1000, 40, TimeUnit.MILLISECONDS);
     }
 

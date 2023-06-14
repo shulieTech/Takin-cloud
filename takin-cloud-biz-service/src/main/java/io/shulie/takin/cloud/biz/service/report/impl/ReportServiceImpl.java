@@ -464,11 +464,11 @@ public class ReportServiceImpl implements ReportService {
 
         String nodeTree = reportResult.getScriptNodeTree();
         if (StringUtils.isNotBlank(nodeTree)) {
-            ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> resultMap = new ConcurrentHashMap<>(reportBusinessActivityDetails.size());
+            ConcurrentHashMap<String, HashMap<String, Object>> resultMap = new ConcurrentHashMap<>(reportBusinessActivityDetails.size());
 
             reportBusinessActivityDetails.parallelStream().filter(a->Objects.nonNull(a)||StringUtils.isNotBlank(a.getBindRef())).forEach(ref->{
                 StatReportDTO statReportDTO = statReportDTOMap.get(ref.getBindRef());
-                ConcurrentHashMap<String, Object> objectMap = fillTempMap(statReportDTO, ref);
+                HashMap<String, Object> objectMap = fillTempMap(statReportDTO, ref);
                 resultMap.put(ref.getBindRef(), objectMap);
             });
             String resultTree = JsonPathUtil.putNodesToJson(nodeTree, resultMap);
@@ -666,11 +666,11 @@ public class ReportServiceImpl implements ReportService {
      */
     private List<ScriptNodeSummaryBean> getScriptNodeSummaryBeans(String nodeTree,
                                                                   List<ReportBusinessActivityDetail> details) {
-        ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> resultMap = new ConcurrentHashMap<>(details.size());
+        ConcurrentHashMap<String, HashMap<String, Object>> resultMap = new ConcurrentHashMap<>(details.size());
         if (StringUtils.isNotBlank(nodeTree)) {
             details.stream().filter(Objects::nonNull)
                     .forEach(detail -> {
-                        ConcurrentHashMap<String, Object> objectMap = fillReportMap(detail);
+                        HashMap<String, Object> objectMap = fillReportMap(detail);
                         if (Objects.nonNull(objectMap)) {
                             resultMap.put(detail.getBindRef(), objectMap);
                         }
@@ -1590,9 +1590,9 @@ public class ReportServiceImpl implements ReportService {
                 && StringUtils.isNotEmpty(jsonObject.getString(ReportConstants.SLA_ERROR_MSG));
     }
 
-    private ConcurrentHashMap<String, Object> fillReportMap(ReportBusinessActivityDetail detail) {
+    private HashMap<String, Object> fillReportMap(ReportBusinessActivityDetail detail) {
         if (Objects.nonNull(detail)) {
-            ConcurrentHashMap<String, Object> resultMap = new ConcurrentHashMap<>(13);
+            HashMap<String, Object> resultMap = new HashMap<>(13);
             resultMap.put("avgRt", new DataBean(detail.getRt(), detail.getTargetRt()));
             resultMap.put("sa", new DataBean(detail.getSa(), detail.getTargetSa()));
             resultMap.put("tps", new DataBean(detail.getTps(), detail.getTargetTps()));
@@ -1640,11 +1640,11 @@ public class ReportServiceImpl implements ReportService {
         return result;
     }
 
-    private ConcurrentHashMap<String, Object> fillTempMap(StatReportDTO statReport, ReportBusinessActivityDetail detail) {
+    private HashMap<String, Object> fillTempMap(StatReportDTO statReport, ReportBusinessActivityDetail detail) {
         if (Objects.isNull(detail)) {
             return null;
         }
-        ConcurrentHashMap<String, Object> resultMap = new ConcurrentHashMap<>(7);
+        HashMap<String, Object> resultMap = new HashMap<>(7);
         if (Objects.nonNull(statReport)) {
             resultMap.put("avgRt", new DataBean(statReport.getAvgRt(), detail.getTargetRt()));
             resultMap.put("sa", new DataBean(statReport.getSa(), detail.getTargetSa()));
@@ -1691,9 +1691,9 @@ public class ReportServiceImpl implements ReportService {
             reportBusinessActivityDetails.stream()
                     .filter(Objects::nonNull)
                     .forEach(detail -> {
-                        ConcurrentHashMap<String, Object> tmpMap = new ConcurrentHashMap<>(1);
+                        HashMap<String, Object> tmpMap = new HashMap<>(1);
                         tmpMap.put("businessActivityId", detail.getBusinessActivityId());
-                        ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> resultMap = new ConcurrentHashMap<>(1);
+                        ConcurrentHashMap<String, HashMap<String, Object>> resultMap = new ConcurrentHashMap<>(1);
                         resultMap.put(detail.getBindRef(), tmpMap);
                         JsonPathUtil.putNodesToJson(context, resultMap);
                     });
