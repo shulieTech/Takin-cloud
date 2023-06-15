@@ -1590,7 +1590,8 @@ public class ReportServiceImpl implements ReportService {
                 && StringUtils.isNotEmpty(jsonObject.getString(ReportConstants.SLA_ERROR_MSG));
     }
 
-    private HashMap<String, Object> fillReportMap(ReportBusinessActivityDetail detail) {
+    private HashMap<String, Object> 
+    fillReportMap(ReportBusinessActivityDetail detail) {
         if (Objects.nonNull(detail)) {
             HashMap<String, Object> resultMap = new HashMap<>(13);
             resultMap.put("avgRt", new DataBean(detail.getRt(), detail.getTargetRt()));
@@ -1650,7 +1651,7 @@ public class ReportServiceImpl implements ReportService {
             resultMap.put("sa", new DataBean(statReport.getSa(), detail.getTargetSa()));
             resultMap.put("tps", new DataBean(statReport.getTps(), detail.getTargetTps()));
             resultMap.put("successRate", new DataBean(statReport.getSuccessRate(), detail.getTargetSuccessRate()));
-            resultMap.put("avgConcurrenceNum", statReport.getAvgConcurrenceNum().toString());
+            resultMap.put("avgConcurrenceNum", statReport.getAvgConcurrenceNum());
             resultMap.put("totalRequest", statReport.getTotalRequest());
             resultMap.put("tempRequestCount", statReport.getTempRequestCount());
         } else {
