@@ -76,9 +76,9 @@ public class InfluxWriter {
         okHttpClient.connectTimeout(5000, TimeUnit.MILLISECONDS);
         okHttpClient.callTimeout(3000,TimeUnit.MILLISECONDS);
         okHttpClient.readTimeout(3000,TimeUnit.MILLISECONDS);
-        okHttpClient.connectionPool(new ConnectionPool(100,5,TimeUnit.MILLISECONDS)).dispatcher(dispatcher);
+        okHttpClient.connectionPool(new ConnectionPool(500,10,TimeUnit.MINUTES)).dispatcher(dispatcher);
         influx = InfluxDBFactory.connect(influxdbUrl, userName, password, okHttpClient);
-        influx.enableBatch(1000, 40, TimeUnit.MILLISECONDS);
+        influx.enableBatch(7500, 1000, TimeUnit.MILLISECONDS);
     }
 
     /**
