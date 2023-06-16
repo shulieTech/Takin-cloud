@@ -10,6 +10,7 @@ import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdatePar
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageRunningResp;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -48,17 +49,12 @@ public class UnCompleteJobScanClearTask  {
     @Value("${uncompleted.need.report:false}")
     private Boolean needReport;
     
-    @Qualifier("unCompletedSceneForceStopPool")
-    @Resource
-    private ThreadPoolExecutor unCompletedSceneForceStopPool;
-
-    
     @Scheduled(fixedDelay = 5,timeUnit = TimeUnit.MINUTES)
     public void test() {
         RedissonDistributedLock distributedLock = new RedissonDistributedLock();
         String key = "un:complete:job:scan:clear:task";
         try {
-            if(!distributedLock.tryLock(key,1L,20L,TimeUnit.SECONDS)){
+            if(!distributedLock.tryLock(key,1L,5L,TimeUnit.MINUTES)){
                 return;
             }
             scanUnCompletedSceneForceStop();
@@ -72,10 +68,25 @@ public class UnCompleteJobScanClearTask  {
     
     public void scanUnCompletedSceneForceStop(){
         List<SceneManageRunningResp> list = null;
-        int page = 1;
-        // 基本200条够了，不够在使用循环
-        int size = 200;
-        list = sceneManageService.getSceneManageRunningList(page,size);
+        try {
+            int page = 1;
+            // 基本200条够了，不够在使用循环
+            int size = 200;
+            list = sceneManageService.getSceneManageRunningList(page,size);
+            if(CollectionUtils.isEmpty(list)){
+                return;
+            }
+            stop(list);
+            
+        }catch (Exception e){
+            log.error("获取压测中场景列表异常",e);
+        }
+        
+      
+       
+    }
+    
+    public void stop(List<SceneManageRunningResp> list){
         for (SceneManageRunningResp runningResp : list) {
             if (runningResp.getDuration() > 0 || runningResp.getLastPtTime() == null) {
                 continue;
@@ -90,8 +101,8 @@ public class UnCompleteJobScanClearTask  {
             long endTime =  startTime + pressureTime + delay;
             // 当前时间大于就直接强制结束
             if(System.currentTimeMillis() > endTime){
-                unCompletedSceneForceStopPool.execute(() -> {
-                    // 直接结束场景
+                // 直接结束场景
+                try {
                     SceneManageCreateOrUpdateParam updateParam = new SceneManageCreateOrUpdateParam();
                     updateParam.setLastPtTime(new Date());
                     updateParam.setId(runningResp.getId());
@@ -103,9 +114,12 @@ public class UnCompleteJobScanClearTask  {
                     if (reportBySceneId != null && reportBySceneId.getStatus() != 2) {
                         sceneTaskService.forceStopTask(reportBySceneId.getId(), needReport);
                     }
-                });
+                }catch (Exception e){
+                    log.error("通知压测场景id={},异常",runningResp.getId(),e);
+                }
             }
         }
+       
     }
    
 }
