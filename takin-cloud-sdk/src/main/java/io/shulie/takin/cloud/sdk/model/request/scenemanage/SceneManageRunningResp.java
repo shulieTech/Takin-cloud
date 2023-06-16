@@ -3,6 +3,7 @@ package io.shulie.takin.cloud.sdk.model.request.scenemanage;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author xjz@io.shulie
@@ -19,4 +20,8 @@ public class SceneManageRunningResp implements Serializable {
      * 压测时间
      */
     private Integer duration;
+    /**
+     * 最后施压时间
+     */
+    private Date lastPtTime;
 }

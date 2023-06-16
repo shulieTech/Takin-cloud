@@ -157,5 +157,5 @@ public interface SceneManageService {
      * @param pageSize 页码大小
      * @return List<SceneManageRunningResp>
      */
-    List<SceneManageRunningResp> getSceneRunningList(Integer page, Integer pageSize);
+    List<SceneManageRunningResp> getSceneManageRunningList(Integer page, Integer pageSize);
 }

@@ -206,7 +206,7 @@ public class SceneManageController {
 
     @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_QUERY_RUNNING_PAGE_LIST)
     @ApiOperation(value = "获取压测中的场景列表")
-    public ResponseResult<List<SceneManageRunningResp>> getSceneRunningList(@RequestParam Integer pageNumber,@RequestParam Integer pageSize){
-        return ResponseResult.success( sceneManageService.getSceneRunningList(pageNumber,pageSize));
+    public ResponseResult<List<SceneManageRunningResp>> getSceneManageRunningList(@RequestParam Integer pageNumber,@RequestParam Integer pageSize){
+        return ResponseResult.success( sceneManageService.getSceneManageRunningList(pageNumber,pageSize));
     }
 }

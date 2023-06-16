@@ -112,6 +112,7 @@ public class SceneManageApiImpl implements SceneManageApi {
      * @param queryReq 请求对象
      * @return
      */
+    @Override
     public List<SceneManageRunningResp> getSceneManageRunningList(SceneManageQueryReq queryReq){
         return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_MANAGE, EntrypointUrl.METHOD_SCENE_MANAGE_QUERY_RUNNING_PAGE_LIST),
                 queryReq, new TypeReference<ResponseResult<List<SceneManageRunningResp>>>() {}).getData();

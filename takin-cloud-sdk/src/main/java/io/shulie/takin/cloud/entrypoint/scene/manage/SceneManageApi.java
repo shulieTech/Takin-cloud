@@ -6,14 +6,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.CloudUpdateSceneFileRequest;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneIpNumReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageDeleteReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageQueryByIdsReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageQueryReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageWrapperReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.ScriptCheckAndUpdateReq;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.*;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageListResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.ScriptCheckResp;
@@ -123,5 +116,13 @@ public interface SceneManageApi {
      * @return 查询列表
      */
     List<SceneManageWrapperResp> queryByIds(SceneManageQueryByIdsReq req);
+
+    /**
+     * 获取压测中场景列表
+     *
+     * @param queryReq 查询条件
+     * @return List<SceneManageRunningResp>
+     */
+    List<SceneManageRunningResp> getSceneManageRunningList(SceneManageQueryReq queryReq);
 
 }

@@ -167,7 +167,7 @@ public class SceneManageDAOImpl
     public Page<SceneManageEntity> getSceneRunningList(Integer page ,Integer pageSize) {
         LambdaQueryWrapper<SceneManageEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.select(SceneManageEntity::getId);
-        queryWrapper.select(SceneManageEntity::getStatus);
+        queryWrapper.select(SceneManageEntity::getLastPtTime);
         queryWrapper.select(SceneManageEntity::getPtConfig);
         List<Integer> sceneManageStatusEnums = Arrays.asList(SceneManageStatusEnum.WAIT.getValue(),
                 SceneManageStatusEnum.FORCE_STOP.getValue());

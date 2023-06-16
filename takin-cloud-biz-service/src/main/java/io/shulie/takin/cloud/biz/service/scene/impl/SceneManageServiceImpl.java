@@ -989,7 +989,7 @@ public class SceneManageServiceImpl implements SceneManageService {
     }
 
     @Override
-    public List<SceneManageRunningResp> getSceneRunningList(Integer page,Integer pageSize) {
+    public List<SceneManageRunningResp> getSceneManageRunningList(Integer page,Integer pageSize) {
         com.baomidou.mybatisplus.extension.plugins.pagination.Page<SceneManageEntity> sceneRunningList = sceneManageDAO.getSceneRunningList(page,pageSize);
         List<SceneManageEntity> records = sceneRunningList.getRecords();
         List<SceneManageRunningResp> list = new ArrayList<>();
@@ -997,6 +997,7 @@ public class SceneManageServiceImpl implements SceneManageService {
             records.forEach(c->{
                 SceneManageRunningResp runningResp = new SceneManageRunningResp();
                 runningResp.setId(c.getId());
+                runningResp.setLastPtTime(c.getLastPtTime());
                 String ptConfig = c.getPtConfig();
                 try {
                     Object o = JSON.parseObject(ptConfig).get("duration");

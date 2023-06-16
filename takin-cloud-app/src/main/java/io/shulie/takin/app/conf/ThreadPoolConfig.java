@@ -40,4 +40,18 @@ public class ThreadPoolConfig {
         return new ThreadPoolExecutor(10, 20, 60L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(5000), nameThreadFactory,
             new ThreadPoolExecutor.AbortPolicy());
     }
+
+
+    /**
+     * 抛出异常
+     *
+     * @return -
+     */
+    @Bean(name = "unCompletedSceneForceStopPool")
+    public ThreadPoolExecutor clearUnCompletedScene() {
+        ThreadFactory nameThreadFactory = new ThreadFactoryBuilder().setNameFormat("unCompletedSceneForceStop-thread-%d").build();
+        return new ThreadPoolExecutor(10, 20, 6, TimeUnit.MINUTES, new ArrayBlockingQueue<>(100), nameThreadFactory,
+                new ThreadPoolExecutor.AbortPolicy());
+    }
+
 }
