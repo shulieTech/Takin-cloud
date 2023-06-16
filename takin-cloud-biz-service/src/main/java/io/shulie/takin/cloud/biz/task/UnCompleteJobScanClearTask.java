@@ -58,7 +58,7 @@ public class UnCompleteJobScanClearTask  {
         RedissonDistributedLock distributedLock = new RedissonDistributedLock();
         String key = "un:complete:job:scan:clear:task";
         try {
-            if(!distributedLock.tryLock(key,10L,10L,TimeUnit.SECONDS)){
+            if(!distributedLock.tryLock(key,1L,20L,TimeUnit.SECONDS)){
                 return;
             }
             scanUnCompletedSceneForceStop();
