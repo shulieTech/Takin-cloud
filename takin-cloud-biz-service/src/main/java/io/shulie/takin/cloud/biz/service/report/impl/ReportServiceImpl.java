@@ -173,6 +173,9 @@ public class ReportServiceImpl implements ReportService {
     @Value("${pressure.engine.log.path:/nfs_dir/logs}")
     private String pressureEngineLogPath;
 
+    @Value("${report.query.influxdb.thread.num:10}")
+    private Integer reportQueryInfluxDBThreadNum;
+
     public static final String COMPARE = "<=";
 
     @Override
@@ -439,7 +442,10 @@ public class ReportServiceImpl implements ReportService {
 
         // 补充操作人
         List<ReportBusinessActivityDetail> reportBusinessActivityDetails = tReportBusinessActivityDetailMapper.queryReportBusinessActivityDetailByReportId(reportResult.getId());
-        ExecutorService service = Executors.newFixedThreadPool(10);
+        if (reportQueryInfluxDBThreadNum == null) {
+            reportQueryInfluxDBThreadNum = 10;
+        }
+        ExecutorService service = Executors.newFixedThreadPool(reportQueryInfluxDBThreadNum);
         List<Future<StatReportDTO>> futures = new ArrayList<>();
         List<StatReportDTO> statReportDTOList = new ArrayList<>();
         for (ReportBusinessActivityDetail businessActivityDetail : reportBusinessActivityDetails) {
