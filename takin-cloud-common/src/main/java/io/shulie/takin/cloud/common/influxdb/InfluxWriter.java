@@ -56,6 +56,45 @@ public class InfluxWriter {
      */
     @Value("${spring.influxdb.database:}")
     private String database;
+    /**
+     * 最大并发请求
+     */
+    @Value("${okhttp.client.max.request}")
+    private Integer okhttpClientMaxRequest;
+    /**
+     * 同一个域名最大连接数
+     */
+    @Value("${okhttp.client.max.pre.host}")
+    private Integer okhttpClientMaxPreHost;
+    /**
+     * 最大空闲连接
+     */
+    @Value("${okhttp.client.max.idle:20}")
+    private Integer okhttpClientMaxIdle;
+    /**
+     * 空闲连接超时时间
+     */
+    @Value("${okhttp.client.max.idle.timeout:5}")
+    private Integer okhttpClientMaxIdleTimeOut;
+    
+    @Value("${okhttp.client.connection.timeout:2000}")
+    private Integer okHttpClientConnectionTimeout;
+
+    @Value("${okhttp.client.read.timeout:2000}")
+    private Integer okhttpClientReadTimeOut;
+
+    @Value("${okhttp.client.call.timeout:2000}")
+    private Integer okHttpClientCallTimeOut;
+    /**
+     * influxdb最大允许批处理出量
+     */
+    @Value("${influx.max.batch:1000}")
+    private Integer influxMaxBatch;
+    /**
+     * influxdb最大推送时间
+     */
+    @Value("${influx.max.flush.duration:100}")
+    private Integer influxMaxFlushDuration;
 
     private InfluxDB influx;
 
@@ -70,15 +109,21 @@ public class InfluxWriter {
         }
         // 增加一些自定义的influxDB默认客户端okHttpClinet连接池设置
         Dispatcher dispatcher = new Dispatcher();
-        dispatcher.setMaxRequests(1000);
-        dispatcher.setMaxRequestsPerHost(1000);
+        if (null != okhttpClientMaxRequest) {
+            // 如果没有值使用默认值，默认值=64，配置的值需大于1，否则会报错
+            dispatcher.setMaxRequests(okhttpClientMaxRequest);
+        }
+        if (null != okhttpClientMaxPreHost) {
+            // 如果没有值使用默认值，默认值=5，配置的值需大于1，否则会报错
+            dispatcher.setMaxRequestsPerHost(okhttpClientMaxPreHost);
+        }
         OkHttpClient.Builder okHttpClient = new OkHttpClient.Builder();
-        okHttpClient.connectTimeout(5000, TimeUnit.MILLISECONDS);
-        okHttpClient.callTimeout(3000,TimeUnit.MILLISECONDS);
-        okHttpClient.readTimeout(3000,TimeUnit.MILLISECONDS);
-        okHttpClient.connectionPool(new ConnectionPool(1000,10,TimeUnit.MINUTES)).dispatcher(dispatcher);
+        okHttpClient.connectTimeout(okHttpClientConnectionTimeout, TimeUnit.MILLISECONDS);
+        okHttpClient.callTimeout(okHttpClientCallTimeOut, TimeUnit.MILLISECONDS);
+        okHttpClient.readTimeout(okhttpClientReadTimeOut, TimeUnit.MILLISECONDS);
+        okHttpClient.connectionPool(new ConnectionPool(okhttpClientMaxIdle, okhttpClientMaxIdleTimeOut, TimeUnit.MINUTES)).dispatcher(dispatcher);
         influx = InfluxDBFactory.connect(influxdbUrl, userName, password, okHttpClient);
-        influx.enableBatch(7500, 1000, TimeUnit.MILLISECONDS);
+        influx.enableBatch(influxMaxBatch, influxMaxFlushDuration, TimeUnit.MILLISECONDS);
     }
 
     /**
