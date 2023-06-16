@@ -2,12 +2,14 @@ package io.shulie.takin.cloud.data.dao.scene.manage;
 
 import java.util.List;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageRunningRequest;
 
 /**
  * @author 无涯
@@ -97,4 +99,12 @@ public interface SceneManageDAO extends IService<SceneManageEntity> {
      * @return 操作影响行数
      */
     int updateStatus(Long sceneId, Integer status, Integer compareStatus);
+
+    /**
+     * 查询正在压测的场景列表
+     * @param page 页码
+     * @param pageSize 页码大小
+     * @return Page<SceneManageEntity>
+     */
+    Page<SceneManageEntity> getSceneRunningList(Integer page,Integer pageSize);
 }

@@ -9,8 +9,12 @@ import java.util.stream.Collectors;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
+import io.shulie.takin.cloud.common.enums.scenemanage.SceneManageStatusEnum;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean;
 import io.shulie.takin.cloud.common.utils.CloudPluginUtils;
@@ -21,6 +25,7 @@ import io.shulie.takin.cloud.data.model.mysql.SceneManageEntity;
 import io.shulie.takin.cloud.data.param.scenemanage.SceneManageCreateOrUpdateParam;
 import io.shulie.takin.cloud.data.result.scenemanage.SceneManageListResult;
 import io.shulie.takin.cloud.data.util.MPUtil;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageRunningRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -156,5 +161,18 @@ public class SceneManageDAOImpl
             .eq(!Objects.isNull(sceneId), SceneManageEntity::getId, sceneId)
             .eq(!Objects.isNull(compareStatus), SceneManageEntity::getStatus, compareStatus);
         return this.baseMapper.update(new SceneManageEntity() {{setStatus(status);}}, wrapper);
+    }
+
+    @Override
+    public Page<SceneManageEntity> getSceneRunningList(Integer page ,Integer pageSize) {
+        LambdaQueryWrapper<SceneManageEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(SceneManageEntity::getId);
+        queryWrapper.select(SceneManageEntity::getStatus);
+        queryWrapper.select(SceneManageEntity::getPtConfig);
+        List<Integer> sceneManageStatusEnums = Arrays.asList(SceneManageStatusEnum.WAIT.getValue(),
+                SceneManageStatusEnum.FORCE_STOP.getValue());
+        queryWrapper.notIn(SceneManageEntity::getStatus, sceneManageStatusEnums);
+        queryWrapper.orderByDesc(SceneManageEntity::getId);
+        return baseMapper.selectPage(new Page<>(page,pageSize), queryWrapper);
     }
 }

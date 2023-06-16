@@ -15,6 +15,8 @@ import io.shulie.takin.cloud.common.bean.scenemanage.UpdateStatusBean;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.CloudUpdateSceneFileRequest;
 import io.shulie.takin.cloud.ext.content.asset.AssetBillExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageRunningRequest;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageRunningResp;
 
 /**
  * @author qianshui
@@ -148,4 +150,12 @@ public interface SceneManageService {
      * @return 操作结果
      */
     ScriptVerityRespExt checkAndUpdate(List<String> request, String uploadPath, boolean isAbsolutePath, boolean update, Integer version);
+
+    /**
+     * 查询正常压测的压测场景列表
+     * @param page 页码
+     * @param pageSize 页码大小
+     * @return List<SceneManageRunningResp>
+     */
+    List<SceneManageRunningResp> getSceneRunningList(Integer page, Integer pageSize);
 }

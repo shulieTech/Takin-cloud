@@ -94,6 +94,8 @@ import io.shulie.takin.cloud.sdk.model.common.RuleBean;
 import io.shulie.takin.cloud.sdk.model.common.TimeBean;
 import io.shulie.takin.cloud.ext.content.enginecall.PtConfigExt;
 import io.shulie.takin.cloud.ext.content.enginecall.ThreadGroupConfigExt;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageRunningRequest;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageRunningResp;
 import io.shulie.takin.plugin.framework.core.PluginManager;
 import io.shulie.takin.utils.file.FileManagerHelper;
 import io.shulie.takin.utils.json.JsonHelper;
@@ -984,6 +986,29 @@ public class SceneManageServiceImpl implements SceneManageService {
         }
         return null;
 
+    }
+
+    @Override
+    public List<SceneManageRunningResp> getSceneRunningList(Integer page,Integer pageSize) {
+        com.baomidou.mybatisplus.extension.plugins.pagination.Page<SceneManageEntity> sceneRunningList = sceneManageDAO.getSceneRunningList(page,pageSize);
+        List<SceneManageEntity> records = sceneRunningList.getRecords();
+        List<SceneManageRunningResp> list = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(records)){
+            records.forEach(c->{
+                SceneManageRunningResp runningResp = new SceneManageRunningResp();
+                runningResp.setId(c.getId());
+                String ptConfig = c.getPtConfig();
+                try {
+                    Object o = JSON.parseObject(ptConfig).get("duration");
+                    runningResp.setDuration(Integer.parseInt(o.toString()));
+                }catch (Exception e){
+                    log.error("解析压测场景ptConfig异常,场景id={}",c.getId(),e);
+                    // 异常直接赋值0，在获取的时候需要判断是不是为-1，如果为-1则代表没有正确解析到，再具体排查
+                    runningResp.setDuration(-1);
+                }
+            });
+        }
+        return list;
     }
 
     private SceneManageEntity getSceneManage(Long id) {

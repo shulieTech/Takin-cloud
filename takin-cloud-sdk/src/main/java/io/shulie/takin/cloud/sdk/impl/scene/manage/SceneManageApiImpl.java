@@ -7,6 +7,8 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.TypeReference;
 
+import io.shulie.takin.cloud.ext.content.trace.PagingContextExt;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.*;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
@@ -15,17 +17,9 @@ import io.shulie.takin.common.beans.response.ResponseResult;
 import io.shulie.takin.cloud.sdk.service.CloudApiSenderService;
 import io.shulie.takin.cloud.entrypoint.scene.manage.SceneManageApi;
 import io.shulie.takin.cloud.sdk.model.response.strategy.StrategyResp;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneIpNumReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageIdReq;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.ScriptCheckResp;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageQueryReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageDeleteReq;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageListResp;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageWrapperReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.ScriptCheckAndUpdateReq;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageWrapperResp;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageQueryByIdsReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.CloudUpdateSceneFileRequest;
 
 /**
  * @author 何仲奇
@@ -113,4 +107,13 @@ public class SceneManageApiImpl implements SceneManageApi {
             req, new TypeReference<ResponseResult<List<SceneManageWrapperResp>>>() {}).getData();
     }
 
+    /**
+     * 获取压测中的压测场景列表
+     * @param queryReq 请求对象
+     * @return
+     */
+    public List<SceneManageRunningResp> getSceneManageRunningList(SceneManageQueryReq queryReq){
+        return cloudApiSenderService.get(EntrypointUrl.join(EntrypointUrl.MODULE_SCENE_MANAGE, EntrypointUrl.METHOD_SCENE_MANAGE_QUERY_RUNNING_PAGE_LIST),
+                queryReq, new TypeReference<ResponseResult<List<SceneManageRunningResp>>>() {}).getData();
+    }
 }

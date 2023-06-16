@@ -17,7 +17,7 @@ import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageListOutput;
 import io.shulie.takin.cloud.biz.output.scene.manage.SceneManageWrapperOutput;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.service.strategy.StrategyConfigService;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.CloudUpdateSceneFileRequest;
+import io.shulie.takin.cloud.sdk.model.request.scenemanage.*;
 import io.shulie.takin.cloud.entrypoint.convert.SceneBusinessActivityRefInputConvert;
 import io.shulie.takin.cloud.entrypoint.convert.SceneScriptRefInputConvert;
 import io.shulie.takin.cloud.entrypoint.convert.SceneSlaRefInputConverter;
@@ -28,9 +28,6 @@ import io.shulie.takin.cloud.ext.content.enginecall.StrategyOutputExt;
 import io.shulie.takin.cloud.ext.content.response.Response;
 import io.shulie.takin.cloud.ext.content.script.ScriptVerityRespExt;
 import io.shulie.takin.cloud.sdk.constant.EntrypointUrl;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageDeleteReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageWrapperReq;
-import io.shulie.takin.cloud.sdk.model.request.scenemanage.ScriptCheckAndUpdateReq;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.SceneManageListResp;
 import io.shulie.takin.cloud.sdk.model.response.scenemanage.ScriptCheckResp;
 import io.shulie.takin.cloud.sdk.model.response.strategy.StrategyResp;
@@ -207,4 +204,9 @@ public class SceneManageController {
         return ResponseResult.success(SceneTaskOpenConverter.INSTANCE.ofScriptVerityRespExt(scriptVerityRespExt));
     }
 
+    @GetMapping(EntrypointUrl.METHOD_SCENE_MANAGE_QUERY_RUNNING_PAGE_LIST)
+    @ApiOperation(value = "获取压测中的场景列表")
+    public ResponseResult<List<SceneManageRunningResp>> getSceneRunningList(@RequestParam Integer pageNumber,@RequestParam Integer pageSize){
+        return ResponseResult.success( sceneManageService.getSceneRunningList(pageNumber,pageSize));
+    }
 }
