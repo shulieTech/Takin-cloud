@@ -93,7 +93,7 @@ public class UnCompleteJobScanClearTask  extends AbstractIndicators {
     
     public void stop(List<SceneManageRunningResp> list){
         for (SceneManageRunningResp runningResp : list) {
-            if (runningResp.getDuration() > 0 || runningResp.getLastPtTime() == null) {
+            if (runningResp.getDuration() < 1 || runningResp.getLastPtTime() == null) {
                 continue;
             }
             // 压测开始时间

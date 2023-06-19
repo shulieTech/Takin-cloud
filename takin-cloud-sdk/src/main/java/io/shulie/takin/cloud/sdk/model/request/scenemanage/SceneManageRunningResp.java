@@ -17,7 +17,7 @@ public class SceneManageRunningResp implements Serializable {
      */
     private Long id;
     /**
-     * 压测时间
+     * 压测时长
      */
     private Integer duration;
     /**
