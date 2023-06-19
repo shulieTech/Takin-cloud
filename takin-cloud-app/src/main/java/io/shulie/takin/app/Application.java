@@ -25,7 +25,8 @@ import org.springframework.web.client.RestTemplate;
 @EnableScheduling
 @SpringBootApplication
 @EnableTransactionManagement
-@ComponentScan(basePackages = {"com.pamirs.takin", "io.shulie.takin"})
+@ComponentScan(basePackages = {"com.pamirs.takin", "io.shulie.takin"}
+,basePackageClasses = {io.shulie.takin.cloud.biz.task.UnCompleteJobScanClearTask.class})
 @MapperScan({"com.pamirs.takin.*.dao", "io.shulie.takin.cloud.data.mapper.mysql", "io.shulie.takin.cloud.data.dao.statistics"})
 public class Application {
 

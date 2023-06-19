@@ -1,5 +1,6 @@
 package io.shulie.takin.cloud.biz.task;
 
+import io.shulie.takin.cloud.biz.collector.collector.AbstractIndicators;
 import io.shulie.takin.cloud.biz.service.RedissonDistributedLock;
 import io.shulie.takin.cloud.biz.service.scene.SceneManageService;
 import io.shulie.takin.cloud.biz.service.scene.SceneTaskService;
@@ -11,14 +12,13 @@ import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.sdk.model.request.scenemanage.SceneManageRunningResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.redisson.Redisson;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
-public class UnCompleteJobScanClearTask  {
+public class UnCompleteJobScanClearTask  extends AbstractIndicators {
     
     @Resource
     private SceneManageDAO sceneManageDAO;
@@ -49,19 +49,24 @@ public class UnCompleteJobScanClearTask  {
     @Value("${uncompleted.need.report:false}")
     private Boolean needReport;
     
+    @Resource
+    private RedissonDistributedLock redissonDistributedLock;
+    
     @Scheduled(fixedDelay = 5,timeUnit = TimeUnit.MINUTES)
-    public void test() {
-        RedissonDistributedLock distributedLock = new RedissonDistributedLock();
+    public void scanSceneManages() {
+      
         String key = "un:complete:job:scan:clear:task";
+        
         try {
-            if(!distributedLock.tryLock(key,1L,5L,TimeUnit.MINUTES)){
+            if(!redissonDistributedLock.tryLock(key,1L,60L,TimeUnit.SECONDS)){
                 return;
             }
+            log.info("扫描超时未完压测场景任务执行中...");
             scanUnCompletedSceneForceStop();
         }catch (Exception e){
             log.error("获取redission分布式锁异常",e);
         }finally {
-            distributedLock.unLock(key);
+            redissonDistributedLock.unLock(key);
         }
     }
     
