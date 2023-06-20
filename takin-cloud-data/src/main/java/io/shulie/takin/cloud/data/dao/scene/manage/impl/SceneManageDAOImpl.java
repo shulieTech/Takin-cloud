@@ -166,9 +166,8 @@ public class SceneManageDAOImpl
     @Override
     public List<SceneManageEntity> getSceneRunningList(Integer pageSize) {
         LambdaQueryWrapper<SceneManageEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(SceneManageEntity::getId);
-        queryWrapper.select(SceneManageEntity::getLastPtTime);
-        queryWrapper.select(SceneManageEntity::getPtConfig);
+        queryWrapper.select(SceneManageEntity::getId, SceneManageEntity::getLastPtTime,
+                SceneManageEntity::getPtConfig);
         List<Integer> sceneManageStatusEnums = Arrays.asList(SceneManageStatusEnum.WAIT.getValue(),
                 SceneManageStatusEnum.FORCE_STOP.getValue());
         queryWrapper.notIn(SceneManageEntity::getStatus, sceneManageStatusEnums);
