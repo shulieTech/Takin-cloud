@@ -990,11 +990,10 @@ public class SceneManageServiceImpl implements SceneManageService {
 
     @Override
     public List<SceneManageRunningResp> getSceneManageRunningList(Integer page,Integer pageSize) {
-        com.baomidou.mybatisplus.extension.plugins.pagination.Page<SceneManageEntity> sceneRunningList = sceneManageDAO.getSceneRunningList(page,pageSize);
-        List<SceneManageEntity> records = sceneRunningList.getRecords();
+        List<SceneManageEntity> sceneRunningList = sceneManageDAO.getSceneRunningList(pageSize);
         List<SceneManageRunningResp> list = new ArrayList<>();
-        if(CollectionUtils.isNotEmpty(records)){
-            records.forEach(c->{
+        if(CollectionUtils.isNotEmpty(sceneRunningList)){
+            sceneRunningList.forEach(c->{
                 SceneManageRunningResp runningResp = new SceneManageRunningResp();
                 runningResp.setId(c.getId());
                 runningResp.setLastPtTime(c.getLastPtTime());

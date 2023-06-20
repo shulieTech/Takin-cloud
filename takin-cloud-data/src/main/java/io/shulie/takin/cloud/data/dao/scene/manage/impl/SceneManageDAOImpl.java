@@ -164,7 +164,7 @@ public class SceneManageDAOImpl
     }
 
     @Override
-    public Page<SceneManageEntity> getSceneRunningList(Integer page ,Integer pageSize) {
+    public List<SceneManageEntity> getSceneRunningList(Integer pageSize) {
         LambdaQueryWrapper<SceneManageEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.select(SceneManageEntity::getId);
         queryWrapper.select(SceneManageEntity::getLastPtTime);
@@ -173,6 +173,7 @@ public class SceneManageDAOImpl
                 SceneManageStatusEnum.FORCE_STOP.getValue());
         queryWrapper.notIn(SceneManageEntity::getStatus, sceneManageStatusEnums);
         queryWrapper.orderByDesc(SceneManageEntity::getId);
-        return baseMapper.selectPage(new Page<>(page,pageSize), queryWrapper);
+        queryWrapper.last( "limit "+pageSize);
+        return baseMapper.selectList(queryWrapper);
     }
 }
