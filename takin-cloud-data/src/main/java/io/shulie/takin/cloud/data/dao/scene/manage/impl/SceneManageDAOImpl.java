@@ -169,7 +169,9 @@ public class SceneManageDAOImpl
         queryWrapper.select(SceneManageEntity::getId, SceneManageEntity::getLastPtTime,
                 SceneManageEntity::getPtConfig);
         List<Integer> sceneManageStatusEnums = Arrays.asList(SceneManageStatusEnum.WAIT.getValue(),
-                SceneManageStatusEnum.FORCE_STOP.getValue());
+                SceneManageStatusEnum.FORCE_STOP.getValue(),
+                SceneManageStatusEnum.FAILED.getValue());
+        queryWrapper.eq(SceneManageEntity::getType, 0);
         queryWrapper.notIn(SceneManageEntity::getStatus, sceneManageStatusEnums);
         queryWrapper.orderByDesc(SceneManageEntity::getId);
         queryWrapper.last( "limit "+pageSize);

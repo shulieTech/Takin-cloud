@@ -91,40 +91,53 @@ public class UnCompleteJobScanClearTask  extends AbstractIndicators {
        
     }
     
-    public void stop(List<SceneManageRunningResp> list){
+    private void stop(List<SceneManageRunningResp> list){
         for (SceneManageRunningResp runningResp : list) {
             if (runningResp.getDuration() < 1 || runningResp.getLastPtTime() == null) {
                 continue;
             }
+            ReportResult reportBySceneId = reportDao.getRecentlyReport(runningResp.getId());
+            if (reportBySceneId == null){
+                forceStopSceneManage(runningResp.getId());
+                log.info("停止压测场景id={}成功,未查询到报告直接结束", runningResp.getId());
+                continue;
+            }
             // 压测开始时间
-            long startTime = runningResp.getLastPtTime().getTime();
+            long startTime = reportBySceneId.getStartTime().getTime();
             // 施压时间
             long pressureTime = runningResp.getDuration() * 60*1000;
             // 延迟计算时间
             long delay = delayTime * 60 * 1000;
             // 强制结束时间
             long endTime =  startTime + pressureTime + delay;
+            long now = System.currentTimeMillis();
+            log.info("压测应结束时间:{},当前时间:{}",endTime,now);
             // 当前时间大于就直接强制结束
-            if(System.currentTimeMillis() > endTime){
+            if(now > endTime){
                 // 直接结束场景
+                log.info("正在停止id={}的压测场景",runningResp.getId());
                 try {
-                    SceneManageCreateOrUpdateParam updateParam = new SceneManageCreateOrUpdateParam();
-                    updateParam.setLastPtTime(new Date());
-                    updateParam.setId(runningResp.getId());
-                    updateParam.setUpdateTime(new Date());
-                    updateParam.setStatus(SceneManageStatusEnum.WAIT.getValue());
-                    sceneManageDAO.update(updateParam);
-                    // 直接结束报告
-                    ReportResult reportBySceneId = reportDao.getRecentlyReport(runningResp.getId());
-                    if (reportBySceneId != null && reportBySceneId.getStatus() != 2) {
-                        sceneTaskService.forceStopTask(reportBySceneId.getId(), needReport);
-                    }
+                    forceStopSceneManage(runningResp.getId());
+                    // 强制结束
+                    sceneTaskService.forceStopTask(reportBySceneId.getId(), needReport);
                 }catch (Exception e){
-                    log.error("通知压测场景id={},异常",runningResp.getId(),e);
+                    log.error("停止压测场景id={},异常",runningResp.getId(),e);
                 }
             }
         }
-       
+    }
+
+    /**
+     * 更改压测场景
+     * @param id 场景id
+     */
+    private void forceStopSceneManage(Long id){
+        SceneManageCreateOrUpdateParam updateParam = new SceneManageCreateOrUpdateParam();
+        updateParam.setLastPtTime(new Date());
+        updateParam.setId(id);
+        updateParam.setUpdateTime(new Date());
+        updateParam.setStatus(SceneManageStatusEnum.WAIT.getValue());
+        sceneManageDAO.update(updateParam);
     }
    
 }

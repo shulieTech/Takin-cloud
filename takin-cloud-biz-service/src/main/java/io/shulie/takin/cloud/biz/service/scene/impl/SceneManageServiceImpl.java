@@ -998,14 +998,22 @@ public class SceneManageServiceImpl implements SceneManageService {
                 runningResp.setId(c.getId());
                 runningResp.setLastPtTime(c.getLastPtTime());
                 String ptConfig = c.getPtConfig();
+                if(StringUtils.isBlank(ptConfig)){
+                    return;
+                }
                 try {
-                    Object o = JSON.parseObject(ptConfig).get("duration");
+                    JSONObject jsonObject = JSON.parseObject(ptConfig);
+                    
+                    Object o = jsonObject.get("duration");
+                    o = o != null ? o: jsonObject.get("ptDuration");
                     runningResp.setDuration(Integer.parseInt(o.toString()));
                 }catch (Exception e){
                     log.error("解析压测场景ptConfig异常,场景id={}",c.getId(),e);
                     // 异常直接赋值0，在获取的时候需要判断是不是为-1，如果为-1则代表没有正确解析到，再具体排查
                     runningResp.setDuration(-1);
                 }
+                log.info("获取到未停止压测场景数据：{}", runningResp);
+                list.add(runningResp);
             });
         }
         return list;
