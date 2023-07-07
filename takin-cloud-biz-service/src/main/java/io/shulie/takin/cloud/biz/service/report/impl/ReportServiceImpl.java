@@ -1115,6 +1115,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
+     *
      * 通过场景iD和报告ID。获取压测中jmeter上报的数据
      *
      * @return -
@@ -1127,6 +1128,7 @@ public class ReportServiceImpl implements ReportService {
         }
         try {
             String measurement = InfluxUtil.getMeasurement(sceneId, reportId, CloudPluginUtils.getContext().getTenantId());
+            // 由于transaction本身已经是tag字段了，看业务是需要获取全量数据，因此加上时间字段也没什么意义
             metricList = influxWriter.query(
                     "select time,avg_tps as avgTps from " + measurement + " where transaction='all'", Metrices.class);
         } catch (Throwable e) {
@@ -1270,6 +1272,7 @@ public class ReportServiceImpl implements ReportService {
                 : testPlanXpathMd5;
         //汇总所有业务活动数据
         StatReportDTO statReport = statReport(taskResult.getSceneId(), reportId, taskResult.getTenantId(), transaction);
+        log.info("获取报告汇总数据，报告id:{},汇总数据为:{}",reportId, statReport);
         if (statReport == null) {
             log.warn("没有找到报表数据，报表生成失败。报告ID：{}", reportId);
         }
@@ -1381,6 +1384,8 @@ public class ReportServiceImpl implements ReportService {
             //统计某个业务活动的数据
             StatReportDTO data = statReport(sceneId, reportId, tenantId,
                     reportBusinessActivityDetail.getBindRef());
+            log.info("获取报告业务活动数据，报告id:{},业务活动md5:{},业务活动数据:{}",reportId, 
+                    reportBusinessActivityDetail.getBindRef(), data);
             if (data == null) {
                 //如果有一个业务活动没有找到对应的数据，则认为压测不通过
                 totalPassFlag = false;
