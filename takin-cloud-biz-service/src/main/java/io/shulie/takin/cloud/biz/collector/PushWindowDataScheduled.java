@@ -157,27 +157,13 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             redisTemplate.delete(String.format(CollectorConstants.REDIS_PRESSURE_TASK_KEY, taskKey));
         }
     }
-    
-    private Long getMetricsMinTimeWindow(Long sceneId, Long reportId, Long customerId,Long pressureStartTime) {
+
+    private Long getMetricsMinTimeWindow(Long sceneId, Long reportId, Long customerId) {
         Long timeWindow = null;
         try {
             String measurement = InfluxUtil.getMetricsMeasurement(sceneId, reportId, customerId);
-            ResponseMetrics metrics;
-            if(pressureStartTime != null){
-                // 可以直接用压测时间,往后推N分钟这个区间来缩小范围 以避免直接全量查询
-                long startTime = TimeUnit.NANOSECONDS.convert(pressureStartTime, TimeUnit.MILLISECONDS);
-                // 查询压测开始时间+1分钟后的数据区间的数据
-                long delayTime = startTime + 60000;
-                long endTime =  TimeUnit.NANOSECONDS.convert(delayTime, TimeUnit.MILLISECONDS);
-                metrics =  influxWriter.querySingle(new SQL().SELECT("*")
-                        .FROM(measurement)
-                        .WHERE("time >= " + startTime)
-                        .WHERE("time <= " + endTime)
-                        .ORDER_BY("time asc").LIMIT(1).toString(), ResponseMetrics.class);
-            }else {
-                metrics = influxWriter.querySingle(new SQL().SELECT("*").FROM(measurement).WHERE("time > 0")
-                        .ORDER_BY("time asc").LIMIT(1).toString(), ResponseMetrics.class);
-            }
+            ResponseMetrics metrics = influxWriter.querySingle(new SQL().SELECT("*").FROM(measurement).WHERE("time > 0")
+                .ORDER_BY("time asc").LIMIT(1).toString(), ResponseMetrics.class);
             if (null != metrics) {
                 timeWindow = CollectorUtil.getTimeWindowTime(metrics.getTime());
             }
@@ -187,7 +173,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
         return timeWindow;
     }
 
-    private List<ResponseMetrics> queryMetrics(Long sceneId, Long reportId, Long customerId, Long timeWindow,Long pressureStartTime) {
+    private List<ResponseMetrics> queryMetrics(Long sceneId, Long reportId, Long customerId, Long timeWindow) {
         try {
             //查询引擎上报数据时，通过时间窗向前5s来查询，(0,5]
             String measurement = InfluxUtil.getMetricsMeasurement(sceneId, reportId, customerId);
@@ -200,9 +186,9 @@ public class PushWindowDataScheduled extends AbstractIndicators {
                 log.info("汇总查询日志：sceneId:{},sql:{},查询结果数量:{}", sceneId, sql, query == null ? "null" : query.size());
                 return query;
             } else {
-                timeWindow = getMetricsMinTimeWindow(sceneId, reportId, customerId, pressureStartTime);
+                timeWindow = getMetricsMinTimeWindow(sceneId, reportId, customerId);
                 if (null != timeWindow) {
-                    return queryMetrics(sceneId, reportId, customerId, timeWindow, pressureStartTime);
+                    return queryMetrics(sceneId, reportId, customerId, timeWindow);
                 }
             }
         } catch (Throwable e) {
@@ -212,32 +198,15 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     }
 
     /**
-     *  
      * 获取当前未完成统计的最小时间窗口
      */
     private Long getWorkingPressureMinTimeWindow(Long sceneId, Long reportId, Long customerId) {
         Long timeWindow = null;
         try {
-            PressureOutput pressure;
-            // 按当前时间往前推一分钟进行查询
-            // 需要知道没有完成的一条，先用范围查找，找一遍，如果找不到，再走原来逻辑
-            long l = System.currentTimeMillis();
-            long before = l - (1000*60*5);
-            long endTime = TimeUnit.NANOSECONDS.convert(l, TimeUnit.MILLISECONDS);
-            long startTime = TimeUnit.NANOSECONDS.convert(before, TimeUnit.MILLISECONDS);
             String measurement = InfluxUtil.getMeasurement(sceneId, reportId, customerId);
             SQL sql = new SQL().SELECT("*").FROM(measurement).WHERE("status = 0")
-                    .WHERE("time >= " + startTime)
-                    .WHERE("time <=" + endTime)
-                    .ORDER_BY("time asc").LIMIT(1);
-            pressure = influxWriter.querySingle(sql.toString(), PressureOutput.class);
-            if (pressure == null) {
-                SQL sql2 = new SQL().SELECT("*").FROM(measurement).WHERE("status = 0")
-                        .WHERE("time >= " + startTime)
-                        .WHERE("time <=" + endTime)
-                        .ORDER_BY("time asc").LIMIT(1);
-                pressure = influxWriter.querySingle(sql2.toString(), PressureOutput.class);
-            }
+                .ORDER_BY("time asc").LIMIT(1);
+            PressureOutput pressure = influxWriter.querySingle(sql.toString(), PressureOutput.class);
             if (null != pressure) {
                 timeWindow = pressure.getTime();
             }
@@ -248,26 +217,14 @@ public class PushWindowDataScheduled extends AbstractIndicators {
     }
 
     /**
-     * 
      * 获取当前统计的最大时间的下一个窗口窗口
      */
     private Long getPressureMaxTimeNextTimeWindow(Long sceneId, Long reportId, Long customerId) {
         Long timeWindow = null;
         try {
-            // 按当前时间往前推一分钟进行查询
-            // 需要知道完成的最新一条，先用范围查找，找一遍，如果找不到，再走原来逻辑
-            PressureOutput pressure;
-            long l = System.currentTimeMillis();
-            long before = l - (1000*60*5);
-            long endTime = TimeUnit.NANOSECONDS.convert(l, TimeUnit.MILLISECONDS);
-            long startTime = TimeUnit.NANOSECONDS.convert(before, TimeUnit.MILLISECONDS);
             String measurement = InfluxUtil.getMeasurement(sceneId, reportId, customerId);
-            pressure = influxWriter.querySingle(
-                    "select * from " + measurement + " where time >=" + startTime + " and time <= " + endTime + "status=1 order by time desc limit 1", PressureOutput.class);
-            if (pressure == null) {
-                pressure = influxWriter.querySingle(
-                        "select * from " + measurement + " where status=1 order by time desc limit 1", PressureOutput.class);
-            }
+            PressureOutput pressure = influxWriter.querySingle(
+                "select * from " + measurement + " where status=1 order by time desc limit 1", PressureOutput.class);
             if (null != pressure) {
                 timeWindow = CollectorUtil.getNextTimeWindow(pressure.getTime());
             }
@@ -312,7 +269,7 @@ public class PushWindowDataScheduled extends AbstractIndicators {
             return timeWindow;
         }
         //timeWindow如果为空，则获取全部metrics数据，如果不为空则获取该时间窗口的数据
-        List<ResponseMetrics> metricsList = queryMetrics(sceneId, reportId, customerId, timeWindow, report.getStartTime().getTime());
+        List<ResponseMetrics> metricsList = queryMetrics(sceneId, reportId, customerId, timeWindow);
         if (Objects.isNull(metricsList) || CollUtil.isEmpty(metricsList)) {
             log.info("{}, timeWindow={} ， metrics 是空集合!", logPre, showTime(timeWindow));
             return timeWindow;
