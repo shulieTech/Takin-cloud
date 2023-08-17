@@ -353,7 +353,10 @@ public class ReportServiceImpl implements ReportService {
             return;
         }
         for (ScriptNodeSummaryBean bean : reportNodeDetail) {
-            if (bean.getActivityId() > 0) {
+            if (Objects.isNull(bean)) {
+                continue;
+            }
+            if (Objects.nonNull(bean.getActivityId()) && bean.getActivityId() > 0) {
                 BusinessActivitySummaryBean summaryBean = new BusinessActivitySummaryBean();
                 summaryBean.setBusinessActivityId(bean.getActivityId());
                 summaryBean.setBusinessActivityName(bean.getTestName());
@@ -472,7 +475,7 @@ public class ReportServiceImpl implements ReportService {
         if (StringUtils.isNotBlank(nodeTree)) {
             ConcurrentHashMap<String, HashMap<String, Object>> resultMap = new ConcurrentHashMap<>(reportBusinessActivityDetails.size());
 
-            reportBusinessActivityDetails.parallelStream().filter(a->Objects.nonNull(a)||StringUtils.isNotBlank(a.getBindRef())).forEach(ref->{
+            reportBusinessActivityDetails.parallelStream().filter(a -> Objects.nonNull(a) || StringUtils.isNotBlank(a.getBindRef())).forEach(ref -> {
                 StatReportDTO statReportDTO = statReportDTOMap.get(ref.getBindRef());
                 HashMap<String, Object> objectMap = fillTempMap(statReportDTO, ref);
                 resultMap.put(ref.getBindRef(), objectMap);
@@ -1424,16 +1427,32 @@ public class ReportServiceImpl implements ReportService {
      * @return -
      */
     private boolean isPass(ReportBusinessActivityDetail detail) {
-        if (isTargetBiggerThanZero(detail.getTargetSuccessRate()) && detail.getTargetSuccessRate().compareTo(
-                detail.getSuccessRate()) > 0) {
+        //如果target的值都为null或者实际的值都为null，则认为通过
+        if (detail.getTargetTps() == null && detail.getTargetRt() == null
+                && detail.getTargetSa() == null && detail.getTargetSuccessRate() == null) {
+            return true;
+        }else if(detail.getTargetTps().compareTo(new BigDecimal(-1)) == 0
+                && detail.getTargetRt().compareTo(new BigDecimal(-1)) == 0
+                && detail.getTargetSa().compareTo(new BigDecimal(-1)) == 0
+                && detail.getTargetSuccessRate().compareTo(new BigDecimal(-1)) == 0){
+            //如果targetTps、targetRt、targetSa、targetSuccessRate是-1，直接返回true
+            return true;
+        }else if (detail.getTps() == null && detail.getRt() == null
+                && detail.getSa() == null && detail.getSuccessRate() == null) {
+            //如果以上条件都不满足，但是实际的值都为null，则认为不通过
+            return false;
+        }
+
+        if (isTargetBiggerThanZero(detail.getTargetSuccessRate()) && detail.getTargetSuccessRate().compareTo(detail.getSuccessRate()) > 0) {
             return false;
         } else if (isTargetBiggerThanZero(detail.getTargetSa()) && detail.getTargetSa().compareTo(detail.getSa()) > 0) {
             return false;
         } else if (isTargetBiggerThanZero(detail.getTargetRt()) && detail.getTargetRt().compareTo(detail.getRt()) < 0) {
             return false;
-        } else {
-            return !isTargetBiggerThanZero(detail.getTargetTps()) || detail.getTargetTps().compareTo(detail.getTps()) <= 0;
+        } else if (isTargetBiggerThanZero(detail.getTargetTps()) && detail.getTargetTps().compareTo(detail.getTps()) > 0) {
+            return false;
         }
+        return true;
     }
 
     private boolean isTargetBiggerThanZero(BigDecimal target) {
@@ -1596,7 +1615,7 @@ public class ReportServiceImpl implements ReportService {
                 && StringUtils.isNotEmpty(jsonObject.getString(ReportConstants.SLA_ERROR_MSG));
     }
 
-    private HashMap<String, Object> 
+    private HashMap<String, Object>
     fillReportMap(ReportBusinessActivityDetail detail) {
         if (Objects.nonNull(detail)) {
             HashMap<String, Object> resultMap = new HashMap<>(13);
