@@ -140,24 +140,29 @@ public class ReportController {
     public ResponseResult<ReportTrendResp> queryReportTrend(ReportTrendQueryReq reportTrendQuery) {
         try {
             String key = JSON.toJSONString(reportTrendQuery);
-            ReportTrendResp data;
-            if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
-                data = JSON.parseObject(stringRedisTemplate.opsForValue().get(key), ReportTrendResp.class);
-                if (Objects.isNull(data)
+            ReportTrendResp data = null;
+
+            // 尝试从缓存获取数据
+            if (stringRedisTemplate.hasKey(key)) {
+                String cachedData = stringRedisTemplate.opsForValue().get(key);
+                if (cachedData != null) {
+                    data = JSON.parseObject(cachedData, ReportTrendResp.class);
+                }
+            }
+            // 如果缓存中数据为空或缓存不存在，重新查询并存储到缓存
+            if (data == null
                     || CollectionUtils.isEmpty(data.getConcurrent())
                     || CollectionUtils.isEmpty(data.getSa())
                     || CollectionUtils.isEmpty(data.getRt())
                     || CollectionUtils.isEmpty(data.getTps())
                     || CollectionUtils.isEmpty(data.getSuccessRate())) {
-                    data = reportService.queryReportTrend(reportTrendQuery);
-                    stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(data));
-                }
-            } else {
                 data = reportService.queryReportTrend(reportTrendQuery);
                 stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(data));
             }
             return ResponseResult.success(data);
         } catch (Exception e) {
+            // 记录异常信息
+            log.error("Error while querying report trend.", e);
             return ResponseResult.success(new ReportTrendResp());
         }
     }
