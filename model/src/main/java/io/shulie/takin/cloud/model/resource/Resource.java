@@ -38,6 +38,9 @@ public class Resource {
      * nfs服务端文件夹
      */
     private String nfsDir;
+
+    private String ptlLogServer;
+
     /**
      * nfs已使用容量
      */

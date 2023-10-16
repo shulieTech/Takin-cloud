@@ -50,6 +50,9 @@ public class ResourceSource {
     @Schema(description = "nfs服务端文件夹")
     private String nfsDir;
 
+    @Schema(description = "ptlLog服务端地址")
+    private String ptlLogServer;
+
     /**
      * nfs已使用容量
      */
