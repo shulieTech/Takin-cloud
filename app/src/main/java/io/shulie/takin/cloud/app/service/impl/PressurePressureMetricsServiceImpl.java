@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit;
 
+import io.shulie.takin.cloud.app.util.RedisKeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.collection.CollUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -42,7 +44,8 @@ public class PressurePressureMetricsServiceImpl implements PressureMetricsServic
     PressureExampleService pressureExampleService;
     @javax.annotation.Resource
     RedisTemplate<String, Object> stringRedisTemplate;
-
+    @Value("${substring.ptl.result:false}")
+    private Boolean substringPtlResult;
     /**
      * {@inheritDoc}
      */
@@ -50,6 +53,12 @@ public class PressurePressureMetricsServiceImpl implements PressureMetricsServic
     public void upload(Long pressureId, Long pressureExampleId, List<MetricsInfo> metricsList, String ip) {
         long timestamp = metricsList.get(0).getTimestamp();
         log.debug("Metrics-Upload({}-{}):接受到的数据:{}", pressureId, pressureExampleId, metricsList);
+        //如果点击了压测停止或者主动停止，则丢弃后续的数据
+        if(Boolean.TRUE.equals(substringPtlResult)
+                && Boolean.TRUE.equals(stringRedisTemplate.hasKey(String.format(RedisKeyUtil.stopSceneKey, pressureId)))) {
+            log.warn("Metrics-Upload({}-{}): 接收到的数据:{}条,压测已停止，数据将会被丢弃......", pressureId, pressureExampleId, metricsList.size());
+            return;
+        }
         log.info("Metrics-Upload({}-{}): 接收到的数据:{}条,时间范围:{},延时:{}", pressureId, pressureExampleId,
             metricsList.size(), timestamp, (System.currentTimeMillis() - timestamp));
         try {

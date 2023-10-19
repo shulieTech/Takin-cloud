@@ -1,16 +1,19 @@
 package io.shulie.takin.cloud.app.service.impl;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 
+import io.shulie.takin.cloud.app.util.RedisKeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.page.PageMethod;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -68,6 +71,9 @@ public class CommandServiceImpl implements CommandService {
     JsonService jsonService;
     @javax.annotation.Resource
     WatchmanConfig watchmanConfig;
+
+    @javax.annotation.Resource
+    RedisTemplate<String, Object> stringRedisTemplate;
 
     @javax.annotation.Resource(name = "metricsMapperServiceImpl")
     MetricsMapperService metricsMapper;
@@ -186,6 +192,8 @@ public class CommandServiceImpl implements CommandService {
                 long commandId = create(t, CommandType.STOP_APPLICATION, request);
                 log.info("下发命令:停止任务:{},命令主键{}.", pressureId, commandId);
             });
+        //如果点击了压测停止或者主动停止，则丢弃后续的数据
+        stringRedisTemplate.opsForValue().set(String.format(RedisKeyUtil.stopSceneKey, pressureEntity.getId()), "1", 3L, TimeUnit.MINUTES);
     }
 
     /**
