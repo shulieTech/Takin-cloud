@@ -35,7 +35,6 @@ public class PressureController {
     @Operation(summary = "停止")
     @GetMapping("stop")
     public ApiResult<Object> stop(@Parameter(description = "任务主键") Long pressureId) {
-        pressureService.stop(pressureId);
-        return ApiResult.success();
+        return ApiResult.success(pressureService.stop(pressureId));
     }
 }

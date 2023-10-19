@@ -325,14 +325,14 @@ public class PressureServiceImpl implements PressureService {
      * {@inheritDoc}
      */
     @Override
-    public void stop(Long pressureId) {
+    public String stop(Long pressureId) {
         // 获取任务
         PressureEntity pressureEntity = pressureMapper.getById(pressureId);
         if (pressureEntity == null) {
             throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_PRESSURE, pressureId));
         }
         // 停止任务
-        commandService.stopApplication(pressureEntity.getId());
+        return commandService.stopApplication(pressureEntity.getId());
     }
 
     /**

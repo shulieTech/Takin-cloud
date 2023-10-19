@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -174,7 +175,7 @@ public class CommandServiceImpl implements CommandService {
      * {@inheritDoc}
      */
     @Override
-    public void stopApplication(long pressureId) {
+    public String stopApplication(long pressureId) {
         // 获取任务
         PressureEntity pressureEntity = pressureService.entity(pressureId);
         if (pressureEntity == null) {throw new IllegalArgumentException(CharSequenceUtil.format(Message.MISS_PRESSURE, pressureId));}
@@ -192,8 +193,9 @@ public class CommandServiceImpl implements CommandService {
                 long commandId = create(t, CommandType.STOP_APPLICATION, request);
                 log.info("下发命令:停止任务:{},命令主键{}.", pressureId, commandId);
             });
-        //如果点击了压测停止或者主动停止，则丢弃后续的数据
+        //如果点击了压测停止或者主动停止，则丢弃后续的数据,返回当前时间
         stringRedisTemplate.opsForValue().set(String.format(RedisKeyUtil.stopSceneKey, pressureEntity.getId()), "1", 3L, TimeUnit.MINUTES);
+        return DateUtil.formatDateTime(new Date());
     }
 
     /**

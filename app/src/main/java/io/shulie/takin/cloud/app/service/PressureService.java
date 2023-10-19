@@ -28,7 +28,7 @@ public interface PressureService {
      *
      * @param pressureId 施压任务主键
      */
-    void stop(Long pressureId);
+    String stop(Long pressureId);
 
     /**
      * 查看配置

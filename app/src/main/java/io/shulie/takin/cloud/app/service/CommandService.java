@@ -40,7 +40,7 @@ public interface CommandService {
      *
      * @param pressureId 施压任务主键
      */
-    void stopApplication(long pressureId);
+    String stopApplication(long pressureId);
 
     /**
      * 更新配置
