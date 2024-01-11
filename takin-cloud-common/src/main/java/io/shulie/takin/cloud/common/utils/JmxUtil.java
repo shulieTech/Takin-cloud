@@ -13,11 +13,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.net.MalformedURLException;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
@@ -43,6 +45,14 @@ public class JmxUtil {
      * 属性基本元素名称列表
      */
     private static final List<String> BASE_PROP_ELEMENTS = CollUtil.newArrayList("stringProp", "boolProp", "intProp", "doubleProp");
+    /**
+     * 统一处理，类型JMETER，能看到请求流量明细数据
+     */
+    public static final List<String> JMETER_SAMPLER_LIST = CollUtil.newArrayList(
+        "JavaSampler", "JSR223Sampler", "BeanShellSampler", "JDBCSampler"
+    );
+
+    public static final String JMETER_SAMPLER_ENTRANCE = "JMETER|%s";
 
     /**
      * 从jmx文件中提取结构树
@@ -74,28 +84,28 @@ public class JmxUtil {
                 return null;
             }
             List<Element> elements = elements(childContainer);
-            return buildNodeTree(elements);
+            return buildNodeTree(null, elements);
         } catch (DocumentException e) {
             log.error("buildNodeTree DocumentException, file=" + file.getAbsolutePath(), e);
         }
         return null;
     }
 
-    public static List<ScriptNode> buildNodeTree(List<Element> elements) {
+    public static List<ScriptNode> buildNodeTree(ScriptNode parentNodeTree, List<Element> elements) {
         if (CollUtil.isEmpty(elements)) {
             return null;
         }
         List<ScriptNode> nodes = CollUtil.newArrayList();
         for (int i = 0; i < elements.size(); i++) {
             Element e = elements.get(i);
-            ScriptNode node = buildNode(e);
+            ScriptNode node = buildNode(parentNodeTree, e);
             if (null == node) {
                 continue;
             }
             if (i < elements.size() - 1) {
                 Element nextElement = elements.get(i + 1);
                 if ("hashTree".equals(nextElement.getName())) {
-                    node.setChildren(buildNodeTree(elements(nextElement)));
+                    node.setChildren(buildNodeTree(node, elements(nextElement)));
                 }
             }
             nodes.add(node);
@@ -103,13 +113,20 @@ public class JmxUtil {
         return nodes;
     }
 
-    public static ScriptNode buildNode(Element element) {
+    public static ScriptNode buildNode(ScriptNode parentNodeTree, Element element) {
         if (isNotEnabled(element)) {
             return null;
         }
         String name = element.getName();
         NodeTypeEnum type = NodeTypeEnum.value(name);
         if (null == type) {
+            return null;
+        }
+        if(type == NodeTypeEnum.CSVDATASET && parentNodeTree != null) {
+            Map<String, String> propMap = buildProps(element, BASE_PROP_ELEMENTS);
+            if(propMap != null && StringUtils.isNotBlank(propMap.get("filename"))) {
+                parentNodeTree.getCsvSet().add(propMap.get("filename"));
+            }
             return null;
         }
         String testName = element.attributeValue("testname");
@@ -310,7 +327,10 @@ public class JmxUtil {
                     //protocol+#+path+method, 即第一个#号前是protocol，最后一个#之后是method，中间的#可能是path自带
                     node.setSamplerType(SamplerTypeEnum.HTTP);
                     setHttpIdentification(node);
-
+                } else if (JMETER_SAMPLER_LIST.contains(name)) {
+                    node.setProps(buildProps(element));
+                    node.setSamplerType(SamplerTypeEnum.JMETER);
+                    setJmeterIdentification(node);
                 } else if ("JavaSampler".equals(name)) {
                     Map<String, String> props = buildProps(element);
                     //找到java请求默认值
@@ -361,9 +381,6 @@ public class JmxUtil {
                             }
                         }
                     }
-                    //dbUrl
-                    setIdentification(node, "dbUrl");
-                    node.setSamplerType(SamplerTypeEnum.JDBC);
                 } else if ("SmtpSampler".equals(name)) {
                     node.setProps(buildProps(element));
                     //domain+#+port
@@ -486,7 +503,7 @@ public class JmxUtil {
         if ("com.gslab.pepper.sampler.PepperBoxKafkaSampler".equals(javaClass)) {
             return SamplerTypeEnum.KAFKA;
         }
-        return SamplerTypeEnum.UNKNOWN;
+        return SamplerTypeEnum.JMETER;
     }
 
     public static JSONObject buildJSON(Element element) {
@@ -764,8 +781,15 @@ public class JmxUtil {
             node.setRequestPath(topic);
             node.setIdentification(String.format("%s|%s", topic, SamplerTypeEnum.KAFKA.getRpcTypeEnum().getValue()));
         } else {
-            log.warn("没有成功解析脚本节点:{}", javaClass);
+            setJmeterIdentification(node);
         }
+    }
+
+    public static void setJmeterIdentification(ScriptNode node) {
+        String testName = StringUtils.replace(node.getTestName(), " ", "");
+        testName = StringUtils.replace(testName, "|", "");
+        node.setRequestPath(String.format(JMETER_SAMPLER_ENTRANCE, testName));
+        node.setIdentification(node.getRequestPath()+"|"+SamplerTypeEnum.JMETER.getRpcTypeEnum().getValue());
     }
 
     public static void setHttpIdentification(ScriptNode node) {
@@ -933,5 +957,9 @@ public class JmxUtil {
             }
         }
         return result;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(JSON.toJSONString(buildNodeTree("/Users/xiaoshu/Desktop/JavaRequest.jmx")));
     }
 }

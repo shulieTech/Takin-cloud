@@ -93,6 +93,7 @@ public class EntrypointUrl {
     public final static String METHOD_REPORT_ACTIVITY_SCENE_ID = "queryReportActivityBySceneId";
     public final static String METHOD_REPORT_WARN_ADD = "warn";
     public final static String METHOD_REPORT_WARN_LIST = "listWarn";
+    public final static String METHOD_REPORT_MOCK_LIST = "listMock";
     public final static String METHOD_REPORT_UPDATE_CONCLUSION = "updateReportConclusion";
     public final static String METHOD_REPORT_DETAIL = "getReportByReportId";
     public final static String METHOD_REPORT_STATUS_BY_ID = "getReportStatusById";

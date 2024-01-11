@@ -222,7 +222,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             asyncService.checkStartedTask(request.getRequest());
         } else {
             // 创建失败
-            log.info("场景{},任务{},顾客{}开始创建压测引擎Job，压测引擎job创建失败", sceneId, taskId, customerId);
+            log.info("场景{},任务{},顾客{}开始创建压测引擎Job，压测引擎job创建失败:{}", sceneId, taskId, customerId, msg);
             sceneManageService.reportRecord(SceneManageStartRecordVO.build(sceneId, taskId, customerId).success(false)
                 .errorMsg("压测引擎job创建失败，失败原因：" + msg).build());
         }

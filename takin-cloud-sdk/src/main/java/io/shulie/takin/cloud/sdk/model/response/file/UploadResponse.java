@@ -45,4 +45,10 @@ public class UploadResponse {
 
     @ApiModelProperty(value = "文件访问路径")
     private String downloadUrl;
+
+    @ApiModelProperty(value = "jmx校验结果")
+    private Boolean jmxCheckSuccess;
+
+    @ApiModelProperty(value = "jmx校验异常信息")
+    private String jmxCheckErrorMsg;
 }

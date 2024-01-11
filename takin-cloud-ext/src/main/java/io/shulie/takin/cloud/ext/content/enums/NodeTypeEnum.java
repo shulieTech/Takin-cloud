@@ -23,6 +23,8 @@ public enum NodeTypeEnum {
      * 逻辑控制器
      */
     CONTROLLER("Controller"),
+    CSVDATASET("CSVDataSet"),
+
     /**
      * 取样器
      */

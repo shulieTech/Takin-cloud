@@ -1,7 +1,9 @@
 package io.shulie.takin.cloud.ext.content.script;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.shulie.takin.cloud.ext.content.AbstractEntry;
 import io.shulie.takin.cloud.ext.content.enums.NodeTypeEnum;
@@ -62,4 +64,6 @@ public class ScriptNode extends AbstractEntry {
      * 子节点
      */
     private List<ScriptNode> children;
+
+    private Set<String> csvSet = new HashSet<>();
 }

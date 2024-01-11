@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--suppress ALL -->
+<mapper namespace="com.pamirs.takin.entity.dao.report.TReportMockMapper">
+    <resultMap id="BaseResultMap" type="com.pamirs.takin.entity.domain.entity.report.ReportMock">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="report_id" jdbcType="BIGINT" property="reportId"/>
+        <result column="start_time" jdbcType="TIMESTAMP" property="startTime"/>
+        <result column="end_time" jdbcType="TIMESTAMP" property="endTime"/>
+        <result column="app_name" jdbcType="VARCHAR" property="appName"/>
+        <result column="mock_name" jdbcType="VARCHAR" property="mockName"/>
+        <result column="mock_script" jdbcType="VARCHAR" property="mockScript"/>
+        <result column="mock_status" jdbcType="INTEGER" property="mockStatus"/>
+        <result column="mock_type" jdbcType="VARCHAR" property="mockType"/>
+        <result column="failure_count" jdbcType="INTEGER" property="failureCount"/>
+        <result column="success_count" jdbcType="INTEGER" property="successCount"/>
+        <result column="avg_rt" jdbcType="DECIMAL" property="avgRt"/>
+    </resultMap>
+
+    <select id="listReportMock" resultMap="BaseResultMap">
+        select *
+        from t_report_mock
+        where report_id = #{reportId}
+        order by app_name, mock_name
+    </select>
+</mapper>
