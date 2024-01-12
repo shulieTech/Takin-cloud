@@ -7,7 +7,6 @@ import com.github.pagehelper.PageInfo;
 import com.pamirs.takin.entity.domain.dto.report.BusinessActivityDTO;
 import com.pamirs.takin.entity.domain.dto.report.CloudReportDTO;
 import com.pamirs.takin.entity.domain.dto.report.Metrices;
-import com.pamirs.takin.entity.domain.dto.report.ReportMockDTO;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportConclusionInput;
 import io.shulie.takin.cloud.biz.input.report.UpdateReportSlaDataInput;
 import io.shulie.takin.cloud.biz.input.report.WarnCreateInput;
@@ -17,7 +16,6 @@ import io.shulie.takin.cloud.biz.output.scene.manage.WarnDetailOutput;
 import io.shulie.takin.cloud.data.result.report.ReportResult;
 import io.shulie.takin.cloud.ext.content.trace.ContextExt;
 import io.shulie.takin.cloud.sdk.model.request.WarnQueryParam;
-import io.shulie.takin.cloud.sdk.model.request.report.ReportMockQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ReportTrendQueryReq;
 import io.shulie.takin.cloud.sdk.model.request.report.ScriptNodeTreeQueryReq;
@@ -77,9 +75,6 @@ public interface ReportService {
      * @return -
      */
     PageInfo<WarnDetailOutput> listWarn(WarnQueryParam param);
-
-    PageInfo<ReportMockDTO> listReportMock(ReportMockQueryReq queryReq);
-
     /**
      * 查询报告中的业务活动
      *

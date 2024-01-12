@@ -22,12 +22,9 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.pamirs.takin.entity.dao.report.TReportMockMapper;
 import com.pamirs.takin.entity.domain.dto.report.*;
-import com.pamirs.takin.entity.domain.entity.report.ReportMock;
 import io.shulie.takin.cloud.biz.service.sla.SlaService;
 import io.shulie.takin.cloud.data.util.ReportScriptNodeLocalCache;
-import io.shulie.takin.cloud.sdk.model.request.report.ReportMockQueryReq;
 import lombok.extern.slf4j.Slf4j;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -147,8 +144,6 @@ public class ReportServiceImpl implements ReportService {
     SceneTaskService sceneTaskService;
     @Resource
     TWarnDetailMapper tWarnDetailMapper;
-    @Resource
-    TReportMockMapper tReportMockMapper;
     @Resource
     ReportEventService reportEventService;
     @Resource
@@ -615,20 +610,6 @@ public class ReportServiceImpl implements ReportService {
         PageInfo<WarnDetail> old = new PageInfo<>(warnDetailList);
         List<WarnDetailOutput> list = ReportConverter.INSTANCE.ofWarnDetail(warnDetailList);
         PageInfo<WarnDetailOutput> data = new PageInfo<>(list);
-        data.setTotal(old.getTotal());
-        return data;
-    }
-
-    @Override
-    public PageInfo<ReportMockDTO> listReportMock(ReportMockQueryReq queryReq) {
-        PageHelper.startPage(queryReq.getPageNumber(), queryReq.getPageSize());
-        List<ReportMock> dataList = tReportMockMapper.listReportMock(queryReq);
-        if (CollectionUtils.isEmpty(dataList)) {
-            return new PageInfo<>();
-        }
-        PageInfo<ReportMock> old = new PageInfo<>(dataList);
-        List<ReportMockDTO> list = ReportConverter.INSTANCE.ofReportMockList(dataList);
-        PageInfo<ReportMockDTO> data = new PageInfo<>(list);
         data.setTotal(old.getTotal());
         return data;
     }

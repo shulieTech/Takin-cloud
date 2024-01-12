@@ -2,8 +2,6 @@ package io.shulie.takin.cloud.biz.cloudserver;
 
 import java.util.List;
 
-import com.pamirs.takin.entity.domain.dto.report.ReportMockDTO;
-import com.pamirs.takin.entity.domain.entity.report.ReportMock;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -97,8 +95,6 @@ public interface ReportConverter {
      * @return -
      */
     List<WarnDetailOutput> ofWarnDetail(List<WarnDetail> warnDetail);
-    ReportMockDTO ofReportMock(ReportMock source);
-    List<ReportMockDTO> ofReportMockList(List<ReportMock> sourceList);
 
     /**
      * 转换{@link WarnBO} -> {@link WarnBean}
