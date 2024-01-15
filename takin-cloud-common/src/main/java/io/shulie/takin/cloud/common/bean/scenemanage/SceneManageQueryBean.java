@@ -22,6 +22,8 @@ public class SceneManageQueryBean extends ContextExt {
 
     private Integer status;
 
+    private List<Integer> statusList;
+
     /**
      * 压测场景类型：0普通场景，1流量调试
      */
@@ -35,4 +37,6 @@ public class SceneManageQueryBean extends ContextExt {
     private String lastPtStartTime;
 
     private String lastPtEndTime;
+
+    private List<Long> userIds;
 }

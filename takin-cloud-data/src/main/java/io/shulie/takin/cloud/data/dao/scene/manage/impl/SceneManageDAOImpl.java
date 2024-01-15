@@ -1,9 +1,6 @@
 package io.shulie.takin.cloud.data.dao.scene.manage.impl;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.bean.BeanUtil;
@@ -77,23 +74,16 @@ public class SceneManageDAOImpl
                 userIds = userIds.substring(1, userIds.length() - 1);
             }
         }
-        List<String> userIdList = Arrays.stream(userIds.split(","))
-            .filter(StrUtil::isNotBlank).collect(Collectors.toList());
-        // 组装查询条件
-        LambdaQueryWrapper<SceneManageEntity> wrapper = Wrappers.lambdaQuery(SceneManageEntity.class)
-            .eq(!Objects.isNull(queryBean.getSceneId()), SceneManageEntity::getId, queryBean.getSceneId())
-            .in(!CollectionUtils.isEmpty(queryBean.getSceneIds()), SceneManageEntity::getId, queryBean.getSceneIds())
-            .like(!StrUtil.isBlank(queryBean.getSceneName()), SceneManageEntity::getSceneName, queryBean.getSceneName())
-            .eq(!Objects.isNull(queryBean.getStatus()), SceneManageEntity::getStatus, queryBean.getStatus())
-            .eq(!Objects.isNull(queryBean.getType()), SceneManageEntity::getType, queryBean.getType())
-            .le(!Objects.isNull(queryBean.getLastPtEndTime()), SceneManageEntity::getLastPtTime, queryBean.getLastPtEndTime())
-            .ge(!Objects.isNull(queryBean.getLastPtStartTime()), SceneManageEntity::getLastPtTime, queryBean.getLastPtStartTime())
-            .eq(SceneManageEntity::getTenantId, CloudPluginUtils.getContext().getTenantId())
-            .eq(SceneManageEntity::getEnvCode, CloudPluginUtils.getContext().getEnvCode())
-            .in(userIdList.size() > 0, SceneManageEntity::getUserId, userIdList)
-            .orderByDesc(SceneManageEntity::getStatus)
-            .orderByDesc(SceneManageEntity::getUpdateTime);
-        return this.baseMapper.selectList(wrapper);
+        List<Long> userIdList = Arrays.stream(userIds.split(","))
+            .filter(StrUtil::isNotBlank).map(data -> Long.parseLong(data)).collect(Collectors.toList());
+        queryBean.setUserIds(userIdList);
+        queryBean.setTenantId(CloudPluginUtils.getContext().getTenantId());
+        queryBean.setEnvCode(CloudPluginUtils.getContext().getEnvCode());
+        //状态需要进行转换
+        if (queryBean.getStatus() != null) {
+            queryBean.setStatusList(SceneManageStatusEnum.parseStatus(queryBean.getStatus()));
+        }
+        return this.baseMapper.getPageList(queryBean);
     }
 
     @Override

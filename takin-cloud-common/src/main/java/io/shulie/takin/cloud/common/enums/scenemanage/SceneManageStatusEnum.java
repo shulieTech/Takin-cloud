@@ -1,6 +1,8 @@
 package io.shulie.takin.cloud.common.enums.scenemanage;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.Getter;
 import lombok.AllArgsConstructor;
@@ -138,5 +140,18 @@ public enum SceneManageStatusEnum {
     public static Boolean ifFree(Integer status) {
         SceneManageStatusEnum statusEnum = getSceneManageStatusEnum(status);
         return SceneManageStatusEnum.getFree().contains(statusEnum);
+    }
+
+    public static List<Integer> parseStatus(Integer status) {
+        SceneManageStatusEnum statusEnum = getSceneManageStatusEnum(status);
+        if (SceneManageStatusEnum.getFree().contains(statusEnum)) {
+           return SceneManageStatusEnum.getFree().stream().map(SceneManageStatusEnum::getValue).collect(Collectors.toList());
+        } else if (SceneManageStatusEnum.getStarting().contains(statusEnum)) {
+            return SceneManageStatusEnum.getStarting().stream().map(SceneManageStatusEnum::getValue).collect(Collectors.toList());
+        } else if (SceneManageStatusEnum.getWorking().contains(statusEnum)) {
+            return SceneManageStatusEnum.getWorking().stream().map(SceneManageStatusEnum::getValue).collect(Collectors.toList());
+
+        }
+        return new ArrayList<>();
     }
 }

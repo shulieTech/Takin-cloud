@@ -9,8 +9,12 @@ resource:
     host: 192.168.1.221
     port: 8086
 spring:
+  flyway:
+    enabled: false
   redis:
     database: 4
+  datasource:
+    url: jdbc:mysql://192.168.1.221:3306/trodb_cloud_sf?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowMultiQueries=true&serverTimezone=Asia/Shanghai
 
 # zk
 takin.pradar.zk.server: 192.168.1.178:2181
@@ -20,3 +24,10 @@ takin.pradar.zk.server: 192.168.1.178:2181
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+okhttp:
+  client:
+    max:
+      request: 10
+      pre:
+        host: 5

@@ -47,7 +47,7 @@ public class UploadResponse {
     private String downloadUrl;
 
     @ApiModelProperty(value = "jmx校验结果")
-    private Boolean jmxCheckSuccess;
+    private Boolean jmxCheckSuccess = true;
 
     @ApiModelProperty(value = "jmx校验异常信息")
     private String jmxCheckErrorMsg;

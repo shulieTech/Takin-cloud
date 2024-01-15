@@ -129,6 +129,13 @@ public class JmxUtil {
             }
             return null;
         }
+        if(type == NodeTypeEnum.DATASOURCE && parentNodeTree != null) {
+            Map<String, String> propMap = buildProps(element, BASE_PROP_ELEMENTS);
+            if(propMap != null && StringUtils.isNotBlank(propMap.get("driver"))) {
+                parentNodeTree.getDriverSet().add(propMap.get("driver"));
+            }
+            return null;
+        }
         String testName = element.attributeValue("testname");
         ScriptNode node = new ScriptNode();
         node.setName(name);

@@ -25,6 +25,8 @@ public enum NodeTypeEnum {
     CONTROLLER("Controller"),
     CSVDATASET("CSVDataSet"),
 
+    DATASOURCE("JDBCDataSource"),
+
     /**
      * 取样器
      */

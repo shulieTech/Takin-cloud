@@ -66,4 +66,6 @@ public class ScriptNode extends AbstractEntry {
     private List<ScriptNode> children;
 
     private Set<String> csvSet = new HashSet<>();
+
+    private Set<String> driverSet = new HashSet<>();
 }

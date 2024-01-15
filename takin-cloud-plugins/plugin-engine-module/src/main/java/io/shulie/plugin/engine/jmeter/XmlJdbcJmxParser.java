@@ -9,6 +9,7 @@ import java.util.Set;
 import io.shulie.plugin.engine.util.SaxUtil;
 import io.shulie.takin.cloud.ext.content.script.ScriptParseExt;
 import io.shulie.takin.cloud.ext.content.script.ScriptUrlExt;
+import io.shulie.takin.utils.string.StringUtil;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -52,7 +53,7 @@ public class XmlJdbcJmxParser extends JmxParser {
         Set<Element> cache, Iterator<Element> iterator) {
         Element subElement = iterator.next();
 
-        if (subElement.getName().equals(JAVA_SAMPLER)) {
+        if (StringUtil.equals(subElement.getName(), JAVA_SAMPLER)) {
 
             ScriptUrlExt scriptUrlExt = new ScriptUrlExt();
             Attribute attribute = subElement.attribute(JAVA_SAMPLER_ATTR_NAME);
@@ -80,8 +81,16 @@ public class XmlJdbcJmxParser extends JmxParser {
             Element headerPanelElement = SaxUtil.selectElementByEleNameAndAttr("HeaderManager", "testclass", "HeaderManager",
                 hashTreeElement.elements());
 
+            if(headerPanelElement == null) {
+                return;
+            }
+
             Element collectionPropElement = SaxUtil.selectElementByEleNameAndAttr("collectionProp", "name",
                 "HeaderManager.headers", headerPanelElement.elements());
+
+            if(collectionPropElement == null) {
+                return;
+            }
 
             List<Element> result = new ArrayList<>();
             SaxUtil.selectElement("stringProp", collectionPropElement.elements(), result);

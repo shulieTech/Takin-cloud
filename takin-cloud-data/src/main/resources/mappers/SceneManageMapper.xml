@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.shulie.takin.cloud.data.mapper.mysql.SceneManageMapper">
+    <resultMap id="BaseResultMap" type="io.shulie.takin.cloud.data.model.mysql.SceneManageEntity">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="scene_name" jdbcType="VARCHAR" property="sceneName"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="last_pt_time" jdbcType="TIMESTAMP" property="lastPtTime"/>
+        <result column="pt_config" jdbcType="VARCHAR" property="ptConfig"/>
+        <result column="script_type" jdbcType="INTEGER" property="scriptType"/>
+        <result column="features" jdbcType="VARCHAR" property="features"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, scene_name, status, type, last_pt_time, pt_config, script_type, `features`,
+        create_time, update_time
+    </sql>
+    <select id="getPageList" resultMap="BaseResultMap" resultType="io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean">
+        select <include refid="Base_Column_List"/>
+        from t_scene_manage
+        where is_deleted = 0
+        <if test="sceneId != null">
+            and scene_id = #{sceneId}
+        </if>
+        <if test="sceneIds != null and sceneIds.size() > 0">
+            and scene_id in
+            <foreach collection="sceneIds" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="sceneName != null and sceneName != ''">
+            and scene_name like concat('%s', #{sceneName}, '%')
+        </if>
+        <if test="statusList != null and statusList.size() > 0">
+            and status in
+            <foreach collection="statusList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="type != null">
+            and `type` = #{type}
+        </if>
+        <if test="lastPtStartTime != null and lastPtStartTime != ''">
+            and last_pt_time &gt;= #{lastPtStartTime}
+        </if>
+        <if test="lastPtEndTime != null and lastPtEndTime != ''">
+            and last_pt_time &lt;= #{lastPtEndTime}
+        </if>
+        <if test="tenantId != null">
+            and tenant_id = #{tenantId}
+        </if>
+        <if test="envCode != null">
+            and env_code = #{envCode}
+        </if>
+        <if test="userIds != null and userIds.size() > 0">
+            and user_id in
+            <foreach collection="userIds" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        order by case when status=0 then 0 when status=1 then 1 when status=2 then 2 when status=3 then 1 when status=4 then 1 when status=5 then 2 when status=6 then 2 when status=7 then 1 when status=8 then 1 when status=9 then 0 when status=10 then 0 else 0 end desc, update_time desc
+    </select>
+</mapper>
