@@ -1160,7 +1160,7 @@ public class SceneManageServiceImpl implements SceneManageService {
                 wrapperOutput.setEstimateFlow(new BigDecimal(flow).setScale(2, RoundingMode.HALF_UP));
             }
         } catch (Exception e) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCENE_MANAGE_GET_ERROR, "施压配置json解析错误", e);
+            log.error("场景id={}施压配置json解析错误", wrapperOutput.getId(), e);
         }
     }
 

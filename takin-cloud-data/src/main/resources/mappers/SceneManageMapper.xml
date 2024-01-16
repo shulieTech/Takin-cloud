@@ -23,16 +23,16 @@
         from t_scene_manage
         where is_deleted = 0
         <if test="sceneId != null">
-            and scene_id = #{sceneId}
+            and id = #{sceneId}
         </if>
         <if test="sceneIds != null and sceneIds.size() > 0">
-            and scene_id in
+            and id in
             <foreach collection="sceneIds" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>
         </if>
         <if test="sceneName != null and sceneName != ''">
-            and scene_name like concat('%s', #{sceneName}, '%')
+            and scene_name like concat('%', #{sceneName}, '%')
         </if>
         <if test="statusList != null and statusList.size() > 0">
             and status in
