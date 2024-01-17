@@ -78,7 +78,7 @@ public class ReportController {
     @Resource
     private RedisTemplate redisTemplate;
 
-    private LoadingCache<String, Object> cloudReportCache = Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.SECONDS).build(new CacheLoader<String, Object>() {
+    private LoadingCache<String, Object> cloudReportCache = Caffeine.newBuilder().expireAfterWrite(3, TimeUnit.SECONDS).build(new CacheLoader<String, Object>() {
 
         @Override
         public @Nullable Object load(@NonNull String key) {
@@ -94,7 +94,7 @@ public class ReportController {
             } else if (key.startsWith("ReportApi#getSummaryList")) {
                 value = reportService.getNodeSummaryList(id);
             }
-            redisTemplate.opsForValue().set(key, value, 5, TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(key, value, 3, TimeUnit.SECONDS);
             return value;
         }
     });
