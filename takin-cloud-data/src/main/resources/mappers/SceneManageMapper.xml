@@ -9,17 +9,19 @@
         <result column="last_pt_time" jdbcType="TIMESTAMP" property="lastPtTime"/>
         <result column="pt_config" jdbcType="VARCHAR" property="ptConfig"/>
         <result column="script_type" jdbcType="INTEGER" property="scriptType"/>
-        <result column="features" jdbcType="VARCHAR" property="features"/>
+        <result column="is_deleted" jdbcType="INTEGER" property="isDeleted"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="features" jdbcType="VARCHAR" property="features"/>
+        <result column="script_analysis_result" jdbcType="VARCHAR" property="scriptAnalysisResult"/>
+        <result column="create_name" jdbcType="VARCHAR" property="createName"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="update_name" jdbcType="VARCHAR" property="updateName"/>
+        <result column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="tenant_id" jdbcType="BIGINT" property="tenantId"/>
+        <result column="env_code" jdbcType="VARCHAR" property="envCode"/>
     </resultMap>
-    <sql id="Base_Column_List">
-        <!--@mbg.generated-->
-        id, scene_name, status, type, last_pt_time, pt_config, script_type, `features`,
-        create_time, update_time
-    </sql>
     <select id="getPageList" resultMap="BaseResultMap" resultType="io.shulie.takin.cloud.common.bean.scenemanage.SceneManageQueryBean">
-        select <include refid="Base_Column_List"/>
+        select *
         from t_scene_manage
         where is_deleted = 0
         <if test="sceneId != null">
