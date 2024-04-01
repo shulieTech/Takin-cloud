@@ -49,7 +49,12 @@ public class JmxUtil {
      * 统一处理，类型JMETER，能看到请求流量明细数据
      */
     public static final List<String> JMETER_SAMPLER_LIST = CollUtil.newArrayList(
-        "JavaSampler", "JSR223Sampler", "BeanShellSampler", "JDBCSampler"
+        "JSR223Sampler", "BeanShellSampler", "JDBCSampler"
+    );
+
+    public static final List<String> KAFKA_SAMPLER_NAME_LIST = CollUtil.newArrayList(
+            "io.shulie.jmeter.plugins.kafka.dataset.Sampler",
+            "ShulieKafkaDataSetSampler"
     );
 
     public static final String JMETER_SAMPLER_ENTRANCE = "JMETER|%s";
@@ -345,7 +350,6 @@ public class JmxUtil {
                     Map<String, String> configProps = buildProps(configElement);
                     props = mergeProps(props, configProps);
                     node.setProps(props);
-                    //kafka:topic, 其他：返回null
                     setJavaSamplerIdentification(node);
                     node.setSamplerType(getJavaSamplerType(node));
                 } else if ("FTPSampler".equals(name)) {
@@ -419,20 +423,23 @@ public class JmxUtil {
                     //interface + # + method
                     setRabbitIdentification(node);
                     node.setSamplerType(SamplerTypeEnum.RABBITMQ);
-                } else if ("ShulieKafkaDataSetSampler".equals(name) || "io.shulie.jmeter.plugins.kafka.dataset.Sampler".equals(name)) {
+                } else if (KAFKA_SAMPLER_NAME_LIST.contains(name)) {
                     node.setProps(buildProps(element));
                     Map<String, String> props = node.getProps();
                     if (null == props) {return;}
-                    String prefix = props.get("prefix");
-                    String suffix = props.get("suffix");
-                    String text = StrUtil.format("{}Kafka数据集采样器{}", prefix, suffix);
-                    node.setRequestPath(text);
-                    node.setIdentification(text);
+                    setJmeterIdentification(node);
                     node.setSamplerType(SamplerTypeEnum.KAFKA);
                 } else {
                     node.setProps(buildProps(element));
                     node.setSamplerType(SamplerTypeEnum.UNKNOWN);
                 }
+                break;
+            case KAKFK:
+                node.setProps(buildProps(element));
+                setJmeterIdentification(node);
+                //控制台只处理取样器 这里要转下
+                node.setType(NodeTypeEnum.SAMPLER);
+                node.setSamplerType(SamplerTypeEnum.HTTP);
                 break;
             default:
                 break;
@@ -770,23 +777,20 @@ public class JmxUtil {
             return;
         }
         String javaClass = props.get("classname");
-        if (StrUtil.isBlank(javaClass)) {
-            return;
-        }
         if ("co.signal.kafkameter.KafkaProducerSampler".equals(javaClass)) {
             String topic = props.get("kafka_topic");
             if (StrUtil.isBlank(topic) || topic.startsWith("$")) {
                 return;
             }
-            node.setRequestPath(topic);
-            node.setIdentification(String.format("%s|%s", topic, SamplerTypeEnum.KAFKA.getRpcTypeEnum().getValue()));
+            node.setRequestPath(String.format(JMETER_SAMPLER_ENTRANCE, topic));
+            node.setIdentification(node.getRequestPath()+"|"+SamplerTypeEnum.KAFKA.getRpcTypeEnum().getValue());
         } else if ("com.gslab.pepper.sampler.PepperBoxKafkaSampler".equals(javaClass)) {
             String topic = props.get("kafka.topic.name");
             if (StrUtil.isBlank(topic) || topic.startsWith("$")) {
                 return;
             }
-            node.setRequestPath(topic);
-            node.setIdentification(String.format("%s|%s", topic, SamplerTypeEnum.KAFKA.getRpcTypeEnum().getValue()));
+            node.setRequestPath(String.format(JMETER_SAMPLER_ENTRANCE, topic));
+            node.setIdentification(node.getRequestPath()+"|"+SamplerTypeEnum.KAFKA.getRpcTypeEnum().getValue());
         } else {
             setJmeterIdentification(node);
         }
@@ -967,6 +971,6 @@ public class JmxUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println(JSON.toJSONString(buildNodeTree("/Users/xiaoshu/Desktop/JavaRequest.jmx")));
+        System.out.println(JSON.toJSONString(buildNodeTree("/Users/xiaoshu/Documents/kafkameter.jmx")));
     }
 }
