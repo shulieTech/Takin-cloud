@@ -121,6 +121,16 @@ public class ReportController {
         return ResponseResult.success(o);
     }
 
+    @ApiOperation("报告简易详情")
+    @GetMapping(value = EntrypointUrl.METHOD_REPORT_SIMPLE)
+    public ResponseResult<ReportDetailResp> getSimpleReportByReportId(Long reportId) {
+        ReportDetailOutput detailOutput = reportService.getSimpleReportByReportId(reportId);
+        if (detailOutput == null) {
+            throw new TakinCloudException(TakinCloudExceptionEnum.REPORT_GET_ERROR, "报告不存在Id:" + reportId);
+        }
+        return ResponseResult.success(BeanUtil.copyProperties(detailOutput, ReportDetailResp.class));
+    }
+
     private ReportDetailResp doGetReportByReportId(Long reportId) {
         ReportDetailOutput detailOutput = reportService.getReportByReportId(reportId);
         if (detailOutput == null) {

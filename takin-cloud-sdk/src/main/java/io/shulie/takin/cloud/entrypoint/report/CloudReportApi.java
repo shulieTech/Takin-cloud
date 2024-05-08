@@ -113,6 +113,8 @@ public interface CloudReportApi {
      */
     ReportDetailResp getReportByReportId(ReportDetailByIdReq req);
 
+    ReportDetailResp getSimpleReportByReportId(ReportDetailByIdReq req);
+
     /**
      * 根据场景id获取报告详情
      *

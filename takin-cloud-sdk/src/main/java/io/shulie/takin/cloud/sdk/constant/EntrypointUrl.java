@@ -96,6 +96,7 @@ public class EntrypointUrl {
     public final static String METHOD_REPORT_MOCK_LIST = "listMock";
     public final static String METHOD_REPORT_UPDATE_CONCLUSION = "updateReportConclusion";
     public final static String METHOD_REPORT_DETAIL = "getReportByReportId";
+    public final static String METHOD_REPORT_SIMPLE = "getSimpleReportByReportId";
     public final static String METHOD_REPORT_STATUS_BY_ID = "getReportStatusById";
     public final static String METHOD_REPORT_DETAIL_TEMP = "tempReportDetail";
     public final static String METHOD_REPORT_ONE_RUNNING = "running";

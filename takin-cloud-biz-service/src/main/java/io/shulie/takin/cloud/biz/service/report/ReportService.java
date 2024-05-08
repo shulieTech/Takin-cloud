@@ -44,6 +44,8 @@ public interface ReportService {
      */
     ReportDetailOutput getReportByReportId(Long reportId);
 
+    ReportDetailOutput getSimpleReportByReportId(Long reportId);
+
     /**
      * 报告链路趋势
      *

@@ -278,6 +278,16 @@ public class ReportServiceImpl implements ReportService {
         return detail;
     }
 
+    @Override
+    public ReportDetailOutput getSimpleReportByReportId(Long reportId) {
+        ReportResult report = reportDao.selectById(reportId);
+        if (report == null) {
+            log.warn("获取报告异常，报告数据不存在。报告ID：{}", reportId);
+            return null;
+        }
+        return ReportConverter.INSTANCE.ofReportDetail(report);
+    }
+
     /**
      * 计算消耗流量并更新数据库
      *
