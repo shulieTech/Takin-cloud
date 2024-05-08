@@ -280,7 +280,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ReportDetailOutput getSimpleReportByReportId(Long reportId) {
-        ReportResult report = reportDao.selectById(reportId);
+        ReportResult report = reportDao.selectBySimplerId(reportId);
         if (report == null) {
             log.warn("获取报告异常，报告数据不存在。报告ID：{}", reportId);
             return null;

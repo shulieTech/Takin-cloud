@@ -107,6 +107,15 @@ public class ReportDaoImpl implements ReportDao {
         return BeanUtil.copyProperties(entityList.get(0), ReportResult.class);
     }
 
+    @Override
+    public ReportResult selectBySimplerId(Long id) {
+        ReportEntity reportEntity = reportMapper.selectById(id);
+        if(reportEntity != null) {
+            return BeanUtil.copyProperties(reportEntity, ReportResult.class);
+        }
+        return null;
+    }
+
     /**
      * 获取最新一条报告id
      *
