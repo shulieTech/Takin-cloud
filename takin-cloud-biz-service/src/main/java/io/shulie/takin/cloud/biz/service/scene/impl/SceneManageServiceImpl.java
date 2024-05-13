@@ -335,6 +335,10 @@ public class SceneManageServiceImpl implements SceneManageService {
         if (sceneManageQueryBean.getType() == null) {
             sceneManageQueryBean.setType(0);
         }
+        //直接根据id查询，允许返回type=1的调试场景
+        if(queryVO.getSceneId() != null) {
+            sceneManageQueryBean.setType(null);
+        }
         List<SceneManageEntity> queryList = sceneManageDAO.getPageList(sceneManageQueryBean);
         if (CollectionUtils.isEmpty(queryList)) {
             return new PageInfo<>(Lists.newArrayList());
