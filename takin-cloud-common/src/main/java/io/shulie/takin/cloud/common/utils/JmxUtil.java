@@ -157,7 +157,11 @@ public class JmxUtil {
         if (null == element) {
             return true;
         }
-        return !Boolean.parseBoolean(element.attributeValue("enabled"));
+        String enabled = element.attributeValue("enabled");
+        if(StringUtils.isBlank(enabled)) {
+            return false;
+        }
+        return !Boolean.parseBoolean(enabled);
     }
 
     /**
@@ -971,6 +975,6 @@ public class JmxUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println(JSON.toJSONString(buildNodeTree("/Users/xiaoshu/Documents/kafkameter.jmx")));
+        System.out.println(JSON.toJSONString(buildNodeTree("/Users/xiaoshu/Documents/shulie-tech/顺丰科技/IUOP兼容IBS下单接口-测试.jmx")));
     }
 }

@@ -50,7 +50,7 @@ public class ProcessController {
         EngineExtApi engineExtApi = enginePluginUtils.getEngineExtApi();
         List<ScriptNode> nodes = engineExtApi.buildNodeTree(request.getScriptFile());
         if (CollectionUtils.isEmpty(nodes)) {
-            throw new TakinCloudException(TakinCloudExceptionEnum.SCRIPT_ANALYZE_FAILED, "请检测脚本内容");
+            throw new TakinCloudException(TakinCloudExceptionEnum.SCRIPT_ANALYZE_FAILED, "解析脚本节点为空，请检测脚本内容");
         }
         return ResponseResult.success(nodes);
     }
