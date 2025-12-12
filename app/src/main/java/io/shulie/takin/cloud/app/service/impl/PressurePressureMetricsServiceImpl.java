@@ -55,10 +55,10 @@ public class PressurePressureMetricsServiceImpl implements PressureMetricsServic
         //如果点击了压测停止或者主动停止，则丢弃后续的数据
         if(Boolean.TRUE.equals(substringPtlResult)
                 && Boolean.TRUE.equals(stringRedisTemplate.hasKey(String.format(RedisKeyUtil.stopSceneKey, pressureId)))) {
-            log.warn("Metrics-Upload({}-{}): 接收到的数据:{}条,压测已停止，数据将会被丢弃......", pressureId, pressureExampleId, metricsList.size());
+            log.warn("Metrics-Upload({}-{}): 接收到数据:{}条,压测已停止，数据被丢弃......", pressureId, pressureExampleId, metricsList.size());
             return;
         }
-        log.info("Metrics-Upload({}-{}): 接收到的数据:{}条,时间范围:{},延时:{}", pressureId, pressureExampleId,
+        log.info("Metrics-Upload({}-{}): 接收到数据:{}条,时间:{},上报延时:{}ms", pressureId, pressureExampleId,
             metricsList.size(), timestamp, (System.currentTimeMillis() - timestamp));
         try {
             // 回调数据
