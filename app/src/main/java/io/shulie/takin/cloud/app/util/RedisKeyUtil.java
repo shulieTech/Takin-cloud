@@ -8,6 +8,8 @@ public class RedisKeyUtil {
 
     public final static String resourceExampleKey = "RESOURCE_EXAMPLE_HEARTBEAT_EVENT_%s";
 
+    public final static String resourceExampleInfoKey = "RESOURCE_EXAMPLE_INFO_EVENT_%s";
+
     public final static String callbackKey = "CALLBACK_HEARTBEAT_%s";
 
     public final static String callbackLogKey = "CALLBACK_LOG_%s";

@@ -136,11 +136,24 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
             log.info("上报异常信息异常，资源实例ID[{}]对应的数据不存在:", id);
             return;
         }
-        resourceExampleEventMapper.save(new ResourceExampleEventEntity()
-            .setResourceExampleId(id)
-            .setType(NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode())
-            .setContext(jsonService.writeValueAsString(info)));
-
+        String redisKey = String.format(RedisKeyUtil.resourceExampleInfoKey, id);
+        if(stringRedisTemplate.opsForValue().setIfAbsent(redisKey, "0", 12, TimeUnit.HOURS)) {
+            ResourceExampleEventEntity eventEntity = new ResourceExampleEventEntity()
+                    .setResourceExampleId(id)
+                    .setType(NotifyEventType.RESOUECE_EXAMPLE_INFO.getCode())
+                    .setContext(jsonService.writeValueAsString(info));
+            resourceExampleEventMapper.save(eventEntity);
+            stringRedisTemplate.opsForValue().set(redisKey, eventEntity.getId().toString(), 12, TimeUnit.HOURS);
+        } else {
+            Long eventId = Long.parseLong(stringRedisTemplate.opsForValue().get(redisKey).toString());
+            if(eventId != null && eventId > 0) {
+                LambdaUpdateWrapper<ResourceExampleEventEntity> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper.eq(ResourceExampleEventEntity::getId, eventId)
+                        .set(ResourceExampleEventEntity::getTime, new Date())
+                        .set(ResourceExampleEventEntity::getContext, jsonService.writeValueAsString(info));
+                resourceExampleEventMapper.update(updateWrapper);
+            }
+        }
         if (Objects.equals(info.getBusinessState(), BusinessStateEnum.SUCCESSFUL.getState())) {
             //主动中断
             onSuccessful(id);

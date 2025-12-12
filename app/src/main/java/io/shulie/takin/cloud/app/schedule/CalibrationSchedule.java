@@ -25,8 +25,8 @@ public class CalibrationSchedule implements Runnable {
     public void run() {
         try {
             // 分页查询
-            PageInfo<CalibrationEntity> ready = calibrationService.listNotCompleted(1, 10);
-            log.info("开始调度.共{}条,本次计划调度{}条\n{}", ready.getTotal(), ready.getSize(), ready);
+            PageInfo<CalibrationEntity> ready = calibrationService.listNotCompleted(1, 20);
+            log.info("开始调度.共{}条,本次计划调度{}条", ready.getTotal(), ready.getSize());
             for (int i = 0; i < ready.getSize(); i++) {
                 CalibrationEntity entity = ready.getList().get(i);
                 calibrationService.exec(entity);

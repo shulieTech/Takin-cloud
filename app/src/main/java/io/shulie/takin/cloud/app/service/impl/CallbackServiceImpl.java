@@ -1,6 +1,5 @@
 package io.shulie.takin.cloud.app.service.impl;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.HashMap;
@@ -49,10 +48,6 @@ public class CallbackServiceImpl implements CallbackService {
     @Resource
     RedisTemplate<String, Object> stringRedisTemplate;
 
-    private static final List<Integer> typeList = Arrays.asList(CallbackType.RESOURCE_EXAMPLE_HEARTBEAT.getCode(),
-            CallbackType.PRESSURE_EXAMPLE_HEARTBEAT.getCode(),
-            CallbackType.FILE_USAGE.getCode());
-
     /**
      * {@inheritDoc}
      * 最近6个小时之内、非心跳类型（新加逻辑）
@@ -64,7 +59,6 @@ public class CallbackServiceImpl implements CallbackService {
             List<CallbackEntity> sourceList = callbackMapper.lambdaQuery()
                 .gt(CallbackEntity::getCreateTime, DateUtil.offsetHour(new Date(), -6))
                 .eq(CallbackEntity::getCompleted, isCompleted)
-                .notIn(CallbackEntity::getType, typeList)
                 .and(t ->
                     // (阈值时间为空 || 阈值时间小于等于当前时间)
                     t.isNull(CallbackEntity::getThresholdTime)
@@ -109,6 +103,7 @@ public class CallbackServiceImpl implements CallbackService {
                         .set(CallbackEntity::getThresholdTime, null)
                         .set(CallbackEntity::getCreateTime, new Date())
                         .eq(CallbackEntity::getId, callbackId);
+                callbackMapper.update(updateWrapper);
             }
         }
     }

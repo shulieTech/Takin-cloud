@@ -79,10 +79,8 @@ public class CallbackLogServiceImpl implements CallbackLogService {
                 if(callbackLogId != null &&  callbackLogId > 0) {
                     LambdaUpdateWrapper<CallbackLogEntity> updateWrapper = new LambdaUpdateWrapper<>();
                     updateWrapper.eq(CallbackLogEntity::getId, callbackLogId)
-                            .set(CallbackLogEntity::getRequestUrl, url)
-                            .set(CallbackLogEntity::getRequestData, data)
-                            .set(CallbackLogEntity::getResponseTime, new Date())
-                            .set(CallbackLogEntity::getRequestData, null)
+                            .set(CallbackLogEntity::getRequestTime, new Date())
+                            .set(CallbackLogEntity::getResponseData, null)
                             .set(CallbackLogEntity::getResponseTime, null)
                             .set(CallbackLogEntity::getCompleted, false);
                     callbackLogMapper.update(updateWrapper);
