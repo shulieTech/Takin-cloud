@@ -1,6 +1,10 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import io.shulie.takin.cloud.app.util.RedisKeyUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -24,6 +28,10 @@ import io.shulie.takin.cloud.data.service.PressureExampleMapperService;
 import io.shulie.takin.cloud.data.service.PressureExampleEventMapperService;
 import io.shulie.takin.cloud.model.callback.PressureExampleError.PressureExampleErrorInfo;
 
+import javax.annotation.Resource;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 /**
  * 施压任务实例服务 - 实现
  *
@@ -42,6 +50,8 @@ public class PressureExampleServiceImpl implements PressureExampleService {
     PressureExampleMapperService pressureExampleMapper;
     @javax.annotation.Resource(name = "pressureExampleEventMapperServiceImpl")
     PressureExampleEventMapperService pressureExampleEventMapper;
+    @Resource
+    RedisTemplate<String, Object> stringRedisTemplate;
 
     @Override
     public void onHeartbeat(long pressureExampleId) {
@@ -50,13 +60,26 @@ public class PressureExampleServiceImpl implements PressureExampleService {
         PressureExampleHeartbeat context = new PressureExampleHeartbeat();
         context.setData(getCallbackData(pressureExampleId, callbackUrl));
         // 创建回调
-        callbackService.create(callbackUrl.toString(), CallbackType.PRESSURE_EXAMPLE_HEARTBEAT, jsonService.writeValueAsString(context));
-        // 记录事件
-        pressureExampleEventMapper.save(new PressureExampleEventEntity()
-            .setContext("{}")
-            .setPressureExampleId(pressureExampleId)
-            .setType(NotifyEventType.PRESSURE_EXAMPLE_HEARTBEAT.getCode())
-        );
+        callbackService.create(callbackUrl.toString(), CallbackType.PRESSURE_EXAMPLE_HEARTBEAT, jsonService.writeValueAsString(context), pressureExampleId);
+        String redisKey = String.format(RedisKeyUtil.pressureExampleKey, pressureExampleId);
+        //心跳事件，不要保存那么多条数据（250个pod，大量数据）
+        if(stringRedisTemplate.opsForValue().setIfAbsent(redisKey, "0", 12, TimeUnit.HOURS)) {
+            // 记录事件
+            PressureExampleEventEntity eventEntity = new PressureExampleEventEntity()
+                    .setContext("{}")
+                    .setPressureExampleId(pressureExampleId)
+                    .setType(NotifyEventType.PRESSURE_EXAMPLE_HEARTBEAT.getCode());
+            pressureExampleEventMapper.save(eventEntity);
+            stringRedisTemplate.opsForValue().set(redisKey, eventEntity.getId().toString(), 12, TimeUnit.HOURS);
+        } else {
+            Long eventId = Long.parseLong(stringRedisTemplate.opsForValue().get(redisKey).toString());
+            if(eventId != null && eventId > 0) {
+                LambdaUpdateWrapper<PressureExampleEventEntity> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper.eq(PressureExampleEventEntity::getId, eventId)
+                        .set(PressureExampleEventEntity::getTime, new Date());
+                pressureExampleEventMapper.update(updateWrapper);
+            }
+        }
     }
 
     /**

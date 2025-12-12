@@ -32,7 +32,7 @@ import static com.alibaba.fastjson.JSON.*;
  * @author <a href="mailto:472546172@qq.com">张天赐</a>
  */
 @Service
-@Slf4j(topic = "metrics")
+@Slf4j(topic = "METRICS")
 public class PressurePressureMetricsServiceImpl implements PressureMetricsService {
     @javax.annotation.Resource
     SlaService slaService;
@@ -52,7 +52,6 @@ public class PressurePressureMetricsServiceImpl implements PressureMetricsServic
     @Override
     public void upload(Long pressureId, Long pressureExampleId, List<MetricsInfo> metricsList, String ip) {
         long timestamp = metricsList.get(0).getTimestamp();
-        log.debug("Metrics-Upload({}-{}):接受到的数据:{}", pressureId, pressureExampleId, metricsList);
         //如果点击了压测停止或者主动停止，则丢弃后续的数据
         if(Boolean.TRUE.equals(substringPtlResult)
                 && Boolean.TRUE.equals(stringRedisTemplate.hasKey(String.format(RedisKeyUtil.stopSceneKey, pressureId)))) {

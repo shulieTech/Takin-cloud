@@ -1,9 +1,11 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.HashMap;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 import cn.hutool.http.HttpUtil;
 import cn.hutool.http.ContentType;
@@ -12,12 +14,15 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.core.exceptions.ExceptionUtil;
 
 import cn.hutool.http.Method;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import io.shulie.takin.cloud.app.util.RedisKeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import com.github.pagehelper.Page;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.DateTime;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.page.PageMethod;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import io.shulie.takin.cloud.data.entity.CallbackEntity;
@@ -25,6 +30,8 @@ import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.constant.enums.CallbackType;
 import io.shulie.takin.cloud.app.service.CallbackLogService;
 import io.shulie.takin.cloud.data.service.CallbackMapperService;
+
+import javax.annotation.Resource;
 
 /**
  * 回调服务 - 实例
@@ -39,14 +46,25 @@ public class CallbackServiceImpl implements CallbackService {
     @javax.annotation.Resource(name = "callbackMapperServiceImpl")
     CallbackMapperService callbackMapper;
 
+    @Resource
+    RedisTemplate<String, Object> stringRedisTemplate;
+
+    private static final List<Integer> typeList = Arrays.asList(CallbackType.RESOURCE_EXAMPLE_HEARTBEAT.getCode(),
+            CallbackType.PRESSURE_EXAMPLE_HEARTBEAT.getCode(),
+            CallbackType.FILE_USAGE.getCode());
+
     /**
      * {@inheritDoc}
+     * 最近6个小时之内、非心跳类型（新加逻辑）
+     * 且未完成（老逻辑）
      */
     @Override
     public PageInfo<CallbackEntity> list(int pageNumber, int pageSize, boolean isCompleted) {
         try (Page<Object> ignored = PageMethod.startPage(pageNumber, pageSize)) {
             List<CallbackEntity> sourceList = callbackMapper.lambdaQuery()
+                .gt(CallbackEntity::getCreateTime, DateUtil.offsetHour(new Date(), -6))
                 .eq(CallbackEntity::getCompleted, isCompleted)
+                .notIn(CallbackEntity::getType, typeList)
                 .and(t ->
                     // (阈值时间为空 || 阈值时间小于等于当前时间)
                     t.isNull(CallbackEntity::getThresholdTime)
@@ -60,9 +78,39 @@ public class CallbackServiceImpl implements CallbackService {
      * {@inheritDoc}
      */
     @Override
-    public void create(String url, CallbackType type, byte[] content) {
+    public Long create(String url, CallbackType type, byte[] content) {
         int typeValue = type == null ? -1 : type.getCode();
-        callbackMapper.save(new CallbackEntity().setUrl(url).setType(typeValue).setContext(content));
+        CallbackEntity callbackEntity = new CallbackEntity().setUrl(url).setType(typeValue).setContext(content);
+        callbackMapper.save(callbackEntity);
+        return callbackEntity.getId();
+    }
+
+    /**
+     * 给CallbackType RESOURCE_EXAMPLE_HEARTBEAT、PRESSURE_EXAMPLE_HEARTBEAT用
+     * @param url
+     * @param type
+     * @param content
+     * @param pressureExampleId
+     */
+    @Override
+    public void create(String url, CallbackType type, String content, Long pressureExampleId) {
+        if(pressureExampleId == null) {
+            return;
+        }
+        String redisKey = String.format(RedisKeyUtil.callbackKey, pressureExampleId);
+        if(stringRedisTemplate.opsForValue().setIfAbsent(redisKey, "0", 12, TimeUnit.HOURS)) {
+            Long callbackId = create(url, type, content.getBytes(StandardCharsets.UTF_8));
+            stringRedisTemplate.opsForValue().set(redisKey, callbackId.toString(), 12, TimeUnit.HOURS);
+        } else {
+            Long callbackId = Long.parseLong(stringRedisTemplate.opsForValue().get(redisKey).toString());
+            if(callbackId != null && callbackId > 0) {
+                LambdaUpdateWrapper<CallbackEntity> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper.set(CallbackEntity::getCompleted, Boolean.FALSE)
+                        .set(CallbackEntity::getThresholdTime, null)
+                        .set(CallbackEntity::getCreateTime, new Date())
+                        .eq(CallbackEntity::getId, callbackId);
+            }
+        }
     }
 
     /**
@@ -82,6 +130,9 @@ public class CallbackServiceImpl implements CallbackService {
             .body(content);
         // 记录请求
         Long callbackLogId = callbackLogService.create(id, type, request.getUrl(), content);
+        if(callbackLogId == null || callbackLogId == 0) {
+            return;
+        }
         byte[] result;
         // 接收响应
         try (HttpResponse response = request.execute()) {

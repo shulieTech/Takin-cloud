@@ -41,7 +41,16 @@ public interface CallbackService {
      * @param type    回调类型
      * @param content 回调内容
      */
-    void create(String url, CallbackType type, byte[] content);
+    Long create(String url, CallbackType type, byte[] content);
+
+    /**
+     * 每个pod的CallbackType:100和200的数据只保留1条
+     * @param url
+     * @param type
+     * @param content
+     * @param pressureExampleId
+     */
+    void create(String url, CallbackType type, String content, Long pressureExampleId);
 
     /**
      * 创建回调

@@ -1,8 +1,15 @@
 package io.shulie.takin.cloud.app.service.impl;
 
+import java.util.Date;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import io.shulie.takin.cloud.app.util.RedisKeyUtil;
+import io.shulie.takin.cloud.data.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import cn.hutool.core.text.CharSequenceUtil;
@@ -11,22 +18,20 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import io.shulie.takin.cloud.model.callback.*;
 import io.shulie.takin.cloud.app.service.JsonService;
-import io.shulie.takin.cloud.data.entity.ResourceEntity;
 import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.app.service.ResourceService;
 import io.shulie.takin.cloud.constant.enums.CallbackType;
 import io.shulie.takin.cloud.constant.enums.NotifyEventType;
 import io.shulie.takin.cloud.constant.enums.BusinessStateEnum;
-import io.shulie.takin.cloud.data.entity.PressureExampleEntity;
-import io.shulie.takin.cloud.data.entity.ResourceExampleEntity;
 import io.shulie.takin.cloud.app.service.ResourceExampleService;
 import io.shulie.takin.cloud.model.callback.basic.ResourceExample;
-import io.shulie.takin.cloud.data.entity.ResourceExampleEventEntity;
 import io.shulie.takin.cloud.data.service.PressureExampleMapperService;
 import io.shulie.takin.cloud.data.service.ResourceExampleMapperService;
 import io.shulie.takin.cloud.data.service.ResourceExampleEventMapperService;
 import io.shulie.takin.cloud.model.request.job.resource.ResourceExampleInfoRequest;
 import io.shulie.takin.cloud.model.callback.ResourceExampleError.ResourceExampleErrorInfo;
+
+import javax.annotation.Resource;
 
 /**
  * 资源实例服务 - 实例
@@ -49,20 +54,37 @@ public class ResourceExampleServiceImpl implements ResourceExampleService {
     PressureExampleMapperService pressureExampleMapper;
     @javax.annotation.Resource(name = "resourceExampleEventMapperServiceImpl")
     ResourceExampleEventMapperService resourceExampleEventMapper;
+    @Resource
+    RedisTemplate<String, Object> stringRedisTemplate;
 
     @Override
     public void onHeartbeat(long id) {
         // 基础信息准备
         StringBuilder callbackUrl = new StringBuilder();
         ResourceExampleHeartbeat context = new ResourceExampleHeartbeat();
-        context.setData(getCallbackData(id, callbackUrl));
+        ResourceExample resourceExample = getCallbackData(id, callbackUrl);
+        context.setData(resourceExample);
         // 创建回调
-        callbackService.create(callbackUrl.toString(), CallbackType.RESOURCE_EXAMPLE_HEARTBEAT, jsonService.writeValueAsString(context));
-        // 记录事件
-        resourceExampleEventMapper.save(new ResourceExampleEventEntity()
-            .setContext("{}")
-            .setResourceExampleId(id)
-            .setType(NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode()));
+        callbackService.create(callbackUrl.toString(), CallbackType.RESOURCE_EXAMPLE_HEARTBEAT, jsonService.writeValueAsString(context), resourceExample.getPressureExampleId());
+        String redisKey = String.format(RedisKeyUtil.resourceExampleKey, id);
+        //心跳事件，不要保存那么多条数据（250个pod，大量数据）
+        if(stringRedisTemplate.opsForValue().setIfAbsent(redisKey, "0", 12, TimeUnit.HOURS)) {
+            // 记录事件
+            ResourceExampleEventEntity eventEntity = new ResourceExampleEventEntity()
+                    .setContext("{}")
+                    .setResourceExampleId(id)
+                    .setType(NotifyEventType.RESOUECE_EXAMPLE_HEARTBEAT.getCode());
+            resourceExampleEventMapper.save(eventEntity);
+            stringRedisTemplate.opsForValue().set(redisKey, eventEntity.getId().toString(), 12, TimeUnit.HOURS);
+        } else {
+            Long eventId = Long.parseLong(stringRedisTemplate.opsForValue().get(redisKey).toString());
+            if(eventId != null && eventId > 0) {
+                LambdaUpdateWrapper<ResourceExampleEventEntity> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper.eq(ResourceExampleEventEntity::getId, eventId)
+                        .set(ResourceExampleEventEntity::getTime, new Date());
+                resourceExampleEventMapper.update(updateWrapper);
+            }
+        }
     }
 
     @Override

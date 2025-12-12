@@ -3,11 +3,16 @@ package io.shulie.takin.cloud.app.service.impl;
 import java.util.Map;
 import java.util.Date;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import io.shulie.takin.cloud.app.util.RedisKeyUtil;
+import io.shulie.takin.cloud.constant.enums.CallbackType;
 import lombok.extern.slf4j.Slf4j;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.BooleanUtil;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -18,6 +23,8 @@ import io.shulie.takin.cloud.app.service.CallbackService;
 import io.shulie.takin.cloud.data.entity.CallbackLogEntity;
 import io.shulie.takin.cloud.app.service.CallbackLogService;
 import io.shulie.takin.cloud.data.service.CallbackLogMapperService;
+
+import javax.annotation.Resource;
 
 /**
  * 回调日志服务
@@ -38,6 +45,8 @@ public class CallbackLogServiceImpl implements CallbackLogService {
     @javax.annotation.Resource(name = "callbackLogMapperServiceImpl")
     CallbackLogMapperService callbackLogMapper;
 
+    @Resource
+    RedisTemplate<String, Object> stringRedisTemplate;
     /**
      * {@inheritDoc}
      */
@@ -53,14 +62,43 @@ public class CallbackLogServiceImpl implements CallbackLogService {
      */
     @Override
     public Long create(long callbackId, Integer type, String url, byte[] data) {
-        CallbackLogEntity callbackLogEntity = new CallbackLogEntity()
-            .setType(type)
-            .setRequestUrl(url)
-            .setRequestData(data)
-            .setCallbackId(callbackId)
-            .setRequestTime(new Date());
-        callbackLogMapper.save(callbackLogEntity);
-        return callbackLogEntity.getId();
+        if(type == CallbackType.RESOURCE_EXAMPLE_HEARTBEAT.getCode() || type == CallbackType.PRESSURE_EXAMPLE_HEARTBEAT.getCode()) {
+            String redisKey = String.format(RedisKeyUtil.callbackLogKey, callbackId);
+            if(stringRedisTemplate.opsForValue().setIfAbsent(redisKey, "0", 12, TimeUnit.HOURS)) {
+                CallbackLogEntity callbackLogEntity = new CallbackLogEntity()
+                        .setType(type)
+                        .setRequestUrl(url)
+                        .setRequestData(data)
+                        .setCallbackId(callbackId)
+                        .setRequestTime(new Date());
+                callbackLogMapper.save(callbackLogEntity);
+                stringRedisTemplate.opsForValue().set(redisKey, callbackLogEntity.getId().toString(), 12, TimeUnit.HOURS);
+                return callbackLogEntity.getId();
+            } else {
+                Long callbackLogId = Long.parseLong(stringRedisTemplate.opsForValue().get(redisKey).toString());
+                if(callbackLogId != null &&  callbackLogId > 0) {
+                    LambdaUpdateWrapper<CallbackLogEntity> updateWrapper = new LambdaUpdateWrapper<>();
+                    updateWrapper.eq(CallbackLogEntity::getId, callbackLogId)
+                            .set(CallbackLogEntity::getRequestUrl, url)
+                            .set(CallbackLogEntity::getRequestData, data)
+                            .set(CallbackLogEntity::getResponseTime, new Date())
+                            .set(CallbackLogEntity::getRequestData, null)
+                            .set(CallbackLogEntity::getResponseTime, null)
+                            .set(CallbackLogEntity::getCompleted, false);
+                    callbackLogMapper.update(updateWrapper);
+                }
+                return callbackLogId;
+            }
+        } else {
+            CallbackLogEntity callbackLogEntity = new CallbackLogEntity()
+                    .setType(type)
+                    .setRequestUrl(url)
+                    .setRequestData(data)
+                    .setCallbackId(callbackId)
+                    .setRequestTime(new Date());
+            callbackLogMapper.save(callbackLogEntity);
+            return callbackLogEntity.getId();
+        }
     }
 
     /**

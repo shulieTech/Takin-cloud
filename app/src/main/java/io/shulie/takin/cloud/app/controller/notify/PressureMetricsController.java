@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
@@ -68,12 +69,15 @@ public class PressureMetricsController {
     @Operation(summary = "聚合上报-旧模式")
     public ApiResult<Object> uploadByOld(
         @Parameter(description = "任务主键-新版本") @RequestParam(required = false) Long pressureId,
-        @Parameter(description = "聚合的指标数据", required = true) @RequestBody List<MetricsInfo> data,
+        @Parameter(description = "聚合的指标数据") @RequestBody(required = false) List<MetricsInfo> data,
         @Parameter(description = "任务主键-旧版本", deprecated = true) @RequestParam(required = false) Long jobId,
         HttpServletRequest request) {
-        if (data.isEmpty()) {return ApiResult.fail(Message.EMPTY_METRICS_LIST);}
         // 兼容老版本
         if (Objects.isNull(pressureId) && Objects.nonNull(jobId)) {pressureId = jobId;}
+        if(CollectionUtil.isEmpty(data)) {
+            log.warn("任务:{}上传指标数据为空", pressureId);
+            return ApiResult.success();
+        }
         PressureEntity pressureEntity = pressureService.entity(pressureId);
         if (pressureEntity == null) {return ApiResult.fail(CharSequenceUtil.format(Message.MISS_PRESSURE, pressureId));}
         String pressureExampleNumberString = data.get(0).getPodNo();
