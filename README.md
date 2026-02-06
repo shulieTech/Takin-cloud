@@ -1,6 +1,6 @@
 # 项目初始化
 
-gradle wrapper
+sudo gradle wrapper
 
 # 项目打包
 

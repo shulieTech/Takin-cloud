@@ -11,7 +11,7 @@ singleServerConfig:
   password: pamirs@2020
   address: "redis://192.168.1.129:6379"
   # 连接池配置
-  connectionPoolSize: 2
+  connectionPoolSize: 10
   dnsMonitoringInterval: 5000
   connectionMinimumIdleSize: 1
   # 订阅配置
